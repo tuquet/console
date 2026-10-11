@@ -3,6 +3,14 @@ import type { RealAnalyticsData } from '#/api';
 
 import { onMounted, ref } from 'vue';
 
+import {
+  Activity,
+  Building2,
+  CheckCircle2,
+  Layers,
+  RefreshCw,
+  Terminal,
+} from '@lucide/vue';
 import { Button, message, Spin, Tag } from 'ant-design-vue';
 
 import { getRealAnalyticsDataApi } from '#/api';
@@ -75,9 +83,12 @@ onMounted(() => {
         <Button
           type="primary"
           :loading="loading"
-          class="w-full sm:w-auto"
+          class="inline-flex items-center justify-center w-full sm:w-auto font-medium"
           @click="loadAnalytics"
         >
+          <template #icon>
+            <RefreshCw class="size-3.5 mr-1" />
+          </template>
           Làm Mới Số Liệu
         </Button>
       </div>
@@ -94,16 +105,16 @@ onMounted(() => {
             Tổng số Workspaces
           </span>
           <span
-            class="flex size-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-500"
+            class="flex size-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400"
           >
-            🏢
+            <Building2 class="size-4.5" />
           </span>
         </div>
         <div class="mt-3 flex items-baseline gap-2">
           <span class="text-3xl font-extrabold tracking-tight text-foreground">
             {{ analyticsData.tenants.total }}
           </span>
-          <span class="text-xs font-semibold text-emerald-500">
+          <span class="text-xs font-semibold text-emerald-400">
             {{ analyticsData.tenants.activeCount }} Đang hoạt động
           </span>
         </div>
@@ -128,9 +139,9 @@ onMounted(() => {
             Hệ sinh thái Cloud Plugins
           </span>
           <span
-            class="flex size-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+            class="flex size-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400"
           >
-            🧩
+            <Layers class="size-4.5" />
           </span>
         </div>
         <div class="mt-3 flex items-baseline gap-2">
@@ -159,9 +170,9 @@ onMounted(() => {
             Specter Fleet Bridge
           </span>
           <span
-            class="flex size-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500"
+            class="flex size-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400"
           >
-            ⚡
+            <Terminal class="size-4.5" />
           </span>
         </div>
         <div class="mt-3 flex items-baseline gap-2">
@@ -192,9 +203,9 @@ onMounted(() => {
             Độ trễ API Edge
           </span>
           <span
-            class="flex size-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500"
+            class="flex size-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400"
           >
-            📡
+            <Activity class="size-4.5" />
           </span>
         </div>
         <div class="mt-3 flex items-baseline gap-2">
@@ -203,8 +214,9 @@ onMounted(() => {
           </span>
           <span class="text-sm font-medium text-muted-foreground">ms</span>
         </div>
-        <div class="mt-2 text-xs text-emerald-400">
-          ✓ Cloudflare Anycast & Supabase Khỏe mạnh
+        <div class="mt-2 flex items-center gap-1.5 text-xs text-emerald-400">
+          <CheckCircle2 class="size-3.5" />
+          <span>Cloudflare Anycast & Supabase Khỏe mạnh</span>
         </div>
       </div>
     </div>

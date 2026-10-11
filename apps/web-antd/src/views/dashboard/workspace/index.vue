@@ -7,6 +7,15 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@vben/stores';
 
 import {
+  Building2,
+  CheckCircle2,
+  Layers,
+  Plus,
+  RefreshCw,
+  ShieldCheck,
+  Terminal,
+} from '@lucide/vue';
+import {
   Badge,
   Button,
   Form,
@@ -248,19 +257,31 @@ onMounted(() => {
       <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center">
         <Button
           type="primary"
-          class="w-full sm:w-auto font-medium"
+          class="inline-flex items-center justify-center w-full sm:w-auto font-medium"
           @click="openCreateModal"
         >
-          + Tạo Workspace Mới
+          <template #icon>
+            <Plus class="size-3.5 mr-1" />
+          </template>
+          Tạo Workspace Mới
         </Button>
-        <Button class="w-full sm:w-auto" @click="handleConnectCli()">
+        <Button
+          class="inline-flex items-center justify-center w-full sm:w-auto"
+          @click="handleConnectCli()"
+        >
+          <template #icon>
+            <Terminal class="size-3.5 mr-1" />
+          </template>
           Ghép Nối Máy Trạm CLI
         </Button>
         <Button
           :loading="loadingTenants"
-          class="w-full sm:w-auto"
+          class="inline-flex items-center justify-center w-full sm:w-auto"
           @click="fetchTenants"
         >
+          <template #icon>
+            <RefreshCw class="size-3.5 mr-1" />
+          </template>
           Làm Mới
         </Button>
       </div>
@@ -270,8 +291,15 @@ onMounted(() => {
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <!-- Metric 1: Workspaces -->
       <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
-        <div class="text-sm font-medium text-muted-foreground">
-          Tổng số Workspaces
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-muted-foreground">
+            Tổng số Workspaces
+          </span>
+          <span
+            class="flex size-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400"
+          >
+            <Building2 class="size-4.5" />
+          </span>
         </div>
         <div class="mt-2 flex items-baseline gap-2">
           <span class="text-3xl font-extrabold tracking-tight text-foreground">
@@ -289,8 +317,15 @@ onMounted(() => {
 
       <!-- Metric 2: Plugins -->
       <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
-        <div class="text-sm font-medium text-muted-foreground">
-          Plugin Hệ Thống Cloud
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-muted-foreground">
+            Plugin Hệ Thống Cloud
+          </span>
+          <span
+            class="flex size-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400"
+          >
+            <Layers class="size-4.5" />
+          </span>
         </div>
         <div class="mt-2 flex items-baseline gap-2">
           <span class="text-3xl font-extrabold tracking-tight text-foreground">
@@ -298,15 +333,23 @@ onMounted(() => {
           </span>
           <span class="text-xs font-semibold text-emerald-400">/ 6 Sẵn sàng</span>
         </div>
-        <div class="mt-2 text-xs text-emerald-400">
-          ✓ Core Kernel & Storage Sẵn Sàng
+        <div class="mt-2 flex items-center gap-1.5 text-xs text-emerald-400">
+          <CheckCircle2 class="size-3.5" />
+          <span>Core Kernel & Storage Sẵn Sàng</span>
         </div>
       </div>
 
       <!-- Metric 3: Fleet Bridge -->
       <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
-        <div class="text-sm font-medium text-muted-foreground">
-          Specter Fleet Bridge
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-muted-foreground">
+            Specter Fleet Bridge
+          </span>
+          <span
+            class="flex size-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400"
+          >
+            <Terminal class="size-4.5" />
+          </span>
         </div>
         <div class="mt-2 flex items-baseline gap-2">
           <span class="text-2xl font-bold tracking-tight text-foreground">
@@ -327,8 +370,15 @@ onMounted(() => {
 
       <!-- Metric 4: Admin Info -->
       <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
-        <div class="text-sm font-medium text-muted-foreground">
-          Quản Trị Viên Hệ Thống
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-muted-foreground">
+            Quản Trị Viên Hệ Thống
+          </span>
+          <span
+            class="flex size-9 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400"
+          >
+            <ShieldCheck class="size-4.5" />
+          </span>
         </div>
         <div class="mt-2 flex items-baseline gap-2 truncate">
           <span

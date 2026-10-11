@@ -26,6 +26,7 @@
     "#/*": "./src/*"
   },
   "dependencies": {
+    "@lucide/vue": "catalog:",
     "@tuquet/vue-table": "0.2.1",
     "@tuquet/vue-ui": "0.2.1",
     "@vben/access": "workspace:*",
