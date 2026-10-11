@@ -213,6 +213,13 @@ watch(
     @clear-preferences-and-logout="handleLogout"
     @logout="handleLogout"
   >
+    <template #logo-text>
+      <span
+        class="hidden sm:inline text-foreground truncate font-semibold text-nowrap"
+      >
+        Tuquet Admin
+      </span>
+    </template>
     <template #user-dropdown>
       <UserDropdown
         :avatar

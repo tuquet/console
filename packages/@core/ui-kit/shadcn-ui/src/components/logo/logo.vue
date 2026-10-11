@@ -142,7 +142,9 @@ const fullLogoStyle = computed(() => ({
       />
       <template v-if="shouldShowText">
         <slot name="text">
-          <span class="text-foreground truncate font-semibold text-nowrap">
+          <span
+            class="text-foreground truncate font-semibold text-nowrap hidden sm:inline"
+          >
             {{ text }}
           </span>
         </slot>
