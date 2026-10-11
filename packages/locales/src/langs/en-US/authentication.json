@@ -1,7 +1,7 @@
 {
   "welcomeBack": "Welcome Back",
-  "pageTitle": "Tuquet ID",
-  "pageDesc": "Unified Identity & Access Management (id.tuquet.com)",
+  "pageTitle": "Tuquet Admin",
+  "pageDesc": "Unified Management & Operations Console (admin.tuquet.com)",
   "loginSuccess": "Login Successful",
   "loginSuccessDesc": "Welcome Back",
   "loginSubtitle": "Enter your account details to manage your projects",

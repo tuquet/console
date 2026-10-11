@@ -1,10 +1,10 @@
-# Tuquet ID (`id.tuquet.com`)
+# Tuquet Admin (`admin.tuquet.com`)
 
-Unified Identity, Authentication & Management Console for the **[Tuquet Ecosystem](https://tuquet.com)**, powered by Vue 3, Vite, and Shadcn-Vue.
+Unified Management, IAM & Operations Console for the **[Tuquet Ecosystem](https://tuquet.com)**, powered by Vue 3, Vite, and Ant Design Vue / Shadcn-Vue.
 
 ## Production Domain
 
-- **Identity & Accounts Service**: [https://id.tuquet.com](https://id.tuquet.com)
+- **Management & Admin Console**: [https://admin.tuquet.com](https://admin.tuquet.com)
 - **Official Website**: [https://tuquet.com](https://tuquet.com)
 
 ## Tech Stack

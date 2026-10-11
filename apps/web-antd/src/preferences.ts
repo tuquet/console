@@ -19,7 +19,7 @@ interface WebAntdPreferencesExtension {
 export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
-    name: 'Tuquet ID',
+    name: 'Tuquet Admin',
     locale: 'en-US',
   },
   widget: {

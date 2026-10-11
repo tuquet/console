@@ -90,6 +90,15 @@ const coreRoutes: RouteRecordRaw[] = [
           title: $t('page.auth.register'),
         },
       },
+      {
+        name: 'DesktopBridge',
+        path: 'desktop',
+        component: () =>
+          import('#/views/_core/authentication/desktop-bridge.vue'),
+        meta: {
+          title: 'Authorize Specter Desk',
+        },
+      },
     ],
   },
 ];

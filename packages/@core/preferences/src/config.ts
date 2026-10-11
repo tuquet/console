@@ -28,7 +28,7 @@ const defaultPreferences: Preferences = {
     layout: 'sidebar-nav',
     locale: 'en-US',
     loginExpiredMode: 'page',
-    name: 'Tuquet ID',
+    name: 'Tuquet Admin',
     preferencesButtonPosition: 'auto',
     timezone: 'Asia/Ho_Chi_Minh',
     watermark: false,
