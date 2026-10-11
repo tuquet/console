@@ -1,8 +1,19 @@
 <script lang="ts" setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { Card, Button, Select, Result, Typography, Tag, Avatar, message } from 'ant-design-vue';
+
 import { useAccessStore, useUserStore } from '@vben/stores';
+
+import {
+  Avatar,
+  Button,
+  Card,
+  message,
+  Result,
+  Select,
+  Tag,
+  Typography,
+} from 'ant-design-vue';
 
 defineOptions({ name: 'DesktopBridge' });
 
@@ -12,15 +23,21 @@ const accessStore = useAccessStore();
 const userStore = useUserStore();
 
 // Query parameters from Desk app
-const machineName = computed(() => (route.query.machine_name as string) || 'Local Workstation');
+const machineName = computed(
+  () => (route.query.machine_name as string) || 'Local Workstation',
+);
 const state = computed(() => (route.query.state as string) || '');
-const challenge = computed(() => (route.query.challenge as string) || '');
 const port = computed(() => (route.query.port as string) || '8765');
 
 // Auth status
 const isLoggedIn = computed(() => Boolean(accessStore.accessToken));
-const userName = computed(() => userStore.userInfo?.realName || userStore.userInfo?.username || 'Operator');
-const userAvatar = computed(() => userStore.userInfo?.avatar || 'https://tuquet.com/icons/cli.svg');
+const userName = computed(
+  () =>
+    userStore.userInfo?.realName || userStore.userInfo?.username || 'Operator',
+);
+const userAvatar = computed(
+  () => userStore.userInfo?.avatar || 'https://tuquet.com/icons/cli.svg',
+);
 
 // Tenancy
 const selectedTenant = ref('default-workspace');
@@ -38,12 +55,6 @@ const deepLinkUrl = computed(() => {
   const token = accessStore.accessToken || '';
   const refreshToken = accessStore.refreshToken || '';
   return `tuquet://auth/callback?token=${encodeURIComponent(token)}&refresh_token=${encodeURIComponent(refreshToken)}&state=${encodeURIComponent(state.value)}&tenant_id=${encodeURIComponent(selectedTenant.value)}&machine_name=${encodeURIComponent(machineName.value)}`;
-});
-
-const loopbackUrl = computed(() => {
-  const token = accessStore.accessToken || '';
-  const refreshToken = accessStore.refreshToken || '';
-  return `http://127.0.0.1:${port.value}/api/v1/auth/callback?token=${encodeURIComponent(token)}&refresh_token=${encodeURIComponent(refreshToken)}&state=${encodeURIComponent(state.value)}&tenant_id=${encodeURIComponent(selectedTenant.value)}&machine_name=${encodeURIComponent(machineName.value)}`;
 });
 
 function goToLogin() {
@@ -70,16 +81,12 @@ async function handleAuthorize() {
     };
 
     // 1. Gửi qua local HTTP loopback bằng POST (JSON Body - Không lộ token trên URL)
-    let loopbackSuccess = false;
     try {
-      const res = await fetch(`http://127.0.0.1:${port.value}/api/v1/auth/callback`, {
+      await fetch(`http://127.0.0.1:${port.value}/api/v1/auth/callback`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (res.ok) {
-        loopbackSuccess = true;
-      }
     } catch {
       // Loopback có thể cần fallback
     }
@@ -88,16 +95,17 @@ async function handleAuthorize() {
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
     iframe.src = deepLinkUrl.value;
-    document.body.appendChild(iframe);
+    document.body.append(iframe);
 
     // Đánh dấu ủy quyền thành công
     setTimeout(() => {
       isAuthorized.value = true;
       loading.value = false;
     }, 600);
-  } catch (err: any) {
+  } catch (error: any) {
     loading.value = false;
-    errorMessage.value = err?.message || 'Không thể gửi phản hồi xác thực tới Specter Desk';
+    errorMessage.value =
+      error?.message || 'Không thể gửi phản hồi xác thực tới Specter Desk';
   }
 }
 
@@ -134,7 +142,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-neutral-900">
+  <div
+    class="flex min-h-screen items-center justify-center bg-gray-50 p-4 dark:bg-neutral-900"
+  >
     <Card class="w-full max-w-lg shadow-xl" :bordered="false">
       <!-- Trạng thái đã ủy quyền thành công -->
       <template v-if="isAuthorized">
@@ -146,11 +156,11 @@ onMounted(() => {
           <template #extra>
             <div class="space-y-3">
               <div class="flex gap-2 justify-center">
-                <Button @click="handleReopenDesk">
-                  Mở lại Specter Desk
-                </Button>
+                <Button @click="handleReopenDesk"> Mở lại Specter Desk </Button>
                 <Button type="dashed" @click="handleCopyTokenBundle">
-                  {{ isCopied ? 'Đã sao chép!' : 'Sao chép mã ghép nối thủ công' }}
+                  {{
+                    isCopied ? 'Đã sao chép!' : 'Sao chép mã ghép nối thủ công'
+                  }}
                 </Button>
               </div>
               <div>
@@ -166,16 +176,27 @@ onMounted(() => {
       <!-- Trạng thái yêu cầu đăng nhập trước -->
       <template v-else-if="!isLoggedIn">
         <div class="text-center py-6">
-          <Avatar :size="64" src="https://tuquet.com/icons/cli.svg" class="mb-4" />
-          <Typography.Title :level="3" class="!mb-2">Kết nối Specter Desk</Typography.Title>
+          <Avatar
+            :size="64"
+            src="https://tuquet.com/icons/cli.svg"
+            class="mb-4"
+          />
+          <Typography.Title :level="3" class="!mb-2">
+Kết nối Specter Desk
+</Typography.Title>
           <Typography.Paragraph type="secondary" class="mb-6">
-            Bạn cần đăng nhập tài khoản <strong>Tuquet Admin</strong> trước khi cấp quyền truy cập cho máy trạm này.
+            Bạn cần đăng nhập tài khoản <strong>Tuquet Admin</strong> trước khi
+            cấp quyền truy cập cho máy trạm này.
           </Typography.Paragraph>
 
-          <div class="rounded-lg bg-gray-100 p-4 text-left dark:bg-neutral-800 mb-6">
+          <div
+            class="rounded-lg bg-gray-100 p-4 text-left dark:bg-neutral-800 mb-6"
+          >
             <Typography.Text strong>Máy trạm yêu cầu:</Typography.Text>
             <div class="mt-1 flex items-center justify-between">
-              <span class="text-sm text-gray-600 dark:text-gray-300">{{ machineName }}</span>
+              <span class="text-sm text-gray-600 dark:text-gray-300">{{
+                machineName
+              }}</span>
               <Tag color="blue">Local Workstation</Tag>
             </div>
           </div>
@@ -189,25 +210,40 @@ onMounted(() => {
       <!-- Màn hình Xác nhận cấp quyền (Consent Screen) -->
       <template v-else>
         <div class="text-center pb-4">
-          <div class="inline-flex items-center justify-center p-3 bg-blue-50 dark:bg-blue-950/40 rounded-full mb-3">
-            <svg class="w-10 h-10 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-              <line x1="8" y1="21" x2="16" y2="21"></line>
-              <line x1="12" y1="17" x2="12" y2="21"></line>
+          <div
+            class="inline-flex items-center justify-center p-3 bg-blue-50 dark:bg-blue-950/40 rounded-full mb-3"
+          >
+            <svg
+              class="w-10 h-10 text-blue-600 dark:text-blue-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
             </svg>
           </div>
-          <Typography.Title :level="3" class="!mb-1">Ủy quyền kết nối Specter Desk</Typography.Title>
+          <Typography.Title :level="3" class="!mb-1">
+Ủy quyền kết nối Specter Desk
+</Typography.Title>
           <Typography.Paragraph type="secondary">
-            Ứng dụng máy trạm đang yêu cầu quyền truy cập và đồng bộ tài nguyên từ hệ sinh thái Tuquet.
+            Ứng dụng máy trạm đang yêu cầu quyền truy cập và đồng bộ tài nguyên
+            từ hệ sinh thái Tuquet.
           </Typography.Paragraph>
         </div>
 
-        <div class="space-y-4 rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-800/50">
+        <div
+          class="space-y-4 rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-800/50"
+        >
           <div class="flex items-center justify-between">
             <span class="text-xs text-gray-500 uppercase tracking-wider">Tài khoản</span>
             <div class="flex items-center space-x-2">
               <Avatar :size="24" :src="userAvatar" />
-              <span class="font-medium text-sm text-gray-800 dark:text-gray-200">{{ userName }}</span>
+              <span
+                class="font-medium text-sm text-gray-800 dark:text-gray-200"
+                >{{ userName }}</span>
             </div>
           </div>
 
@@ -217,7 +253,9 @@ onMounted(() => {
           </div>
 
           <div>
-            <span class="text-xs text-gray-500 uppercase tracking-wider block mb-1.5">Chọn Workspace / Tenant</span>
+            <span
+              class="text-xs text-gray-500 uppercase tracking-wider block mb-1.5"
+              >Chọn Workspace / Tenant</span>
             <Select
               v-model:value="selectedTenant"
               :options="tenantOptions"
@@ -227,11 +265,18 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="mt-4 p-3 bg-amber-50 rounded-lg dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-xs text-amber-800 dark:text-amber-300">
-          <strong>Lưu ý bảo mật:</strong> Specter Desk sẽ được cấp quyền điều khiển profile browser và quản lý tác vụ runner trong Workspace bạn đã chọn.
+        <div
+          class="mt-4 p-3 bg-amber-50 rounded-lg dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-xs text-amber-800 dark:text-amber-300"
+        >
+          <strong>Lưu ý bảo mật:</strong> Specter Desk sẽ được cấp quyền điều
+          khiển profile browser và quản lý tác vụ runner trong Workspace bạn đã
+          chọn.
         </div>
 
-        <div v-if="errorMessage" class="mt-3 text-sm text-red-600 dark:text-red-400">
+        <div
+          v-if="errorMessage"
+          class="mt-3 text-sm text-red-600 dark:text-red-400"
+        >
           {{ errorMessage }}
         </div>
 

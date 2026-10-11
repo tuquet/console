@@ -1,0 +1,38 @@
+name: Deploy Tuquet Admin to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: pages-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy (admin.tuquet.com)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node & pnpm
+        uses: ./.github/actions/setup-node
+
+      - name: Build Web Application
+        run: pnpm run build:antd
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
+          VITE_APP_TITLE: "Tuquet Admin"
+          VITE_APP_NAMESPACE: "tuquet-admin"
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/web-antd/dist --project-name=tuquet-admin --branch=main --commit-dirty=true
