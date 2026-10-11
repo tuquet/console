@@ -3,6 +3,7 @@ import { useAccessStore } from '@vben/stores';
 export namespace AuthApi {
   /** 登录接口参数 */
   export interface LoginParams {
+    captchaToken?: string;
     password?: string;
     username?: string;
   }
@@ -38,6 +39,38 @@ export async function loginApi(
   const { anonKey, supabaseUrl } = getSupabaseConfig();
   const email = (data.username || '').trim();
   const password = data.password || '';
+  const captchaToken = data.captchaToken;
+
+  // Verify Turnstile with Cloudflare Pages Function if available
+  if (captchaToken) {
+    try {
+      const verifyRes = await fetch('/api/verify-turnstile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: captchaToken }),
+      });
+      if (verifyRes.status === 403) {
+        const errorData = (await verifyRes.json().catch(() => ({}))) as any;
+        throw new Error(
+          errorData.error ||
+            'Turnstile verification failed. Automated bot access blocked.',
+        );
+      }
+    } catch (error: any) {
+      if (
+        error?.message?.includes('bot') ||
+        error?.message?.includes('Turnstile')
+      ) {
+        throw error;
+      }
+      // Non-blocking for local dev or network glitch
+    }
+  }
+
+  const reqBody: Record<string, any> = { email, password };
+  if (captchaToken) {
+    reqBody.gotrue_meta_security = { captcha_token: captchaToken };
+  }
 
   const response = await fetch(
     `${supabaseUrl}/auth/v1/token?grant_type=password`,
@@ -47,7 +80,7 @@ export async function loginApi(
         'Content-Type': 'application/json',
         apikey: anonKey,
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(reqBody),
     },
   );
 
