@@ -55,12 +55,27 @@ export const useAuthStore = defineStore('auth', () => {
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
+        } else if (onSuccess) {
+          await onSuccess?.();
         } else {
-          onSuccess
-            ? await onSuccess?.()
-            : await router.push(
-                userInfo.homePath || preferences.app.defaultHomePath,
-              );
+          const redirectParam = router.currentRoute.value.query?.redirect as
+            | string
+            | undefined;
+          let targetPath =
+            userInfo?.homePath || preferences.app.defaultHomePath;
+
+          if (redirectParam) {
+            try {
+              const decoded = decodeURIComponent(redirectParam);
+              if (decoded && !decoded.startsWith('/auth/login')) {
+                targetPath = decoded;
+              }
+            } catch {
+              // Ignore decoding error, fallback to targetPath
+            }
+          }
+
+          await router.push(targetPath);
         }
 
         if (userInfo?.realName) {

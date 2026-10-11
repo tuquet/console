@@ -43,7 +43,7 @@ export async function getUserInfoApi(): Promise<UserInfo> {
   return {
     avatar,
     desc: user.email || 'Tuquet Administrator',
-    homePath: '/dashboard/analytics',
+    homePath: '/dashboard/workspace',
     realName,
     roles: ['super', 'admin'],
     token,

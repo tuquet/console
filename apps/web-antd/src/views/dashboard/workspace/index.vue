@@ -1,266 +1,510 @@
 <script lang="ts" setup>
-import type {
-  WorkbenchProjectItem,
-  WorkbenchQuickNavItem,
-  WorkbenchTodoItem,
-  WorkbenchTrendItem,
-} from '@vben/common-ui';
+import type { SystemPluginItem, TenantItem } from '#/api';
 
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import {
-  AnalysisChartCard,
-  WorkbenchHeader,
-  WorkbenchProject,
-  WorkbenchQuickNav,
-  WorkbenchTodo,
-  WorkbenchTrends,
-} from '@vben/common-ui';
-import { preferences } from '@vben/preferences';
 import { useUserStore } from '@vben/stores';
-import { openWindow } from '@vben/utils';
 
-import AnalyticsVisitsSource from '../analytics/analytics-visits-source.vue';
+import {
+  Badge,
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  message,
+  Modal,
+  Row,
+  Select,
+  Space,
+  Statistic,
+  Table,
+  Tabs,
+  Tag,
+  Typography,
+} from 'ant-design-vue';
 
-const userStore = useUserStore();
+import {
+  createTenantApi,
+  getActiveTenantId,
+  getSystemPluginsApi,
+  getTenantsApi,
+  setActiveTenantId,
+} from '#/api';
 
-// 这是一个示例数据，实际项目中需要根据实际情况进行调整
-// url 也可以是内部路由，在 navTo 方法中识别处理，进行内部跳转
-// 例如：url: /dashboard/workspace
-const projectItems: WorkbenchProjectItem[] = [
-  {
-    color: '',
-    content: '不要等待机会，而要创造机会。',
-    date: '2021-04-01',
-    group: '开源组',
-    icon: 'carbon:logo-github',
-    title: 'Github',
-    url: 'https://github.com',
-  },
-  {
-    color: '#3fb27f',
-    content: '现在的你决定将来的你。',
-    date: '2021-04-01',
-    group: '算法组',
-    icon: 'ion:logo-vue',
-    title: 'Vue',
-    url: 'https://vuejs.org',
-  },
-  {
-    color: '#e18525',
-    content: '没有什么才能比努力更重要。',
-    date: '2021-04-01',
-    group: '上班摸鱼',
-    icon: 'ion:logo-html5',
-    title: 'Html5',
-    url: 'https://developer.mozilla.org/zh-CN/docs/Web/HTML',
-  },
-  {
-    color: '#bf0c2c',
-    content: '热情和欲望可以突破一切难关。',
-    date: '2021-04-01',
-    group: 'UI',
-    icon: 'ion:logo-angular',
-    title: 'Angular',
-    url: 'https://angular.io',
-  },
-  {
-    color: '#00d8ff',
-    content: '健康的身体是实现目标的基石。',
-    date: '2021-04-01',
-    group: '技术牛',
-    icon: 'bx:bxl-react',
-    title: 'React',
-    url: 'https://reactjs.org',
-  },
-  {
-    color: '#EBD94E',
-    content: '路是走出来的，而不是空想出来的。',
-    date: '2021-04-01',
-    group: '架构组',
-    icon: 'ion:logo-javascript',
-    title: 'Js',
-    url: 'https://developer.mozilla.org/zh-CN/docs/Web/JavaScript',
-  },
-];
-
-// 同样，这里的 url 也可以使用以 http 开头的外部链接
-const quickNavItems: WorkbenchQuickNavItem[] = [
-  {
-    color: '#1fdaca',
-    icon: 'ion:home-outline',
-    title: '首页',
-    url: '/',
-  },
-  {
-    color: '#bf0c2c',
-    icon: 'ion:grid-outline',
-    title: '仪表盘',
-    url: '/dashboard',
-  },
-  {
-    color: '#e18525',
-    icon: 'ion:layers-outline',
-    title: '组件',
-    url: '/demos/features/icons',
-  },
-  {
-    color: '#3fb27f',
-    icon: 'ion:settings-outline',
-    title: '系统管理',
-    url: '/demos/features/login-expired', // 这里的 URL 是示例，实际项目中需要根据实际情况进行调整
-  },
-  {
-    color: '#4daf1bc9',
-    icon: 'ion:key-outline',
-    title: '权限管理',
-    url: '/demos/access/page-control',
-  },
-  {
-    color: '#00d8ff',
-    icon: 'ion:bar-chart-outline',
-    title: '图表',
-    url: '/analytics',
-  },
-];
-
-const todoItems = ref<WorkbenchTodoItem[]>([
-  {
-    completed: false,
-    content: `审查最近提交到Git仓库的前端代码，确保代码质量和规范。`,
-    date: '2024-07-30 11:00:00',
-    title: '审查前端代码提交',
-  },
-  {
-    completed: true,
-    content: `检查并优化系统性能，降低CPU使用率。`,
-    date: '2024-07-30 11:00:00',
-    title: '系统性能优化',
-  },
-  {
-    completed: false,
-    content: `进行系统安全检查，确保没有安全漏洞或未授权的访问。 `,
-    date: '2024-07-30 11:00:00',
-    title: '安全检查',
-  },
-  {
-    completed: false,
-    content: `更新项目中的所有npm依赖包，确保使用最新版本。`,
-    date: '2024-07-30 11:00:00',
-    title: '更新项目依赖',
-  },
-  {
-    completed: false,
-    content: `修复用户报告的页面UI显示问题，确保在不同浏览器中显示一致。 `,
-    date: '2024-07-30 11:00:00',
-    title: '修复UI显示问题',
-  },
-]);
-const trendItems: WorkbenchTrendItem[] = [
-  {
-    avatar: 'svg:avatar-1',
-    content: `在 <a>开源组</a> 创建了项目 <a>Vue</a>`,
-    date: '刚刚',
-    title: '威廉',
-  },
-  {
-    avatar: 'svg:avatar-2',
-    content: `关注了 <a>威廉</a> `,
-    date: '1个小时前',
-    title: '艾文',
-  },
-  {
-    avatar: 'svg:avatar-3',
-    content: `发布了 <a>个人动态</a> `,
-    date: '1天前',
-    title: '克里斯',
-  },
-  {
-    avatar: 'svg:avatar-4',
-    content: `发表文章 <a>如何编写一个Vite插件</a> `,
-    date: '2天前',
-    title: 'Vben',
-  },
-  {
-    avatar: 'svg:avatar-1',
-    content: `回复了 <a>杰克</a> 的问题 <a>如何进行项目优化？</a>`,
-    date: '3天前',
-    title: '皮特',
-  },
-  {
-    avatar: 'svg:avatar-2',
-    content: `关闭了问题 <a>如何运行项目</a> `,
-    date: '1周前',
-    title: '杰克',
-  },
-  {
-    avatar: 'svg:avatar-3',
-    content: `发布了 <a>个人动态</a> `,
-    date: '1周前',
-    title: '威廉',
-  },
-  {
-    avatar: 'svg:avatar-4',
-    content: `推送了代码到 <a>Github</a>`,
-    date: '2021-04-01 20:00',
-    title: '威廉',
-  },
-  {
-    avatar: 'svg:avatar-4',
-    content: `发表文章 <a>如何编写使用 Admin Vben</a> `,
-    date: '2021-03-01 20:00',
-    title: 'Vben',
-  },
-];
+defineOptions({ name: 'Workspace' });
 
 const router = useRouter();
+const userStore = useUserStore();
 
-// 这是一个示例方法，实际项目中需要根据实际情况进行调整
-// This is a sample method, adjust according to the actual project requirements
-function navTo(nav: WorkbenchProjectItem | WorkbenchQuickNavItem) {
-  if (nav.url?.startsWith('http')) {
-    openWindow(nav.url);
-    return;
-  }
-  if (nav.url?.startsWith('/')) {
-    router.push(nav.url).catch((error) => {
-      console.error('Navigation failed:', error);
-    });
-  } else {
-    console.warn(`Unknown URL for navigation item: ${nav.title} -> ${nav.url}`);
+// Loading states
+const loadingTenants = ref(false);
+const loadingPlugins = ref(false);
+const creatingTenant = ref(false);
+
+// Data
+const tenants = ref<TenantItem[]>([]);
+const plugins = ref<SystemPluginItem[]>([]);
+const activeTenantId = ref(getActiveTenantId());
+
+// Modal state
+const isModalVisible = ref(false);
+const newTenantName = ref('');
+const newTenantSlug = ref('');
+const newTenantPlan = ref('pro');
+
+const activeTenant = computed(() => {
+  return (
+    tenants.value.find((t) => t.id === activeTenantId.value) ||
+    tenants.value[0] ||
+    null
+  );
+});
+
+// Load all tenants from Supabase
+async function fetchTenants() {
+  loadingTenants.value = true;
+  try {
+    const list = await getTenantsApi();
+    tenants.value = list;
+    if (list.length > 0 && !activeTenantId.value) {
+      activeTenantId.value = list[0]?.id || '';
+      setActiveTenantId(activeTenantId.value);
+    }
+  } catch (error: any) {
+    message.error(error.message || 'Không thể tải danh sách Workspace');
+  } finally {
+    loadingTenants.value = false;
   }
 }
+
+// Load plugins registry from Supabase
+async function fetchPlugins() {
+  loadingPlugins.value = true;
+  try {
+    plugins.value = await getSystemPluginsApi();
+  } catch (error: any) {
+    console.error('Failed to load plugins:', error);
+  } finally {
+    loadingPlugins.value = false;
+  }
+}
+
+function handleSelectTenant(record: any) {
+  activeTenantId.value = record.id;
+  setActiveTenantId(record.id);
+  message.success(`Đã chuyển sang Workspace: ${record.name} (${record.slug})`);
+}
+
+function handleConnectCli(record?: any) {
+  const targetId = record?.id || activeTenantId.value;
+  router.push(
+    `/auth/desktop?machine_name=Local Workstation&tenant_id=${encodeURIComponent(targetId)}`,
+  );
+}
+
+function openCreateModal() {
+  newTenantName.value = '';
+  newTenantSlug.value = '';
+  newTenantPlan.value = 'pro';
+  isModalVisible.value = true;
+}
+
+function handleNameChange() {
+  newTenantSlug.value = newTenantName.value
+    .toLowerCase()
+    .trim()
+    .replaceAll(/[^\w\s-]/g, '')
+    .replaceAll(/[\s_-]+/g, '-')
+    .replaceAll(/^-+|-+$/g, '');
+}
+
+async function handleCreateTenant() {
+  if (!newTenantName.value.trim() || !newTenantSlug.value.trim()) {
+    message.warning('Vui lòng nhập tên và mã định danh (slug) của Workspace');
+    return;
+  }
+
+  creatingTenant.value = true;
+  try {
+    const created = await createTenantApi({
+      name: newTenantName.value.trim(),
+      plan: newTenantPlan.value,
+      slug: newTenantSlug.value.trim(),
+    });
+    message.success(`Tạo thành công Workspace: ${created.name}`);
+    isModalVisible.value = false;
+    await fetchTenants();
+    activeTenantId.value = created.id;
+    setActiveTenantId(created.id);
+  } catch (error: any) {
+    message.error(error.message || 'Tạo Workspace thất bại');
+  } finally {
+    creatingTenant.value = false;
+  }
+}
+
+// Tenant Table Columns
+const tenantColumns = [
+  {
+    title: 'Tên Workspace / Tổ chức',
+    dataIndex: 'name',
+    key: 'name',
+  },
+  {
+    title: 'Mã Slug',
+    dataIndex: 'slug',
+    key: 'slug',
+  },
+  {
+    title: 'Gói Dịch Vụ',
+    key: 'plan',
+  },
+  {
+    title: 'Trạng Thái',
+    dataIndex: 'status',
+    key: 'status',
+  },
+  {
+    title: 'Ngày Khởi Tạo',
+    dataIndex: 'created_at',
+    key: 'created_at',
+  },
+  {
+    title: 'Thao Tác Quản Trị',
+    key: 'action',
+  },
+];
+
+// Plugins Table Columns
+const pluginColumns = [
+  {
+    title: 'Tên Plugin / Dịch Vụ',
+    dataIndex: 'name',
+    key: 'name',
+  },
+  {
+    title: 'Mã Plugin (ID)',
+    dataIndex: 'id',
+    key: 'id',
+  },
+  {
+    title: 'Database Schema',
+    dataIndex: 'schema_name',
+    key: 'schema_name',
+  },
+  {
+    title: 'Phiên Bản',
+    dataIndex: 'version',
+    key: 'version',
+  },
+  {
+    title: 'Phân Loại',
+    key: 'type',
+  },
+  {
+    title: 'Trạng Thái',
+    dataIndex: 'status',
+    key: 'status',
+  },
+];
+
+function formatDate(dateStr: string) {
+  if (!dateStr) return '-';
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleString('vi-VN');
+  } catch {
+    return dateStr;
+  }
+}
+
+onMounted(() => {
+  fetchTenants();
+  fetchPlugins();
+});
 </script>
 
 <template>
-  <div class="p-5">
-    <WorkbenchHeader
-      :avatar="userStore.userInfo?.avatar || preferences.app.defaultAvatar"
+  <div class="p-6">
+    <!-- Header Banner -->
+    <div
+      class="mb-6 flex flex-col justify-between gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 md:flex-row md:items-center"
     >
-      <template #title>
-        早安, {{ userStore.userInfo?.realName }}, 开始您一天的工作吧！
-      </template>
-      <template #description> 今日晴，20℃ - 32℃！ </template>
-    </WorkbenchHeader>
+      <div>
+        <div class="flex items-center gap-3">
+          <Typography.Title :level="3" class="!mb-0">
+            Trung tâm Quản trị Multi-Tenant
+          </Typography.Title>
+          <Tag color="blue" class="text-xs font-semibold uppercase">
+            System Admin Console
+          </Tag>
+        </div>
+        <Typography.Paragraph type="secondary" class="!mb-0 mt-1">
+          Quản trị toàn diện các Tổ chức / Workspace, Máy trạm Specter CLI và Hệ
+          sinh thái Plugin trên Tuquet Cloud
+        </Typography.Paragraph>
+      </div>
 
-    <div class="flex flex-col lg:flex-row">
-      <div class="mr-4 w-full lg:w-3/5">
-        <WorkbenchProject :items="projectItems" title="项目" @click="navTo" />
-        <WorkbenchTrends :items="trendItems" class="mt-5" title="最新动态" />
-      </div>
-      <div class="w-full lg:w-2/5">
-        <WorkbenchQuickNav
-          :items="quickNavItems"
-          class="lg:mt-0"
-          title="快捷导航"
-          @click="navTo"
-        />
-        <WorkbenchTodo :items="todoItems" class="mt-5" title="待办事项" />
-        <AnalysisChartCard class="mt-5" title="访问来源">
-          <AnalyticsVisitsSource />
-        </AnalysisChartCard>
-      </div>
+      <Space wrap>
+        <Button type="primary" @click="openCreateModal">
+          + Tạo Workspace Mới
+        </Button>
+        <Button @click="handleConnectCli()"> Ghép Nối Máy Trạm CLI </Button>
+        <Button :loading="loadingTenants" @click="fetchTenants">
+          Làm Mới
+        </Button>
+      </Space>
     </div>
+
+    <!-- 4 Platform Metric Cards -->
+    <Row :gutter="[16, 16]" class="mb-6">
+      <Col :xs="24" :sm="12" :lg="6">
+        <Card :bordered="false" class="shadow-sm">
+          <Statistic
+            title="Tổng số Workspaces"
+            :value="tenants.length"
+            suffix="Tenants"
+          />
+          <div class="mt-2 text-xs text-gray-500">
+            Workspace hoạt động:
+            <span class="font-semibold text-blue-600">
+              {{ activeTenant?.name || 'Nguyen Dinh Tu' }}
+            </span>
+          </div>
+        </Card>
+      </Col>
+      <Col :xs="24" :sm="12" :lg="6">
+        <Card :bordered="false" class="shadow-sm">
+          <Statistic
+            title="Plugin Hệ thống Cloud"
+            :value="plugins.length"
+            suffix="/ 6 Active"
+          />
+          <div class="mt-2 text-xs text-green-600">
+            ✓ Core Kernel & Storage Sẵn sàng
+          </div>
+        </Card>
+      </Col>
+      <Col :xs="24" :sm="12" :lg="6">
+        <Card :bordered="false" class="shadow-sm">
+          <Statistic title="Specter Fleet Bridge" value="Sẵn Sàng" />
+          <div class="mt-2 text-xs text-gray-500">
+            Cổng SSO Loopback: <span class="font-mono">:8765</span>
+          </div>
+        </Card>
+      </Col>
+      <Col :xs="24" :sm="12" :lg="6">
+        <Card :bordered="false" class="shadow-sm">
+          <Statistic
+            title="Quản trị viên Hệ thống"
+            :value="userStore.userInfo?.realName || 'Nguyen Dinh Tu'"
+          />
+          <div class="mt-2 text-xs text-blue-500">
+            Quyền hạn: Super Administrator
+          </div>
+        </Card>
+      </Col>
+    </Row>
+
+    <!-- Main Multi-Tenant Tabs -->
+    <Card :bordered="false" class="shadow-sm">
+      <Tabs default-active-key="tenants">
+        <!-- Tab 1: Tenants List -->
+        <Tabs.TabPane key="tenants" tab="Danh sách Workspace (Tenants)">
+          <Table
+            :columns="tenantColumns"
+            :data-source="tenants"
+            :loading="loadingTenants"
+            row-key="id"
+            :pagination="{ pageSize: 10 }"
+          >
+            <!-- Name column -->
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'name'">
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-gray-900 dark:text-gray-100">
+                    {{ record.name }}
+                  </span>
+                  <Badge
+                    v-if="record.id === activeTenantId"
+                    status="processing"
+                    text="Đang chọn"
+                  />
+                </div>
+              </template>
+
+              <!-- Slug column -->
+              <template v-else-if="column.key === 'slug'">
+                <Tag class="font-mono text-xs">{{ record.slug }}</Tag>
+              </template>
+
+              <!-- Plan column -->
+              <template v-else-if="column.key === 'plan'">
+                <Tag
+                  :color="
+                    record.metadata?.plan === 'pro'
+                      ? 'geekblue'
+                      : record.metadata?.plan === 'enterprise'
+                        ? 'purple'
+                        : 'default'
+                  "
+                  class="uppercase"
+                >
+                  {{ record.metadata?.plan || 'Standard' }}
+                </Tag>
+              </template>
+
+              <!-- Status column -->
+              <template v-else-if="column.key === 'status'">
+                <Tag
+                  :color="record.status === 'active' ? 'success' : 'warning'"
+                  class="uppercase"
+                >
+                  {{ record.status }}
+                </Tag>
+              </template>
+
+              <!-- Created at column -->
+              <template v-else-if="column.key === 'created_at'">
+                <span class="text-xs text-gray-500">
+                  {{ formatDate(record.created_at) }}
+                </span>
+              </template>
+
+              <!-- Actions column -->
+              <template v-else-if="column.key === 'action'">
+                <Space size="small">
+                  <Button
+                    size="small"
+                    :type="record.id === activeTenantId ? 'dashed' : 'primary'"
+                    @click="handleSelectTenant(record)"
+                  >
+                    {{
+                      record.id === activeTenantId
+                        ? 'Đang hoạt động'
+                        : 'Chọn Workspace này'
+                    }}
+                  </Button>
+                  <Button size="small" @click="handleConnectCli(record)">
+                    Ghép nối CLI
+                  </Button>
+                </Space>
+              </template>
+            </template>
+          </Table>
+        </Tabs.TabPane>
+
+        <!-- Tab 2: System Plugins -->
+        <Tabs.TabPane key="plugins" tab="Hệ sinh thái Plugin Cloud">
+          <Table
+            :columns="pluginColumns"
+            :data-source="plugins"
+            :loading="loadingPlugins"
+            row-key="id"
+            :pagination="false"
+          >
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'name'">
+                <div>
+                  <div class="font-medium">{{ record.name }}</div>
+                  <div class="text-xs text-gray-400">
+                    {{ record.description }}
+                  </div>
+                </div>
+              </template>
+
+              <template v-else-if="column.key === 'id'">
+                <Tag class="font-mono text-xs">{{ record.id }}</Tag>
+              </template>
+
+              <template v-else-if="column.key === 'schema_name'">
+                <Tag color="cyan" class="font-mono text-xs">
+                  {{ record.schema_name }}
+                </Tag>
+              </template>
+
+              <template v-else-if="column.key === 'type'">
+                <Tag :color="record.is_system ? 'blue' : 'purple'">
+                  {{ record.is_system ? 'Core Kernel' : 'Module Service' }}
+                </Tag>
+              </template>
+
+              <template v-else-if="column.key === 'status'">
+                <Tag color="success" class="uppercase">
+                  {{ record.status }}
+                </Tag>
+              </template>
+            </template>
+          </Table>
+        </Tabs.TabPane>
+
+        <!-- Tab 3: Specter Runners & Desktop Guide -->
+        <Tabs.TabPane key="runners" tab="Máy trạm Specter CLI & Runners">
+          <div class="max-w-2xl py-4">
+            <Typography.Title :level="4">
+              Hướng dẫn Ghép Nối Máy Trạm Specter CLI
+            </Typography.Title>
+            <Typography.Paragraph type="secondary">
+              Specter CLI Daemon (`tuquet/cli`) kết nối máy trạm cục bộ với
+              Tuquet Cloud thông qua Desktop SSO loopback.
+            </Typography.Paragraph>
+
+            <div
+              class="my-4 rounded-lg bg-gray-900 p-4 font-mono text-sm text-green-400"
+            >
+              # Bước 1: Mở terminal trên máy trạm của bạn<br />
+              tuquet login<br /><br />
+              # Trình duyệt sẽ mở cổng Desktop Bridge:<br />
+              https://admin.tuquet.com/auth/desktop
+            </div>
+
+            <Button type="primary" size="large" @click="handleConnectCli()">
+              Mở Màn Hình Ghép Nối Desktop SSO Ngay
+            </Button>
+          </div>
+        </Tabs.TabPane>
+      </Tabs>
+    </Card>
+
+    <!-- Create Tenant Modal -->
+    <Modal
+      v-model:open="isModalVisible"
+      title="Tạo Workspace / Tổ chức Mới"
+      :confirm-loading="creatingTenant"
+      ok-text="Tạo Workspace"
+      cancel-text="Hủy"
+      @ok="handleCreateTenant"
+    >
+      <Form layout="vertical" class="mt-4">
+        <Form.Item label="Tên Workspace / Tổ chức" required>
+          <Input
+            v-model:value="newTenantName"
+            placeholder="Ví dụ: Công ty Công nghệ Tuquet"
+            @input="handleNameChange"
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Mã định danh (Slug)"
+          required
+          extra="Slug được dùng làm subdomain hoặc định danh duy nhất (chỉ gồm chữ thường, số và dấu gạch ngang)"
+        >
+          <Input
+            v-model:value="newTenantSlug"
+            placeholder="Ví dụ: tuquet-tech"
+          />
+        </Form.Item>
+
+        <Form.Item label="Gói dịch vụ (Subscription Tier)">
+          <Select v-model:value="newTenantPlan">
+            <Select.Option value="pro">Pro Plan (Mặc định)</Select.Option>
+            <Select.Option value="free">Free Tier</Select.Option>
+            <Select.Option value="enterprise">Enterprise Custom</Select.Option>
+          </Select>
+        </Form.Item>
+      </Form>
+    </Modal>
   </div>
 </template>

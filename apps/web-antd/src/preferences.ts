@@ -18,8 +18,9 @@ interface WebAntdPreferencesExtension {
 export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
-    name: 'Tuquet Admin',
+    defaultHomePath: '/dashboard/workspace',
     locale: 'en-US',
+    name: 'Tuquet Admin',
   },
   widget: {
     languageToggle: false,
