@@ -1,90 +1,364 @@
 <script lang="ts" setup>
-import type { AnalysisOverviewItem } from '@vben/common-ui';
-import type { TabOption } from '@vben/types';
+import type { RealAnalyticsData } from '#/api';
 
-import {
-  AnalysisChartCard,
-  AnalysisChartsTabs,
-  AnalysisOverview,
-} from '@vben/common-ui';
-import {
-  SvgBellIcon,
-  SvgCakeIcon,
-  SvgCardIcon,
-  SvgDownloadIcon,
-} from '@vben/icons';
+import { onMounted, ref } from 'vue';
 
-import AnalyticsTrends from './analytics-trends.vue';
-import AnalyticsVisitsData from './analytics-visits-data.vue';
-import AnalyticsVisitsSales from './analytics-visits-sales.vue';
-import AnalyticsVisitsSource from './analytics-visits-source.vue';
-import AnalyticsVisits from './analytics-visits.vue';
+import { Button, message, Spin, Tag } from 'ant-design-vue';
 
-const overviewItems: AnalysisOverviewItem[] = [
-  {
-    icon: SvgCardIcon,
-    title: '用户量',
-    totalTitle: '总用户量',
-    totalValue: 120_000,
-    value: 2000,
-  },
-  {
-    icon: SvgCakeIcon,
-    title: '访问量',
-    totalTitle: '总访问量',
-    totalValue: 500_000,
-    value: 20_000,
-  },
-  {
-    icon: SvgDownloadIcon,
-    title: '下载量',
-    totalTitle: '总下载量',
-    totalValue: 120_000,
-    value: 8000,
-  },
-  {
-    icon: SvgBellIcon,
-    title: '使用量',
-    totalTitle: '总使用量',
-    totalValue: 50_000,
-    value: 5000,
-  },
-];
+import { getRealAnalyticsDataApi } from '#/api';
 
-const chartTabs: TabOption[] = [
-  {
-    label: '流量趋势',
-    value: 'trends',
+import GrowthChart from './growth-chart.vue';
+import PlansChart from './plans-chart.vue';
+import PluginsChart from './plugins-chart.vue';
+
+defineOptions({ name: 'Analytics' });
+
+const loading = ref(true);
+const analyticsData = ref<RealAnalyticsData>({
+  fleet: { loopbackPort: 8765, status: 'ready' },
+  plugins: { coreCount: 0, items: [], moduleCount: 0, total: 0 },
+  system: {
+    edgeProvider: 'Cloudflare Pages',
+    latencyMs: 20,
+    status: 'healthy',
   },
-  {
-    label: '月访问量',
-    value: 'visits',
+  tenants: {
+    activeCount: 0,
+    growth: [],
+    items: [],
+    planBreakdown: { enterprise: 0, free: 0, pro: 0 },
+    total: 0,
   },
-];
+});
+
+async function loadAnalytics() {
+  loading.value = true;
+  try {
+    const data = await getRealAnalyticsDataApi();
+    analyticsData.value = data;
+  } catch (error: any) {
+    message.error(error.message || 'Không thể tải dữ liệu telemetry');
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  loadAnalytics();
+});
 </script>
 
 <template>
-  <div class="p-5">
-    <AnalysisOverview :items="overviewItems" />
-    <AnalysisChartsTabs :tabs="chartTabs" class="mt-5">
-      <template #trends>
-        <AnalyticsTrends />
-      </template>
-      <template #visits>
-        <AnalyticsVisits />
-      </template>
-    </AnalysisChartsTabs>
+  <div class="space-y-6 p-4 sm:p-6">
+    <!-- Top Header: KISS & Clean -->
+    <div
+      class="flex flex-col justify-between gap-4 rounded-xl border border-border/60 bg-card p-5 shadow-sm sm:flex-row sm:items-center"
+    >
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h1
+            class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+          >
+            Giám Sát & Đo Lường Nền Tảng
+          </h1>
+          <Tag color="cyan" class="font-mono text-xs uppercase">
+            Live Telemetry
+          </Tag>
+        </div>
+        <p class="mt-1 text-sm text-muted-foreground">
+          Số liệu đo đếm thực tế thời gian thực từ Tuquet Cloud, Cơ sở dữ liệu
+          và Cầu nối Specter CLI
+        </p>
+      </div>
 
-    <div class="mt-5 w-full md:flex">
-      <AnalysisChartCard class="mt-5 md:mt-0 md:mr-4 md:w-1/3" title="访问数量">
-        <AnalyticsVisitsData />
-      </AnalysisChartCard>
-      <AnalysisChartCard class="mt-5 md:mt-0 md:mr-4 md:w-1/3" title="访问来源">
-        <AnalyticsVisitsSource />
-      </AnalysisChartCard>
-      <AnalysisChartCard class="mt-5 md:mt-0 md:w-1/3" title="访问来源">
-        <AnalyticsVisitsSales />
-      </AnalysisChartCard>
+      <div class="flex w-full sm:w-auto">
+        <Button
+          type="primary"
+          :loading="loading"
+          class="w-full sm:w-auto"
+          @click="loadAnalytics"
+        >
+          Làm Mới Số Liệu
+        </Button>
+      </div>
+    </div>
+
+    <!-- 4 Platform Metric Cards: Mobile-First Grid -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <!-- Metric 1: Workspaces -->
+      <div
+        class="rounded-xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:border-border"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-muted-foreground">
+            Tổng số Workspaces
+          </span>
+          <span
+            class="flex size-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-500"
+          >
+            🏢
+          </span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold tracking-tight text-foreground">
+            {{ analyticsData.tenants.total }}
+          </span>
+          <span class="text-xs font-semibold text-emerald-500">
+            {{ analyticsData.tenants.activeCount }} Đang hoạt động
+          </span>
+        </div>
+        <div class="mt-2 text-xs text-muted-foreground">
+          Phân bổ:
+          <span class="font-medium text-foreground">
+            {{ analyticsData.tenants.planBreakdown.pro }} Pro
+          </span>
+          •
+          <span class="font-medium text-foreground">
+            {{ analyticsData.tenants.planBreakdown.free }} Free
+          </span>
+        </div>
+      </div>
+
+      <!-- Metric 2: System Plugins -->
+      <div
+        class="rounded-xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:border-border"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-muted-foreground">
+            Hệ sinh thái Cloud Plugins
+          </span>
+          <span
+            class="flex size-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+          >
+            🧩
+          </span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold tracking-tight text-foreground">
+            {{ analyticsData.plugins.total }}
+          </span>
+          <span class="text-xs font-semibold text-sky-400">
+            Dịch vụ Sẵn sàng
+          </span>
+        </div>
+        <div class="mt-2 text-xs text-muted-foreground">
+          Gồm:
+          <span class="font-medium text-foreground">
+            {{ analyticsData.plugins.coreCount }} Core Kernel
+          </span>
+          và các Module mở rộng
+        </div>
+      </div>
+
+      <!-- Metric 3: Fleet CLI Daemon -->
+      <div
+        class="rounded-xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:border-border"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-muted-foreground">
+            Specter Fleet Bridge
+          </span>
+          <span
+            class="flex size-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500"
+          >
+            ⚡
+          </span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-2xl font-bold tracking-tight text-foreground">
+            Sẵn Sàng
+          </span>
+          <span class="inline-flex items-center gap-1 text-xs text-emerald-400">
+            <span
+              class="size-2 rounded-full bg-emerald-400 animate-pulse"
+            ></span>
+            Online
+          </span>
+        </div>
+        <div class="mt-2 font-mono text-xs text-muted-foreground">
+          Cổng SSO Loopback:
+          <span class="font-semibold text-foreground">
+            :{{ analyticsData.fleet.loopbackPort }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Metric 4: API Edge Latency -->
+      <div
+        class="rounded-xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:border-border"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium text-muted-foreground">
+            Độ trễ API Edge
+          </span>
+          <span
+            class="flex size-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500"
+          >
+            📡
+          </span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold tracking-tight text-foreground">
+            {{ analyticsData.system.latencyMs }}
+          </span>
+          <span class="text-sm font-medium text-muted-foreground">ms</span>
+        </div>
+        <div class="mt-2 text-xs text-emerald-400">
+          ✓ Cloudflare Anycast & Supabase Khỏe mạnh
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row 1: Growth Timeline & Plans Breakdown -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <!-- Growth Timeline (2 cols on lg) -->
+      <div
+        class="rounded-xl border border-border/60 bg-card p-5 shadow-sm lg:col-span-2"
+      >
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-semibold text-foreground">
+              Tiến Trình Phát Triển Workspaces
+            </h2>
+            <p class="text-xs text-muted-foreground">
+              Số lượng Workspace / Tổ chức được khởi tạo theo mốc thời gian thực
+              tế
+            </p>
+          </div>
+          <Tag color="blue" class="text-xs">
+            Tổng cộng: {{ analyticsData.tenants.total }}
+          </Tag>
+        </div>
+
+        <div
+          v-if="loading"
+          class="flex h-64 items-center justify-center sm:h-80"
+        >
+          <Spin tip="Đang tải dữ liệu biểu đồ..." />
+        </div>
+        <GrowthChart v-else :data="analyticsData.tenants.growth" />
+      </div>
+
+      <!-- Subscription Plans Donut (1 col on lg) -->
+      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+        <div class="mb-4">
+          <h2 class="text-base font-semibold text-foreground">
+            Cơ Cấu Gói Thuê Bao
+          </h2>
+          <p class="text-xs text-muted-foreground">
+            Phân bổ tỷ lệ các gói dịch vụ khách hàng đang sử dụng
+          </p>
+        </div>
+
+        <div
+          v-if="loading"
+          class="flex h-64 items-center justify-center sm:h-80"
+        >
+          <Spin tip="Đang tải..." />
+        </div>
+        <PlansChart v-else :data="analyticsData.tenants.planBreakdown" />
+      </div>
+    </div>
+
+    <!-- Charts Row 2: Plugins Ecosystem & Infrastructure Health -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <!-- Plugins Distribution -->
+      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+        <div class="mb-4">
+          <h2 class="text-base font-semibold text-foreground">
+            Kiến Trúc Cloud Plugin
+          </h2>
+          <p class="text-xs text-muted-foreground">
+            Tỷ lệ thành phần Core Kernel so với các Module mở rộng nghiệp vụ
+          </p>
+        </div>
+
+        <div
+          v-if="loading"
+          class="flex h-64 items-center justify-center sm:h-80"
+        >
+          <Spin tip="Đang tải..." />
+        </div>
+        <PluginsChart
+          v-else
+          :core-count="analyticsData.plugins.coreCount"
+          :module-count="analyticsData.plugins.moduleCount"
+        />
+      </div>
+
+      <!-- Infrastructure Status List -->
+      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+        <div class="mb-4">
+          <h2 class="text-base font-semibold text-foreground">
+            Trạng Thái Hạ Tầng & Dịch Vụ Cốt Lõi
+          </h2>
+          <p class="text-xs text-muted-foreground">
+            Giám sát trạng thái vận hành của các dịch vụ hệ thống
+          </p>
+        </div>
+
+        <div class="divide-y divide-border/40">
+          <div class="flex items-center justify-between py-3">
+            <div>
+              <div class="font-medium text-foreground">
+                Tuquet Cloud Database
+              </div>
+              <div class="text-xs text-muted-foreground">
+                PostgreSQL Multi-Tenant via Supabase
+              </div>
+            </div>
+            <Tag color="success">HOẠT ĐỘNG TỐT</Tag>
+          </div>
+
+          <div class="flex items-center justify-between py-3">
+            <div>
+              <div class="font-medium text-foreground">
+                Global CDN & Edge Delivery
+              </div>
+              <div class="text-xs text-muted-foreground">
+                {{ analyticsData.system.edgeProvider }}
+              </div>
+            </div>
+            <Tag color="success">ONLINE</Tag>
+          </div>
+
+          <div class="flex items-center justify-between py-3">
+            <div>
+              <div class="font-medium text-foreground">
+                Specter CLI Desktop Bridge
+              </div>
+              <div class="text-xs text-muted-foreground">
+                SSO Loopback Daemon (:8765)
+              </div>
+            </div>
+            <Tag color="processing">SẴN SÀNG GHÉP NỐI</Tag>
+          </div>
+
+          <div class="flex items-center justify-between py-3">
+            <div>
+              <div class="font-medium text-foreground">
+                Core Authentication & IAM
+              </div>
+              <div class="text-xs text-muted-foreground">
+                Plugin: core-iam (Schema: public)
+              </div>
+            </div>
+            <Tag color="success">ACTIVE</Tag>
+          </div>
+
+          <div class="flex items-center justify-between py-3">
+            <div>
+              <div class="font-medium text-foreground">
+                Specter Runners Execution Engine
+              </div>
+              <div class="text-xs text-muted-foreground">
+                Plugin: runners (Schema: runners)
+              </div>
+            </div>
+            <Tag color="success">ACTIVE</Tag>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

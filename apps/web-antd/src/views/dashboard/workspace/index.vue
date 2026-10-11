@@ -9,20 +9,15 @@ import { useUserStore } from '@vben/stores';
 import {
   Badge,
   Button,
-  Card,
-  Col,
   Form,
   Input,
   message,
   Modal,
-  Row,
   Select,
   Space,
-  Statistic,
   Table,
   Tabs,
   Tag,
-  Typography,
 } from 'ant-design-vue';
 
 import {
@@ -148,65 +143,65 @@ async function handleCreateTenant() {
 // Tenant Table Columns
 const tenantColumns = [
   {
-    title: 'Tên Workspace / Tổ chức',
     dataIndex: 'name',
     key: 'name',
+    title: 'Tên Workspace / Tổ chức',
   },
   {
-    title: 'Mã Slug',
     dataIndex: 'slug',
     key: 'slug',
+    title: 'Mã Slug',
   },
   {
-    title: 'Gói Dịch Vụ',
     key: 'plan',
+    title: 'Gói Dịch Vụ',
   },
   {
-    title: 'Trạng Thái',
     dataIndex: 'status',
     key: 'status',
+    title: 'Trạng Thái',
   },
   {
-    title: 'Ngày Khởi Tạo',
     dataIndex: 'created_at',
     key: 'created_at',
+    title: 'Ngày Khởi Tạo',
   },
   {
-    title: 'Thao Tác Quản Trị',
     key: 'action',
+    title: 'Thao Tác Quản Trị',
   },
 ];
 
 // Plugins Table Columns
 const pluginColumns = [
   {
-    title: 'Tên Plugin / Dịch Vụ',
     dataIndex: 'name',
     key: 'name',
+    title: 'Tên Plugin / Dịch Vụ',
   },
   {
-    title: 'Mã Plugin (ID)',
     dataIndex: 'id',
     key: 'id',
+    title: 'Mã Plugin (ID)',
   },
   {
-    title: 'Database Schema',
     dataIndex: 'schema_name',
     key: 'schema_name',
+    title: 'Database Schema',
   },
   {
-    title: 'Phiên Bản',
     dataIndex: 'version',
     key: 'version',
+    title: 'Phiên Bản',
   },
   {
-    title: 'Phân Loại',
     key: 'type',
+    title: 'Phân Loại',
   },
   {
-    title: 'Trạng Thái',
     dataIndex: 'status',
     key: 'status',
+    title: 'Trạng Thái',
   },
 ];
 
@@ -227,232 +222,398 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6">
-    <!-- Header Banner -->
+  <div class="space-y-6 p-4 sm:p-6">
+    <!-- Top Header: KISS & Shadcn Slate Flat Design -->
     <div
-      class="mb-6 flex flex-col justify-between gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 md:flex-row md:items-center"
+      class="flex flex-col justify-between gap-4 rounded-xl border border-border/60 bg-card p-5 shadow-sm sm:flex-row sm:items-center"
     >
       <div>
-        <div class="flex items-center gap-3">
-          <Typography.Title :level="3" class="!mb-0">
-            Trung tâm Quản trị Multi-Tenant
-          </Typography.Title>
-          <Tag color="blue" class="text-xs font-semibold uppercase">
-            System Admin Console
+        <div class="flex items-center gap-2.5">
+          <h1
+            class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+          >
+            Quản Trị Multi-Tenant
+          </h1>
+          <Tag color="blue" class="font-mono text-xs uppercase">
+            System Console
           </Tag>
         </div>
-        <Typography.Paragraph type="secondary" class="!mb-0 mt-1">
-          Quản trị toàn diện các Tổ chức / Workspace, Máy trạm Specter CLI và Hệ
-          sinh thái Plugin trên Tuquet Cloud
-        </Typography.Paragraph>
+        <p class="mt-1 text-sm text-muted-foreground">
+          Quản lý các Tổ chức / Workspace, Ghép nối Specter CLI Daemon và Hệ
+          sinh thái Cloud Plugin
+        </p>
       </div>
 
-      <Space wrap>
-        <Button type="primary" @click="openCreateModal">
+      <!-- Action Buttons: Mobile-First Responsive Stack -->
+      <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+        <Button
+          type="primary"
+          class="w-full sm:w-auto font-medium"
+          @click="openCreateModal"
+        >
           + Tạo Workspace Mới
         </Button>
-        <Button @click="handleConnectCli()"> Ghép Nối Máy Trạm CLI </Button>
-        <Button :loading="loadingTenants" @click="fetchTenants">
+        <Button class="w-full sm:w-auto" @click="handleConnectCli()">
+          Ghép Nối Máy Trạm CLI
+        </Button>
+        <Button
+          :loading="loadingTenants"
+          class="w-full sm:w-auto"
+          @click="fetchTenants"
+        >
           Làm Mới
         </Button>
-      </Space>
+      </div>
     </div>
 
-    <!-- 4 Platform Metric Cards -->
-    <Row :gutter="[16, 16]" class="mb-6">
-      <Col :xs="24" :sm="12" :lg="6">
-        <Card :bordered="false" class="shadow-sm">
-          <Statistic
-            title="Tổng số Workspaces"
-            :value="tenants.length"
-            suffix="Tenants"
-          />
-          <div class="mt-2 text-xs text-gray-500">
-            Workspace hoạt động:
-            <span class="font-semibold text-blue-600">
-              {{ activeTenant?.name || 'Nguyen Dinh Tu' }}
-            </span>
-          </div>
-        </Card>
-      </Col>
-      <Col :xs="24" :sm="12" :lg="6">
-        <Card :bordered="false" class="shadow-sm">
-          <Statistic
-            title="Plugin Hệ thống Cloud"
-            :value="plugins.length"
-            suffix="/ 6 Active"
-          />
-          <div class="mt-2 text-xs text-green-600">
-            ✓ Core Kernel & Storage Sẵn sàng
-          </div>
-        </Card>
-      </Col>
-      <Col :xs="24" :sm="12" :lg="6">
-        <Card :bordered="false" class="shadow-sm">
-          <Statistic title="Specter Fleet Bridge" value="Sẵn Sàng" />
-          <div class="mt-2 text-xs text-gray-500">
-            Cổng SSO Loopback: <span class="font-mono">:8765</span>
-          </div>
-        </Card>
-      </Col>
-      <Col :xs="24" :sm="12" :lg="6">
-        <Card :bordered="false" class="shadow-sm">
-          <Statistic
-            title="Quản trị viên Hệ thống"
-            :value="userStore.userInfo?.realName || 'Nguyen Dinh Tu'"
-          />
-          <div class="mt-2 text-xs text-blue-500">
-            Quyền hạn: Super Administrator
-          </div>
-        </Card>
-      </Col>
-    </Row>
+    <!-- 4 Platform Metric Cards: Mobile-First Grid -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <!-- Metric 1: Workspaces -->
+      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+        <div class="text-sm font-medium text-muted-foreground">
+          Tổng số Workspaces
+        </div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold tracking-tight text-foreground">
+            {{ tenants.length }}
+          </span>
+          <span class="text-xs font-semibold text-sky-400">Tenants</span>
+        </div>
+        <div class="mt-2 text-xs text-muted-foreground">
+          Đang chọn:
+          <span class="font-semibold text-foreground">
+            {{ activeTenant?.name || 'Nguyen Dinh Tu' }}
+          </span>
+        </div>
+      </div>
 
-    <!-- Main Multi-Tenant Tabs -->
-    <Card :bordered="false" class="shadow-sm">
+      <!-- Metric 2: Plugins -->
+      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+        <div class="text-sm font-medium text-muted-foreground">
+          Plugin Hệ Thống Cloud
+        </div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span class="text-3xl font-extrabold tracking-tight text-foreground">
+            {{ plugins.length }}
+          </span>
+          <span class="text-xs font-semibold text-emerald-400">/ 6 Sẵn sàng</span>
+        </div>
+        <div class="mt-2 text-xs text-emerald-400">
+          ✓ Core Kernel & Storage Sẵn Sàng
+        </div>
+      </div>
+
+      <!-- Metric 3: Fleet Bridge -->
+      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+        <div class="text-sm font-medium text-muted-foreground">
+          Specter Fleet Bridge
+        </div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span class="text-2xl font-bold tracking-tight text-foreground">
+            Sẵn Sàng
+          </span>
+          <span class="inline-flex items-center gap-1 text-xs text-emerald-400">
+            <span
+              class="size-2 rounded-full bg-emerald-400 animate-pulse"
+            ></span>
+            Online
+          </span>
+        </div>
+        <div class="mt-2 font-mono text-xs text-muted-foreground">
+          Cổng SSO Loopback:
+          <span class="text-foreground font-semibold">:8765</span>
+        </div>
+      </div>
+
+      <!-- Metric 4: Admin Info -->
+      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+        <div class="text-sm font-medium text-muted-foreground">
+          Quản Trị Viên Hệ Thống
+        </div>
+        <div class="mt-2 flex items-baseline gap-2 truncate">
+          <span
+            class="text-xl font-bold tracking-tight text-foreground truncate"
+          >
+            {{ userStore.userInfo?.realName || 'Nguyen Dinh Tu' }}
+          </span>
+        </div>
+        <div class="mt-2 text-xs text-sky-400">Quyền: Super Administrator</div>
+      </div>
+    </div>
+
+    <!-- Main Content Container: Shadcn Slate Tabs -->
+    <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
       <Tabs default-active-key="tenants">
         <!-- Tab 1: Tenants List -->
         <Tabs.TabPane key="tenants" tab="Danh sách Workspace (Tenants)">
-          <Table
-            :columns="tenantColumns"
-            :data-source="tenants"
-            :loading="loadingTenants"
-            row-key="id"
-            :pagination="{ pageSize: 10 }"
-          >
-            <!-- Name column -->
-            <template #bodyCell="{ column, record }">
-              <template v-if="column.key === 'name'">
-                <div class="flex items-center gap-2">
-                  <span class="font-medium text-gray-900 dark:text-gray-100">
-                    {{ record.name }}
+          <!-- Desktop Table View: Hidden on Mobile -->
+          <div class="hidden md:block">
+            <Table
+              :columns="tenantColumns"
+              :data-source="tenants"
+              :loading="loadingTenants"
+              row-key="id"
+              :pagination="{ pageSize: 10 }"
+            >
+              <!-- Name column -->
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.key === 'name'">
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-foreground">
+                      {{ record.name }}
+                    </span>
+                    <Badge
+                      v-if="record.id === activeTenantId"
+                      status="processing"
+                      text="Đang chọn"
+                    />
+                  </div>
+                </template>
+
+                <!-- Slug column -->
+                <template v-else-if="column.key === 'slug'">
+                  <Tag class="font-mono text-xs">{{ record.slug }}</Tag>
+                </template>
+
+                <!-- Plan column -->
+                <template v-else-if="column.key === 'plan'">
+                  <Tag
+                    :color="
+                      record.metadata?.plan === 'pro'
+                        ? 'geekblue'
+                        : record.metadata?.plan === 'enterprise'
+                          ? 'purple'
+                          : 'default'
+                    "
+                    class="uppercase"
+                  >
+                    {{ record.metadata?.plan || 'Standard' }}
+                  </Tag>
+                </template>
+
+                <!-- Status column -->
+                <template v-else-if="column.key === 'status'">
+                  <Tag
+                    :color="record.status === 'active' ? 'success' : 'warning'"
+                    class="uppercase"
+                  >
+                    {{ record.status }}
+                  </Tag>
+                </template>
+
+                <!-- Created at column -->
+                <template v-else-if="column.key === 'created_at'">
+                  <span class="text-xs text-muted-foreground">
+                    {{ formatDate(record.created_at) }}
                   </span>
-                  <Badge
-                    v-if="record.id === activeTenantId"
-                    status="processing"
-                    text="Đang chọn"
-                  />
+                </template>
+
+                <!-- Actions column -->
+                <template v-else-if="column.key === 'action'">
+                  <Space size="small">
+                    <Button
+                      size="small"
+                      :type="
+                        record.id === activeTenantId ? 'dashed' : 'primary'
+                      "
+                      @click="handleSelectTenant(record)"
+                    >
+                      {{
+                        record.id === activeTenantId
+                          ? 'Đang hoạt động'
+                          : 'Chọn Workspace này'
+                      }}
+                    </Button>
+                    <Button size="small" @click="handleConnectCli(record)">
+                      Ghép nối CLI
+                    </Button>
+                  </Space>
+                </template>
+              </template>
+            </Table>
+          </div>
+
+          <!-- Mobile Card View: Exclusively Optimized for Mobile Screens -->
+          <div class="block space-y-3 md:hidden">
+            <div
+              v-for="tenant in tenants"
+              :key="tenant.id"
+              class="rounded-lg border p-4 transition-all"
+              :class="
+                tenant.id === activeTenantId
+                  ? 'border-sky-500 bg-sky-500/5'
+                  : 'border-border/60 bg-card/60'
+              "
+            >
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <div class="font-semibold text-foreground">
+                    {{ tenant.name }}
+                  </div>
+                  <div class="mt-0.5 font-mono text-xs text-muted-foreground">
+                    {{ tenant.slug }}
+                  </div>
                 </div>
-              </template>
+                <Badge
+                  v-if="tenant.id === activeTenantId"
+                  status="processing"
+                  text="Active"
+                />
+              </div>
 
-              <!-- Slug column -->
-              <template v-else-if="column.key === 'slug'">
-                <Tag class="font-mono text-xs">{{ record.slug }}</Tag>
-              </template>
-
-              <!-- Plan column -->
-              <template v-else-if="column.key === 'plan'">
+              <div class="mt-3 flex flex-wrap items-center gap-2">
                 <Tag
                   :color="
-                    record.metadata?.plan === 'pro'
+                    tenant.metadata?.plan === 'pro'
                       ? 'geekblue'
-                      : record.metadata?.plan === 'enterprise'
+                      : tenant.metadata?.plan === 'enterprise'
                         ? 'purple'
                         : 'default'
                   "
-                  class="uppercase"
+                  class="uppercase text-xs"
                 >
-                  {{ record.metadata?.plan || 'Standard' }}
+                  {{ tenant.metadata?.plan || 'Standard' }}
                 </Tag>
-              </template>
-
-              <!-- Status column -->
-              <template v-else-if="column.key === 'status'">
                 <Tag
-                  :color="record.status === 'active' ? 'success' : 'warning'"
-                  class="uppercase"
+                  :color="tenant.status === 'active' ? 'success' : 'warning'"
+                  class="uppercase text-xs"
                 >
-                  {{ record.status }}
+                  {{ tenant.status }}
                 </Tag>
-              </template>
-
-              <!-- Created at column -->
-              <template v-else-if="column.key === 'created_at'">
-                <span class="text-xs text-gray-500">
-                  {{ formatDate(record.created_at) }}
+                <span class="text-xs text-muted-foreground ml-auto">
+                  {{ formatDate(tenant.created_at) }}
                 </span>
-              </template>
+              </div>
 
-              <!-- Actions column -->
-              <template v-else-if="column.key === 'action'">
-                <Space size="small">
-                  <Button
-                    size="small"
-                    :type="record.id === activeTenantId ? 'dashed' : 'primary'"
-                    @click="handleSelectTenant(record)"
-                  >
-                    {{
-                      record.id === activeTenantId
-                        ? 'Đang hoạt động'
-                        : 'Chọn Workspace này'
-                    }}
-                  </Button>
-                  <Button size="small" @click="handleConnectCli(record)">
-                    Ghép nối CLI
-                  </Button>
-                </Space>
-              </template>
-            </template>
-          </Table>
+              <!-- Action buttons on mobile: Tap targets -->
+              <div class="mt-4 flex gap-2 pt-2 border-t border-border/40">
+                <Button
+                  size="middle"
+                  class="flex-1"
+                  :type="tenant.id === activeTenantId ? 'dashed' : 'primary'"
+                  @click="handleSelectTenant(tenant)"
+                >
+                  {{
+                    tenant.id === activeTenantId
+                      ? '✓ Đang chọn'
+                      : 'Chọn Workspace'
+                  }}
+                </Button>
+                <Button
+                  size="middle"
+                  class="flex-1"
+                  @click="handleConnectCli(tenant)"
+                >
+                  Ghép Nối CLI
+                </Button>
+              </div>
+            </div>
+
+            <div
+              v-if="tenants.length === 0 && !loadingTenants"
+              class="py-8 text-center text-sm text-muted-foreground"
+            >
+              Chưa có Workspace nào. Hãy nhấn "+ Tạo Workspace Mới".
+            </div>
+          </div>
         </Tabs.TabPane>
 
         <!-- Tab 2: System Plugins -->
         <Tabs.TabPane key="plugins" tab="Hệ sinh thái Plugin Cloud">
-          <Table
-            :columns="pluginColumns"
-            :data-source="plugins"
-            :loading="loadingPlugins"
-            row-key="id"
-            :pagination="false"
-          >
-            <template #bodyCell="{ column, record }">
-              <template v-if="column.key === 'name'">
+          <!-- Desktop Table -->
+          <div class="hidden md:block">
+            <Table
+              :columns="pluginColumns"
+              :data-source="plugins"
+              :loading="loadingPlugins"
+              row-key="id"
+              :pagination="false"
+            >
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.key === 'name'">
+                  <div>
+                    <div class="font-medium text-foreground">
+                      {{ record.name }}
+                    </div>
+                    <div class="text-xs text-muted-foreground">
+                      {{ record.description }}
+                    </div>
+                  </div>
+                </template>
+
+                <template v-else-if="column.key === 'id'">
+                  <Tag class="font-mono text-xs">{{ record.id }}</Tag>
+                </template>
+
+                <template v-else-if="column.key === 'schema_name'">
+                  <Tag color="cyan" class="font-mono text-xs">
+                    {{ record.schema_name }}
+                  </Tag>
+                </template>
+
+                <template v-else-if="column.key === 'type'">
+                  <Tag :color="record.is_system ? 'blue' : 'purple'">
+                    {{ record.is_system ? 'Core Kernel' : 'Module Service' }}
+                  </Tag>
+                </template>
+
+                <template v-else-if="column.key === 'status'">
+                  <Tag color="success" class="uppercase">
+                    {{ record.status }}
+                  </Tag>
+                </template>
+              </template>
+            </Table>
+          </div>
+
+          <!-- Mobile Cards for Plugins -->
+          <div class="block space-y-3 md:hidden">
+            <div
+              v-for="plugin in plugins"
+              :key="plugin.id"
+              class="rounded-lg border border-border/60 bg-card/60 p-4"
+            >
+              <div class="flex items-start justify-between gap-2">
                 <div>
-                  <div class="font-medium">{{ record.name }}</div>
-                  <div class="text-xs text-gray-400">
-                    {{ record.description }}
+                  <div class="font-semibold text-foreground">
+                    {{ plugin.name }}
+                  </div>
+                  <div class="text-xs text-muted-foreground">
+                    {{ plugin.description || 'Hệ thống plugin cốt lõi Tuquet' }}
                   </div>
                 </div>
-              </template>
-
-              <template v-else-if="column.key === 'id'">
-                <Tag class="font-mono text-xs">{{ record.id }}</Tag>
-              </template>
-
-              <template v-else-if="column.key === 'schema_name'">
-                <Tag color="cyan" class="font-mono text-xs">
-                  {{ record.schema_name }}
+                <Tag color="success" class="uppercase text-xs">
+                  {{ plugin.status }}
                 </Tag>
-              </template>
+              </div>
 
-              <template v-else-if="column.key === 'type'">
-                <Tag :color="record.is_system ? 'blue' : 'purple'">
-                  {{ record.is_system ? 'Core Kernel' : 'Module Service' }}
+              <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                <Tag class="font-mono">{{ plugin.id }}</Tag>
+                <Tag color="cyan" class="font-mono">
+                  schema: {{ plugin.schema_name }}
                 </Tag>
-              </template>
-
-              <template v-else-if="column.key === 'status'">
-                <Tag color="success" class="uppercase">
-                  {{ record.status }}
+                <Tag :color="plugin.is_system ? 'blue' : 'purple'">
+                  {{ plugin.is_system ? 'Core Kernel' : 'Module' }}
                 </Tag>
-              </template>
-            </template>
-          </Table>
+                <span class="text-muted-foreground ml-auto">v{{ plugin.version }}</span>
+              </div>
+            </div>
+          </div>
         </Tabs.TabPane>
 
         <!-- Tab 3: Specter Runners & Desktop Guide -->
         <Tabs.TabPane key="runners" tab="Máy trạm Specter CLI & Runners">
-          <div class="max-w-2xl py-4">
-            <Typography.Title :level="4">
-              Hướng dẫn Ghép Nối Máy Trạm Specter CLI
-            </Typography.Title>
-            <Typography.Paragraph type="secondary">
+          <div class="max-w-2xl py-2">
+            <h2 class="text-lg font-semibold text-foreground">
+              Hướng Dẫn Ghép Nối Máy Trạm Specter CLI
+            </h2>
+            <p class="mt-1 text-sm text-muted-foreground">
               Specter CLI Daemon (`tuquet/cli`) kết nối máy trạm cục bộ với
               Tuquet Cloud thông qua Desktop SSO loopback.
-            </Typography.Paragraph>
+            </p>
 
             <div
-              class="my-4 rounded-lg bg-gray-900 p-4 font-mono text-sm text-green-400"
+              class="my-4 overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-xs sm:text-sm text-emerald-400 border border-slate-800"
             >
               # Bước 1: Mở terminal trên máy trạm của bạn<br />
               tuquet login<br /><br />
@@ -460,27 +621,34 @@ onMounted(() => {
               https://admin.tuquet.com/auth/desktop
             </div>
 
-            <Button type="primary" size="large" @click="handleConnectCli()">
+            <Button
+              type="primary"
+              size="large"
+              class="w-full sm:w-auto"
+              @click="handleConnectCli()"
+            >
               Mở Màn Hình Ghép Nối Desktop SSO Ngay
             </Button>
           </div>
         </Tabs.TabPane>
       </Tabs>
-    </Card>
+    </div>
 
-    <!-- Create Tenant Modal -->
+    <!-- Create Tenant Modal: Touch Friendly on Mobile -->
     <Modal
       v-model:open="isModalVisible"
       title="Tạo Workspace / Tổ chức Mới"
       :confirm-loading="creatingTenant"
       ok-text="Tạo Workspace"
       cancel-text="Hủy"
+      class="max-w-[calc(100vw-2rem)] sm:max-w-lg"
       @ok="handleCreateTenant"
     >
       <Form layout="vertical" class="mt-4">
         <Form.Item label="Tên Workspace / Tổ chức" required>
           <Input
             v-model:value="newTenantName"
+            size="large"
             placeholder="Ví dụ: Công ty Công nghệ Tuquet"
             @input="handleNameChange"
           />
@@ -493,12 +661,13 @@ onMounted(() => {
         >
           <Input
             v-model:value="newTenantSlug"
+            size="large"
             placeholder="Ví dụ: tuquet-tech"
           />
         </Form.Item>
 
         <Form.Item label="Gói dịch vụ (Subscription Tier)">
-          <Select v-model:value="newTenantPlan">
+          <Select v-model:value="newTenantPlan" size="large">
             <Select.Option value="pro">Pro Plan (Mặc định)</Select.Option>
             <Select.Option value="free">Free Tier</Select.Option>
             <Select.Option value="enterprise">Enterprise Custom</Select.Option>

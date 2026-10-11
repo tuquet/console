@@ -19,20 +19,47 @@ export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
     defaultHomePath: '/dashboard/workspace',
+    enablePreferences: false,
     locale: 'en-US',
     name: 'Tuquet Admin',
   },
-  widget: {
-    languageToggle: false,
+  breadcrumb: {
+    enable: false,
   },
   copyright: {
     companyName: 'Tuquet',
     companySiteLink: 'https://tuquet.com',
     date: '2026',
-    enable: true,
+    enable: false,
     icp: '',
     icpLink: '',
-    settingShow: true,
+    settingShow: false,
+  },
+  footer: {
+    enable: false,
+  },
+  sidebar: {
+    collapsed: false,
+    width: 210,
+  },
+  tabbar: {
+    enable: false,
+  },
+  theme: {
+    builtinType: 'slate',
+    mode: 'dark',
+    radius: '0.5',
+  },
+  widget: {
+    fullscreen: false,
+    globalSearch: false,
+    languageToggle: false,
+    lockScreen: false,
+    notification: false,
+    refresh: false,
+    sidebarToggle: true,
+    themeToggle: true,
+    timezone: false,
   },
 });
 
