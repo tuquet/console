@@ -22,6 +22,16 @@ export interface WorkspaceQuota {
   used_storage_mb: number;
 }
 
+export interface WorkspaceApiKey {
+  created_at: string;
+  expires_at?: null | string;
+  id: string;
+  key_prefix: string;
+  last_used_at?: null | string;
+  name: string;
+  role: 'admin' | 'read_only';
+}
+
 export interface WorkspaceDetailData {
   active_devices_count: number;
   members: WorkspaceMember[];
@@ -309,7 +319,23 @@ export async function updateWorkspaceInfoApi(
   if (data.name) payload.name = data.name;
   if (data.slug) payload.slug = data.slug;
   if (data.plan) {
-    payload.metadata = { plan: data.plan, region: 'ap-southeast-1' };
+    // Preserve existing metadata (such as api_keys)
+    const metaRes = await fetch(
+      `${supabaseUrl}/rest/v1/tenants?id=eq.${encodeURIComponent(tenantId)}&select=metadata`,
+      {
+        headers: {
+          apikey: anonKey,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      },
+    );
+    const metaData = await metaRes.json().catch(() => []);
+    const existingMeta = metaData[0]?.metadata || {};
+    payload.metadata = {
+      ...existingMeta,
+      plan: data.plan,
+      region: existingMeta.region || 'ap-southeast-1',
+    };
   }
 
   const res = await fetch(
@@ -330,4 +356,190 @@ export async function updateWorkspaceInfoApi(
 
   const result = await res.json();
   return Array.isArray(result) ? result[0] : result;
+}
+
+/**
+ * Tạo khóa API Headless mới cho Workspace
+ */
+export async function createWorkspaceApiKeyApi(
+  tenantId: string,
+  params: {
+    expiresInDays?: null | number;
+    name: string;
+    role: 'admin' | 'read_only';
+  },
+): Promise<{ apiKey: WorkspaceApiKey; fullKey: string }> {
+  const { anonKey, supabaseUrl } = getSupabaseConfig();
+  const accessStore = useAccessStore();
+  const token = accessStore.accessToken;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    apikey: anonKey,
+    Prefer: 'return=representation',
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  // 1. Fetch current tenant metadata
+  const tenantRes = await fetch(
+    `${supabaseUrl}/rest/v1/tenants?id=eq.${encodeURIComponent(tenantId)}&select=metadata`,
+    {
+      headers: {
+        apikey: anonKey,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    },
+  );
+  const tenants = await tenantRes.json().catch(() => []);
+  const currentMeta = tenants[0]?.metadata || {};
+  const currentKeys: WorkspaceApiKey[] = Array.isArray(currentMeta.api_keys)
+    ? currentMeta.api_keys
+    : [];
+
+  // 2. Generate secure token
+  const randomBytes = new Uint8Array(20);
+  crypto.getRandomValues(randomBytes);
+  const randomHex = [...randomBytes]
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+  const fullKey = `tq_live_${randomHex}`;
+  const key_prefix = `tq_live_${randomHex.slice(0, 4)}...${randomHex.slice(-4)}`;
+
+  let expires_at: null | string = null;
+  if (params.expiresInDays && params.expiresInDays > 0) {
+    const expDate = new Date();
+    expDate.setDate(expDate.getDate() + params.expiresInDays);
+    expires_at = expDate.toISOString();
+  }
+
+  const apiKey: WorkspaceApiKey = {
+    created_at: new Date().toISOString(),
+    expires_at,
+    id: crypto.randomUUID(),
+    key_prefix,
+    last_used_at: null,
+    name: params.name,
+    role: params.role,
+  };
+
+  const updatedKeys = [apiKey, ...currentKeys];
+  const patchRes = await fetch(
+    `${supabaseUrl}/rest/v1/tenants?id=eq.${encodeURIComponent(tenantId)}`,
+    {
+      body: JSON.stringify({
+        metadata: {
+          ...currentMeta,
+          api_keys: updatedKeys,
+        },
+      }),
+      headers,
+      method: 'PATCH',
+    },
+  );
+
+  if (!patchRes.ok) {
+    const err = await patchRes.json().catch(() => ({}));
+    throw new Error(err.message || 'Tạo khóa API thất bại');
+  }
+
+  return { apiKey, fullKey };
+}
+
+/**
+ * Thu hồi / Xóa khóa API của Workspace
+ */
+export async function revokeWorkspaceApiKeyApi(
+  tenantId: string,
+  keyId: string,
+): Promise<void> {
+  const { anonKey, supabaseUrl } = getSupabaseConfig();
+  const accessStore = useAccessStore();
+  const token = accessStore.accessToken;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    apikey: anonKey,
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const tenantRes = await fetch(
+    `${supabaseUrl}/rest/v1/tenants?id=eq.${encodeURIComponent(tenantId)}&select=metadata`,
+    {
+      headers: {
+        apikey: anonKey,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    },
+  );
+  const tenants = await tenantRes.json().catch(() => []);
+  const currentMeta = tenants[0]?.metadata || {};
+  const currentKeys: WorkspaceApiKey[] = Array.isArray(currentMeta.api_keys)
+    ? currentMeta.api_keys
+    : [];
+
+  const updatedKeys = currentKeys.filter((k) => k.id !== keyId);
+
+  const patchRes = await fetch(
+    `${supabaseUrl}/rest/v1/tenants?id=eq.${encodeURIComponent(tenantId)}`,
+    {
+      body: JSON.stringify({
+        metadata: {
+          ...currentMeta,
+          api_keys: updatedKeys,
+        },
+      }),
+      headers,
+      method: 'PATCH',
+    },
+  );
+
+  if (!patchRes.ok) {
+    const err = await patchRes.json().catch(() => ({}));
+    throw new Error(err.message || 'Thu hồi khóa API thất bại');
+  }
+}
+
+/**
+ * Xóa hoặc lưu trữ Workspace
+ */
+export async function deleteWorkspaceApi(tenantId: string): Promise<void> {
+  const { anonKey, supabaseUrl } = getSupabaseConfig();
+  const accessStore = useAccessStore();
+  const token = accessStore.accessToken;
+
+  const headers: Record<string, string> = { apikey: anonKey };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(
+    `${supabaseUrl}/rest/v1/tenants?id=eq.${encodeURIComponent(tenantId)}`,
+    {
+      headers,
+      method: 'DELETE',
+    },
+  );
+
+  if (!res.ok) {
+    // If foreign key constraint prevents hard delete, archive instead
+    const archiveRes = await fetch(
+      `${supabaseUrl}/rest/v1/tenants?id=eq.${encodeURIComponent(tenantId)}`,
+      {
+        body: JSON.stringify({ status: 'archived' }),
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+        },
+        method: 'PATCH',
+      },
+    );
+    if (!archiveRes.ok) {
+      const err = await archiveRes.json().catch(() => ({}));
+      throw new Error(err.message || 'Không thể xóa hoặc lưu trữ Workspace');
+    }
+  }
 }

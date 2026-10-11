@@ -1,5 +1,9 @@
 <script lang="ts" setup>
-import type { WorkspaceDetailData, WorkspaceMember } from '#/api';
+import type {
+  WorkspaceApiKey,
+  WorkspaceDetailData,
+  WorkspaceMember,
+} from '#/api';
 
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -12,9 +16,12 @@ import {
   Copy,
   CreditCard,
   Edit3,
+  KeyRound,
+  Plus,
   RefreshCw,
   Server,
   Settings,
+  ShieldAlert,
   Terminal,
   Trash2,
   UserPlus,
@@ -37,10 +44,13 @@ import {
 } from 'ant-design-vue';
 
 import {
+  createWorkspaceApiKeyApi,
+  deleteWorkspaceApi,
   getActiveTenantId,
   getWorkspaceDetailApi,
   inviteWorkspaceMemberApi,
   removeWorkspaceMemberApi,
+  revokeWorkspaceApiKeyApi,
   setActiveTenantId,
   updateWorkspaceInfoApi,
   updateWorkspaceMemberApi,
@@ -322,6 +332,124 @@ function getRoleColor(role: string) {
     default: {
       return 'default';
     }
+  }
+}
+
+// API Keys state & columns
+const isCreateKeyModalVisible = ref(false);
+const newKeyName = ref('');
+const newKeyRole = ref<'admin' | 'read_only'>('admin');
+const newKeyExpiresIn = ref<number>(0);
+const creatingKey = ref(false);
+
+const isKeyCreatedModalVisible = ref(false);
+const generatedFullKey = ref('');
+
+const apiKeys = computed<WorkspaceApiKey[]>(() => {
+  return detailData.value?.tenant?.metadata?.api_keys || [];
+});
+
+const apiKeyColumns = [
+  {
+    key: 'name',
+    title: 'Tên Khóa & ID',
+  },
+  {
+    key: 'key_prefix',
+    title: 'Tiền Tố Token',
+  },
+  {
+    key: 'role',
+    title: 'Quyền Hạn',
+  },
+  {
+    key: 'created_at',
+    title: 'Thời Gian Tạo / Hạn',
+  },
+  {
+    key: 'action',
+    title: 'Thao Tác',
+    width: 100,
+  },
+];
+
+function openCreateKeyModal() {
+  newKeyName.value = '';
+  newKeyRole.value = 'admin';
+  newKeyExpiresIn.value = 0;
+  isCreateKeyModalVisible.value = true;
+}
+
+async function handleCreateKeySubmit() {
+  if (!newKeyName.value.trim()) {
+    message.warning('Vui lòng nhập tên nhận diện cho khóa API');
+    return;
+  }
+  creatingKey.value = true;
+  try {
+    const { apiKey, fullKey } = await createWorkspaceApiKeyApi(tenantId.value, {
+      expiresInDays: newKeyExpiresIn.value > 0 ? newKeyExpiresIn.value : null,
+      name: newKeyName.value.trim(),
+      role: newKeyRole.value,
+    });
+    if (detailData.value) {
+      if (!detailData.value.tenant.metadata) {
+        detailData.value.tenant.metadata = {};
+      }
+      const existing = detailData.value.tenant.metadata.api_keys || [];
+      detailData.value.tenant.metadata.api_keys = [apiKey, ...existing];
+    }
+    generatedFullKey.value = fullKey;
+    isCreateKeyModalVisible.value = false;
+    isKeyCreatedModalVisible.value = true;
+    message.success('Tạo khóa API thành công!');
+  } catch (error: any) {
+    message.error(error.message || 'Tạo khóa API thất bại');
+  } finally {
+    creatingKey.value = false;
+  }
+}
+
+async function handleRevokeApiKey(keyId: string) {
+  try {
+    await revokeWorkspaceApiKeyApi(tenantId.value, keyId);
+    if (detailData.value?.tenant.metadata?.api_keys) {
+      detailData.value.tenant.metadata.api_keys =
+        detailData.value.tenant.metadata.api_keys.filter(
+          (k: WorkspaceApiKey) => k.id !== keyId,
+        );
+    }
+    message.success('Đã thu hồi khóa API thành công');
+  } catch (error: any) {
+    message.error(error.message || 'Thu hồi khóa API thất bại');
+  }
+}
+
+// Danger Zone state & handlers
+const isDeleteWorkspaceModalVisible = ref(false);
+const confirmSlugInput = ref('');
+const deletingWorkspace = ref(false);
+
+function openDeleteWorkspaceModal() {
+  confirmSlugInput.value = '';
+  isDeleteWorkspaceModalVisible.value = true;
+}
+
+async function handleDeleteWorkspaceSubmit() {
+  if (confirmSlugInput.value.trim() !== detailData.value?.tenant.slug) {
+    message.error('Mã Slug xác nhận không chính xác!');
+    return;
+  }
+  deletingWorkspace.value = true;
+  try {
+    await deleteWorkspaceApi(tenantId.value);
+    message.success('Đã xóa hoặc lưu trữ Workspace');
+    isDeleteWorkspaceModalVisible.value = false;
+    router.push('/dashboard/workspace');
+  } catch (error: any) {
+    message.error(error.message || 'Xóa Workspace thất bại');
+  } finally {
+    deletingWorkspace.value = false;
   }
 }
 
@@ -848,17 +976,19 @@ onMounted(() => {
               </p>
             </div>
 
-            <div class="space-y-4 max-w-2xl">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Field 1: Workspace ID -->
-              <div class="rounded-lg border border-border/60 p-4">
-                <label class="text-xs font-medium text-muted-foreground">WORKSPACE ID (TENANT ID)</label>
+              <div class="rounded-xl border border-border/60 bg-muted/10 p-4">
+                <label
+                  class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                  >WORKSPACE ID (TENANT ID)</label>
                 <div class="mt-1 flex items-center justify-between gap-2">
-                  <span class="font-mono text-sm text-foreground">{{
+                  <span class="font-mono text-sm text-foreground truncate">{{
                     tenantId
                   }}</span>
                   <Button
                     size="small"
-                    class="flex items-center gap-1"
+                    class="flex items-center gap-1 shrink-0"
                     @click="copyToClipboard(tenantId, 'Tenant ID')"
                   >
                     <Check
@@ -872,15 +1002,17 @@ onMounted(() => {
               </div>
 
               <!-- Field 2: Slug -->
-              <div class="rounded-lg border border-border/60 p-4">
-                <label class="text-xs font-medium text-muted-foreground">WORKSPACE SLUG</label>
+              <div class="rounded-xl border border-border/60 bg-muted/10 p-4">
+                <label
+                  class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                  >WORKSPACE SLUG</label>
                 <div class="mt-1 flex items-center justify-between gap-2">
                   <span class="font-mono text-sm text-foreground">{{
                     detailData?.tenant.slug
                   }}</span>
                   <Button
                     size="small"
-                    class="flex items-center gap-1"
+                    class="flex items-center gap-1 shrink-0"
                     @click="
                       copyToClipboard(detailData?.tenant.slug || '', 'Slug')
                     "
@@ -894,30 +1026,247 @@ onMounted(() => {
                   </Button>
                 </div>
               </div>
+            </div>
 
-              <!-- Field 3: CLI Command snippet -->
-              <div class="rounded-lg border border-border/60 bg-muted/30 p-4">
-                <label class="text-xs font-medium text-muted-foreground">LỆNH KẾT NỐI SPECTER CLI TRỰC TIẾP</label>
-                <div
-                  class="mt-2 rounded bg-black/60 p-3 font-mono text-xs text-sky-300 flex items-center justify-between gap-2"
+            <!-- Field 3: CLI Command snippet -->
+            <div class="rounded-xl border border-border/60 bg-muted/20 p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <Terminal class="size-4 text-sky-400" />
+                <label
+                  class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                  >LỆNH KẾT NỐI SPECTER CLI TRỰC TIẾP</label>
+              </div>
+              <div
+                class="rounded bg-black/60 p-3 font-mono text-xs text-sky-300 flex items-center justify-between gap-2"
+              >
+                <code>tuquet login --tenant-id={{ tenantId }}</code>
+                <Button
+                  type="text"
+                  size="small"
+                  class="text-sky-300 hover:text-white p-0 size-6 shrink-0"
+                  @click="
+                    copyToClipboard(
+                      `tuquet login --tenant-id=${tenantId}`,
+                      'CLI Command',
+                    )
+                  "
                 >
-                  <code>tuquet login --tenant-id={{ tenantId }}</code>
-                  <Button
-                    type="text"
-                    size="small"
-                    class="text-sky-300 hover:text-white p-0 size-6"
-                    @click="
-                      copyToClipboard(
-                        `tuquet login --tenant-id=${tenantId}`,
-                        'CLI Command',
-                      )
-                    "
+                  <Check
+                    v-if="copiedField === 'CLI Command'"
+                    class="size-3.5 text-green-500"
+                  />
+                  <Copy v-else class="size-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            <!-- Section 2: Headless API Keys -->
+            <div class="border-t border-border/60 pt-6 space-y-4">
+              <div
+                class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"
+              >
+                <div>
+                  <div class="flex items-center gap-2">
+                    <KeyRound class="size-4.5 text-amber-400" />
+                    <h3 class="text-base font-semibold text-foreground">
+                      Khóa API & Headless Tokens ({{ apiKeys.length }})
+                    </h3>
+                  </div>
+                  <p class="text-xs text-muted-foreground">
+                    Cung cấp quyền truy cập bảo mật cho CI/CD pipelines, GitHub
+                    Actions và runner automation
+                  </p>
+                </div>
+                <Button
+                  type="primary"
+                  class="flex items-center justify-center gap-1.5"
+                  @click="openCreateKeyModal"
+                >
+                  <Plus class="size-4" />
+                  <span>Tạo API Key Mới</span>
+                </Button>
+              </div>
+
+              <!-- Desktop Table (md:block) -->
+              <div class="hidden md:block">
+                <Table
+                  :columns="apiKeyColumns"
+                  :data-source="apiKeys"
+                  row-key="id"
+                  :pagination="false"
+                  :locale="{
+                    emptyText:
+                      'Chưa có API Key nào. Hãy tạo khóa để tích hợp CI/CD.',
+                  }"
+                >
+                  <template #bodyCell="{ column, record }">
+                    <template v-if="column.key === 'name'">
+                      <div class="font-medium text-foreground">
+                        {{ record.name }}
+                      </div>
+                      <div class="text-xs font-mono text-muted-foreground">
+                        ID: {{ record.id.slice(0, 8) }}...
+                      </div>
+                    </template>
+
+                    <template v-else-if="column.key === 'key_prefix'">
+                      <div class="flex items-center gap-2">
+                        <code
+                          class="rounded bg-muted/60 px-2 py-0.5 font-mono text-xs text-foreground"
+                        >
+                          {{ record.key_prefix }}
+                        </code>
+                        <Button
+                          type="text"
+                          size="small"
+                          class="p-0 size-6 text-muted-foreground hover:text-foreground"
+                          @click="
+                            copyToClipboard(record.key_prefix, record.name)
+                          "
+                        >
+                          <Check
+                            v-if="copiedField === record.name"
+                            class="size-3 text-green-500"
+                          />
+                          <Copy v-else class="size-3" />
+                        </Button>
+                      </div>
+                    </template>
+
+                    <template v-else-if="column.key === 'role'">
+                      <Tag
+                        :color="record.role === 'admin' ? 'purple' : 'blue'"
+                        class="font-medium uppercase"
+                      >
+                        {{
+                          record.role === 'admin' ? 'Full Access' : 'Read Only'
+                        }}
+                      </Tag>
+                    </template>
+
+                    <template v-else-if="column.key === 'created_at'">
+                      <div class="text-xs text-muted-foreground">
+                        {{ formatDate(record.created_at) }}
+                      </div>
+                      <div class="text-[11px] text-muted-foreground/70">
+                        {{
+                          record.expires_at
+                            ? `Hạn: ${formatDate(record.expires_at)}`
+                            : 'Vĩnh viễn (Không hết hạn)'
+                        }}
+                      </div>
+                    </template>
+
+                    <template v-else-if="column.key === 'action'">
+                      <Popconfirm
+                        title="Bạn có chắc chắn muốn thu hồi khóa API này không?"
+                        ok-text="Thu Hồi"
+                        cancel-text="Hủy"
+                        @confirm="handleRevokeApiKey(record.id)"
+                      >
+                        <Button danger type="link" size="small" class="p-0">
+                          Thu Hồi
+                        </Button>
+                      </Popconfirm>
+                    </template>
+                  </template>
+                </Table>
+              </div>
+
+              <!-- Mobile Card List (md:hidden) -->
+              <div class="space-y-3 md:hidden">
+                <div
+                  v-if="apiKeys.length === 0"
+                  class="rounded-xl border border-dashed border-border/70 p-6 text-center text-sm text-muted-foreground"
+                >
+                  Chưa có API key nào. Nhấn "Tạo API Key Mới" để bắt đầu.
+                </div>
+                <div
+                  v-for="keyItem in apiKeys"
+                  :key="keyItem.id"
+                  class="rounded-xl border border-border/60 bg-muted/10 p-4 space-y-2.5"
+                >
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium text-foreground text-sm">
+                      {{ keyItem.name }}
+                    </span>
+                    <Tag
+                      :color="keyItem.role === 'admin' ? 'purple' : 'blue'"
+                      class="font-medium text-xs uppercase"
+                    >
+                      {{
+                        keyItem.role === 'admin' ? 'Full Access' : 'Read Only'
+                      }}
+                    </Tag>
+                  </div>
+                  <div
+                    class="flex items-center justify-between rounded bg-black/40 px-2.5 py-1.5"
                   >
-                    <Check
-                      v-if="copiedField === 'CLI Command'"
-                      class="size-3.5 text-green-500"
-                    />
-                    <Copy v-else class="size-3.5" />
+                    <code class="font-mono text-xs text-sky-300">
+                      {{ keyItem.key_prefix }}
+                    </code>
+                    <Button
+                      type="text"
+                      size="small"
+                      class="p-0 size-5 text-sky-300"
+                      @click="copyToClipboard(keyItem.key_prefix, keyItem.name)"
+                    >
+                      <Check
+                        v-if="copiedField === keyItem.name"
+                        class="size-3 text-green-500"
+                      />
+                      <Copy v-else class="size-3" />
+                    </Button>
+                  </div>
+                  <div
+                    class="flex items-center justify-between border-t border-border/30 pt-1 text-xs text-muted-foreground"
+                  >
+                    <span>Tạo: {{ formatDate(keyItem.created_at) }}</span>
+                    <Popconfirm
+                      title="Thu hồi khóa API này?"
+                      ok-text="Thu Hồi"
+                      cancel-text="Hủy"
+                      @confirm="handleRevokeApiKey(keyItem.id)"
+                    >
+                      <Button
+                        danger
+                        type="link"
+                        size="small"
+                        class="p-0 text-xs"
+                      >
+                        Thu Hồi
+                      </Button>
+                    </Popconfirm>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 3: Danger Zone -->
+            <div class="border-t border-red-500/20 pt-6">
+              <div
+                class="rounded-xl border border-red-500/30 bg-red-500/5 p-4 space-y-3"
+              >
+                <div class="flex items-center gap-2 text-red-400">
+                  <ShieldAlert class="size-4.5" />
+                  <h4 class="text-sm font-semibold">
+                    Vùng Nguy Hiểm (Danger Zone)
+                  </h4>
+                </div>
+                <p class="text-xs text-muted-foreground">
+                  Xóa hoặc lưu trữ không gian làm việc này sẽ ngắt toàn bộ phiên
+                  kết nối máy trạm và vô hiệu hóa tất cả API keys liên quan.
+                </p>
+                <div>
+                  <Button
+                    danger
+                    type="primary"
+                    ghost
+                    class="flex items-center gap-1.5"
+                    @click="openDeleteWorkspaceModal"
+                  >
+                    <Trash2 class="size-4" />
+                    <span>Xóa Hoặc Lưu Trữ Workspace</span>
                   </Button>
                 </div>
               </div>
@@ -1105,6 +1454,149 @@ onMounted(() => {
                 value: 'free',
               },
             ]"
+          />
+        </div>
+      </div>
+    </Modal>
+
+    <!-- Modal Tạo Khóa API Mới -->
+    <Modal
+      v-model:open="isCreateKeyModalVisible"
+      title="Tạo Khóa API Headless Mới"
+      ok-text="Tạo Khóa"
+      cancel-text="Hủy"
+      :confirm-loading="creatingKey"
+      @ok="handleCreateKeySubmit"
+    >
+      <div class="space-y-4 py-3">
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">
+            Tên Nhận Diện Khóa (Purpose)
+          </label>
+          <Input
+            v-model:value="newKeyName"
+            placeholder="Ví dụ: GitHub Actions Deploy, Production Worker"
+            size="large"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">
+            Quyền Hạn API (Scope)
+          </label>
+          <Select
+            v-model:value="newKeyRole"
+            size="large"
+            class="w-full"
+            :options="[
+              {
+                label: 'Full Access (Toàn quyền quản trị và đẩy job chạy)',
+                value: 'admin',
+              },
+              {
+                label: 'Read Only (Chỉ đọc trạng thái và logs runner)',
+                value: 'read_only',
+              },
+            ]"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">
+            Thời Gian Hiệu Lực
+          </label>
+          <Select
+            v-model:value="newKeyExpiresIn"
+            size="large"
+            class="w-full"
+            :options="[
+              { label: 'Không bao giờ hết hạn (Vĩnh viễn)', value: 0 },
+              { label: '30 Ngày', value: 30 },
+              { label: '60 Ngày', value: 60 },
+              { label: '90 Ngày', value: 90 },
+              { label: '365 Ngày (1 Năm)', value: 365 },
+            ]"
+          />
+        </div>
+      </div>
+    </Modal>
+
+    <!-- Modal Hiển Thị Khóa API Đã Tạo -->
+    <Modal
+      v-model:open="isKeyCreatedModalVisible"
+      title="Khóa API Đã Được Tạo Thành Công"
+      :footer="null"
+    >
+      <div class="space-y-4 py-3">
+        <div
+          class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-300"
+        >
+          <strong>Lưu ý bảo mật quan trọng:</strong> Khóa này chỉ hiển thị một
+          lần duy nhất. Hãy sao chép và lưu trữ an toàn ngay bây giờ.
+        </div>
+
+        <div>
+          <label
+            class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5"
+          >
+            Khóa Token Truy Cập Bí Mật
+          </label>
+          <div
+            class="rounded bg-black/60 p-3 font-mono text-xs text-sky-300 flex items-center justify-between gap-2 break-all"
+          >
+            <span>{{ generatedFullKey }}</span>
+            <Button
+              type="text"
+              size="small"
+              class="text-sky-300 hover:text-white p-0 size-6 shrink-0"
+              @click="copyToClipboard(generatedFullKey, 'Full API Key')"
+            >
+              <Check
+                v-if="copiedField === 'Full API Key'"
+                class="size-4 text-green-500"
+              />
+              <Copy v-else class="size-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <Button type="primary" @click="isKeyCreatedModalVisible = false">
+            Đã Lưu Khóa & Đóng
+          </Button>
+        </div>
+      </div>
+    </Modal>
+
+    <!-- Modal Xóa Hoặc Lưu Trữ Workspace -->
+    <Modal
+      v-model:open="isDeleteWorkspaceModalVisible"
+      title="Xác Nhận Xóa / Lưu Trữ Workspace"
+      ok-text="Xác Nhận Xóa"
+      cancel-text="Hủy"
+      ok-type="danger"
+      :confirm-loading="deletingWorkspace"
+      @ok="handleDeleteWorkspaceSubmit"
+    >
+      <div class="space-y-4 py-3">
+        <div
+          class="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-400"
+        >
+          Hành động này sẽ vô hiệu hóa toàn bộ API keys, ngắt kết nối thiết bị
+          và loại bỏ workspace khỏi hệ thống.
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">
+            Để xác nhận, hãy nhập chính xác slug:
+            <strong class="font-mono text-red-400">{{
+              detailData?.tenant.slug
+            }}</strong>
+          </label>
+          <Input
+            v-model:value="confirmSlugInput"
+            :placeholder="detailData?.tenant.slug"
+            size="large"
           />
         </div>
       </div>
