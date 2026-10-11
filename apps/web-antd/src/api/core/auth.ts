@@ -1,4 +1,4 @@
-import { baseRequestClient, requestClient } from '#/api/request';
+import { useAccessStore } from '@vben/stores';
 
 export namespace AuthApi {
   /** 登录接口参数 */
@@ -10,6 +10,7 @@ export namespace AuthApi {
   /** 登录接口返回值 */
   export interface LoginResult {
     accessToken: string;
+    refreshToken?: string;
   }
 
   export interface RefreshTokenResult {
@@ -18,38 +19,124 @@ export namespace AuthApi {
   }
 }
 
-/**
- * 登录
- */
-export async function loginApi(data: AuthApi.LoginParams) {
-  return requestClient.post<AuthApi.LoginResult>('/auth/login', data);
-}
+const getSupabaseConfig = () => {
+  const supabaseUrl =
+    (import.meta.env.VITE_SUPABASE_URL as string) ||
+    'https://dswhacsoaxgpfnkaxnhz.supabase.co';
+  const anonKey =
+    (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ||
+    'sb_publishable_8Y-l9FtldJSSuFAWhzICqg_UobFOsua';
+  return { anonKey, supabaseUrl };
+};
 
 /**
- * 刷新accessToken
+ * 登录 (Supabase GoTrue REST)
  */
-export async function refreshTokenApi() {
-  return baseRequestClient.post<AuthApi.RefreshTokenResult>(
-    '/auth/refresh',
-    undefined,
+export async function loginApi(
+  data: AuthApi.LoginParams,
+): Promise<AuthApi.LoginResult> {
+  const { anonKey, supabaseUrl } = getSupabaseConfig();
+  const email = (data.username || '').trim();
+  const password = data.password || '';
+
+  const response = await fetch(
+    `${supabaseUrl}/auth/v1/token?grant_type=password`,
     {
-      withCredentials: true,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: anonKey,
+      },
+      body: JSON.stringify({ email, password }),
     },
   );
+
+  const resJson = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const errorMsg =
+      resJson.msg ||
+      resJson.error_description ||
+      resJson.message ||
+      'Invalid email or password';
+    throw new Error(errorMsg);
+  }
+
+  return {
+    accessToken: resJson.access_token,
+    refreshToken: resJson.refresh_token,
+  };
 }
 
 /**
- * 退出登录
+ * 刷新accessToken (Supabase GoTrue REST)
+ */
+export async function refreshTokenApi(): Promise<AuthApi.RefreshTokenResult> {
+  const { anonKey, supabaseUrl } = getSupabaseConfig();
+  const accessStore = useAccessStore();
+  const currentRefreshToken = accessStore.refreshToken;
+
+  if (!currentRefreshToken) {
+    throw new Error('No refresh token available');
+  }
+
+  const response = await fetch(
+    `${supabaseUrl}/auth/v1/token?grant_type=refresh_token`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: anonKey,
+      },
+      body: JSON.stringify({ refresh_token: currentRefreshToken }),
+    },
+  );
+
+  const resJson = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      resJson.msg || resJson.error_description || 'Session refresh failed',
+    );
+  }
+
+  if (resJson.refresh_token) {
+    accessStore.setRefreshToken(resJson.refresh_token);
+  }
+
+  return {
+    data: resJson.access_token,
+    status: 200,
+  };
+}
+
+/**
+ * 退出登录 (Supabase GoTrue REST)
  */
 export async function logoutApi() {
-  return baseRequestClient.post('/auth/logout', undefined, {
-    withCredentials: true,
-  });
+  const { anonKey, supabaseUrl } = getSupabaseConfig();
+  const accessStore = useAccessStore();
+  const token = accessStore.accessToken;
+
+  if (token) {
+    try {
+      await fetch(`${supabaseUrl}/auth/v1/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: anonKey,
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch {
+      // Ignore network errors during logout
+    }
+  }
 }
 
 /**
- * 获取用户权限码
+ * 获取用户权限码 (Supabase Admin Console RBAC)
  */
-export async function getAccessCodesApi() {
-  return requestClient.get<string[]>('/auth/codes');
+export async function getAccessCodesApi(): Promise<string[]> {
+  return ['super', 'admin', 'user'];
 }

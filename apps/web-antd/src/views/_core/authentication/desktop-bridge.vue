@@ -40,11 +40,57 @@ const userAvatar = computed(
 );
 
 // Tenancy
-const selectedTenant = ref('default-workspace');
-const tenantOptions = ref([
-  { label: 'Default Workspace (Owner)', value: 'default-workspace' },
-  { label: 'Production Automation (Admin)', value: 'prod-automation' },
-]);
+const selectedTenant = ref('');
+const tenantOptions = ref<{ label: string; value: string }[]>([]);
+
+async function loadTenants() {
+  if (!accessStore.accessToken) return;
+  try {
+    const supabaseUrl =
+      (import.meta.env.VITE_SUPABASE_URL as string) ||
+      'https://dswhacsoaxgpfnkaxnhz.supabase.co';
+    const anonKey =
+      (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ||
+      'sb_publishable_8Y-l9FtldJSSuFAWhzICqg_UobFOsua';
+
+    const userId = userStore.userInfo?.userId;
+    const url = userId
+      ? `${supabaseUrl}/rest/v1/tenant_members?select=tenant_id,tenants(id,name,slug)&user_id=eq.${userId}`
+      : `${supabaseUrl}/rest/v1/tenants?select=id,name,slug`;
+
+    const res = await fetch(url, {
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${accessStore.accessToken}`,
+      },
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        tenantOptions.value = data.map((item: any) => {
+          const t = item.tenants || item;
+          return {
+            label: `${t.name || 'Workspace'} (${t.slug || t.id})`,
+            value: t.id || item.tenant_id,
+          };
+        });
+        if (tenantOptions.value.length > 0) {
+          selectedTenant.value = tenantOptions.value[0]?.value || '';
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load tenants:', error);
+  }
+
+  if (tenantOptions.value.length === 0) {
+    tenantOptions.value = [
+      { label: 'Default Workspace (Owner)', value: 'default-workspace' },
+    ];
+    selectedTenant.value = 'default-workspace';
+  }
+}
 
 const loading = ref(false);
 const isAuthorized = ref(false);
@@ -137,7 +183,9 @@ function handleCancel() {
 }
 
 onMounted(() => {
-  // Sẵn sàng nhận lệnh
+  if (isLoggedIn.value) {
+    loadTenants();
+  }
 });
 </script>
 
@@ -182,8 +230,8 @@ onMounted(() => {
             class="mb-4"
           />
           <Typography.Title :level="3" class="!mb-2">
-Kết nối Specter Desk
-</Typography.Title>
+            Kết nối Specter Desk
+          </Typography.Title>
           <Typography.Paragraph type="secondary" class="mb-6">
             Bạn cần đăng nhập tài khoản <strong>Tuquet Admin</strong> trước khi
             cấp quyền truy cập cho máy trạm này.
@@ -226,8 +274,8 @@ Kết nối Specter Desk
             </svg>
           </div>
           <Typography.Title :level="3" class="!mb-1">
-Ủy quyền kết nối Specter Desk
-</Typography.Title>
+            Ủy quyền kết nối Specter Desk
+          </Typography.Title>
           <Typography.Paragraph type="secondary">
             Ứng dụng máy trạm đang yêu cầu quyền truy cập và đồng bộ tài nguyên
             từ hệ sinh thái Tuquet.
