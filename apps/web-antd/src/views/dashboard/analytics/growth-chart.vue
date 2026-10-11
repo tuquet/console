@@ -23,11 +23,11 @@ function updateChart() {
   nextTick(() => {
     renderEcharts({
       grid: {
-        bottom: '8%',
+        bottom: '12%',
         containLabel: true,
-        left: '2%',
+        left: '3%',
         right: '4%',
-        top: '12%',
+        top: '15%',
       },
       series: [
         {

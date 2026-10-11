@@ -39,12 +39,16 @@ function updateChart() {
     renderEcharts({
       legend: {
         bottom: '2%',
+        itemGap: 12,
+        itemHeight: 10,
+        itemWidth: 10,
         left: 'center',
-        textStyle: { color: '#94a3b8' },
+        textStyle: { color: '#94a3b8', fontSize: 11 },
       },
       series: [
         {
           avoidLabelOverlap: true,
+          center: ['50%', '42%'],
           data: chartData,
           emphasis: {
             itemStyle: {
@@ -54,7 +58,7 @@ function updateChart() {
             },
             label: {
               color: '#f8fafc',
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: 'bold',
               show: true,
             },
@@ -69,7 +73,7 @@ function updateChart() {
             show: false,
           },
           name: 'Gói Dịch Vụ',
-          radius: ['45%', '70%'],
+          radius: ['38%', '62%'],
           type: 'pie',
         },
       ],

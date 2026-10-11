@@ -213,7 +213,7 @@ onMounted(() => {
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <!-- Growth Timeline (2 cols on lg) -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-5 shadow-sm lg:col-span-2"
+        class="overflow-hidden rounded-xl border border-border/60 bg-card p-5 shadow-sm lg:col-span-2"
       >
         <div class="mb-4 flex items-center justify-between">
           <div>
@@ -240,7 +240,9 @@ onMounted(() => {
       </div>
 
       <!-- Subscription Plans Donut (1 col on lg) -->
-      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+      <div
+        class="overflow-hidden rounded-xl border border-border/60 bg-card p-5 shadow-sm"
+      >
         <div class="mb-4">
           <h2 class="text-base font-semibold text-foreground">
             Cơ Cấu Gói Thuê Bao
@@ -263,7 +265,9 @@ onMounted(() => {
     <!-- Charts Row 2: Plugins Ecosystem & Infrastructure Health -->
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <!-- Plugins Distribution -->
-      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+      <div
+        class="overflow-hidden rounded-xl border border-border/60 bg-card p-5 shadow-sm"
+      >
         <div class="mb-4">
           <h2 class="text-base font-semibold text-foreground">
             Kiến Trúc Cloud Plugin

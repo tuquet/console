@@ -31,24 +31,33 @@ function updateChart() {
     renderEcharts({
       legend: {
         bottom: '2%',
+        itemGap: 16,
+        itemHeight: 10,
+        itemWidth: 10,
         left: 'center',
-        textStyle: { color: '#94a3b8' },
+        textStyle: { color: '#94a3b8', fontSize: 11 },
       },
       series: [
         {
+          center: ['50%', '42%'],
           data: chartData,
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+              shadowOffsetX: 0,
+            },
+          },
           itemStyle: {
             borderColor: '#0f172a',
             borderRadius: 6,
             borderWidth: 2,
           },
           label: {
-            formatter: '{b}\n{c} Plugins',
-            show: true,
+            show: false,
           },
           name: 'Hệ Sinh Thái Plugins',
-          radius: ['40%', '65%'],
-          roseType: 'radius',
+          radius: ['38%', '62%'],
           type: 'pie',
         },
       ],
