@@ -474,6 +474,12 @@ onMounted(() => {
                           : 'Chọn Workspace này'
                       }}
                     </Button>
+                    <Button
+                      size="small"
+                      @click="router.push(`/dashboard/workspace/${record.id}`)"
+                    >
+                      Chi Tiết
+                    </Button>
                     <Button size="small" @click="handleConnectCli(record)">
                       Ghép nối CLI
                     </Button>
@@ -536,7 +542,9 @@ onMounted(() => {
               </div>
 
               <!-- Action buttons on mobile: Tap targets -->
-              <div class="mt-4 flex gap-2 pt-2 border-t border-border/40">
+              <div
+                class="mt-4 flex flex-wrap gap-2 pt-2 border-t border-border/40"
+              >
                 <Button
                   size="middle"
                   class="flex-1"
@@ -545,15 +553,17 @@ onMounted(() => {
                 >
                   {{
                     tenant.id === activeTenantId
-                      ? '✓ Đang chọn'
+                      ? 'Đang chọn'
                       : 'Chọn Workspace'
                   }}
                 </Button>
                 <Button
                   size="middle"
-                  class="flex-1"
-                  @click="handleConnectCli(tenant)"
+                  @click="router.push(`/dashboard/workspace/${tenant.id}`)"
                 >
+                  Chi Tiết
+                </Button>
+                <Button size="middle" @click="handleConnectCli(tenant)">
                   Ghép Nối CLI
                 </Button>
               </div>

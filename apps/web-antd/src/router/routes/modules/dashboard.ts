@@ -28,8 +28,18 @@ const routes: RouteRecordRaw[] = [
         path: 'workspace',
         component: () => import('#/views/dashboard/workspace/index.vue'),
         meta: {
-          icon: 'carbon:workspace',
+          icon: 'lucide:layers',
           title: $t('page.dashboard.workspace'),
+        },
+      },
+      {
+        name: 'WorkspaceDetail',
+        path: 'workspace/:id',
+        component: () => import('#/views/dashboard/workspace/detail.vue'),
+        meta: {
+          hideInMenu: true,
+          icon: 'lucide:layout-grid',
+          title: $t('page.dashboard.workspaceDetail'),
         },
       },
     ],
