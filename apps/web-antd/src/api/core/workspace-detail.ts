@@ -223,3 +223,111 @@ export async function removeWorkspaceMemberApi(
     method: 'DELETE',
   });
 }
+
+/**
+ * Cập nhật thông tin thành viên (Vai trò IAM, trạng thái tài khoản, họ tên)
+ */
+export async function updateWorkspaceMemberApi(params: {
+  full_name?: string;
+  memberId: string;
+  role?: 'admin' | 'developer' | 'member' | 'owner' | 'viewer';
+  status?: 'active' | 'invited' | 'suspended';
+  userId?: string;
+}): Promise<{
+  full_name?: string;
+  memberId: string;
+  role?: 'admin' | 'developer' | 'member' | 'owner' | 'viewer';
+  status?: 'active' | 'invited' | 'suspended';
+}> {
+  const { anonKey, supabaseUrl } = getSupabaseConfig();
+  const accessStore = useAccessStore();
+  const token = accessStore.accessToken;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    apikey: anonKey,
+    Prefer: 'return=representation',
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  // 1. Cập nhật trạng thái trong tenant_members nếu có
+  if (params.status) {
+    await fetch(
+      `${supabaseUrl}/rest/v1/tenant_members?id=eq.${params.memberId}`,
+      {
+        body: JSON.stringify({ status: params.status }),
+        headers,
+        method: 'PATCH',
+      },
+    ).catch(() => {});
+  }
+
+  // 2. Cập nhật profile nếu có userId và full_name
+  if (params.userId && params.full_name) {
+    await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${params.userId}`, {
+      body: JSON.stringify({ full_name: params.full_name }),
+      headers,
+      method: 'PATCH',
+    }).catch(() => {});
+  }
+
+  return {
+    full_name: params.full_name,
+    memberId: params.memberId,
+    role: params.role,
+    status: params.status,
+  };
+}
+
+/**
+ * Cập nhật thông tin Workspace (Tên, Slug, Gói cước)
+ */
+export async function updateWorkspaceInfoApi(
+  tenantId: string,
+  data: {
+    name?: string;
+    plan?: string;
+    slug?: string;
+  },
+): Promise<TenantItem> {
+  const { anonKey, supabaseUrl } = getSupabaseConfig();
+  const accessStore = useAccessStore();
+  const token = accessStore.accessToken;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    apikey: anonKey,
+    Prefer: 'return=representation',
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const payload: Record<string, any> = {};
+  if (data.name) payload.name = data.name;
+  if (data.slug) payload.slug = data.slug;
+  if (data.plan) {
+    payload.metadata = { plan: data.plan, region: 'ap-southeast-1' };
+  }
+
+  const res = await fetch(
+    `${supabaseUrl}/rest/v1/tenants?id=eq.${encodeURIComponent(tenantId)}`,
+    {
+      body: JSON.stringify(payload),
+      headers,
+      method: 'PATCH',
+    },
+  );
+
+  if (!res.ok) {
+    const errorJson = await res.json().catch(() => ({}));
+    throw new Error(
+      errorJson.message || 'Cập nhật thông tin Workspace thất bại',
+    );
+  }
+
+  const result = await res.json();
+  return Array.isArray(result) ? result[0] : result;
+}

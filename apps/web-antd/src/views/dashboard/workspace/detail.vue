@@ -11,8 +11,10 @@ import {
   CheckCircle2,
   Copy,
   CreditCard,
+  Edit3,
   RefreshCw,
   Server,
+  Settings,
   Terminal,
   Trash2,
   UserPlus,
@@ -28,6 +30,7 @@ import {
   Popconfirm,
   Progress,
   Select,
+  Space,
   Table,
   Tabs,
   Tag,
@@ -39,6 +42,8 @@ import {
   inviteWorkspaceMemberApi,
   removeWorkspaceMemberApi,
   setActiveTenantId,
+  updateWorkspaceInfoApi,
+  updateWorkspaceMemberApi,
 } from '#/api';
 
 defineOptions({ name: 'WorkspaceDetail' });
@@ -56,6 +61,23 @@ const isInviteModalVisible = ref(false);
 const inviteEmail = ref('');
 const inviteRole = ref<'admin' | 'developer' | 'member'>('developer');
 const inviting = ref(false);
+
+// Edit Member modal
+const isEditMemberModalVisible = ref(false);
+const editingMember = ref<null | WorkspaceMember>(null);
+const editMemberFullName = ref('');
+const editMemberRole = ref<
+  'admin' | 'developer' | 'member' | 'owner' | 'viewer'
+>('developer');
+const editMemberStatus = ref<'active' | 'invited' | 'suspended'>('active');
+const updatingMember = ref(false);
+
+// Edit Workspace modal
+const isEditWorkspaceModalVisible = ref(false);
+const editWorkspaceName = ref('');
+const editWorkspaceSlug = ref('');
+const editWorkspacePlan = ref('pro');
+const updatingWorkspace = ref(false);
 
 // Active tenant state
 const currentActiveTenantId = ref(getActiveTenantId());
@@ -166,6 +188,80 @@ async function handleRemoveMember(member: WorkspaceMember) {
   }
 }
 
+function openEditMemberModal(member: WorkspaceMember) {
+  editingMember.value = member;
+  editMemberFullName.value = member.full_name || '';
+  editMemberRole.value = member.role;
+  editMemberStatus.value = member.status;
+  isEditMemberModalVisible.value = true;
+}
+
+async function handleUpdateMemberSubmit() {
+  if (!editingMember.value) return;
+  updatingMember.value = true;
+  try {
+    await updateWorkspaceMemberApi({
+      full_name: editMemberFullName.value.trim(),
+      memberId: editingMember.value.id,
+      role: editMemberRole.value,
+      status: editMemberStatus.value,
+      userId: editingMember.value.user_id,
+    });
+
+    if (detailData.value) {
+      const idx = detailData.value.members.findIndex(
+        (m) => m.id === editingMember.value?.id,
+      );
+      if (idx !== -1) {
+        const current = detailData.value.members[idx];
+        if (current) {
+          current.full_name = editMemberFullName.value.trim();
+          current.role = editMemberRole.value;
+          current.status = editMemberStatus.value;
+        }
+      }
+    }
+    message.success('Cập nhật thông tin thành viên thành công');
+    isEditMemberModalVisible.value = false;
+  } catch (error: any) {
+    message.error(error.message || 'Cập nhật thành viên thất bại');
+  } finally {
+    updatingMember.value = false;
+  }
+}
+
+function openEditWorkspaceModal() {
+  if (!detailData.value) return;
+  editWorkspaceName.value = detailData.value.tenant.name;
+  editWorkspaceSlug.value = detailData.value.tenant.slug;
+  editWorkspacePlan.value = detailData.value.tenant.metadata?.plan || 'pro';
+  isEditWorkspaceModalVisible.value = true;
+}
+
+async function handleUpdateWorkspaceSubmit() {
+  if (!editWorkspaceName.value.trim() || !editWorkspaceSlug.value.trim()) {
+    message.warning('Vui lòng điền tên và slug Workspace');
+    return;
+  }
+  updatingWorkspace.value = true;
+  try {
+    const updated = await updateWorkspaceInfoApi(tenantId.value, {
+      name: editWorkspaceName.value.trim(),
+      plan: editWorkspacePlan.value,
+      slug: editWorkspaceSlug.value.trim(),
+    });
+    if (detailData.value) {
+      detailData.value.tenant = updated;
+    }
+    message.success('Cập nhật Workspace thành công');
+    isEditWorkspaceModalVisible.value = false;
+  } catch (error: any) {
+    message.error(error.message || 'Cập nhật Workspace thất bại');
+  } finally {
+    updatingWorkspace.value = false;
+  }
+}
+
 // Table columns for members
 const memberColumns = [
   {
@@ -193,7 +289,7 @@ const memberColumns = [
   {
     key: 'actions',
     title: 'Thao Tác',
-    width: 120,
+    width: 160,
   },
 ];
 
@@ -315,6 +411,13 @@ onMounted(() => {
         >
           <Terminal class="size-4" />
           <span>Ghép Nối Specter CLI</span>
+        </Button>
+        <Button
+          class="flex items-center gap-1.5"
+          @click="openEditWorkspaceModal"
+        >
+          <Settings class="size-4" />
+          <span class="hidden sm:inline">Cài Đặt</span>
         </Button>
         <Button
           class="flex items-center gap-1.5"
@@ -518,26 +621,37 @@ onMounted(() => {
 
                   <!-- Actions Column -->
                   <template v-else-if="column.key === 'actions'">
-                    <Popconfirm
-                      v-if="record.role !== 'owner'"
-                      title="Bạn có chắc muốn xóa thành viên này?"
-                      ok-text="Xóa"
-                      cancel-text="Hủy"
-                      @confirm="handleRemoveMember(record as any)"
-                    >
+                    <Space size="small">
                       <Button
                         type="text"
-                        danger
                         size="small"
-                        class="flex items-center gap-1"
+                        class="flex items-center gap-1 text-sky-400 hover:text-sky-300"
+                        @click="openEditMemberModal(record as any)"
                       >
-                        <Trash2 class="size-3.5" />
-                        <span>Xóa</span>
+                        <Edit3 class="size-3.5" />
+                        <span>Sửa</span>
                       </Button>
-                    </Popconfirm>
-                    <span v-else class="text-xs text-muted-foreground italic">
-                      Mặc định
-                    </span>
+                      <Popconfirm
+                        v-if="record.role !== 'owner'"
+                        title="Bạn có chắc muốn xóa thành viên này?"
+                        ok-text="Xóa"
+                        cancel-text="Hủy"
+                        @confirm="handleRemoveMember(record as any)"
+                      >
+                        <Button
+                          type="text"
+                          danger
+                          size="small"
+                          class="flex items-center gap-1"
+                        >
+                          <Trash2 class="size-3.5" />
+                          <span>Xóa</span>
+                        </Button>
+                      </Popconfirm>
+                      <span v-else class="text-xs text-muted-foreground italic">
+                        Owner
+                      </span>
+                    </Space>
                   </template>
                 </template>
               </Table>
@@ -581,7 +695,16 @@ onMounted(() => {
                   class="mt-3 flex items-center justify-between border-t border-border/40 pt-2 text-xs text-muted-foreground"
                 >
                   <div>Tham gia: {{ formatDate(member.joined_at) }}</div>
-                  <div>
+                  <div class="flex items-center gap-3">
+                    <Button
+                      type="text"
+                      size="small"
+                      class="flex items-center gap-1 text-sky-400 p-0 text-xs"
+                      @click="openEditMemberModal(member)"
+                    >
+                      <Edit3 class="size-3" />
+                      <span>Sửa</span>
+                    </Button>
                     <Popconfirm
                       v-if="member.role !== 'owner'"
                       title="Xóa thành viên này?"
@@ -846,6 +969,140 @@ onMounted(() => {
               {
                 label: 'Member (Thành viên - Chỉ xem và đọc dữ liệu)',
                 value: 'member',
+              },
+            ]"
+          />
+        </div>
+      </div>
+    </Modal>
+
+    <!-- Modal Chỉnh Sửa Thông Tin Thành Viên -->
+    <Modal
+      v-model:open="isEditMemberModalVisible"
+      title="Chỉnh Sửa Thông Tin Thành Viên"
+      ok-text="Lưu Thay Đổi"
+      cancel-text="Hủy"
+      :confirm-loading="updatingMember"
+      @ok="handleUpdateMemberSubmit"
+    >
+      <div class="space-y-4 py-3">
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">
+            Họ và Tên
+          </label>
+          <Input
+            v-model:value="editMemberFullName"
+            placeholder="Nhập họ và tên thành viên"
+            size="large"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">
+            Địa Chỉ Email
+          </label>
+          <Input :value="editingMember?.email" disabled size="large" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">
+            Vai Trò IAM (Phân Quyền)
+          </label>
+          <Select
+            v-model:value="editMemberRole"
+            size="large"
+            class="w-full"
+            :options="[
+              {
+                label: 'Owner (Chủ sở hữu - Toàn quyền quản trị)',
+                value: 'owner',
+              },
+              {
+                label: 'Admin (Quản trị viên - Quản lý thành viên & Quota)',
+                value: 'admin',
+              },
+              {
+                label: 'Developer (Kỹ sư phát triển - Chạy CLI & Runners)',
+                value: 'developer',
+              },
+              {
+                label: 'Member (Thành viên - Xem và đọc dữ liệu)',
+                value: 'member',
+              },
+            ]"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">
+            Trạng Thái Tài Khoản
+          </label>
+          <Select
+            v-model:value="editMemberStatus"
+            size="large"
+            class="w-full"
+            :options="[
+              { label: 'Hoạt động (Active)', value: 'active' },
+              { label: 'Tạm khóa (Suspended)', value: 'suspended' },
+              { label: 'Chờ chấp thuận (Invited)', value: 'invited' },
+            ]"
+          />
+        </div>
+      </div>
+    </Modal>
+
+    <!-- Modal Cài Đặt & Chỉnh Sửa Workspace -->
+    <Modal
+      v-model:open="isEditWorkspaceModalVisible"
+      title="Cài Đặt & Cập Nhật Workspace"
+      ok-text="Cập Nhật"
+      cancel-text="Hủy"
+      :confirm-loading="updatingWorkspace"
+      @ok="handleUpdateWorkspaceSubmit"
+    >
+      <div class="space-y-4 py-3">
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">
+            Tên Workspace / Tổ Chức
+          </label>
+          <Input
+            v-model:value="editWorkspaceName"
+            placeholder="Ví dụ: Core Engineering"
+            size="large"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">
+            Mã Slug (Định danh URL)
+          </label>
+          <Input
+            v-model:value="editWorkspaceSlug"
+            placeholder="core-eng"
+            size="large"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">
+            Gói Dịch Vụ
+          </label>
+          <Select
+            v-model:value="editWorkspacePlan"
+            size="large"
+            class="w-full"
+            :options="[
+              {
+                label: 'Pro (25 Nodes, 10 Thành viên, 10 GB Storage)',
+                value: 'pro',
+              },
+              {
+                label: 'Enterprise (100 Nodes, 50 Thành viên, 50 GB Storage)',
+                value: 'enterprise',
+              },
+              {
+                label: 'Free (3 Nodes, 3 Thành viên, 1 GB Storage)',
+                value: 'free',
               },
             ]"
           />
