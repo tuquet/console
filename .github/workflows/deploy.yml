@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'scratch/**'
+      - '.vscode/**'
+      - '.idea/**'
+      - 'LICENSE'
   workflow_dispatch:
 
 concurrency:
@@ -13,6 +20,7 @@ concurrency:
 jobs:
   build-and-deploy:
     name: Build & Deploy (admin.tuquet.com)
+    if: "${{ !contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[ci skip]') }}"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code
@@ -26,9 +34,9 @@ jobs:
       - name: Build Web Application
         run: pnpm run build:antd
         env:
-          NODE_OPTIONS: "--max-old-space-size=8192"
-          VITE_APP_TITLE: "Tuquet Admin"
-          VITE_APP_NAMESPACE: "tuquet-admin"
+          NODE_OPTIONS: '--max-old-space-size=8192'
+          VITE_APP_TITLE: 'Tuquet Admin'
+          VITE_APP_NAMESPACE: 'tuquet-admin'
 
       - name: Deploy to Cloudflare Pages
         run: pnpm dlx wrangler pages deploy apps/web-antd/dist --project-name=tuquet-admin --branch=main --commit-dirty=true

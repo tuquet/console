@@ -286,24 +286,30 @@ onMounted(() => {
           class="space-y-4 rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-neutral-800 dark:bg-neutral-800/50"
         >
           <div class="flex items-center justify-between">
-            <span class="text-xs text-gray-500 uppercase tracking-wider">Tài khoản</span>
+            <span class="text-xs text-gray-500 uppercase tracking-wider"
+              >Tài khoản</span
+            >
             <div class="flex items-center space-x-2">
               <Avatar :size="24" :src="userAvatar" />
               <span
                 class="font-medium text-sm text-gray-800 dark:text-gray-200"
-                >{{ userName }}</span>
+                >{{ userName }}</span
+              >
             </div>
           </div>
 
           <div class="flex items-center justify-between">
-            <span class="text-xs text-gray-500 uppercase tracking-wider">Thiết bị</span>
+            <span class="text-xs text-gray-500 uppercase tracking-wider"
+              >Thiết bị</span
+            >
             <Tag color="cyan">{{ machineName }}</Tag>
           </div>
 
           <div>
             <span
               class="text-xs text-gray-500 uppercase tracking-wider block mb-1.5"
-              >Chọn Workspace / Tenant</span>
+              >Chọn Workspace / Tenant</span
+            >
             <Select
               v-model:value="selectedTenant"
               :options="tenantOptions"

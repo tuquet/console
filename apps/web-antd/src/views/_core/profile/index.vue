@@ -433,7 +433,9 @@ onMounted(() => {
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <Building2 class="size-4.5 text-sky-400" />
-                  <span class="font-semibold text-foreground">Workspace Đang Chọn</span>
+                  <span class="font-semibold text-foreground"
+                    >Workspace Đang Chọn</span
+                  >
                 </div>
                 <Tag color="blue" class="font-mono text-xs">ACTIVE</Tag>
               </div>

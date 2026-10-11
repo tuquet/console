@@ -12,6 +12,7 @@ Hệ thống quản trị `admin.tuquet.com` kết nối trực tiếp đến **
 - **YAGNI (You Aren't Gonna Need It)**: Chỉ xây dựng những gì thực sự cần cho người quản trị hệ thống. Tuyệt đối không nhồi nhét "Feature Bloat" từ các template ERP cũ.
 
 ### Các quy tắc cụ thể:
+
 1. **Không sử dụng Chrome Tabbar ảo trong SPA** (`tabbar: { enable: false }`):
    - Trình duyệt đã có thanh Tab. Không lồng thêm thanh tab kiểu Chrome trong web app làm mất 40px chiều cao màn hình quý giá của người dùng (nhất là trên điện thoại).
 2. **Tối giản hóa Header**:
@@ -38,8 +39,7 @@ Toàn bộ console áp dụng phong cách thiết kế hiện đại của **Sha
 
 ## 3. Quy Chuẩn Icon: BẮT BUỘC DÙNG LUCIDE ICON
 
-> [!IMPORTANT]
-> **Tuyệt đối không sử dụng Emoji hoặc Icon chất lượng thấp làm biểu tượng giao diện.**
+> [!IMPORTANT] **Tuyệt đối không sử dụng Emoji hoặc Icon chất lượng thấp làm biểu tượng giao diện.**
 
 - **Chỉ sử dụng duy nhất Lucide Icons** (`@lucide/vue` hoặc `lucide-vue-next`).
 - **Nghiêm cấm dùng Emojis** (như 🏢, 🧩, ⚡, 📡, ✓...) thay thế cho icon chức năng hay trạng thái hệ thống.
@@ -96,4 +96,50 @@ Mọi màn hình, bảng dữ liệu và cửa sổ tương tác (Modal/Drawer) 
    - Tiêu đề commit phải tuân thủ định dạng Lefthook commitlint:
      - `feat(@vben/web-antd): <mô tả ngắn gọn>`
      - `fix(@vben/web-antd): <mô tả ngắn gọn>`
+     - `refactor(@vben/web-antd): <mô tả ngắn gọn>`
    - Độ dài tiêu đề commit không được vượt quá **108 ký tự**.
+
+---
+
+## 7. Quy Tắc Bảo Vệ Quota CI & Quy Trình Đẩy Code Lên GitHub (Zero-Waste CI Gate)
+
+> [!CAUTION] **TIẾT KIỆM TỐI ĐA PHÚT BUILD MIỄN PHÍ GITHUB ACTIONS — TUYỆT ĐỐI KHÔNG PUSH CODE THỬ VẬN MAY.** Mỗi lần GitHub Actions chạy tốn tài nguyên và thời gian runner. Lặp lại lỗi CI là vi phạm nghiêm trọng quy chuẩn kỹ thuật.
+
+### 7.1. Cổng Kiểm Định Cục Bộ (Local Pre-Push Quality Gate)
+
+Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt là `main`), Agent và Kỹ sư **BẮT BUỘC** phải chạy thành công 3 bước kiểm tra tại môi trường cục bộ:
+
+1. **Kiểm tra Type TypeScript**:
+   ```bash
+   pnpm check:type
+   ```
+   _Kết quả yêu cầu:_ `vue-tsc` trả về **0 lỗi** trên toàn bộ 39 packages.
+2. **Kiểm tra Lint & Định dạng Mã Nguồn**:
+   ```bash
+   pnpm run lint
+   ```
+   _Kết quả yêu cầu:_ `oxfmt` + `eslint` + `stylelint` trả về **0 errors**. Nếu phát hiện lệch format, chạy `pnpm run format` để tự động chuẩn hóa.
+3. **Kiểm tra Build Ứng Dụng Web**:
+   ```bash
+   pnpm run build:antd
+   ```
+   _Kết quả yêu cầu:_ Vite đóng gói thành công toàn bộ bundle `apps/web-antd/dist` không phát sinh lỗi module.
+
+### 7.2. Quy Chuẩn Quản Lý Dependency & Catalog PNPM
+
+- Mọi dependency dùng chung hoặc thư viện bên ngoài phải được khai báo phiên bản tập trung tại file [`pnpm-workspace.yaml`](file:///D:/Repository/tuquet/admin/pnpm-workspace.yaml) trong khối `catalog:`.
+- Trong file `package.json` của từng ứng dụng/gói (ví dụ [`apps/web-antd/package.json`](file:///D:/Repository/tuquet/admin/apps/web-antd/package.json)): **BẮT BUỘC** dùng `"catalog:"`. Tuyệt đối không ghi phiên bản số trực tiếp (như `"0.2.1"`).
+- Tuyệt đối không để lại các catalog item không được sử dụng (`pnpm/yaml-no-unused-catalog-item`).
+
+### 7.3. Chiến Lược Tiết Kiệm Phút Build CI (CI Minutes Conservation)
+
+1. **Bắt buộc gắn cờ `[skip ci]` cho commit tài liệu / phi mã nguồn**:
+   - Khi commit chỉ thay đổi tài liệu (`*.md`), kế hoạch phân tích, ảnh chụp màn hình trong `scratch/`, ghi chú hoặc cấu hình IDE: **BẮT BUỘC** chèn `[skip ci]` hoặc `[ci skip]` vào tiêu đề commit.
+   - Ví dụ: `docs: update zero-waste ci rules in agents guide [skip ci]`
+2. **Gom Commit Thành Khối Hoàn Chỉnh (Atomic Batching — Cấm Micro-Push)**:
+   - Nghiêm cấm push lắt nhắt từng commit sửa một vài ký tự.
+   - Hãy gom các commit liên quan lại và chỉ push **duy nhất 1 lần** khi toàn bộ tính năng/bản vá đã hoàn chỉnh và đã vượt qua Cổng Kiểm Định Cục Bộ (7.1).
+3. **Quản Lý & Dọn Dẹp CI Bằng GitHub CLI (`gh`)**:
+   - Sau khi push, kiểm tra trạng thái CI: `gh run list -L 5`.
+   - Xem log lỗi ngay khi có sự cố: `gh run view <run-id> --log-failed`.
+   - **Hủy ngay lập tức các run thừa/treo**: Nếu phát hiện run CI bị lặp lại hoặc commit mới đã thay thế commit cũ, dùng lệnh `gh run cancel <run-id>` để lập tức giải phóng runner, bảo toàn phút build miễn phí.

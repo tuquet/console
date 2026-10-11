@@ -53,7 +53,9 @@ const props = withDefaults(defineProps<Props>(), {
       <!-- Quota 2: Devices -->
       <div class="rounded-xl border border-border/60 bg-muted/20 p-4">
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-foreground">Máy Trạm & Runners</span>
+          <span class="text-sm font-medium text-foreground"
+            >Máy Trạm & Runners</span
+          >
           <span class="text-xs text-muted-foreground">
             {{ props.quota.used_devices }} / {{ props.quota.max_devices }}
           </span>

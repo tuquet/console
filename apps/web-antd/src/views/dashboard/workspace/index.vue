@@ -331,7 +331,9 @@ onMounted(() => {
           <span class="text-3xl font-extrabold tracking-tight text-foreground">
             {{ plugins.length }}
           </span>
-          <span class="text-xs font-semibold text-emerald-400">/ 6 Sẵn sàng</span>
+          <span class="text-xs font-semibold text-emerald-400"
+            >/ 6 Sẵn sàng</span
+          >
         </div>
         <div class="mt-2 flex items-center gap-1.5 text-xs text-emerald-400">
           <CheckCircle2 class="size-3.5" />
@@ -655,7 +657,9 @@ onMounted(() => {
                 <Tag :color="plugin.is_system ? 'blue' : 'purple'">
                   {{ plugin.is_system ? 'Core Kernel' : 'Module' }}
                 </Tag>
-                <span class="text-muted-foreground ml-auto">v{{ plugin.version }}</span>
+                <span class="text-muted-foreground ml-auto"
+                  >v{{ plugin.version }}</span
+                >
               </div>
             </div>
           </div>

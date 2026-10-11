@@ -146,7 +146,8 @@ const memberColumns = [
               <span
                 v-if="record.role !== 'owner'"
                 class="text-muted-foreground/40"
-                >•</span>
+                >•</span
+              >
               <Popconfirm
                 v-if="record.role !== 'owner'"
                 title="Bạn có chắc chắn muốn xóa thành viên này?"
