@@ -16,7 +16,6 @@ import {
   RefreshCw,
   Save,
   ShieldCheck,
-  Terminal,
   User,
 } from '@lucide/vue';
 import {
@@ -35,6 +34,8 @@ import {
   updateUserPasswordApi,
   updateUserProfileApi,
 } from '#/api';
+import CliSnippetCard from '#/components/common/cli-snippet-card.vue';
+import { useClipboard } from '#/composables';
 
 defineOptions({ name: 'Profile' });
 
@@ -44,7 +45,8 @@ const userStore = useUserStore();
 const loading = ref(false);
 const savingProfile = ref(false);
 const savingPassword = ref(false);
-const copiedField = ref<null | string>(null);
+
+const { copyToClipboard, isCopied } = useClipboard();
 
 // Form states
 const fullName = ref('');
@@ -123,17 +125,6 @@ async function handleSavePassword() {
   }
 }
 
-function copyToClipboard(text: string, fieldName: string) {
-  navigator.clipboard.writeText(text);
-  copiedField.value = fieldName;
-  message.success(`Đã sao chép ${fieldName}`);
-  setTimeout(() => {
-    if (copiedField.value === fieldName) {
-      copiedField.value = null;
-    }
-  }, 2000);
-}
-
 const userInitials = computed(() => {
   const name = fullName.value || email.value || 'AD';
   return name.slice(0, 2).toUpperCase();
@@ -203,7 +194,7 @@ onMounted(() => {
                 @click="copyToClipboard(userId, 'User ID')"
               >
                 <Check
-                  v-if="copiedField === 'User ID'"
+                  v-if="isCopied('User ID')"
                   class="size-3 text-green-500"
                 />
                 <Copy v-else class="size-3 text-muted-foreground" />
@@ -462,31 +453,10 @@ onMounted(() => {
             </div>
 
             <!-- CLI Command -->
-            <div class="rounded-xl border border-border/60 bg-muted/30 p-4">
-              <div class="flex items-center gap-2 mb-2">
-                <Terminal class="size-4 text-sky-400" />
-                <label
-                  class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-                  >Lệnh Đăng Nhập Specter CLI</label>
-              </div>
-              <div
-                class="mt-1 rounded bg-black/60 p-3 font-mono text-xs text-sky-300 flex items-center justify-between gap-2"
-              >
-                <code>tuquet login</code>
-                <Button
-                  type="text"
-                  size="small"
-                  class="text-sky-300 hover:text-white p-0 size-6"
-                  @click="copyToClipboard('tuquet login', 'CLI Command')"
-                >
-                  <Check
-                    v-if="copiedField === 'CLI Command'"
-                    class="size-3.5 text-green-500"
-                  />
-                  <Copy v-else class="size-3.5" />
-                </Button>
-              </div>
-            </div>
+            <CliSnippetCard
+              command="tuquet login"
+              label="Lệnh Đăng Nhập Specter CLI"
+            />
           </div>
         </Tabs.TabPane>
       </Tabs>
