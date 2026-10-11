@@ -1,6 +1,11 @@
-# Tuquet Admin
+# Tuquet ID (`id.tuquet.com`)
 
-Modern, enterprise-grade admin console for the Tuquet Ecosystem, powered by Vue 3, Vite, and Shadcn-Vue.
+Unified Identity, Authentication & Management Console for the **[Tuquet Ecosystem](https://tuquet.com)**, powered by Vue 3, Vite, and Shadcn-Vue.
+
+## Production Domain
+
+- **Identity & Accounts Service**: [https://id.tuquet.com](https://id.tuquet.com)
+- **Official Website**: [https://tuquet.com](https://tuquet.com)
 
 ## Tech Stack
 
@@ -31,6 +36,10 @@ pnpm dev
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+- **Default Accounts**:
+  - `tuquet` / `123456` (Super Administrator)
+  - `admin` / `123456` (Administrator)
+
 ## License
 
-MIT © [Tuquet](https://github.com/tuquet)
+MIT © [Tuquet](https://tuquet.com)

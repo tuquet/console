@@ -9,14 +9,14 @@
     "dashboard",
     "shadcn"
   ],
-  "homepage": "https://github.com/tuquet/admin",
+  "homepage": "https://id.tuquet.com",
   "bugs": "https://github.com/tuquet/admin/issues",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tuquet/admin.git"
   },
   "license": "MIT",
-  "author": "Tuquet <dev@tuquet.io>",
+  "author": "Tuquet <dev@tuquet.com>",
   "type": "module",
   "scripts": {
     "bootstrap": "pnpm install",

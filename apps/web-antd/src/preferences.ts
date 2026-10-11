@@ -19,13 +19,21 @@ interface WebAntdPreferencesExtension {
 export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
-    name: import.meta.env.VITE_APP_TITLE,
+    name: 'Tuquet ID',
     locale: 'en-US',
   },
   widget: {
     languageToggle: false,
   },
-  copyright: appCopyrightPreferences,
+  copyright: {
+    companyName: 'Tuquet',
+    companySiteLink: 'https://tuquet.com',
+    date: '2026',
+    enable: true,
+    icp: '',
+    icpLink: '',
+    settingShow: true,
+  },
 });
 
 export const preferencesExtension =

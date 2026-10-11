@@ -95,30 +95,21 @@ const menus = computed(() => [
   },
   {
     handler: () => {
-      openWindow(VBEN_DOC_URL, {
+      openWindow('https://tuquet.com', {
         target: '_blank',
       });
     },
     icon: BookOpenText,
-    text: $t('ui.widgets.document'),
+    text: 'Tuquet Home',
   },
   {
     handler: () => {
-      openWindow(VBEN_GITHUB_URL, {
+      openWindow('https://github.com/tuquet/admin', {
         target: '_blank',
       });
     },
     icon: SvgGithubIcon,
     text: 'GitHub',
-  },
-  {
-    handler: () => {
-      openWindow(`${VBEN_GITHUB_URL}/issues`, {
-        target: '_blank',
-      });
-    },
-    icon: CircleHelp,
-    text: $t('ui.widgets.qa'),
   },
 ]);
 
@@ -228,8 +219,8 @@ watch(
         :avatar
         :menus
         :text="userStore.userInfo?.realName"
-        description="ann.vben@gmail.com"
-        tag-text="Pro"
+        description="admin@tuquet.com"
+        tag-text="ID"
         @clear-preferences-and-logout="handleLogout"
         @logout="handleLogout"
       />
