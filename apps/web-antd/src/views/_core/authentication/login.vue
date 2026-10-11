@@ -98,7 +98,17 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <div ref="turnstileContainerRef" style="display: none"></div>
+    <div
+      ref="turnstileContainerRef"
+      style="
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+        pointer-events: none;
+        opacity: 0;
+      "
+    ></div>
     <AuthenticationLogin
       :form-schema="formSchema"
       :loading="authStore.loginLoading"

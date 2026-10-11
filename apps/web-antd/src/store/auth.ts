@@ -66,8 +66,15 @@ export const useAuthStore = defineStore('auth', () => {
 
           if (redirectParam) {
             try {
-              const decoded = decodeURIComponent(redirectParam);
-              if (decoded && !decoded.startsWith('/auth/login')) {
+              let decoded = decodeURIComponent(redirectParam).trim();
+              if (decoded.startsWith('#')) {
+                decoded = decoded.replace(/^#+/, '');
+              }
+              if (
+                decoded &&
+                !decoded.startsWith('/auth/login') &&
+                decoded.startsWith('/')
+              ) {
                 targetPath = decoded;
               }
             } catch {

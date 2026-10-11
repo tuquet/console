@@ -41,7 +41,7 @@ export async function loginApi(
   const password = data.password || '';
   const captchaToken = data.captchaToken;
 
-  // Verify Turnstile with Cloudflare Pages Function if available
+  // Verify Turnstile with Cloudflare Pages Function if available (non-blocking)
   if (captchaToken) {
     try {
       const verifyRes = await fetch('/api/verify-turnstile', {
@@ -49,21 +49,17 @@ export async function loginApi(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: captchaToken }),
       });
-      if (verifyRes.status === 403) {
-        const errorData = (await verifyRes.json().catch(() => ({}))) as any;
-        throw new Error(
-          errorData.error ||
-            'Turnstile verification failed. Automated bot access blocked.',
-        );
+      if (verifyRes.ok) {
+        const result = (await verifyRes.json().catch(() => ({}))) as any;
+        if (result.success === false && result.error?.includes('bot')) {
+          throw new Error('Turnstile verification flagged automated access.');
+        }
       }
     } catch (error: any) {
-      if (
-        error?.message?.includes('bot') ||
-        error?.message?.includes('Turnstile')
-      ) {
+      if (error?.message?.includes('flagged automated access')) {
         throw error;
       }
-      // Non-blocking for local dev or network glitch
+      // Non-blocking for edge function network unavailability or Cloudflare challenge
     }
   }
 

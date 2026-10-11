@@ -53,11 +53,23 @@ function setupAccessGuard(router: Router) {
     // 基本路由，这些路由不需要进入权限拦截
     if (coreRouteNames.includes(to.name as string)) {
       if (to.path === LOGIN_PATH && accessStore.accessToken) {
-        return decodeURIComponent(
-          (to.query?.redirect as string) ||
-            userStore.userInfo?.homePath ||
-            preferences.app.defaultHomePath,
-        );
+        let redirectTarget = (to.query?.redirect as string) || '';
+        if (redirectTarget) {
+          try {
+            redirectTarget = decodeURIComponent(redirectTarget)
+              .trim()
+              .replace(/^#+/, '');
+          } catch {}
+        }
+        if (
+          !redirectTarget ||
+          redirectTarget.startsWith('/auth/login') ||
+          !redirectTarget.startsWith('/')
+        ) {
+          redirectTarget =
+            userStore.userInfo?.homePath || preferences.app.defaultHomePath;
+        }
+        return redirectTarget;
       }
       return true;
     }
@@ -92,7 +104,15 @@ function setupAccessGuard(router: Router) {
 
     // 生成路由表
     // 当前登录用户拥有的角色标识列表
-    const userInfo = userStore.userInfo || (await authStore.fetchUserInfo());
+    let userInfo = userStore.userInfo;
+    if (!userInfo) {
+      try {
+        userInfo = await authStore.fetchUserInfo();
+      } catch {
+        await authStore.logout(false);
+        return { path: LOGIN_PATH, replace: true };
+      }
+    }
     const userRoles = userInfo.roles ?? [];
 
     // 生成菜单和路由
@@ -107,13 +127,30 @@ function setupAccessGuard(router: Router) {
     accessStore.setAccessMenus(accessibleMenus);
     accessStore.setAccessRoutes(accessibleRoutes);
     accessStore.setIsAccessChecked(true);
-    const redirectPath = (from.query.redirect ??
-      (to.path === preferences.app.defaultHomePath
+
+    let redirectPath = (
+      to.path === preferences.app.defaultHomePath
         ? userInfo.homePath || preferences.app.defaultHomePath
-        : to.fullPath)) as string;
+        : to.fullPath
+    ) as string;
+
+    if (from.query?.redirect) {
+      try {
+        const fromRedirect = decodeURIComponent(from.query.redirect as string)
+          .trim()
+          .replace(/^#+/, '');
+        if (
+          fromRedirect &&
+          !fromRedirect.startsWith('/auth/login') &&
+          fromRedirect.startsWith('/')
+        ) {
+          redirectPath = fromRedirect;
+        }
+      } catch {}
+    }
 
     return {
-      ...router.resolve(decodeURIComponent(redirectPath)),
+      ...router.resolve(redirectPath),
       replace: true,
     };
   });
