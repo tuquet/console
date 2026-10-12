@@ -434,10 +434,10 @@ $namespace: vben;
   align-items: center;
   max-width: var(--menu-title-width);
   overflow: hidden;
-  line-height: 1;
   text-overflow: ellipsis;
-  font-size: var(--menu-font-size) !important;
   white-space: nowrap;
+  font-size: var(--menu-font-size) !important;
+  line-height: 1;
   opacity: 1;
 }
 

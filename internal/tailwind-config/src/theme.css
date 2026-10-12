@@ -623,3 +623,13 @@ html.invert-mode {
 html.grayscale-mode {
   @apply grayscale;
 }
+
+@layer utilities {
+  /* Prevent conflict between legacy Tailwind v3 transform and Tailwind v4 translate on shared utility classes */
+  .-translate-y-1\/2,
+  .-translate-x-1\/2,
+  .translate-y-0,
+  .translate-x-0 {
+    transform: none;
+  }
+}
