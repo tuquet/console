@@ -169,3 +169,70 @@ export async function logoutApi() {
 export async function getAccessCodesApi(): Promise<string[]> {
   return ['super', 'admin', 'user'];
 }
+
+/**
+ * 找回密码 (Supabase GoTrue REST)
+ */
+export async function resetPasswordApi(email: string): Promise<void> {
+  const { anonKey, supabaseUrl } = getSupabaseConfig();
+  const response = await fetch(`${supabaseUrl}/auth/v1/recover`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: anonKey,
+    },
+    body: JSON.stringify({
+      email: email.trim(),
+      redirect_to: `${window.location.origin}/auth/reset-password`,
+    }),
+  });
+
+  const resJson = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const errorMsg =
+      resJson.msg ||
+      resJson.error_description ||
+      resJson.message ||
+      'Không thể gửi email khôi phục mật khẩu';
+    throw new Error(errorMsg);
+  }
+}
+
+/**
+ * 更新密码 (Supabase GoTrue REST)
+ */
+export async function updatePasswordApi(
+  password: string,
+  customToken?: string,
+): Promise<void> {
+  const { anonKey, supabaseUrl } = getSupabaseConfig();
+  const accessStore = useAccessStore();
+  const token = customToken || accessStore.accessToken;
+
+  if (!token) {
+    throw new Error('Không tìm thấy phiên làm việc hoặc token khôi phục');
+  }
+
+  const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: anonKey,
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ password }),
+  });
+
+  const resJson = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const errorMsg =
+      resJson.msg ||
+      resJson.error_description ||
+      resJson.message ||
+      'Cập nhật mật khẩu thất bại';
+    throw new Error(errorMsg);
+  }
+}
+

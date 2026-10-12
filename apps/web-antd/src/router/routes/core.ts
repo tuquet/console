@@ -77,6 +77,24 @@ const coreRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'ForgetPassword',
+        path: 'forget-password',
+        component: () =>
+          import('#/views/_core/authentication/forget-password.vue'),
+        meta: {
+          title: $t('authentication.forgetPassword'),
+        },
+      },
+      {
+        name: 'ResetPassword',
+        path: 'reset-password',
+        component: () =>
+          import('#/views/_core/authentication/reset-password.vue'),
+        meta: {
+          title: 'Đặt lại mật khẩu',
+        },
+      },
+      {
         name: 'DesktopBridge',
         path: 'desktop',
         component: () =>
