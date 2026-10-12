@@ -1,5 +1,7 @@
 import { useAccessStore } from '@vben/stores';
 
+import { getSupabaseConfig } from './supabase-client';
+
 export namespace AuthApi {
   /** Login API parameters */
   export interface LoginParams {
@@ -19,16 +21,6 @@ export namespace AuthApi {
     status: number;
   }
 }
-
-const getSupabaseConfig = () => {
-  const supabaseUrl =
-    (import.meta.env.VITE_SUPABASE_URL as string) ||
-    'https://dswhacsoaxgpfnkaxnhz.supabase.co';
-  const anonKey =
-    (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ||
-    'sb_publishable_8Y-l9FtldJSSuFAWhzICqg_UobFOsua';
-  return { anonKey, supabaseUrl };
-};
 
 /**
  * Login (Supabase GoTrue REST)

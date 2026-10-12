@@ -27,6 +27,8 @@ import LoginForm from '#/views/_core/authentication/login.vue';
 
 const notifications = ref<NotificationItem[]>([
   {
+    avatar: 'https://tuquet.com/icons/cli.svg',
+    date: '10m ago',
     id: 1,
     avatar: 'https://avatar.vercel.sh/vercel.svg?text=VB',
     date: '3 hours ago',
@@ -35,6 +37,8 @@ const notifications = ref<NotificationItem[]>([
     title: 'Received 14 new reports',
   },
   {
+    avatar: 'https://tuquet.com/icons/cli.svg',
+    date: '1h ago',
     id: 2,
     avatar: 'https://avatar.vercel.sh/1',
     date: 'Just now',
