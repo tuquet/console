@@ -13,12 +13,12 @@
     },
     {
       "type": "chrome",
-      "name": "vben admin antd dev",
+      "name": "tuquet admin web dev",
       "request": "launch",
       "url": "http://localhost:5666",
       "env": { "NODE_ENV": "development" },
       "sourceMaps": true,
-      "webRoot": "${workspaceFolder}/apps/web-antd"
+      "webRoot": "${workspaceFolder}/apps/web-admin"
     },
     {
       "type": "chrome",

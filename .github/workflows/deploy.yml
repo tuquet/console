@@ -32,14 +32,14 @@ jobs:
         uses: ./.github/actions/setup-node
 
       - name: Build Web Application
-        run: pnpm run build:antd
+        run: pnpm run build:admin
         env:
           NODE_OPTIONS: '--max-old-space-size=8192'
           VITE_APP_TITLE: 'Tuquet Admin'
           VITE_APP_NAMESPACE: 'tuquet-admin'
 
       - name: Deploy to Cloudflare Pages
-        run: pnpm dlx wrangler pages deploy apps/web-antd/dist --project-name=tuquet-admin --branch=main --commit-dirty=true
+        run: pnpm dlx wrangler pages deploy apps/web-admin/dist --project-name=tuquet-admin --branch=main --commit-dirty=true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

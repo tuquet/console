@@ -89,14 +89,14 @@ Mọi màn hình, bảng dữ liệu và cửa sổ tương tác (Modal/Drawer) 
    - Lưu ảnh chụp màn hình vào thư mục `scratch/` để nghiệm thu trực quan trước khi commit.
    - Tuyệt đối không cố gắng chạy các kịch bản kiểm thử tự động trực tiếp trên môi trường live/production.
 2. **Đảm bảo Chất lượng Mã Nguồn (Zero Errors)**:
-   - Kiểu dữ liệu TypeScript: `pnpm --filter @vben/web-antd run typecheck` (`vue-tsc --noEmit --skipLibCheck`) phải kết thúc với **0 lỗi**.
-   - Linting: `npx oxlint apps/web-antd/src/` phải kết thúc với **0 warnings, 0 errors**.
+   - Kiểu dữ liệu TypeScript: `pnpm --filter @tuquet/admin-web run typecheck` (`vue-tsc --noEmit --skipLibCheck`) phải kết thúc với **0 lỗi**.
+   - Linting: `npx oxlint apps/web-admin/src/` phải kết thúc với **0 warnings, 0 errors**.
    - Định dạng: Tự động chạy `oxfmt` qua pre-commit hook của Lefthook.
 3. **Quy Chuẩn Commit (Conventional Commits)**:
    - Tiêu đề commit phải tuân thủ định dạng Lefthook commitlint:
-     - `feat(@vben/web-antd): <mô tả ngắn gọn>`
-     - `fix(@vben/web-antd): <mô tả ngắn gọn>`
-     - `refactor(@vben/web-antd): <mô tả ngắn gọn>`
+     - `feat(@tuquet/admin-web): <mô tả ngắn gọn>`
+     - `fix(@tuquet/admin-web): <mô tả ngắn gọn>`
+     - `refactor(@tuquet/admin-web): <mô tả ngắn gọn>`
    - Độ dài tiêu đề commit không được vượt quá **108 ký tự**.
 
 ---
@@ -121,14 +121,14 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
    _Kết quả yêu cầu:_ `oxfmt` + `eslint` + `stylelint` trả về **0 errors**. Nếu phát hiện lệch format, chạy `pnpm run format` để tự động chuẩn hóa.
 3. **Kiểm tra Build Ứng Dụng Web**:
    ```bash
-   pnpm run build:antd
+   pnpm run build:admin
    ```
-   _Kết quả yêu cầu:_ Vite đóng gói thành công toàn bộ bundle `apps/web-antd/dist` không phát sinh lỗi module.
+   _Kết quả yêu cầu:_ Vite đóng gói thành công toàn bộ bundle `apps/web-admin/dist` không phát sinh lỗi module.
 
 ### 7.2. Quy Chuẩn Quản Lý Dependency & Catalog PNPM
 
 - Mọi dependency dùng chung hoặc thư viện bên ngoài phải được khai báo phiên bản tập trung tại file [`pnpm-workspace.yaml`](file:///D:/Repository/tuquet/admin/pnpm-workspace.yaml) trong khối `catalog:`.
-- Trong file `package.json` của từng ứng dụng/gói (ví dụ [`apps/web-antd/package.json`](file:///D:/Repository/tuquet/admin/apps/web-antd/package.json)): **BẮT BUỘC** dùng `"catalog:"`. Tuyệt đối không ghi phiên bản số trực tiếp (như `"0.2.1"`).
+- Trong file `package.json` của từng ứng dụng/gói (ví dụ [`apps/web-admin/package.json`](file:///D:/Repository/tuquet/admin/apps/web-admin/package.json)): **BẮT BUỘC** dùng `"catalog:"`. Tuyệt đối không ghi phiên bản số trực tiếp (như `"0.2.1"`).
 - Tuyệt đối không để lại các catalog item không được sử dụng (`pnpm/yaml-no-unused-catalog-item`).
 
 ### 7.3. Chiến Lược Tiết Kiệm Phút Build CI (CI Minutes Conservation)

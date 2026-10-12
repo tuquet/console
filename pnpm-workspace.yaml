@@ -30,6 +30,7 @@ minimumReleaseAge: 0
 overrides:
   '@ast-grep/napi': 'catalog:'
   '@ctrl/tinycolor': 'catalog:'
+  '@vue/compiler-sfc': 'catalog:'
   clsx: 'catalog:'
   pinia: 'catalog:'
   vue: 'catalog:'
@@ -45,7 +46,6 @@ catalog:
   '@ctrl/tinycolor': ^4.2.0
   '@eslint-community/eslint-plugin-eslint-comments': ^4.7.2
   '@eslint/js': ^10.0.1
-  '@faker-js/faker': ^10.5.0
   '@iconify/json': ^2.2.520
   '@iconify/tailwind4': ^1.2.3
   '@iconify/vue': ^5.0.1
@@ -79,7 +79,6 @@ catalog:
   '@types/archiver': ^8.0.0
   '@types/html-minifier-terser': ^7.0.2
   '@types/json-bigint': ^1.0.4
-  '@types/jsonwebtoken': ^9.0.10
   '@types/lodash.clonedeep': ^4.5.9
   '@types/node': ^25.9.7
   '@types/nprogress': ^0.2.3
@@ -89,12 +88,12 @@ catalog:
   '@typescript-eslint/parser': ^8.68.0
   '@vitejs/plugin-vue': ^6.0.9
   '@vitejs/plugin-vue-jsx': ^5.1.6
+  '@vue/compiler-sfc': 3.5.41
   '@vue/shared': ^3.5.40
   '@vue/test-utils': ^2.4.11
   '@vueuse/core': ^14.4.0
   '@vueuse/integrations': ^14.3.0
   '@vueuse/motion': ^3.0.3
-  ant-design-vue: ^4.2.6
   archiver: ^8.0.0
   axios: ^1.18.1
   axios-mock-adapter: ^2.1.0
@@ -129,12 +128,10 @@ catalog:
   find-up: ^8.0.0
   get-port: ^7.2.0
   globals: ^17.7.0
-  h3: ^1.15.11
   happy-dom: ^20.14.5
   html-minifier-terser: ^7.2.0
   is-ci: ^4.1.0
   json-bigint: ^1.0.0
-  jsonwebtoken: ^9.0.3
   knip: ^6.29.0
   lefthook: ^2.1.14
   lodash.clonedeep: ^4.5.0
