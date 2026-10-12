@@ -58,16 +58,16 @@ function handleOk() {
         <DialogTitle>Mời Thành Viên Vào Workspace</DialogTitle>
       </DialogHeader>
 
-      <div class="space-y-4 py-2">
+      <div class="space-y-5 py-2">
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Email Thành Viên
           </label>
           <Input v-model="email" placeholder="dev@tuquet.com" type="email" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Vai Trò IAM (Phân Quyền)
           </label>
           <select

@@ -70,10 +70,10 @@ function handleOk() {
         <DialogTitle>Tạo Workspace Mới</DialogTitle>
       </DialogHeader>
 
-      <div class="space-y-4 py-2">
+      <div class="space-y-5 py-2">
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
-            Tên Workspace <span class="text-destructive">*</span>
+          <label class="block text-sm font-medium text-foreground mb-2">
+            Tên Workspace <span class="text-destructive ml-0.5">*</span>
           </label>
           <Input
             v-model="name"
@@ -83,17 +83,17 @@ function handleOk() {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
-            Mã định danh (Slug) <span class="text-destructive">*</span>
+          <label class="block text-sm font-medium text-foreground mb-2">
+            Mã định danh (Slug) <span class="text-destructive ml-0.5">*</span>
           </label>
           <Input v-model="slug" placeholder="Ví dụ: core-eng" />
-          <p class="mt-1 text-xs text-muted-foreground">
+          <p class="mt-1.5 text-xs text-muted-foreground">
             Dùng trong định danh URL. Chỉ gồm chữ thường, số và dấu gạch ngang.
           </p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Gói Dịch Vụ
           </label>
           <select

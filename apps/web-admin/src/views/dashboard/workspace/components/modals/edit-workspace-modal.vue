@@ -65,23 +65,23 @@ function handleOk() {
         <DialogTitle>Cài Đặt & Cập Nhật Workspace</DialogTitle>
       </DialogHeader>
 
-      <div class="space-y-4 py-2">
+      <div class="space-y-5 py-2">
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Tên Workspace / Tổ Chức
           </label>
           <Input v-model="name" placeholder="Ví dụ: Core Engineering" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Mã Slug (Định danh URL)
           </label>
           <Input v-model="slug" placeholder="core-eng" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Gói Dịch Vụ
           </label>
           <select

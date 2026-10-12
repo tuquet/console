@@ -58,10 +58,10 @@ async function handleSubmit() {
       </p>
     </div>
 
-    <form class="space-y-4" @submit.prevent="handleSubmit">
-      <div class="space-y-1.5">
+    <form class="space-y-5" @submit.prevent="handleSubmit">
+      <div class="space-y-2">
         <label class="text-sm font-medium leading-none">
-          Mật khẩu mới <span class="text-destructive">*</span>
+          Mật khẩu mới <span class="text-destructive ml-0.5">*</span>
         </label>
         <Input
           v-model="password"
@@ -71,9 +71,9 @@ async function handleSubmit() {
         />
       </div>
 
-      <div class="space-y-1.5">
+      <div class="space-y-2">
         <label class="text-sm font-medium leading-none">
-          Xác nhận mật khẩu <span class="text-destructive">*</span>
+          Xác nhận mật khẩu <span class="text-destructive ml-0.5">*</span>
         </label>
         <Input
           v-model="confirmPassword"

@@ -68,9 +68,9 @@ function handleOk() {
         <DialogTitle>Tạo Khóa API Headless Mới</DialogTitle>
       </DialogHeader>
 
-      <div class="space-y-4 py-2">
+      <div class="space-y-5 py-2">
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Tên Nhận Diện Khóa (Purpose)
           </label>
           <Input
@@ -80,7 +80,7 @@ function handleOk() {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Quyền Hạn API (Scope)
           </label>
           <select
@@ -97,7 +97,7 @@ function handleOk() {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Thời Gian Hiệu Lực
           </label>
           <select

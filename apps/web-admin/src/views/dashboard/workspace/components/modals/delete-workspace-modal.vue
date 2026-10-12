@@ -55,7 +55,7 @@ function handleOk() {
         <DialogTitle>Xác Nhận Xóa / Lưu Trữ Workspace</DialogTitle>
       </DialogHeader>
 
-      <div class="space-y-4 py-2">
+      <div class="space-y-5 py-2">
         <div
           class="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-400"
         >
@@ -64,7 +64,7 @@ function handleOk() {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Để xác nhận, hãy nhập chính xác slug:
             <strong class="font-mono text-red-400">{{ props.slug }}</strong>
           </label>

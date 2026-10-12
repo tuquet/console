@@ -279,7 +279,7 @@ onMounted(() => {
 
           <div>
             <span
-              class="text-xs text-muted-foreground uppercase tracking-wider block mb-1.5"
+              class="text-xs text-muted-foreground uppercase tracking-wider block mb-2"
               >Workspace</span
             >
             <select

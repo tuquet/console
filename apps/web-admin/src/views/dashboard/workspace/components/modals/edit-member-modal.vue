@@ -69,9 +69,9 @@ function handleOk() {
         <DialogTitle>Chỉnh Sửa Thông Tin Thành Viên</DialogTitle>
       </DialogHeader>
 
-      <div class="space-y-4 py-2">
+      <div class="space-y-5 py-2">
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Email Định Danh
           </label>
           <Input
@@ -82,14 +82,14 @@ function handleOk() {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Họ Và Tên Thành Viên
           </label>
           <Input v-model="fullName" placeholder="Nhập họ và tên hiển thị" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Vai Trò IAM (Quyền Hạn)
           </label>
           <select
@@ -109,7 +109,7 @@ function handleOk() {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-1.5">
+          <label class="block text-sm font-medium text-foreground mb-2">
             Trạng Thái Tài Khoản
           </label>
           <select

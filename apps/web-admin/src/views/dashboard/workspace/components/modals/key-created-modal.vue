@@ -32,7 +32,7 @@ const { copyToClipboard, isCopied } = useClipboard();
         <DialogTitle>Khóa API Đã Được Tạo Thành Công</DialogTitle>
       </DialogHeader>
 
-      <div class="space-y-4 py-2">
+      <div class="space-y-5 py-2">
         <div
           class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-300"
         >
@@ -42,7 +42,7 @@ const { copyToClipboard, isCopied } = useClipboard();
 
         <div>
           <label
-            class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5"
+            class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2"
           >
             Khóa Token Truy Cập Bí Mật
           </label>

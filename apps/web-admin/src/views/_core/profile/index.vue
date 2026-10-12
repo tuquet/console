@@ -267,7 +267,7 @@ onMounted(async () => {
             </div>
 
             <!-- Field 1: Họ và tên -->
-            <div class="space-y-1.5">
+            <div class="space-y-2">
               <label class="block text-sm font-medium text-foreground">
                 Họ và Tên
               </label>
@@ -284,7 +284,7 @@ onMounted(async () => {
             </div>
 
             <!-- Field 2: Email -->
-            <div class="space-y-1.5">
+            <div class="space-y-2">
               <label class="block text-sm font-medium text-foreground">
                 Email Đăng Nhập
               </label>
@@ -300,7 +300,7 @@ onMounted(async () => {
             </div>
 
             <!-- Field 3: Avatar URL -->
-            <div class="space-y-1.5">
+            <div class="space-y-2">
               <label class="block text-sm font-medium text-foreground">
                 Ảnh Đại Diện (URL)
               </label>
@@ -312,7 +312,7 @@ onMounted(async () => {
             </div>
 
             <!-- Field 4: Bio / Ghi chú -->
-            <div class="space-y-1.5">
+            <div class="space-y-2">
               <label class="block text-sm font-medium text-foreground">
                 Tiểu Sử
               </label>
@@ -352,7 +352,7 @@ onMounted(async () => {
             </div>
 
             <!-- New Password -->
-            <div class="space-y-1.5">
+            <div class="space-y-2">
               <label class="block text-sm font-medium text-foreground">
                 Mật Khẩu Mới
               </label>
@@ -370,7 +370,7 @@ onMounted(async () => {
             </div>
 
             <!-- Confirm Password -->
-            <div class="space-y-1.5">
+            <div class="space-y-2">
               <label class="block text-sm font-medium text-foreground">
                 Xác Nhận Mật Khẩu
               </label>
