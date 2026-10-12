@@ -5,12 +5,14 @@ import { ExternalLink, RefreshCw, Terminal } from '@lucide/vue';
 import {
   Badge,
   Button,
+} from '@tuquet/vue-ui';
+import {
   Dialog,
-  DialogContent,
   DialogFooter,
   DialogHeader,
+  DialogScrollContent as DialogContent,
   DialogTitle,
-} from '@tuquet/vue-ui';
+} from '@vben-core/shadcn-ui';
 
 import CliSnippetCard from '#/components/common/cli-snippet-card.vue';
 
@@ -51,7 +53,7 @@ function handleOpenAuthBridge() {
           class="flex items-center justify-between rounded-lg border border-border/60 bg-muted/30 p-3.5"
         >
           <div class="flex items-center gap-2">
-            <Terminal class="size-4 text-primary" />
+            <Terminal class="size-4 text-primary shrink-0" />
             <span class="text-sm font-medium text-foreground">
               Cổng Loopback Daemon
             </span>
@@ -78,7 +80,7 @@ function handleOpenAuthBridge() {
               @click="emit('reprobe')"
             >
               <RefreshCw
-                class="size-3"
+                class="size-3 shrink-0"
                 :class="{ 'animate-spin': props.probing }"
               />
               <span>Kiểm tra</span>
@@ -90,7 +92,7 @@ function handleOpenAuthBridge() {
         <div class="space-y-2">
           <div class="flex items-center gap-2">
             <span
-              class="flex size-5 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary"
+              class="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary"
             >
               1
             </span>
@@ -114,7 +116,7 @@ function handleOpenAuthBridge() {
         <div class="space-y-2">
           <div class="flex items-center gap-2">
             <span
-              class="flex size-5 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary"
+              class="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary"
             >
               2
             </span>
@@ -131,7 +133,7 @@ function handleOpenAuthBridge() {
               class="flex items-center gap-1.5"
               @click="handleOpenAuthBridge"
             >
-              <ExternalLink class="size-3.5" />
+              <ExternalLink class="size-3.5 shrink-0" />
               <span>Mở Trang Ủy Quyền Desktop SSO</span>
             </Button>
           </div>

@@ -5,49 +5,49 @@ import { VbenAvatar } from '../avatar';
 
 interface Props {
   /**
-   * @zh_CN 是否收起文本；布局状态，侧边栏收起时隐藏文字。
+   * Whether text is collapsed; layout state, hides text when sidebar collapses.
    */
   collapsed?: boolean;
   /**
-   * @zh_CN Logo 图片适应方式
+   * Logo image fit mode
    */
   fit?: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
   /**
-   * @zh_CN logo高度， 只在 logoMode=full时生效
+   * Logo height, effective only when logoMode=full
    */
   fullLogoHeight?: number | string;
   /**
-   * @zh_CN Logo 跳转地址
+   * Logo target URL
    */
   href?: string;
   /**
-   * @zh_CN logo 展示类型，icon 图标模式， full 铺满logo区域
+   * Logo display mode: icon mode or full mode filling logo area
    */
   logoMode?: 'full' | 'icon';
   /**
-   * @zh_CN Logo 图片大小
+   * Logo image size
    */
   logoSize?: number;
   /**
-   * @zh_CN Logo 是否展示文本
+   * Whether logo displays text
    */
   showText?: boolean;
   /**
-   * @zh_CN Logo 图标
+   * Logo icon
    */
   src?: string;
   /**
-   * @zh_CN 暗色主题 Logo 图标 (可选，若不设置则使用 src)
+   * Dark theme Logo icon (optional, defaults to src if omitted)
    */
   srcDark?: string;
 
   /**
-   * @zh_CN Logo 文本
+   * Logo text
    */
   text: string;
 
   /**
-   * @zh_CN Logo 主题
+   * Logo theme
    */
   theme?: string;
 }
@@ -70,26 +70,26 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 /**
- * @zh_CN 根据主题选择合适的 logo 图标
+ * Choose appropriate logo icon based on theme
  */
 const logoSrc = computed(() => {
-  // 如果是暗色主题且提供了 srcDark，则使用暗色主题的 logo
+  // If dark theme and srcDark is provided, use dark theme logo
   if (props.theme === 'dark' && props.srcDark) {
     return props.srcDark;
   }
-  // 否则使用默认的 src
+  // Otherwise use default src
   return props.src;
 });
 
 /**
- * @zh_CN 是否铺满容器显示log
+ * Whether to fill container to display logo
  */
 const shouldUseFullLogo = computed(() => {
   return props.logoMode === 'full' && !props.collapsed;
 });
 
 /**
- * @zh_CN 根据配置展示 logo text
+ * Display logo text according to configuration
  */
 const shouldShowText = computed(() => {
   return (
@@ -101,7 +101,7 @@ const shouldShowText = computed(() => {
 });
 
 /**
- * @zh_CN full 模式下logo的样式
+ * Logo styles under full mode
  */
 const fullLogoStyle = computed(() => ({
   height:
@@ -143,7 +143,7 @@ const fullLogoStyle = computed(() => ({
       <template v-if="shouldShowText">
         <slot name="text">
           <span
-            class="text-foreground truncate font-semibold text-nowrap hidden sm:inline"
+            class="text-foreground truncate font-semibold text-nowrap hidden sm:inline-flex items-center leading-none"
           >
             {{ text }}
           </span>

@@ -35,7 +35,7 @@ const props = withDefaults(defineProps<DescriptionsProps>(), {
 const slots = useSlots();
 const screens = useScreens();
 
-// 优先使用 items；否则从默认插槽中解析 VbenDescriptionsItem
+// Prefer items; otherwise parse VbenDescriptionsItem from default slot
 const resolvedItems = computed<DescriptionsItemType[]>(() => {
   if (props.items && props.items.length > 0) return props.items;
   const nodes = (slots.default?.() ?? []) as VNode[];
@@ -55,7 +55,7 @@ const hasHeader = computed(
 const tableClass = computed(() =>
   cn(
     'w-full table-auto border-collapse text-sm',
-    // 非边框模式下，去掉最后一行的底部间距
+    // In non-bordered mode, remove bottom spacing of the last row
     !props.bordered && '[&>tbody>tr:last-child>td]:pb-0',
   ),
 );

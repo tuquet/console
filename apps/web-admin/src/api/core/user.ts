@@ -85,4 +85,3 @@ export async function updateUserPasswordApi(
     method: 'PUT',
   });
 }
-

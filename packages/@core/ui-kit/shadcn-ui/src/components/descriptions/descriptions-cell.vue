@@ -10,27 +10,27 @@ import { cn } from '@vben-core/shared/utils';
 import { VbenRenderContent } from '../render-content';
 
 interface Props {
-  /** 是否边框模式 */
+  /** Whether border mode */
   bordered?: boolean;
-  /** 是否显示冒号（仅非边框模式生效） */
+  /** Whether to show colon (only effective in non-border mode) */
   colon?: boolean;
-  /** 内容 */
+  /** Content */
   content?: DescriptionsRenderNode | null;
-  /** 内容样式 */
+  /** Content style */
   contentStyle?: CSSProperties;
-  /** 单项自定义类名 */
+  /** Single item custom class name */
   itemClass?: string;
-  /** 标签 */
+  /** Label */
   label?: DescriptionsRenderNode | null;
-  /** 标签样式 */
+  /** Label style */
   labelStyle?: CSSProperties;
-  /** 尺寸 */
+  /** Size */
   size?: DescriptionsSize;
-  /** 跨列数 */
+  /** Span count */
   span?: number;
-  /** 渲染标签 th 还是 td */
+  /** Whether to render th or td */
   tag: 'td' | 'th';
-  /** 单元格类型 */
+  /** Cell type */
   type: 'content' | 'item' | 'label';
 }
 
@@ -58,7 +58,7 @@ const PLAIN_PADDING: Record<DescriptionsSize, string> = {
   small: 'pb-2',
 };
 
-// 冒号通过伪元素追加，避免标签为渲染函数时无法拼接
+// Colon appended via pseudo-element to avoid concatenation issues when label is render function
 const COLON_CLASS = "after:content-[':']";
 
 const hasLabel = computed(
@@ -68,8 +68,8 @@ const hasContent = computed(
   () => props.content !== null && props.content !== undefined,
 );
 
-// 数字 0 会被 VbenRenderContent 当作 falsy 隐藏，这里转为字符串保证展示；
-// 同时将 null 归一为 undefined，匹配 VbenRenderContent 的 content 类型
+// Number 0 is treated as falsy by VbenRenderContent; convert to string to ensure display;
+// also normalize null to undefined to match VbenRenderContent content type
 const displayLabel = computed(() => {
   if (props.label === null || props.label === undefined) return undefined;
   return typeof props.label === 'number' ? String(props.label) : props.label;

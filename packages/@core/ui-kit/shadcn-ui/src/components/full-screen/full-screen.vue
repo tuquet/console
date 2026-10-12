@@ -18,7 +18,7 @@ withDefaults(
 
 const { isFullscreen, toggle } = useFullscreen();
 
-// 重新检查全屏状态
+// Re-check fullscreen state
 isFullscreen.value = !!(
   document.fullscreenElement ||
   // @ts-expect-error - vendor fullscreen APIs are not included in the standard DOM typings

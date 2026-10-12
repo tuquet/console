@@ -11,77 +11,77 @@ export type BeforeCloseScope = {
 };
 
 export type AlertProps = {
-  /** 关闭前的回调，如果返回false，则终止关闭 */
+  /** Callback before closing; if returns false, closing is aborted */
   beforeClose?: (
     scope: BeforeCloseScope,
   ) => boolean | Promise<boolean | undefined> | undefined;
-  /** 边框 */
+  /** Border */
   bordered?: boolean;
   /**
-   * 按钮对齐方式
+   * Button alignment
    * @default 'end'
    */
   buttonAlign?: 'center' | 'end' | 'start';
-  /** 取消按钮的标题 */
+  /** Cancel button title */
   cancelText?: string;
-  /** 是否居中显示 */
+  /** Whether to center */
   centered?: boolean;
-  /** 确认按钮的标题 */
+  /** Confirm button title */
   confirmText?: string;
-  /** 弹窗容器的额外样式 */
+  /** Extra class for modal container */
   containerClass?: string;
-  /** 弹窗提示内容 */
+  /** Modal content */
   content?: Component | string;
-  /** 弹窗内容的额外样式 */
+  /** Extra class for modal content */
   contentClass?: string;
-  /** 执行beforeClose回调期间，在内容区域显示一个loading遮罩*/
+  /** Show loading overlay in content area while beforeClose callback executes */
   contentMasking?: boolean;
-  /** 按下Esc时是否关闭弹窗 */
+  /** Whether to close modal when pressing Esc */
   escapeKeyClose?: boolean;
-  /** 弹窗底部内容（与按钮在同一个容器中） */
+  /** Modal footer content (in same container as buttons) */
   footer?: Component | string;
-  /** 弹窗的图标（在标题的前面） */
+  /** Modal icon (in front of title) */
   icon?: Component | IconType;
   /**
-   * 弹窗遮罩模糊效果
+   * Modal overlay blur effect
    */
   overlayBlur?: number;
-  /** 是否显示取消按钮 */
+  /** Whether to show cancel button */
   showCancel?: boolean;
-  /** 弹窗标题 */
+  /** Modal title */
   title?: string;
 };
 
-/** Prompt属性 */
+/** Prompt properties */
 export type PromptProps<T = any> = {
-  /** 关闭前的回调，如果返回false，则终止关闭 */
+  /** Callback before closing; if returns false, closing is aborted */
   beforeClose?: (scope: {
     isConfirm: boolean;
     value?: T;
   }) => boolean | Promise<boolean | undefined> | undefined;
-  /** 用于接受用户输入的组件 */
+  /** Component used to accept user input */
   component?: Component;
-  /** 输入组件的属性 */
+  /** Input component props */
   componentProps?: Recordable<any>;
-  /** 输入组件的插槽 */
+  /** Input component slots */
   componentSlots?:
     | (() => any)
     | Recordable<unknown>
     | VNode
     | VNodeArrayChildren;
-  /** 默认值 */
+  /** Default value */
   defaultValue?: T;
-  /** 输入组件的值属性名 */
+  /** Value property name for input component */
   modelPropName?: string;
 } & Omit<AlertProps, 'beforeClose'>;
 
 /**
- * Alert上下文
+ * Alert context
  */
 export type AlertContext = {
-  /** 执行取消操作 */
+  /** Perform cancel operation */
   doCancel: () => void;
-  /** 执行确认操作 */
+  /** Perform confirm operation */
   doConfirm: () => void;
 };
 
@@ -89,7 +89,7 @@ export const [injectAlertContext, provideAlertContext] =
   createContext<AlertContext>('VbenAlertContext');
 
 /**
- * 获取Alert上下文
+ * Get Alert context
  * @returns AlertContext
  */
 export function useAlertContext() {

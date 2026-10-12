@@ -2,40 +2,40 @@ import type { Component } from 'vue';
 
 interface IContextMenuItem {
   /**
-   * @zh_CN 是否禁用
+   * Whether disabled
    */
   disabled?: boolean;
   /**
-   * @zh_CN 点击事件处理
+   * Click event handler
    * @param data
    */
   handler?: (data: any) => void;
   /**
-   * @zh_CN 是否隐藏
+   * Whether hidden
    */
   hidden?: boolean;
   /**
-   * @zh_CN 图标
+   * Icon
    */
   icon?: Component;
   /**
-   * @zh_CN 是否显示图标
+   * Whether to show icon
    */
   inset?: boolean;
   /**
-   * @zh_CN 唯一标识
+   * Unique identifier
    */
   key: string;
   /**
-   * @zh_CN 是否是分割线
+   * Whether it is a divider
    */
   separator?: boolean;
   /**
-   * @zh_CN 快捷键
+   * Shortcut key
    */
   shortcut?: string;
   /**
-   * @zh_CN 标题
+   * Title
    */
   text: string;
 }

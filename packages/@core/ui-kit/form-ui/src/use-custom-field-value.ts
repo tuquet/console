@@ -7,7 +7,7 @@ import { computed, inject, onUnmounted, provide, toRaw, watch } from 'vue';
 import { cloneDeep, isEqual } from '@vben-core/shared/utils';
 
 export interface FormCustomFieldContext {
-  /** 已注册的取值函数，同一表单项只接受一个 */
+  /** Registered getter function; a form item only accepts one */
   customValue: ShallowRef<(() => any) | undefined>;
   disabled: ComputedRef<boolean>;
   error: Readonly<Ref<string | undefined>>;
@@ -19,22 +19,22 @@ export interface FormCustomFieldContext {
 }
 
 export interface UseCustomFieldValueOptions {
-  /** 取值为对象/数组且原地修改时开启 */
+  /** Enable when value is object/array mutated in place */
   deep?: boolean;
-  /** 挂载时把当前值写入表单（不触发校验） */
+  /** Write current value to form on mount (without triggering validation) */
   immediate?: boolean;
 }
 
 export interface UseCustomFieldValueReturn<T> {
-  /** 表单项的禁用态（含表单级、schema 级、依赖计算） */
+  /** Disabled state of form item (including form-level, schema-level, dependencies) */
   disabled: ComputedRef<boolean>;
-  /** 表单项当前的校验错误 */
+  /** Current validation error of form item */
   error: Readonly<Ref<string | undefined>>;
-  /** 所在表单项的字段名，不在表单项内时为 undefined */
+  /** Field name of containing form item; undefined when not inside a form item */
   fieldName: string | undefined;
-  /** 清除该表单项的校验状态 */
+  /** Clear validation state of this form item */
   resetValidation: () => void;
-  /** 表单中该字段的值，可用于响应 setValues / resetForm */
+  /** Form value of this field, can be used to react to setValues / resetForm */
   value: ComputedRef<T | undefined>;
 }
 
@@ -47,15 +47,15 @@ export function provideFormCustomField(context: FormCustomFieldContext) {
 }
 
 /**
- * 让 VbenForm 表单项内的自定义组件把自己的值交给表单。
+ * Allow custom components inside VbenForm form items to deliver their values to the form.
  *
- * 组件既没有绑定 `componentProps`（插槽用法），也没有实现 `modelValue` 时，
- * 表单拿不到它的值，schema 上的 rules 也就无从校验。调用该函数后，取值函数的
- * 结果会写回表单字段，并按表单项的 `validateOn` 触发校验。
+ * When component neither binds `componentProps` (slot usage) nor implements `modelValue`,
+ * the form cannot retrieve its value and schema rules cannot validate it. After calling this function, the getter
+ * result writes back to the form field and triggers validation according to the form item's `validateOn`.
  *
- * 值仍归表单所有：组件应继续用 `modelValue` 接收表单下发的值（插槽用法就是
- * `v-bind="slotProps.componentProps"`），`setValues`、重置才能顺着 props 流回组件。
- * 只有完全自持内部状态的组件，才需要用返回的 `value` 自行同步。
+ * Value remains owned by form: component should continue using `modelValue` to receive form values (slot usage is
+ * `v-bind="slotProps.componentProps"`), allowing `setValues` and reset to flow back to the component.
+ * Only components holding internal state completely independently need to sync with the returned `value`.
  */
 export function useCustomFieldValue<T = any>(
   customValue: () => T,
@@ -64,7 +64,7 @@ export function useCustomFieldValue<T = any>(
   const field = inject(CUSTOM_FIELD_INJECTION_KEY, null);
 
   if (!field) {
-    console.warn('useCustomFieldValue 只能在 VbenForm 的表单项内部使用');
+    console.warn('useCustomFieldValue can only be used inside a VbenForm field item');
     return {
       disabled: computed(() => false),
       error: computed(() => undefined),
@@ -74,10 +74,10 @@ export function useCustomFieldValue<T = any>(
     };
   }
 
-  // 一个字段只能有一个值来源，后来者会互相覆盖
+  // A field can only have one value source; later registrations overwrite previous ones
   if (field.customValue.value) {
     console.warn(
-      `表单项 ${field.fieldName} 已存在自定义取值函数，本次注册被忽略`,
+      `Form field ${field.fieldName} already has a custom getter; this registration was ignored`,
     );
   } else {
     field.customValue.value = customValue;
@@ -88,8 +88,8 @@ export function useCustomFieldValue<T = any>(
       }
     });
 
-    // deep 时组件原地改的就是这个对象，存一份副本进表单，
-    // 下次比较才不是拿它跟自己比，原地改动也就不会被当成没变
+    // When deep is true, component mutates this object in place; store a copy in the form,
+    // so next comparison does not compare against itself and in-place changes are detected
     const toFormValue = (value: T) =>
       options.deep ? cloneDeep(toRaw(value)) : value;
 
@@ -100,9 +100,9 @@ export function useCustomFieldValue<T = any>(
     watch(
       customValue,
       (value) => {
-        // 组件由表单驱动（v-model / componentProps）时，setValues、重置下发的新值
-        // 会经组件再流回这里，此时值与表单一致：不重复写回，也不触发校验，
-        // 否则一点重置就立刻冒出必填错误
+        // When component is driven by form (v-model / componentProps), new values from setValues or reset
+        // flow through component back here matching form value: do not rewrite or trigger validation,
+        // otherwise clicking reset immediately triggers required validation errors
         if (isEqual(value, toRaw(field.value.value))) {
           return;
         }

@@ -102,7 +102,7 @@ export function useFormInitial(
       if (Reflect.has(item, 'defaultValue')) {
         set(initialValues, item.fieldName, item.defaultValue);
       } else if (item.rules && !isString(item.rules)) {
-        // 检查规则是否适合提取默认值
+        // Check whether rule is suitable for extracting default value
         const rawRules = toRaw(item.rules);
         const customDefaultValue = getCustomDefaultValue(rawRules);
         zodObject[item.fieldName] = normalizeSchemaForDefaults(rawRules);
@@ -120,15 +120,15 @@ export function useFormInitial(
     }
     return mergeWithArrayOverride(initialValues, zodDefaults);
   }
-  // 自定义默认值提取逻辑
+  // Custom default value extraction logic
   function getCustomDefaultValue(rule: any): any {
     rule = toRaw(rule);
     if (rule instanceof ZodString || rule instanceof ZodStringFormat) {
-      return ''; // 字符串及其格式校验默认为空字符串
+      return ''; // Strings and formatted validations default to empty string
     } else if (rule instanceof ZodNumber) {
-      return null; // 默认为 null（避免显示 0）
+      return null; // Defaults to null (avoid displaying 0)
     } else if (rule instanceof ZodObject) {
-      // 递归提取嵌套对象的默认值
+      // Recursively extract default values for nested objects
       const defaultValues: Record<string, any> = {};
       for (const [key, valueSchema] of Object.entries(rule.shape)) {
         defaultValues[key] = getCustomDefaultValue(valueSchema);
@@ -137,7 +137,7 @@ export function useFormInitial(
     } else if (rule instanceof ZodIntersection) {
       return getDefaultsForSchema(normalizeSchemaForDefaults(rule) as any);
     } else {
-      return undefined; // 其他类型不提供默认值
+      return undefined; // Other types provide no default value
     }
   }
 

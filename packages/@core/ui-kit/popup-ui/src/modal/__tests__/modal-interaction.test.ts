@@ -24,7 +24,7 @@ interface MountOptions {
 }
 
 /**
- * 挂载一个受控的 Modal 组件，用于验证鼠标点击与键盘交互后的关闭行为和事件副作用。
+ * Mount a controlled Modal component to verify close behavior and event side effects after mouse clicks and keyboard interactions.
  */
 async function mountModal(options: MountOptions = {}) {
   const mainContent = document.createElement('main');
@@ -57,8 +57,8 @@ async function mountModal(options: MountOptions = {}) {
   activeApp.mount(host);
   await nextTick();
   await nextTick();
-  // reka-ui 在 setTimeout(0) 之后才把 document 级的 pointerdown 监听挂上，
-  // 等待一个宏任务，确保遮罩交互在监听器就绪后触发。
+  // reka-ui attaches document-level pointerdown listener after setTimeout(0),
+  // wait for one macrotask to ensure overlay interaction triggers after listener is ready.
   await new Promise((resolve) => setTimeout(resolve, 0));
 
   if (!capturedApi) {

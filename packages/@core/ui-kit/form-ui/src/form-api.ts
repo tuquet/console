@@ -130,11 +130,11 @@ export class FormApi<
   public store: Store<FormApiProps<TFormValues, T, P, TSubmitValues>>;
 
   /**
-   * 组件实例映射
+   * Component instance mapping
    */
   private componentRefMap: Map<string, unknown> = new Map();
 
-  // 最后一次点击提交时的表单值
+  // Form values at the last submit click
   private latestSubmissionValues: null | Partial<TSubmitValues> = null;
 
   private legacyTransformWarningState: null | Pick<
@@ -195,9 +195,9 @@ export class FormApi<
   }
 
   /**
-   * 获取字段组件实例
-   * @param fieldName 字段名
-   * @returns 组件实例
+   * Get field component instance
+   * @param fieldName Field name
+   * @returns Component instance
    */
   getFieldComponentRef<T = ComponentPublicInstance>(
     fieldName: string,
@@ -225,7 +225,7 @@ export class FormApi<
   }
 
   /**
-   * 获取当前聚焦的字段，如果没有聚焦的字段则返回undefined
+   * Get currently focused field, returns undefined if no field is focused
    */
   getFocusedField() {
     for (const fieldName of this.componentRefMap.keys()) {
@@ -366,7 +366,7 @@ export class FormApi<
   }
 
   /**
-   * 根据字段名移除表单项
+   * Remove form field by field name
    * @param fields
    */
   async removeSchemaByFields(fields: string[]) {
@@ -378,7 +378,7 @@ export class FormApi<
   }
 
   /**
-   * 重置表单
+   * Reset form
    */
   async reset(state?: FormResetState<TFormValues>, opts?: FormResetOptions) {
     const form = await this.getForm();
@@ -407,8 +407,8 @@ export class FormApi<
   }
 
   /**
-   * 滚动到第一个错误字段
-   * @param errors 验证错误对象
+   * Scroll to first error field
+   * @param errors Validation error object
    */
   scrollToFirstError(errors: Record<string, any> | string) {
     const firstErrorFieldName =
@@ -422,7 +422,7 @@ export class FormApi<
       `[name="${firstErrorFieldName}"]`,
     ) as HTMLElement;
 
-    // 如果通过 name 属性找不到，尝试通过组件引用查找
+    // If not found by name attribute, try finding by component ref
     if (!el) {
       const componentRef = this.getFieldComponentRef(firstErrorFieldName);
       if (componentRef && componentRef.$el instanceof HTMLElement) {
@@ -431,7 +431,7 @@ export class FormApi<
     }
 
     if (el) {
-      // 滚动到错误字段，添加一些偏移量以确保字段完全可见
+      // Scroll to error field, add offset to ensure field is fully visible
       el.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
@@ -496,9 +496,9 @@ export class FormApi<
   }
 
   /**
-   * 设置表单值
+   * Set form values
    * @param fields record
-   * @param filterFields 过滤不在schema中定义的字段 默认为true
+   * @param filterFields Filter out fields not defined in schema, defaults to true
    * @param shouldValidate
    */
   async setValues(
@@ -646,7 +646,7 @@ export class FormApi<
 
   private async getForm() {
     if (!this.isMounted) {
-      // 等待form挂载
+      // Wait for form to mount
       await this.stateHandler.waitForCondition();
     }
     if (!this.form?.meta) {
@@ -665,7 +665,7 @@ export class FormApi<
   private updateState() {
     const currentSchema = getFormFieldSchemas(this.state?.schema ?? []);
     const prevSchema = getFormFieldSchemas(this.prevState?.schema ?? []);
-    // 进行了删除schema操作
+    // Schema deletion performed
     if (currentSchema.length < prevSchema.length) {
       const currentFields = new Set(
         currentSchema.map((item) => item.fieldName),

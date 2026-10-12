@@ -295,7 +295,7 @@ describe('form public types', () => {
     expectTypeOf<FormGroupSchema['children']>().toEqualTypeOf<
       FormFieldSchema[]
     >();
-    // updateSchema 只接受字段更新，分组本身不可被更新
+    // updateSchema only accepts field updates; group itself cannot be updated
     expectTypeOf(formApi.updateSchema)
       .parameter(0)
       .toEqualTypeOf<
@@ -308,13 +308,13 @@ describe('form public types', () => {
         >[]
       >();
 
-    // @ts-expect-error 分组不能声明 fieldName
+    // @ts-expect-error Groups cannot declare fieldName
     const invalidGroup: FormSchema = {
       children: [],
       fieldName: 'group',
       type: 'group',
     };
-    // @ts-expect-error 数组子字段不能是分组
+    // @ts-expect-error Array sub-fields cannot be groups
     const invalidArrayChildren: FormSchema = {
       children: [{ children: [], type: 'group' }],
       fieldName: 'contacts',

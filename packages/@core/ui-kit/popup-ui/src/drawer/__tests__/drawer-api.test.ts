@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DrawerApi } from '../drawer-api';
 
-// 模拟 Store 类
+// Mock Store class
 vi.mock('@vben-core/shared/store', () => {
   return {
     isFunction: (fn: any) => typeof fn === 'function',
@@ -72,7 +72,7 @@ describe('drawerApi', () => {
     drawerApiWithHook.open();
     drawerApiWithHook.onCancel();
     expect(onCancel).toHaveBeenCalled();
-    expect(drawerApiWithHook.store.state.isOpen).toBe(true); // 关闭逻辑不在 onCancel 内
+    expect(drawerApiWithHook.store.state.isOpen).toBe(true); // Close logic is not inside onCancel
   });
 
   it('should update shared data correctly', () => {

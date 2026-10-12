@@ -28,10 +28,10 @@ const itemClass = computed(() =>
 );
 
 /**
- * 阻止 reka-ui 事件的默认行为，用于：
- * - @select：阻止点击菜单项后自动关闭菜单，以便弹出气泡确认框；
- * - @open-auto-focus：阻止弹层抢占焦点（避免与菜单的焦点陷阱冲突）；
- * - @focus-outside：阻止因菜单夺回焦点而被误判为「焦点移出」从而关闭弹层。
+ * Prevent default behavior of reka-ui events, used for:
+ * - @select: prevent menu auto-closing after click to display popconfirm;
+ * - @open-auto-focus: prevent popup from stealing focus (avoids conflict with menu focus trap);
+ * - @focus-outside: prevent false dismissal when menu regains focus.
  */
 function preventDefault(event: Event) {
   event.preventDefault();
@@ -50,7 +50,7 @@ function onConfirm() {
   } else {
     props.action.onClick?.();
   }
-  // 确认后关闭整个下拉菜单
+  // Close entire dropdown menu after confirmation
   emit('confirm');
 }
 

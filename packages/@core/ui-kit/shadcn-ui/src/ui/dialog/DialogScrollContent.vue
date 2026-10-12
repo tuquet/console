@@ -19,7 +19,7 @@ defineOptions({
 
 const props = withDefaults(
   defineProps<DialogContentProps & { class?: any; zIndex?: number }>(),
-  { zIndex: 1000 },
+  { zIndex: 1050 },
 );
 const emits = defineEmits<DialogContentEmits>();
 

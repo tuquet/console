@@ -8,8 +8,8 @@ import { defineComponent } from 'vue';
 import { DESCRIPTIONS_ITEM_NAME } from './use-descriptions';
 
 /**
- * 子节点用法的标记组件，本身不渲染任何内容。
- * 其 props 与默认插槽会被父级 VbenDescriptions 收集为列表项。
+ * Marker component for child node usage, does not render content directly.
+ * Its props and default slot are collected as items by parent VbenDescriptions.
  */
 const VbenDescriptionsItem = defineComponent({
   name: DESCRIPTIONS_ITEM_NAME,
@@ -50,7 +50,7 @@ const VbenDescriptionsItem = defineComponent({
   },
 });
 
-// 额外标记，便于在 vnode 中稳健识别
+// Extra marker for robust identification in vnodes
 (VbenDescriptionsItem as Record<string, any>).__isDescriptionsItem = true;
 
 export default VbenDescriptionsItem;

@@ -4,7 +4,7 @@ import { Store } from '@vben-core/shared/store';
 import { bindMethods, isFunction } from '@vben-core/shared/utils';
 
 export class DrawerApi<TData = unknown> {
-  // 共享数据
+  // Shared data
   public sharedData: Record<'payload', TData | undefined> = {
     payload: undefined,
   };
@@ -81,12 +81,12 @@ export class DrawerApi<TData = unknown> {
   }
 
   /**
-   * 关闭抽屉
-   * @description 关闭抽屉时会调用 onBeforeClose 钩子函数，如果 onBeforeClose 返回 false，则不关闭弹窗
+   * Close drawer
+   * @description Calls onBeforeClose hook when closing drawer; if onBeforeClose returns false, closing is aborted
    */
   async close() {
-    // 通过 onBeforeClose 钩子函数来判断是否允许关闭弹窗
-    // 如果 onBeforeClose 返回 false，则不关闭弹窗
+    // Determine whether closing is permitted via onBeforeClose hook
+    // If onBeforeClose returns false, do not close popup
     const allowClose = (await this.api.onBeforeClose?.()) ?? true;
     if (allowClose) {
       this.store.setState((prev) => ({
@@ -102,16 +102,16 @@ export class DrawerApi<TData = unknown> {
   }
 
   /**
-   * 锁定抽屉状态（用于提交过程中的等待状态）
-   * @description 锁定状态将禁用默认的取消按钮，使用spinner覆盖抽屉内容，隐藏关闭按钮，阻止手动关闭弹窗，将默认的提交按钮标记为loading状态
-   * @param isLocked 是否锁定
+   * Lock drawer state (used for pending state during submission)
+   * @description Locked state disables default cancel button, overlays content with spinner, hides close button, prevents manual closing, and marks submit button as loading
+   * @param isLocked Whether locked
    */
   lock(isLocked: boolean = true) {
     return this.setState({ submitting: isLocked });
   }
 
   /**
-   * 取消操作
+   * Cancel operation
    */
   onCancel() {
     if (this.api.onCancel) {
@@ -122,7 +122,7 @@ export class DrawerApi<TData = unknown> {
   }
 
   /**
-   * 弹窗关闭动画播放完毕后的回调
+   * Callback when popup close animation completes
    */
   onClosed() {
     if (!this.state.isOpen) {
@@ -131,14 +131,14 @@ export class DrawerApi<TData = unknown> {
   }
 
   /**
-   * 确认操作
+   * Confirm operation
    */
   onConfirm() {
     this.api.onConfirm?.();
   }
 
   /**
-   * 弹窗打开动画播放完毕后的回调
+   * Callback when popup open animation completes
    */
   onOpened() {
     if (this.state.isOpen) {
@@ -169,8 +169,8 @@ export class DrawerApi<TData = unknown> {
   }
 
   /**
-   * 解除抽屉的锁定状态
-   * @description 解除由lock方法设置的锁定状态，是lock(false)的别名
+   * Unlock drawer state
+   * @description Unlocks the locked state set by lock method, alias for lock(false)
    */
   unlock() {
     return this.lock(false);

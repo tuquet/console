@@ -5,8 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { alert, clearAllAlerts, confirm } from '../index';
 
 vi.mock('@vben-core/composables', () => {
-  // Alert 组件内部使用函数调用 $t(key)，AlertBuilder 使用 $t.value(key)，
-  // 因此同时支持两种调用方式。
+  // Alert component internally uses function call $t(key), AlertBuilder uses $t.value(key),
+  // thus supporting both call styles.
   const $t = Object.assign((key: string) => key, {
     value: (key: string) => key,
   });
@@ -27,7 +27,7 @@ vi.mock('@vben-core/preferences', () => ({
 }));
 
 /**
- * 在当前 document 中查找文案匹配的按钮。
+ * Find button matching text in current document.
  */
 function findButtonByText(text: string) {
   return [...document.querySelectorAll('button')].find(
@@ -36,7 +36,7 @@ function findButtonByText(text: string) {
 }
 
 /**
- * 查找 AlertBuilder 挂载到 body 的容器元素（其内容包含指定文案）。
+ * Find container element mounted to body by AlertBuilder (content contains specified text).
  */
 function findAlertContainer(content: string) {
   return [...document.body.children].find((element) =>
@@ -70,7 +70,7 @@ describe('imperative alert builder (AlertBuilder)', () => {
     await expect(promise).resolves.toBeUndefined();
     await nextTick();
 
-    // 容器与按钮应从 DOM 中移除，页面恢复到调用前的状态。
+    // Container and buttons should be removed from DOM, page restored to state prior to call.
     expect(findButtonByText('Confirm')).toBeUndefined();
     expect(document.body.contains(container)).toBe(false);
   });
@@ -95,7 +95,7 @@ describe('imperative alert builder (AlertBuilder)', () => {
     await expect(promise).rejects.toThrow('dialog cancelled');
     await nextTick();
 
-    // 容器与按钮应从 DOM 中移除。
+    // Container and buttons should be removed from DOM.
     expect(findButtonByText('Cancel')).toBeUndefined();
     expect(document.body.contains(container)).toBe(false);
   });

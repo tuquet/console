@@ -11,7 +11,7 @@ let activeApp: App | undefined;
 const HOST_DEFAULT_MAX = 100;
 
 /**
- * 挂载受控 Progress，验证 reka-ui 原语暴露的 ARIA 订单与确定/不确定状态语义。
+ * Mount controlled Progress to verify ARIA order and determinate/indeterminate state semantics exposed by reka-ui primitive.
  */
 async function mountProgress(
   modelValue: null | number,
@@ -63,7 +63,7 @@ describe('vben progress', () => {
     expect(root.getAttribute('aria-valuemax')).toBe('50');
     expect(root.getAttribute('aria-valuenow')).toBe('30');
 
-    // 30 / 50 应按自定义 max 归一化为 60%，而不是 30%。
+    // 30 / 50 should normalize to 60% per custom max, rather than 30%.
     expect(indicator).toBeInstanceOf(HTMLElement);
     if (!(indicator instanceof HTMLElement)) return;
     expect(indicator.style.transform).toBe('translateX(-40%)');
@@ -79,7 +79,7 @@ describe('vben progress', () => {
     if (!(root instanceof HTMLElement)) return;
     expect(root.getAttribute('aria-valuemax')).toBe('100');
 
-    // 非有限 max 不得产生无穷 transform：30 / 100 → 30% 填充。
+    // Non-finite max must not produce infinite transform: 30 / 100 -> 30% fill.
     expect(indicator).toBeInstanceOf(HTMLElement);
     if (!(indicator instanceof HTMLElement)) return;
     expect(indicator.style.transform).toBe('translateX(-70%)');

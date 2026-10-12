@@ -89,7 +89,7 @@ const actionWrapperClass = computed(() => {
       cls.push('col-[-2/-1]');
       break;
     }
-    // 'inline' 不需要额外类名，保持默认
+    // 'inline' does not need extra class name, keep default
   }
 
   switch (actionPosition) {
@@ -102,7 +102,7 @@ const actionWrapperClass = computed(() => {
       break;
     }
     default: {
-      // case 'right': 默认右对齐
+      // case 'right': align right by default
       cls.push('justify-end');
       break;
     }

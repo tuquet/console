@@ -133,7 +133,7 @@ describe('form group schema', () => {
       children: [{ fieldName: 'label', label: 'Tag' }],
       fieldName: 'tags',
     });
-    // 原 schema 不应被修改
+    // Original schema should not be modified
     expect(schema[1]).not.toHaveProperty('children.1.label');
   });
 

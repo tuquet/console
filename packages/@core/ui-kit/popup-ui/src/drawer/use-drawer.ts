@@ -50,7 +50,7 @@ interface DrawerInjectData<TData> {
 const { globalEscapeShortcutKey } = usePreferences();
 
 /**
- * 默认配置
+ * Default configuration
  */
 const DEFAULT_DRAWER_PROPS: Partial<DrawerProps> = {};
 
@@ -64,11 +64,11 @@ export function useVbenDrawer<
 >(options: DrawerApiOptions<TConnectedComponent> = {}) {
   type TResolvedData = ResolvedDrawerData<TData, TConnectedComponent>;
 
-  // Drawer一般会抽离出来，所以如果有传入 connectedComponent，则表示为外部调用，与内部组件进行连接
-  // 外部的Drawer通过provide/inject传递api
+  // Drawer is generally decoupled; if connectedComponent is provided, it indicates external invocation connecting to internal component
+  // External Drawer passes api via provide/inject
 
   const defaultOptions = {
-    closeOnPressEscape: globalEscapeShortcutKey.value, // 全局Esc快捷键配置
+    closeOnPressEscape: globalEscapeShortcutKey.value, // Global Esc shortcut configuration
     ...options,
   };
   const { connectedComponent } = options;
@@ -201,7 +201,7 @@ async function checkProps<TData>(
 
   for (const attr of Object.keys(attrs)) {
     if (stateKeys.has(attr) && !['class'].includes(attr)) {
-      // connectedComponent存在时，不要传入Drawer的props，会造成复杂度提升，如果你需要修改Drawer的props，请使用 useVbenDrawer 或者api
+      // When connectedComponent exists, do not pass Drawer props to avoid complexity; use useVbenDrawer or api to modify Drawer props
       console.warn(
         `[Vben Drawer]: When 'connectedComponent' exists, do not set props or slots '${attr}', which will increase complexity. If you need to modify the props of Drawer, please use useVbenDrawer or api.`,
       );

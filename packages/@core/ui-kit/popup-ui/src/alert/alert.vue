@@ -50,10 +50,10 @@ function onAlertClosed() {
 }
 
 function onEscapeKeyDown(e: KeyboardEvent) {
-  // 先标记是按 Esc 触发的（用于后续 isConfirm 判断等）
+  // Mark triggered by Esc first (used for subsequent isConfirm checks etc.)
   isConfirm.value = false;
 
-  // 只有当组件参数和全局配置都为false时才阻止关闭，其任意一个为true都需要让esc生效
+  // Only prevent close when both component prop and global config are false; if either is true, esc takes effect
   if (!props.escapeKeyClose && !globalEscapeShortcutKey.value) {
     e.preventDefault();
   }
@@ -128,7 +128,7 @@ function handleCancel() {
 
 const loading = ref(false);
 async function handleOpenChange(val: boolean) {
-  await nextTick(); // 等待标记isConfirm状态
+  await nextTick(); // Wait for isConfirm state flag
   if (!val && props.beforeClose) {
     loading.value = true;
     try {

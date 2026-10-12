@@ -254,7 +254,7 @@ interface FormArraySchemaLike {
 }
 
 interface UpdatableFormSchemaLike extends FormArraySchemaLike {
-  /** 分组没有 fieldName，因此这里是可选的 */
+  /** Groups do not have fieldName, so this is optional */
   fieldName?: string;
   type?: string;
 }
@@ -272,7 +272,7 @@ export function isFormGroupSchema(schema: object) {
 }
 
 /**
- * 展开分组，得到表单中全部字段 schema
+ * Expand groups to get all field schemas in the form
  */
 export function getFormFieldSchemas<
   T extends BaseFormComponentType,
@@ -347,7 +347,7 @@ export function updateFormSchemaList<TSchema extends UpdatableFormSchemaLike>(
   updated: Partial<TSchema>[],
 ): TSchema[] {
   return currentSchema.map((schema) => {
-    // 分组本身不是字段，直接把更新下发给组内字段
+    // Group itself is not a field, dispatch updates directly to fields within group
     if (isFormGroupSchema(schema)) {
       return setSchemaChildren(
         schema,
@@ -388,7 +388,7 @@ export function updateFormSchemaList<TSchema extends UpdatableFormSchemaLike>(
 }
 
 /**
- * 按字段名移除 schema，分组内的字段一并处理，分组壳子保留
+ * Remove schema by field name, fields within group are processed together while preserving group shell
  */
 export function removeFormSchemaByFields<
   TSchema extends UpdatableFormSchemaLike,

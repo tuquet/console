@@ -107,7 +107,7 @@ const FieldComponent = computed(() => {
     ? componentMap.value[component]
     : component;
   if (!finalComponent) {
-    // 组件未注册
+    // Component not registered
     console.warn(`Component ${component} is not registered`);
   }
   return finalComponent ? markRaw(toRaw(finalComponent)) : finalComponent;
@@ -247,7 +247,7 @@ const computedProps = computed(() => {
   };
 });
 
-// 自定义帮助信息
+// Custom help message
 const computedHelp = computed(() => {
   const helpContent = dynamicHelpResolved.value ? dynamicHelp.value : help;
   if (!helpContent) {
@@ -273,7 +273,7 @@ const shouldDisabled = computed(() => {
   return Boolean(isDisabled.value || disabled || computedProps.value?.disabled);
 });
 
-// 插槽里的自定义组件既无 componentProps 绑定也无 modelValue 时，靠 useCustomFieldValue 回写值
+// When custom component in slot has neither componentProps binding nor modelValue, rely on useCustomFieldValue to write back value
 provideFormCustomField({
   customValue: shallowRef(),
   disabled: shouldDisabled,
@@ -310,11 +310,11 @@ const fieldProps = computed(() => {
   };
 });
 
-// 字段名与 <form> 固有属性冲突时（如 nodeName），不把 name 落到原生控件上：
-// <input name="nodeName"> 会劫持 form.nodeName 访问器，返回控件元素而非字符串，
-// 导致 popper/floating 计算（getNodeName → nodeName.toLowerCase()）崩溃（issue #8214）。
-// 判定：form 固有属性均不为 undefined（''、0、null、对象、函数），
-// 而 form 上不存在的命名属性访问返回 undefined——以此区分冲突与否。
+// When field name conflicts with inherent <form> property (e.g. nodeName), do not set name on native control:
+// <input name="nodeName"> hijacks form.nodeName accessor returning control element instead of string,
+// causing popper/floating calculation (getNodeName -> nodeName.toLowerCase()) to crash (issue #8214).
+// Check: form inherent properties are never undefined ('', 0, null, object, function),
+// while non-existent named properties on form return undefined -- used to detect conflicts.
 const fieldNameConflictCache = new Map<string, boolean>();
 function conflictsWithFormProperty(fieldName: string): boolean {
   let cached = fieldNameConflictCache.get(fieldName);
@@ -333,11 +333,11 @@ function conflictsWithFormProperty(fieldName: string): boolean {
   return cached;
 }
 
-// 组件定义内省：props（数组或对象）显式声明 name 时，binds.name 是组件的
-// 语义 prop 而非原生 fallthrough 属性，不参与原生剥离判定（coderabbit review
-// 边界修正）。入参必须传解析后的 FieldComponent：字符串组件名经 componentMap
-// 解析后再内省；未注册的字符串组件（解析结果为 undefined）按未声明处理，
-// 维持原生剥离的默认安全性。
+// Component definition introspection: when props (array or object) explicitly declares name, binds.name is component
+// semantic prop rather than native fallthrough attribute, and does not participate in native stripping (coderabbit review
+// boundary fix). Argument must pass resolved FieldComponent: string component name is resolved via componentMap
+// before introspection; unregistered string components (resolved as undefined) are treated as undeclared,
+// maintaining default safety of native attribute stripping.
 function declaresNameProp(comp: unknown): boolean {
   const compProps = (comp as undefined | { props?: undefined | unknown })
     ?.props;
@@ -384,7 +384,7 @@ function fieldBindEvent(
   const handler = componentField['onUpdate:modelValue'];
 
   let value = modelValue;
-  // antd design 的一些组件会传递一个 event 对象
+  // Some Ant Design components pass an event object
   if (modelValue && isObject(modelValue) && bindEventField) {
     value = isEventObjectLike(modelValue)
       ? modelValue?.target?.[bindEventField]
@@ -439,15 +439,15 @@ function createComponentProps(slotProps: RuntimeFieldSlotProps) {
     Reflect.deleteProperty(binds, 'onUpdate:modelValue');
   }
 
-  // 合并完成后统一剥离与 <form> 固有属性冲突的 name（含用户 binds 显式传入的值），
-  // 防止 <input name="nodeName"> 劫持 form.nodeName 访问器（issue #8214）；
-  // 不冲突的 name（无论生成还是绑定来源）原样保留。
-  // 边界：fieldBindEvent 产出过 name 键时，binds.name 是模型数据绑定
-  // （modelPropName / modelPropNameMap 显式解析为 'name'），承载的是表单数据
-  // 而非原生属性，即便其值与 <form> 固有属性同名也不得剥离。
-  // 边界：组件把 name 声明为语义 prop 时（含字符串组件名经 componentMap
-  // 解析出的组件），binds.name 是组件 prop 而非原生 fallthrough 属性，
-  // 同样不剥离；未注册的字符串组件按未声明处理。
+  // After merge, strip names conflicting with <form> inherent properties (including user binds explicit values),
+  // preventing <input name="nodeName"> from hijacking form.nodeName accessor (issue #8214);
+  // Non-conflicting names (whether generated or bound) are kept intact.
+  // Boundary: when fieldBindEvent produces name key, binds.name is model data binding
+  // (modelPropName / modelPropNameMap explicitly resolved to 'name'), carrying form data
+  // rather than native property, and must not be stripped even if value matches <form> inherent property name.
+  // Boundary: when component declares name as semantic prop (including components resolved from string names
+  // via componentMap), binds.name is component prop rather than native fallthrough attribute,
+  // and is likewise not stripped; unregistered string components are treated as undeclared.
   const nameIsModelBinding = Reflect.has(bindEvents, 'name');
   if (
     !nameIsModelBinding &&
@@ -476,7 +476,7 @@ function autofocus() {
   if (
     fieldComponentRef.value &&
     isFunction(fieldComponentRef.value.focus) &&
-    // 检查当前是否有元素被聚焦
+    // Check whether an element is currently focused
     document.activeElement !== fieldComponentRef.value
   ) {
     fieldComponentRef.value?.focus?.();

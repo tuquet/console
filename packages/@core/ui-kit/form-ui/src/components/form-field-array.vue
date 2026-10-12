@@ -20,40 +20,40 @@ defineOptions({ name: 'VbenFormFieldArray', inheritAttrs: false });
 
 const props = withDefaults(
   defineProps<{
-    /** 操作列表头文案 */
+    /** Action column header text */
     actionText?: string;
-    /** 「添加」按钮文案 */
+    /** "Add" button text */
     addButtonText?: string;
-    /** 子字段通用配置 */
+    /** Common configuration for sub-fields */
     commonConfig?: FormCommonConfig;
     /**
-     * 新增一行时生成的默认数据；缺省时按 schema 的 fieldName 生成空对象
+     * Default data generated when adding a row; defaults to empty object based on schema fieldNames
      */
     createRow?: () => Record<string, any>;
     disabled?: boolean;
-    /** 空数据文案 */
+    /** Empty data text */
     emptyText?: string;
-    /** 子字段全局通用配置 */
+    /** Global common configuration for sub-fields */
     globalCommonConfig?: FormCommonConfig;
-    /** 最多行数 */
+    /** Maximum row count */
     max?: number;
-    /** 最少行数 */
+    /** Minimum row count */
     min?: number;
-    /** 字段路径，由外层 FormField 通过 componentField 透传 */
+    /** Field path passed through from outer FormField via componentField */
     name?: string;
     /**
-     * 列定义，每一列就是一个子字段（复用 FormFieldSchema）
+     * Column definitions, each column is a sub-field (reuses FormFieldSchema)
      */
     schema?: FormFieldSchema[];
-    /** 是否显示序号列 */
+    /** Whether to show index column */
     showIndex?: boolean;
   }>(),
   {
-    actionText: '操作',
-    addButtonText: '添加一行',
+    actionText: 'Action',
+    addButtonText: 'Add Row',
     createRow: undefined,
     disabled: false,
-    emptyText: '暂无数据',
+    emptyText: 'No data',
     commonConfig: () => ({}),
     globalCommonConfig: () => ({}),
     max: Number.POSITIVE_INFINITY,

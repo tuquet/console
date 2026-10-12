@@ -10,9 +10,9 @@ import { cn } from '@vben-core/shared/utils';
 import { injectRenderFormProps } from './context';
 
 interface Props {
-  /** 分组内容区（字段栅格）的样式 */
+  /** Style for group content area (field grid) */
   contentClass?: string;
-  /** 表单折叠按钮收起时是否隐藏当前分组 */
+  /** Whether to hide current group when form collapse button is collapsed */
   hidden?: boolean;
   schema: FormGroupSchema;
 }
@@ -32,7 +32,7 @@ const shouldCollapsible = computed(() => {
   return props.schema.collapsible !== false;
 });
 
-// 组内任一字段校验失败时自动展开，避免错误提示被折叠区域遮住
+// Auto expand when any field in group fails validation, preventing error message from being hidden by collapsed area
 const hasInvalidField = computed(() => {
   const errors = formRenderProps.form?.errors ?? {};
   return props.schema.children.some(({ fieldName }) =>

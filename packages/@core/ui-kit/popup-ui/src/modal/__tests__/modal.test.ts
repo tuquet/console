@@ -137,7 +137,7 @@ describe('vben modal', () => {
     expect(marker).toBeInstanceOf(HTMLElement);
     if (!(marker instanceof HTMLElement)) return;
     expect(marker.textContent?.trim()).toBe('Custom');
-    // extra slot 应渲染在 fullscreen 按钮容器内，与全屏按钮同排
+    // extra slot should render inside fullscreen button container, aligned with fullscreen button
     const container = marker.closest('.absolute');
     expect(container).toBeInstanceOf(HTMLElement);
     expect(mainContent.contains(container)).toBe(true);

@@ -66,7 +66,7 @@ const expanded = ref<Array<number | string>>([]);
 
 const treeValue = ref();
 
-/** ID → 原始数据映射，O(1) 查找替代 O(n) find */
+/** ID -> raw data map, O(1) lookup replaces O(n) find */
 const valueMap = computed(() => {
   const map = new Map<number | string, Recordable<any>>();
   for (const item of flattenData.value) {
@@ -87,7 +87,7 @@ function updateTreeValue() {
     if (val.length === 0) {
       treeValue.value = [];
     } else {
-      // 单次遍历完成过滤 + 映射，避免重复 getItemByValue
+      // Single pass filtering + mapping, avoiding redundant getItemByValue
       const enabledItems: Recordable<any>[] = [];
       const enabledIds: (number | string)[] = [];
       for (const v of val) {
@@ -98,8 +98,8 @@ function updateTreeValue() {
         }
       }
 
-      // 半选节点不传给 Reka UI 内部选择：Reka UI 会把 model-value 中的节点当作已选中，
-      // 点击半选祖先时会被视为取消选择，误移除祖先及其所有后代。半选节点仅保留在 modelValue 返回值中。
+      // Indeterminate nodes are not passed to Reka UI internal selection: Reka UI treats model-value nodes as selected,
+      // causing clicks on indeterminate ancestors to be treated as uncheck, accidentally removing ancestor and descendants. Kept only in modelValue.
       if (props.includeIndeterminate && props.multiple) {
         const excludedKeys = computeIndeterminateKeysInSelection(enabledIds);
         treeValue.value = enabledItems.filter(
@@ -124,13 +124,13 @@ function updateTreeValue() {
   }
 }
 
-// 初始化：构建 flattenData 并同步 treeValue
+// Init: build flattenData and sync treeValue
 flattenData.value = flatten(props.treeData, props.childrenField);
 if (flattenData.value.length > 0) {
   updateTreeValue();
 }
 
-// 初始化：展开 — defaultExpandedLevel 优先，否则使用 defaultExpandedKeys
+// Init: expand - defaultExpandedLevel takes priority, otherwise use defaultExpandedKeys
 if (
   props.defaultExpandedLevel !== undefined &&
   props.defaultExpandedLevel > 0
@@ -140,7 +140,7 @@ if (
   expanded.value = props.defaultExpandedKeys ?? [];
 }
 
-// 仅监听 treeData 及相关字段变更，重建 flattenData
+// Watch only treeData and related field changes to rebuild flattenData
 let lastTreeData: any = JSON.stringify(props.treeData);
 watch(
   () => ({
@@ -154,7 +154,7 @@ watch(
       updateTreeValue();
     }
 
-    // 仅在 treeData 内容实质变化时才重新展开（避免过度展开）
+    // Re-expand only when treeData content substantially changes (avoid over-expansion)
     const currentTreeData = JSON.stringify(props.treeData);
     if (lastTreeData !== currentTreeData) {
       lastTreeData = currentTreeData;
@@ -169,8 +169,8 @@ watch(
   { deep: true },
 );
 
-// 仅监听 modelValue 变更，同步 treeValue（不重建 flattenData，避免响应式回环）
-// flush: 'sync' 确保赋值后立即同步，配合 checkAll/unCheckAll 移除手动 updateTreeValue 调用
+// Watch only modelValue changes to sync treeValue (without rebuilding flattenData to avoid reactive loops)
+// flush: 'sync' ensures immediate sync after assignment, removing manual updateTreeValue calls with checkAll/unCheckAll
 watch(
   () => modelValue.value,
   () => {
@@ -187,7 +187,7 @@ function updateModelValue(val: Arrayable<Recordable<any>>) {
     const selectedIds = filteredVal.map((v) => get(v, props.valueField));
     modelValue.value = mergeIndeterminate(selectedIds);
   } else {
-    // 单选模式下取消选择时 val 为 null/undefined，需要同步清空
+    // In single-select mode, val is null/undefined when unchecking, clear synchronously
     modelValue.value =
       val && !get(val, props.disabledField)
         ? get(val, props.valueField)
@@ -252,7 +252,7 @@ function isNodeDisabled(item: FlattenedItem<Recordable<any>>) {
   return props.disabled || get(item.value, props.disabledField);
 }
 
-// 计算全选/半选状态
+// Calculate checked/indeterminate state
 const selectAllStatus = computed<'indeterminate' | boolean>(() => {
   if (!props.multiple) return false;
   if (!modelValue.value || !Array.isArray(modelValue.value)) return false;
@@ -286,14 +286,14 @@ function onSelect(item: FlattenedItem<Recordable<any>>, isSelected: boolean) {
   }
 
   if (props.checkStrictly && props.multiple && props.autoCheckParent) {
-    // 获取当前节点在 flattenData 中的记录以读取 parents
+    // Get current node record in flattenData to read parents
     const flatItem = flattenData.value.find(
       (i) =>
         get(i.value, props.valueField) === get(item.value, props.valueField),
     );
 
     if (isSelected) {
-      // 选中时：将所有已启用的祖先追加到 modelValue（keepParentOnUncheck 不影响选中时的祖先追加）
+      // On check: append all enabled ancestors to modelValue (keepParentOnUncheck does not affect ancestor append on check)
       flatItem?.parents
         ?.filter((p) => {
           const parentItem = getItemByValue(p);
@@ -308,7 +308,7 @@ function onSelect(item: FlattenedItem<Recordable<any>>, isSelected: boolean) {
           }
         });
     } else if (!props.keepParentOnUncheck) {
-      // 取消选中时：移除不再有已选子节点的祖先；keepParentOnUncheck 为 true 时保留父节点选中状态
+      // On uncheck: remove ancestors with no selected children; retain parent check state when keepParentOnUncheck is true
       flatItem?.parents
         ?.filter((p) => {
           const parentItem = getItemByValue(p);
@@ -334,8 +334,8 @@ function onSelect(item: FlattenedItem<Recordable<any>>, isSelected: boolean) {
         });
     }
   }
-  // 确保 watcher 同步 treeValue：checkStrictly 模式需要新引用（祖先 push/pop 已原位修改数组），
-  // 或 includeIndeterminate 需合并半选节点时创建新引用
+  // Ensure watcher syncs treeValue: checkStrictly mode needs new reference (ancestor push/pop mutates array in place),
+  // or create new reference when includeIndeterminate needs to merge indeterminate nodes
   if (props.multiple && Array.isArray(modelValue.value)) {
     if (props.includeIndeterminate) {
       modelValue.value = mergeIndeterminate(
@@ -348,7 +348,7 @@ function onSelect(item: FlattenedItem<Recordable<any>>, isSelected: boolean) {
   emits('select', item);
 }
 
-/** 计算给定选中列表中，处于半选（indeterminate）状态的节点 key */
+/** Calculate node keys in indeterminate state for given checked list */
 function computeIndeterminateKeys(
   selectedIds: (number | string)[],
 ): (number | string)[] {
@@ -360,20 +360,20 @@ function computeIndeterminateKeys(
     return [];
 
   const selectedSet = new Set(selectedIds);
-  // 统计每个祖先节点下有多少个选中后代
+  // Count how many selected descendants each ancestor node has
   const ancestorCounts = new Map<number | string, number>();
 
   for (const node of flattenData.value) {
     const nodeId = get(node.value, props.valueField) as number | string;
     if (!selectedSet.has(nodeId)) continue;
 
-    // 为当前选中节点的所有祖先累加计数
+    // Accumulate count for all ancestors of currently selected node
     for (const parentId of node.parents) {
       ancestorCounts.set(parentId, (ancestorCounts.get(parentId) ?? 0) + 1);
     }
   }
 
-  // 过滤出自身未选中的祖先即为半选节点
+  // Filter ancestors that are not themselves selected as indeterminate nodes
   const result: (number | string)[] = [];
   for (const [nodeId] of ancestorCounts) {
     if (!selectedSet.has(nodeId)) {
@@ -385,9 +385,9 @@ function computeIndeterminateKeys(
 }
 
 /**
- * 计算选中列表中"半选祖先节点"的 key：节点自身已在选中列表，但后代仅部分被选中。
- * 与 computeIndeterminateKeys 不同，它基于后代选中数量统计，适用于 modelValue 已合并半选节点的场景，
- * 用于从传给 Reka UI 的内部选择中剔除半选节点，并用于补充复选框的半选状态展示。
+ * Calculate keys of "indeterminate ancestor nodes" in checked list: node itself is in checked list, but descendants are only partially checked.
+ * Unlike computeIndeterminateKeys, this is based on descendant counts, applicable when modelValue has merged indeterminate nodes,
+ * used to strip indeterminate nodes from Reka UI internal selection and supplement checkbox indeterminate display.
  */
 function computeIndeterminateKeysInSelection(
   selectedIds: (number | string)[],
@@ -429,7 +429,7 @@ function computeIndeterminateKeysInSelection(
   return result;
 }
 
-/** 半选节点 key 集合，用于 Reka UI 不计算半选状态的场景（如 checkStrictly）下补充复选框展示 */
+/** Indeterminate node key set, used to supplement checkbox display in scenarios where Reka UI does not compute indeterminate state (e.g. checkStrictly) */
 const indeterminateKeys = computed(() => {
   if (!props.multiple || !props.includeIndeterminate) {
     return new Set<number | string>();
@@ -440,7 +440,7 @@ const indeterminateKeys = computed(() => {
   return computeIndeterminateKeysInSelection(ids);
 });
 
-/** 根据 includeIndeterminate 配置，将半选节点合并到选中列表 */
+/** Merge indeterminate nodes into checked list according to includeIndeterminate config */
 function mergeIndeterminate(
   selectedIds: (number | string)[],
 ): (number | string)[] {
@@ -667,22 +667,22 @@ defineExpose({
   }
 }
 
-/* 1. 声明过渡效果 */
+/* 1. Declare transition effects */
 .fade-move,
 .fade-enter-active,
 .fade-leave-active {
   transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
 }
 
-/* 2. 声明进入和离开的状态 */
+/* 2. Declare enter and leave states */
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
   transform: scaleY(0.01) translate(30px, 0);
 }
 
-/* 3. 确保离开的项目被移除出了布局流
-      以便正确地计算移动时的动画效果。 */
+/* 3. Ensure leaving items are removed from layout flow
+      to correctly compute moving animations. */
 .fade-leave-active {
   position: absolute;
 }

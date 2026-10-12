@@ -27,9 +27,9 @@ export interface FormCodec<
   TFormValues extends FormValues = FormValues,
   TSubmitValues extends FormValues = TFormValues,
 > {
-  /** 将提交值转换为表单组件值。 */
+  /** Convert submit value to form component value. */
   decode: (values: Readonly<TSubmitValues>) => TFormValues;
-  /** 将表单组件值转换为提交值。 */
+  /** Convert form component value to submit value. */
   encode: (values: Readonly<TFormValues>) => TSubmitValues;
 }
 
@@ -78,11 +78,11 @@ export interface FormFieldOptions {
 export type FormValidationTrigger = 'blur' | 'change';
 
 export interface FormShape {
-  /** 默认值 */
+  /** Default value */
   default?: any;
-  /** 字段名 */
+  /** Field name */
   fieldName: string;
-  /** 是否必填 */
+  /** Whether required */
   required?: boolean;
   rules?: ZodType;
 }
@@ -270,8 +270,8 @@ export interface VbenFormFieldSlotProps<
 }
 
 /**
- * 表单值带索引签名时字段值解析不出具体类型（`unknown`），此处放宽成 `any`：
- * 否则 `v-bind="slotProps.componentProps"` 喂不进任何声明了具体 model 类型的组件。
+ * When form value has index signature, field value resolves to `unknown`; relax to `any` here:
+ * Otherwise `v-bind="slotProps.componentProps"` cannot be passed to components declaring concrete model types.
  */
 type LooseFieldValue<TValue> = unknown extends TValue ? any : TValue;
 
@@ -351,25 +351,25 @@ export type VbenFormComponent<
 };
 
 export interface FormSchemaContext<TValues extends FormValues = FormValues> {
-  /** 数组字段名，例如 contacts */
+  /** Array field name, e.g. contacts */
   arrayField?: string;
-  /** 当前真实字段名，例如 contacts[0].name */
+  /** Current real field name, e.g. contacts[0].name */
   fieldName?: string;
-  /** 原始 schema 字段名，例如 name */
+  /** Original schema field name, e.g. name */
   originalFieldName?: string;
-  /** 表单完整值 */
+  /** Complete form values */
   rootValues?: TValues;
-  /** 当前行数据 */
+  /** Current row data */
   row?: Record<string, any>;
-  /** 当前行索引 */
+  /** Current row index */
   rowIndex?: number;
-  /** 当前行路径，例如 contacts[0] */
+  /** Current row path, e.g. contacts[0] */
   rowPath?: string;
 }
 
 export type CustomRenderType = (() => Component | string) | string;
 
-// 动态渲染参数
+// Dynamic render parameters
 export type CustomParamsRenderType<TValues extends FormValues = FormValues> =
   | ((ctx: FormSchemaContext<TValues>) => Component | string)
   | string;
@@ -387,27 +387,27 @@ type FormItemDependenciesCondition<
 > = (
   value: Partial<TValues>,
   actions: FormActions<TValues>,
-  controller: ExtendedFormApi<TValues>, // 在 dependencies 里提供访问extendApi的能力
+  controller: ExtendedFormApi<TValues>, // Provide ability to access extendApi in dependencies
   ctx?: FormSchemaContext<TValues>,
 ) => TResult;
 
 type FormItemDependenciesConditionWithRules<TValues extends FormValues> = (
   value: Partial<TValues>,
   actions: FormActions<TValues>,
-  controller: ExtendedFormApi<TValues>, // 在 dependencies 里提供访问extendApi的能力
+  controller: ExtendedFormApi<TValues>, // Provide ability to access extendApi in dependencies
   ctx?: FormSchemaContext<TValues>,
 ) => FormSchemaRuleType | PromiseLike<FormSchemaRuleType>;
 
 type FormItemDependenciesConditionWithProps<TValues extends FormValues> = (
   value: Partial<TValues>,
   actions: FormActions<TValues>,
-  controller: ExtendedFormApi<TValues>, // 在 dependencies 里提供访问extendApi的能力
+  controller: ExtendedFormApi<TValues>, // Provide ability to access extendApi in dependencies
   ctx?: FormSchemaContext<TValues>,
 ) => MaybeComponentProps | PromiseLike<MaybeComponentProps>;
 
 interface FormItemDependenciesBase {
   /**
-   * 触发字段
+   * Trigger field
    */
   triggerFields: string[];
 }
@@ -436,43 +436,43 @@ export interface FormItemDependenciesLegacy<
   TValues extends FormValues = FormValues,
 > extends FormItemDependenciesBase {
   /**
-   * 组件参数
-   * @returns 组件参数
+   * Component props
+   * @returns Component props
    * @deprecated Use `dependencies.resolve` instead.
    */
   componentProps?: FormItemDependenciesConditionWithProps<TValues>;
   /**
-   * 是否禁用
-   * @returns 是否禁用
+   * Whether disabled
+   * @returns Whether disabled
    * @deprecated Use `dependencies.resolve` instead.
    */
   disabled?: boolean | FormItemDependenciesCondition<TValues>;
   /**
-   * 是否渲染（删除dom）
-   * @returns 是否渲染
+   * Whether to render (remove DOM)
+   * @returns Whether to render
    * @deprecated Use `dependencies.resolve` instead.
    */
   if?: boolean | FormItemDependenciesCondition<TValues>;
   /**
-   * 是否必填
-   * @returns 是否必填
+   * Whether required
+   * @returns Whether required
    * @deprecated Use `dependencies.resolve` instead.
    */
   required?: FormItemDependenciesCondition<TValues>;
   resolve?: never;
   /**
-   * 字段规则
+   * Field rules
    * @deprecated Use `dependencies.resolve` instead.
    */
   rules?: FormItemDependenciesConditionWithRules<TValues>;
   /**
-   * 是否隐藏(Css)
-   * @returns 是否隐藏
+   * Whether hidden (CSS)
+   * @returns Whether hidden
    * @deprecated Use `dependencies.resolve` instead.
    */
   show?: boolean | FormItemDependenciesCondition<TValues>;
   /**
-   * 任意触发都会执行
+   * Executed on any trigger
    * @deprecated Use `dependencies.resolve` instead.
    */
   trigger?: FormItemDependenciesCondition<TValues, void>;
@@ -506,79 +506,79 @@ type ComponentProps<TValues extends FormValues = FormValues> =
 
 export interface FormCommonConfig<TValues extends FormValues = FormValues> {
   /**
-   * 是否启用 change 事件兼容回退。
-   * 仅当组件不发送 update:*、只发送 change 时启用。
+   * Whether to enable change event fallback.
+   * Enabled only when component does not emit update:* and only emits change.
    * @default false
    */
   changeEventFallback?: boolean;
   /**
-   * 是否可折叠的
+   * Whether collapsible
    * @default false
    */
   collapsible?: boolean;
   /**
-   * 在Label后显示一个冒号
+   * Display a colon after Label
    */
   colon?: boolean;
   /**
-   * 所有表单项的props
+   * Props for all form items
    */
   componentProps?: ComponentProps<TValues>;
   /**
-   * 所有表单项的控件样式
+   * Control styles for all form items
    */
   controlClass?: string;
   /**
-   * 默认折叠
+   * Collapsed by default
    * @default false
    */
   defaultCollapsed?: boolean;
   /**
-   * 所有表单项的禁用状态
+   * Disabled state for all form items
    * @default false
    */
   disabled?: boolean;
   /**
-   * 所有表单项的空状态值,默认都是undefined，naive-ui的空状态值是null
+   * Empty state value for all form items, defaults to undefined; naive-ui empty value is null
    */
   emptyStateValue?: null | undefined;
   /**
-   * 所有表单项的控件样式
+   * Control styles for all form items
    * @default {}
    */
   formFieldProps?: FormFieldOptions;
   /**
-   * 所有表单项的栅格布局，支持函数形式
+   * Grid layout for all form items, supports function format
    * @default ""
    */
   formItemClass?: (() => string) | string;
   /**
-   * 隐藏所有表单项label
+   * Hide labels for all form items
    * @default false
    */
   hideLabel?: boolean;
   /**
-   * 是否隐藏必填标记
+   * Whether to hide required mark
    * @default false
    */
   hideRequiredMark?: boolean;
   /**
-   * 所有表单项的label样式
+   * Label styles for all form items
    * @default ""
    */
   labelClass?: string;
   /**
-   * 所有表单项的label宽度
-   * 设置为 `auto` 时，水平布局下会按当前表单可见 label 的最大宽度自动对齐
+   * Label width for all form items
+   * When set to `auto`, automatically aligns by max width of visible labels in horizontal layout
    */
   labelWidth?: number | string;
   /**
-   * 所有表单项的model属性名
+   * Model property name for all form items
    * @default "modelValue"
    */
   modelPropName?: string;
   /**
-   * 所有表单项的wrapper样式
+   * Wrapper styles for all form items
    */
   wrapperClass?: string;
 }
@@ -592,11 +592,11 @@ type MappedComponentProps<P, TValues extends FormValues = FormValues> =
   | (P & Record<string, any>);
 
 /**
- * 格式化 `getValues()` 输出中的当前字段值。
- * - 返回 `undefined`：保留当前字段已被移除的状态，通常配合 `setValue(key, nextValue)`
- *   把一个字段拆分写入到其他字段，例如 `startTime` / `endTime`
- * - 返回其他值：会将当前字段恢复/写回为该返回值
- * - `setValue` 回调签名为 `(key, nextValue) => void`
+ * Format current field value in `getValues()` output.
+ * - Returns `undefined`: retains field removed state, usually paired with `setValue(key, nextValue)`
+ *   to split a field into other fields, e.g. `startTime` / `endTime`
+ * - Returns other value: restores/writes back current field to that value
+ * - `setValue` callback signature is `(key, nextValue) => void`
  * @deprecated Use the form-level `codec` instead.
  */
 export type FormValueFormat<TValues extends FormValues = FormValues> = (
@@ -610,30 +610,30 @@ interface FormSchemaBody<TValues extends FormValues = FormValues> extends Omit<
   FormCommonConfig<TValues>,
   'componentProps'
 > {
-  /** 默认值 */
+  /** Default value */
   defaultValue?: any;
-  /** 依赖 */
+  /** Dependencies */
   dependencies?: FormItemDependencies<TValues>;
-  /** 描述 */
+  /** Description */
   description?: CustomRenderType;
-  /** 字段名 */
+  /** Field name */
   fieldName: string;
-  /** 帮助信息 */
+  /** Help message */
   help?: CustomParamsRenderType<TValues>;
-  /** 是否隐藏表单项 */
+  /** Whether to hide form item */
   hide?: boolean;
-  /** 表单项 */
+  /** Form item */
   label?: CustomRenderType;
-  // 自定义组件内部渲染
+  // Custom component internal rendering
   renderComponentContent?: RenderComponentContentType<TValues>;
-  /** 字段规则 */
+  /** Field rules */
   rules?: FormSchemaRuleType;
-  /** 后缀 */
+  /** Suffix */
   suffix?: CustomRenderType;
   /**
-   * 获取表单值时格式化当前字段。
-   * - 返回值不为 `undefined` 时，会回写到当前 fieldName
-   * - 返回值为 `undefined` 时，可通过 setValue 写入一个或多个目标字段
+   * Format current field when getting form values.
+   * - When return value is not `undefined`, writes back to current fieldName
+   * - When return value is `undefined`, one or more target fields can be written via setValue
    * @deprecated Use the form-level `codec` instead.
    */
   valueFormat?: FormValueFormat<TValues>;
@@ -645,9 +645,9 @@ type FormSchemaDiscriminated<
   TValues extends FormValues,
 > = {
   [K in Extract<keyof P, T>]: {
-    /** 组件 */
+    /** Component */
     component: K;
-    /** 组件参数 */
+    /** Component props */
     componentProps?: MappedComponentProps<P[K], TValues>;
   } & FormSchemaBody<TValues>;
 }[Extract<keyof P, T>];
@@ -656,9 +656,9 @@ type FormSchemaFallback<
   T extends BaseFormComponentType,
   TValues extends FormValues,
 > = {
-  /** 组件 */
+  /** Component */
   component: Component | T;
-  /** 组件参数 */
+  /** Component props */
   componentProps?: ComponentProps<TValues>;
 } & FormSchemaBody<TValues>;
 
@@ -667,64 +667,64 @@ type FormArraySchema<
   P extends Record<string, any>,
   TValues extends FormValues,
 > = {
-  /** 内置数组编辑器参数 */
+  /** Built-in array editor props */
   arrayProps?: Omit<
     VbenFormFieldArrayProps<T, P, TValues>,
     'disabled' | 'globalCommonConfig' | 'name' | 'schema'
   >;
-  /** 数组子字段定义 */
+  /** Array sub-field definitions */
   children: FormFieldSchema<T, P, TValues>[];
-  /** 兼容显式指定内置数组编辑器 */
+  /** Compatibility for explicitly specifying built-in array editor */
   component?: Component | T;
-  /** 兼容通过 componentProps 传递数组编辑器参数 */
+  /** Compatibility for passing array editor props via componentProps */
   componentProps?: ComponentProps<TValues>;
-  /** 数组字段标记 */
+  /** Array field marker */
   type: 'array';
 } & FormSchemaBody<TValues>;
 
 /**
- * 表单分组，用于把若干字段组织成一个可折叠的区块。
- * 分组本身不是字段，不参与取值与校验。
+ * Form group, used to organize fields into a collapsible section.
+ * Group itself is not a field and does not participate in value retrieval or validation.
  */
 export interface FormGroupSchema<
   T extends BaseFormComponentType = BaseFormComponentType,
   P extends Record<string, any> = Record<never, never>,
   TValues extends FormValues = FormValues,
 > {
-  /** 分组内的字段定义 */
+  /** Field definitions within group */
   children: FormFieldSchema<T, P, TValues>[];
   /**
-   * 是否允许折叠
+   * Whether to allow collapse
    * @default true
    */
   collapsible?: boolean;
-  /** 分组不是字段，禁止指定组件 */
+  /** Group is not a field; specifying component is forbidden */
   component?: never;
   /**
-   * 是否默认折叠
+   * Whether collapsed by default
    * @default false
    */
   defaultCollapsed?: boolean;
-  /** 标题右侧的附加内容 */
+  /** Additional content on right side of title */
   extra?: CustomRenderType;
-  /** 分组不是字段，禁止指定字段名 */
+  /** Group is not a field; specifying fieldName is forbidden */
   fieldName?: never;
-  /** 分组容器在表单栅格中的样式，默认占满一行 */
+  /** Group container style in form grid, defaults to full row */
   formItemClass?: FormItemClassType;
-  /** 是否隐藏分组 */
+  /** Whether to hide group */
   hide?: boolean;
-  /** 分组标识，用于渲染时的稳定 key，缺省按索引 */
+  /** Group identifier for stable rendering key, defaults to index */
   name?: string;
-  /** 分组标题 */
+  /** Group title */
   title?: CustomRenderType;
-  /** 分组标记 */
+  /** Group marker */
   type: 'group';
-  /** 分组内部的栅格布局，缺省继承表单的 wrapperClass */
+  /** Grid layout inside group, defaults to inheriting form wrapperClass */
   wrapperClass?: WrapperClassType;
 }
 
 /**
- * 单个表单字段的 schema（普通字段 / 数组字段）
+ * Schema for a single form field (regular field / array field)
  */
 export type FormFieldSchema<
   T extends BaseFormComponentType = BaseFormComponentType,
@@ -736,7 +736,7 @@ export type FormFieldSchema<
   | FormSchemaFallback<T, TValues>;
 
 /**
- * 表单 schema 项：字段或分组，以 `type` 区分
+ * Form schema item: field or group, distinguished by `type`
  */
 export type FormSchema<
   T extends BaseFormComponentType = BaseFormComponentType,
@@ -745,35 +745,35 @@ export type FormSchema<
 > = FormFieldSchema<T, P, TValues> | FormGroupSchema<T, P, TValues>;
 
 /**
- * 数组编辑器（VbenFormFieldArray）的组件参数
+ * Component props for array editor (VbenFormFieldArray)
  */
 export interface VbenFormFieldArrayProps<
   T extends BaseFormComponentType = BaseFormComponentType,
   P extends Record<string, any> = Record<never, never>,
   TValues extends FormValues = FormValues,
 > {
-  /** 操作列表头文案 */
+  /** Action column header text */
   actionText?: string;
-  /** 「添加」按钮文案 */
+  /** "Add" button text */
   addButtonText?: string;
-  /** 子字段通用配置 */
+  /** Common configuration for sub-fields */
   commonConfig?: FormCommonConfig<TValues>;
-  /** 新增一行时生成的默认数据；缺省时按列定义的 fieldName 生成空对象 */
+  /** Default data generated when adding a row; defaults to empty object based on column fieldName */
   createRow?: () => Record<string, any>;
   disabled?: boolean;
-  /** 空数据文案 */
+  /** Empty data text */
   emptyText?: string;
-  /** 子字段全局通用配置 */
+  /** Global common configuration for sub-fields */
   globalCommonConfig?: FormCommonConfig<TValues>;
-  /** 最多行数 */
+  /** Maximum row count */
   max?: number;
-  /** 最少行数 */
+  /** Minimum row count */
   min?: number;
-  /** 数组字段路径，由外层 FormField 透传 */
+  /** Array field path passed through from outer FormField */
   name?: string;
-  /** 列定义，每一列是一个子字段（复用 FormFieldSchema） */
+  /** Column definitions, each column is a sub-field (reuses FormFieldSchema) */
   schema?: FormFieldSchema<T, P, TValues>[];
-  /** 是否显示序号列 */
+  /** Whether to show index column */
   showIndex?: boolean;
 }
 
@@ -806,18 +806,18 @@ export type FieldMappingTime = FieldMappingTimeItem[];
 
 /** @deprecated Use the form-level `codec` instead. */
 export type ArrayToStringFields = Array<
-  | [string[], string?] // 嵌套数组格式，可选分隔符
-  | string // 单个字段，使用默认分隔符
-  | string[] // 简单数组格式，最后一个元素可以是分隔符
+  | [string[], string?] // Nested array format, optional separator
+  | string // Single field, uses default separator
+  | string[] // Simple array format, last element can be separator
 >;
 
 export interface FormFieldProps<
   T extends BaseFormComponentType = BaseFormComponentType,
   TValues extends FormValues = FormValues,
 > extends FormSchemaBody<TValues> {
-  /** 组件 */
+  /** Component */
   component: Component | T;
-  /** 组件参数 */
+  /** Component props */
   componentProps?: ComponentProps<TValues>;
 }
 
@@ -827,69 +827,69 @@ export interface FormRenderProps<
   TValues extends FormValues = FormValues,
 > {
   /**
-   * 表单字段数组映射字符串配置 默认使用","
+   * Form field array-to-string mapping configuration, defaults to ","
    * @deprecated Use the form-level `codec` instead.
    */
   arrayToStringFields?: ArrayToStringFields;
   /**
-   * 是否折叠，在showCollapseButton=true下生效
-   * true:折叠 false:展开
+   * Whether collapsed, effective when showCollapseButton=true
+   * true: collapsed, false: expanded
    */
   collapsed?: boolean;
   /**
-   * 折叠时保持行数
+   * Number of rows to keep when collapsed
    * @default 1
    */
   collapsedRows?: number;
   /**
-   * 是否触发resize事件
+   * Whether to trigger resize event
    * @default false
    */
   collapseTriggerResize?: boolean;
   /**
-   * 表单项通用后备配置，当子项目没配置时使用这里的配置，子项目配置优先级高于此配置
+   * Common fallback config for form items when child item is not configured; child item config takes precedence
    */
   commonConfig?: FormCommonConfig<TValues>;
   /**
-   * 紧凑模式（移除表单每一项底部为校验信息预留的空间）
+   * Compact mode (removes space reserved at bottom of each form item for validation messages)
    */
   compact?: boolean;
   /**
-   * 组件v-model事件绑定
+   * Component v-model event binding
    */
   componentBindEventMap?: Partial<Record<BaseFormComponentType, string>>;
   /**
-   * 组件集合
+   * Component collection
    */
   componentMap: Record<BaseFormComponentType, Component>;
   /**
-   * 表单字段映射到时间格式
+   * Form field mapped to date/time format
    * @deprecated Use the form-level `codec` instead.
    */
   fieldMappingTime?: FieldMappingTime;
   /**
-   * 表单实例
+   * Form instance
    */
   form?: FormActions<TValues>;
   /**
-   * 表单项布局
+   * Form item layout
    */
   layout?: FormLayout;
   /**
-   * 表单定义
+   * Form definition
    */
   schema?: FormSchema<T, P, TValues>[];
 
   /**
-   * 是否显示展开/折叠
+   * Whether to display expand/collapse
    */
   showCollapseButton?: boolean;
   /**
-   * 格式化日期
+   * Format date
    */
 
   /**
-   * 表单栅格布局
+   * Form grid layout
    * @default "grid-cols-1"
    */
   wrapperClass?: WrapperClassType;
@@ -911,53 +911,53 @@ export interface VbenFormProps<
   'componentBindEventMap' | 'componentMap' | 'form'
 > {
   /**
-   * 操作按钮是否反转（提交按钮前置）
+   * Whether to reverse action buttons (submit button placed first)
    */
   actionButtonsReverse?: boolean;
   /**
-   * 操作按钮组的样式
-   * newLine: 在新行显示。rowEnd: 在行内显示，靠右对齐（默认）。inline: 使用grid默认样式
+   * Style for action button group
+   * newLine: display on new line. rowEnd: display in row, right-aligned (default). inline: use grid default style
    */
   actionLayout?: 'inline' | 'newLine' | 'rowEnd';
   /**
-   * 操作按钮组显示位置，默认靠右显示
+   * Action button group display position, defaults to right-aligned
    */
   actionPosition?: 'center' | 'left' | 'right';
   /**
-   * 表单操作区域class
+   * Form action area class
    */
   actionWrapperClass?: ClassType;
   /**
-   * 表单字段数组映射字符串配置 默认使用","
+   * Form field array-to-string mapping configuration, defaults to ","
    * @deprecated Use the form-level `codec` instead.
    */
   arrayToStringFields?: ArrayToStringFields;
 
   /**
-   * submitOnChange改变时防抖时间 | 默认300ms
+   * Debounce time when submitOnChange triggers | default 300ms
    */
   changeDebouncedTime?: number;
-  /** 表单组件值与提交值之间的双向编解码器。 */
+  /** Bidirectional codec between form component value and submit value. */
   codec?: FormCodec<TValues, TSubmitValues>;
   /**
-   * 表单字段映射
+   * Form field mapping
    * @deprecated Use the form-level `codec` instead.
    */
   fieldMappingTime?: FieldMappingTime;
   /**
-   * 表单收起展开状态变化回调
+   * Callback when form collapse/expand state changes
    */
   handleCollapsedChange?: (collapsed: boolean) => void;
   /**
-   * 表单重置回调
+   * Form reset callback
    */
   handleReset?: HandleResetFn<NoInfer<TSubmitValues>>;
   /**
-   * 表单提交回调
+   * Form submit callback
    */
   handleSubmit?: HandleSubmitFn<TValues, TSubmitValues>;
   /**
-   * 表单值变化回调
+   * Form value change callback
    */
   handleValuesChange?: (
     values: Readonly<TValues>,
@@ -966,35 +966,35 @@ export interface VbenFormProps<
   ) => void;
 
   /**
-   * 重置按钮参数
+   * Reset button props
    */
   resetButtonOptions?: ActionButtonOptions;
 
   /**
-   * 验证失败时是否自动滚动到第一个错误字段
+   * Whether to automatically scroll to first error field upon validation failure
    * @default false
    */
   scrollToFirstError?: boolean;
 
   /**
-   * 是否显示默认操作按钮
+   * Whether to display default action buttons
    * @default true
    */
   showDefaultActions?: boolean;
 
   /**
-   * 提交按钮参数
+   * Submit button props
    */
   submitButtonOptions?: ActionButtonOptions;
 
   /**
-   * 是否在字段值改变时提交表单
+   * Whether to submit form when field value changes
    * @default false
    */
   submitOnChange?: boolean;
 
   /**
-   * 是否在回车时提交表单
+   * Whether to submit form on enter key
    * @default false
    */
   submitOnEnter?: boolean;
@@ -1019,8 +1019,8 @@ export interface VbenFormAdapterOptions<
   config?: {
     baseModelPropName?: string;
     /**
-     * 是否启用 change 事件兼容回退。
-     * 仅用于只发送 change 的兼容组件。
+     * Whether to enable change event fallback.
+     * Only for compatible components that only emit change.
      * @default false
      */
     changeEventFallback?: boolean;

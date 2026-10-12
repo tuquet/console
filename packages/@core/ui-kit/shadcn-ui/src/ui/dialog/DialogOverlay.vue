@@ -24,7 +24,7 @@ const dismissableModalId = inject('DISMISSABLE_MODAL_ID', undefined);
   <div
     :data-dismissable-modal="dismissableModalId"
     :style="{
-      ...(zIndex ? { zIndex } : {}),
+      ...(zIndex ? { zIndex } : { zIndex: 1040 }),
       position,
       backdropFilter:
         overlayBlur && overlayBlur > 0 ? `blur(${overlayBlur}px)` : 'none',

@@ -14,7 +14,7 @@ const props = withDefaults(
   },
 );
 
-// 通过 v-if 控制挂载/卸载，组件卸载时 useScrollLock 自动解锁滚动
+// Controlled via v-if; useScrollLock unlocks scroll automatically on unmount
 useScrollLock();
 </script>
 

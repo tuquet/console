@@ -23,11 +23,13 @@ import {
   AlertDialogTrigger,
   Badge,
   Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from '@tuquet/vue-ui';
+import {
+  Dialog,
+  DialogHeader,
+  DialogScrollContent as DialogContent,
+  DialogTitle,
+} from '@vben-core/shadcn-ui';
 
 import { useClipboard, useDateFormat } from '#/composables';
 
@@ -99,9 +101,9 @@ const { formatDate } = useDateFormat();
         <!-- Specs Grid -->
         <div class="grid grid-cols-2 gap-3 text-xs">
           <div class="rounded-lg border border-border/60 bg-card p-3 space-y-1">
-            <div class="text-muted-foreground flex items-center gap-1.5">
-              <Cpu class="size-3.5 text-muted-foreground" />
-              <span>Vi Xử Lý (CPU)</span>
+            <div class="text-muted-foreground inline-flex items-center gap-1.5">
+              <Cpu class="size-3.5 shrink-0 text-muted-foreground" />
+              <span class="leading-none">Vi Xử Lý (CPU)</span>
             </div>
             <div class="font-semibold text-foreground text-sm">
               {{ props.node.cpu_cores }} Cores
@@ -109,9 +111,9 @@ const { formatDate } = useDateFormat();
           </div>
 
           <div class="rounded-lg border border-border/60 bg-card p-3 space-y-1">
-            <div class="text-muted-foreground flex items-center gap-1.5">
-              <HardDrive class="size-3.5 text-muted-foreground" />
-              <span>Bộ Nhớ (RAM)</span>
+            <div class="text-muted-foreground inline-flex items-center gap-1.5">
+              <HardDrive class="size-3.5 shrink-0 text-muted-foreground" />
+              <span class="leading-none">Bộ Nhớ (RAM)</span>
             </div>
             <div class="font-semibold text-foreground text-sm">
               {{ props.node.ram_gb }} GB
@@ -119,9 +121,9 @@ const { formatDate } = useDateFormat();
           </div>
 
           <div class="rounded-lg border border-border/60 bg-card p-3 space-y-1">
-            <div class="text-muted-foreground flex items-center gap-1.5">
-              <Globe class="size-3.5 text-muted-foreground" />
-              <span>Hệ Điều Hành</span>
+            <div class="text-muted-foreground inline-flex items-center gap-1.5">
+              <Globe class="size-3.5 shrink-0 text-muted-foreground" />
+              <span class="leading-none">Hệ Điều Hành</span>
             </div>
             <div class="font-semibold text-foreground uppercase">
               {{ props.node.os_info }}
@@ -129,9 +131,9 @@ const { formatDate } = useDateFormat();
           </div>
 
           <div class="rounded-lg border border-border/60 bg-card p-3 space-y-1">
-            <div class="text-muted-foreground flex items-center gap-1.5">
-              <CheckCircle2 class="size-3.5 text-muted-foreground" />
-              <span>Driver Thực Thi</span>
+            <div class="text-muted-foreground inline-flex items-center gap-1.5">
+              <CheckCircle2 class="size-3.5 shrink-0 text-muted-foreground" />
+              <span class="leading-none">Driver Thực Thi</span>
             </div>
             <div class="font-semibold text-foreground uppercase">
               {{ props.node.driver_type }}
@@ -202,7 +204,7 @@ const { formatDate } = useDateFormat();
           <AlertDialog>
             <AlertDialogTrigger as-child>
               <Button variant="destructive" class="flex items-center gap-1.5">
-                <ShieldAlert class="size-4" />
+                <ShieldAlert class="size-4 shrink-0" />
                 <span>Thu Hồi Quyền</span>
               </Button>
             </AlertDialogTrigger>

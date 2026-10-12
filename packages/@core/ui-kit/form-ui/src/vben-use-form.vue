@@ -22,7 +22,7 @@ import {
   useFormInitial,
 } from './use-form-context';
 
-// 通过 extends 会导致热更新卡死，所以重复写了一遍
+// Using extends causes hot reload to freeze, so duplicated here
 interface Props extends VbenFormProps {
   formApi?: ExtendedFormApi<any, any, any, any>;
 }
@@ -54,7 +54,7 @@ formApi.mount(form, componentRefMap);
 
 function handleUpdateCollapsed(value: boolean) {
   props.formApi?.setState({ collapsed: value });
-  // 触发收起展开状态变化回调
+  // Trigger collapse/expand state change callback
   forward.value.handleCollapsedChange?.(value);
 }
 
@@ -62,8 +62,8 @@ function handleKeyDownEnter(event: KeyboardEvent) {
   if (!state?.value.submitOnEnter || !forward.value.formApi?.isMounted) {
     return;
   }
-  // 如果是 textarea 不阻止默认行为，否则会导致无法换行。
-  // 跳过 textarea 的回车提交处理
+  // If textarea, do not prevent default behavior to allow line breaks.
+  // Skip enter submit handling for textarea
   if (event.target instanceof HTMLTextAreaElement) {
     return;
   }
@@ -79,7 +79,7 @@ const handleValuesChangeDebounced = useDebounceFn(async () => {
 let valuesChangeReady = false;
 
 onMounted(async () => {
-  // 只在挂载后开始监听，form.values会有一个初始化的过程
+  // Only start listening after mount; form.values undergoes an initialization process
   await nextTick();
   valuesChangeReady = true;
 });

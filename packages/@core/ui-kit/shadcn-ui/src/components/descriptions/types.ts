@@ -1,6 +1,6 @@
 import type { Component, CSSProperties } from 'vue';
 
-/** 响应式断点，与 antdv-next 保持一致 */
+/** Responsive breakpoints, aligned with antdv-next */
 export type DescriptionsBreakpoint =
   | 'lg'
   | 'md'
@@ -10,63 +10,63 @@ export type DescriptionsBreakpoint =
   | 'xxl'
   | 'xxxl';
 
-/** 当前命中的断点集合 */
+/** Currently matched breakpoint set */
 export type ScreenMap = Partial<Record<DescriptionsBreakpoint, boolean>>;
 
 export type DescriptionsLayout = 'horizontal' | 'vertical';
 
 export type DescriptionsSize = 'large' | 'middle' | 'small';
 
-/** 列数，可为固定数字或按断点配置 */
+/** Column count, can be fixed number or configured by breakpoint */
 export type DescriptionsColumn =
   | number
   | Partial<Record<DescriptionsBreakpoint, number>>;
 
-/** 单项跨列，支持固定数字、'filled'（占满当前行剩余）或按断点配置 */
+/** Item span, supports fixed number, 'filled' (fills remainder of current row), or configured by breakpoint */
 export type DescriptionsItemSpan =
   | 'filled'
   | number
   | Partial<Record<DescriptionsBreakpoint, number>>;
 
-/** 可渲染内容：字符串/数字/渲染函数/组件 */
+/** Renderable content: string / number / render function / component */
 export type DescriptionsRenderNode = (() => any) | Component | number | string;
 
 export interface DescriptionsItemType {
-  /** 内容 */
+  /** Content */
   content?: DescriptionsRenderNode;
-  /** 内容样式 */
+  /** Content style */
   contentStyle?: CSSProperties;
-  /** 唯一 key */
+  /** Unique key */
   key?: number | string;
-  /** 标签 */
+  /** Label */
   label?: DescriptionsRenderNode;
-  /** 标签样式 */
+  /** Label style */
   labelStyle?: CSSProperties;
-  /** 跨列 */
+  /** Span */
   span?: DescriptionsItemSpan;
 }
 
 export interface DescriptionsProps {
-  /** 是否展示边框 */
+  /** Whether to show border */
   bordered?: boolean;
   class?: any;
-  /** 是否显示冒号（仅非 bordered 的水平布局生效） */
+  /** Whether to show colon (only effective in non-bordered horizontal layout) */
   colon?: boolean;
-  /** 一行的列数 */
+  /** Number of columns per row */
   column?: DescriptionsColumn;
-  /** 统一的内容样式 */
+  /** Unified content style */
   contentStyle?: CSSProperties;
-  /** 操作区域，位于标题右侧 */
+  /** Action area located on right side of title */
   extra?: string;
-  /** 数据驱动的列表项；不传则读取默认插槽中的 VbenDescriptionsItem */
+  /** Data-driven items; if omitted, reads VbenDescriptionsItem from default slot */
   items?: DescriptionsItemType[];
-  /** 统一的标签样式 */
+  /** Unified label style */
   labelStyle?: CSSProperties;
-  /** 布局方式 */
+  /** Layout mode */
   layout?: DescriptionsLayout;
-  /** 尺寸 */
+  /** Size */
   size?: DescriptionsSize;
-  /** 标题 */
+  /** Title */
   title?: string;
 }
 
@@ -78,7 +78,7 @@ export interface DescriptionsItemProps {
   span?: DescriptionsItemSpan;
 }
 
-/** 归一化后的内部项，span 已解析为数字 */
+/** Normalized internal item, span already resolved to number */
 export interface InternalDescriptionsItem {
   _index?: number;
   class?: string;

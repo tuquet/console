@@ -24,13 +24,13 @@ const ElTreeSelect = defineComponent({
 
 const wrappers: VueWrapper[] = [];
 
-// 探针：记录 ElTreeSelect 实际收到的 props/attrs 键
+// Probe: record props/attrs keys actually received by ElTreeSelect
 let capturedTreeSelectKeys: string[] = [];
 let capturedTreeSelectNodeName: unknown;
 let capturedTreeSelectNameValue: unknown;
 let capturedDeclaredName: unknown;
 
-// 声明 name 为语义 prop 的探针组件：验证 componentProps.name 不被剥离
+// Probe declaring name as semantic prop: verify componentProps.name is not stripped
 const DeclaredNameComponent = defineComponent({
   name: 'DeclaredNameComponent',
   props: {
@@ -109,27 +109,27 @@ describe('issue #8214: form field named nodeName crashes TreeSelect render', () 
     expect(renderError).toBeUndefined();
     expect(consoleError).not.toHaveBeenCalled();
 
-    // 打开 TreeSelect 弹层：issue #8214 的崩溃发生在弹层 floating 定位
-    // （getNodeName 读取被劫持的 form.nodeName）阶段，此处验证完整打开流程无错
+    // Open TreeSelect popup: issue #8214 crash happened during popup floating positioning
+    // (getNodeName reads hijacked form.nodeName), verify entire open flow succeeds here
     await wrapper.find('.el-select__wrapper').trigger('click');
     await flushPromises();
     await nextTick();
     expect(renderError).toBeUndefined();
     expect(consoleError).not.toHaveBeenCalled();
 
-    // 原生控件上不应存在 name="nodeName"：<input name="nodeName"> 会劫持
-    // form.nodeName 访问器（issue #8214 的根因）
+    // Native control should not have name="nodeName": <input name="nodeName"> hijacks
+    // form.nodeName accessor (root cause of issue #8214)
     expect(wrapper.find('input[name="nodeName"]').exists()).toBe(false);
 
-    // 探针结果：ElTreeSelect 收到的键里不应有值为对象的 nodeName 键
+    // Probe result: ElTreeSelect received keys must not include nodeName key with object value
     expect(capturedTreeSelectKeys).toContain('name');
     expect(capturedTreeSelectNodeName).toBeUndefined();
   });
 
   it('does not leak a nodeName keyed object into TreeSelect props when field is named nodeName', async () => {
-    // 反向场景：TreeSelect 字段本身就是 nodeName（最严格情形）
-    // 环境前提：happy-dom 的 <form> 必须支持 nodeName 固有属性，
-    // 否则 conflictsWithFormProperty 检测会误判（返回 undefined → 不剥离 name）
+    // Inverse scenario: TreeSelect field itself is nodeName (strictest case)
+    // Environment prerequisite: happy-dom <form> must support inherent nodeName property,
+    // otherwise conflictsWithFormProperty check misjudges (returns undefined -> name not stripped)
     expect(Reflect.get(document.createElement('form'), 'nodeName')).toBe(
       'FORM',
     );
@@ -158,16 +158,16 @@ describe('issue #8214: form field named nodeName crashes TreeSelect render', () 
     await nextTick();
 
     expect(renderError).toBeUndefined();
-    // 冲突字段（nodeName）的控件不应收到 name，否则 <input name="nodeName">
-    // 会劫持 form.nodeName 访问器（issue #8214）
+    // Conflicting field (nodeName) control must not receive name, otherwise <input name="nodeName">
+    // hijacks form.nodeName accessor (issue #8214)
     expect(capturedTreeSelectKeys).not.toContain('name');
     expect(capturedTreeSelectNodeName).toBeUndefined();
   });
 
   it('keeps model binding when modelPropName resolves to name and its value collides', async () => {
-    // coderabbit review 边界：modelPropName: 'name' 时 binds.name 承载模型数据
-    // （v-model 语义），即便其值与 <form> 固有属性同名也不得剥离；
-    // 原生属性路径仍由 conflictsWithFormProperty 阻断。
+    // coderabbit review boundary: when modelPropName is 'name', binds.name carries model data
+    // (v-model semantics), and must not be stripped even if value matches <form> inherent property;
+    // native attribute path is still blocked by conflictsWithFormProperty.
     const [Form] = useVbenForm({
       schema: [
         {
@@ -185,14 +185,14 @@ describe('issue #8214: form field named nodeName crashes TreeSelect render', () 
     await flushPromises();
     await nextTick();
 
-    // 模型绑定存活：name 键存在且承载表单数据（未被子组件 attr 路径劫持）
+    // Model binding survives: name key exists and carries form data (not hijacked by child attr path)
     expect(capturedTreeSelectKeys).toContain('name');
     expect(capturedTreeSelectNameValue).toBe('nodeName');
   });
 
   it('preserves componentProps.name when the component declares name as a semantic prop', async () => {
-    // coderabbit review 边界：声明了 name 语义 prop 的组件，componentProps.name
-    // 是组件 prop 而非原生 fallthrough 属性，值冲突也不得剥离
+    // coderabbit review boundary: for component declaring name semantic prop, componentProps.name
+    // is component prop rather than native fallthrough attribute, must not be stripped on conflict
     const [Form] = useVbenForm({
       schema: [
         {
@@ -208,13 +208,13 @@ describe('issue #8214: form field named nodeName crashes TreeSelect render', () 
     await flushPromises();
     await nextTick();
 
-    // 语义 prop 存活：组件收到的 name 就是用户显式配置的值
+    // Semantic prop survives: component receives name explicitly configured by user
     expect(capturedDeclaredName).toBe('nodeName');
   });
 
   it('resolves string components through componentMap before the declared-prop check', async () => {
-    // coderabbit review 边界：字符串组件名经 componentMap 解析出的组件若声明了
-    // name 语义 prop，同样不得剥离（守卫须内省解析后的 FieldComponent）
+    // coderabbit review boundary: if component resolved from string name via componentMap declares
+    // name semantic prop, it must likewise not be stripped (guard must inspect resolved FieldComponent)
     COMPONENT_MAP.NameDeclared = DeclaredNameComponent;
     const [Form] = useVbenForm({
       schema: [

@@ -6,26 +6,26 @@ import type { ModalApi } from './modal-api';
 
 export interface ModalProps {
   /**
-   * 动画类型
+   * Animation type
    * @default 'slide'
    */
   animationType?: 'scale' | 'slide';
   /**
-   * 是否要挂载到内容区域
+   * Whether to append to main content area
    * @default false
    */
   appendToMain?: boolean;
   /**
-   * 是否显示边框
+   * Whether to show border
    * @default false
    */
   bordered?: boolean;
   /**
-   * 取消按钮文字
+   * Cancel button text
    */
   cancelText?: string;
   /**
-   * 是否居中
+   * Whether centered
    * @default false
    */
   centered?: boolean;
@@ -33,122 +33,122 @@ export interface ModalProps {
   class?: ClassType;
 
   /**
-   * 是否显示右上角的关闭按钮
+   * Whether to show close button in top right
    * @default true
    */
   closable?: boolean;
   /**
-   * 点击弹窗遮罩是否关闭弹窗
+   * Whether clicking overlay closes modal
    * @default true
    */
   closeOnClickModal?: boolean;
   /**
-   * 按下 ESC 键是否关闭弹窗
+   * Whether pressing ESC key closes modal
    * @default true
    */
   closeOnPressEscape?: boolean;
   /**
-   * 禁用确认按钮
+   * Disable confirm button
    */
   confirmDisabled?: boolean;
   /**
-   * 确定按钮 loading
+   * Confirm button loading state
    * @default false
    */
   confirmLoading?: boolean;
   /**
-   * 确定按钮文字
+   * Confirm button text
    */
   confirmText?: string;
   contentClass?: ClassType;
   /**
-   * 弹窗描述
+   * Modal description
    */
   description?: string;
   /**
-   * 在关闭时销毁弹窗
+   * Destroy modal on close
    */
   destroyOnClose?: boolean;
   /**
-   * 是否可拖拽
+   * Whether draggable
    * @default false
    */
   draggable?: boolean;
   /**
-   * 是否显示底部
+   * Whether to show footer
    * @default true
    */
   footer?: boolean;
   footerClass?: ClassType;
   /**
-   * 是否全屏
+   * Whether fullscreen
    * @default false
    */
   fullscreen?: boolean;
   /**
-   * 是否显示全屏按钮
+   * Whether to show fullscreen button
    * @default true
    */
   fullscreenButton?: boolean;
   /**
-   * 是否显示顶栏
+   * Whether to show header
    * @default true
    */
   header?: boolean;
   headerClass?: ClassType;
   /**
-   * 弹窗加载状态
+   * Modal loading state
    * @default false
    */
   loading?: boolean;
   /**
-   * 是否显示遮罩
+   * Whether to show overlay
    * @default true
    */
   modal?: boolean;
   /**
-   * 是否自动聚焦
+   * Whether to auto focus
    */
   openAutoFocus?: boolean;
   /**
-   * 拖动范围是否可以超出可视区
+   * Whether drag area can exceed viewport
    * @default false
    */
   overflow?: boolean;
   /**
-   * 弹窗遮罩模糊效果
+   * Modal overlay blur effect
    */
   overlayBlur?: number;
   /**
-   * 是否显示取消按钮
+   * Whether to show cancel button
    * @default true
    */
   showCancelButton?: boolean;
   /**
-   * 是否显示确认按钮
+   * Whether to show confirm button
    * @default true
    */
   showConfirmButton?: boolean;
   /**
-   * 提交中（锁定弹窗状态）
+   * Submitting (lock modal state)
    */
   submitting?: boolean;
   /**
-   * 弹窗标题
+   * Modal title
    */
   title?: string;
   /**
-   * 弹窗标题提示
+   * Modal title tooltip
    */
   titleTooltip?: string;
   /**
-   * 弹窗层级
+   * Modal z-index
    */
   zIndex?: number;
 }
 
 export interface ModalState extends ModalProps {
-  /** 弹窗打开状态 */
+  /** Modal open state */
   isOpen?: boolean;
 }
 
@@ -177,35 +177,35 @@ export interface ModalApiOptions<
   TConnectedComponent extends Component = Component,
 > extends ModalState {
   /**
-   * 独立的弹窗组件
+   * Standalone modal component
    */
   connectedComponent?: TConnectedComponent;
   /**
-   * 关闭前的回调，返回 false 可以阻止关闭
+   * Callback before closing; returning false prevents closing
    * @returns
    */
   onBeforeClose?: () => MaybePromise<boolean | undefined>;
   /**
-   * 点击取消按钮的回调
+   * Callback when cancel button is clicked
    */
   onCancel?: () => void;
   /**
-   * 弹窗关闭动画结束的回调
+   * Callback when modal close animation ends
    * @returns
    */
   onClosed?: () => void;
   /**
-   * 点击确定按钮的回调
+   * Callback when confirm button is clicked
    */
   onConfirm?: () => void;
   /**
-   * 弹窗状态变化回调
+   * Callback when modal state changes
    * @param isOpen
    * @returns
    */
   onOpenChange?: (isOpen: boolean) => void;
   /**
-   * 弹窗打开动画结束的回调
+   * Callback when modal open animation ends
    * @returns
    */
   onOpened?: () => void;

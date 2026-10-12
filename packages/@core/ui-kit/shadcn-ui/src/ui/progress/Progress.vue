@@ -16,7 +16,7 @@ const props = defineProps<
 
 const emits = defineEmits<ProgressRootEmits>();
 
-/** ProgressRoot 对非法 max 的回退值（max 必须为正数）。 */
+/** ProgressRoot fallback for invalid max (max must be positive). */
 const DEFAULT_MAX = 100;
 
 const delegatedProps = reactiveOmit(props, 'class');
@@ -24,9 +24,9 @@ const delegatedProps = reactiveOmit(props, 'class');
 const forwarded = useForwardPropsEmits(delegatedProps, emits);
 
 /**
- * ProgressRoot 会把非法 max（0、负数、NaN、Infinity）回退为 100；这里用
- * 同一规则归一化后同时用于 root 与指示条 transform，避免 max=0 产生无穷
- * 百分比，也避免 max=Infinity 让指示条除以无穷而退化为空填充。
+ * ProgressRoot falls back invalid max (0, negative, NaN, Infinity) to 100; normalized here
+ * using the same rule for both root and indicator transform to avoid infinite percentage on max=0
+ * and avoid empty fill from division by infinity on max=Infinity.
  */
 const normalizedMax = computed(() => {
   const { max } = props;

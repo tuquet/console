@@ -123,7 +123,7 @@ const computedSchema = computed(
 
     (props.schema ?? []).forEach((schema, index) => {
       const hidden =
-        // 折叠状态 & 显示折叠按钮 & 当前索引大于保留索引（分组按一个顶层项计算）
+        // Collapsed state & show collapse button & current index > keep index (group counts as one top-level item)
         props.showCollapseButton && !!formCollapsed.value && keepIndex
           ? keepIndex <= index
           : false;

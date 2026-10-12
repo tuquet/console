@@ -52,15 +52,15 @@ const legacyDependencyKeys = [
 const mixedDependenciesWarnings = new WeakSet<object>();
 
 /**
- * 解析Nested Objects对应的字段值
- * @param values 表单值
- * @param fieldName 字段名
+ * Parse field values corresponding to Nested Objects
+ * @param values Form values
+ * @param fieldName Field name
  */
 function resolveValueByFieldName(
   values: Record<string, any>,
   fieldName: string,
 ) {
-  // [] 表示禁用嵌套
+  // [] indicates disabling nesting
   const { rawKey } = resolveFieldNamePath(fieldName);
   if (rawKey) {
     return values[rawKey];
@@ -181,7 +181,7 @@ export default function useDependencies(
   const initialTriggerFields = getDependencies()?.triggerFields ?? [];
   const initialTriggerValues = formApi.useFieldValues(initialTriggerFields);
 
-  // 在 dependencies 里提供访问extendApi的能力
+  // Provide ability to access extendApi in dependencies
   function getController(): ExtendedFormApi {
     const controller = isRef(extendApi)
       ? extendApi.value.formApi
@@ -200,7 +200,7 @@ export default function useDependencies(
   let dependencyEvaluationId = 0;
 
   const triggerFieldValues = computed(() => {
-    // 该字段可能会被多个字段触发
+    // This field may be triggered by multiple fields
     const triggerFields = getDependencies()?.triggerFields ?? [];
     const usesInitialTriggerFields =
       triggerFields.length === initialTriggerFields.length &&

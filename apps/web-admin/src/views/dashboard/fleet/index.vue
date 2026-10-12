@@ -150,8 +150,8 @@ onMounted(() => {
           class="inline-flex items-center justify-center w-full sm:w-auto font-medium"
           @click="isConnectModalVisible = true"
         >
-          <Plus class="size-3.5 mr-1" />
-          Ghép Nối Máy Trạm
+          <Plus class="size-3.5 mr-1 shrink-0" />
+          <span>Ghép Nối Máy Trạm</span>
         </Button>
         <Button
           variant="outline"
@@ -160,10 +160,10 @@ onMounted(() => {
           @click="loadFleetData"
         >
           <RefreshCw
-            class="size-3.5 mr-1"
+            class="size-3.5 mr-1 shrink-0"
             :class="{ 'animate-spin': loading }"
           />
-          Làm Mới
+          <span>Làm Mới</span>
         </Button>
       </div>
     </div>
@@ -180,7 +180,7 @@ onMounted(() => {
         class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/40 pb-4"
       >
         <div class="flex items-center gap-2">
-          <Terminal class="size-4 text-muted-foreground" />
+          <Terminal class="size-4 shrink-0 text-muted-foreground" />
           <span class="text-sm font-semibold text-foreground">
             Danh Sách Thiết Bị
           </span>
@@ -297,12 +297,12 @@ onMounted(() => {
               <TableCell>
                 <div class="flex items-center gap-3 text-xs text-foreground">
                   <span class="inline-flex items-center gap-1 font-mono">
-                    <Cpu class="size-3.5 text-muted-foreground" />
-                    {{ record.cpu_cores }} Cores
+                    <Cpu class="size-3.5 shrink-0 text-muted-foreground" />
+                    <span class="leading-none">{{ record.cpu_cores }} Cores</span>
                   </span>
                   <span class="inline-flex items-center gap-1 font-mono">
-                    <HardDrive class="size-3.5 text-muted-foreground" />
-                    {{ record.ram_gb }} GB
+                    <HardDrive class="size-3.5 shrink-0 text-muted-foreground" />
+                    <span class="leading-none">{{ record.ram_gb }} GB</span>
                   </span>
                 </div>
               </TableCell>
@@ -367,7 +367,7 @@ onMounted(() => {
                     class="h-7 text-xs flex items-center gap-1"
                     @click="handleOpenDetail(record)"
                   >
-                    <Eye class="size-3" />
+                    <Eye class="size-3 shrink-0" />
                     <span>Chi Tiết</span>
                   </Button>
                   <AlertDialog>

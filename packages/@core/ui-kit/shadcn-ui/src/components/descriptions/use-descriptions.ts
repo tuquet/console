@@ -12,7 +12,7 @@ import { Comment, computed, Fragment } from 'vue';
 
 import { useBreakpoints } from '@vueuse/core';
 
-/** 默认列数映射 */
+/** Default column count mapping */
 export const DEFAULT_COLUMN_MAP: Record<DescriptionsBreakpoint, number> = {
   lg: 3,
   md: 3,
@@ -23,7 +23,7 @@ export const DEFAULT_COLUMN_MAP: Record<DescriptionsBreakpoint, number> = {
   xxxl: 4,
 };
 
-/** 由大到小的断点顺序，matchScreen 按此顺序取第一个命中的值 */
+/** Breakpoint order from largest to smallest; matchScreen takes first matching value in this order */
 const RESPONSIVE_ARRAY: DescriptionsBreakpoint[] = [
   'xxxl',
   'xxl',
@@ -34,7 +34,7 @@ const RESPONSIVE_ARRAY: DescriptionsBreakpoint[] = [
   'xs',
 ];
 
-/** 断点像素值 */
+/** Breakpoint pixel values */
 const BREAKPOINT_PX = {
   sm: 576,
   md: 768,
@@ -45,7 +45,7 @@ const BREAKPOINT_PX = {
 };
 
 /**
- * 在给定的断点配置中，按由大到小的顺序取第一个命中的值
+ * Take the first matching value in order from largest to smallest in given breakpoint config
  */
 export function matchScreen(
   screens: ScreenMap,
@@ -61,7 +61,7 @@ export function matchScreen(
 }
 
 /**
- * 监听视口宽度，返回当前命中的断点集合
+ * Observe viewport width, returns currently matched breakpoint set
  */
 export function useScreens() {
   const breakpoints = useBreakpoints(BREAKPOINT_PX);
@@ -77,7 +77,7 @@ export function useScreens() {
 }
 
 /**
- * 计算最终列数：固定数字直接返回，否则按断点解析
+ * Calculate final column count: returns fixed number directly, otherwise resolves by breakpoint
  */
 export function resolveColumn(
   column: DescriptionsColumn | undefined,
@@ -88,7 +88,7 @@ export function resolveColumn(
 }
 
 /**
- * 归一化列表项：将 span 解析为数字，'filled' 标记为 filled
+ * Normalize items: resolves span to number, marks 'filled' as filled
  */
 export function normalizeItems(
   items: DescriptionsItemType[],
@@ -108,8 +108,8 @@ export function normalizeItems(
 }
 
 /**
- * 行装箱算法：根据列数与各项 span 将列表项拆分为多行，
- * 并补齐每行最后一项以占满列数。移植自 antdv-next useRow。
+ * Row bin-packing algorithm: splits items into multiple rows according to column count and item spans,
+ * and pads the last item of each row to fill all columns. Ported from antdv-next useRow.
  */
 export function calcRows(
   items: InternalDescriptionsItem[],
@@ -121,7 +121,7 @@ export function calcRows(
 
   items.filter(Boolean).forEach((item) => {
     const { filled, ...rest } = item;
-    // filled：占满当前行剩余，并立即换行
+    // filled: fill remaining columns of current row, and wrap immediately
     if (filled) {
       tmpRow.push(rest);
       rows.push(tmpRow);
@@ -134,7 +134,7 @@ export function calcRows(
     count += item.span || 1;
 
     if (count >= column) {
-      // 超出列数时，将当前项 span 收敛为剩余列数，避免溢出
+      // When exceeding column count, clamp item span to remaining columns to avoid overflow
       tmpRow.push(count > column ? { ...rest, span: restSpan } : rest);
       rows.push(tmpRow);
       tmpRow = [];
@@ -146,7 +146,7 @@ export function calcRows(
 
   if (tmpRow.length > 0) rows.push(tmpRow);
 
-  // 补齐：若一行总 span 不足列数，扩展最后一项
+  // Pad: if total span of row is less than column count, extend the last item
   rows = rows.map((row) => {
     const total = row.reduce((acc, item) => acc + (item.span || 1), 0);
     if (total < column) {
@@ -161,7 +161,7 @@ export function calcRows(
   return rows;
 }
 
-/** 标记组件类型为 DescriptionsItem，便于从插槽 vnode 中识别 */
+/** Mark component type as DescriptionsItem to facilitate identification from slot vnodes */
 export const DESCRIPTIONS_ITEM_NAME = 'VbenDescriptionsItem';
 
 function isItemVNode(node: VNode): boolean {
@@ -185,8 +185,8 @@ function flattenVNodes(nodes: VNode[]): VNode[] {
 }
 
 /**
- * 从默认插槽的 vnode 中解析出列表项，支持
- * <VbenDescriptionsItem label="..." :span="2">content</VbenDescriptionsItem> 写法
+ * Parse items from default slot vnodes, supporting
+ * <VbenDescriptionsItem label="..." :span="2">content</VbenDescriptionsItem> syntax
  */
 export function parseItemsFromSlot(nodes: VNode[]): DescriptionsItemType[] {
   return flattenVNodes(nodes)

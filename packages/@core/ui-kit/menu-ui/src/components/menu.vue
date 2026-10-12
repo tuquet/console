@@ -425,11 +425,14 @@ $namespace: vben;
   }
 
   * {
-    vertical-align: bottom;
+    vertical-align: middle;
   }
 }
 
 @mixin menu-title {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
   max-width: var(--menu-title-width);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -721,12 +724,22 @@ $namespace: vben;
   }
 
   &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
     width: var(--menu-item-icon-size);
     height: var(--menu-item-icon-size);
     margin-right: 8px;
-    vertical-align: middle;
+    line-height: 1;
     text-align: center;
+    vertical-align: middle;
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
   }
 }
 

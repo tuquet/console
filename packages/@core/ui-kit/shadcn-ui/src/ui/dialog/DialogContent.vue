@@ -75,9 +75,9 @@ const position = computed(() => {
   return isAppendToBody() ? 'fixed' : 'absolute';
 });
 
-// reka-ui 的 Dialog 在 modal=false 时不会渲染遮罩，这里通过 DialogOverlay 组件自行渲染遮罩层并锁定滚动。
-// DialogOverlay 组件通过 v-if 控制挂载/卸载，其内部的 useScrollLock 会在组件卸载时自动解锁滚动，
-// 避免 modal=true 时 body 被设置 pointer-events:none 导致弹出层（如 Select 下拉框）无法点击的问题。
+// reka-ui Dialog does not render overlay when modal=false; DialogOverlay renders overlay and locks scroll.
+// DialogOverlay controls mounting via v-if; internal useScrollLock unlocks scroll on unmount,
+// avoiding issues where body pointer-events:none in modal=true prevents popups (e.g. Select dropdowns) from being clicked.
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits);
 
@@ -108,14 +108,14 @@ defineExpose({
     </Transition>
     <DialogContent
       ref="contentRef"
-      :style="{ ...(zIndex ? { zIndex } : {}), position }"
+      :style="{ ...(zIndex ? { zIndex } : { zIndex: 1050 }), position: 'fixed' }"
       data-slot="dialog-content"
       @animationend="handleAnimationEvent"
       @animationcancel="handleAnimationEvent"
       v-bind="forwarded"
       :class="
         cn(
-          'z-popup bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 w-full p-6 shadow-lg outline-hidden sm:rounded-xl',
+          'z-popup bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-h-[90vh] overflow-y-auto w-full max-w-[calc(100%-2rem)] sm:max-w-lg border border-border p-6 shadow-xl outline-hidden sm:rounded-xl',
           {
             'data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]':
               animationType === 'slide',

@@ -38,11 +38,11 @@ const emits = defineEmits<
   AlertDialogContentEmits & { close: []; closed: []; opened: [] }
 >();
 
-// reka-ui 的 AlertDialog 在 modal=true 时会将 body 设置 pointer-events:none，
-// 弹出层（如 Select 下拉框）会因此无法点击。这里通过在上层传入 :modal="false" 来
-// 避免该问题，同时通过 AlertDialogOverlay 组件自行渲染遮罩并锁定滚动。
-// AlertDialogOverlay 通过 v-if 控制挂载/卸载，其内部的 useScrollLock 会在组件
-// 卸载时自动解锁滚动。
+// reka-ui AlertDialog sets pointer-events:none on body when modal=true,
+// which prevents popups (e.g. Select dropdowns) from being clicked. Passing :modal="false"
+// avoids this while AlertDialogOverlay renders overlay and locks scroll.
+// AlertDialogOverlay uses v-if to control mounting; internal useScrollLock
+// unlocks scroll automatically upon component unmount.
 
 const delegatedProps = reactiveOmit(props, 'class');
 

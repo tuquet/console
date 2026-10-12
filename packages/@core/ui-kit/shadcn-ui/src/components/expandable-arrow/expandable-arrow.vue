@@ -6,7 +6,7 @@ const props = defineProps<{
   class?: string;
 }>();
 
-// 控制箭头展开/收起状态
+// Control arrow expand/collapse state
 const collapsed = defineModel<boolean>({ default: false });
 </script>
 

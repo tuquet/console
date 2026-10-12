@@ -12,10 +12,10 @@ import { useVbenForm } from '../src/use-vben-form';
 
 const wrappers: VueWrapper[] = [];
 
-// 字段的组件由插槽接管，schema 上只需要一个占位组件
+// Field component is handled by slot; schema only needs a placeholder component
 const Placeholder = () => h('span');
 
-// 内部维护选中项、不接收 modelValue 的复合组件
+// Compound component maintaining selection internally and not receiving modelValue
 const TagPicker = defineComponent({
   props: {
     immediate: { default: false, type: Boolean },
@@ -45,7 +45,7 @@ const TagPicker = defineComponent({
   },
 });
 
-// 原地修改同一个数组的复合组件，只有 deep 才能感知到变化
+// Compound component mutating same array in place; only deep can detect changes
 const DeepTagPicker = defineComponent({
   setup() {
     const tags = reactive<string[]>([]);
@@ -67,7 +67,7 @@ const DeepTagPicker = defineComponent({
   },
 });
 
-// 值由表单通过 modelValue 下发的复合组件，取值函数只服务于校验
+// Compound component receiving value via modelValue from form; getter only serves validation
 const BoundTagPicker = defineComponent({
   props: {
     modelValue: { default: () => [], type: Array as PropType<string[]> },
@@ -285,7 +285,7 @@ describe('useCustomFieldValue', () => {
     await flushPromises();
 
     expect(warn).toHaveBeenCalledWith(
-      '表单项 tags 已存在自定义取值函数，本次注册被忽略',
+      'Form field tags already has a custom getter; this registration was ignored',
     );
   });
 
@@ -296,7 +296,7 @@ describe('useCustomFieldValue', () => {
     await flushPromises();
 
     expect(warn).toHaveBeenCalledWith(
-      'useCustomFieldValue 只能在 VbenForm 的表单项内部使用',
+      'useCustomFieldValue can only be used inside a VbenForm field item',
     );
     expect(wrapper.get('.tag-picker').attributes('data-field-name')).toBe('');
   });

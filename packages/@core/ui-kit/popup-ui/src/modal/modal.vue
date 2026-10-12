@@ -57,7 +57,7 @@ const { $t } = useSimpleLocale();
 const state = props.modalApi?.useStore?.();
 
 const id = useId();
-// 遮罩层通过该 id 标记，仅当点击发生在当前 Modal 的遮罩上时才允许关闭
+// Overlay is marked by this id; closing is only allowed when click occurs on current Modal overlay
 provide('DISMISSABLE_MODAL_ID', id);
 
 const {
@@ -155,10 +155,10 @@ watch(
 // );
 
 /**
- * 在开启keepAlive情况下 直接通过浏览器按钮/手势等返回 不会关闭弹窗
+ * When keepAlive is enabled, navigating back via browser buttons/gestures will not close modal
  */
 onDeactivated(() => {
-  // 如果弹窗没有被挂载到内容区域，则关闭弹窗
+  // If modal is not mounted to content area, close modal
   if (!appendToMain.value) {
     props.modalApi?.close();
   }

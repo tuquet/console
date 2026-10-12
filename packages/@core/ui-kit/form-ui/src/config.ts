@@ -106,7 +106,7 @@ export function setupVbenForm<
       nextBindEventMap[key] = baseModelPropName;
     }
 
-    // 覆盖特殊组件的modelPropName
+    // Override modelPropName for special components
     if (modelPropNameMap && modelPropNameMap[key]) {
       nextBindEventMap[key] = modelPropNameMap[key];
     }

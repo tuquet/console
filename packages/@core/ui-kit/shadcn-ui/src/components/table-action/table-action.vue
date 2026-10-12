@@ -35,7 +35,7 @@ const props = withDefaults(defineProps<TableActionProps>(), {
 });
 
 function checkVisible(item: ActionItem): boolean {
-  // 权限
+  // Permissions
   if (item.auth && props.hasPermission && !props.hasPermission(item.auth)) {
     return false;
   }
@@ -59,7 +59,7 @@ const alignClass = computed(
     ],
 );
 
-// 缓存根节点类名，避免每次渲染都执行 cn()（内部 tailwind-merge 解析开销较大）
+// Cache root node class name to avoid executing cn() on every render (internal tailwind-merge has high parse overhead)
 const wrapperClass = computed(() =>
   cn('flex items-center gap-1', alignClass.value, props.class),
 );
@@ -76,11 +76,11 @@ function tooltipContent(action: ActionItem) {
 }
 
 /**
- * 预计算每个主操作的渲染视图模型：
- * - 普通按钮在本组件内直接渲染，不再为每个操作多包一层子组件，
- *   表格大量行时可显著减少组件实例数；
- * - 仅 popConfirm 操作仍交由子组件维护独立弹层状态；
- * - 类名等在此一次性计算并缓存，避免模板每次渲染都执行 cn()。
+ * Precompute render view model for each primary action:
+ * - Render regular buttons directly in this component without wrapping another child component,
+ *   significantly reducing component instances for large tables;
+ * - Only popConfirm actions delegate to child component to manage standalone popover state;
+ * - Class names are calculated and cached once to avoid executing cn() on every render.
  */
 const renderedActions = computed(() => {
   const list = visibleActions.value;
@@ -113,8 +113,8 @@ function onActionClick(action: ActionItem) {
 }
 
 /**
- * 当与气泡确认（Popover）交互时，避免误关闭整个下拉菜单。
- * Popover 内容被 Portal 渲染到菜单之外，默认会被判定为「点击外部」而关闭菜单。
+ * Avoid erroneously closing entire dropdown menu when interacting with popconfirm (Popover).
+ * Popover content is rendered outside menu via Portal and would otherwise be considered an outside click.
  */
 function onContentInteractOutside(event: Event) {
   const target = (event as CustomEvent).detail?.originalEvent?.target as

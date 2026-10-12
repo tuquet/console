@@ -86,4 +86,3 @@ export async function getSystemPluginsApi(): Promise<SystemPluginItem[]> {
     '/rest/v1/system_plugins?select=*&order=is_system.desc,name.asc',
   );
 }
-
