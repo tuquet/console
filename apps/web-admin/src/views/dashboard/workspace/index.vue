@@ -326,7 +326,9 @@ onMounted(() => {
     </div>
 
     <!-- Main Content Container: Tabs -->
-    <div class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm">
+    <div
+      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
+    >
       <Tabs default-value="tenants" class="w-full">
         <TabsList class="mb-4">
           <TabsTrigger value="tenants" class="flex items-center gap-1.5">

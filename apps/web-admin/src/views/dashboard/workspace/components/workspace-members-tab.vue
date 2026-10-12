@@ -55,11 +55,7 @@ const { formatDate } = useDateFormat();
       <h3 class="text-base font-semibold text-foreground">
         Danh Sách Thành Viên ({{ props.members.length }})
       </h3>
-      <Button
-        size="sm"
-        class="h-8 gap-1.5 font-medium"
-        @click="emit('invite')"
-      >
+      <Button size="sm" class="h-8 gap-1.5 font-medium" @click="emit('invite')">
         <UserPlus class="size-3.5" />
         <span>Mời Thành Viên</span>
       </Button>

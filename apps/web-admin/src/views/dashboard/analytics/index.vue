@@ -301,7 +301,9 @@ onMounted(() => {
       </div>
 
       <!-- Infrastructure Status List -->
-      <div class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm">
+      <div
+        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
+      >
         <div class="mb-4">
           <h2 class="text-base font-semibold text-foreground">
             Trạng Thái Dịch Vụ Cốt Lõi

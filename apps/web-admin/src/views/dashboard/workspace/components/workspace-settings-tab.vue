@@ -46,9 +46,7 @@ const { formatDate } = useDateFormat();
 
 <template>
   <div class="space-y-5 pt-1">
-    <h3 class="text-base font-semibold text-foreground">
-      Thông Số & Khóa API
-    </h3>
+    <h3 class="text-base font-semibold text-foreground">Thông Số & Khóa API</h3>
 
     <!-- Section 1: Specs -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
