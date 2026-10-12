@@ -2,6 +2,13 @@
 import type { FleetNodeItem } from '#/api';
 
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@vben-core/shadcn-ui';
+
+import {
   Check,
   CheckCircle2,
   Copy,
@@ -11,12 +18,6 @@ import {
   Laptop,
   ShieldAlert,
 } from '@lucide/vue';
-import {
-  Dialog,
-  DialogScrollContent as DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@vben-core/shadcn-ui';
 import {
   AlertDialog,
   AlertDialogAction,

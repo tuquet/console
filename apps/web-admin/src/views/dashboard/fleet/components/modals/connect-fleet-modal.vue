@@ -1,14 +1,15 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
 
-import { ExternalLink, RefreshCw, Terminal } from '@lucide/vue';
 import {
   Dialog,
-  DialogScrollContent as DialogContent,
+  DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@vben-core/shadcn-ui';
+
+import { ExternalLink, RefreshCw, Terminal } from '@lucide/vue';
 import {
   Badge,
   Button,
