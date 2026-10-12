@@ -434,9 +434,9 @@ $namespace: vben;
   align-items: center;
   max-width: var(--menu-title-width);
   overflow: hidden;
+  text-overflow: ellipsis;
   font-size: var(--menu-font-size) !important;
   line-height: 1;
-  text-overflow: ellipsis;
   white-space: nowrap;
   opacity: 1;
 }
