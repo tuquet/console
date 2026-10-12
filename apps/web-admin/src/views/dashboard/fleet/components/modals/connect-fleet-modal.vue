@@ -3,16 +3,16 @@ import { useRouter } from 'vue-router';
 
 import { ExternalLink, RefreshCw, Terminal } from '@lucide/vue';
 import {
+  Dialog,
+  DialogScrollContent as DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@vben-core/shadcn-ui';
+import {
   Badge,
   Button,
 } from '@tuquet/vue-ui';
-import {
-  Dialog,
-  DialogFooter,
-  DialogHeader,
-  DialogScrollContent as DialogContent,
-  DialogTitle,
-} from '@vben-core/shadcn-ui';
 
 import CliSnippetCard from '#/components/common/cli-snippet-card.vue';
 

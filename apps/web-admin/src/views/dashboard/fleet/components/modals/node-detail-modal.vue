@@ -12,6 +12,12 @@ import {
   ShieldAlert,
 } from '@lucide/vue';
 import {
+  Dialog,
+  DialogScrollContent as DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@vben-core/shadcn-ui';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -24,12 +30,6 @@ import {
   Badge,
   Button,
 } from '@tuquet/vue-ui';
-import {
-  Dialog,
-  DialogHeader,
-  DialogScrollContent as DialogContent,
-  DialogTitle,
-} from '@vben-core/shadcn-ui';
 
 import { useClipboard, useDateFormat } from '#/composables';
 

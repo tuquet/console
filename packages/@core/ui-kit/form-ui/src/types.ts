@@ -644,29 +644,29 @@ type FormSchemaDiscriminated<
   P extends Record<string, any>,
   TValues extends FormValues,
 > = {
-  [K in Extract<keyof P, T>]: {
+  [K in Extract<keyof P, T>]: FormSchemaBody<TValues> & {
     /** Component */
     component: K;
     /** Component props */
     componentProps?: MappedComponentProps<P[K], TValues>;
-  } & FormSchemaBody<TValues>;
+  };
 }[Extract<keyof P, T>];
 
 type FormSchemaFallback<
   T extends BaseFormComponentType,
   TValues extends FormValues,
-> = {
+> = FormSchemaBody<TValues> & {
   /** Component */
   component: Component | T;
   /** Component props */
   componentProps?: ComponentProps<TValues>;
-} & FormSchemaBody<TValues>;
+};
 
 type FormArraySchema<
   T extends BaseFormComponentType,
   P extends Record<string, any>,
   TValues extends FormValues,
-> = {
+> = FormSchemaBody<TValues> & {
   /** Built-in array editor props */
   arrayProps?: Omit<
     VbenFormFieldArrayProps<T, P, TValues>,
@@ -680,7 +680,7 @@ type FormArraySchema<
   componentProps?: ComponentProps<TValues>;
   /** Array field marker */
   type: 'array';
-} & FormSchemaBody<TValues>;
+};
 
 /**
  * Form group, used to organize fields into a collapsible section.

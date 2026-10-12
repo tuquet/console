@@ -75,7 +75,12 @@ export async function createTenantApi(data: {
     },
   );
 
-  return Array.isArray(result) ? result[0] : result;
+  const created = Array.isArray(result) ? result[0] : result;
+  if (!created) {
+    throw new Error('Failed to create tenant: empty response from server');
+  }
+
+  return created;
 }
 
 /**

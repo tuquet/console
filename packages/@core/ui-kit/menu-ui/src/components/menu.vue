@@ -432,8 +432,8 @@ $namespace: vben;
 @mixin menu-title {
   display: inline-flex;
   align-items: center;
-  line-height: 1;
   max-width: var(--menu-title-width);
+  line-height: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: var(--menu-font-size) !important;
@@ -725,15 +725,15 @@ $namespace: vben;
 
   &__icon {
     display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
     width: var(--menu-item-icon-size);
     height: var(--menu-item-icon-size);
     margin-right: 8px;
     line-height: 1;
-    text-align: center;
     vertical-align: middle;
+    text-align: center;
 
     svg {
       display: block;
