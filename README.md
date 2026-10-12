@@ -7,6 +7,10 @@ Unified Management, IAM & Operations Console for the **[Tuquet Ecosystem](https:
 - **Management & Admin Console**: [https://admin.tuquet.com](https://admin.tuquet.com)
 - **Official Website**: [https://tuquet.com](https://tuquet.com)
 
+## Architecture & Documentation
+
+- [Routing Architecture Specification (Tuquet Cloud Aligned)](docs/routing_architecture.md)
+
 ## Tech Stack
 
 - **Framework**: [Vue 3](https://vuejs.org/) + [TypeScript](https://www.typescriptlang.org/)
