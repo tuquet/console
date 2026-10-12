@@ -57,10 +57,10 @@ useTabsDrag(props, emit);
         'cursor-pointer text-muted-foreground hover:bg-muted': !scrollIsAtLeft,
         'pointer-events-none opacity-30': scrollIsAtLeft,
       }"
-      class="border-r px-2"
+      class="flex-center h-full border-r px-2"
       @click="scrollDirection('left')"
     >
-      <ChevronsLeft class="size-4 h-full" />
+      <ChevronsLeft class="size-4" />
     </span>
 
     <div
@@ -98,10 +98,10 @@ useTabsDrag(props, emit);
         'cursor-pointer text-muted-foreground hover:bg-muted': !scrollIsAtRight,
         'pointer-events-none opacity-30': scrollIsAtRight,
       }"
-      class="cursor-pointer border-l px-2 text-muted-foreground hover:bg-muted"
+      class="flex-center h-full border-l px-2"
       @click="scrollDirection('right')"
     >
-      <ChevronsRight class="size-4 h-full" />
+      <ChevronsRight class="size-4" />
     </span>
   </div>
 </template>

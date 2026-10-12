@@ -112,7 +112,7 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
           <div class="relative flex size-full items-center">
             <!-- extra -->
             <div
-              class="tabs__extra absolute top-1/2 right-1.5 z-3 flex size-4 -translate-y-1/2 items-center justify-center overflow-hidden"
+              class="tabs__extra absolute top-1/2 right-1.5 z-3 flex size-4 -translate-y-1/2 items-center justify-center"
             >
               <!-- close-icon -->
               <X

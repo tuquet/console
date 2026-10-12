@@ -332,7 +332,7 @@ function clearPreferencesAndLogout() {
         <template v-else-if="slot.name === 'theme-toggle'">
           <VbenTooltip side="bottom">
             <template #trigger>
-              <ThemeToggle class="mt-0.5 mr-1" />
+              <ThemeToggle class="mr-1" />
             </template>
             {{ $t('preferences.theme.title') }}
           </VbenTooltip>
@@ -352,7 +352,7 @@ function clearPreferencesAndLogout() {
           />
         </template>
         <template v-else-if="slot.name === 'timezone'">
-          <TimezoneButton class="mt-0.5 mr-1" />
+          <TimezoneButton class="mr-1" />
         </template>
         <template v-else-if="slot.name === 'lock-screen-btn'">
           <VbenIconButton

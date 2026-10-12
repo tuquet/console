@@ -148,7 +148,7 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
               />
               <Pin
                 v-show="tab.affixTab && tabsView.length > 1 && tab.closable"
-                class="size-3.5 cursor-pointer rounded-full text-accent-foreground/80 transition-all group-[.is-active]:text-accent-foreground hover:text-accent-foreground"
+                class="size-3.5 cursor-pointer rounded-full text-accent-foreground/80 transition-all group-[.is-active]:text-accent-foreground hover:bg-accent hover:stroke-accent-foreground hover:text-accent-foreground"
                 @click.stop="() => emit('unpin', tab)"
               />
             </div>
@@ -160,7 +160,8 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
               <VbenIcon
                 v-if="showIcon"
                 :icon="tab.icon"
-                class="mr-1 flex size-4 items-center overflow-hidden group-hover:animate-[shrink_0.3s_ease-in-out]"
+                class="mr-1.5 flex size-4 items-center overflow-hidden group-hover:animate-[shrink_0.3s_ease-in-out]"
+                fallback
               />
 
               <span class="flex-1 overflow-hidden text-sm whitespace-nowrap">
