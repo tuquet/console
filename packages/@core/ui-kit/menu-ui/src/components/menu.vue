@@ -436,8 +436,8 @@ $namespace: vben;
   overflow: hidden;
   font-size: var(--menu-font-size) !important;
   line-height: 1;
-  white-space: nowrap;
   text-overflow: ellipsis;
+  white-space: nowrap;
   opacity: 1;
 }
 
