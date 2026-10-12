@@ -291,7 +291,7 @@ onMounted(() => {
         @click="router.push('/dashboard/workspace')"
       >
         <ArrowLeft class="size-4" />
-        <span>Quay lại Danh sách Workspace</span>
+        <span>Danh Sách Workspace</span>
       </Button>
     </div>
 
@@ -324,16 +324,16 @@ onMounted(() => {
           />
         </Tabs.TabPane>
 
-        <!-- Tab 2: Hạn Mức Quota -->
-        <Tabs.TabPane key="quotas" tab="Hạn Mức Quota">
+        <!-- Tab 2: Hạn Ngạch -->
+        <Tabs.TabPane key="quotas" tab="Hạn Ngạch">
           <WorkspaceQuotasTab
             :quota="detailData.quota"
             :plan-name="detailData.tenant.metadata?.plan"
           />
         </Tabs.TabPane>
 
-        <!-- Tab 3: Cấu Hình & Keys -->
-        <Tabs.TabPane key="settings" tab="Cấu Hình & Keys">
+        <!-- Tab 3: Cấu Hình & API Keys -->
+        <Tabs.TabPane key="settings" tab="Cấu Hình & API Keys">
           <WorkspaceSettingsTab
             :tenant-id="tenantId"
             :tenant-slug="detailData.tenant.slug"

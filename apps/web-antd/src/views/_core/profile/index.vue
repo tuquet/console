@@ -223,15 +223,14 @@ onMounted(() => {
     >
       <Tabs default-active-key="info">
         <!-- Tab 1: Thông Tin Cá Nhân -->
-        <Tabs.TabPane key="info" tab="Thông Tin Cá Nhân">
+        <Tabs.TabPane key="info" tab="Hồ Sơ">
           <div class="max-w-2xl space-y-5 pt-3">
             <div>
               <h3 class="text-base font-semibold text-foreground">
-                Hồ Sơ Tài Khoản
+                Hồ Sơ Cá Nhân
               </h3>
               <p class="text-xs text-muted-foreground">
-                Thông tin cá nhân hiển thị trên toàn bộ các Workspace thuộc
-                Tuquet Cloud
+                Thông tin hiển thị trên các Workspace của bạn.
               </p>
             </div>
 
@@ -254,7 +253,7 @@ onMounted(() => {
             <!-- Field 2: Email -->
             <div>
               <label class="block text-sm font-medium text-foreground mb-1.5">
-                Địa Chỉ Email Đăng Nhập
+                Email Đăng Nhập
               </label>
               <Input :value="email" disabled size="large">
                 <template #prefix>
@@ -262,15 +261,14 @@ onMounted(() => {
                 </template>
               </Input>
               <p class="mt-1 text-xs text-muted-foreground">
-                Email được định danh từ hệ thống xác thực Supabase Auth và không
-                thể thay đổi trực tiếp.
+                Email định danh tài khoản, không thể thay đổi trực tiếp.
               </p>
             </div>
 
             <!-- Field 3: Avatar URL -->
             <div>
               <label class="block text-sm font-medium text-foreground mb-1.5">
-                Đường Dẫn Ảnh Đại Diện (Avatar URL)
+                Ảnh Đại Diện (URL)
               </label>
               <Input
                 v-model:value="avatarUrl"
@@ -282,7 +280,7 @@ onMounted(() => {
             <!-- Field 4: Bio / Ghi chú -->
             <div>
               <label class="block text-sm font-medium text-foreground mb-1.5">
-                Tiểu Sử / Vai Trò Công Việc
+                Tiểu Sử
               </label>
               <Input.TextArea
                 v-model:value="bio"
@@ -301,21 +299,21 @@ onMounted(() => {
                 @click="handleSaveProfile"
               >
                 <Save class="size-4" />
-                <span>Lưu Thay Đổi Hồ Sơ</span>
+                <span>Lưu Thay Đổi</span>
               </Button>
             </div>
           </div>
         </Tabs.TabPane>
 
-        <!-- Tab 2: Bảo Mật & Mật Khẩu -->
-        <Tabs.TabPane key="security" tab="Bảo Mật & Mật Khẩu">
+        <!-- Tab 2: Bảo Mật -->
+        <Tabs.TabPane key="security" tab="Bảo Mật">
           <div class="max-w-2xl space-y-6 pt-3">
             <div>
               <h3 class="text-base font-semibold text-foreground">
-                Đổi Mật Khẩu Tài Khoản
+                Đổi Mật Khẩu
               </h3>
               <p class="text-xs text-muted-foreground">
-                Cập nhật mật khẩu mới thông qua giao thức Supabase GoTrue Auth
+                Cập nhật mật khẩu mới cho tài khoản đăng nhập.
               </p>
             </div>
 
@@ -326,7 +324,7 @@ onMounted(() => {
               </label>
               <Input.Password
                 v-model:value="newPassword"
-                placeholder="Nhập tối thiểu 6 ký tự"
+                placeholder="Tối thiểu 6 ký tự"
                 size="large"
               >
                 <template #prefix>
@@ -338,7 +336,7 @@ onMounted(() => {
             <!-- Confirm Password -->
             <div>
               <label class="block text-sm font-medium text-foreground mb-1.5">
-                Xác Nhận Mật Khẩu Mới
+                Xác Nhận Mật Khẩu
               </label>
               <Input.Password
                 v-model:value="confirmPassword"
@@ -360,14 +358,14 @@ onMounted(() => {
                 @click="handleSavePassword"
               >
                 <KeyRound class="size-4" />
-                <span>Cập Nhật Mật Khẩu</span>
+                <span>Lưu Mật Khẩu</span>
               </Button>
             </div>
 
             <!-- Security Overview Cards -->
             <div class="border-t border-border/40 pt-5 space-y-4">
               <h4 class="text-sm font-semibold text-foreground">
-                Tình Trạng An Toàn Tài Khoản
+                Tình Trạng Bảo Mật
               </h4>
 
               <div
@@ -384,11 +382,11 @@ onMounted(() => {
                       Xác Thực Hai Yếu Tố (MFA)
                     </div>
                     <div class="text-xs text-muted-foreground">
-                      Bảo vệ tài khoản bằng OTP hoặc khóa bảo mật FIDO2
+                      Bảo vệ tài khoản qua mã OTP hoặc FIDO2
                     </div>
                   </div>
                 </div>
-                <Tag color="default">Sẵn sàng kích hoạt</Tag>
+                <Tag color="default">Sẵn sàng</Tag>
               </div>
 
               <div
@@ -402,28 +400,28 @@ onMounted(() => {
                   </div>
                   <div>
                     <div class="text-sm font-medium text-foreground">
-                      Phiên Đăng Nhập Trình Duyệt
+                      Phiên Đăng Nhập
                     </div>
                     <div class="text-xs text-muted-foreground">
-                      Mã hóa token JWT 3600 giây tự động gia hạn
+                      Mã hóa JWT tự động gia hạn an toàn
                     </div>
                   </div>
                 </div>
-                <Tag color="success">Đang hoạt động</Tag>
+                <Tag color="success">Hoạt động</Tag>
               </div>
             </div>
           </div>
         </Tabs.TabPane>
 
-        <!-- Tab 3: Workspace & Specter CLI -->
-        <Tabs.TabPane key="workspace" tab="Workspace Của Tôi">
+        <!-- Tab 3: Workspace -->
+        <Tabs.TabPane key="workspace" tab="Workspace">
           <div class="max-w-2xl space-y-5 pt-3">
             <div>
               <h3 class="text-base font-semibold text-foreground">
-                Không Gian Làm Việc & Ghép Nối CLI
+                Workspace Đang Hoạt Động
               </h3>
               <p class="text-xs text-muted-foreground">
-                Workspace hiện tại đang được kích hoạt cho tài khoản này
+                Không gian làm việc mặc định của tài khoản hiện tại.
               </p>
             </div>
 
@@ -434,7 +432,7 @@ onMounted(() => {
                 <div class="flex items-center gap-2">
                   <Building2 class="size-4.5 text-sky-400" />
                   <span class="font-semibold text-foreground"
-                    >Workspace Đang Chọn</span
+                    >Workspace Hiện Tại</span
                   >
                 </div>
                 <Tag color="blue" class="font-mono text-xs">ACTIVE</Tag>
@@ -449,7 +447,7 @@ onMounted(() => {
                   ghost
                   @click="router.push('/dashboard/workspace')"
                 >
-                  Quản Trị Danh Sách Workspace
+                  Xem Tất Cả Workspace
                 </Button>
               </div>
             </div>
@@ -457,7 +455,7 @@ onMounted(() => {
             <!-- CLI Command -->
             <CliSnippetCard
               command="tuquet login"
-              label="Lệnh Đăng Nhập Specter CLI"
+              label="Lệnh Ghép Nối Specter CLI"
             />
           </div>
         </Tabs.TabPane>

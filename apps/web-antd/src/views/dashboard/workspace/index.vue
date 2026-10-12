@@ -18,11 +18,7 @@ import {
 import {
   Badge,
   Button,
-  Form,
-  Input,
   message,
-  Modal,
-  Select,
   Space,
   Table,
   Tabs,
@@ -36,11 +32,15 @@ import {
   getTenantsApi,
   setActiveTenantId,
 } from '#/api';
+import { useDateFormat } from '#/composables';
+
+import CreateWorkspaceModal from './components/modals/create-workspace-modal.vue';
 
 defineOptions({ name: 'Workspace' });
 
 const router = useRouter();
 const userStore = useUserStore();
+const { formatDate } = useDateFormat();
 
 // Loading states
 const loadingTenants = ref(false);
@@ -54,9 +54,6 @@ const activeTenantId = ref(getActiveTenantId());
 
 // Modal state
 const isModalVisible = ref(false);
-const newTenantName = ref('');
-const newTenantSlug = ref('');
-const newTenantPlan = ref('pro');
 
 const activeTenant = computed(() => {
   return (
@@ -65,6 +62,18 @@ const activeTenant = computed(() => {
     null
   );
 });
+
+// Plan mapping config
+const PLAN_MAP: Record<string, { color: string; label: string }> = {
+  enterprise: { color: 'purple', label: 'Enterprise' },
+  free: { color: 'default', label: 'Free' },
+  pro: { color: 'geekblue', label: 'Pro' },
+};
+
+function getPlanInfo(plan?: string) {
+  const key = plan?.toLowerCase() || 'pro';
+  return PLAN_MAP[key] || { color: 'default', label: plan || 'Standard' };
+}
 
 // Load all tenants from Supabase
 async function fetchTenants() {
@@ -98,7 +107,7 @@ async function fetchPlugins() {
 function handleSelectTenant(record: any) {
   activeTenantId.value = record.id;
   setActiveTenantId(record.id);
-  message.success(`Đã chuyển sang Workspace: ${record.name} (${record.slug})`);
+  message.success(`Đã chuyển sang Workspace: ${record.name}`);
 }
 
 function handleConnectCli(record?: any) {
@@ -109,33 +118,20 @@ function handleConnectCli(record?: any) {
 }
 
 function openCreateModal() {
-  newTenantName.value = '';
-  newTenantSlug.value = '';
-  newTenantPlan.value = 'pro';
   isModalVisible.value = true;
 }
 
-function handleNameChange() {
-  newTenantSlug.value = newTenantName.value
-    .toLowerCase()
-    .trim()
-    .replaceAll(/[^\w\s-]/g, '')
-    .replaceAll(/[\s_-]+/g, '-')
-    .replaceAll(/^-+|-+$/g, '');
-}
-
-async function handleCreateTenant() {
-  if (!newTenantName.value.trim() || !newTenantSlug.value.trim()) {
-    message.warning('Vui lòng nhập tên và mã định danh (slug) của Workspace');
-    return;
-  }
-
+async function handleCreateTenant(payload: {
+  name: string;
+  plan: string;
+  slug: string;
+}) {
   creatingTenant.value = true;
   try {
     const created = await createTenantApi({
-      name: newTenantName.value.trim(),
-      plan: newTenantPlan.value,
-      slug: newTenantSlug.value.trim(),
+      name: payload.name,
+      plan: payload.plan,
+      slug: payload.slug,
     });
     message.success(`Tạo thành công Workspace: ${created.name}`);
     isModalVisible.value = false;
@@ -154,12 +150,12 @@ const tenantColumns = [
   {
     dataIndex: 'name',
     key: 'name',
-    title: 'Tên Workspace / Tổ chức',
+    title: 'Tên Workspace',
   },
   {
     dataIndex: 'slug',
     key: 'slug',
-    title: 'Mã Slug',
+    title: 'Định Danh Slug',
   },
   {
     key: 'plan',
@@ -173,11 +169,11 @@ const tenantColumns = [
   {
     dataIndex: 'created_at',
     key: 'created_at',
-    title: 'Ngày Khởi Tạo',
+    title: 'Ngày Tạo',
   },
   {
     key: 'action',
-    title: 'Thao Tác Quản Trị',
+    title: 'Thao Tác',
   },
 ];
 
@@ -186,12 +182,12 @@ const pluginColumns = [
   {
     dataIndex: 'name',
     key: 'name',
-    title: 'Tên Plugin / Dịch Vụ',
+    title: 'Tên Plugin',
   },
   {
     dataIndex: 'id',
     key: 'id',
-    title: 'Mã Plugin (ID)',
+    title: 'Mã Plugin',
   },
   {
     dataIndex: 'schema_name',
@@ -214,16 +210,6 @@ const pluginColumns = [
   },
 ];
 
-function formatDate(dateStr: string) {
-  if (!dateStr) return '-';
-  try {
-    const d = new Date(dateStr);
-    return d.toLocaleString('vi-VN');
-  } catch {
-    return dateStr;
-  }
-}
-
 onMounted(() => {
   fetchTenants();
   fetchPlugins();
@@ -232,7 +218,7 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6 p-4 sm:p-6">
-    <!-- Top Header: KISS & Shadcn Slate Flat Design -->
+    <!-- Top Header: KISS, Concise & Polished -->
     <div
       class="flex flex-col justify-between gap-4 rounded-xl border border-border/60 bg-card p-5 shadow-sm sm:flex-row sm:items-center"
     >
@@ -241,19 +227,19 @@ onMounted(() => {
           <h1
             class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
           >
-            Quản Trị Multi-Tenant
+            Quản Trị Workspace
           </h1>
           <Tag color="blue" class="font-mono text-xs uppercase">
-            System Console
+            Multi-Tenant
           </Tag>
         </div>
         <p class="mt-1 text-sm text-muted-foreground">
-          Quản lý các Tổ chức / Workspace, Ghép nối Specter CLI Daemon và Hệ
-          sinh thái Cloud Plugin
+          Quản lý không gian làm việc, định danh tổ chức và kết nối Specter
+          Fleet.
         </p>
       </div>
 
-      <!-- Action Buttons: Mobile-First Responsive Stack -->
+      <!-- Action Buttons -->
       <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center">
         <Button
           type="primary"
@@ -263,7 +249,7 @@ onMounted(() => {
           <template #icon>
             <Plus class="size-3.5 mr-1" />
           </template>
-          Tạo Workspace Mới
+          Tạo Workspace
         </Button>
         <Button
           class="inline-flex items-center justify-center w-full sm:w-auto"
@@ -272,7 +258,7 @@ onMounted(() => {
           <template #icon>
             <Terminal class="size-3.5 mr-1" />
           </template>
-          Ghép Nối Máy Trạm CLI
+          Ghép Nối Specter Desk
         </Button>
         <Button
           :loading="loadingTenants"
@@ -287,13 +273,13 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 4 Platform Metric Cards: Mobile-First Grid -->
+    <!-- 4 Platform Metric Cards -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <!-- Metric 1: Workspaces -->
       <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Tổng số Workspaces
+            Tổng Workspace
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400"
@@ -307,10 +293,10 @@ onMounted(() => {
           </span>
           <span class="text-xs font-semibold text-sky-400">Tenants</span>
         </div>
-        <div class="mt-2 text-xs text-muted-foreground">
+        <div class="mt-2 text-xs text-muted-foreground truncate">
           Đang chọn:
           <span class="font-semibold text-foreground">
-            {{ activeTenant?.name || 'Nguyen Dinh Tu' }}
+            {{ activeTenant?.name || 'Chưa chọn' }}
           </span>
         </div>
       </div>
@@ -319,7 +305,7 @@ onMounted(() => {
       <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Plugin Hệ Thống Cloud
+            Plugin Hệ Thống
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400"
@@ -331,13 +317,11 @@ onMounted(() => {
           <span class="text-3xl font-extrabold tracking-tight text-foreground">
             {{ plugins.length }}
           </span>
-          <span class="text-xs font-semibold text-emerald-400"
-            >/ 6 Sẵn sàng</span
-          >
+          <span class="text-xs font-semibold text-emerald-400">Sẵn sàng</span>
         </div>
         <div class="mt-2 flex items-center gap-1.5 text-xs text-emerald-400">
           <CheckCircle2 class="size-3.5" />
-          <span>Core Kernel & Storage Sẵn Sàng</span>
+          <span>Core Kernel & Storage Hoạt Động</span>
         </div>
       </div>
 
@@ -374,7 +358,7 @@ onMounted(() => {
       <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Quản Trị Viên Hệ Thống
+            Quản Trị Viên
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400"
@@ -386,19 +370,23 @@ onMounted(() => {
           <span
             class="text-xl font-bold tracking-tight text-foreground truncate"
           >
-            {{ userStore.userInfo?.realName || 'Nguyen Dinh Tu' }}
+            {{
+              userStore.userInfo?.realName ||
+              userStore.userInfo?.username ||
+              'Quản trị viên'
+            }}
           </span>
         </div>
         <div class="mt-2 text-xs text-sky-400">Quyền: Super Administrator</div>
       </div>
     </div>
 
-    <!-- Main Content Container: Shadcn Slate Tabs -->
+    <!-- Main Content Container: Tabs -->
     <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
       <Tabs default-active-key="tenants">
         <!-- Tab 1: Tenants List -->
-        <Tabs.TabPane key="tenants" tab="Danh sách Workspace (Tenants)">
-          <!-- Desktop Table View: Hidden on Mobile -->
+        <Tabs.TabPane key="tenants" tab="Danh Sách Workspace">
+          <!-- Desktop Table View -->
           <div class="hidden md:block">
             <Table
               :columns="tenantColumns"
@@ -430,16 +418,10 @@ onMounted(() => {
                 <!-- Plan column -->
                 <template v-else-if="column.key === 'plan'">
                   <Tag
-                    :color="
-                      record.metadata?.plan === 'pro'
-                        ? 'geekblue'
-                        : record.metadata?.plan === 'enterprise'
-                          ? 'purple'
-                          : 'default'
-                    "
+                    :color="getPlanInfo(record.metadata?.plan).color"
                     class="uppercase"
                   >
-                    {{ record.metadata?.plan || 'Standard' }}
+                    {{ getPlanInfo(record.metadata?.plan).label }}
                   </Tag>
                 </template>
 
@@ -473,7 +455,7 @@ onMounted(() => {
                       {{
                         record.id === activeTenantId
                           ? 'Đang hoạt động'
-                          : 'Chọn Workspace này'
+                          : 'Kích Hoạt'
                       }}
                     </Button>
                     <Button
@@ -483,7 +465,7 @@ onMounted(() => {
                       Chi Tiết
                     </Button>
                     <Button size="small" @click="handleConnectCli(record)">
-                      Ghép nối CLI
+                      Ghép Nối Desk
                     </Button>
                   </Space>
                 </template>
@@ -491,7 +473,7 @@ onMounted(() => {
             </Table>
           </div>
 
-          <!-- Mobile Card View: Exclusively Optimized for Mobile Screens -->
+          <!-- Mobile Card View -->
           <div class="block space-y-3 md:hidden">
             <div
               v-for="tenant in tenants"
@@ -521,16 +503,10 @@ onMounted(() => {
 
               <div class="mt-3 flex flex-wrap items-center gap-2">
                 <Tag
-                  :color="
-                    tenant.metadata?.plan === 'pro'
-                      ? 'geekblue'
-                      : tenant.metadata?.plan === 'enterprise'
-                        ? 'purple'
-                        : 'default'
-                  "
+                  :color="getPlanInfo(tenant.metadata?.plan).color"
                   class="uppercase text-xs"
                 >
-                  {{ tenant.metadata?.plan || 'Standard' }}
+                  {{ getPlanInfo(tenant.metadata?.plan).label }}
                 </Tag>
                 <Tag
                   :color="tenant.status === 'active' ? 'success' : 'warning'"
@@ -543,7 +519,6 @@ onMounted(() => {
                 </span>
               </div>
 
-              <!-- Action buttons on mobile: Tap targets -->
               <div
                 class="mt-4 flex flex-wrap gap-2 pt-2 border-t border-border/40"
               >
@@ -553,11 +528,7 @@ onMounted(() => {
                   :type="tenant.id === activeTenantId ? 'dashed' : 'primary'"
                   @click="handleSelectTenant(tenant)"
                 >
-                  {{
-                    tenant.id === activeTenantId
-                      ? 'Đang chọn'
-                      : 'Chọn Workspace'
-                  }}
+                  {{ tenant.id === activeTenantId ? 'Đang chọn' : 'Kích Hoạt' }}
                 </Button>
                 <Button
                   size="middle"
@@ -566,7 +537,7 @@ onMounted(() => {
                   Chi Tiết
                 </Button>
                 <Button size="middle" @click="handleConnectCli(tenant)">
-                  Ghép Nối CLI
+                  Ghép Nối Desk
                 </Button>
               </div>
             </div>
@@ -575,13 +546,13 @@ onMounted(() => {
               v-if="tenants.length === 0 && !loadingTenants"
               class="py-8 text-center text-sm text-muted-foreground"
             >
-              Chưa có Workspace nào. Hãy nhấn "+ Tạo Workspace Mới".
+              Chưa có Workspace nào. Nhấn "+ Tạo Workspace" để bắt đầu.
             </div>
           </div>
         </Tabs.TabPane>
 
         <!-- Tab 2: System Plugins -->
-        <Tabs.TabPane key="plugins" tab="Hệ sinh thái Plugin Cloud">
+        <Tabs.TabPane key="plugins" tab="Plugin Cloud">
           <!-- Desktop Table -->
           <div class="hidden md:block">
             <Table
@@ -666,14 +637,14 @@ onMounted(() => {
         </Tabs.TabPane>
 
         <!-- Tab 3: Specter Runners & Desktop Guide -->
-        <Tabs.TabPane key="runners" tab="Máy trạm Specter CLI & Runners">
+        <Tabs.TabPane key="runners" tab="Kết Nối Specter Desk">
           <div class="max-w-2xl py-2">
             <h2 class="text-lg font-semibold text-foreground">
-              Hướng Dẫn Ghép Nối Máy Trạm Specter CLI
+              Ghép Nối Máy Trạm Specter Desk
             </h2>
             <p class="mt-1 text-sm text-muted-foreground">
-              Specter CLI Daemon (`tuquet/cli`) kết nối máy trạm cục bộ với
-              Tuquet Cloud thông qua Desktop SSO loopback.
+              Specter CLI Daemon kết nối máy trạm cục bộ với Tuquet Cloud thông
+              qua Desktop SSO loopback.
             </p>
 
             <div
@@ -691,53 +662,18 @@ onMounted(() => {
               class="w-full sm:w-auto"
               @click="handleConnectCli()"
             >
-              Mở Màn Hình Ghép Nối Desktop SSO Ngay
+              Mở Màn Hình Ghép Nối
             </Button>
           </div>
         </Tabs.TabPane>
       </Tabs>
     </div>
 
-    <!-- Create Tenant Modal: Touch Friendly on Mobile -->
-    <Modal
+    <!-- Create Workspace Modal -->
+    <CreateWorkspaceModal
       v-model:open="isModalVisible"
-      title="Tạo Workspace / Tổ chức Mới"
-      :confirm-loading="creatingTenant"
-      ok-text="Tạo Workspace"
-      cancel-text="Hủy"
-      class="max-w-[calc(100vw-2rem)] sm:max-w-lg"
-      @ok="handleCreateTenant"
-    >
-      <Form layout="vertical" class="mt-4">
-        <Form.Item label="Tên Workspace / Tổ chức" required>
-          <Input
-            v-model:value="newTenantName"
-            size="large"
-            placeholder="Ví dụ: Công ty Công nghệ Tuquet"
-            @input="handleNameChange"
-          />
-        </Form.Item>
-
-        <Form.Item
-          label="Mã định danh (Slug)"
-          required
-          extra="Slug được dùng làm subdomain hoặc định danh duy nhất (chỉ gồm chữ thường, số và dấu gạch ngang)"
-        >
-          <Input
-            v-model:value="newTenantSlug"
-            size="large"
-            placeholder="Ví dụ: tuquet-tech"
-          />
-        </Form.Item>
-
-        <Form.Item label="Gói dịch vụ (Subscription Tier)">
-          <Select v-model:value="newTenantPlan" size="large">
-            <Select.Option value="pro">Pro Plan (Mặc định)</Select.Option>
-            <Select.Option value="free">Free Tier</Select.Option>
-            <Select.Option value="enterprise">Enterprise Custom</Select.Option>
-          </Select>
-        </Form.Item>
-      </Form>
-    </Modal>
+      :loading="creatingTenant"
+      @submit="handleCreateTenant"
+    />
   </div>
 </template>

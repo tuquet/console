@@ -67,15 +67,14 @@ onMounted(() => {
           <h1
             class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
           >
-            Giám Sát & Đo Lường Nền Tảng
+            Giám Sát Nền Tảng
           </h1>
           <Tag color="cyan" class="font-mono text-xs uppercase">
             Live Telemetry
           </Tag>
         </div>
         <p class="mt-1 text-sm text-muted-foreground">
-          Số liệu đo đếm thực tế thời gian thực từ Tuquet Cloud, Cơ sở dữ liệu
-          và Cầu nối Specter CLI
+          Số liệu thời gian thực từ Tuquet Cloud và Specter Fleet.
         </p>
       </div>
 
@@ -89,7 +88,7 @@ onMounted(() => {
           <template #icon>
             <RefreshCw class="size-3.5 mr-1" />
           </template>
-          Làm Mới Số Liệu
+          Làm Mới
         </Button>
       </div>
     </div>
@@ -102,7 +101,7 @@ onMounted(() => {
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Tổng số Workspaces
+            Tổng Workspace
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400"
@@ -136,7 +135,7 @@ onMounted(() => {
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Hệ sinh thái Cloud Plugins
+            Plugin Hệ Thống
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400"
@@ -230,15 +229,14 @@ onMounted(() => {
         <div class="mb-4 flex items-center justify-between">
           <div>
             <h2 class="text-base font-semibold text-foreground">
-              Tiến Trình Phát Triển Workspaces
+              Tăng Trưởng Workspace
             </h2>
             <p class="text-xs text-muted-foreground">
-              Số lượng Workspace / Tổ chức được khởi tạo theo mốc thời gian thực
-              tế
+              Số lượng Workspace khởi tạo theo thời gian.
             </p>
           </div>
           <Tag color="blue" class="text-xs">
-            Tổng cộng: {{ analyticsData.tenants.total }}
+            Tổng: {{ analyticsData.tenants.total }}
           </Tag>
         </div>
 
@@ -257,10 +255,10 @@ onMounted(() => {
       >
         <div class="mb-4">
           <h2 class="text-base font-semibold text-foreground">
-            Cơ Cấu Gói Thuê Bao
+            Phân Bổ Gói Dịch Vụ
           </h2>
           <p class="text-xs text-muted-foreground">
-            Phân bổ tỷ lệ các gói dịch vụ khách hàng đang sử dụng
+            Tỷ lệ phân bổ các gói tài khoản trong hệ thống.
           </p>
         </div>
 
@@ -282,10 +280,10 @@ onMounted(() => {
       >
         <div class="mb-4">
           <h2 class="text-base font-semibold text-foreground">
-            Kiến Trúc Cloud Plugin
+            Phân Loại Plugin
           </h2>
           <p class="text-xs text-muted-foreground">
-            Tỷ lệ thành phần Core Kernel so với các Module mở rộng nghiệp vụ
+            Tỷ lệ Core Kernel và Module mở rộng.
           </p>
         </div>
 
@@ -306,10 +304,10 @@ onMounted(() => {
       <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
         <div class="mb-4">
           <h2 class="text-base font-semibold text-foreground">
-            Trạng Thái Hạ Tầng & Dịch Vụ Cốt Lõi
+            Trạng Thái Dịch Vụ Cốt Lõi
           </h2>
           <p class="text-xs text-muted-foreground">
-            Giám sát trạng thái vận hành của các dịch vụ hệ thống
+            Trạng thái vận hành của các dịch vụ hệ thống.
           </p>
         </div>
 

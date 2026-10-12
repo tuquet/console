@@ -27,10 +27,10 @@ const { copyToClipboard, isCopied } = useClipboard();
 const { formatDate } = useDateFormat();
 
 const apiKeyColumns = [
-  { key: 'name', title: 'Tên Khóa & ID' },
-  { key: 'key_prefix', title: 'Tiền Tố Token' },
+  { key: 'name', title: 'Tên Khóa' },
+  { key: 'key_prefix', title: 'Tiền Tố' },
   { key: 'role', title: 'Quyền Hạn' },
-  { key: 'created_at', title: 'Thời Gian Tạo / Hạn' },
+  { key: 'created_at', title: 'Ngày Tạo' },
   { key: 'action', title: 'Thao Tác', width: 100 },
 ];
 </script>
@@ -39,10 +39,10 @@ const apiKeyColumns = [
   <div class="space-y-6 pt-2">
     <div>
       <h3 class="text-base font-semibold text-foreground">
-        Thông Số Kỹ Thuật & Khóa Kết Nối
+        Thông Số & Khóa API
       </h3>
       <p class="text-xs text-muted-foreground">
-        Sử dụng các thông số này để cấu hình Specter CLI và CI/CD Automation
+        Cấu hình tích hợp Specter CLI và CI/CD tự động hóa.
       </p>
     </div>
 
@@ -53,7 +53,7 @@ const apiKeyColumns = [
         <label
           class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
         >
-          WORKSPACE ID (TENANT ID)
+          WORKSPACE ID
         </label>
         <div class="mt-1 flex items-center justify-between gap-2">
           <span class="font-mono text-sm text-foreground truncate">
@@ -79,7 +79,7 @@ const apiKeyColumns = [
         <label
           class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
         >
-          WORKSPACE SLUG
+          MÃ SLUG
         </label>
         <div class="mt-1 flex items-center justify-between gap-2">
           <span class="font-mono text-sm text-foreground">
@@ -101,7 +101,7 @@ const apiKeyColumns = [
     <!-- Section 2: CLI Command -->
     <CliSnippetCard
       :command="`tuquet login --tenant-id=${props.tenantId}`"
-      label="LỆNH KẾT NỐI SPECTER CLI TRỰC TIẾP"
+      label="LỆNH KẾT NỐI SPECTER CLI"
       copied-label="CLI Command"
     />
 
@@ -114,12 +114,11 @@ const apiKeyColumns = [
           <div class="flex items-center gap-2">
             <KeyRound class="size-4.5 text-amber-400" />
             <h3 class="text-base font-semibold text-foreground">
-              Khóa API & Headless Tokens ({{ props.apiKeys.length }})
+              Khóa API ({{ props.apiKeys.length }})
             </h3>
           </div>
           <p class="text-xs text-muted-foreground">
-            Cung cấp quyền truy cập bảo mật cho CI/CD pipelines, GitHub Actions
-            và runner automation
+            Cung cấp quyền truy cập bảo mật cho CI/CD và runner automation.
           </p>
         </div>
         <Button
@@ -128,7 +127,7 @@ const apiKeyColumns = [
           @click="emit('createKey')"
         >
           <Plus class="size-4" />
-          <span>Tạo API Key Mới</span>
+          <span>Tạo API Key</span>
         </Button>
       </div>
 

@@ -27,7 +27,7 @@ const { formatDate } = useDateFormat();
 const memberColumns = [
   { key: 'user', title: 'Thành Viên' },
   { dataIndex: 'email', key: 'email', title: 'Email' },
-  { key: 'role', title: 'Vai Trò IAM' },
+  { key: 'role', title: 'Vai Trò' },
   { key: 'status', title: 'Trạng Thái' },
   { key: 'joined_at', title: 'Ngày Tham Gia' },
   { key: 'action', title: 'Thao Tác', width: 140 },
@@ -45,7 +45,7 @@ const memberColumns = [
           Danh Sách Thành Viên ({{ props.members.length }})
         </h3>
         <p class="text-xs text-muted-foreground">
-          Quản lý quyền truy cập và vai trò của các kỹ sư trong Workspace này
+          Quản lý danh sách thành viên và phân quyền truy cập.
         </p>
       </div>
       <Button
@@ -85,7 +85,7 @@ const memberColumns = [
                   v-if="record.role === 'owner'"
                   class="text-xs text-purple-400 font-medium"
                 >
-                  Workspace Owner
+                  Chủ Sở Hữu
                 </div>
               </div>
             </div>

@@ -17,10 +17,10 @@ const props = withDefaults(defineProps<Props>(), {
   <div class="space-y-6 pt-2">
     <div>
       <h3 class="text-base font-semibold text-foreground">
-        Định mức tài nguyên gói {{ props.planName }}
+        Hạn Ngạch Tài Nguyên (Gói {{ props.planName }})
       </h3>
       <p class="text-xs text-muted-foreground">
-        Hạn mức sử dụng CPU Runners, bộ nhớ Cloud Storage và số lượng thành viên
+        Hạn mức sử dụng thành viên, thiết bị và dung lượng lưu trữ.
       </p>
     </div>
 
@@ -46,16 +46,14 @@ const props = withDefaults(defineProps<Props>(), {
           />
         </div>
         <div class="mt-1 text-xs text-muted-foreground">
-          Số lượng thành viên tối đa có thể tham gia Workspace
+          Số thành viên tối đa trong Workspace
         </div>
       </div>
 
       <!-- Quota 2: Devices -->
       <div class="rounded-xl border border-border/60 bg-muted/20 p-4">
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-foreground"
-            >Máy Trạm & Runners</span
-          >
+          <span class="text-sm font-medium text-foreground">Thiết Bị Trạm</span>
           <span class="text-xs text-muted-foreground">
             {{ props.quota.used_devices }} / {{ props.quota.max_devices }}
           </span>
@@ -73,14 +71,16 @@ const props = withDefaults(defineProps<Props>(), {
           />
         </div>
         <div class="mt-1 text-xs text-muted-foreground">
-          Số lượng máy trạm ghép nối Specter CLI đồng thời
+          Số thiết bị Specter kết nối đồng thời
         </div>
       </div>
 
       <!-- Quota 3: Storage -->
       <div class="rounded-xl border border-border/60 bg-muted/20 p-4">
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-foreground">Cloud Storage</span>
+          <span class="text-sm font-medium text-foreground"
+            >Dung Lượng Lưu Trữ</span
+          >
           <span class="text-xs text-muted-foreground">
             {{
               Math.round(((props.quota.used_storage_mb || 0) / 1024) * 10) / 10
