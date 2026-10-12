@@ -34,4 +34,15 @@ const resetRoutes = () => resetStaticRoutes(router, routes);
 // Initialize router guards
 createRouterGuard(router);
 
+// Handle dynamic chunk loading errors from new releases/stale caches
+router.onError((error) => {
+  console.error('[Router Error]', error);
+  if (
+    error?.message?.includes('Failed to fetch dynamically imported module') ||
+    error?.message?.includes('Importing a module script failed')
+  ) {
+    window.location.reload();
+  }
+});
+
 export { resetRoutes, router };

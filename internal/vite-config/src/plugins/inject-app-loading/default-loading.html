@@ -111,3 +111,17 @@
   <div class="loader"></div>
   <div class="title">%VITE_APP_TITLE%</div>
 </div>
+<script data-app-loading="inject-js">
+  setTimeout(function () {
+    var loader = document.getElementById('__app-loading__');
+    var app = document.getElementById('app');
+    if (loader && (!app || !app.children.length)) {
+      var hint = document.createElement('div');
+      hint.style.cssText =
+        'margin-top:24px;font-size:13px;color:#888;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 16px;';
+      hint.innerHTML =
+        '<span>Tải trang lâu hơn dự kiến...</span><button onclick="window.location.reload(true)" style="padding:6px 14px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;">Tải lại trang (Reload)</button>';
+      loader.appendChild(hint);
+    }
+  }, 10000);
+</script>
