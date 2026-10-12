@@ -8,7 +8,7 @@ import {
 } from '../dom';
 
 describe('getElementVisibleRect', () => {
-  // 设置浏览器视口尺寸的 mock
+  // Mock viewport dimensions
   beforeEach(() => {
     vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(
       800,

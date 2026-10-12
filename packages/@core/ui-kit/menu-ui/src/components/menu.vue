@@ -74,7 +74,7 @@ const isMenuPopup = computed<MenuProvider['isMenuPopup']>(() => {
 });
 
 const getSlot = computed(() => {
-  // 更新插槽内容
+  // Update slot content
   const defaultSlots: VNodeArrayChildren = slots.default?.() ?? [];
 
   const originalSlot = flattedChildren(defaultSlots) as VNodeArrayChildren;
@@ -117,7 +117,7 @@ watchEffect(() => {
   }
 });
 
-// 注入上下文
+// Inject context
 createMenuContext(
   reactive({
     activePath,
@@ -217,16 +217,16 @@ useMenuScroll(activePath, {
   delay: 320,
 });
 
-// 监听 activePath 变化，自动滚动到激活项
+// Watch activePath changes to auto-scroll to active item
 // watch(activePath, () => {
 //   scrollToActiveItem();
 // });
 
-// 默认展开菜单
+// Default expanded menus
 function initMenu() {
   const parentPaths = getActivePaths();
 
-  // 展开该菜单项的路径上所有子菜单
+  // Expand all submenus along the path of this menu item
   // expand all subMenus of the menu item
   parentPaths.forEach((path) => {
     const subMenu = subMenus.value[path];
@@ -276,7 +276,7 @@ function close(path: string) {
 }
 
 /**
- * 关闭、折叠菜单
+ * Close or collapse menu
  */
 function closeMenu(path: string, parentPaths: string[]) {
   if (props.accordion) {
@@ -289,13 +289,13 @@ function closeMenu(path: string, parentPaths: string[]) {
 }
 
 /**
- * 点击展开菜单
+ * Click to expand menu
  */
 function openMenu(path: string, parentPaths: string[]) {
   if (openedMenus.value.includes(path)) {
     return;
   }
-  // 手风琴模式菜单
+  // Accordion mode menu
   if (props.accordion) {
     const activeParentPaths = getActivePaths();
     if (activeParentPaths.includes(path)) {
@@ -557,7 +557,7 @@ $namespace: vben;
   list-style: none;
   background: hsl(var(--menu-background-color));
 
-  // 垂直菜单
+  // Vertical menu
   &.is-vertical {
     &:not(.#{$namespace}-menu.is-collapse) {
       & .#{$namespace}-menu-item,
@@ -655,7 +655,7 @@ $namespace: vben;
     //   }
     // }
   }
-  // 折叠菜单
+  // Collapsed menu
 
   &.is-collapse {
     .#{$namespace}-menu__icon {

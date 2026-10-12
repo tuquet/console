@@ -14,7 +14,7 @@ interface Item {
   key: string;
   label: string;
   position: 'auto' | 'fixed' | 'header' | 'none' | 'user-dropdown';
-  /** 每项可选的 position 选项；不传则用 props.positionItems */
+  /** Selectable position options per item; falls back to props.positionItems */
   positionItems?: SelectOption[];
 }
 
@@ -34,10 +34,10 @@ const emit = defineEmits<{
 const listRef = ref<HTMLElement>();
 let sortableInstance: null | Sortable = null;
 
-// 划分规则：
-// - hidden：position === 'none'（不显示）
-// - sortable：其它（含 auto/fixed，偏好按钮的智能模式视觉归入顶栏组参与排序，
-//   避免 preferences 从 widget.order 丢失）
+// Partition rules:
+// - hidden: position === 'none' (not shown)
+// - sortable: other (including auto/fixed, so preferences button stays in widget order)
+//   preventing preferences from dropping out of widget.order
 const sortableList = computed(() =>
   props.items.filter((item) => item.position !== 'none'),
 );
@@ -53,8 +53,8 @@ function initSortable() {
     animation: 200,
     handle: '.drag-handle',
     onEnd() {
-      // Sortable 已经改了 DOM，但 sortableList computed 还是旧顺序。
-      // 直接从 DOM 读 children 的 data-key 拿新顺序，再追加 hidden 部分。
+      // Sortable modified DOM but sortableList computed is still previous order.
+      // Read new order directly from children data-key in DOM, then append hidden entries.
       const newOrder = [...container.children]
         .map((el) => (el as HTMLElement).dataset.key)
         .filter(Boolean) as string[];

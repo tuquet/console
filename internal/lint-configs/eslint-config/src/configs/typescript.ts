@@ -3,13 +3,13 @@ import type { Linter } from 'eslint';
 import { interopDefault } from '../util';
 
 /**
- * @typescript-eslint 的规则已迁移到 oxlint（typescript 插件）。
- * 这里仅保留 TS 解析器，供其它 eslint 插件（perfectionist、n 等）解析 TS/TSX 文件。
- * 因不再有类型感知规则，已移除 parserOptions.project，eslint 解析更快。
+ * @typescript-eslint rules have been migrated to oxlint (typescript plugin).
+ * Only the TS parser is kept here for other eslint plugins (perfectionist, n, etc.) to parse TS/TSX files.
+ * Since type-aware rules are no longer needed, parserOptions.project has been removed for faster eslint parsing.
  *
- * 注意：移除 @typescript-eslint 插件后，unused-imports/no-unused-vars 会退回核心实现，
- * 无法识别 TS 类型签名里的形参（会误报）。故对 TS/TSX/Vue 统一关闭该规则，
- * 未使用变量改由 oxlint 的 no-unused-vars（类型感知）负责。
+ * Note: After removing @typescript-eslint, unused-imports/no-unused-vars falls back to core implementation,
+ * which fails to recognize parameters in TS type signatures (causing false positives). Therefore, disable this rule for TS/TSX/Vue,
+ * and delegate unused variable checks to oxlint's type-aware no-unused-vars.
  */
 export async function typescript(): Promise<Linter.Config[]> {
   const parserTs = await interopDefault(import('@typescript-eslint/parser'));
@@ -34,7 +34,7 @@ export async function typescript(): Promise<Linter.Config[]> {
       },
     },
     {
-      // Vue `<script>` 的未使用变量同样交给 oxlint，避免核心规则误报 TS 类型签名形参
+      // Delegate unused variables in Vue `<script>` to oxlint as well, avoiding core rule false positives on TS type signature params
       files: ['**/*.vue'],
       rules: {
         'unused-imports/no-unused-vars': 'off',

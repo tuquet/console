@@ -623,7 +623,7 @@ onUnmounted(() => {
                     </VbenTooltip>
                   </slot>
                 </FormControl>
-                <!-- 自定义后缀 -->
+                <!-- Custom suffix -->
                 <div v-if="suffix" class="ml-1">
                   <VbenRenderContent :content="suffix" />
                 </div>

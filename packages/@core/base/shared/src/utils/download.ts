@@ -9,8 +9,8 @@ interface DownloadOptions<T = string> {
 const DEFAULT_FILENAME = 'downloaded_file';
 
 /**
- * 通过 URL 下载文件，支持跨域
- * @throws {Error} - 当下载失败时抛出错误
+ * Download file via URL, supports CORS
+ * @throws {Error} - Throws on download failure
  */
 export async function downloadFileFromUrl({
   fileName,
@@ -41,7 +41,7 @@ export async function downloadFileFromUrl({
 }
 
 /**
- * 通过 Base64 下载文件
+ * Download file via Base64 data
  */
 export function downloadFileFromBase64({ fileName, source }: DownloadOptions) {
   if (!source || typeof source !== 'string') {
@@ -53,7 +53,7 @@ export function downloadFileFromBase64({ fileName, source }: DownloadOptions) {
 }
 
 /**
- * 通过图片 URL 下载图片文件
+ * Download image file via image URL
  */
 export async function downloadFileFromImageUrl({
   fileName,
@@ -64,7 +64,7 @@ export async function downloadFileFromImageUrl({
 }
 
 /**
- * 通过 Blob 下载文件
+ * Download file via Blob
  */
 export function downloadFileFromBlob({
   fileName = DEFAULT_FILENAME,
@@ -79,19 +79,19 @@ export function downloadFileFromBlob({
 }
 
 /**
- * 下载文件，支持 Blob、字符串和其他 BlobPart 类型
+ * Download file; supports Blob, string, and BlobPart types
  */
 export function downloadFileFromBlobPart({
   fileName = DEFAULT_FILENAME,
   source,
 }: DownloadOptions<BlobPart>): void {
-  // 如果 data 不是 Blob，则转换为 Blob
+  // If data is not a Blob, convert to Blob
   const blob =
     source instanceof Blob
       ? source
       : new Blob([source], { type: 'application/octet-stream' });
 
-  // 创建对象 URL 并触发下载
+  // Create object URL and trigger download
   const url = URL.createObjectURL(blob);
   triggerDownload(url, fileName);
 }
@@ -122,10 +122,10 @@ export function urlToBase64(url: string, mineType?: string): Promise<string> {
 }
 
 /**
- * 通用下载触发函数
- * @param href - 文件下载的 URL
- * @param fileName - 下载文件的名称，如果未提供则自动识别
- * @param revokeDelay - 清理 URL 的延迟时间 (毫秒)
+ * Generic download trigger function
+ * @param href - Download URL
+ * @param fileName - File name; automatically detected if omitted
+ * @param revokeDelay - Delay before revoking object URL (ms)
  */
 export function triggerDownload(
   href: string,
@@ -148,7 +148,7 @@ export function triggerDownload(
   link.click();
   link.remove();
 
-  // 清理临时 URL 以释放内存
+  // Revoke object URL to free memory
   setTimeout(() => URL.revokeObjectURL(href), revokeDelay);
 }
 

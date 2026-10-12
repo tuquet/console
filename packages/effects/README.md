@@ -1,10 +1,10 @@
-## Effects 目录
+## Effects Directory
 
-`effects` 目录专门用于存放与轻微耦合相关的代码和逻辑。如果你的包具有以下特点，建议将其放置在 `effects` 目录下：
+The `effects` directory is dedicated to code and logic with side-effects or loose couplings. Place packages here if they involve:
 
-- **状态管理**：使用状态管理框架 `pinia`，并包含处理副作用（如异步操作、API 调用）的部分。
-- **用户偏好设置**：使用 `@vben-core/preferences` 处理用户偏好设置，涉及本地存储或浏览器缓存逻辑（如使用 `localStorage`）。
-- **导航和路由**：处理导航、页面跳转等场景，需要管理路由变化的逻辑。
-- **组件库依赖**：包含与特定组件库紧密耦合或依赖大型仓库的部分。
+- **State Management**: Using `pinia` stores with side-effects (e.g. async operations, API calls).
+- **Preferences**: Handling user preferences with `@vben-core/preferences`, touching storage or browser cache (`localStorage`).
+- **Navigation & Routing**: Handling navigation, page redirects, and route transitions.
+- **UI Library Coupling**: Tightly coupled with or dependent on specific component libraries.
 
-通过将相关代码归类到 `effects` 目录，可以使项目结构更加清晰，便于维护和扩展。
+Organizing related logic under `effects` keeps architecture clear, maintainable, and extensible.

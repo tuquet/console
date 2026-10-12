@@ -4,7 +4,7 @@ import type { RequestClient } from '../request-client';
 import type { SseRequestOptions } from '../types';
 
 /**
- * SSE模块
+ * SSE module
  */
 class SSE {
   private client: RequestClient;
@@ -25,10 +25,10 @@ class SSE {
   }
 
   /**
-   * SSE请求方法
-   * @param url - 请求URL
-   * @param data - 请求数据
-   * @param requestOptions - SSE请求选项
+   * SSE request method
+   * @param url - Request URL
+   * @param data - Request data
+   * @param requestOptions - SSE request options
    */
   public async requestSSE(
     url: string,
@@ -114,20 +114,20 @@ class SSE {
 
 function safeJoinUrl(baseUrl: string | undefined, url: string): string {
   if (!baseUrl) {
-    return url; // 没有 baseUrl，直接返回 url
+    return url; // No baseUrl, return url directly
   }
 
-  // 如果 url 本身就是绝对地址，直接返回
+  // If url is already absolute, return directly
   if (/^https?:\/\//i.test(url)) {
     return url;
   }
 
-  // 如果 baseUrl 是完整 URL，就用 new URL
+  // If baseUrl is a full URL, use new URL
   if (/^https?:\/\//i.test(baseUrl)) {
     return new URL(url, baseUrl).toString();
   }
 
-  // 否则，当作路径拼接
+  // Otherwise, concatenate as path
   return `${baseUrl.replace(/\/+$/, '')}/${url.replace(/^\/+/, '')}`;
 }
 

@@ -1,28 +1,28 @@
 /**
- * 支持的语言注册表（核心默认语言）。
+ * Supported languages registry (core default languages).
  *
- * 接口值仅为文档用途的语言标签，类型系统只消费键。
- * 应用如需扩展语言，无需改动核心包，只需在应用内新建 d.ts 文件，
- * 通过模块增强（declaration merging）追加语言键：
+ * Interface values serve solely as documentation labels; the type system consumes only keys.
+ * To extend languages without mutating core, create a d.ts file in the application and augment:
+ * Extend via declaration merging:
  *
  * ```ts
  * declare module '@vben-core/typings' {
  *   interface SupportedLanguages {
- *     'zh-TW': '繁體中文';
+ *     'zh-TW': 'Traditional Chinese';
  *   }
  * }
  * ```
  *
- * 追加后 `SupportedLanguagesType` 联合类型会自动包含新语言，
- * 所有引用该类型的包（preferences、locales、constants 等）同步获得类型约束；
- * 运行时语言列表则通过 `setSupportLanguages` 注册。
+ * `SupportedLanguagesType` union will automatically include new languages,
+ * propagating type constraints across preferences, locales, constants, etc.
+ * Register runtime language list via `setSupportLanguages`.
  */
 export interface SupportedLanguages {
   'en-US': 'English';
-  'zh-CN': '简体中文';
+  'zh-CN': 'Chinese (Simplified)';
 }
 
 /**
- * 支持的语言类型
+ * Supported languages union type
  */
 export type SupportedLanguagesType = keyof SupportedLanguages;

@@ -2,7 +2,7 @@ import type { OxlintConfig } from 'oxlint';
 
 const plugins: OxlintConfig = {
   /**
-   * oxlint 支持的插件，将默认开启的也显示配置
+   * Plugins supported by oxlint; explicitly configure even default-enabled plugins
    * type: eslint | react | unicorn | typescript | oxc |
    * import | jsdoc | jest | vitest | jsx-a11y | nextjs |
    * react-perf | promise | node | vue

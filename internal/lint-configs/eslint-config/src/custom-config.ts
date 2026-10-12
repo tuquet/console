@@ -3,7 +3,7 @@ import type { Linter } from 'eslint';
 const restrictedImportIgnores = ['**/vite.config.mts'];
 
 const customConfig: Linter.Config[] = [
-  // shadcn-ui 内部组件是自动生成的，不做太多限制
+  // Internal shadcn-ui components are auto-generated; avoid excessive restrictions
   {
     files: ['packages/@core/ui-kit/shadcn-ui/**/**'],
     rules: {
@@ -24,7 +24,7 @@ const customConfig: Linter.Config[] = [
     },
   },
   {
-    // apps内部的一些基础规则
+    // Basic internal rules for apps
     files: ['apps/**/**'],
     ignores: restrictedImportIgnores,
     rules: {
@@ -58,7 +58,7 @@ const customConfig: Linter.Config[] = [
     },
   },
   {
-    // @core内部组件，不能引入@vben/* 里面的包
+    // @core internal components must not import packages from @vben/*
     files: ['packages/@core/**/**'],
     ignores: restrictedImportIgnores,
     rules: {
@@ -77,7 +77,7 @@ const customConfig: Linter.Config[] = [
     },
   },
   {
-    // @core/shared内部组件，不能引入@vben/* 或者 @vben-core/* 里面的包
+    // @core/shared internal components must not import packages from @vben/* or @vben-core/*
     files: ['packages/@core/base/**/**'],
     ignores: restrictedImportIgnores,
     rules: {
@@ -97,7 +97,7 @@ const customConfig: Linter.Config[] = [
   },
 
   {
-    // 不能引入@vben/*里面的包
+    // Must not import packages from @vben/*
     files: [
       'packages/types/**/**',
       'packages/utils/**/**',
@@ -124,7 +124,7 @@ const customConfig: Linter.Config[] = [
       ],
     },
   },
-  // 后端模拟代码，不需要太多规则
+  // Backend mock code; does not require strict rules
   {
     files: ['apps/backend-mock/**/**', 'docs/**/**'],
     rules: {

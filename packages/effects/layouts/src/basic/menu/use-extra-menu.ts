@@ -17,7 +17,7 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
 
   const menus = computed(() => useRootMenus?.value ?? accessStore.accessMenus);
 
-  /** 记录当前顶级菜单下哪个子菜单最后激活 */
+  /** Track which sub-menu was last activated under current top-level menu */
   const defaultSubMap = new Map<string, string>();
   const extraRootMenus = ref<MenuRecordRaw[]>([]);
   const route = useRoute();
@@ -29,7 +29,7 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
   );
 
   /**
-   * 选择混合菜单事件
+   * Mixed menu select event handler
    * @param menu
    */
   const handleMixedMenuSelect = async (menu: MenuRecordRaw) => {
@@ -54,7 +54,7 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
   };
 
   /**
-   * 选择默认菜单事件
+   * Default menu select event handler
    * @param menu
    * @param rootMenu
    */
@@ -71,9 +71,9 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
   };
 
   /**
-   * 解析当前路径所属的一级菜单。
-   * 默认子路由 path 为 '' 时（如 /cards），父子菜单路径相同，findMenuByPath 会先命中
-   * 一级菜单自身，而一级菜单没有 parents，rootMenu 解析不出来会导致二级菜单为空。
+   * Resolve top-level menu corresponding to current path.
+   * When default child route path is '' (e.g. /cards), parent/child share the same path; findMenuByPath hits
+   * top menu first. Without parents, rootMenu resolution would fail and leave secondary menu empty.
    */
   function resolveRootMenu(currentPath: string, level = 0) {
     const { findMenu, rootMenu, rootMenuPath } = findRootMenuByPath(
@@ -91,7 +91,7 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
   }
 
   /**
-   * 侧边菜单鼠标移出事件
+   * Sidebar menu mouse leave event handler
    */
   const handleSideMouseLeave = () => {
     if (preferences.sidebar.expandOnHover) {
@@ -127,8 +127,8 @@ function useExtraMenu(useRootMenus?: ComputedRef<MenuRecordRaw[]>) {
     sidebarExtraVisible.value = extraMenus.value.length > 0;
   }
 
-  // 悬停时 layout-sidebar 会直接把 sidebarExtraVisible 置真，没有二级菜单时必须压回去，
-  // 否则空面板仍会展开并遮挡正文
+  // On hover, layout-sidebar sets sidebarExtraVisible to true; collapse if no secondary menu
+  // to prevent an empty panel from obscuring main content
   watch([sidebarExtraVisible, extraMenus], ([visible, items]) => {
     if (visible && items.length === 0) {
       sidebarExtraVisible.value = false;

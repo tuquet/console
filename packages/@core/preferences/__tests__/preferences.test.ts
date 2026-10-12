@@ -9,7 +9,7 @@ describe('preferences', () => {
     typeof import('../src/preferences').PreferenceManager
   >;
 
-  // 模拟 window.matchMedia 方法
+  // Mock window.matchMedia method
   vi.stubGlobal(
     'matchMedia',
     vi.fn().mockImplementation((query) => ({
@@ -110,8 +110,8 @@ describe('preferences', () => {
       overrides,
     });
 
-    // 等待防抖动操作完成
-    // await new Promise((resolve) => setTimeout(resolve, 300)); // 等待100毫秒
+    // Await debounce operation completion
+    // await new Promise((resolve) => setTimeout(resolve, 300)); // Wait 100ms
 
     const expected = {
       ...defaultPreferences,
@@ -144,14 +144,14 @@ describe('preferences', () => {
   });
 
   it('resets preferences to default', async () => {
-    // 先更新一些偏好设置
+    // First update some preferences
     preferenceManager.updatePreferences({
       theme: {
         mode: 'light',
       },
     });
 
-    // 然后重置偏好设置
+    // Then reset preferences
     await preferenceManager.resetPreferences();
 
     expect(preferenceManager.getPreferences()).toEqual(defaultPreferences);
@@ -174,7 +174,7 @@ describe('preferences', () => {
   });
 
   it('updates isMobile correctly', () => {
-    // 模拟移动端状态
+    // Mock mobile viewport status
     vi.stubGlobal(
       'matchMedia',
       vi.fn().mockImplementation((query) => ({
@@ -229,7 +229,7 @@ describe('preferences', () => {
   });
 
   it('resets preferences to default correctly', async () => {
-    // 先更新一些偏好设置
+    // First update some preferences
     preferenceManager.updatePreferences({
       app: { locale: 'en-US' },
       sidebar: { collapsed: true, width: 200 },
@@ -238,7 +238,7 @@ describe('preferences', () => {
       },
     });
 
-    // 然后重置偏好设置
+    // Then reset preferences
     await preferenceManager.resetPreferences();
 
     expect(preferenceManager.getPreferences()).toEqual(defaultPreferences);
@@ -270,7 +270,7 @@ describe('preferences', () => {
     const originalPreferences = preferenceManager.getPreferences();
 
     preferenceManager.updatePreferences({
-      app: { isMobile: 'true' as unknown as boolean }, // 错误类型
+      app: { isMobile: 'true' as unknown as boolean }, // Invalid type
     });
 
     expect(preferenceManager.getPreferences()).toEqual(originalPreferences);
@@ -318,21 +318,21 @@ describe('preferences', () => {
           component: 'switch',
           defaultValue: true,
           key: 'enableWorkbench',
-          label: '启用工作台',
+          label: 'Enable Workbench',
         },
         {
           component: 'select',
           defaultValue: 'single',
           key: 'tenantMode',
-          label: '租户模式',
+          label: 'Tenant Mode',
           options: [
-            { label: '单租户', value: 'single' },
-            { label: '多租户', value: 'multi' },
+            { label: 'Single Tenant', value: 'single' },
+            { label: 'Multi Tenant', value: 'multi' },
           ],
         },
       ],
-      tabLabel: '扩展',
-      title: '业务偏好',
+      tabLabel: 'Extensions',
+      title: 'Business Preferences',
     } as const;
 
     await preferenceManager.initPreferences({
@@ -359,11 +359,11 @@ describe('preferences', () => {
           },
           defaultValue: 4,
           key: 'pageSize',
-          label: '分页大小',
+          label: 'Page Size',
         },
       ],
-      tabLabel: '扩展',
-      title: '业务偏好',
+      tabLabel: 'Extensions',
+      title: 'Business Preferences',
     } as const;
 
     await preferenceManager.initPreferences({
@@ -390,7 +390,7 @@ describe('preferences', () => {
       return;
     }
 
-    firstField.label = '已修改';
+    firstField.label = 'Modified';
     firstField.componentProps.max = 20;
 
     expect(preferenceManager.getInitialCustomPreferences()).toEqual({
@@ -407,35 +407,35 @@ describe('preferences', () => {
             component: 'number',
             defaultValue: 20,
             key: 'pageSize',
-            label: '分页大小',
+            label: 'Page Size',
           },
           {
             component: 'input',
-            defaultValue: '日报',
+            defaultValue: 'Daily Report',
             key: 'reportTitle',
-            label: '报表标题',
+            label: 'Report Title',
           },
         ],
-        tabLabel: '扩展',
+        tabLabel: 'Extensions',
       },
       namespace: 'custom-reset',
     });
 
     preferenceManager.updateCustomPreferences({
       pageSize: 50,
-      reportTitle: '月报',
+      reportTitle: 'Monthly Report',
     });
 
     expect(preferenceManager.getCustomPreferences()).toEqual({
       pageSize: 50,
-      reportTitle: '月报',
+      reportTitle: 'Monthly Report',
     });
 
     await preferenceManager.resetPreferences();
 
     expect(preferenceManager.getCustomPreferences()).toEqual({
       pageSize: 20,
-      reportTitle: '日报',
+      reportTitle: 'Daily Report',
     });
   });
 
@@ -447,20 +447,20 @@ describe('preferences', () => {
             component: 'switch',
             defaultValue: true,
             key: 'enableWorkbench',
-            label: '启用工作台',
+            label: 'Enable Workbench',
           },
           {
             component: 'select',
             defaultValue: 'single',
             key: 'tenantMode',
-            label: '租户模式',
+            label: 'Tenant Mode',
             options: [
-              { label: '单租户', value: 'single' },
-              { label: '多租户', value: 'multi' },
+              { label: 'Single Tenant', value: 'single' },
+              { label: 'Multi Tenant', value: 'multi' },
             ],
           },
         ],
-        tabLabel: '扩展',
+        tabLabel: 'Extensions',
       },
       namespace: 'custom-invalid',
     });
@@ -491,10 +491,10 @@ describe('preferences', () => {
             },
             defaultValue: 4,
             key: 'pageSize',
-            label: '分页大小',
+            label: 'Page Size',
           },
         ],
-        tabLabel: '扩展',
+        tabLabel: 'Extensions',
       },
       namespace: 'custom-number-constraints',
     });
@@ -557,10 +557,10 @@ describe('preferences', () => {
             },
             defaultValue: 4,
             key: 'pageSize',
-            label: '分页大小',
+            label: 'Page Size',
           },
         ],
-        tabLabel: '扩展',
+        tabLabel: 'Extensions',
       },
       namespace: 'custom-number-cache',
     });

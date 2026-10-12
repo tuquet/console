@@ -2,21 +2,21 @@ import type { VNode } from 'vue';
 
 export interface IconPickerProps {
   pageSize?: number;
-  /** 图标集的名字 */
+  /** Icon set prefix @default 'lucide' */
   prefix?: string;
-  /** 是否自动请求API以获得图标集的数据.提供prefix时有效 */
+  /** Whether to auto-fetch icon set data via API when prefix is provided */
   autoFetchApi?: boolean;
   /**
-   * 图标列表
+   * Icon list
    */
   icons?: string[];
-  /** Input组件 */
+  /** Input component */
   inputComponent?: VNode;
-  /** 图标插槽名，预览图标将被渲染到此插槽中 */
+  /** Icon slot name for preview rendering */
   iconSlot?: string;
-  /** input组件的值属性名称 */
+  /** Input component value prop name */
   modelValueProp?: string;
-  /** 图标样式 */
+  /** Icon style */
   iconClass?: string;
   type?: 'icon' | 'input';
 }

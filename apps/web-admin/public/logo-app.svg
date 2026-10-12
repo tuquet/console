@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Nền Dark Theme chuẩn shadcn Zinc (zinc-950 -> zinc-900) -->
+    <linearGradient id="zincBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181b" />
+      <stop offset="60%" stop-color="#09090b" />
+      <stop offset="100%" stop-color="#030712" />
+    </linearGradient>
+
+    <!-- Viền tinh tế (zinc-700 / zinc-800) -->
+    <linearGradient id="zincBorder" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3f3f46" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#27272a" stop-opacity="0.3" />
+    </linearGradient>
+
+    <!-- Gradient thân Specter Ghost (zinc-50 -> zinc-400) -->
+    <linearGradient id="ghostBody1" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" stop-color="#fafafa" />
+      <stop offset="40%" stop-color="#e4e4e7" />
+      <stop offset="100%" stop-color="#a1a1aa" />
+    </linearGradient>
+
+    <!-- Filter làm mờ vầng sáng chuẩn W3C SVG -->
+    <filter id="auraBlur1" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="24" />
+    </filter>
+
+    <!-- Hiệu ứng đổ bóng mờ phong cách Minimalist -->
+    <filter id="ghostShadow1" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.55" />
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#ffffff" flood-opacity="0.08" />
+    </filter>
+  </defs>
+
+  <!-- Khung nền App Icon Squircle bo góc chuẩn (zinc-950) -->
+  <rect 
+    x="16" 
+    y="16" 
+    width="480" 
+    height="480" 
+    rx="108" 
+    ry="108" 
+    fill="url(#zincBg)" 
+    stroke="url(#zincBorder)" 
+    stroke-width="2.5" 
+  />
+
+  <!-- Vầng sáng quang (Aura Glow) chuẩn SVG Filter -->
+  <circle cx="256" cy="250" r="105" fill="#f4f4f5" opacity="0.08" filter="url(#auraBlur1)" />
+
+  <!-- Thân Specter Ghost -->
+  <path 
+    d="M 256,120 
+       C 185,120 144,175 144,245 
+       C 144,295 142,348 144,380 
+       C 145,395 166,398 176,386 
+       C 192,366 210,366 226,386 
+       C 236,398 256,398 266,386 
+       C 282,366 300,366 316,386 
+       C 328,400 350,395 351,380 
+       C 353,348 368,295 368,245 
+       C 368,175 327,120 256,120 Z" 
+    fill="url(#ghostBody1)" 
+    filter="url(#ghostShadow1)" 
+  />
+
+  <!-- Đôi mắt Specter (Màu zinc-950) -->
+  <ellipse cx="220" cy="235" rx="13" ry="20" fill="#09090b" />
+  <ellipse cx="292" cy="235" rx="13" ry="20" fill="#09090b" />
+
+  <!-- Điểm bắt sáng trong mắt -->
+  <circle cx="223" cy="228" r="4" fill="#fafafa" opacity="0.9" />
+  <circle cx="295" cy="228" r="4" fill="#fafafa" opacity="0.9" />
+</svg>

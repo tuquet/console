@@ -4,7 +4,7 @@ import type { RouteRecordRaw } from 'vue-router';
 import type { Recordable } from './helper';
 
 /**
- * 扩展路由原始对象
+ * Extended route raw object
  */
 type ExRouteRecordRaw = RouteRecordRaw & {
   parent?: string;
@@ -14,66 +14,66 @@ type ExRouteRecordRaw = RouteRecordRaw & {
 
 interface MenuRecordBadgeRaw {
   /**
-   * 徽标
+   * Badge
    */
   badge?: string;
   /**
-   * 徽标类型
+   * Badge type
    */
   badgeType?: 'dot' | 'normal';
   /**
-   * 徽标颜色
+   * Badge color/variants
    */
   badgeVariants?: 'destructive' | 'primary' | string;
 }
 
 /**
- * 菜单原始对象
+ * Menu record raw object
  */
 interface MenuRecordRaw extends MenuRecordBadgeRaw {
   /**
-   * 激活时的图标名
+   * Active icon name
    */
   activeIcon?: string;
   /**
-   * 子菜单
+   * Child menus
    */
   children?: MenuRecordRaw[];
   /**
-   * 是否禁用菜单
+   * Whether menu item is disabled
    * @default false
    */
   disabled?: boolean;
   /**
-   * 图标名
+   * Icon name
    */
   icon?: Component | string;
   /**
-   * 菜单名
+   * Menu name
    */
   name: string;
   /**
-   * 排序号
+   * Order index
    */
   order?: number;
   /**
-   * 父级路径
+   * Parent path
    */
   parent?: string;
   /**
-   * 所有父级路径
+   * All parent paths
    */
   parents?: string[];
   /**
-   * 菜单路径，唯一，可当作key
+   * Menu path (unique, used as key)
    */
   path: string;
   /**
-   * 菜单参数
+   * Menu parameters
    */
   query?: Recordable<any>;
   /**
-   * 是否显示菜单
+   * Whether menu item is visible
    * @default true
    */
   show?: boolean;

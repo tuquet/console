@@ -7,14 +7,14 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { useContentSpinner } from '../use-content-spinner';
 
-// preferences 是模块级单例，测试里用可变 mock 控制开关
+// preferences is a module-level singleton; test uses mutable mock to toggle settings
 const mockPreferences = vi.hoisted(() => ({ transition: { loading: true } }));
 
 vi.mock('@vben/preferences', () => ({
   preferences: mockPreferences,
 }));
 
-// useRouter 从实例注入取 router，测试里用 holder 直接供给
+// useRouter injects router from instance; test provides via holder directly
 const routerHolder = vi.hoisted(() => ({
   current: undefined as undefined | { afterEach: unknown; beforeEach: unknown },
 }));
@@ -50,7 +50,7 @@ function createRouterMock() {
 
 let activeApp: App | undefined;
 
-/** 挂载组合式函数并返回对 spinning 的实时读取 */
+/** Mount composable and return live getter for spinning */
 function mountSpinner(router: Router) {
   routerHolder.current = router as never;
   const host = document.createElement('div');
@@ -97,14 +97,14 @@ describe('useContentSpinner', () => {
       const route = makeRoute();
 
       await runBefore(beforeGuard, route);
-      // 在 showDelay 之前完成导航
+      // Complete navigation before showDelay
       vi.advanceTimersByTime(SHOW_DELAY - 50);
       await runAfter(afterHook, route);
       vi.advanceTimersByTime(SHOW_DELAY * 2);
       await nextTick();
 
       expect(isSpinning()).toBe(false);
-      // 快速导航不应遗留任何净新增定时器（环境基线之上）
+      // Rapid navigation should not leave net new timers above baseline
       expect(vi.getTimerCount()).toBe(timerBaseline);
     } finally {
       vi.useRealTimers();
@@ -125,7 +125,7 @@ describe('useContentSpinner', () => {
       await nextTick();
       expect(isSpinning()).toBe(true);
 
-      // 导航耗时 800ms > minShowTime，afterEach 时立即隐藏
+      // Navigation took 800ms > minShowTime; hide immediately on afterEach
       vi.advanceTimersByTime(800 - SHOW_DELAY);
       await runAfter(afterHook, route);
       await nextTick();
@@ -149,7 +149,7 @@ describe('useContentSpinner', () => {
       await nextTick();
       expect(isSpinning()).toBe(true);
 
-      // 导航耗时 300ms，spinner 从 200ms 开始显示，应保留到 700ms
+      // Navigation took 300ms; spinner starts showing at 200ms, should stay visible until 700ms
       vi.advanceTimersByTime(300 - SHOW_DELAY);
       await runAfter(afterHook, route);
       await nextTick();
@@ -202,7 +202,7 @@ describe('useContentSpinner', () => {
       const isSpinning = mountSpinner(routerMock.router);
       const { afterHook, beforeGuard } = routerMock.getHooks();
 
-      // 连续三次快速导航，任意时刻都不应显示
+      // Three consecutive rapid navigations should never display spinner
       let route = makeRoute();
       await runBefore(beforeGuard, route);
       vi.advanceTimersByTime(100);

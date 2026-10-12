@@ -80,14 +80,14 @@ const {
   viewedRowOptions,
 } = usePriorityValues(props, state);
 
-// viewedRowOptions：helper 只创建一次（persist/keyField 不支持运行时切换）
-// actionCodes、rowClassName、rowStyle、viewedKeys 的变化通过 options computed 自然响应
+// viewedRowOptions: helper is created once (persist/keyField do not support runtime switching)
+// Changes in actionCodes, rowClassName, rowStyle, viewedKeys respond via options computed
 const gridApi = props.api;
 
 watch(
   viewedRowOptions,
   (cfg) => {
-    // helper 已存在则不重建
+    // If helper exists, do not recreate
     if (gridApi.viewedRowHelper) return;
 
     if (!cfg) return;
@@ -134,7 +134,7 @@ const [Form, formApi] = useTableForm({
     await formApi.reset();
     const formValues = await formApi.getValues();
     formApi.setLatestSubmissionValues(formValues);
-    // 如果值发生了变化，submitOnChange会触发刷新。所以只在submitOnChange为false或者值没有发生变化时，手动刷新
+    // If value changed, submitOnChange triggers refresh; manually refresh only when submitOnChange is false or value unchanged
     if (isEqual(prevValues, formValues) || !formOptions.value?.submitOnChange) {
       props.api.reload(formValues);
     }
@@ -173,7 +173,7 @@ const toolbarOptions = computed(() => {
       ? $t('common.hideSearchPanel')
       : $t('common.showSearchPanel'),
   };
-  // 将搜索按钮合并到用户配置的toolbarConfig.tools中
+  // Merge search button into user-configured toolbarConfig.tools
   const toolbarConfig: VxeGridPropTypes.ToolbarConfig = {
     tools: (gridOptions.value?.toolbarConfig?.tools ??
       []) as VxeToolbarPropTypes.ToolConfig[],
@@ -189,8 +189,8 @@ const toolbarOptions = computed(() => {
     return { toolbarConfig };
   }
 
-  // 强制使用固定的toolbar配置，不允许用户自定义
-  // 减少配置的复杂度，以及后续维护的成本
+  // Enforce fixed toolbar config to disallow arbitrary user override,
+  // reducing complexity and maintenance cost
   toolbarConfig.slots = {
     ...(hasSlotActions || showTableTitle.value
       ? { buttons: TOOLBAR_ACTIONS }
@@ -218,7 +218,7 @@ const options = computed(() => {
   if (mergedOptions.proxyConfig) {
     const { ajax } = mergedOptions.proxyConfig;
     mergedOptions.proxyConfig.enabled = !!ajax;
-    // 不自动加载数据, 由组件控制
+    // Do not autoload data; controlled by component
     mergedOptions.proxyConfig.autoLoad = false;
   }
 
@@ -257,7 +257,7 @@ const options = computed(() => {
     mergedOptions.data = tableData.value;
   }
 
-  // 注入已读行功能（rowClassName、rowStyle、columns 拦截）
+  // Inject viewed row feature (intercept rowClassName, rowStyle, columns)
   if (viewedRowOptions.value && gridApi.viewedRowHelper) {
     applyViewedRowOptions(
       mergedOptions,
@@ -316,11 +316,11 @@ const delegatedFormSlots = computed(() => {
 });
 
 const showDefaultEmpty = computed(() => {
-  // 检查是否有原生的 VXE Table 空状态配置
+  // Check if native VXE Table empty state is configured
   const hasEmptyText = options.value.emptyText !== undefined;
   const hasEmptyRender = options.value.emptyRender !== undefined;
 
-  // 如果有原生配置，就不显示默认的空状态
+  // If native config exists, do not show default empty state
   return !hasEmptyText && !hasEmptyRender;
 });
 
@@ -332,21 +332,21 @@ async function init() {
     toRaw(gridOptions.value),
     toRaw(globalGridConfig),
   );
-  // 内部主动加载数据，防止form的默认值影响
+  // Internally load data to prevent interference from form default values
   const autoLoad = defaultGridOptions.proxyConfig?.autoLoad;
   const enableProxyConfig = options.value.proxyConfig?.enabled;
 
-  // form 由 vben-form代替，所以不适配formConfig，这里给出警告
+  // form is replaced by vben-form (formConfig unsupported); log warning
   const formConfig = gridOptions.value?.formConfig;
-  // 处理某个页面加载多个Table时，第2个之后的Table初始化报出警告
-  // 因为第一次初始化之后会把defaultGridOptions和gridOptions合并后缓存进State
+  // Handle warning when loading multiple tables on one page:
+  // defaultGridOptions and gridOptions are cached into State after first initialization
   if (formConfig && formConfig.enabled) {
     console.warn(
       '[Vben Vxe Table]: The formConfig in the grid is not supported, please use the `formOptions` props',
     );
   }
   props.api?.setState?.({ gridOptions: defaultGridOptions });
-  // form 由 vben-form 代替，所以需要保证query相关事件可以拿到参数
+  // Form is replaced by vben-form; ensure query events receive arguments
   extendProxyOptions(props.api, defaultGridOptions, () =>
     formApi.getLatestSubmissionValues(),
   );
@@ -361,7 +361,7 @@ async function init() {
   }
 }
 
-// formOptions支持响应式
+// formOptions supports reactivity
 watch(
   formOptions,
   () => {
@@ -413,7 +413,7 @@ onUnmounted(() => {
       v-bind="options"
       v-on="events"
     >
-      <!-- 左侧操作区域或者title -->
+      <!-- Left action area or title -->
       <template v-if="showToolbar" #toolbar-actions="slotProps">
         <slot v-if="showTableTitle" name="table-title">
           <div class="flex-center gap-1 text-[1rem] font-bold">
@@ -426,7 +426,7 @@ onUnmounted(() => {
         <slot name="toolbar-actions" v-bind="slotProps"> </slot>
       </template>
 
-      <!-- 继承默认的slot -->
+      <!-- Inherit default slots -->
       <template
         v-for="slotName in delegatedSlots"
         :key="slotName"
@@ -447,7 +447,7 @@ onUnmounted(() => {
         />
       </template>
 
-      <!-- form表单 -->
+      <!-- Search form -->
       <template #form>
         <div
           v-if="formOptions"
@@ -506,7 +506,7 @@ onUnmounted(() => {
           <VbenLoading :spinning="true" />
         </slot>
       </template>
-      <!-- 统一控状态 -->
+      <!-- Unified empty state -->
       <template v-if="showDefaultEmpty" #empty>
         <slot name="empty">
           <EmptyIcon class="mx-auto" />

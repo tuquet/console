@@ -4,24 +4,24 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 
 interface AccessState {
   /**
-   * 用户信息
+   * User profile information
    */
   userInfo: BasicUserInfo | null;
   /**
-   * 用户角色
+   * User role identifiers
    */
   userRoles: string[];
 }
 
 /**
- * @zh_CN 用户信息相关
+ * User store
  */
 export const useUserStore = defineStore('core-user', {
   actions: {
     setUserInfo(userInfo: BasicUserInfo | null) {
-      // 设置用户信息
+      // Set user info
       this.userInfo = userInfo;
-      // 设置角色信息
+      // Set roles
       const roles = userInfo?.roles ?? [];
       this.setUserRoles(roles);
     },
@@ -35,7 +35,7 @@ export const useUserStore = defineStore('core-user', {
   }),
 });
 
-// 解决热更新问题
+// Hot module replacement (HMR) support
 const hot = import.meta.hot;
 if (hot) {
   hot.accept(acceptHMRUpdate(useUserStore, hot));

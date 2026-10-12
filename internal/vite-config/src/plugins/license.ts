@@ -5,7 +5,7 @@ import { EOL } from 'node:os';
 import { dateUtil, readPackageJSON } from '@vben/node-utils';
 
 /**
- * 用于注入版权信息
+ * Inject license / copyright information
  * @returns
  */
 async function viteLicensePlugin(
@@ -38,10 +38,10 @@ async function viteLicensePlugin(
 
         for (const [, fileContent] of Object.entries(bundle)) {
           if (fileContent.type === 'chunk' && fileContent.isEntry) {
-            // 插入版权信息
+            // Insert license information
             const content = fileContent.code;
             const updatedContent = `${copyrightText}${EOL}${content}`;
-            // 更新bundle
+            // Update bundle
             fileContent.code = updatedContent;
           }
         }

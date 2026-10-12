@@ -2,8 +2,8 @@ import type { OxlintConfig } from 'oxlint';
 
 const typescript: OxlintConfig = {
   rules: {
-    // —— 从 @typescript-eslint strict 预设迁移而来（非类型感知，oxlint 原生支持）——
-    // no-array-constructor / no-useless-constructor 已由 javascript 配置以核心规则覆盖。
+    // Migrated from @typescript-eslint strict preset (non-type-aware, natively supported by oxlint)
+    // no-array-constructor / no-useless-constructor already covered by core rules in javascript configuration.
     'typescript/ban-ts-comment': 'error',
     'typescript/no-duplicate-enum-values': 'error',
     'typescript/no-dynamic-delete': 'error',

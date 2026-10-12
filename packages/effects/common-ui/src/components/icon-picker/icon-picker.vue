@@ -29,7 +29,7 @@ import { objectOmit, refDebounced, watchDebounced } from '@vueuse/core';
 import { fetchIconsData } from './icons';
 
 const props = withDefaults(defineProps<IconPickerProps>(), {
-  prefix: 'ant-design',
+  prefix: 'lucide',
   pageSize: 36,
   icons: () => [],
   iconSlot: 'default',

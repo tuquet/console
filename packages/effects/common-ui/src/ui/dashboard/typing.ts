@@ -9,7 +9,7 @@ interface AnalysisOverviewItem {
 }
 
 interface WorkbenchProjectItem {
-  /** 临时字段 */
+  /** Temporary field */
   [key: string]: any;
   color?: string;
   content: string;

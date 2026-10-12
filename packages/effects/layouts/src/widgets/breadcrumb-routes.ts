@@ -10,7 +10,7 @@ interface BreadcrumbRoute {
 type BreadcrumbRouteResolver = (path: string) => { matched: MatchedRoutes };
 
 /**
- * 解析用于渲染当前面包屑的路由匹配记录。
+ * Resolve matched route records for rendering active breadcrumb.
  */
 export function resolveBreadcrumbMatches(
   route: BreadcrumbRoute,

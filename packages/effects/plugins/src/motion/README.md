@@ -1,17 +1,17 @@
 # Motion Plugin
 
-基于 @vueuse/motion 的动画插件。
+Animation plugin based on @vueuse/motion.
 
-## 导出
+## Exports
 
-| 导出              | 类型 | 说明       |
+| Export | Type | Description |
 | ----------------- | ---- | ---------- |
-| `Motion`          | 组件 | 动画组件   |
-| `MotionGroup`     | 组件 | 动画组组件 |
-| `MotionDirective` | 指令 | 动画指令   |
-| `MotionPlugin`    | 插件 | Vue 插件   |
+| `Motion`          | Component | Motion component |
+| `MotionGroup`     | Component | Motion group component |
+| `MotionDirective` | Directive | Motion directive |
+| `MotionPlugin`    | Plugin | Vue plugin |
 
-## 使用
+## Usage
 
 ```ts
 import { MotionPlugin, Motion, MotionDirective } from '@vben/plugins/motion';
@@ -19,7 +19,7 @@ import { MotionPlugin, Motion, MotionDirective } from '@vben/plugins/motion';
 app.use(MotionPlugin);
 ```
 
-## 类型
+## Types
 
 ```ts
 import type { MotionOptions, MotionVariants } from '@vben/plugins/motion';

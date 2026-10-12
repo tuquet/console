@@ -1,12 +1,12 @@
 import { TinyColor } from '@ctrl/tinycolor';
 
 /**
- * 将颜色转换为HSL格式。
+ * Convert color to HSL format.
  *
- * HSL是一种颜色模型，包括色相(Hue)、饱和度(Saturation)和亮度(Lightness)三个部分。
+ * HSL color model includes Hue, Saturation, and Lightness.
  *
- * @param {string} color 输入的颜色。
- * @returns {string} HSL格式的颜色字符串。
+ * @param {string} color Input color.
+ * @returns {string} HSL color string.
  */
 function convertToHsl(color: string): string {
   const { a, h, l, s } = new TinyColor(color).toHsl();
@@ -15,13 +15,13 @@ function convertToHsl(color: string): string {
 }
 
 /**
- * 将颜色转换为HSL CSS变量。
+ * Convert color to HSL CSS variable format.
  *
- * 这个函数与convertToHsl函数类似，但是返回的字符串格式稍有不同，
- * 以便可以作为CSS变量使用。
+ * Similar to convertToHsl, but returns space-separated values
+ * suitable for CSS variables.
  *
- * @param {string} color 输入的颜色。
- * @returns {string} 可以作为CSS变量使用的HSL格式的颜色字符串。
+ * @param {string} color Input color.
+ * @returns {string} HSL formatted string for CSS variables.
  */
 function convertToHslCssVar(color: string): string {
   const { a, h, l, s } = new TinyColor(color).toHsl();
@@ -30,21 +30,21 @@ function convertToHslCssVar(color: string): string {
 }
 
 /**
- * 将颜色转换为RGB颜色字符串
- * TinyColor无法处理hsl内包含'deg'、'grad'、'rad'或'turn'的字符串
- * 比如 hsl(231deg 98% 65%)将被解析为rgb(0, 0, 0)
- * 这里在转换之前先将这些单位去掉
- * @param str 表示HLS颜色值的字符串
- * @returns 如果颜色值有效，则返回对应的RGB颜色字符串；如果无效，则返回rgb(0, 0, 0)
+ * Convert color to RGB string
+ * TinyColor cannot parse HSL containing 'deg', 'grad', 'rad', or 'turn';
+ * e.g. hsl(231deg 98% 65%) parses to rgb(0, 0, 0).
+ * Strip these units before conversion.
+ * @param str HSL color string
+ * @returns RGB string if valid, rgb(0, 0, 0) otherwise
  */
 function convertToRgb(str: string): string {
   return new TinyColor(str.replaceAll(/deg|grad|rad|turn/g, '')).toRgbString();
 }
 
 /**
- * 检查颜色是否有效
- * @param {string} color - 待检查的颜色
- * 如果颜色有效返回true，否则返回false
+ * Check if color is valid
+ * @param {string} color Color to validate
+ * Returns true if valid, false otherwise
  */
 function isValidColor(color?: string) {
   if (!color) {

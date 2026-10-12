@@ -8,7 +8,7 @@ function useNavigation() {
   const router = useRouter();
   const routeMetaMap = new Map<string, RouteRecordNormalized>();
 
-  // 初始化路由映射
+  // Initialize route mapping
   const initRouteMetaMap = () => {
     const routes = router.getRoutes();
     routes.forEach((route) => {
@@ -18,18 +18,18 @@ function useNavigation() {
 
   initRouteMetaMap();
 
-  // 监听路由变化
+  // Watch route changes
   router.afterEach(() => {
     initRouteMetaMap();
   });
 
-  // 检查是否应该在新窗口打开
+  // Check if route should open in new window
   const shouldOpenInNewWindow = (path: string): boolean => {
     if (isHttpUrl(path)) {
       return true;
     }
     const route = routeMetaMap.get(path);
-    // 如果有外链或者设置了在新窗口打开，返回 true
+    // Return true if external link or configured to open in new window
     return !!(route?.meta?.link || route?.meta?.openInNewWindow);
   };
 
@@ -42,7 +42,7 @@ function useNavigation() {
       const route = routeMetaMap.get(path);
       const { openInNewWindow = false, query = {}, link } = route?.meta ?? {};
 
-      // 检查是否有外链
+      // Check for external link
       if (link && typeof link === 'string') {
         openWindow(link, { target: '_blank' });
         return;

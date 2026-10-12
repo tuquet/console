@@ -2,7 +2,7 @@ import type { PageProps } from '../page/types';
 
 export interface ColPageProps extends PageProps {
   /**
-   * 左侧宽度
+   * Left column width
    * @default 30
    */
   leftWidth?: number;
@@ -11,7 +11,7 @@ export interface ColPageProps extends PageProps {
   leftCollapsedWidth?: number;
   leftCollapsible?: boolean;
   /**
-   * 右侧宽度
+   * Right column width
    * @default 70
    */
   rightWidth?: number;

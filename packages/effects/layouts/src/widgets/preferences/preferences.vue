@@ -12,7 +12,7 @@ import { VbenButton } from '@vben-core/shadcn-ui';
 import PreferencesDrawer from './preferences-drawer.vue';
 
 interface Props {
-  /** 是否显示按钮 */
+  /** Whether to show button */
   showButton?: boolean;
 }
 
@@ -26,13 +26,13 @@ const [Drawer, drawerApi] = useVbenDrawer({
   connectedComponent: PreferencesDrawer,
 });
 
-// 暴露打开抽屉的方法
+// Expose method to open preferences drawer
 defineExpose({
   open: () => drawerApi.open(),
 });
 
 /**
- * preferences 转成 vue props
+ * Transform preferences to Vue props
  * preferences.widget.fullscreen=>widgetFullscreen
  */
 const attrs = computed(() => {
@@ -46,7 +46,7 @@ const attrs = computed(() => {
 });
 
 /**
- * preferences 转成 vue listener
+ * Transform preferences to Vue listeners
  * preferences.widget.fullscreen=>@update:widgetFullscreen
  */
 const listen = computed(() => {
@@ -78,7 +78,7 @@ const listen = computed(() => {
       @clear-preferences-and-logout="emit('clearPreferencesAndLogout')"
     />
 
-    <!-- 触发打开抽屉的按钮(可覆盖) -->
+    <!-- Button to trigger opening drawer (can be overridden) -->
     <slot>
       <VbenButton
         v-if="props.showButton"

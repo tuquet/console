@@ -11,43 +11,43 @@ export const TransitionPresetsKeys = Object.keys(
 ) as TransitionPresets[];
 
 export interface CountToProps {
-  /** 初始值 */
+  /** Initial value */
   startVal?: number;
-  /** 当前值 */
+  /** Current value */
   endVal: number;
-  /** 是否禁用动画 */
+  /** Whether animation is disabled */
   disabled?: boolean;
-  /** 延迟动画开始的时间 */
+  /** Delay before animation starts */
   delay?: number;
-  /** 持续时间  */
+  /** Duration */
   duration?: number;
-  /** 小数位数  */
+  /** Decimal places */
   decimals?: number;
-  /** 小数点  */
+  /** Decimal symbol */
   decimal?: string;
-  /** 分隔符  */
+  /** Thousand separator */
   separator?: string;
-  /** 前缀  */
+  /** Prefix */
   prefix?: string;
-  /** 后缀  */
+  /** Suffix */
   suffix?: string;
-  /** 过渡效果  */
+  /** Transition easing effect */
   transition?: CubicBezierPoints | EasingFunction | TransitionPresets;
-  /** 整数部分的类名 */
+  /** Integer part class name */
   mainClass?: string;
-  /** 小数部分的类名 */
+  /** Decimal part class name */
   decimalClass?: string;
-  /** 前缀部分的类名 */
+  /** Prefix part class name */
   prefixClass?: string;
-  /** 后缀部分的类名 */
+  /** Suffix part class name */
   suffixClass?: string;
 
-  /** 整数部分的样式 */
+  /** Integer part style */
   mainStyle?: StyleValue;
-  /** 小数部分的样式 */
+  /** Decimal part style */
   decimalStyle?: StyleValue;
-  /** 前缀部分的样式 */
+  /** Prefix part style */
   prefixStyle?: StyleValue;
-  /** 后缀部分的样式 */
+  /** Suffix part style */
   suffixStyle?: StyleValue;
 }

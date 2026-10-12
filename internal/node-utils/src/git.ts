@@ -5,7 +5,7 @@ import { execa } from 'execa';
 export * from '@changesets/git';
 
 /**
- * 获取暂存区文件
+ * Get staged files
  */
 async function getStagedFiles(): Promise<string[]> {
   try {

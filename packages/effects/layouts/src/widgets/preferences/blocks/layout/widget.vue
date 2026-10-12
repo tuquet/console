@@ -69,9 +69,9 @@ const buttonPositionItems = computed((): SelectOption[] => [
 ]);
 
 /**
- * preferences 按钮独享的位置选项：
- * 保留 auto/fixed 让 use-preferences.ts 的智能 fallback 生效
- * （移动端/全屏内容模式下自动切换 header/fixed，避免偏好入口死锁）
+ * Dedicated position options for preferences button:
+ * Preserves auto/fixed for smart fallback in use-preferences.ts
+ * (switches header/fixed on mobile or fullscreen to prevent access lockout)
  */
 const preferencesPositionItems = computed((): SelectOption[] => [
   {

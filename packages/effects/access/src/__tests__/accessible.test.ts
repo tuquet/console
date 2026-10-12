@@ -4,10 +4,10 @@ import { describe, expect, it } from 'vitest';
 
 import { generateAccessible } from '../accessible';
 
-// generateAccessible 会操作传入的 router 实例。这里用最小 stub 覆盖它实际调用的方法：
-// - getRoutes(): 返回 [] -> 不存在根路由 '/', 走 router.addRoute 分支
-// - addRoute/removeRoute: 空实现
-// 我们只断言返回的 accessibleRoutes 上自动生成的 redirect。
+// generateAccessible manipulates passed router instance. Cover methods with minimal stub:
+// - getRoutes(): returns [] -> no root route '/', triggers router.addRoute branch
+// - addRoute/removeRoute: no-op stub
+// We only assert auto-generated redirects on accessibleRoutes.
 function createRouterStub() {
   return {
     addRoute: () => {},
@@ -43,7 +43,7 @@ function findByName(
 }
 
 describe('generateAccessible - redirect normalization', () => {
-  it('不为动态参数(:id)首子路由的父级生成 redirect', async () => {
+  it('does not generate redirect for parent when first child route has dynamic param (:id)', async () => {
     const routes = [
       {
         name: 'DyeSets',
@@ -63,7 +63,7 @@ describe('generateAccessible - redirect normalization', () => {
     expect(findByName(result, 'DyeSets')?.redirect).toBeUndefined();
   });
 
-  it('父级为对象 redirect({name}) 且含 :id 子路由时不抛异常且不生成 redirect', async () => {
+  it('does not throw and does not generate redirect when parent has object redirect({name}) and contains :id child route', async () => {
     const routes = [
       {
         name: 'Production',
@@ -93,15 +93,15 @@ describe('generateAccessible - redirect normalization', () => {
     ] as unknown as RouteRecordRaw[];
 
     const result = await generate(routes);
-    // 顶级对象 redirect 保持不变
+    // Top-level object redirect remains unchanged
     expect(findByName(result, 'Production')?.redirect).toEqual({
       name: 'ProductionTasks',
     });
-    // :id 首子路由的父级不生成 redirect
+    // Parent of :id first child route does not generate redirect
     expect(findByName(result, 'ProductionTasks')?.redirect).toBeUndefined();
   });
 
-  it('父级为对象 redirect 时，普通相对首子路由回退用 parent.path 拼接', async () => {
+  it('falls back to parent.path concatenation for relative first child route when parent has object redirect', async () => {
     const routes = [
       {
         name: 'Setting',
@@ -131,7 +131,7 @@ describe('generateAccessible - redirect normalization', () => {
     );
   });
 
-  it('深层嵌套(上游风格)相对路径逐级生成正确的累计绝对 redirect', async () => {
+  it('generates correct cumulative absolute redirect for deep nested relative paths step by step', async () => {
     const routes = [
       {
         name: 'Demos',
@@ -167,7 +167,7 @@ describe('generateAccessible - redirect normalization', () => {
     ] as unknown as RouteRecordRaw[];
 
     const result = await generate(routes);
-    // Demos 重定向到第一级子路由，子路由继续级联到叶子
+    // Demos redirects to first-level child route, child cascades down to leaf
     expect(findByName(result, 'Demos')?.redirect).toBe('/demos/nested');
     expect(findByName(result, 'NestedDemos')?.redirect).toBe(
       '/demos/nested/menu1',
@@ -177,7 +177,7 @@ describe('generateAccessible - redirect normalization', () => {
     );
   });
 
-  it('首子路由为绝对路径(/foo)时不生成 redirect', async () => {
+  it('does not generate redirect when first child route is an absolute path (/foo)', async () => {
     const routes = [
       {
         name: 'Dashboard',
@@ -197,7 +197,7 @@ describe('generateAccessible - redirect normalization', () => {
     expect(findByName(result, 'Dashboard')?.redirect).toBeUndefined();
   });
 
-  it('首子路由为空 path 时不生成 redirect', async () => {
+  it('does not generate redirect when first child route has empty path', async () => {
     const routes = [
       {
         name: 'HideChildrenParent',
@@ -217,7 +217,7 @@ describe('generateAccessible - redirect normalization', () => {
     expect(findByName(result, 'HideChildrenParent')?.redirect).toBeUndefined();
   });
 
-  it('已存在的 redirect 保持不变', async () => {
+  it('preserves existing redirect without modification', async () => {
     const routes = [
       {
         name: 'Custom',

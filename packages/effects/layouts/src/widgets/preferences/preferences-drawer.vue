@@ -17,7 +17,17 @@ import type { SegmentedItem } from '@vben-core/shadcn-ui';
 
 import { computed, ref } from 'vue';
 
-import { Copy, Pin, PinOff, RotateCw } from '@vben/icons';
+import {
+  Copy,
+  Keyboard,
+  LayoutTemplate,
+  Palette,
+  Pin,
+  PinOff,
+  RotateCw,
+  Settings,
+  SlidersHorizontal,
+} from '@vben/icons';
 import { $t, loadLocaleMessages } from '@vben/locales';
 import {
   clearCache,
@@ -324,18 +334,22 @@ const showCustomTab = computed(() => {
 const tabs = computed((): SegmentedItem[] => {
   const items: SegmentedItem[] = [
     {
+      icon: Palette,
       label: $t('preferences.appearance'),
       value: 'appearance',
     },
     {
+      icon: LayoutTemplate,
       label: $t('preferences.layout'),
       value: 'layout',
     },
     {
+      icon: Keyboard,
       label: $t('preferences.shortcutKeys.title'),
       value: 'shortcutKey',
     },
     {
+      icon: Settings,
       label: $t('preferences.general'),
       value: 'general',
     },
@@ -343,6 +357,7 @@ const tabs = computed((): SegmentedItem[] => {
 
   if (showCustomTab.value) {
     items.push({
+      icon: SlidersHorizontal,
       label: customTabLabel.value,
       value: 'custom',
     });

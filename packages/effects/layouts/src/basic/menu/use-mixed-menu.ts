@@ -17,7 +17,7 @@ function useMixedMenu() {
   const rootMenuPath = ref<string>('');
   const mixedRootMenuPath = ref<string>('');
   const mixExtraMenus = ref<MenuRecordRaw[]>([]);
-  /** 记录当前顶级菜单下哪个子菜单最后激活 */
+  /** Track which sub-menu was last activated under current top-level menu */
   const defaultSubMap = new Map<string, string>();
   const { isMixedNav, isHeaderMixedNav, isMobile } = usePreferences();
 
@@ -38,7 +38,7 @@ function useMixedMenu() {
   const menus = computed(() => accessStore.accessMenus);
 
   /**
-   * 头部菜单
+   * Header menus
    */
   const headerMenus = computed(() => {
     if (!needSplit.value) {
@@ -53,7 +53,7 @@ function useMixedMenu() {
   });
 
   /**
-   * 侧边菜单
+   * Sidebar menus
    */
   const sidebarMenus = computed(() => {
     return needSplit.value ? splitSideMenus.value : menus.value;
@@ -64,14 +64,14 @@ function useMixedMenu() {
   });
 
   /**
-   * 侧边菜单激活路径
+   * Sidebar menu active path
    */
   const sidebarActive = computed(() => {
     return (route?.meta?.activePath as string) ?? route.path;
   });
 
   /**
-   * 头部菜单激活路径
+   * Header menu active path
    */
   const headerActive = computed(() => {
     if (!needSplit.value) {
@@ -81,9 +81,9 @@ function useMixedMenu() {
   });
 
   /**
-   * 菜单点击事件处理
-   * @param key 菜单路径
-   * @param mode 菜单模式
+   * Menu click event handler
+   * @param key Menu path
+   * @param mode Menu mode
    */
   const handleMenuSelect = (key: string, mode?: string) => {
     if (!needSplit.value || mode === 'vertical') {
@@ -110,9 +110,9 @@ function useMixedMenu() {
   };
 
   /**
-   * 侧边菜单展开事件
-   * @param key 路由路径
-   * @param parentsPath 父级路径
+   * Sidebar menu expand event handler
+   * @param key Route path
+   * @param parentsPath Parent path
    */
   const handleMenuOpen = (key: string, parentsPath: string[]) => {
     if (parentsPath.length <= 1 && preferences.sidebar.autoActivateChild) {
@@ -123,8 +123,8 @@ function useMixedMenu() {
   };
 
   /**
-   * 计算侧边菜单
-   * @param path 路由路径
+   * Compute sidebar menus
+   * @param path Route path
    */
   function calcSideMenus(path: string = route.path) {
     let { rootMenu } = findRootMenuByPath(menus.value, path);
@@ -152,7 +152,7 @@ function useMixedMenu() {
     { immediate: true },
   );
 
-  // 初始化计算侧边菜单
+  // Initialize computation of sidebar menus
   onBeforeMount(() => {
     calcSideMenus(route.meta?.activePath || route.path);
   });

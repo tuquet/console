@@ -47,18 +47,18 @@ const { copyToClipboard, isCopied } = useClipboard();
             Khóa Token Truy Cập Bí Mật
           </label>
           <div
-            class="rounded bg-black/60 p-3 font-mono text-xs text-sky-300 flex items-center justify-between gap-2 break-all"
+            class="rounded bg-muted/60 border border-border p-3 font-mono text-xs text-foreground flex items-center justify-between gap-2 break-all"
           >
             <span>{{ props.fullKey }}</span>
             <Button
               variant="ghost"
               size="icon"
-              class="text-sky-300 hover:text-white p-0 size-6 shrink-0"
+              class="text-muted-foreground hover:text-foreground p-0 size-6 shrink-0"
               @click="copyToClipboard(props.fullKey, 'Full API Key')"
             >
               <Check
                 v-if="isCopied('Full API Key')"
-                class="size-4 text-green-500"
+                class="size-4 text-emerald-500"
               />
               <Copy v-else class="size-4" />
             </Button>

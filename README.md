@@ -1,4 +1,4 @@
-# Tuquet Admin (`admin.tuquet.com`)
+# Specter (`admin.tuquet.com`)
 
 Unified Management, IAM & Operations Console for the **[Tuquet Ecosystem](https://tuquet.com)**, powered by Vue 3, Vite, and Ant Design Vue / Shadcn-Vue.
 

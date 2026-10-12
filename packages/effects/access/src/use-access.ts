@@ -11,7 +11,7 @@ function useAccess() {
   });
 
   /**
-   * 基于角色判断是否有权限
+   * Check permission based on roles
    * @description: Determine whether there is permission，The role is judged by the user's role
    * @param roles
    */
@@ -22,7 +22,7 @@ function useAccess() {
   }
 
   /**
-   * 基于权限码判断是否有权限
+   * Check permission based on permission codes
    * @description: Determine whether there is permission，The permission code is judged by the user's permission code
    * @param codes
    */

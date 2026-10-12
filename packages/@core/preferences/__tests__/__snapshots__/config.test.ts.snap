@@ -28,7 +28,7 @@ exports[`defaultPreferences immutability test > should not modify the config obj
     "layout": "sidebar-nav",
     "locale": "en-US",
     "loginExpiredMode": "page",
-    "name": "Tuquet Admin",
+    "name": "Specter",
     "preferencesButtonPosition": "auto",
     "timezone": "Asia/Ho_Chi_Minh",
     "watermark": false,

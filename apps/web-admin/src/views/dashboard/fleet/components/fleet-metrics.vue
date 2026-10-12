@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
           Tổng Máy Trạm
         </span>
         <span
-          class="flex size-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400"
+          class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
         >
           <Laptop class="size-4.5" />
         </span>
@@ -31,7 +31,9 @@ const props = withDefaults(defineProps<Props>(), {
         <span class="text-3xl font-extrabold tracking-tight text-foreground">
           {{ props.metrics.total_nodes }}
         </span>
-        <span class="text-xs font-semibold text-sky-400">Thiết bị</span>
+        <span class="text-xs font-semibold text-muted-foreground"
+          >Thiết bị</span
+        >
       </div>
       <div class="mt-2 text-xs text-muted-foreground">
         Đã đăng ký vào hệ thống
@@ -45,19 +47,21 @@ const props = withDefaults(defineProps<Props>(), {
           Đang Trực Tuyến
         </span>
         <span
-          class="flex size-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400"
+          class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
         >
-          <CheckCircle2 class="size-4.5" />
+          <CheckCircle2 class="size-4.5 text-emerald-500" />
         </span>
       </div>
       <div class="mt-2 flex items-baseline gap-2">
         <span class="text-3xl font-extrabold tracking-tight text-foreground">
           {{ props.metrics.online_nodes }}
         </span>
-        <span class="text-xs font-semibold text-emerald-400">Sẵn sàng</span>
+        <span class="text-xs font-semibold text-muted-foreground"
+          >Sẵn sàng</span
+        >
       </div>
-      <div class="mt-2 flex items-center gap-1.5 text-xs text-emerald-400">
-        <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <div class="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+        <span class="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
         <span>Nhận lệnh thực thi tự động</span>
       </div>
     </div>
@@ -69,7 +73,7 @@ const props = withDefaults(defineProps<Props>(), {
           Tác Vụ Đang Chạy
         </span>
         <span
-          class="flex size-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400"
+          class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
         >
           <Cpu class="size-4.5" />
         </span>
@@ -78,7 +82,9 @@ const props = withDefaults(defineProps<Props>(), {
         <span class="text-3xl font-extrabold tracking-tight text-foreground">
           {{ props.metrics.active_jobs }}
         </span>
-        <span class="text-xs font-semibold text-indigo-400">Runner Jobs</span>
+        <span class="text-xs font-semibold text-muted-foreground"
+          >Runner Jobs</span
+        >
       </div>
       <div class="mt-2 text-xs text-muted-foreground">
         Tiến trình Win32 Job Object
@@ -92,7 +98,7 @@ const props = withDefaults(defineProps<Props>(), {
           Cổng Daemon Loopback
         </span>
         <span
-          class="flex size-9 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400"
+          class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
         >
           <Terminal class="size-4.5" />
         </span>
@@ -103,9 +109,9 @@ const props = withDefaults(defineProps<Props>(), {
         </span>
         <span
           v-if="props.metrics.loopback_online"
-          class="inline-flex items-center gap-1 text-xs text-emerald-400"
+          class="inline-flex items-center gap-1.5 text-xs text-foreground"
         >
-          <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
           Online
         </span>
         <span v-else class="text-xs text-muted-foreground"> Chờ kết nối </span>

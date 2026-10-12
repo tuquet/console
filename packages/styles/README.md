@@ -1,18 +1,18 @@
 # @vben/styles
 
-用于多个 `app` 公用的样式文件，继承了 `@vben-core/design` 的所有能力。业务上有通用的样式文件可以放在这里。
+Shared style files for multiple apps, inheriting all capabilities from `@vben-core/design`. Common style files can be placed here.
 
-## 用法
+## Usage
 
-### 添加依赖
+### Add Dependency
 
 ```bash
-# 进入目标应用目录，例如 apps/xxxx-app
+# Navigate to target app directory, e.g. apps/xxxx-app
 # cd apps/xxxx-app
 pnpm add @vben/styles
 ```
 
-### 使用
+### Usage
 
 ```ts
 import '@vben/styles';

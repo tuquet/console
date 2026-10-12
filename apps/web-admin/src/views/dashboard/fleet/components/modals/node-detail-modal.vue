@@ -61,7 +61,7 @@ const { formatDate } = useDateFormat();
         >
           <div class="flex items-center gap-3">
             <div
-              class="flex size-10 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400"
+              class="flex size-10 items-center justify-center rounded-lg bg-muted text-foreground"
             >
               <Laptop class="size-5" />
             </div>
@@ -75,16 +75,17 @@ const { formatDate } = useDateFormat();
             </div>
           </div>
 
-          <Badge
-            variant="outline"
-            :class="
-              props.node.status === 'online'
-                ? 'bg-green-500/10 text-green-400 border-green-500/30'
-                : props.node.status === 'busy'
-                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                  : 'bg-muted text-muted-foreground'
-            "
-          >
+          <Badge variant="outline" class="text-xs font-normal">
+            <span
+              class="mr-1.5 size-1.5 rounded-full"
+              :class="
+                props.node.status === 'online'
+                  ? 'bg-emerald-500'
+                  : props.node.status === 'busy'
+                    ? 'bg-blue-500'
+                    : 'bg-muted-foreground'
+              "
+            ></span>
             {{
               props.node.status === 'online'
                 ? 'Trực Tuyến'
@@ -99,7 +100,7 @@ const { formatDate } = useDateFormat();
         <div class="grid grid-cols-2 gap-3 text-xs">
           <div class="rounded-lg border border-border/60 bg-card p-3 space-y-1">
             <div class="text-muted-foreground flex items-center gap-1.5">
-              <Cpu class="size-3.5 text-indigo-400" />
+              <Cpu class="size-3.5 text-muted-foreground" />
               <span>Vi Xử Lý (CPU)</span>
             </div>
             <div class="font-semibold text-foreground text-sm">
@@ -109,7 +110,7 @@ const { formatDate } = useDateFormat();
 
           <div class="rounded-lg border border-border/60 bg-card p-3 space-y-1">
             <div class="text-muted-foreground flex items-center gap-1.5">
-              <HardDrive class="size-3.5 text-emerald-400" />
+              <HardDrive class="size-3.5 text-muted-foreground" />
               <span>Bộ Nhớ (RAM)</span>
             </div>
             <div class="font-semibold text-foreground text-sm">
@@ -119,7 +120,7 @@ const { formatDate } = useDateFormat();
 
           <div class="rounded-lg border border-border/60 bg-card p-3 space-y-1">
             <div class="text-muted-foreground flex items-center gap-1.5">
-              <Globe class="size-3.5 text-sky-400" />
+              <Globe class="size-3.5 text-muted-foreground" />
               <span>Hệ Điều Hành</span>
             </div>
             <div class="font-semibold text-foreground uppercase">
@@ -129,7 +130,7 @@ const { formatDate } = useDateFormat();
 
           <div class="rounded-lg border border-border/60 bg-card p-3 space-y-1">
             <div class="text-muted-foreground flex items-center gap-1.5">
-              <CheckCircle2 class="size-3.5 text-amber-400" />
+              <CheckCircle2 class="size-3.5 text-muted-foreground" />
               <span>Driver Thực Thi</span>
             </div>
             <div class="font-semibold text-foreground uppercase">

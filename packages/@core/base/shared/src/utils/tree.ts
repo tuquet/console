@@ -1,14 +1,14 @@
 interface TreeConfigOptions {
-  // 子属性的名称，默认为'children'
+  // Children property key name (default: 'children')
   childProps: string;
 }
 
 /**
- * @zh_CN 遍历树形结构，并返回所有节点中指定的值。
- * @param tree 树形结构数组
- * @param getValue 获取节点值的函数
- * @param options 作为子节点数组的可选属性名称。
- * @returns 所有节点中指定的值的数组
+ * Traverse tree structure and extract specified value from each node.
+ * @param tree Tree data array
+ * @param getValue Getter function for node value
+ * @param options Optional children property name options.
+ * @returns Array of extracted node values
  */
 function traverseTreeValues<T, V>(
   tree: T[],
@@ -41,20 +41,20 @@ function traverseTreeValues<T, V>(
 }
 
 /**
- * 根据条件过滤给定树结构的节点，并以原有顺序返回所有匹配节点的数组。
+ * Filter tree nodes matching condition, preserving original order.
  *
- * 该函数是纯函数：不会把过滤后的结果写回传入的树（源数据不被修改）。
- * 否则第二次用不同条件过滤同一棵树时（例如切换用户角色后重新生成路由），
- * 上一次被过滤掉的子节点将永久丢失。
+ * Pure function: does not mutate input tree (source data untouched).
+ * Callers re-filtering with different conditions will not lose filtered children.
+ 
  *
- * 引用语义：只有当子节点序列真的发生变化时，命中的分支节点才会被浅拷贝；
- * 子节点未发生变化（或节点没有子节点）时，仍按引用返回原节点，
- * 因此按引用缓存或比较节点的调用方，其行为保持不变。
+ * Reference semantics: branch nodes are shallow-copied only when child sequence changes.
+ * When children are unchanged, original node reference is returned.
+ 
  *
- * @param tree 要过滤的树结构的根节点数组。
- * @param filter 用于匹配每个节点的条件。
- * @param options 作为子节点数组的可选属性名称。
- * @returns 包含所有匹配节点的数组。
+ * @param tree Root nodes array of tree to filter.
+ * @param filter Filter predicate.
+ * @param options Optional children property name options.
+ * @returns Array containing all matched nodes.
  */
 function filterTree<T extends Record<string, any>>(
   tree: T[],
@@ -82,8 +82,8 @@ function filterTree<T extends Record<string, any>>(
 
       const filteredChildren = _filterTree(children);
 
-      // 子节点序列没有变化时按引用返回原节点，保持原有的引用语义；
-      // 只有确实需要替换子节点时才复制节点，避免污染源数据
+      // Return original node by reference if children are unchanged;
+      // clone only when children need replacement to avoid mutating source
       const childrenUnchanged =
         filteredChildren.length === children.length &&
         filteredChildren.every((child, index) => child === children[index]);
@@ -100,10 +100,10 @@ function filterTree<T extends Record<string, any>>(
 }
 
 /**
- * 根据条件重新映射给定树结构的节
- * @param tree 要过滤的树结构的根节点数组。
- * @param mapper 用于map每个节点的条件。
- * @param options 作为子节点数组的可选属性名称。
+ * Remap nodes of tree structure based on mapper function
+ * @param tree Root nodes array of tree to filter.
+ * @param mapper Mapping transform function.
+ * @param options Optional children property name options.
  */
 function mapTree<T, V extends Record<string, any>>(
   tree: T[],
@@ -129,11 +129,11 @@ function mapTree<T, V extends Record<string, any>>(
 }
 
 /**
- * 对树形结构数据进行递归排序
- * @param treeData - 树形数据数组
- * @param sortFunction - 排序函数，用于定义排序规则
- * @param options - 配置选项，包括子节点属性名
- * @returns 排序后的树形数据
+ * Recursively sort tree data
+ * @param treeData - Tree data array
+ * @param sortFunction - Sort comparator function
+ * @param options - Configuration options, including children property key
+ * @returns Sorted tree data
  */
 function sortTree<T extends Record<string, any>>(
   treeData: T[],

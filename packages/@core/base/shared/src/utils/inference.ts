@@ -1,37 +1,37 @@
 import { isFunction, isObject, isString } from '@vue/shared';
 
 /**
- * 检查传入的值是否为undefined。
+ * Check whether value is undefined.
  *
- * @param {unknown} value 要检查的值。
- * @returns {boolean} 如果值是undefined，返回true，否则返回false。
+ * @param {unknown} value Value to check.
+ * @returns {boolean} Returns true if undefined, false otherwise.
  */
 function isUndefined(value?: unknown): value is undefined {
   return value === undefined;
 }
 
 /**
- * 检查传入的值是否为boolean
+ * Check whether value is boolean.
  * @param value
- * @returns 如果值是布尔值，返回true，否则返回false。
+ * @returns Returns true if boolean, false otherwise.
  */
 function isBoolean(value: unknown): value is boolean {
   return typeof value === 'boolean';
 }
 
 /**
- * 检查传入的值是否为空。
+ * Check whether value is empty.
  *
- * 以下情况将被认为是空：
- * - 值为null。
- * - 值为undefined。
- * - 值为一个空字符串。
- * - 值为一个长度为0的数组。
- * - 值为一个没有元素的Map或Set。
- * - 值为一个没有属性的对象。
+ * The following values are considered empty:
+ * - null
+ * - undefined
+ * - empty string
+ * - empty array (length === 0)
+ * - empty Map or Set (size === 0)
+ * - empty object (no enumerable properties)
  *
- * @param {T} value 要检查的值。
- * @returns {boolean} 如果值为空，返回true，否则返回false。
+ * @param {T} value Value to check.
+ * @returns {boolean} Returns true if empty, false otherwise.
  */
 function isEmpty<T = unknown>(value?: T): value is T {
   if (value === null || value === undefined) {
@@ -54,25 +54,25 @@ function isEmpty<T = unknown>(value?: T): value is T {
 }
 
 /**
- * 检查传入的字符串是否为有效的HTTP或HTTPS URL。
+ * Check whether string is valid HTTP or HTTPS URL.
  *
- * @param {string} url 要检查的字符串。
- * @return {boolean} 如果字符串是有效的HTTP或HTTPS URL，返回true，否则返回false。
+ * @param {string} url URL string to check.
+ * @return {boolean} Returns true if valid HTTP/HTTPS URL, false otherwise.
  */
 function isHttpUrl(url?: string): boolean {
   if (!url) {
     return false;
   }
-  // 使用正则表达式测试URL是否以http:// 或 https:// 开头
+  // Test whether URL starts with http:// or https://
   const httpRegex = /^https?:\/\/.*$/;
   return httpRegex.test(url);
 }
 
 /**
- * 检查传入的值是否为window对象。
+ * Check whether value is Window object.
  *
- * @param {any} value 要检查的值。
- * @returns {boolean} 如果值是window对象，返回true，否则返回false。
+ * @param {any} value Value to check.
+ * @returns {boolean} Returns true if window, false otherwise.
  */
 function isWindow(value: any): value is Window {
   return (
@@ -81,12 +81,12 @@ function isWindow(value: any): value is Window {
 }
 
 /**
- * 检查当前运行环境是否为Mac OS。
+ * Check whether current environment is macOS.
  *
- * 这个函数通过检查navigator.userAgent字符串来判断当前运行环境。
- * 如果userAgent字符串中包含"macintosh"或"mac os x"（不区分大小写），则认为当前环境是Mac OS。
+ * Inspects navigator.userAgent string.
+ * Returns true if userAgent contains "macintosh" or "mac os x" (case-insensitive).
  *
- * @returns {boolean} 如果当前环境是Mac OS，返回true，否则返回false。
+ * @returns {boolean} Returns true if macOS, false otherwise.
  */
 function isMacOs(): boolean {
   const macRegex = /macintosh|mac os x/i;
@@ -94,12 +94,12 @@ function isMacOs(): boolean {
 }
 
 /**
- * 检查当前运行环境是否为Windows OS。
+ * Check whether current environment is Windows OS.
  *
- * 这个函数通过检查navigator.userAgent字符串来判断当前运行环境。
- * 如果userAgent字符串中包含"windows"或"win32"（不区分大小写），则认为当前环境是Windows OS。
+ * Inspects navigator.userAgent string.
+ * Returns true if userAgent contains "windows" or "win32" (case-insensitive).
  *
- * @returns {boolean} 如果当前环境是Windows OS，返回true，否则返回false。
+ * @returns {boolean} Returns true if Windows OS, false otherwise.
  */
 function isWindowsOs(): boolean {
   const windowsRegex = /windows|win32/i;
@@ -107,7 +107,7 @@ function isWindowsOs(): boolean {
 }
 
 /**
- * 检查传入的值是否为数字
+ * Check whether value is number
  * @param value
  */
 function isNumber(value: any): value is number {

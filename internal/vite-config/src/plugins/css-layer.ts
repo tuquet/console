@@ -1,9 +1,9 @@
 import type { Plugin } from 'vite';
 
 interface CssLayerRule {
-  /** 层名，需在 css 中先于 @import 'tailwindcss' 声明层顺序（见 internal/tailwind-config/theme.css） */
+  /** Layer name; must declare layer order before @import 'tailwindcss' in CSS (see internal/tailwind-config/theme.css) */
   layerName: string;
-  /** 需要包层的包名（匹配该包在 node_modules 下的 css 模块 id） */
+  /** Package name to wrap in layer (matches package's CSS module ID in node_modules) */
   packageName: string;
 }
 
@@ -12,31 +12,31 @@ function escapeRegExp(value: string): string {
 }
 
 /**
- * 与 internal/tailwind-config/src/theme.css 中的层顺序保持一致：
- * properties(Tailwind 的 --tw-* 回退变量层) < preflight(base) <
- * UI 库组件样式(antd / el / td) < Tailwind 工具类。
- * 该声明必须在打包后注入：生产构建下 css 按 chunk 注入，若组件库的 css
- * chunk 先于含层顺序声明的 theme.css 加载，层名会先被注册为最低优先级，
- * 导致 Tailwind base/utilities 覆盖组件样式。打包后在每个含组件库层的
- * css 产物顶部补上该声明，无论 chunk 加载顺序如何，层优先级都正确
- * （theme.css 先加载时该声明是幂等的 no-op）。
- * 注意 properties 必须排在首位：它是 Tailwind 为不支持 @property 的旧
- * 浏览器准备的 --tw-* 回退变量层，必须始终是最低优先级，否则其回退声明
- * 会覆盖工具类写入的变量。
+ * Kept consistent with the layer order in internal/tailwind-config/src/theme.css:
+ * properties (Tailwind's --tw-* fallback variable layer) < preflight (base) <
+ * UI library component styles (antd / el / td) < Tailwind utility classes.
+ * This statement must be injected after build: under production builds, CSS is injected by chunks. If the UI
+ * component library CSS chunk loads before theme.css (which contains the layer order statement), the layer name
+ * would be registered with the lowest priority first, causing Tailwind base/utilities to override component styles.
+ * By appending this declaration at the top of every CSS output containing UI component library layers, layer priority
+ * remains correct regardless of chunk loading order (when theme.css loads first, this statement is an idempotent no-op).
+ * Note that properties must be listed first: it is Tailwind's fallback variable layer for older browsers lacking
+ * @property support, and must always have the lowest priority, otherwise its fallback declarations would override
+ * variables written by utility classes.
  */
 const LAYER_ORDER_STATEMENT =
   '@layer properties, theme, base, ant, antd, el, td, components, utilities;';
 
 /**
- * 把指定包内的 css 包进 @layer：
- * 组件库的 css 是无层样式，无层样式在级联中永远压过 @layer 内的 Tailwind 工具类；
- * 包层后由 theme.css 的层声明决定顺序（utilities 排在组件库层之后），
- * 使 Tailwind 工具类可以覆盖组件库样式。
+ * Wraps CSS from specified packages inside @layer:
+ * Component library CSS is unlayered styles, and unlayered styles always override Tailwind utilities inside @layer
+ * in the cascade. After wrapping in a layer, theme.css determines the order (utilities placed after component library layers),
+ * allowing Tailwind utilities to override component styles.
  *
- * 注意：层顺序声明不能在 transform 阶段随包层 css 一起输出——rolldown-vite
- * 的 css 合并会将「层顺序声明 + @layer 规则」形式的模块拆层（规则被脱层），
- * 且产物压缩阶段也会丢弃该声明。因此改在 generateBundle 阶段对最终 css
- * 产物统一注入（见 LAYER_ORDER_STATEMENT）。
+ * Note: Layer order declarations cannot be output together with layered CSS during transform phase—rolldown-vite
+ * CSS bundling unlayers modules in the form of "layer order declaration + @layer rules" (rules get unlayered),
+ * and asset minification also discards the declaration. Therefore, it is injected uniformly into the final CSS
+ * artifacts during the generateBundle phase (see LAYER_ORDER_STATEMENT).
  *
  * @example
  * ```ts
@@ -74,7 +74,7 @@ export function viteCssLayerPlugin(
         if (!matched) {
           continue;
         }
-        // 先去除可能的 BOM 再判断，避免重复注入层顺序声明
+        // Strip potential BOM before checking to avoid duplicate layer order statement injection
         const hasStatement = css
           .replace(/^\uFEFF/, '')
           .trimStart()

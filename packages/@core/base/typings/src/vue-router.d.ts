@@ -3,43 +3,43 @@ import type { Router, RouteRecordRaw } from 'vue-router';
 
 interface RouteMeta {
   /**
-   * 激活图标（菜单/tab）
+   * Active icon (menu/tab)
    */
   activeIcon?: string;
   /**
-   * 当前激活的菜单，有时候不想激活现有菜单，需要激活父级菜单时使用
+   * Active menu path override; use when parent should be active instead of current route
    */
   activePath?: string;
   /**
-   * 是否使用 activePath 对应的路由层级生成面包屑
+   * Whether to generate breadcrumb hierarchy based on activePath route hierarchy
    * @default false
    */
   breadcrumbUseActivePath?: boolean;
   /**
-   * 是否固定标签页
+   * Whether tab is pinned (affix)
    * @default false
    */
   affixTab?: boolean;
   /**
-   * 固定标签页的顺序
+   * Pinned tab order
    * @default 0
    */
   affixTabOrder?: number;
   /**
-   * 需要特定的角色标识才可以访问
+   * Required roles for access
    * @default []
    */
   authority?: string[];
   /**
-   * 徽标
+   * Badge
    */
   badge?: string;
   /**
-   * 徽标类型
+   * Badge type
    */
   badgeType?: 'dot' | 'normal';
   /**
-   * 徽标颜色
+   * Badge color/variants
    */
   badgeVariants?:
     | 'default'
@@ -49,90 +49,90 @@ interface RouteMeta {
     | 'warning'
     | string;
   /**
-   * 路由对应dom是否缓存起来
+   * Whether route DOM is cached
    */
   domCached?: boolean;
   /**
-   * 路由的完整路径作为key（默认true）
+   * Use full path as key (default: true)
    */
   fullPathKey?: boolean;
   /**
-   * 当前路由的子级在菜单中不展现
+   * Hide child routes in menu
    * @default false
    */
   hideChildrenInMenu?: boolean;
   /**
-   * 当前路由在面包屑中不展现
+   * Hide route in breadcrumbs
    * @default false
    */
   hideInBreadcrumb?: boolean;
   /**
-   * 当前路由在菜单中不展现
+   * Hide route in menu
    * @default false
    */
   hideInMenu?: boolean;
   /**
-   * 当前路由在标签页不展现
+   * Hide route in tabbar
    * @default false
    */
   hideInTab?: boolean;
   /**
-   * 图标（菜单/tab）
+   * Icon (menu/tab)
    */
   icon?: Component | string;
   /**
-   * iframe 地址
+   * iframe URL
    */
   iframeSrc?: string;
   /**
-   * 忽略权限，直接可以访问
+   * Ignore access rules; accessible directly
    * @default false
    */
   ignoreAccess?: boolean;
   /**
-   * 开启KeepAlive缓存
+   * Enable KeepAlive caching
    */
   keepAlive?: boolean;
   /**
-   * 外链-跳转路径
+   * External link redirect path
    */
   link?: string;
   /**
-   * 路由是否已经加载过
+   * Whether route has been loaded
    */
   loaded?: boolean;
   /**
-   * 标签页最大打开数量
+   * Max number of open tabs for dynamic route
    * @default -1
    */
   maxNumOfOpenTab?: number;
   /**
-   * 菜单可以看到，但是访问会被重定向到403
+   * Visible in menu but access redirects to 403
    */
   menuVisibleWithForbidden?: boolean;
   /**
-   * 不使用基础布局（仅在顶级生效）
+   * Do not use basic layout (effective at top-level only)
    */
   noBasicLayout?: boolean;
   /**
-   * 在新窗口打开
+   * Open in new window
    */
   openInNewWindow?: boolean;
   /**
-   * 用于路由->菜单排序
+   * Order index for route -> menu sorting
    */
   order?: number;
   /**
-   * 菜单所携带的参数
+   * Query/param payload carried by menu item
    */
   query?: Recordable;
   /**
-   * 标题名称
+   * Title name
    */
   title: string;
 }
 
-// 定义递归类型以将 RouteRecordRaw 的 component 属性更改为 string
+// Recursive type mapping component property of RouteRecordRaw to string
 type RouteRecordStringComponent<T = string> = Omit<
   RouteRecordRaw,
   'children' | 'component'

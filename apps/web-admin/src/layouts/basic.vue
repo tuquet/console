@@ -13,7 +13,11 @@ import {
   Notification,
   UserDropdown,
 } from '@vben/layouts';
-import { preferences, usePreferences } from '@vben/preferences';
+import {
+  preferences,
+  updatePreferences,
+  usePreferences,
+} from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 import { openWindow } from '@vben/utils';
 
@@ -25,51 +29,51 @@ const notifications = ref<NotificationItem[]>([
   {
     id: 1,
     avatar: 'https://avatar.vercel.sh/vercel.svg?text=VB',
-    date: '3小时前',
+    date: '3 hours ago',
     isRead: true,
-    message: '描述信息描述信息描述信息',
-    title: '收到了 14 份新周报',
+    message: 'System performance reports are now available.',
+    title: 'Received 14 new reports',
   },
   {
     id: 2,
     avatar: 'https://avatar.vercel.sh/1',
-    date: '刚刚',
+    date: 'Just now',
     isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '朱偏右 回复了你',
+    message: 'Mentioned you in fleet cluster status.',
+    title: 'Alex replied to your thread',
   },
   {
     id: 3,
     avatar: 'https://avatar.vercel.sh/1',
     date: '2024-01-01',
     isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '曲丽丽 评论了你',
+    message: 'Reviewed your recent configuration changes.',
+    title: 'Sarah commented on your workspace',
   },
   {
     id: 4,
     avatar: 'https://avatar.vercel.sh/satori',
-    date: '1天前',
+    date: '1 day ago',
     isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '代办提醒',
+    message: 'Node healthcheck scheduled for this evening.',
+    title: 'Scheduled maintenance reminder',
   },
   {
     id: 5,
     avatar: 'https://avatar.vercel.sh/satori',
-    date: '1天前',
+    date: '1 day ago',
     isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '跳转Workspace示例',
+    message: 'Quick link to overview workspace dashboard.',
+    title: 'Navigate to Workspace',
     link: '/workspace',
   },
   {
     id: 6,
     avatar: 'https://avatar.vercel.sh/satori',
-    date: '1天前',
+    date: '1 day ago',
     isRead: false,
-    message: '描述信息描述信息描述信息',
-    title: '跳转外部链接示例',
+    message: 'Explore Tuquet documentation and operational guides.',
+    title: 'Tuquet Documentation',
     link: 'https://doc.vben.pro',
   },
 ]);
@@ -79,7 +83,36 @@ const userStore = useUserStore();
 const authStore = useAuthStore();
 const accessStore = useAccessStore();
 const { destroyWatermark, updateWatermark } = useWatermark();
-const { isDark } = usePreferences();
+const { isDark, isMobile } = usePreferences();
+
+// Tự động tối ưu giao diện: Bật đầy đủ trên Desktop và tinh giản trên Mobile
+let userDesktopTabbar = preferences.tabbar.enable;
+watch(
+  isMobile,
+  (mobile) => {
+    if (mobile) {
+      userDesktopTabbar = preferences.tabbar.enable;
+      updatePreferences({
+        tabbar: { enable: false },
+        widget: {
+          fullscreen: false,
+          lockScreen: false,
+          refresh: false,
+        },
+      });
+    } else {
+      updatePreferences({
+        tabbar: { enable: userDesktopTabbar },
+        widget: {
+          fullscreen: true,
+          lockScreen: true,
+          refresh: true,
+        },
+      });
+    }
+  },
+  { immediate: true },
+);
 const showDot = computed(() =>
   notifications.value.some((item) => !item.isRead),
 );
@@ -142,7 +175,7 @@ function handleMakeAll() {
 const viewAll = () => {};
 
 const handleClick = (item: NotificationItem) => {
-  // 如果通知项有链接，点击时跳转
+  // If notification item has a link, navigate on click
   if (item.link) {
     navigateTo(item.link, item.query, item.state);
   }
@@ -154,10 +187,10 @@ function navigateTo(
   state?: Record<string, any>,
 ) {
   if (link.startsWith('http://') || link.startsWith('https://')) {
-    // 外部链接，在新标签页打开
+    // External link: open in new tab
     window.open(link, '_blank');
   } else {
-    // 内部路由链接，支持 query 参数和 state
+    // Internal route: support query params and navigation state
     router.push({
       path: link,
       query: query || {},
@@ -215,9 +248,9 @@ watch(
   >
     <template #logo-text>
       <span
-        class="hidden sm:inline text-foreground truncate font-semibold text-nowrap"
+        class="sm:inline text-foreground truncate font-semibold text-nowrap"
       >
-        Tuquet Admin
+        Specter
       </span>
     </template>
     <template #user-dropdown>

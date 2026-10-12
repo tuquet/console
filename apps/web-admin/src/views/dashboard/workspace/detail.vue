@@ -8,7 +8,7 @@ import type {
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { ArrowLeft } from '@lucide/vue';
+import { ArrowLeft, Gauge, KeyRound, Users } from '@lucide/vue';
 import {
   Button,
   Tabs,
@@ -321,9 +321,18 @@ onMounted(() => {
     >
       <Tabs default-value="members" class="w-full">
         <TabsList class="mb-4">
-          <TabsTrigger value="members"> Thành Viên </TabsTrigger>
-          <TabsTrigger value="quotas"> Hạn Ngạch </TabsTrigger>
-          <TabsTrigger value="settings"> Cấu Hình & API Keys </TabsTrigger>
+          <TabsTrigger value="members" class="flex items-center gap-1.5">
+            <Users class="size-4 shrink-0" />
+            <span>Thành Viên</span>
+          </TabsTrigger>
+          <TabsTrigger value="quotas" class="flex items-center gap-1.5">
+            <Gauge class="size-4 shrink-0" />
+            <span>Hạn Ngạch</span>
+          </TabsTrigger>
+          <TabsTrigger value="settings" class="flex items-center gap-1.5">
+            <KeyRound class="size-4 shrink-0" />
+            <span>Cấu Hình & API Keys</span>
+          </TabsTrigger>
         </TabsList>
 
         <!-- Tab 1: Thành Viên -->

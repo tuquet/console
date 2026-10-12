@@ -129,13 +129,13 @@ function onContentInteractOutside(event: Event) {
 
 <template>
   <div :class="wrapperClass">
-    <!-- 所有主操作共享同一个 TooltipProvider，避免每个 tooltip 各建一个 provider -->
+    <!-- All primary actions share one TooltipProvider to avoid instantiating a provider per tooltip -->
     <TooltipProvider v-if="renderedActions.length > 0" :delay-duration="0">
       <template v-for="item in renderedActions" :key="item.key">
-        <!-- 气泡确认：需独立弹层状态，交由子组件维护 -->
+        <!-- Popconfirm: requires independent popup state, managed by child component -->
         <ActionItemComp v-if="item.isConfirm" :action="item.action" />
 
-        <!-- 带提示的普通按钮 -->
+        <!-- Standard button with tooltip -->
         <Tooltip v-else-if="item.hasTooltip">
           <TooltipTrigger as-child tabindex="-1">
             <VbenButton
@@ -162,7 +162,7 @@ function onContentInteractOutside(event: Event) {
           </TooltipContent>
         </Tooltip>
 
-        <!-- 普通按钮 -->
+        <!-- Standard button -->
         <VbenButton
           v-else
           :class="item.buttonClass"

@@ -99,15 +99,15 @@ function removeSubMenu(subMenu: MenuItemRegistered) {
 }
 
 /**
- * 点击submenu展开/关闭
+ * Click submenu to expand/collapse
  */
 function handleClick() {
   const mode = rootMenu?.props.mode;
   if (
-    // 当前菜单禁用时，不展开
+    // Do not expand when current menu is disabled
     props.disabled ||
     (rootMenu?.props.collapse && mode === 'vertical') ||
-    // 水平模式下不展开
+    // Do not expand in horizontal mode
     mode === 'horizontal'
   ) {
     return;

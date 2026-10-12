@@ -1,11 +1,11 @@
 /**
- * 加载js文件
- * @param src js文件地址
+ * Load JavaScript file dynamically
+ * @param src Script file URL
  */
 function loadScript(src: string) {
   return new Promise<void>((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) {
-      // 如果已经加载过，直接 resolve
+      // Resolve immediately if already loaded
       return resolve();
     }
     const script = document.createElement('script');

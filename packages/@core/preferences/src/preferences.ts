@@ -45,14 +45,14 @@ class PreferenceManager {
 
   constructor() {
     this.cache = new StorageManager({ driver: new MemoryStorageDriver() });
-    // 构造函数不再同步读取缓存，使用默认值初始化
-    // 真正的缓存加载在 initPreferences 中完成（已经是 async）
+    // Constructor does not synchronously read cache; initialize with defaults
+    // Actual cache loading happens in initPreferences (async)
     this.state = reactive<Preferences>({ ...defaultPreferences });
     this.debouncedSave = useDebounceFn(() => this.saveToCache(), 150);
   }
 
   /**
-   * 清除所有缓存的偏好设置
+   * Clear all cached preferences
    */
   clearCache = async () => {
     await Promise.all(
@@ -61,7 +61,7 @@ class PreferenceManager {
   };
 
   /**
-   * 获取扩展偏好设置
+   * Get extended preferences
    */
   getCustomPreferences = <
     TCustomPreferences extends object = CustomPreferencesRecord,
@@ -70,7 +70,7 @@ class PreferenceManager {
   };
 
   /**
-   * 获取初始化扩展偏好设置
+   * Get initial extended preferences
    */
   getInitialCustomPreferences = <
     TCustomPreferences extends object = CustomPreferencesRecord,
@@ -81,21 +81,21 @@ class PreferenceManager {
   };
 
   /**
-   * 获取初始化偏好设置
+   * Get initial preferences
    */
   getInitialPreferences = () => {
     return this.initialPreferences;
   };
 
   /**
-   * 获取当前偏好设置（只读）
+   * Get current preferences (readonly)
    */
   getPreferences = () => {
     return readonly(this.state);
   };
 
   /**
-   * 获取扩展偏好设置配置
+   * Get extended preferences configuration
    */
   getPreferencesExtension = <
     TCustomPreferences extends object = CustomPreferencesRecord,
@@ -108,10 +108,10 @@ class PreferenceManager {
   };
 
   /**
-   * 初始化偏好设置
-   * @param options - 初始化配置项
-   * @param options.namespace - 命名空间，用于隔离不同应用的配置
-   * @param options.overrides - 要覆盖的偏好设置
+   * Initialize preferences
+   * @param options - Initialization options
+   * @param options.namespace - Namespace to isolate configuration between apps
+   * @param options.overrides - Preference overrides
    */
   initPreferences = async <
     TCustomPreferences extends object = CustomPreferencesRecord,
@@ -120,34 +120,34 @@ class PreferenceManager {
     overrides,
     extension,
   }: InitialOptions<TCustomPreferences>) => {
-    // 防止重复初始化
+    // Prevent duplicate initialization
     if (this.isInitialized) {
       return;
     }
 
-    // 使用命名空间初始化存储管理器
+    // Initialize storage manager with namespace
     this.cache = new StorageManager({ prefix: namespace });
 
-    // 合并初始偏好设置：前面的对象优先，后面的对象仅补齐缺失字段
+    // Merge initial preferences: preceding objects take precedence; trailing objects fill missing fields
     this.initialPreferences = merge({}, overrides, defaultPreferences);
     this.customPreferencesExtension = extension ?? null;
     this.initialCustomPreferences = this.resolveCustomPreferencesDefaults(
       this.customPreferencesExtension,
     );
 
-    // 加载缓存的偏好设置，并仅用缓存补齐初始化配置中未显式设置的字段
+    // Load cached preferences, filling in fields not explicitly configured
     const cachedPreferences = (await this.loadFromCache()) || {};
-    // 修复历史脏数据：早期版本用 defu(merge) 合并数组，导致 widget.order
-    // 在每次 updatePreferences 时被 concat 追加，膨胀到几十/上百条重复 key。
-    // 这里在加载缓存后做一次去重，保留首次出现的 key。
+    // Fix dirty data: earlier versions used defu(merge) which concats arrays, causing widget.order
+    // to bloat with duplicate keys on every update.
+    // Deduplicate here after loading cache, preserving first occurrence.
     this.sanitizeCachedArray(cachedPreferences, 'widget', 'order');
     const mergedPreference = mergeWithArrayOverride(
       {},
-      cachedPreferences, // 用户缓存的设置优先
-      this.initialPreferences, // 初始设置仅补齐缺失字段
+      cachedPreferences, // User cached preferences take priority
+      this.initialPreferences, // Initial settings fill missing fields
     );
 
-    // 更新偏好设置
+    // Update preferences
     this.updatePreferences(mergedPreference);
 
     const cachedCustom = (await this.loadCustomFromCache()) || {};
@@ -160,33 +160,33 @@ class PreferenceManager {
     );
     await this.saveToCache();
 
-    // 设置监听器
+    // Setup listeners
     this.setupWatcher();
 
-    // 初始化平台标识
+    // Initialize platform identity
     this.initPlatform();
 
     this.isInitialized = true;
   };
 
   /**
-   * 重置偏好设置到初始状态
+   * Reset preferences to initial state
    */
   resetPreferences = async () => {
-    // 将状态重置为初始偏好设置
+    // Reset state to initial preferences
     Object.assign(this.state, this.initialPreferences);
     this.replaceCustomPreferences(this.initialCustomPreferences);
 
-    // 直接触发 UI 更新
+    // Trigger UI updates directly
     this.handleUpdates(this.state);
 
-    // 保存偏好设置至缓存
+    // Save preferences to cache
     await this.saveToCache();
   };
 
   /**
-   * 更新扩展偏好设置
-   * @param updates - 要更新的扩展偏好设置
+   * Update extended preferences
+   * @param updates - Extended preferences to update
    */
   updateCustomPreferences = <
     TCustomPreferences extends object = CustomPreferencesRecord,
@@ -212,14 +212,14 @@ class PreferenceManager {
   };
 
   /**
-   * 更新偏好设置
-   * @param updates - 要更新的偏好设置
+   * Update preferences
+   * @param updates - Preferences to update
    */
   updatePreferences = (updates: DeepPartial<Preferences>) => {
-    // 深度合并更新内容和当前状态
-    // 注意：必须用 mergeWithArrayOverride 而不是 merge。
-    // defu(merge) 对数组的语义是 concat 追加，会导致 widget.order 等
-    // 数组字段在每次 updatePreferences 时被重复追加，指数级膨胀。
+    // Deep merge updates into current state
+    // Note: must use mergeWithArrayOverride instead of merge.
+    // defu(merge) semantics for arrays is concat, causing bloat in widget.order etc.
+    // Array fields get repeatedly appended on each updatePreferences, causing exponential bloat.
     const mergedState = mergeWithArrayOverride(
       {},
       updates,
@@ -227,10 +227,10 @@ class PreferenceManager {
     );
     Object.assign(this.state, mergedState);
 
-    // 根据更新的值执行更新
+    // Execute updates based on incoming values
     this.handleUpdates(updates);
 
-    // 保存到缓存（fire-and-forget，通过 debounce 控制频率）
+    // Save to cache (fire-and-forget, throttled via debounce)
     this.debouncedSave();
   };
 
@@ -251,8 +251,8 @@ class PreferenceManager {
   }
 
   /**
-   * 处理更新
-   * @param updates - 更新的偏好设置
+   * Handle preference updates
+   * @param updates - Preference updates
    */
   private handleUpdates(updates: DeepPartial<Preferences>) {
     const { theme, app } = updates;
@@ -273,7 +273,7 @@ class PreferenceManager {
   }
 
   /**
-   * 初始化平台标识
+   * Initialize platform identity
    */
   private initPlatform() {
     document.documentElement.dataset.platform = isMacOs() ? 'macOs' : 'window';
@@ -336,16 +336,16 @@ class PreferenceManager {
   }
 
   /**
-   * 从缓存加载扩展偏好设置
-   * @returns 缓存的扩展偏好设置，如果不存在则返回 null
+   * Load extended preferences from cache
+   * @returns Cached extended preferences, or null if absent
    */
   private async loadCustomFromCache(): Promise<CustomPreferencesRecord | null> {
     return this.cache.getItem<CustomPreferencesRecord>(STORAGE_KEYS.CUSTOM);
   }
 
   /**
-   * 从缓存加载偏好设置
-   * @returns 缓存的偏好设置，如果不存在则返回 null
+   * Load preferences from cache
+   * @returns Cached preferences, or null if absent
    */
   private async loadFromCache(): Promise<null | Preferences> {
     return this.cache.getItem<Preferences>(STORAGE_KEYS.MAIN);
@@ -381,8 +381,8 @@ class PreferenceManager {
   }
 
   /**
-   * 清理缓存中膨胀的数组字段（保留首次出现的元素）
-   * 用于修复早期版本 defu 合并数组时 concat 追加导致的脏数据
+   * Clean up bloated array fields in cache (preserve first occurrence)
+   * Fixes dirty data caused by earlier defu concat behavior
    */
   private sanitizeCachedArray(
     cached: Record<string, any>,
@@ -426,7 +426,7 @@ class PreferenceManager {
   }
 
   /**
-   * 保存偏好设置到缓存
+   * Save preferences to cache
    */
   private async saveToCache() {
     try {
@@ -448,14 +448,14 @@ class PreferenceManager {
   }
 
   /**
-   * 监听状态和系统偏好设置的变化
+   * Watch state and system preference changes
    */
   private setupWatcher() {
     if (this.isInitialized) {
       return;
     }
 
-    // 监听断点，判断是否移动端
+    // Watch breakpoint to determine mobile status
     const breakpoints = useBreakpoints(breakpointsTailwind);
     const isMobile = breakpoints.smaller('md');
 
@@ -469,17 +469,17 @@ class PreferenceManager {
       { immediate: true },
     );
 
-    // 监听系统主题偏好设置变化
+    // Watch system color scheme changes
     window
       .matchMedia('(prefers-color-scheme: dark)')
       .addEventListener('change', ({ matches: isDark }) => {
-        // 仅在自动模式下跟随系统主题
+        // Follow system theme only in auto mode
         if (this.state.theme.mode === 'auto') {
-          // 先应用实际的主题
+          // Apply actual theme first
           this.updatePreferences({
             theme: { mode: isDark ? 'dark' : 'light' },
           });
-          // 再恢复为 auto 模式，保持跟随系统的状态
+          // Restore to auto mode to preserve following system status
           this.updatePreferences({
             theme: { mode: 'auto' },
           });
@@ -488,8 +488,8 @@ class PreferenceManager {
   }
 
   /**
-   * 更新页面颜色模式（灰色、色弱）
-   * @param preference - 偏好设置
+   * Update page color filter modes (grayscale, color-weak)
+   * @param preference - Preferences
    */
   private updateColorMode(preference: Preferences) {
     const { colorGrayMode, colorWeakMode } = preference.app;

@@ -57,7 +57,7 @@ defineExpose({
 </script>
 <template>
   <Page v-bind="delegatedProps">
-    <!-- 继承默认的slot -->
+    <!-- Inherit default slots -->
     <template
       v-for="slotName in delegatedSlots"
       :key="slotName"

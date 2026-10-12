@@ -52,14 +52,14 @@ defineEmits(['click']);
             <span class="ml-4 text-lg font-medium">{{ item.title }}</span>
           </div>
 
-          <!-- 内容区域支持插槽自定义 -->
+          <!-- Content area supports custom slot -->
           <slot name="content" :item="item" :index="index">
             <div class="text-foreground/80 mt-4 flex h-10">
               {{ item.content }}
             </div>
           </slot>
 
-          <!-- 底部信息区域支持插槽自定义 -->
+          <!-- Footer info area supports custom slot -->
           <slot name="footer" :item="item" :index="index">
             <div class="text-foreground/80 flex justify-between">
               <span>{{ item.group }}</span>

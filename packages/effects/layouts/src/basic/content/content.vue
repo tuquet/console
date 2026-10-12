@@ -22,7 +22,7 @@ const { getCachedTabs, getExcludeCachedTabs, renderRouteView } =
 const { getEnabledTransition, getTransitionName } = useLayoutHook();
 
 /**
- * 是否显示component
+ * Whether to display component
  * @param route
  */
 const showComponent = (route: RouteLocationNormalizedLoadedGeneric) => {
@@ -88,7 +88,7 @@ const showComponent = (route: RouteLocationNormalizedLoadedGeneric) => {
 </template>
 
 <style>
-/* 优化router动画切换切换重叠问题 */
+/* Optimize router animation transition overlap */
 .page-route-leave-active {
   position: absolute;
   top: 0;
@@ -96,13 +96,13 @@ const showComponent = (route: RouteLocationNormalizedLoadedGeneric) => {
   width: 100%;
 }
 
-/* 移除动画切换的横向滚动条 translateX(-30px) */
+/* Remove horizontal scrollbar during animation transition translateX(-30px) */
 .page-route-container:has(> .fade-slide-enter-active),
 .page-route-container:has(> .fade-slide-leave-active) {
   overflow-x: hidden;
 }
 
-/* 移除动画切换的纵向滚动条 */
+/* Remove vertical scrollbar during animation transition */
 .page-route-container:has(> .fade-up-enter-active),
 .page-route-container:has(> .fade-up-leave-active),
 .page-route-container:has(> .fade-down-enter-active),

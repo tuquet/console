@@ -1,5 +1,5 @@
 /**
- * 将字符串的首字母大写
+ * Capitalize the first letter of a string
  * @param string
  */
 function capitalizeFirstLetter(string: string): string {
@@ -7,18 +7,18 @@ function capitalizeFirstLetter(string: string): string {
 }
 
 /**
- * 将字符串的首字母转换为小写。
+ * Lowercase the first letter of a string.
  *
- * @param str 要转换的字符串
- * @returns 首字母小写的字符串
+ * @param str String to transform
+ * @returns String with first letter lowercased
  */
 function toLowerCaseFirstLetter(str: string): string {
-  if (!str) return str; // 如果字符串为空，直接返回
+  if (!str) return str; // Return directly if empty
   return str.charAt(0).toLowerCase() + str.slice(1);
 }
 
 /**
- *  生成驼峰命名法的键名
+ * Generate camelCase key name
  * @param key
  * @param parentKey
  */

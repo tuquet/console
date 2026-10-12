@@ -17,9 +17,9 @@ defineOptions({ name: 'NotificationPopup' });
 
 withDefaults(
   defineProps<{
-    /** 显示圆点 */
+    /** Show dot indicator */
     dot?: boolean;
-    /** 消息列表 */
+    /** Notification list */
     notifications?: NotificationItem[];
   }>(),
   {

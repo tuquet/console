@@ -11,7 +11,7 @@ import {
   useLayoutHeaderStyle,
   useLayoutViewportHeight,
 } from '@vben-core/composables';
-import { IconifyIcon } from '@vben-core/icons';
+import { PanelLeftClose, PanelLeftOpen } from '@vben-core/icons';
 import { VbenIconButton } from '@vben-core/shadcn-ui';
 import {
   ELEMENT_ID_LAYOUT_SCROLL,
@@ -91,7 +91,7 @@ const sidebarEnable = defineModel<boolean>('sidebarEnable', { default: true });
 
 const HEADER_TRIGGER_DISTANCE = 12;
 
-// side是否处于hover状态展开菜单中
+// Whether sidebar is expanded on hover
 const sidebarExpandOnHovering = ref(false);
 const mobileSidebarOpen = ref(false);
 const headerIsHidden = ref(false);
@@ -121,7 +121,7 @@ const {
 } = useLayout(props);
 
 /**
- * 顶栏是否自动隐藏
+ * Whether header auto-hides
  */
 const isHeaderAutoActive = computed(
   () =>
@@ -175,14 +175,14 @@ const activeSidebarCollapse = computed({
 });
 
 /**
- * 动态获取侧边区域是否可见
+ * Dynamically get whether sidebar area is visible
  */
 const sidebarEnableState = computed(() => {
   return !isHeaderNav.value && sidebarEnable.value;
 });
 
 /**
- * 侧边区域离顶部高度
+ * Sidebar distance from top
  */
 const sidebarMarginTop = computed(() => {
   const { headerHeight, isMobile } = props;
@@ -190,7 +190,7 @@ const sidebarMarginTop = computed(() => {
 });
 
 /**
- * 动态获取侧边宽度
+ * Dynamically get sidebar width
  */
 const getSidebarWidth = computed(() => {
   const { isMobile, sidebarHidden, sidebarMixedWidth, sidebarWidth } = props;
@@ -221,7 +221,7 @@ const getSidebarWidth = computed(() => {
 });
 
 /**
- * 获取扩展区域宽度
+ * Get extra area width
  */
 const sidebarExtraWidth = computed(() => {
   const { sidebarExtraCollapsedWidth, sidebarWidth } = props;
@@ -230,7 +230,7 @@ const sidebarExtraWidth = computed(() => {
 });
 
 /**
- * 是否侧边栏模式，包含混合侧边
+ * Whether sidebar mode, including mixed sidebar
  */
 const isSideMode = computed(
   () =>
@@ -242,7 +242,7 @@ const isSideMode = computed(
 );
 
 /**
- * header fixed值
+ * Header fixed value
  */
 const headerFixed = computed(() => {
   const { headerMode } = props;
@@ -259,7 +259,7 @@ const showSidebar = computed(() => {
 });
 
 /**
- * 遮罩可见性
+ * Mask visibility
  */
 const maskVisible = computed(
   () => !activeSidebarCollapse.value && props.isMobile,
@@ -276,7 +276,7 @@ const mainStyle = computed(() => {
     showSidebar.value &&
     !props.isMobile
   ) {
-    // fixed模式下生效
+    // Effective under fixed mode
     const isSideNavEffective =
       (isSidebarMixedNav.value || isHeaderMixedNav.value) &&
       sidebarExpandOnHover.value &&
@@ -289,7 +289,7 @@ const mainStyle = computed(() => {
         ? props.sidebarExtraCollapsedWidth
         : props.sidebarWidth;
 
-      // 100% - 侧边菜单混合宽度 - 菜单宽度
+      // 100% - sidebar mixed width - menu width
       sidebarAndExtraWidth = `${sideCollapseWidth + sideWidth}px`;
       width = `calc(100% - ${sidebarAndExtraWidth})`;
     } else {
@@ -310,29 +310,29 @@ const mainStyle = computed(() => {
   };
 });
 
-// 计算 tabbar 的样式
+// Calculate tabbar styles
 const tabbarStyle = computed((): CSSProperties => {
   let width: string;
   let marginLeft = 0;
 
-  // 如果不是混合导航，tabbar 的宽度为 100%
+  // If not mixed navigation, tabbar width is 100%
   if (!isMixedNav.value || props.sidebarHidden) {
     width = '100%';
   } else if (sidebarEnable.value) {
-    // 鼠标在侧边栏上时，且侧边栏展开时的宽度
+    // Width when mouse is hovering over sidebar and sidebar is expanded
     const onHoveringWidth = sidebarExpandOnHover.value
       ? props.sidebarWidth
       : getSideCollapseWidth.value;
 
-    // 设置 marginLeft，根据侧边栏是否折叠来决定
+    // Set marginLeft depending on whether sidebar is collapsed
     marginLeft = activeSidebarCollapse.value
       ? getSideCollapseWidth.value
       : onHoveringWidth;
 
-    // 设置 tabbar 的宽度，计算方式为 100% 减去侧边栏的宽度
+    // Set tabbar width calculated as 100% minus sidebar width
     width = `calc(100% - ${activeSidebarCollapse.value ? getSidebarWidth.value : onHoveringWidth}px)`;
   } else {
-    // 默认情况下，tabbar 的宽度为 100%
+    // Tabbar width defaults to 100%
     width = '100%';
   }
 
@@ -405,7 +405,7 @@ const headerWrapperStyle = computed((): CSSProperties => {
 });
 
 /**
- * 侧边栏z-index
+ * Sidebar z-index
  */
 const sidebarZIndex = computed(() => {
   const { isMobile, zIndex } = props;
@@ -431,7 +431,7 @@ const maskStyle = computed((): CSSProperties => {
 });
 
 /**
- * 侧边栏 Logo 区域是否显示
+ * Whether sidebar logo area is displayed
  */
 const sidebarHeaderHeight = computed(() => {
   if (isMixedNav.value || !props.sidebarLogoVisible) {
@@ -676,11 +676,11 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
                 class="my-0 mr-1 rounded-md"
                 @click="handleHeaderToggle"
               >
-                <IconifyIcon
+                <PanelLeftClose
                   v-if="isMobile ? !activeSidebarCollapse : showSidebar"
-                  icon="ep:fold"
+                  class="size-4"
                 />
-                <IconifyIcon v-else icon="ep:expand" />
+                <PanelLeftOpen v-else class="size-4" />
               </VbenIconButton>
             </template>
             <slot name="header"></slot>

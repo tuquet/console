@@ -1,6 +1,6 @@
 /**
- * 全局复用的变量、组件、配置，各个模块之间共享
- * 通过单例模式实现,单例必须注意不受请求影响，例如用户信息这些需要根据请求获取的。后续如果有ssr需求，也不会影响
+ * Shared global variables, components, and configuration across modules
+ * Implemented via singleton pattern (request-independent, SSR safe)
  */
 
 interface ComponentsState {
@@ -21,7 +21,7 @@ class GlobalShareState {
   #message: MessageState = {};
 
   /**
-   * 定义框架内部各个场景的消息提示
+   * Internal toast and message notifications
    */
   public defineMessage({ copyPreferencesSuccess }: MessageState) {
     this.#message = {

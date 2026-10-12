@@ -98,7 +98,7 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
           typeWithClass.content,
         ]"
         :data-index="i"
-        class="group tab-item translate-all relative flex cursor-pointer select-none [&:not(.is-active)]:hover:bg-accent"
+        class="group tab-item transition-all relative flex cursor-pointer select-none [&:not(.is-active)]:hover:bg-accent"
         data-tab-item="true"
         @click="active = tab.key"
         @mousedown="onMouseDown($event, tab)"
@@ -112,7 +112,7 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
           <div class="relative flex size-full items-center">
             <!-- extra -->
             <div
-              class="absolute top-1/2 right-1.5 z-3 translate-y-[-50%] overflow-hidden"
+              class="tabs__extra absolute top-1/2 right-1.5 z-3 flex size-4 -translate-y-1/2 items-center justify-center overflow-hidden"
             >
               <!-- close-icon -->
               <X
@@ -122,7 +122,7 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
               />
               <Pin
                 v-show="tab.affixTab && tabsView.length > 1 && tab.closable"
-                class="mt-px size-3.5 cursor-pointer rounded-full transition-all group-[.is-active]:text-primary hover:bg-accent hover:stroke-accent-foreground group-[.is-active]:dark:text-accent-foreground"
+                class="size-3.5 cursor-pointer rounded-full transition-all group-[.is-active]:text-primary hover:bg-accent hover:stroke-accent-foreground group-[.is-active]:dark:text-accent-foreground"
                 @click.stop="() => emit('unpin', tab)"
               />
             </div>
@@ -148,3 +148,9 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
     </TransitionGroup>
   </div>
 </template>
+
+<style scoped>
+.tabs__extra {
+  transform: translateY(-50%);
+}
+</style>

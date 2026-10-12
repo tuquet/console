@@ -12,43 +12,43 @@ export interface CaptchaData {
    */
   y: number;
   /**
-   * 时间戳
+   * Timestamp
    */
   t: number;
 }
 export interface CaptchaPoint extends CaptchaData {
   /**
-   * 数据索引
+   * Data index
    */
   i: number;
 }
 export interface PointSelectionCaptchaCardProps {
   /**
-   * 验证码图片
+   * Captcha image
    */
   captchaImage: string;
   /**
-   * 验证码图片高度
+   * Captcha image height
    * @default '220px'
    */
   height?: number | string;
   /**
-   * 水平内边距
+   * Horizontal padding
    * @default '12px'
    */
   paddingX?: number | string;
   /**
-   * 垂直内边距
+   * Vertical padding
    * @default '16px'
    */
   paddingY?: number | string;
   /**
-   * 标题
-   * @default '请按图依次点击'
+   * Title
+   * @default 'Click in order according to the clue'
    */
   title?: string;
   /**
-   * 验证码图片宽度
+   * Captcha image width
    * @default '300px'
    */
   width?: number | string;
@@ -56,17 +56,17 @@ export interface PointSelectionCaptchaCardProps {
 
 export interface PointSelectionCaptchaProps extends PointSelectionCaptchaCardProps {
   /**
-   * 是否展示确定按钮
+   * Whether to display confirm button
    * @default false
    */
   showConfirm?: boolean;
   /**
-   * 提示图片
+   * Clue image
    * @default ''
    */
   hintImage?: string;
   /**
-   * 提示文本
+   * Clue text
    * @default ''
    */
   hintText?: string;
@@ -75,121 +75,121 @@ export interface PointSelectionCaptchaProps extends PointSelectionCaptchaCardPro
 export interface SliderCaptchaProps {
   class?: ClassType;
   /**
-   * @description 滑块的样式
+   * @description Slider style
    * @default {}
    */
   actionStyle?: CSSProperties;
 
   /**
-   * @description 滑块条的样式
+   * @description Slider track style
    * @default {}
    */
   barStyle?: CSSProperties;
 
   /**
-   * @description 内容的样式
+   * @description Content style
    * @default {}
    */
   contentStyle?: CSSProperties;
 
   /**
-   * @description 组件的样式
+   * @description Component style
    * @default {}
    */
   wrapperStyle?: CSSProperties;
 
   /**
-   * @description 是否作为插槽使用，用于联动组件，可参考旋转校验组件
+   * @description Whether used as slot for linked component
    * @default false
    */
   isSlot?: boolean;
 
   /**
-   * @description 验证成功的提示
-   * @default '验证通过'
+   * @description Success message
+   * @default 'Verification successful'
    */
   successText?: string;
 
   /**
-   * @description 提示文字
-   * @default '请按住滑块拖动'
+   * @description Hint text
+   * @default 'Drag the slider'
    */
   text?: string;
 }
 
 export interface SliderRotateCaptchaProps {
   /**
-   * @description 旋转的角度
+   * @description Rotation angle
    * @default 20
    */
   diffDegree?: number;
 
   /**
-   * @description 图片的宽度
+   * @description Image width
    * @default 260
    */
   imageSize?: number;
 
   /**
-   * @description 图片的样式
+   * @description Image style
    * @default {}
    */
   imageWrapperStyle?: CSSProperties;
 
   /**
-   * @description 最大旋转角度
+   * @description Maximum rotation angle
    * @default 270
    */
   maxDegree?: number;
 
   /**
-   * @description 最小旋转角度
+   * @description Minimum rotation angle
    * @default 90
    */
   minDegree?: number;
 
   /**
-   * @description 图片的地址
+   * @description Image URL
    */
   src?: string;
   /**
-   * @description 默认提示文本
+   * @description Default hint text
    */
   defaultTip?: string;
 }
 
 export interface SliderTranslateCaptchaProps {
   /**
-   * @description 拼图的宽度
+   * @description Puzzle width
    * @default 420
    */
   canvasWidth?: number;
   /**
-   * @description 拼图的高度
+   * @description Puzzle height
    * @default 280
    */
   canvasHeight?: number;
   /**
-   * @description 切块上正方形的长度
+   * @description Square side length on tile
    * @default 42
    */
   squareLength?: number;
   /**
-   * @description 切块上圆形的半径
+   * @description Circle radius on tile
    * @default 10
    */
   circleRadius?: number;
   /**
-   * @description 图片的地址
+   * @description Image URL
    */
   src?: string;
   /**
-   * @description 允许的最大差距
+   * @description Maximum allowed offset tolerance
    * @default 3
    */
   diffDistance?: number;
   /**
-   * @description 默认提示文本
+   * @description Default hint text
    */
   defaultTip?: string;
 }

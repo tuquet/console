@@ -47,7 +47,7 @@ export class VxeGridApi<
   public store: Store<VxeGridProps<T, D, P, TFormValues, TSubmitValues>>;
 
   /**
-   * 已读行 helper（在 mount 中初始化，业务能力全部封装在 useViewedRow 中）
+   * Viewed row helper (initialized in mount; all business logic encapsulated in useViewedRow)
    */
   public viewedRowHelper: null | ViewedRowHelper<T> = null;
 
@@ -88,14 +88,14 @@ export class VxeGridApi<
   }
 
   /**
-   * 清除所有已读状态
+   * Clear all viewed states
    */
   clearViewedRows() {
     this.viewedRowHelper?.clearViewed();
   }
 
   /**
-   * 获取所有已读的 key 集合（返回副本，避免外部修改内部状态）
+   * Get set of all viewed keys (returns copy to prevent mutation)
    */
   getViewedKeys(): Set<number | string> {
     const raw = this.viewedRowHelper?.viewedSet.value;
@@ -103,21 +103,21 @@ export class VxeGridApi<
   }
 
   /**
-   * 判断某行是否已读
+   * Check if row has been viewed
    */
   isRowViewed(record: T): boolean {
     return this.viewedRowHelper?.isViewed(record) ?? false;
   }
 
   /**
-   * 批量标记行为已读
+   * Mark rows as viewed in bulk
    */
   markKeysAsViewed(keys: Array<number | string>) {
     this.viewedRowHelper?.markKeysAsViewed(keys);
   }
 
   /**
-   * 标记某行为已读
+   * Mark a row as viewed
    */
   markRowAsViewed(record: T) {
     this.viewedRowHelper?.markAsViewed(record);
@@ -152,7 +152,7 @@ export class VxeGridApi<
   }
 
   /**
-   * 移除指定 key 的已读状态
+   * Remove viewed state for specified key
    */
   removeViewedKeys(keys: Array<number | string>) {
     this.viewedRowHelper?.removeKeys(keys);

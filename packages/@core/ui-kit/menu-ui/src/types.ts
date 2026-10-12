@@ -8,52 +8,52 @@ import type {
 
 interface MenuProps {
   /**
-   * @zh_CN 是否开启手风琴模式
+   * Whether to enable accordion mode
    * @default true
    */
   accordion?: boolean;
   /**
-   * @zh_CN 菜单是否折叠
+   * Whether menu is collapsed
    * @default false
    */
   collapse?: boolean;
 
   /**
-   * @zh_CN 菜单折叠时是否显示菜单名称
+   * Whether to show menu title when menu is collapsed
    * @default false
    */
   collapseShowTitle?: boolean;
 
   /**
-   * @zh_CN 默认激活的菜单
+   * Default active menu
    */
   defaultActive?: string;
 
   /**
-   * @zh_CN 默认展开的菜单
+   * Default expanded menus
    */
   defaultOpeneds?: string[];
 
   /**
-   * @zh_CN 菜单模式
+   * Menu mode
    * @default vertical
    */
   mode?: 'horizontal' | 'vertical';
 
   /**
-   * @zh_CN 是否圆润风格
+   * Whether rounded style
    * @default true
    */
   rounded?: boolean;
 
   /**
-   * @zh_CN 是否自动滚动到激活的菜单项
+   * Whether to auto scroll to active menu item
    * @default false
    */
   scrollToActive?: boolean;
 
   /**
-   * @zh_CN 菜单主题
+   * Menu theme
    * @default dark
    */
   theme?: ThemeModeType;
@@ -61,42 +61,42 @@ interface MenuProps {
 
 interface SubMenuProps extends MenuRecordBadgeRaw {
   /**
-   * @zh_CN 激活图标
+   * Active icon
    */
   activeIcon?: string;
   /**
-   * @zh_CN 是否禁用
+   * Whether disabled
    */
   disabled?: boolean;
   /**
-   * @zh_CN 图标
+   * Icon
    */
   icon?: Component | string;
   /**
-   * @zh_CN submenu 名称
+   * Submenu title
    */
   path: string;
 }
 
 interface MenuItemProps extends MenuRecordBadgeRaw {
   /**
-   * @zh_CN 图标
+   * Icon
    */
   activeIcon?: string;
   /**
-   * @zh_CN 是否禁用
+   * Whether disabled
    */
   disabled?: boolean;
   /**
-   * @zh_CN 图标
+   * Icon
    */
   icon?: Component | string;
   /**
-   * @zh_CN menuitem 名称
+   * Menu item title
    */
   path: string;
   /**
-   * @zh_CN 菜单所携带的参数
+   * Parameters carried by menu
    */
   query?: Recordable<any>;
 }

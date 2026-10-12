@@ -1,12 +1,11 @@
 /*
- * 级联层顺序声明（必须先于 @import 'tailwindcss' 首次出现）：
- * properties(Tailwind 的 --tw-* 回退变量层) < preflight(base) <
- * UI 库组件样式(antd / el / td) < Tailwind 工具类，
- * 使组件库样式（antdv-next 经 StyleProvider layer 注入 @layer antd；
- * element-plus / tdesign 经各自应用的 vite css-layer 插件包入对应层）
- * 能被工具类覆盖。
- * 与 internal/vite-config/src/plugins/css-layer.ts 中的 LAYER_ORDER_STATEMENT
- * 保持一致。
+ * Cascade layer order declaration (must appear before @import 'tailwindcss'):
+ * properties (Tailwind's --tw-* fallback variable layer) < preflight (base) <
+ * UI library component styles (antd / el / td) < Tailwind utility classes,
+ * allowing component library styles (antdv-next via StyleProvider layer injected into @layer antd;
+ * element-plus / tdesign via app vite css-layer plugin wrapped into respective layers)
+ * to be overridden by utility classes.
+ * Kept consistent with LAYER_ORDER_STATEMENT in internal/vite-config/src/plugins/css-layer.ts.
  */
 @layer properties, theme, base, ant, antd, el, td, components, utilities;
 
@@ -25,9 +24,23 @@
 /* Dark mode uses .dark class selector, not prefers-color-scheme */
 @custom-variant dark (&:is(.dark *));
 
-/* Explicitly pin Tailwind v4 dynamic spacing for classes like w-150/h-55. */
+/* Explicitly pin Tailwind v4 dynamic spacing for classes like w-150/h-55 and Vietnamese-first font */
 @theme {
   --spacing: 0.25rem;
+  --font-sans: 'Be Vietnam Pro', 'Inter', 'Roboto', -apple-system, blinkmacsystemfont, 'Segoe UI', arial, sans-serif;
+}
+
+@layer base {
+  *, ::before, ::after, ::backdrop {
+    --tw-translate-x: 0;
+    --tw-translate-y: 0;
+    --tw-translate-z: 0;
+  }
+
+  html,
+  body {
+    font-family: var(--font-family, 'Be Vietnam Pro', 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif);
+  }
 }
 
 @theme inline {
@@ -399,7 +412,7 @@
     }
   }
 
-  /* Tailwind v4 Preflight 不再为 button 默认设置 pointer；见官方升级说明：
+  /* Tailwind v4 Preflight no longer sets pointer for button by default; see official upgrade notes:
    * https://tailwindcss.com/docs/upgrade-guide#buttons-use-the-default-cursor */
   button:not(:disabled),
   [role='button']:not(:disabled) {
@@ -421,8 +434,8 @@
   justify-content: center;
 }
 
-/* Tailwind v4 的 utilities 在 @layer 内；组件样式若留在 layer 外，会按层叠规则压过 py-4 等工具类。
- * 见：https://tailwindcss.com/docs/adding-custom-styles#using-css-and-layering */
+/* Tailwind v4 utilities live inside @layer; unlayered component styles would override py-4 etc. in the cascade.
+ * See: https://tailwindcss.com/docs/adding-custom-styles#using-css-and-layering */
 @layer components {
   .outline-box {
     @apply relative cursor-pointer rounded-md p-1 outline-1 outline-border;

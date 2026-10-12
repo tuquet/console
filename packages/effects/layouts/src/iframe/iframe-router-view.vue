@@ -45,7 +45,7 @@ function canRender(tabItem: RouteLocationNormalized) {
     return routeShow(tabItem);
   }
 
-  // 跟随 keepAlive 状态,与其他tab页保持一致
+  // Follow keepAlive state to remain consistent with other tabs
   if (
     !meta?.keepAlive &&
     tabNames.value.has(name as string) &&
@@ -62,7 +62,7 @@ function hideLoading(index: number) {
 
 function showSpinning(index: number) {
   const curSpinning = spinningList.value[index];
-  // 首次加载时显示loading
+  // Show loading on first mount
   return curSpinning === undefined ? true : curSpinning;
 }
 </script>

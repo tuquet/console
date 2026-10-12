@@ -4,7 +4,7 @@ import { loadScript } from '../resources';
 
 describe('loadScript', () => {
   beforeEach(() => {
-    // 每个测试前清空 head，保证环境干净
+    // Clear head before each test to ensure clean environment
     document.head.innerHTML = '';
   });
 
@@ -21,18 +21,18 @@ describe('loadScript', () => {
   });
 
   it('should not insert duplicate script and resolve immediately if already loaded', async () => {
-    // 先手动插入一个相同 src 的 script
+    // Manually insert script with same src first
     const existing = document.createElement('script');
     existing.src = 'bar.js';
     document.head.append(existing);
 
-    // 再次调用
+    // Invoke again
     const promise = loadScript('bar.js');
 
-    // 立即 resolve
+    // Resolve immediately
     await expect(promise).resolves.toBeUndefined();
 
-    // head 中只保留一个
+    // Retain only one in head
     const scripts = document.head.querySelectorAll('script[src="bar.js"]');
     expect(scripts).toHaveLength(1);
   });
@@ -40,8 +40,8 @@ describe('loadScript', () => {
   it('should reject when the script fails to load', async () => {
     let capturedScript: HTMLScriptElement | null = null;
 
-    // 拦截 append，捕获 script 元素但不插入 DOM，
-    // 防止 happy-dom v20+ 自动触发 load 事件
+    // Intercept append and capture script element without inserting into DOM,
+    // preventing happy-dom v20+ from auto-firing load event
     const appendSpy = vi
       .spyOn(document.head, 'append')
       .mockImplementation((...nodes) => {
@@ -69,11 +69,11 @@ describe('loadScript', () => {
     const p1 = loadScript('/test-script.js');
     const p2 = loadScript('/test-script.js');
 
-    // happy-dom v20+ auto-fires 'load'，两个 promise 都应该 resolve
+    // happy-dom v20+ auto-fires 'load'; both promises should resolve
     await expect(p1).resolves.toBeUndefined();
     await expect(p2).resolves.toBeUndefined();
 
-    // 只插入一次
+    // Insert only once
     const scripts = document.head.querySelectorAll(
       'script[src="/test-script.js"]',
     );

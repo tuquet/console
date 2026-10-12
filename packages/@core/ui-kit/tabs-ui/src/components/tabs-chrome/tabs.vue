@@ -96,7 +96,7 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
         ]"
         :data-active-tab="active"
         :data-index="i"
-        class="draggable group tabs-chrome__item translate-all relative -mr-3 flex h-full items-center select-none"
+        class="draggable group tabs-chrome__item transition-all relative -mr-3 flex h-full items-center select-none"
         data-tab-item="true"
         @click="active = tab.key"
         @mousedown="onMouseDown($event, tab)"
@@ -111,7 +111,7 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
             <!-- divider -->
             <div
               v-if="i !== 0 && tab.key !== active"
-              class="tabs-chrome__divider absolute top-1/2 left-(--gap) z-0 h-4 w-px translate-y-[-50%] bg-border transition-all"
+              class="tabs-chrome__divider absolute top-1/2 left-(--gap) z-0 h-4 w-px -translate-y-1/2 bg-border transition-all"
             ></div>
             <!-- background -->
             <div
@@ -138,17 +138,17 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
 
             <!-- extra -->
             <div
-              class="tabs-chrome__extra absolute top-1/2 right-(--gap) z-3 size-4 translate-y-[-50%]"
+              class="tabs-chrome__extra absolute top-1/2 right-(--gap) z-3 flex size-4 -translate-y-1/2 items-center justify-center"
             >
               <!-- close-icon -->
               <X
                 v-show="!tab.affixTab && tabsView.length > 1 && tab.closable"
-                class="mt-0.5 size-3 cursor-pointer rounded-full stroke-accent-foreground/80 text-accent-foreground/80 transition-all group-[.is-active]:text-accent-foreground hover:bg-accent hover:stroke-accent-foreground"
+                class="size-3 cursor-pointer rounded-full stroke-accent-foreground/80 text-accent-foreground/80 transition-all group-[.is-active]:text-accent-foreground hover:bg-accent hover:stroke-accent-foreground"
                 @click.stop="() => emit('close', tab.key)"
               />
               <Pin
                 v-show="tab.affixTab && tabsView.length > 1 && tab.closable"
-                class="mt-px size-3.5 cursor-pointer rounded-full text-accent-foreground/80 transition-all group-[.is-active]:text-accent-foreground hover:text-accent-foreground"
+                class="size-3.5 cursor-pointer rounded-full text-accent-foreground/80 transition-all group-[.is-active]:text-accent-foreground hover:text-accent-foreground"
                 @click.stop="() => emit('unpin', tab)"
               />
             </div>
@@ -179,6 +179,11 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
 
 .tabs-chrome__item:not(.dragging) {
   @apply cursor-pointer;
+}
+
+.tabs-chrome__extra,
+.tabs-chrome__divider {
+  transform: translateY(-50%);
 }
 
 .tabs-chrome__item:not(.dragging):hover:not(.is-active)

@@ -134,10 +134,7 @@ onMounted(() => {
           >
             Quản Trị Máy Trạm
           </h1>
-          <Badge
-            variant="outline"
-            class="font-mono text-xs uppercase text-sky-500 border-sky-500/30 bg-sky-500/10"
-          >
+          <Badge variant="secondary" class="font-mono text-xs uppercase">
             Specter Fleet
           </Badge>
         </div>
@@ -271,7 +268,7 @@ onMounted(() => {
               <TableCell>
                 <div class="flex items-center gap-2.5">
                   <div
-                    class="flex size-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400"
+                    class="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground"
                   >
                     <Laptop class="size-4" />
                   </div>
@@ -300,11 +297,11 @@ onMounted(() => {
               <TableCell>
                 <div class="flex items-center gap-3 text-xs text-foreground">
                   <span class="inline-flex items-center gap-1 font-mono">
-                    <Cpu class="size-3.5 text-indigo-400" />
+                    <Cpu class="size-3.5 text-muted-foreground" />
                     {{ record.cpu_cores }} Cores
                   </span>
                   <span class="inline-flex items-center gap-1 font-mono">
-                    <HardDrive class="size-3.5 text-emerald-400" />
+                    <HardDrive class="size-3.5 text-muted-foreground" />
                     {{ record.ram_gb }} GB
                   </span>
                 </div>
@@ -319,17 +316,17 @@ onMounted(() => {
 
               <!-- Status Column -->
               <TableCell>
-                <Badge
-                  variant="outline"
-                  :class="
-                    record.status === 'online'
-                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-                      : record.status === 'busy'
-                        ? 'border-indigo-500/30 bg-indigo-500/10 text-indigo-400'
-                        : 'border-border/60 bg-muted/40 text-muted-foreground'
-                  "
-                  class="text-xs"
-                >
+                <Badge variant="outline" class="text-xs font-normal">
+                  <span
+                    class="mr-1.5 size-1.5 rounded-full"
+                    :class="
+                      record.status === 'online'
+                        ? 'bg-emerald-500'
+                        : record.status === 'busy'
+                          ? 'bg-blue-500'
+                          : 'bg-muted-foreground'
+                    "
+                  ></span>
                   {{
                     record.status === 'online'
                       ? 'Trực Tuyến'
@@ -346,7 +343,7 @@ onMounted(() => {
                   class="font-mono text-xs font-semibold"
                   :class="
                     record.active_jobs > 0
-                      ? 'text-indigo-400'
+                      ? 'text-primary'
                       : 'text-muted-foreground'
                   "
                 >
@@ -427,7 +424,7 @@ onMounted(() => {
           <div class="flex items-start justify-between gap-2">
             <div class="flex items-center gap-2.5">
               <div
-                class="flex size-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400"
+                class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
               >
                 <Laptop class="size-4.5" />
               </div>
@@ -441,17 +438,17 @@ onMounted(() => {
               </div>
             </div>
 
-            <Badge
-              variant="outline"
-              :class="
-                node.status === 'online'
-                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-                  : node.status === 'busy'
-                    ? 'border-indigo-500/30 bg-indigo-500/10 text-indigo-400'
-                    : 'border-border/60 bg-muted/40 text-muted-foreground'
-              "
-              class="text-xs"
-            >
+            <Badge variant="outline" class="text-xs font-normal">
+              <span
+                class="mr-1.5 size-1.5 rounded-full"
+                :class="
+                  node.status === 'online'
+                    ? 'bg-emerald-500'
+                    : node.status === 'busy'
+                      ? 'bg-blue-500'
+                      : 'bg-muted-foreground'
+                "
+              ></span>
               {{
                 node.status === 'online'
                   ? 'Online'

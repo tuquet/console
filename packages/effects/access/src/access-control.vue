@@ -1,9 +1,9 @@
 <!--
  Access control component for fine-grained access control.
- TODO: 可以扩展更完善的功能：
- 1. 支持多个权限码，只要有一个权限码满足即可 或者 多个权限码全部满足
- 2. 支持多个角色，只要有一个角色满足即可 或者 多个角色全部满足
- 3. 支持自定义权限码和角色的判断逻辑
+ TODO: Potential enhancements:
+ 1. Support multiple permission codes (satisfy any, or require all)
+ 2. Support multiple roles (satisfy any, or require all)
+ 3. Support custom determination logic for permission codes and roles
 -->
 <script lang="ts" setup>
 import { computed } from 'vue';
@@ -18,7 +18,7 @@ interface Props {
   codes?: string[];
 
   /**
-   * 通过什么方式来控制组件，如果是 role，则传入角色，如果是 code，则传入权限码
+   * Control method for component: pass role for role-based control, or code for permission-code control
    * @default 'role'
    */
   type?: 'code' | 'role';

@@ -16,58 +16,58 @@ import { useElementSize } from '@vueuse/core';
 
 interface Props {
   /**
-   * 是否启用点击文本展开全部
+   * Whether clicking text expands full content
    * @default false
    */
   expand?: boolean;
   /**
-   * 文本最大行数
+   * Maximum number of lines
    * @default 1
    */
   line?: number;
   /**
-   * 文本最大宽度
+   * Maximum text width
    * @default '100%'
    */
   maxWidth?: number | string;
   /**
-   * 提示框位置
+   * Tooltip placement
    * @default 'top'
    */
   placement?: 'bottom' | 'left' | 'right' | 'top';
   /**
-   * 是否启用文本提示框
+   * Whether to enable tooltip
    * @default true
    */
   tooltip?: boolean;
   /**
-   * 是否只在文本被截断时显示提示框
+   * Whether to display tooltip only when text is truncated
    * @default false
    */
   tooltipWhenEllipsis?: boolean;
   /**
-   * 文本截断检测的像素差异阈值，越大则判断越严格
+   * Pixel tolerance threshold for truncation detection
    * @default 3
    */
   ellipsisThreshold?: number;
   /**
-   * 提示框背景颜色，优先级高于 overlayStyle
+   * Tooltip background color (overrides overlayStyle)
    */
   tooltipBackgroundColor?: string;
   /**
-   * 提示文本字体颜色，优先级高于 overlayStyle
+   * Tooltip text color (overrides overlayStyle)
    */
   tooltipColor?: string;
   /**
-   * 提示文本字体大小，单位px，优先级高于 overlayStyle
+   * Tooltip font size in px (overrides overlayStyle)
    */
   tooltipFontSize?: number;
   /**
-   * 提示框内容最大宽度，单位px，默认不设置时，提示文本内容自动与展示文本宽度保持一致
+   * Tooltip max width in px; defaults to matching display text width
    */
   tooltipMaxWidth?: number;
   /**
-   * 提示框内容区域样式
+   * Tooltip content area styles
    * @default { textAlign: 'justify' }
    */
   tooltipOverlayStyle?: CSSProperties;
@@ -103,7 +103,7 @@ const isEllipsis = ref(false);
 
 const { width: eleWidth } = useElementSize(ellipsis);
 
-// 检测文本是否被截断
+// Check if text is truncated
 const checkEllipsis = () => {
   if (!ellipsis.value || !props.tooltipWhenEllipsis) return;
 
@@ -112,7 +112,7 @@ const checkEllipsis = () => {
   const originalText = element.textContent || '';
   const originalTrimmed = originalText.trim();
 
-  // 对于空文本直接返回 false
+  // Return false for empty text
   if (!originalTrimmed) {
     isEllipsis.value = false;
     return;
@@ -121,14 +121,14 @@ const checkEllipsis = () => {
   const widthDiff = element.scrollWidth - element.clientWidth;
   const heightDiff = element.scrollHeight - element.clientHeight;
 
-  // 使用足够大的差异阈值确保只有真正被截断的文本才会显示 tooltip
+  // Enforce tolerance so tooltip only displays when truly truncated
   isEllipsis.value =
     props.line === 1
       ? widthDiff > props.ellipsisThreshold
       : heightDiff > props.ellipsisThreshold;
 };
 
-// 使用 ResizeObserver 监听尺寸变化
+// Use ResizeObserver to watch dimension changes
 let resizeObserver: null | ResizeObserver = null;
 
 onMounted(() => {
@@ -142,11 +142,11 @@ onMounted(() => {
     }
   }
 
-  // 初始检测
+  // Initial detection
   checkEllipsis();
 });
 
-// 使用onUpdated钩子检测内容变化
+// Use onUpdated hook to detect content changes
 onUpdated(() => {
   if (props.tooltipWhenEllipsis) {
     checkEllipsis();

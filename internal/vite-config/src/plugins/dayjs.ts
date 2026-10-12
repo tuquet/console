@@ -5,10 +5,10 @@ function viteDayjsPlugin(): Plugin {
     name: 'vite-dayjs-plugin',
     enforce: 'pre',
     async resolveId(source, importer, options) {
-      // 1) 已经使用了 dayjs/esm 的不处理
+      // 1) Do not process if already using dayjs/esm
       if (source.startsWith('dayjs/esm')) return null;
 
-      // 2) 根入口：dayjs -> dayjs/esm
+      // 2) Root entry: dayjs -> dayjs/esm
       if (source === 'dayjs') {
         return await this.resolve('dayjs/esm', importer, {
           skipSelf: true,
@@ -16,7 +16,7 @@ function viteDayjsPlugin(): Plugin {
         });
       }
 
-      // 3) 插件入口的多种写法
+      // 3) Various plugin entry formats
       //    - dayjs/plugin/xxx.js           -> dayjs/esm/plugin/xxx/index.js
       //    - dayjs/plugin/xxx              -> dayjs/esm/plugin/xxx
       const pluginWithJs = source.match(/^dayjs\/plugin\/([^/]+)\.js$/);
@@ -37,7 +37,7 @@ function viteDayjsPlugin(): Plugin {
         });
       }
 
-      // 4) 处理多语言包
+      // 4) Handle locale packages
       //    - dayjs/locale/xxx.js          -> dayjs/esm/locale/xxx.js
       const localeWithJs = source.match(/^dayjs\/locale\/([^/]+)\.js$/);
       if (localeWithJs) {

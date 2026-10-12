@@ -7,7 +7,7 @@ import { $t } from '#/locales';
 
 const BasicLayout = () => import('#/layouts/basic.vue');
 const AuthPageLayout = () => import('#/layouts/auth.vue');
-/** 全局404页面 */
+/** Global 404 fallback route */
 const fallbackNotFoundRoute: RouteRecordRaw = {
   component: () => import('#/views/_core/fallback/not-found.vue'),
   meta: {
@@ -20,12 +20,12 @@ const fallbackNotFoundRoute: RouteRecordRaw = {
   path: '/:path(.*)*',
 };
 
-/** 基本路由，这些路由是必须存在的 */
+/** Core fundamental routes */
 const coreRoutes: RouteRecordRaw[] = [
   /**
-   * 根路由
-   * 使用基础布局，作为所有页面的父级容器，子级就不必配置BasicLayout。
-   * 此路由必须存在，且不应修改
+   * Root route
+   * Uses BasicLayout as the parent container for all pages so child routes do not need BasicLayout.
+   * This route is required and must not be altered.
    */
   {
     component: BasicLayout,

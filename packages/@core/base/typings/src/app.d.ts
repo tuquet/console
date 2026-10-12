@@ -10,12 +10,12 @@ type LayoutType =
 type ThemeModeType = 'auto' | 'dark' | 'light';
 
 /**
- * 偏好设置按钮位置
- * auto 自动（按布局上下文在 header/fixed 间切换）
- * fixed 固定在屏幕右边缘
- * header 顶栏
- * user-dropdown 用户的下拉弹出框中
- * none 不显示
+ * Preferences button position
+ * auto: Automatically toggle between header/fixed based on layout
+ * fixed: Fixed on right edge of screen
+ * header: In header toolbar
+ * user-dropdown: In user dropdown menu
+ * none: Do not display
  */
 type PreferencesButtonPositionType =
   | 'auto'
@@ -50,58 +50,58 @@ type LayoutHeaderModeType = 'auto' | 'auto-scroll' | 'fixed' | 'static';
 type LayoutHeaderMenuAlignType = 'center' | 'end' | 'start';
 
 /**
- * 登录过期模式
- * modal 弹窗模式
- * page 页面模式
+ * Login expiration mode
+ * modal: Modal dialog mode
+ * page: Full page redirect mode
  */
 type LoginExpiredModeType = 'modal' | 'page';
 
 /**
- * 面包屑样式
- * background 背景
- * normal 默认
+ * Breadcrumb style
+ * background: Filled background
+ * normal: Default minimal
  */
 type BreadcrumbStyleType = 'background' | 'normal';
 
 /**
- * 权限模式
- * backend 后端权限模式
- * frontend 前端权限模式
- * mixed 混合权限模式
+ * Access control mode
+ * backend: Backend mode
+ * frontend: Frontend mode
+ * mixed: Mixed mode
  */
 type AccessModeType = 'backend' | 'frontend' | 'mixed';
 
 /**
- * 导航风格
- * plain 朴素
- * rounded 圆润
+ * Navigation style
+ * plain: Plain
+ * rounded: Rounded
  */
 type NavigationStyleType = 'plain' | 'rounded';
 
 /**
- * 标签栏风格
- * brisk 轻快
- * card 卡片
- * chrome 谷歌
- * plain 朴素
+ * Tabbar style
+ * brisk: Brisk
+ * card: Card
+ * chrome: Chrome-like
+ * plain: Plain
  */
 type TabsStyleType = 'brisk' | 'card' | 'chrome' | 'plain';
 
 /**
- * 页面切换动画
+ * Page transition animation
  */
 type PageTransitionType = 'fade' | 'fade-down' | 'fade-slide' | 'fade-up';
 
 /**
- * 页面切换动画
- * panel-center 居中布局
- * panel-left 居左布局
- * panel-right 居右布局
+ * Page transition animation
+ * panel-center: Center layout
+ * panel-left: Left layout
+ * panel-right: Right layout
  */
 type AuthPageLayoutType = 'panel-center' | 'panel-left' | 'panel-right';
 
 /**
- * 时区选项
+ * Timezone option
  */
 interface TimezoneOption {
   label: string;

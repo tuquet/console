@@ -44,10 +44,14 @@ function handleClick(path?: string) {
           <BreadcrumbItem>
             <div v-if="item.items?.length ?? 0 > 0">
               <DropdownMenu>
-                <DropdownMenuTrigger class="flex items-center gap-1">
-                  <VbenIcon v-if="showIcon" :icon="item.icon" class="size-5" />
-                  {{ item.title }}
-                  <ChevronDown class="size-4" />
+                <DropdownMenuTrigger class="inline-flex items-center gap-1.5">
+                  <VbenIcon
+                    v-if="showIcon && item.icon"
+                    :icon="item.icon"
+                    class="size-4 shrink-0 align-middle"
+                  />
+                  <span class="leading-none">{{ item.title }}</span>
+                  <ChevronDown class="size-3.5 shrink-0" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
                   <template
@@ -66,26 +70,26 @@ function handleClick(path?: string) {
               href="javascript:void 0"
               @click.stop="handleClick(item.path)"
             >
-              <div class="flex-center">
+              <span class="inline-flex items-center">
                 <VbenIcon
-                  v-if="showIcon"
-                  :class="{ 'size-5': item.isHome }"
+                  v-if="showIcon && item.icon"
+                  :class="{ 'size-4.5': item.isHome, 'size-4': !item.isHome }"
                   :icon="item.icon"
-                  class="mr-1 size-4"
+                  class="mr-1.5 shrink-0 align-middle"
                 />
-                {{ item.title }}
-              </div>
+                <span class="leading-none">{{ item.title }}</span>
+              </span>
             </BreadcrumbLink>
             <BreadcrumbPage v-else>
-              <div class="flex-center">
+              <span class="inline-flex items-center">
                 <VbenIcon
-                  v-if="showIcon"
-                  :class="{ 'size-5': item.isHome }"
+                  v-if="showIcon && item.icon"
+                  :class="{ 'size-4.5': item.isHome, 'size-4': !item.isHome }"
                   :icon="item.icon"
-                  class="mr-1 size-4"
+                  class="mr-1.5 shrink-0 align-middle"
                 />
-                {{ item.title }}
-              </div>
+                <span class="leading-none">{{ item.title }}</span>
+              </span>
             </BreadcrumbPage>
             <BreadcrumbSeparator
               v-if="index < breadcrumbs.length - 1 && !item.isHome"

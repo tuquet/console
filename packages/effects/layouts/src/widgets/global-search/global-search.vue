@@ -3,13 +3,7 @@ import type { MenuRecordRaw } from '@vben/types';
 
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
-import {
-  ArrowDown,
-  ArrowUp,
-  CornerDownLeft,
-  MdiKeyboardEsc,
-  Search,
-} from '@vben/icons';
+import { ArrowDown, ArrowUp, CornerDownLeft, Search, X } from '@vben/icons';
 import { $t } from '@vben/locales';
 import { isWindowsOs } from '@vben/utils';
 
@@ -27,7 +21,7 @@ const props = withDefaults(
   defineProps<{
     enableShortcutKey?: boolean;
     menus?: MenuRecordRaw[];
-    /** 是否显示触发按钮（嵌在 dropdown 等容器里时可关掉） */
+    /** Whether to show trigger button (can hide when embedded in containers like dropdown) */
     showButton?: boolean;
   }>(),
   {
@@ -101,7 +95,7 @@ onMounted(() => {
   });
 });
 
-// 暴露给父组件，允许从外部触发搜索弹框（如 user-dropdown 里点击菜单项触发）
+// Expose to parent component to allow triggering search modal externally (e.g. from user-dropdown)
 defineExpose({
   open: () => modalApi.open(),
   close: () => modalApi.close(),
@@ -141,7 +135,7 @@ defineExpose({
             {{ $t('ui.widgets.search.navigate') }}
           </div>
           <div class="flex items-center">
-            <MdiKeyboardEsc class="mr-1 size-3" />
+            <X class="mr-1 size-3" />
             {{ $t('ui.widgets.search.close') }}
           </div>
         </div>

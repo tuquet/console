@@ -1,14 +1,14 @@
 import type NProgress from 'nprogress';
 
-// 创建一个NProgress实例的变量，初始值为null
+// NProgress instance variable (null initially)
 let nProgressInstance: null | typeof NProgress = null;
 
 /**
- * 动态加载NProgress库，并进行配置。
- * 此函数首先检查是否已经加载过NProgress库，如果已经加载过，则直接返回NProgress实例。
- * 否则，动态导入NProgress库，进行配置，然后返回NProgress实例。
+ * Dynamically load NProgress library and configure it.
+ * Reuses instance if already loaded; otherwise dynamically imports and configures it.
+ 
  *
- * @returns  NProgress实例的Promise对象。
+ * @returns Promise resolving to NProgress instance.
  */
 async function loadNprogress() {
   if (nProgressInstance) {
@@ -23,8 +23,8 @@ async function loadNprogress() {
 }
 
 /**
- * 开始显示进度条。
- * 此函数首先加载NProgress库，然后调用NProgress的start方法开始显示进度条。
+ * Start progress bar.
+ * Loads NProgress and calls start().
  */
 async function startProgress() {
   const nprogress = await loadNprogress();
@@ -32,8 +32,8 @@ async function startProgress() {
 }
 
 /**
- * 停止显示进度条，并隐藏进度条。
- * 此函数首先加载NProgress库，然后调用NProgress的done方法停止并隐藏进度条。
+ * Stop and hide progress bar.
+ * Loads NProgress and calls done().
  */
 async function stopProgress() {
   const nprogress = await loadNprogress();

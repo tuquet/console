@@ -4,7 +4,7 @@ import { preferences, usePreferences } from '@vben/preferences';
 import { convertToRgb, updateCSSVariables } from '@vben/utils';
 
 /**
- * 用于适配各个框架的设计系统
+ * Adapt design systems across various component libraries
  */
 
 export function useAntdDesignTokens() {
@@ -25,7 +25,7 @@ export function useAntdDesignTokens() {
     colorSuccess: '',
     colorTextBase: '',
     colorWarning: '',
-    zIndexPopupBase: 2000, // 调整基础弹层层级，避免下拉等组件被弹窗或者最大化状态下的表格遮挡
+    zIndexPopupBase: 2000, // Adjust base popup z-index so dropdowns are not occluded by modals or maximized tables
   });
 
   const getCssVariableValue = (variable: string, isColor: boolean = true) => {
@@ -304,7 +304,7 @@ export function useElementPlusDesignTokens() {
         '--el-fill-color-dark': getCssVariableValue('--accent-dark'),
         '--el-fill-color-darker': getCssVariableValue('--accent-darker'),
 
-        // 解决ElLoading背景色问题
+        // Fix ElLoading background color issue
         '--el-mask-color': isDark.value
           ? 'rgba(0,0,0,.8)'
           : 'rgba(255,255,255,.9)',
@@ -330,11 +330,11 @@ export function useTDesignDesignTokens() {
   };
 
   /**
-   * 生成某个语义色对应的 TDesign 变量（语义变体 + 1~10 色阶）。
-   * TDesign 的色阶在亮色模式下 1 最浅、10 最深，暗色模式下方向相反，
-   * 这里根据当前模式把 Vben 的 50~900 色板映射到对应方向。
-   * @param tdName TDesign 颜色名，如 `brand`、`error`
-   * @param vbenName Vben 颜色名，如 `primary`、`destructive`
+   * Generate TDesign variables corresponding to a semantic color (semantic variant + 1-10 ramp).
+   * TDesign color ramps: in light mode 1 is lightest and 10 is darkest; dark mode is inverted.
+   * Maps Vben 50-900 palettes according to active theme mode.
+   * @param tdName TDesign color name, e.g. `brand`, `error`
+   * @param vbenName Vben color name, e.g. `primary`, `destructive`
    */
   const getColorTokens = (tdName: string, vbenName: string) => {
     const dark = isDark.value;
@@ -343,7 +343,7 @@ export function useTDesignDesignTokens() {
         level === undefined ? `--${vbenName}` : `--${vbenName}-${level}`,
       );
 
-    // 亮色模式 1 最浅、10 最深；暗色模式相反
+    // Light mode: 1 is lightest, 10 is darkest; dark mode is inverted
     const lightScale = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
     const scaleLevels = dark ? [...lightScale].toReversed() : lightScale;
     const scale: Record<string, string> = {};
@@ -367,13 +367,13 @@ export function useTDesignDesignTokens() {
     () => preferences.theme,
     () => {
       const variables: Record<string, string> = {
-        // 品牌色（主题色）、功能色
+        // Brand (theme) and functional colors
         ...getColorTokens('brand', 'primary'),
         ...getColorTokens('error', 'destructive'),
         ...getColorTokens('warning', 'warning'),
         ...getColorTokens('success', 'success'),
 
-        // 文字颜色
+        // Text colors
         '--td-text-color-anti': getCssVariableValue('--primary-foreground'),
         '--td-text-color-brand': getCssVariableValue('--primary'),
         '--td-text-color-disabled': getCssVariableValue('--muted-foreground'),
@@ -384,7 +384,7 @@ export function useTDesignDesignTokens() {
         '--td-text-color-primary': getCssVariableValue('--foreground'),
         '--td-text-color-secondary': getCssVariableValue('--muted-foreground'),
 
-        // 背景颜色
+        // Background colors
         '--td-bg-color-component': getCssVariableValue('--accent'),
         '--td-bg-color-component-active':
           getCssVariableValue('--accent-darker'),
@@ -398,18 +398,18 @@ export function useTDesignDesignTokens() {
         '--td-bg-color-page': getCssVariableValue('--background-deep'),
         '--td-bg-color-secondarycontainer': getCssVariableValue('--card'),
 
-        // 边框颜色
+        // Border colors
         '--td-border-level-1-color': getCssVariableValue('--border'),
         '--td-border-level-2-color': getCssVariableValue('--border'),
         '--td-component-border': getCssVariableValue('--border'),
         '--td-component-stroke': getCssVariableValue('--border'),
 
-        // 圆角
+        // Border radius
         '--td-radius-default': getCssVariableValue('--radius', false),
       };
 
-      // TDesign 将亮/暗变量定义在 `:root[theme-mode='light'|'dark']` 下，
-      // 需要写入相同优先级的选择器才能覆盖默认值
+      // TDesign defines light/dark variables under `:root[theme-mode='light'|'dark']`;
+      // requires matching selector specificity to override defaults
       const selector = isDark.value
         ? `:root[theme-mode='dark']`
         : `:root[theme-mode='light']`;

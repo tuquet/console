@@ -11,91 +11,91 @@ import { SidebarCollapseButton, SidebarFixedButton } from './widgets';
 
 interface Props {
   /**
-   * 折叠区域高度
+   * Collapse trigger height
    * @default 42
    */
   collapseHeight?: number;
   /**
-   * 折叠宽度
+   * Collapsed width
    * @default 48
    */
   collapseWidth?: number;
   /**
-   * 隐藏的dom是否可见
+   * Whether hidden DOM is visible
    * @default true
    */
   domVisible?: boolean;
   /**
-   * 标准侧栏展开宽度
+   * Standard sidebar expanded width
    */
   expandedWidth?: number;
   /**
-   * 扩展区域extra-title的高度
+   * Height of extra-title in extra panel
    */
   extraTitleHeight?: number;
   /**
-   * 扩展区域宽度
+   * Extra panel width
    */
   extraWidth: number;
   /**
-   * 固定扩展区域
+   * Fix extra panel
    * @default false
    */
   fixedExtra?: boolean;
   /**
-   * 头部高度
+   * Header height
    */
   headerHeight: number;
   /**
-   * 是否移动端抽屉模式
+   * Whether mobile drawer mode
    * @default false
    */
   isMobile?: boolean;
   /**
-   * 是否侧边混合模式
+   * Whether sidebar mixed mode
    * @default false
    */
   isSidebarMixed?: boolean;
   /**
-   * 顶部margin
+   * Top margin
    * @default 60
    */
   marginTop?: number;
   /**
-   * 混合菜单宽度
+   * Mixed menu width
    * @default 80
    */
   mixedWidth?: number;
   /**
-   * 顶部padding
+   * Top padding
    * @default 60
    */
   paddingTop?: number;
   /**
-   * 是否显示
+   * Whether to display
    * @default true
    */
   show?: boolean;
   /**
-   * 显示折叠按钮
+   * Show collapse button
    * @default true
    */
   showCollapseButton?: boolean;
   /**
-   * 显示固定按钮
+   * Show pin/fixed button
    * @default true
    */
   showFixedButton?: boolean;
   /**
-   * 主题
+   * Theme
    */
   theme: string;
   /**
-   * 子主题
+   * Sub-theme
    */
   themeSub: string;
   /**
-   * 宽度
+   * Width
    */
   width: number;
   /**
@@ -162,9 +162,9 @@ const dragBarStyle = computed((): CSSProperties => {
 });
 
 /**
- * 二级面板是否展开。可见性、占位宽度必须由同一判定驱动：
- * 二者不一致时面板会浮在正文上（vben-layout 的 header 偏移只看 extraVisible）。
- * fixedExtra 与 expandOnHover 在 vben-layout 里绑同一个偏好，但作为组件 API 不能假设调用方总是成对传。
+ * Whether the secondary panel is expanded. Visibility and placeholder width must be driven by the same condition:
+ * Inconsistency causes the panel to float over the main content (vben-layout header offset only checks extraVisible).
+ * fixedExtra and expandOnHover are bound to the same preference in vben-layout, but as component API we cannot assume callers always pass them in pairs.
  */
 const extraPanelExpanded = computed(
   () =>
@@ -287,7 +287,7 @@ function calcMenuWidthStyle(): CSSProperties {
 }
 
 function handleMouseenter(e: MouseEvent) {
-  // 移动端抽屉模式不存在 hover 语义：合成 mouse 事件不得改写折叠状态
+  // Mobile drawer mode does not have hover semantics: synthetic mouse events must not mutate collapse state
   if (props.isMobile) {
     return;
   }

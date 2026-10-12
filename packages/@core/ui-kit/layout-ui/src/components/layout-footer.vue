@@ -5,12 +5,12 @@ import { computed } from 'vue';
 
 interface Props {
   /**
-   * 是否固定在底部
+   * Whether to fix at the bottom
    */
   fixed?: boolean;
   height: number;
   /**
-   * 是否显示
+   * Whether to display
    * @default true
    */
   show?: boolean;

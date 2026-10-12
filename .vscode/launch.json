@@ -13,7 +13,7 @@
     },
     {
       "type": "chrome",
-      "name": "tuquet admin web dev",
+      "name": "Specter web dev",
       "request": "launch",
       "url": "http://localhost:5666",
       "env": { "NODE_ENV": "development" },

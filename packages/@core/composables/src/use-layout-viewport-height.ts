@@ -17,8 +17,8 @@ function readViewportHeight() {
 }
 
 /**
- * 仅在不支持 dvh 时，把 --vben-viewport-height 写成像素值。
- * 支持 dvh 时保持 CSS 的 100vh → 100dvh 级联，避免 useCssVar 把单位冻成 px。
+ * Only write --vben-viewport-height as pixel value when dvh is not supported.
+ * When dvh is supported, keep CSS cascade 100vh -> 100dvh, avoiding freezing units into px via useCssVar.
  */
 export function useLayoutViewportHeight() {
   if (typeof window === 'undefined' || supportsDynamicViewportHeight()) {

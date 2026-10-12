@@ -51,25 +51,25 @@ const emit = defineEmits<{
 }>();
 
 interface Props {
-  /** 自定义 Logo 图片地址，不传则使用偏好设置默认值 */
+  /** Custom Logo image URL; uses preferences default if omitted */
   logoSrc?: string;
-  /** 自定义暗色主题 Logo 图片地址 */
+  /** Custom dark theme Logo image URL */
   logoSrcDark?: string;
-  /** 自定义 Logo 文本，不传则使用偏好设置默认值 */
+  /** Custom Logo text; uses preferences default if omitted */
   logoText?: string;
-  /** 用户头像图片地址 */
+  /** User avatar image URL */
   avatar?: string;
-  /** 用户文本（如用户名） */
+  /** User text (e.g. username) */
   text?: string;
 }
 
-/** 最终使用的 Logo 图片地址（自定义优先，否则使用默认） */
+/** Resolved Logo image URL (custom takes priority, falls back to default) */
 const finalLogoSrc = computed(() => props.logoSrc || preferences.logo.source);
-/** 最终使用的暗色 Logo 图片地址 */
+/** Resolved dark theme Logo image URL */
 const finalLogoSrcDark = computed(
   () => props.logoSrcDark || preferences.logo.sourceDark,
 );
-/** 最终使用的 Logo 文本（自定义优先，否则使用默认应用名称） */
+/** Resolved Logo text (custom takes priority, falls back to default app name) */
 const finalLogoText = computed(() => props.logoText || preferences.app.name);
 
 const {
@@ -156,7 +156,7 @@ const logoTheme = computed(() => {
 });
 
 /**
- * layout-sidebar扩展区域插槽extra-title的高度
+ * layout-sidebar extra title slot height
  */
 const sidebarExtraTitleHeight = computed<number | undefined>(() => {
   const showSideExtraTitle =
@@ -175,7 +175,7 @@ const {
   sidebarVisible,
 } = useMixedMenu();
 
-// 侧边多列菜单
+// Multi-column sidebar menu
 const {
   extraActiveMenu,
   extraMenus,
@@ -187,9 +187,9 @@ const {
 } = useExtraMenu(mixHeaderMenus);
 
 /**
- * 包装菜单，翻译菜单名称
- * @param menus 原始菜单数据
- * @param deep 是否深度包装。对于双列布局，只需要包装第一层，因为更深层的数据会在扩展菜单中重新包装
+ * Wrap menu items and translate menu titles
+ * @param menus Raw menu data
+ * @param deep Whether to wrap deeply (in mixed layout only first level is wrapped)
  */
 function wrapperMenus(menus: MenuRecordRaw[], deep: boolean = true) {
   return deep
@@ -241,11 +241,11 @@ function refreshAll() {
   refresh();
 }
 
-// 语言更新后，刷新页面
-// i18n.global.locale会在preference.app.locale变更之后才会更新，因此watchpreference.app.locale是不合适的，刷新页面时可能语言配置尚未完全加载完成
+// Refresh page when language updates
+// i18n.global.locale updates after preferences; wait for full locale loading
 watch(i18n.global.locale, refreshAll, { flush: 'post' });
 
-// 时区更新后，刷新页面
+// Refresh page when timezone updates
 watch(() => timezoneStore.timezone, refreshAll, { flush: 'post' });
 
 const slots: SetupContext['slots'] = useSlots();
@@ -336,7 +336,7 @@ const headerSlots = computed(() => {
         </template>
       </VbenLogo>
     </template>
-    <!-- 头部区域 -->
+    <!-- Header area -->
     <template #header>
       <LayoutHeader
         :avatar="avatar"
@@ -378,7 +378,7 @@ const headerSlots = computed(() => {
         </template>
       </LayoutHeader>
     </template>
-    <!-- 侧边菜单区域 -->
+    <!-- Sidebar menu area -->
     <template #menu>
       <LayoutMenu
         :accordion="preferences.navigation.accordion"
@@ -404,7 +404,7 @@ const headerSlots = computed(() => {
         @select="handleMixedMenuSelect"
       />
     </template>
-    <!-- 侧边额外区域 -->
+    <!-- Sidebar extra area -->
     <template #side-extra>
       <LayoutExtraMenu
         :accordion="preferences.navigation.accordion"
@@ -436,7 +436,7 @@ const headerSlots = computed(() => {
       />
     </template>
 
-    <!-- 主体内容 -->
+    <!-- Main content -->
     <template #content>
       <LayoutContent />
     </template>
@@ -445,7 +445,7 @@ const headerSlots = computed(() => {
       <LayoutContentSpinner />
     </template>
 
-    <!-- 页脚 -->
+    <!-- Footer -->
     <template v-if="preferences.footer.enable" #footer>
       <LayoutFooter>
         <Copyright

@@ -3,7 +3,7 @@ import {
   definePreferencesExtension,
 } from '@vben/preferences';
 
-interface WebAntdPreferencesExtension {
+interface WebAdminPreferencesExtension {
   defaultTableSize: number;
   enableFormFullscreen: boolean;
   reportTitle: string;
@@ -11,23 +11,31 @@ interface WebAntdPreferencesExtension {
 }
 
 /**
- * @description 项目配置文件
- * 只需要覆盖项目中的一部分配置，不需要的配置不用覆盖，会自动使用默认配置
- * !!! 更改配置后请清空缓存，否则可能不生效
+ * @description Project preferences configuration
+ * Only override necessary configurations; omitted options will automatically fallback to default values.
+ * Note: Clear localStorage / cache if configuration changes do not take effect immediately.
  */
 export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
     defaultHomePath: '/dashboard/workspace',
-    enablePreferences: false,
+    enablePreferences: true,
     locale: 'en-US',
-    name: 'Tuquet Admin',
+    name: 'Specter',
+    preferencesButtonPosition: 'auto',
+    authPageLayout: 'panel-right',
+  },
+  logo: {
+    enable: true,
+    fit: 'contain',
+    source: '/logo.svg',
+    sourceDark: '/logo.svg',
   },
   breadcrumb: {
-    enable: false,
+    enable: true,
   },
   copyright: {
-    companyName: 'Tuquet',
+    companyName: 'tuquet',
     companySiteLink: 'https://tuquet.com',
     date: '2026',
     enable: false,
@@ -43,20 +51,22 @@ export const overridesPreferences = defineOverridesPreferences({
     width: 210,
   },
   tabbar: {
-    enable: false,
+    enable: true,
   },
   theme: {
-    builtinType: 'slate',
+    builtinType: 'neutral',
+    colorPrimary: 'hsl(0 0% 98%)',
     mode: 'dark',
     radius: '0.5',
   },
   widget: {
-    fullscreen: false,
-    globalSearch: false,
+    fullscreen: true,
+    globalSearch: true,
     languageToggle: false,
-    lockScreen: false,
-    notification: false,
-    refresh: false,
+    lockScreen: true,
+    logoutButtonPosition: 'user-dropdown',
+    notification: true,
+    refresh: true,
     sidebarToggle: true,
     themeToggle: true,
     timezone: false,
@@ -64,29 +74,29 @@ export const overridesPreferences = defineOverridesPreferences({
 });
 
 export const preferencesExtension =
-  definePreferencesExtension<WebAntdPreferencesExtension>({
-    tabLabel: 'preferences.antd.tabLabel',
-    title: 'preferences.antd.title',
+  definePreferencesExtension<WebAdminPreferencesExtension>({
+    tabLabel: 'preferences.admin.tabLabel',
+    title: 'preferences.admin.title',
     fields: [
       {
         component: 'switch',
         defaultValue: true,
         key: 'enableFormFullscreen',
-        label: 'preferences.antd.fields.enableFormFullscreen.label',
-        tip: 'preferences.antd.fields.enableFormFullscreen.tip',
+        label: 'preferences.admin.fields.enableFormFullscreen.label',
+        tip: 'preferences.admin.fields.enableFormFullscreen.tip',
       },
       {
         component: 'select',
         defaultValue: 'single',
         key: 'tenantMode',
-        label: 'preferences.antd.fields.tenantMode.label',
+        label: 'preferences.admin.fields.tenantMode.label',
         options: [
           {
-            label: 'preferences.antd.fields.tenantMode.options.single.label',
+            label: 'preferences.admin.fields.tenantMode.options.single.label',
             value: 'single',
           },
           {
-            label: 'preferences.antd.fields.tenantMode.options.multi.label',
+            label: 'preferences.admin.fields.tenantMode.options.multi.label',
             value: 'multi',
           },
         ],
@@ -100,14 +110,14 @@ export const preferencesExtension =
         },
         defaultValue: 20,
         key: 'defaultTableSize',
-        label: 'preferences.antd.fields.defaultTableSize.label',
+        label: 'preferences.admin.fields.defaultTableSize.label',
       },
       {
         component: 'input',
         defaultValue: '',
         key: 'reportTitle',
-        label: 'preferences.antd.fields.reportTitle.label',
-        placeholder: 'preferences.antd.fields.reportTitle.placeholder',
+        label: 'preferences.admin.fields.reportTitle.label',
+        placeholder: 'preferences.admin.fields.reportTitle.placeholder',
       },
     ],
   });

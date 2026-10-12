@@ -132,7 +132,7 @@
   // search
   "search.searchEditor.singleClickBehaviour": "peekDefinition",
   "search.followSymlinks": false,
-  // 使用搜索功能时，将这些文件和文件夹排除在外
+  // Exclude these files and folders when searching
   "search.exclude": {
     "**/node_modules": true,
     "**/*.log": true,
@@ -226,7 +226,7 @@
   "i18n-ally.sortKeys": true,
   "i18n-ally.namespace": true,
 
-  // 控制相关文件嵌套展示
+  // Control file nesting in file explorer
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {

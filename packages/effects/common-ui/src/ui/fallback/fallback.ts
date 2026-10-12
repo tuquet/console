@@ -1,24 +1,24 @@
 interface FallbackProps {
   /**
-   * 描述
+   * Description
    */
   description?: string;
   /**
-   *  @zh_CN 首页路由地址
+   * Home route path
    *  @default /
    */
   homePath?: string;
   /**
-   * @zh_CN 默认显示的图片
+   * Default display image
    * @default pageNotFoundSvg
    */
   image?: string;
   /**
-   *  @zh_CN 内置类型
+   * Built-in type
    */
   status?: '403' | '404' | '500' | 'coming-soon' | 'offline';
   /**
-   *  @zh_CN 页面提示语
+   * Page notice / message
    */
   title?: string;
 }

@@ -50,7 +50,7 @@ const timezoneOptionsRef = ref<
 
 onMounted(async () => {
   timezoneOptionsRef.value = await timezoneStore.getTimezoneOptions();
-  // 获取当前时区，例如：Asia/Shanghai
+  // Get current timezone, e.g. Asia/Shanghai
   const timezoneValue = unref(timezoneStore.timezone);
   if (timezoneValue) {
     appTimezone.value = timezoneValue;

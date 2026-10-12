@@ -60,14 +60,14 @@ export function useVbenVxeGrid<
       name: 'VbenVxeGrid',
       inheritAttrs: false,
       slots: Object as SlotsType<
-        {
-          // 表格标题
+        FilteredSlots<T> & {
+          // Table title
           'table-title': undefined;
-          // 工具栏左侧部分
+          // Toolbar left section
           'toolbar-actions': VxeGridSlotTypes.DefaultSlotParams<T>;
-          // 工具栏右侧部分
+          // Toolbar right section
           'toolbar-tools': VxeGridSlotTypes.DefaultSlotParams<T>;
-        } & FilteredSlots<T>
+        }
       >,
     },
   );

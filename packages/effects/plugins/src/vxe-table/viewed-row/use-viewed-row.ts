@@ -21,11 +21,11 @@ import { useDebounceFn } from '@vueuse/core';
 
 const DEFAULT_VIEWED_CLASS = 'vxe-row--viewed';
 
-// ========== 持久化策略 ==========
+// ========== Persistence Strategy ==========
 
 /**
- * localStorage / sessionStorage 适配器
- * 整体存储：key → [1, 2, 3]
+ * localStorage / sessionStorage adapter
+ * Monolithic storage: key → [1, 2, 3]
  */
 function createWebStorageAdapter(
   storageType: 'localStorage' | 'sessionStorage',
@@ -51,8 +51,8 @@ function createWebStorageAdapter(
 }
 
 /**
- * IndexedDB 适配器
- * 单条存储：prefix:1 → { expiry, value: 1 }
+ * IndexedDB adapter
+ * Individual entry storage: prefix:1 → { expiry, value: 1 }
  */
 function createIndexedDBAdapter(
   opts: Extract<ViewedRowPersistOptions, { type: 'indexedDB' }>,
@@ -70,7 +70,7 @@ function createIndexedDBAdapter(
   return {
     async getKeys() {
       try {
-        // 通过 StorageManager 获取当前前缀下所有 key，再逐条读取（自动过滤过期）
+        // Get all keys under prefix via StorageManager and read sequentially (auto-filters expired)
         const shortKeys = await manager.keys();
 
         const results: Array<number | string> = [];
@@ -96,11 +96,11 @@ function createIndexedDBAdapter(
     async setKeys(keys) {
       try {
         const newKeySet = new Set(keys.map(String));
-        // 获取已存在的 key，避免重复写入刷新过期时间
+        // Fetch existing keys to avoid rewriting and resetting expiration
         const existingKeys = await manager.keys();
         const existingKeySet = new Set(existingKeys);
 
-        // 只写入新增的 key，不覆盖已有记录的过期时间
+        // Only write newly added keys, preserving expiration on existing entries
         const toAdd = keys.filter((key) => !existingKeySet.has(String(key)));
         if (toAdd.length > 0) {
           await Promise.all(
@@ -108,7 +108,7 @@ function createIndexedDBAdapter(
           );
         }
 
-        // 清理不在新集合中的旧 key
+        // Clean up old keys not present in new set
         const toRemove = existingKeys.filter((k) => !newKeySet.has(k));
         if (toRemove.length > 0) {
           await Promise.all(toRemove.map((k) => manager.removeItem(k)));
@@ -121,21 +121,21 @@ function createIndexedDBAdapter(
 }
 
 /**
- * 根据 persist 配置创建存储适配器
+ * Create storage adapter based on persist config
  */
 function createStorageAdapter(
   persist?: string | ViewedRowPersistOptions,
 ): null | ViewedRowStorageAdapter {
   if (!persist) return null;
 
-  // 简写模式：string → localStorage
+  // Shorthand mode: string → localStorage
   if (typeof persist === 'string') {
     return createWebStorageAdapter('localStorage', persist);
   }
 
   switch (persist.type) {
     case 'custom': {
-      // 用户自定义适配器，解除 Vue 响应式代理
+      // Custom adapter: unwrap Vue reactive proxy
       return toRaw(persist.storage);
     }
     case 'indexedDB': {
@@ -160,10 +160,10 @@ function createStorageAdapter(
   }
 }
 
-// ========== maxSize 淘汰 ==========
+// ========== maxSize Eviction ==========
 
 /**
- * 强制执行 maxSize 限制，超出时淘汰最早插入的 key（FIFO）
+ * Enforce maxSize constraint: evict oldest inserted key (FIFO) when exceeded
  */
 function enforceMaxSize(set: Set<number | string>, maxSize: number): void {
   if (maxSize > 0 && set.size > maxSize) {
@@ -177,12 +177,12 @@ function enforceMaxSize(set: Set<number | string>, maxSize: number): void {
   }
 }
 
-// ========== 核心 composable ==========
+// ========== Core Composable ==========
 
 export function useViewedRow<T = any>(
   options: ViewedRowOptions<T> & { keyField: string },
 ) {
-  // ========== 解析持久化配置 ==========
+  // ========== Parse Persistence Config ==========
   const persistOpts: null | ViewedRowPersistOptions = options.persist
     ? typeof options.persist === 'string'
       ? { key: options.persist, type: 'localStorage' }
@@ -192,10 +192,10 @@ export function useViewedRow<T = any>(
   const adapter = createStorageAdapter(options.persist);
   const maxSize = persistOpts?.maxSize ?? 100;
 
-  // ========== 初始化已读集合 ==========
+  // ========== Initialize Viewed Set ==========
   const viewedSet = shallowRef<Set<number | string>>(new Set());
 
-  // ========== 持久化（防抖） ==========
+  // ========== Persistence (Debounced) ==========
   function persistImmediate() {
     if (!adapter) return;
     adapter.setKeys([...viewedSet.value]).catch((error) => {
@@ -205,7 +205,7 @@ export function useViewedRow<T = any>(
 
   const persist = useDebounceFn(persistImmediate, 300);
 
-  // ========== 从存储恢复 ==========
+  // ========== Restore from Storage ==========
   async function restoreFromStorage(): Promise<void> {
     if (!adapter) return;
 
@@ -225,7 +225,7 @@ export function useViewedRow<T = any>(
     }
   }
 
-  // 先恢复存储，再合并外部 viewedKeys，确保 viewedKeys 是最新插入的（最后被淘汰）
+  // Restore storage first, then merge external viewedKeys to ensure viewedKeys are latest
   restoreFromStorage().then(() => {
     if (options.viewedKeys) {
       const keys = isRef(options.viewedKeys)
@@ -244,7 +244,7 @@ export function useViewedRow<T = any>(
     }
   });
 
-  // ========== 更新 viewedSet 的统一入口 ==========
+  // ========== Unified Entry to Update viewedSet ==========
   function updateViewedSet(updater: (set: Set<number | string>) => boolean) {
     const changed = updater(viewedSet.value);
 
@@ -257,7 +257,7 @@ export function useViewedRow<T = any>(
     }
   }
 
-  // ========== 监听外部 viewedKeys 变化（如果是 Ref） ==========
+  // ========== Watch External viewedKeys Changes (if Ref) ==========
   if (isRef(options.viewedKeys)) {
     watch(options.viewedKeys, (newKeys) => {
       updateViewedSet((set) => {
@@ -273,7 +273,7 @@ export function useViewedRow<T = any>(
     });
   }
 
-  // ========== 标记已读 ==========
+  // ========== Mark Viewed ==========
   function markAsViewed(record: T) {
     const key = (record as Record<string, any>)[options.keyField] as
       | number
@@ -300,7 +300,7 @@ export function useViewedRow<T = any>(
     });
   }
 
-  // ========== 查询 ==========
+  // ========== Query ==========
   function isViewed(record: T): boolean {
     const key = (record as Record<string, any>)[options.keyField] as
       | number
@@ -308,7 +308,7 @@ export function useViewedRow<T = any>(
     return viewedSet.value.has(key);
   }
 
-  // ========== 清除 ==========
+  // ========== Clear ==========
   function clearViewed() {
     const hadData = viewedSet.value.size > 0;
     viewedSet.value.clear();
@@ -324,7 +324,7 @@ export function useViewedRow<T = any>(
     }
   }
 
-  // ========== 移除指定 keys ==========
+  // ========== Remove Specified Keys ==========
   function removeKeys(keys: Array<number | string>) {
     updateViewedSet((set) => {
       let changed = false;
@@ -338,7 +338,7 @@ export function useViewedRow<T = any>(
     });
   }
 
-  // ========== rowClassName 函数 ==========
+  // ========== rowClassName Function ==========
   function getRowClassName(params: any): string {
     if (!isViewed(params.row)) return '';
 
@@ -355,7 +355,7 @@ export function useViewedRow<T = any>(
     return DEFAULT_VIEWED_CLASS;
   }
 
-  // ========== rowStyle 函数 ==========
+  // ========== rowStyle Function ==========
   function getRowStyle(params: any): any {
     if (!isViewed(params.row)) return undefined;
 
@@ -383,7 +383,7 @@ export function useViewedRow<T = any>(
 
 export type ViewedRowHelper<T = any> = ReturnType<typeof useViewedRow<T>>;
 
-// ========== 工具函数 ==========
+// ========== Utility Functions ==========
 
 function normalizeClassName(value: any): string {
   if (!value) return '';
@@ -405,8 +405,8 @@ function mergeClassNames(...classNames: any[]): string {
 }
 
 /**
- * 包装 columns，拦截 CellOperation 的 onClick，根据 actionCodes 自动标记已读
- * 注意：columns 每次都是 cloneDeep 后的新对象，不存在重复包装问题
+ * Wrap columns to intercept CellOperation onClick and mark viewed based on actionCodes
+ * Note: columns are fresh cloneDeep objects each time; no duplicate wrapping risk
  */
 function wrapColumnsForViewedRow(
   columns: any[],
@@ -447,15 +447,15 @@ function wrapColumnsForViewedRow(
 }
 
 /**
- * 将 viewedRow 配置应用到 mergedOptions 上
- * 注入 rowClassName、rowStyle、columns 拦截
+ * Apply viewedRow config onto mergedOptions
+ * Inject rowClassName, rowStyle, and column intercepts
  */
 export function applyViewedRowOptions(
   mergedOptions: VxeTableGridProps,
   viewedRowConfig: boolean | ViewedRowOptions,
   helper: ReturnType<typeof useViewedRow>,
 ) {
-  // 从最新的配置中读取 rowClassName 和 rowStyle（支持运行时修改）
+  // Read rowClassName and rowStyle from latest config (supports runtime mutation)
   const viewedRowClassName = isBoolean(viewedRowConfig)
     ? undefined
     : viewedRowConfig.rowClassName;
@@ -463,7 +463,7 @@ export function applyViewedRowOptions(
     ? undefined
     : viewedRowConfig.rowStyle;
 
-  // 注入 rowClassName
+  // Inject rowClassName
   const originalRowClassName = mergedOptions.rowClassName;
   mergedOptions.rowClassName = (params: any) => {
     if (!helper.isViewed(params.row)) {
@@ -493,7 +493,7 @@ export function applyViewedRowOptions(
     );
   };
 
-  // 注入 rowStyle
+  // Inject rowStyle
   const originalRowStyle = mergedOptions.rowStyle;
   mergedOptions.rowStyle = (params: any) => {
     const originalStyle = isFunction(originalRowStyle)
@@ -519,7 +519,7 @@ export function applyViewedRowOptions(
     return { ...originalStyle, ...viewedStyle };
   };
 
-  // 拦截 CellOperation columns
+  // Intercept CellOperation columns
   const actionCodes =
     !isBoolean(viewedRowConfig) && viewedRowConfig.actionCodes
       ? Array.isArray(viewedRowConfig.actionCodes)

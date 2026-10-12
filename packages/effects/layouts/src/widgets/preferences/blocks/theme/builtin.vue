@@ -109,7 +109,7 @@ watch(
     const theme = builtinThemePresets.value.find(
       (item) => item.type === themeType,
     );
-    if (theme) {
+    if (theme && theme.type !== 'custom') {
       const primaryColor = isDark
         ? theme.darkPrimaryColor || theme.primaryColor
         : theme.primaryColor;
@@ -117,6 +117,7 @@ watch(
       themeColorPrimary.value = primaryColor || theme.color;
     }
   },
+  { immediate: true },
 );
 </script>
 

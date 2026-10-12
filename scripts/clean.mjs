@@ -3,22 +3,22 @@ import { join, normalize } from 'node:path';
 
 const rootDir = process.cwd();
 
-// 控制并发数量，避免创建过多的并发任务
+// Control concurrency to avoid creating too many parallel tasks
 const CONCURRENCY_LIMIT = 10;
 
-// 需要跳过的目录，避免进入这些目录进行清理
+// Directories to skip during cleanup
 const SKIP_DIRS = new Set(['.DS_Store', '.git', '.idea', '.vscode']);
 
 /**
- * 处理单个文件/目录项
- * @param {string} currentDir - 当前目录路径
- * @param {string} item - 文件/目录名
- * @param {string[]} targets - 要删除的目标列表
- * @param {number} _depth - 当前递归深度
- * @returns {Promise<boolean>} - 是否需要进一步递归处理
+ * Process individual file or directory item
+ * @param {string} currentDir - Current directory path
+ * @param {string} item - File or directory name
+ * @param {string[]} targets - List of targets to delete
+ * @param {number} _depth - Current recursion depth
+ * @returns {Promise<boolean>} - Whether further recursion is needed
  */
 async function processItem(currentDir, item, targets, _depth) {
-  // 跳过特殊目录
+  // Skip special directories
   if (SKIP_DIRS.has(item)) {
     return false;
   }
@@ -27,18 +27,18 @@ async function processItem(currentDir, item, targets, _depth) {
     const itemPath = normalize(join(currentDir, item));
 
     if (targets.includes(item)) {
-      // 匹配到目标目录或文件时直接删除
+      // Delete directly when matching target directory or file
       await fs.rm(itemPath, { force: true, recursive: true });
       console.log(`✅ Deleted: ${itemPath}`);
-      return false; // 已删除，无需递归
+      return false; // Deleted, no recursion needed
     }
 
-    // 使用 readdir 的 withFileTypes 选项，避免额外的 lstat 调用
-    return true; // 可能需要递归，由调用方决定
+    // Use readdir withFileTypes option to avoid extra lstat calls
+    return true; // May need recursion, decided by caller
   } catch (error) {
-    // 更详细的错误信息
+    // More detailed error info
     if (error.code === 'ENOENT') {
-      // 文件不存在，可能已被删除，这是正常情况
+      // File does not exist, may have been deleted already (expected)
       return false;
     } else if (error.code === 'EPERM' || error.code === 'EACCES') {
       console.error(`❌ Permission denied: ${item} in ${currentDir}`);
@@ -52,13 +52,13 @@ async function processItem(currentDir, item, targets, _depth) {
 }
 
 /**
- * 递归查找并删除目标目录（并发优化版本）
- * @param {string} currentDir - 当前遍历的目录路径
- * @param {string[]} targets - 要删除的目标列表
- * @param {number} depth - 当前递归深度，避免过深递归
+ * Recursively find and delete target directories (concurrency-optimized version)
+ * @param {string} currentDir - Current traversed directory path
+ * @param {string[]} targets - List of targets to delete
+ * @param {number} depth - Current recursion depth to avoid exceeding limit
  */
 async function cleanTargetsRecursively(currentDir, targets, depth = 0) {
-  // 限制递归深度，避免无限递归
+  // Limit recursion depth to avoid infinite recursion
   if (depth > 10) {
     console.warn(`Max recursion depth reached at: ${currentDir}`);
     return;
@@ -66,15 +66,15 @@ async function cleanTargetsRecursively(currentDir, targets, depth = 0) {
 
   let dirents;
   try {
-    // 使用 withFileTypes 选项，一次性获取文件类型信息，避免后续 lstat 调用
+    // Use withFileTypes option to fetch file types at once, avoiding subsequent lstat calls
     dirents = await fs.readdir(currentDir, { withFileTypes: true });
   } catch (error) {
-    // 如果无法读取目录，可能已被删除或权限不足
+    // If directory cannot be read, it may be deleted or permissions insufficient
     console.warn(`Cannot read directory ${currentDir}: ${error.message}`);
     return;
   }
 
-  // 分批处理，控制并发数量
+  // Process in batches to control concurrency
   for (let i = 0; i < dirents.length; i += CONCURRENCY_LIMIT) {
     const batch = dirents.slice(i, i + CONCURRENCY_LIMIT);
 
@@ -82,7 +82,7 @@ async function cleanTargetsRecursively(currentDir, targets, depth = 0) {
       const item = dirent.name;
       const shouldRecurse = await processItem(currentDir, item, targets, depth);
 
-      // 如果是目录且没有被删除，则递归处理
+      // If directory and not deleted, process recursively
       if (shouldRecurse && dirent.isDirectory()) {
         const itemPath = normalize(join(currentDir, item));
         return cleanTargetsRecursively(itemPath, targets, depth + 1);
@@ -91,10 +91,10 @@ async function cleanTargetsRecursively(currentDir, targets, depth = 0) {
       return null;
     });
 
-    // 并发执行当前批次的任务
+    // Execute current batch tasks concurrently
     const results = await Promise.allSettled(tasks);
 
-    // 检查是否有失败的任务（可选：用于调试）
+    // Check for failed tasks (optional: for debugging)
     const failedTasks = results.filter(
       (result) => result.status === 'rejected',
     );
@@ -107,7 +107,7 @@ async function cleanTargetsRecursively(currentDir, targets, depth = 0) {
 }
 
 (async function startCleanup() {
-  // 要删除的目录及文件名称
+  // Directory and file names to delete
   const targets = ['node_modules', 'dist', '.turbo', 'dist.zip'];
   const deleteLockFile = process.argv.includes('--del-lock');
   const cleanupTargets = [...targets];
@@ -123,7 +123,7 @@ async function cleanTargetsRecursively(currentDir, targets, depth = 0) {
   const startTime = Date.now();
 
   try {
-    // 先统计要删除的目标数量
+    // Count number of targets to delete first
     console.log('📊 Scanning for cleanup targets...');
 
     await cleanTargetsRecursively(rootDir, cleanupTargets);

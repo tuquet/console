@@ -3,13 +3,13 @@ import type { IStorageDriver } from './types';
 type StorageType = 'localStorage' | 'sessionStorage';
 
 interface LocalStorageDriverOptions {
-  /** 使用 localStorage 还是 sessionStorage */
+  /** Whether to use localStorage or sessionStorage */
   storageType?: StorageType;
 }
 
 /**
- * LocalStorage / SessionStorage 驱动
- * 用 async 包装同步 API，保持接口统一
+ * LocalStorage / SessionStorage driver
+ * Wraps synchronous API with async to maintain unified interface
  */
 class LocalStorageDriver implements IStorageDriver {
   private storage: Storage;
@@ -40,7 +40,7 @@ class LocalStorageDriver implements IStorageDriver {
     try {
       return JSON.parse(raw) as T;
     } catch {
-      // 数据损坏，清除并返回 null
+      // Corrupted data: clear and return null
       this.storage.removeItem(key);
       return null;
     }

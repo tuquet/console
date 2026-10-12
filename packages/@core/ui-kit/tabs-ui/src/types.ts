@@ -15,51 +15,51 @@ export interface TabsProps {
    */
   contentClass?: string;
   /**
-   * @zh_CN 右键菜单
+   * Context menu
    */
   contextMenus?: (data: any) => IContextMenuItem[];
   /**
-   * @zh_CN 是否可以拖拽
+   * Whether draggable
    */
   draggable?: boolean;
   /**
-   * @zh_CN 间隙
+   * Gap
    * @default 7
-   * 仅限 tabs-chrome
+   * Only for tabs-chrome
    */
   gap?: number;
   /**
-   * @zh_CN tab 最大宽度
-   * 仅限 tabs-chrome
+   * Maximum tab width
+   * Only for tabs-chrome
    */
   maxWidth?: number;
   /**
-   * @zh_CN 点击中键时关闭Tab
+   * Close tab on middle click
    */
   middleClickToClose?: boolean;
 
   /**
-   * @zh_CN tab最小宽度
-   * 仅限 tabs-chrome
+   * Minimum tab width
+   * Only for tabs-chrome
    */
   minWidth?: number;
 
   /**
-   * @zh_CN 是否显示图标
+   * Whether to show icon
    */
   showIcon?: boolean;
   /**
-   * @zh_CN 标签页风格
+   * Tab style
    */
   styleType?: TabsStyleType;
 
   /**
-   * @zh_CN 选项卡数据
+   * Tab items data
    */
   tabs?: TabDefinition[];
 
   /**
-   * @zh_CN 是否响应滚轮事件
+   * Whether to respond to mouse wheel events
    */
   wheelable?: boolean;
 }

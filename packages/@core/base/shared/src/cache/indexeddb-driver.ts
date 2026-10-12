@@ -1,17 +1,17 @@
 import type { IStorageDriver } from './types';
 
 interface IndexedDBDriverOptions {
-  /** 数据库名称 */
+  /** Database name */
   dbName?: string;
-  /** 数据库版本 */
+  /** Database version */
   dbVersion?: number;
-  /** 对象存储名称 */
+  /** Object store name */
   storeName?: string;
 }
 
 /**
- * IndexedDB 驱动
- * 采用懒初始化模式，首次操作时自动打开数据库
+ * IndexedDB driver
+ * Uses lazy initialization, opening database automatically on first operation
  */
 class IndexedDBDriver implements IStorageDriver {
   private dbName: string;
@@ -103,7 +103,7 @@ class IndexedDBDriver implements IStorageDriver {
   }
 
   /**
-   * 懒初始化：首次调用时打开数据库，后续复用同一个 Promise
+   * Lazy initialization: opens database on first call and reuses the Promise
    */
   private getDB(): Promise<IDBDatabase> {
     if (!this.dbPromise) {

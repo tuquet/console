@@ -8,7 +8,7 @@ const { getPackages: getPackagesFunc, getPackagesSync: getPackagesSyncFunc } =
   manypkg;
 
 /**
- * 查找大仓的根目录
+ * Find monorepo root directory
  * @param cwd
  */
 function findMonorepoRoot(cwd: string = process.cwd()) {
@@ -29,7 +29,7 @@ function findMonorepoRoot(cwd: string = process.cwd()) {
 }
 
 /**
- * 获取大仓的所有包
+ * Get all packages in monorepo
  */
 function getPackagesSync() {
   const root = findMonorepoRoot();
@@ -37,7 +37,7 @@ function getPackagesSync() {
 }
 
 /**
- * 获取大仓的所有包
+ * Get all packages in monorepo
  */
 async function getPackages() {
   const root = findMonorepoRoot();
@@ -46,7 +46,7 @@ async function getPackages() {
 }
 
 /**
- * 获取大仓指定的包
+ * Get specified package in monorepo
  */
 async function getPackage(pkgName: string) {
   const { packages } = await getPackages();

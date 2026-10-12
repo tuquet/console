@@ -17,7 +17,7 @@ function findMenuByPath(
 }
 
 /**
- * 查找根菜单
+ * Find root menu
  * @param menus
  * @param path
  */

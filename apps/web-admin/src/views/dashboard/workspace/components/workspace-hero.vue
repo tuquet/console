@@ -64,21 +64,18 @@ const planName = computed(() => {
             <h1 class="text-xl font-bold text-foreground truncate">
               {{ props.tenant.name }}
             </h1>
-            <Badge
-              variant="outline"
-              class="font-mono uppercase text-xs text-sky-500 border-sky-500/30 bg-sky-500/10"
-            >
+            <Badge variant="secondary" class="font-mono uppercase text-xs">
               {{ planName }}
             </Badge>
-            <Badge
-              variant="outline"
-              :class="
-                props.tenant.status === 'active'
-                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-                  : 'border-border/60 bg-muted/40 text-muted-foreground'
-              "
-              class="text-xs font-normal"
-            >
+            <Badge variant="outline" class="text-xs font-normal">
+              <span
+                class="mr-1.5 size-1.5 rounded-full"
+                :class="
+                  props.tenant.status === 'active'
+                    ? 'bg-emerald-500'
+                    : 'bg-muted-foreground'
+                "
+              ></span>
               {{
                 props.tenant.status === 'active' ? 'Đang hoạt động' : 'Tạm dừng'
               }}
@@ -116,10 +113,10 @@ const planName = computed(() => {
 
         <Badge
           v-else
-          variant="outline"
-          class="flex items-center gap-1 px-3 py-1 font-medium text-xs border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+          variant="secondary"
+          class="flex items-center gap-1.5 px-3 py-1 font-medium text-xs"
         >
-          <CheckCircle2 class="size-3.5" />
+          <span class="size-1.5 rounded-full bg-emerald-500"></span>
           <span>Active Workspace</span>
         </Badge>
 
@@ -128,7 +125,7 @@ const planName = computed(() => {
           class="flex items-center gap-1.5"
           @click="emit('connectCli')"
         >
-          <Terminal class="size-4 text-sky-400" />
+          <Terminal class="size-4" />
           <span>Ghép Nối CLI</span>
         </Button>
 

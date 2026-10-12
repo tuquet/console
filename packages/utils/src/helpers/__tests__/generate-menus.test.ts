@@ -9,28 +9,28 @@ import { generateMenus } from '../generate-menus';
 // Nested route setup to test child inclusion and hideChildrenInMenu functionality
 
 describe('generateMenus', () => {
-  // 模拟路由数据
+  // Mock route data
   const mockRoutes = [
     {
-      meta: { icon: 'home-icon', title: '首页' },
+      meta: { icon: 'home-icon', title: 'Home' },
       name: 'home',
       path: '/home',
     },
     {
-      meta: { hideChildrenInMenu: true, icon: 'about-icon', title: '关于' },
+      meta: { hideChildrenInMenu: true, icon: 'about-icon', title: 'About' },
       name: 'about',
       path: '/about',
       children: [
         {
           path: 'team',
           name: 'team',
-          meta: { icon: 'team-icon', title: '团队' },
+          meta: { icon: 'team-icon', title: 'Team' },
         },
       ],
     },
   ] as RouteRecordRaw[];
 
-  // 模拟 Vue 路由器实例
+  // Mock Vue Router instance
   const mockRouter = {
     getRoutes: vi.fn(() => [
       { name: 'home', path: '/home' },
@@ -46,7 +46,7 @@ describe('generateMenus', () => {
         badgeType: undefined,
         badgeVariants: undefined,
         icon: 'home-icon',
-        name: '首页',
+        name: 'Home',
         order: undefined,
         parent: undefined,
         parents: undefined,
@@ -59,7 +59,7 @@ describe('generateMenus', () => {
         badgeType: undefined,
         badgeVariants: undefined,
         icon: 'about-icon',
-        name: '关于',
+        name: 'About',
         order: undefined,
         parent: undefined,
         parents: undefined,

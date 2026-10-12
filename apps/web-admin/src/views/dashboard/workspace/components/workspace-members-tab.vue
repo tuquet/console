@@ -95,7 +95,7 @@ const { formatDate } = useDateFormat();
                     :src="record.avatar_url"
                   />
                   <AvatarFallback
-                    class="bg-sky-600 text-xs font-semibold text-white uppercase"
+                    class="bg-muted text-muted-foreground text-xs font-semibold uppercase"
                   >
                     {{ (record.full_name || record.email || 'U').slice(0, 2) }}
                   </AvatarFallback>
@@ -106,7 +106,7 @@ const { formatDate } = useDateFormat();
                   </div>
                   <div
                     v-if="record.role === 'owner'"
-                    class="text-xs text-purple-400 font-medium"
+                    class="text-xs text-primary font-medium"
                   >
                     Chủ Sở Hữu
                   </div>
@@ -128,17 +128,17 @@ const { formatDate } = useDateFormat();
 
             <!-- Status Column -->
             <TableCell>
-              <Badge
-                variant="outline"
-                :class="
-                  record.status === 'active'
-                    ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-                    : record.status === 'invited'
-                      ? 'border-sky-500/30 bg-sky-500/10 text-sky-400'
-                      : 'border-destructive/30 bg-destructive/10 text-destructive'
-                "
-                class="text-xs font-normal"
-              >
+              <Badge variant="outline" class="text-xs font-normal">
+                <span
+                  class="mr-1.5 size-1.5 rounded-full"
+                  :class="
+                    record.status === 'active'
+                      ? 'bg-emerald-500'
+                      : record.status === 'invited'
+                        ? 'bg-blue-500'
+                        : 'bg-destructive'
+                  "
+                ></span>
                 {{
                   record.status === 'active'
                     ? 'Hoạt động'
@@ -162,7 +162,7 @@ const { formatDate } = useDateFormat();
                 <Button
                   variant="ghost"
                   size="sm"
-                  class="flex items-center gap-1 p-0 h-auto text-sky-400 hover:text-sky-300 text-xs"
+                  class="flex items-center gap-1 p-0 h-auto text-foreground hover:text-primary text-xs"
                   @click="emit('edit', record)"
                 >
                   <Edit3 class="size-3.5" />
@@ -225,7 +225,7 @@ const { formatDate } = useDateFormat();
             <Avatar class="size-8">
               <AvatarImage v-if="member.avatar_url" :src="member.avatar_url" />
               <AvatarFallback
-                class="bg-sky-600 text-xs font-semibold text-white uppercase"
+                class="bg-muted text-muted-foreground text-xs font-semibold uppercase"
               >
                 {{ (member.full_name || member.email || 'U').slice(0, 2) }}
               </AvatarFallback>
@@ -245,17 +245,17 @@ const { formatDate } = useDateFormat();
         <div
           class="flex items-center justify-between border-t border-border/40 pt-2 text-xs text-muted-foreground"
         >
-          <Badge
-            variant="outline"
-            :class="
-              member.status === 'active'
-                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-                : member.status === 'invited'
-                  ? 'border-sky-500/30 bg-sky-500/10 text-sky-400'
-                  : 'border-destructive/30 bg-destructive/10 text-destructive'
-            "
-            class="text-xs font-normal"
-          >
+          <Badge variant="outline" class="text-xs font-normal">
+            <span
+              class="mr-1.5 size-1.5 rounded-full"
+              :class="
+                member.status === 'active'
+                  ? 'bg-emerald-500'
+                  : member.status === 'invited'
+                    ? 'bg-blue-500'
+                    : 'bg-destructive'
+              "
+            ></span>
             {{
               member.status === 'active'
                 ? 'Hoạt động'
@@ -269,7 +269,7 @@ const { formatDate } = useDateFormat();
             <Button
               variant="ghost"
               size="sm"
-              class="flex items-center gap-1 p-0 h-auto text-sky-400 hover:text-sky-300 text-xs"
+              class="flex items-center gap-1 p-0 h-auto text-foreground hover:text-primary text-xs"
               @click="emit('edit', member)"
             >
               <Edit3 class="size-3.5" />

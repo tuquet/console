@@ -119,7 +119,7 @@ defineExpose({
 <template>
   <div :class="cn(actionWrapperClass)">
     <template v-if="rootProps.actionButtonsReverse">
-      <!-- 提交按钮前 -->
+      <!-- Before submit button -->
       <slot name="submit-before"></slot>
 
       <component
@@ -133,7 +133,7 @@ defineExpose({
       </component>
     </template>
 
-    <!-- 重置按钮前 -->
+    <!-- Before reset button -->
     <slot name="reset-before"></slot>
 
     <component
@@ -147,7 +147,7 @@ defineExpose({
     </component>
 
     <template v-if="!rootProps.actionButtonsReverse">
-      <!-- 提交按钮前 -->
+      <!-- Before submit button -->
       <slot name="submit-before"></slot>
 
       <component
@@ -161,7 +161,7 @@ defineExpose({
       </component>
     </template>
 
-    <!-- 展开按钮前 -->
+    <!-- Before expand/collapse button -->
     <slot name="expand-before"></slot>
 
     <VbenExpandableArrow
@@ -172,7 +172,7 @@ defineExpose({
       <span>{{ collapsed ? $t('expand') : $t('collapse') }}</span>
     </VbenExpandableArrow>
 
-    <!-- 展开按钮后 -->
+    <!-- After expand/collapse button -->
     <slot name="expand-after"></slot>
   </div>
 </template>

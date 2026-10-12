@@ -1,14 +1,14 @@
 import type { RouteRecordRaw } from 'vue-router';
 
-// 定义模块类型
+// Define module type
 interface RouteModuleType {
   default: RouteRecordRaw[];
 }
 
 /**
- * 合并动态路由模块的默认导出
- * @param routeModules 动态导入的路由模块对象
- * @returns 合并后的路由配置数组
+ * Merge default exports of dynamic route modules
+ * @param routeModules Dynamically imported route module object
+ * @returns Merged route configuration array
  */
 function mergeRouteModules(
   routeModules: Record<string, unknown>,

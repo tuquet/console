@@ -32,7 +32,7 @@ import { viteTailwindReferencePlugin } from './tailwind-reference';
 import { viteVxeTableImportsPlugin } from './vxe-table';
 
 /**
- * 获取条件成立的 vite 插件
+ * Get conditional Vite plugins
  * @param conditionPlugins
  */
 async function loadConditionPlugins(conditionPlugins: ConditionPlugin[]) {
@@ -47,7 +47,7 @@ async function loadConditionPlugins(conditionPlugins: ConditionPlugin[]) {
 }
 
 /**
- * 根据条件获取通用的vite插件
+ * Get common Vite plugins conditionally
  */
 async function loadCommonPlugins(
   options: CommonPluginOptions,
@@ -91,12 +91,12 @@ async function loadCommonPlugins(
 }
 
 /**
- * 根据条件获取应用类型的vite插件
+ * Get application-type Vite plugins conditionally
  */
 async function loadApplicationPlugins(
   options: ApplicationPluginOptions,
 ): Promise<PluginOption[]> {
-  // 单独取，否则commonOptions拿不到
+  // Fetch separately, otherwise commonOptions cannot be accessed
   const isBuild = options.isBuild;
   const env = options.env;
 
@@ -234,12 +234,12 @@ async function loadApplicationPlugins(
 }
 
 /**
- * 根据条件获取库类型的vite插件
+ * Get library-type Vite plugins conditionally
  */
 async function loadLibraryPlugins(
   options: LibraryPluginOptions,
 ): Promise<PluginOption[]> {
-  // 单独取，否则commonOptions拿不到
+  // Fetch separately, otherwise commonOptions cannot be accessed
   const isBuild = options.isBuild;
   const { dts, ...commonOptions } = options;
   const dtsOptions = typeof dts === 'object' ? dts : undefined;

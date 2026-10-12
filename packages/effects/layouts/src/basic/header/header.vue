@@ -28,15 +28,15 @@ import {
 
 interface Props {
   /**
-   * 头像
+   * Avatar
    */
   avatar?: string;
   /**
-   * Logo 主题
+   * Logo theme
    */
   theme?: string;
   /**
-   * 用户文本
+   * User text
    */
   text?: string;
 }
@@ -114,7 +114,7 @@ function handleSubmitLogout() {
   logoutModalApi.close();
 }
 
-// 快捷键
+// Keyboard shortcuts
 if (preferences.shortcutKeys.enable) {
   const keys = useMagicKeys();
   const lockKey = keys['Alt+KeyL'];
@@ -138,14 +138,14 @@ if (preferences.shortcutKeys.enable) {
 }
 
 /**
- * 插槽列表类型
+ * Slot list item type
  */
 type SlotItem = { index: number; name: string };
 
 const rightSlots = computed(() => {
   const list: Array<SlotItem> = [];
 
-  // 按 widget.order 顺序遍历，检查每个部件是否应在 header 中显示
+  // Iterate by widget.order and check if each widget should display in header
   const widgetChecks: Record<string, { slotName: string; visible: boolean }> = {
     globalSearch: {
       visible:
@@ -212,7 +212,7 @@ const rightSlots = computed(() => {
     }
   }
 
-  // 用户插槽（header-right-N）追加在后面
+  // Append user custom slots (header-right-N) at the end
   Object.keys(slots).forEach((key) => {
     if (key.startsWith('header-right')) {
       const slotIndex = Number(key.split('-')[2]);
@@ -220,10 +220,10 @@ const rightSlots = computed(() => {
       list.push({ index, name: key });
     }
   });
-  // 最后追加用户下拉框，若是索引值超过1000时则固定在1000（适配用户按钮不在最后的场景）
+  // Append user dropdown at the end, capping index at 1000
   const userDropdownIndex = Math.min(1000, nextIndex(list));
   list.push({ index: userDropdownIndex, name: 'user-dropdown' });
-  // 按照索引排序，保证插槽顺序
+  // Sort by index to maintain slot order
   return list.toSorted((a, b) => a.index - b.index);
 });
 
@@ -231,21 +231,21 @@ const leftSlots = computed(() => {
   const list: Array<SlotItem> = [];
 
   Object.keys(slots).forEach((key) => {
-    // 适配插槽名称，例如第一个插槽名：header-left-1
+    // Adapt slot name, e.g. first slot name: header-left-1
     if (key.startsWith('header-left')) {
-      // 取第三个占位的数字，若是第三个占位不是数字，则自动分配排序索引
+      // Extract third placeholder number; assign fallback sort index if not a number
       const slotIndex = Number(key.split('-')[2]);
       const index = Number.isNaN(slotIndex) ? nextIndex(list) : slotIndex;
       list.push({ index, name: key });
     }
   });
-  // 按照索引排序，保证插槽顺序
+  // Sort by index to maintain slot order
   return list.toSorted((a, b) => a.index - b.index);
 });
 
 /**
- * 获取列表下一个索引值(用于排序)
- * @param list 列表
+ * Get next index value in list (for sorting)
+ * @param list List
  */
 function nextIndex(list: Array<SlotItem>) {
   const index =

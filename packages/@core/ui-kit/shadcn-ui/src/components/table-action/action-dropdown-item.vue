@@ -61,9 +61,9 @@ function onCancel() {
 
 <template>
   <!--
-    气泡确认：菜单项同时作为 Popover 触发器。
-    通过双重 as-child（DropdownMenuItem + PopoverTrigger 均合并到同一个叶子元素），
-    使该元素既是菜单项又是弹层触发器；@select 阻止点击后菜单自动关闭。
+    Popconfirm: menu item simultaneously acts as Popover trigger.
+    Through dual as-child (DropdownMenuItem + PopoverTrigger merged into same leaf element),
+    making this element both a menu item and a popover trigger; @select prevents menu from auto-closing on click.
   -->
   <Popover v-if="action.popConfirm" v-model:open="open">
     <PopoverTrigger as-child>
@@ -103,7 +103,7 @@ function onCancel() {
     </PopoverContent>
   </Popover>
 
-  <!-- 普通下拉项 -->
+  <!-- Standard dropdown item -->
   <DropdownMenuItem
     v-else
     :class="itemClass"

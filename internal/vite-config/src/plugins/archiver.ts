@@ -51,7 +51,7 @@ async function zipFolder(
     const output = fs.createWriteStream(outputPath);
 
     const archive = new ZipArchive({
-      zlib: { level: 9 }, // 设置压缩级别为 9 以实现最高压缩率
+      zlib: { level: 9 }, // Set compression level to 9 for highest compression ratio
     });
 
     output.on('close', () => {
@@ -67,10 +67,10 @@ async function zipFolder(
 
     archive.pipe(output);
 
-    // 使用 directory 方法以流的方式压缩文件夹，减少内存消耗
+    // Use directory stream compression to reduce memory consumption
     archive.directory(folderPath, false);
 
-    // 流式处理完成
+    // Stream processing complete
     archive.finalize();
   });
 }

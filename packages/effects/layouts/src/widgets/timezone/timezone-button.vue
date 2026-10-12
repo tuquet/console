@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, unref } from 'vue';
 
-import { createIconifyIcon } from '@vben/icons';
+import { Globe } from '@vben/icons';
 import { $t } from '@vben/locales';
 import { useTimezoneStore } from '@vben/stores';
 
@@ -13,8 +13,6 @@ import {
 } from '@vben-core/shadcn-ui';
 
 withDefaults(defineProps<{ showButton?: boolean }>(), { showButton: true });
-
-const TimezoneIcon = createIconifyIcon('fluent-mdl2:world-clock');
 
 const timezoneStore = useTimezoneStore();
 
@@ -64,7 +62,7 @@ defineExpose({ open });
       class="hover:animate-[shrink_0.3s_ease-in-out]"
       @click="open"
     >
-      <TimezoneIcon class="size-4 text-foreground" />
+      <Globe class="size-4 text-foreground" />
     </VbenIconButton>
     <Modal :title="$t('ui.widgets.timezone.setTimezone')">
       <div class="timezone-container">

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="84 76 344 344" width="100%" height="100%">
+  <defs>
+    <!-- Gradient thân Specter Ghost chuẩn shadcn zinc -->
+    <linearGradient id="ghostBody2" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" stop-color="#fafafa" />
+      <stop offset="45%" stop-color="#e4e4e7" />
+      <stop offset="100%" stop-color="#a1a1aa" />
+    </linearGradient>
+
+    <!-- Aura filter chuẩn W3C SVG -->
+    <filter id="auraBlur2" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="20" />
+    </filter>
+
+    <!-- Đổ bóng tự nhiên không bị cắt khung -->
+    <filter id="ghostShadow2" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000000" flood-opacity="0.32" />
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000000" flood-opacity="0.12" />
+    </filter>
+  </defs>
+
+  <!-- Quầng hào quang mờ (Aura) -->
+  <circle cx="256" cy="255" r="115" fill="#e4e4e7" opacity="0.15" filter="url(#auraBlur2)" />
+
+  <!-- Thân Specter Ghost -->
+  <path 
+    d="M 256,110 
+       C 185,110 144,165 144,235 
+       C 144,285 142,342 144,374 
+       C 145,389 166,392 176,380 
+       C 192,360 210,360 226,380 
+       C 236,392 256,392 266,380 
+       C 282,360 300,360 316,380 
+       C 328,394 350,389 351,374 
+       C 353,342 368,285 368,235 
+       C 368,165 327,110 256,110 Z" 
+    fill="url(#ghostBody2)" 
+    filter="url(#ghostShadow2)" 
+  />
+
+  <!-- Đôi mắt Specter sâu thẳm (Tương thích cả Dark lẫn Light theme) -->
+  <ellipse cx="220" cy="235" rx="13" ry="20" fill="#09090b" />
+  <ellipse cx="292" cy="235" rx="13" ry="20" fill="#09090b" />
+
+  <!-- Điểm bắt sáng trong mắt -->
+  <circle cx="223" cy="228" r="4.2" fill="#ffffff" opacity="0.95" />
+  <circle cx="295" cy="228" r="4.2" fill="#ffffff" opacity="0.95" />
+</svg>

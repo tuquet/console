@@ -1,5 +1,5 @@
 /**
- * 该文件可自行根据业务逻辑进行调整
+ * Adjust this file according to specific business logic requirements
  */
 import type { RequestClientOptions } from '@vben/request';
 
@@ -28,7 +28,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   });
 
   /**
-   * 重新认证逻辑
+   * Re-authentication logic
    */
   async function doReAuthenticate() {
     console.warn('Access token or refresh token is invalid or expired. ');
@@ -46,7 +46,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   }
 
   /**
-   * 刷新token逻辑
+   * Token refresh logic
    */
   async function doRefreshToken() {
     const accessStore = useAccessStore();
@@ -60,7 +60,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
     return token ? `Bearer ${token}` : null;
   }
 
-  // 请求头处理
+  // Request headers handling
   client.addRequestInterceptor({
     fulfilled: async (config) => {
       const accessStore = useAccessStore();
@@ -71,7 +71,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
     },
   });
 
-  // 处理返回的响应数据格式
+  // Response data format handling
   client.addResponseInterceptor(
     defaultResponseInterceptor({
       codeField: 'code',
@@ -80,7 +80,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
     }),
   );
 
-  // token过期的处理
+  // Handle token expiration
   client.addResponseInterceptor(
     authenticateResponseInterceptor({
       client,
@@ -91,14 +91,13 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
     }),
   );
 
-  // 通用的错误处理,如果没有进入上面的错误处理逻辑，就会进入这里
+  // Generic error handling fallback
   client.addResponseInterceptor(
     errorMessageResponseInterceptor((msg: string, error) => {
-      // 这里可以根据业务进行定制,你可以拿到 error 内的信息进行定制化处理，根据不同的 code 做不同的提示，而不是直接使用 message.error 提示 msg
-      // 当前mock接口返回的错误字段是 error 或者 message
+      // Customize based on business needs using error code/payload
       const responseData = error?.response?.data ?? {};
       const errorMessage = responseData?.error ?? responseData?.message ?? '';
-      // 如果没有错误信息，则会根据状态码进行提示
+      // Fallback to HTTP status code message if no error payload
       toast.error(errorMessage || msg);
     }),
   );

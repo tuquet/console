@@ -1,29 +1,29 @@
 # ECharts Plugin
 
-ECharts 图表插件，预置常用组件和图表类型。
+ECharts chart plugin with preset components and chart types.
 
-## 导出
+## Exports
 
-| 导出         | 类型 | 说明         |
+| Export | Type | Description |
 | ------------ | ---- | ------------ |
-| `default`    | 对象 | echarts 实例 |
-| `EchartsUI`  | 组件 | 图表容器组件 |
-| `ECOption`   | 类型 | 图表配置类型 |
-| `useEcharts` | 函数 | 组合式函数   |
+| `default`    | Object | echarts instance |
+| `EchartsUI`  | Component | Chart container component |
+| `ECOption`   | Type | Chart option type |
+| `useEcharts` | Function | Composable |
 
-## 使用
+## Usage
 
 ```ts
 import { EchartsUI, useEcharts, ECOption } from '@vben/plugins/echarts';
 ```
 
-## 类型
+## Types
 
 ```ts
 import type { ECOption } from '@vben/plugins/echarts';
 ```
 
-## 预置组件
+## Preset Components
 
 - TitleComponent
 - TooltipComponent
@@ -33,7 +33,7 @@ import type { ECOption } from '@vben/plugins/echarts';
 - DatasetComponent
 - TransformComponent
 
-## 预置图表
+## Preset Charts
 
 - BarChart
 - LineChart

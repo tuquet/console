@@ -3,80 +3,80 @@ import type { VxeTablePropTypes } from 'vxe-table';
 import type { Ref } from 'vue';
 
 /**
- * 自定义存储适配器接口
- * 用户可接入任意后端（API、IndexedDB wrapper、第三方库等）
+ * Custom storage adapter interface
+ * Supports arbitrary backends (API, IndexedDB wrapper, third-party libraries, etc.)
  */
 export interface ViewedRowStorageAdapter {
-  /** 读取所有已查看的 key 列表 */
+  /** Read list of all viewed keys */
   getKeys(): Promise<Array<number | string>>;
 
-  /** 移除所有已查看数据 */
+  /** Remove all viewed data */
   removeKeys(): Promise<void>;
 
-  /** 持久化已查看的 key 列表 */
+  /** Persist list of viewed keys */
   setKeys(keys: Array<number | string>): Promise<void>;
 }
 
 /**
- * 已读行持久化 — 公共基础字段
+ * Viewed row persistence — common base fields
  */
 interface ViewedRowPersistBase {
-  /** 持久化数据的存活时间（毫秒） */
+  /** Time-to-live for persisted data (milliseconds) */
   ttl?: number;
-  /** 最大缓存数量，超出时淘汰最早标记的 key（FIFO），默认 100 */
+  /** Max cache capacity; evicts oldest marked key (FIFO) when exceeded (default: 100) */
   maxSize?: number;
 }
 
 /**
- * 已读行持久化配置（按 type 区分的联合类型）
+ * Viewed row persistence configuration (discriminated union by type)
  *
- * - 'memory'          → 仅内存，不持久化
- * - 'localStorage'    → 使用 localStorage 整体存储，key 必传
- * - 'sessionStorage'  → 使用 sessionStorage 整体存储，key 必传
- * - 'indexedDB'       → 使用 IndexedDB 单条存储，key 必传
- * - 'custom'          → 用户自定义存储适配器，storage 必传
+ * - 'memory'          → In-memory only, no persistence
+ * - 'localStorage'    → Persist in localStorage; key is required
+ * - 'sessionStorage'  → Persist in sessionStorage; key is required
+ * - 'indexedDB'       → Persist in IndexedDB per entry; key is required
+ * - 'custom'          → User-defined adapter; storage is required
  */
 export type ViewedRowPersistOptions =
-  | ({
-      /** IndexedDB 数据库名称，默认 'viewed-table-db' */
-      dbName?: string;
-      /** IndexedDB 数据库版本，默认 1 */
-      dbVersion?: number;
-      /** 存储 key / prefix（必传） */
-      key: string;
-      /** IndexedDB 对象存储名称，默认 'viewed-table-row' */
-      storeName?: string;
-      type: 'indexedDB';
-    } & ViewedRowPersistBase)
-  | ({
-      /** 存储 key（必传） */
-      key: string;
-      type: 'localStorage' | 'sessionStorage';
-    } & ViewedRowPersistBase)
-  | ({
-      /** 自定义存储适配器（必传） */
+  | (ViewedRowPersistBase & {
+      /** Custom storage adapter (required) */
       storage: ViewedRowStorageAdapter;
       type: 'custom';
-    } & ViewedRowPersistBase)
+    })
+  | (ViewedRowPersistBase & {
+      /** IndexedDB database name, default 'viewed-table-db' */
+      dbName?: string;
+      /** IndexedDB database version, default 1 */
+      dbVersion?: number;
+      /** Storage key / prefix (required) */
+      key: string;
+      /** IndexedDB object store name, default 'viewed-table-row' */
+      storeName?: string;
+      type: 'indexedDB';
+    })
+  | (ViewedRowPersistBase & {
+      /** Storage key (required) */
+      key: string;
+      type: 'localStorage' | 'sessionStorage';
+    })
   | (ViewedRowPersistBase & {
       type: 'memory';
     });
 
 /**
- * 已查看row设置
+ * Viewed row settings
  */
 export interface ViewedRowOptions<T = any> {
-  /** 点击 CellOperation 中匹配的 code 时，自动将该行标记为已读 */
+  /** Mark row as viewed when clicking matching code in CellOperation */
   actionCodes?: string | string[];
-  /** 行唯一标识字段，默认取 gridOptions.rowConfig.keyField，最终兜底 'id' */
+  /** Row unique identifier field; defaults to gridOptions.rowConfig.keyField, falls back to 'id' */
   keyField?: string;
-  /** 已查看的行key列表 */
+  /** List of viewed row keys */
   viewedKeys?: Array<number | string> | Ref<Array<number | string>>;
   /**
-   * 持久化配置
-   * - 传 string：使用内置 localStorage，值为 storage key（向后兼容）
-   * - 传 object：高级配置
-   * - 不传：不持久化（等同于 memory）
+   * Persistence configuration
+   * - string: Uses built-in localStorage with value as storage key (backwards compatible)
+   * - object: Advanced configuration
+   * - omitted: No persistence (equivalent to memory)
    */
   persist?: string | ViewedRowPersistOptions;
   rowClassName?: VxeTablePropTypes.RowClassName<T>;

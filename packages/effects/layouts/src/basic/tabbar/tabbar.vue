@@ -46,7 +46,7 @@ const menus = computed(() => {
   });
 });
 
-// 刷新后如果不保持tab状态，关闭其他tab
+// If tab state not preserved across refresh, close other tabs
 if (!preferences.tabbar.persist) {
   tabbarStore.closeOtherTabs(route);
 }

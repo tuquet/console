@@ -7,7 +7,7 @@ class TestClass {
 
   constructor(value: string) {
     this.value = value;
-    bindMethods(this); // 调用通用方法
+    bindMethods(this); // Call helper method
   }
 
   getValue() {
@@ -23,10 +23,10 @@ describe('bindMethods', () => {
   it('should bind methods to the instance correctly', () => {
     const instance = new TestClass('initial');
 
-    // 解构方法
+    // Destructure methods
     const { getValue } = instance;
 
-    // 检查 getValue 是否能正确调用，并且 this 绑定了 instance
+    // Check getValue executes with this bound to instance
     expect(getValue()).toBe('initial');
   });
 
@@ -35,7 +35,7 @@ describe('bindMethods', () => {
 
     const { getValue, setValue } = instance;
 
-    // 检查 getValue 和 setValue 方法是否正确绑定了 this
+    // Check getValue and setValue correctly bind this
     setValue('newValue');
     expect(getValue()).toBe('newValue');
   });
@@ -43,14 +43,14 @@ describe('bindMethods', () => {
   it('should not bind non-function properties', () => {
     const instance = new TestClass('initial');
 
-    // 检查普通属性是否保持原样
+    // Check regular properties remain unchanged
     expect(instance.value).toBe('initial');
   });
 
   it('should not bind constructor method', () => {
     const instance = new TestClass('test');
 
-    // 检查 constructor 是否没有被绑定
+    // Check constructor is not bound
     expect(instance.constructor.name).toBe('TestClass');
   });
 
@@ -74,7 +74,7 @@ describe('bindMethods', () => {
     const instance = new TestWithGetterSetter();
     const { value } = instance;
 
-    // Getter 和 setter 不应被绑定
+    // Getters and setters should not be bound
     expect(value).toBe('test');
   });
 });

@@ -27,14 +27,14 @@ export interface VxePaginationInfo {
 }
 
 interface ToolbarConfigOptions extends VxeGridPropTypes.ToolbarConfig {
-  /** 是否显示切换搜索表单的按钮 */
+  /** Whether to show toggle search form button */
   search?: boolean;
 }
 
 export type VxeTableGridColumns<T = any> = VxeTableGridOptions<T>['columns'];
 
 export interface VxeTableGridOptions<T = any> extends VxeTableGridProps<T> {
-  /** 工具栏配置 */
+  /** Toolbar configuration */
   toolbarConfig?: ToolbarConfigOptions;
 }
 
@@ -51,19 +51,19 @@ export interface VxeGridProps<
   TSubmitValues extends FormValues = TFormValues,
 > {
   /**
-   * 数据
+   * Data
    */
   tableData?: any[];
   /**
-   * 标题
+   * Title
    */
   tableTitle?: string;
   /**
-   * 标题帮助
+   * Title help tooltip
    */
   tableTitleHelp?: string;
   /**
-   * 组件class
+   * Component class
    */
   class?: ClassType;
   /**
@@ -71,27 +71,27 @@ export interface VxeGridProps<
    */
   gridClass?: ClassType;
   /**
-   * vxe-grid 配置
+   * vxe-grid options
    */
   gridOptions?: DeepPartial<VxeTableGridOptions<T>>;
   /**
-   * vxe-grid 事件
+   * vxe-grid events
    */
   gridEvents?: DeepPartial<VxeGridListeners<T>>;
   /**
-   * 表单配置
+   * Form configuration
    */
   formOptions?: VbenFormProps<D, P, TFormValues, TSubmitValues>;
   /**
-   * 显示搜索表单
+   * Show search form
    */
   showSearchForm?: boolean;
   /**
-   * 搜索表单与表格主体之间的分隔条
+   * Separator between search form and table body
    */
   separator?: boolean | SeparatorOptions;
   /**
-   * 已读行功能
+   * Viewed row feature
    */
   viewedRowOptions?: boolean | ViewedRowOptions<T>;
 }

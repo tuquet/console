@@ -38,7 +38,7 @@ const getZIndex = computed(() => {
 });
 
 /**
- * 排除ant-message和loading:9999的z-index
+ * Exclude z-index for ant-message and loading: 9999
  */
 const zIndexExcludeClass = ['ant-message', 'loading'];
 function isZIndexExcludeClass(element: Element) {
@@ -48,7 +48,7 @@ function isZIndexExcludeClass(element: Element) {
 }
 
 /**
- * 获取最大的zIndex值
+ * Get maximum z-index value
  */
 function calcZIndex() {
   let maxZ = 0;

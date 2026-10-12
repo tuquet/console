@@ -67,7 +67,7 @@ function handleCopy(node: any, defaultCopy: () => void) {
   }, copyConfig.value.timeout ?? 2000);
 }
 
-// 支持显示 bigint 数据，如较长的订单号
+// Supports bigint display, e.g. long order IDs
 const jsonData = computed<Record<string, any>>(() => {
   if (typeof props.value !== 'string') {
     return props.value || {};

@@ -6,8 +6,8 @@ import type {
 import type { DeepPartial } from '@vben-core/typings';
 
 /**
- * 如果你想所有的app都使用相同的默认偏好设置，你可以在这里定义
- * 而不是去修改 @vben-core/preferences 中的默认偏好设置
+ * If you want all apps to use the same default preferences, you can define them here
+ * instead of modifying the default preferences in @vben-core/preferences.
  * @param preferences
  * @returns
  */
@@ -22,14 +22,14 @@ function definePreferencesExtension<
   return extension;
 }
 
-/** 应用级版权配置，供各 app 的 preferences 覆盖使用 */
+/** Application copyright preferences for app overrides */
 const appCopyrightPreferences = {
-  companyName: 'Vben',
-  companySiteLink: 'https://www.vben.pro',
-  date: '2024',
+  companyName: 'Tuquet',
+  companySiteLink: 'https://tuquet.com',
+  date: '2026',
   enable: true,
-  icp: '闽ICP备19024351号',
-  icpLink: 'https://beian.miit.gov.cn/',
+  icp: '',
+  icpLink: '',
   settingShow: true,
 } satisfies DeepPartial<Preferences>['copyright'];
 

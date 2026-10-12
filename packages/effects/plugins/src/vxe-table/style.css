@@ -118,7 +118,7 @@
   overflow: hidden;
 }
 
-/* 已读行默认样式 */
+/* Default styles for viewed rows */
 .vxe-row--viewed {
   color: hsl(var(--foreground) / 50%);
 

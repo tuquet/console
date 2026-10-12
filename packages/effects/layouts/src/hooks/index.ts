@@ -9,7 +9,7 @@ import { computed } from 'vue';
 import { preferences, usePreferences } from '@vben/preferences';
 
 /**
- * 转换组件，自动添加 name
+ * Transform component and attach name automatically
  * @param component
  * @param route
  */
@@ -17,7 +17,7 @@ export function transformComponent(
   component: VNode,
   route: RouteLocationNormalizedLoadedGeneric,
 ) {
-  // 组件视图未找到，如果有设置后备视图，则返回后备视图，如果没有，则抛出错误
+  // Component view not found; return fallback view if set, otherwise throw error
   if (!component) {
     console.error(
       'Component view not found，please check the route configuration',
@@ -26,23 +26,23 @@ export function transformComponent(
   }
 
   const routeName = route.name as string;
-  // 如果组件没有 name，则直接返回
+  // Return directly if component lacks name
   if (!routeName) {
     return component;
   }
   const componentName = (component?.type as any)?.name;
 
-  // 已经设置过 name，则直接返回
+  // Return directly if name is already set
   if (componentName) {
     return component;
   }
 
-  // componentName 与 routeName 一致，则直接返回
+  // Return directly if componentName matches routeName
   if (componentName === routeName) {
     return component;
   }
 
-  // 设置 name
+  // Set name
   component.type ||= {};
   (component.type as any).name = routeName;
 
@@ -50,12 +50,12 @@ export function transformComponent(
 }
 
 /**
- * Layout相关hook
+ * Layout composables
  */
 export function useLayoutHook() {
   const { keepAlive } = usePreferences();
   /**
-   * 是否使用动画
+   * Whether to use animations
    */
   const getEnabledTransition = computed(() => {
     const { transition } = preferences;
@@ -64,27 +64,27 @@ export function useLayoutHook() {
   });
 
   /**
-   * 获取路由过渡动画
+   * Get route transition animation
    * @param _route
    */
   function getTransitionName(_route: RouteLocationNormalizedLoaded) {
-    // 如果偏好设置未设置，则不使用动画
+    // Do not use animation if disabled in preferences
     const { tabbar, transition } = preferences;
     const transitionName = transition.name;
     if (!transitionName || !transition.enable) {
       return;
     }
 
-    // 标签页未启用或者未开启缓存，则使用全局配置动画
+    // If tabs disabled or caching disabled, use global transition config
     if (!tabbar.enable || !keepAlive) {
       return transitionName;
     }
 
-    // 如果页面已经加载过，则不使用动画
+    // Do not use animation if page was already loaded
     // if (route.meta.loaded) {
     //   return;
     // }
-    // 已经打开且已经加载过的页面不使用动画
+    // Pages already open and loaded skip transition animation
     // const inTabs = getCachedTabs.value.includes(route.name as string);
 
     // return inTabs && route.meta.loaded ? undefined : transitionName;

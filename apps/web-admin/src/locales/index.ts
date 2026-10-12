@@ -19,8 +19,8 @@ const localesMap = loadLocalesMapFromDir(
 );
 
 /**
- * 加载应用特有的语言包
- * 这里也可以改造为从服务端获取翻译数据
+ * Load application-specific locale messages
+ * Can also be adapted to fetch translation data from backend
  * @param lang
  */
 async function loadMessages(lang: SupportedLanguagesType) {
@@ -32,7 +32,7 @@ async function loadMessages(lang: SupportedLanguagesType) {
 }
 
 /**
- * 加载第三方组件库的语言包
+ * Load third-party component library locale messages
  * @param lang
  */
 async function loadThirdPartyMessage(lang: SupportedLanguagesType) {
@@ -40,7 +40,7 @@ async function loadThirdPartyMessage(lang: SupportedLanguagesType) {
 }
 
 /**
- * 加载dayjs的语言包
+ * Load Day.js locale
  * @param lang
  */
 async function loadDayjsLocale(_lang: SupportedLanguagesType) {

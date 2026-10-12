@@ -3,7 +3,7 @@ import type { UserInfo } from '@vben/types';
 import { useAccessStore } from '@vben/stores';
 
 /**
- * 获取用户信息 (Supabase GoTrue REST)
+ * Get user info (Supabase GoTrue REST)
  */
 export async function getUserInfoApi(): Promise<UserInfo> {
   const supabaseUrl =
@@ -36,13 +36,13 @@ export async function getUserInfoApi(): Promise<UserInfo> {
     meta.full_name ||
     meta.display_name ||
     user.email?.split('@')[0] ||
-    'Tuquet Admin';
+    'Specter';
   const avatar =
     meta.avatar_url || 'https://avatars.githubusercontent.com/u/tuquet';
 
   return {
     avatar,
-    desc: user.email || 'Tuquet Administrator',
+    desc: user.email || 'Specteristrator',
     homePath: '/dashboard/workspace',
     realName,
     roles: ['super', 'admin'],

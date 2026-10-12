@@ -21,28 +21,27 @@ export const useAuthStore = defineStore('auth', () => {
   const loginLoading = ref(false);
 
   /**
-   * 异步处理登录操作
    * Asynchronously handle the login process
-   * @param params 登录表单数据
+   * @param params Login form parameters
    */
   async function authLogin(
     params: Recordable<any>,
     onSuccess?: () => Promise<void> | void,
   ) {
-    // 异步处理用户登录操作并获取 accessToken
+    // Asynchronously handle user login and obtain accessToken
     let userInfo: null | UserInfo = null;
     try {
       loginLoading.value = true;
       const { accessToken, refreshToken } = await loginApi(params);
 
-      // 如果成功获取到 accessToken
+      // On successful accessToken retrieval
       if (accessToken) {
         accessStore.setAccessToken(accessToken);
         if (refreshToken) {
           accessStore.setRefreshToken(refreshToken);
         }
 
-        // 获取用户信息并存储到 accessStore 中
+        // Fetch user info and store into accessStore
         const [fetchUserInfoResult, accessCodes] = await Promise.all([
           fetchUserInfo(),
           getAccessCodesApi(),
@@ -112,20 +111,17 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await logoutApi();
     } catch {
-      // 不做任何处理
+      // Ignore network errors on logout
     }
     resetAllStores();
     accessStore.setLoginExpired(false);
 
-    // 已经在登录页时不能再带 redirect：此时 currentRoute.fullPath 就是登录页本身，
-    // 再编码一层会得到「登录页?redirect=编码后的登录页」，下一次又在这个基础上再包一层，
-    // 反复登出会让 URL 逐跳变长，且没有上限。
     // On the login page the current route is the login page itself, so carrying it as
     // `redirect` would nest one more encoded layer on every repeat.
     const currentRoute = router.currentRoute.value;
     const alreadyOnLogin = currentRoute.path === LOGIN_PATH;
 
-    // 回登录页带上当前路由地址
+    // Redirect to login page carrying previous target route if applicable
     await router.replace({
       path: LOGIN_PATH,
       query:

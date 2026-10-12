@@ -1,4 +1,4 @@
-# Tuquet Admin — Engineering Standards & Agent Guidelines
+# Specter — Engineering Standards & Agent Guidelines
 
 Tài liệu này xác lập các tiêu chuẩn kỹ thuật, thiết kế và quy trình phát triển bắt buộc áp dụng cho toàn bộ AI Agents và Kỹ sư phát triển trên kho lưu trữ `tuquet/admin`.
 

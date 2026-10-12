@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="100%" height="100%">
+  <defs>
+    <linearGradient id="favBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181b" />
+      <stop offset="60%" stop-color="#09090b" />
+      <stop offset="100%" stop-color="#020408" />
+    </linearGradient>
+    <linearGradient id="favGhost" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="45%" stop-color="#f4f4f5" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Squircle nền Dark Zinc (32x32) -->
+  <rect x="1" y="1" width="30" height="30" rx="7.5" ry="7.5" fill="url(#favBg)" stroke="#3f3f46" stroke-width="0.8" stroke-opacity="0.8" />
+
+  <!-- Thân Specter Ghost căn chỉnh tỉ lệ vàng cho Favicon -->
+  <g transform="translate(16, 16.5) scale(0.078) translate(-256, -252)">
+    <path 
+      d="M 256,110 
+         C 185,110 144,165 144,235 
+         C 144,285 142,342 144,374 
+         C 145,389 166,392 176,380 
+         C 192,360 210,360 226,380 
+         C 236,392 256,392 266,380 
+         C 282,360 300,360 316,380 
+         C 328,394 350,389 351,374 
+         C 353,342 368,285 368,235 
+         C 368,165 327,110 256,110 Z" 
+      fill="url(#favGhost)" 
+    />
+    <!-- Đôi mắt tương phản cao -->
+    <ellipse cx="220" cy="235" rx="15" ry="22" fill="#09090b" />
+    <ellipse cx="292" cy="235" rx="15" ry="22" fill="#09090b" />
+    <!-- Điểm bắt sáng rõ nét -->
+    <circle cx="224" cy="227" r="5.5" fill="#ffffff" />
+    <circle cx="296" cy="227" r="5.5" fill="#ffffff" />
+  </g>
+</svg>

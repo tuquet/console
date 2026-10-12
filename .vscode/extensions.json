@@ -1,32 +1,32 @@
 {
   "recommendations": [
-    // Vue 3 的语言支持
+    // Vue 3 language support
     "Vue.volar",
-    // 将 eslint 集成到 VS Code 中。
+    // Integrates ESLint into VS Code
     "dbaeumer.vscode-eslint",
-    // 将 oxlint 集成到 VS Code 中。
+    // Integrates oxlint into VS Code
     "oxc.oxc-vscode",
-    // Visual Studio Code 的官方 Stylelint 扩展
+    // Official Stylelint extension for VS Code
     "stylelint.vscode-stylelint",
-    // 支持 dotenv 文件语法
+    // Dotenv file syntax support
     "mikestead.dotenv",
-    // YAML 语言支持，供 ESLint 校验 pnpm-workspace.yaml 等文件
+    // YAML language support for ESLint validation of pnpm-workspace.yaml etc.
     "redhat.vscode-yaml",
-    // 源代码的拼写检查器
+    // Spell checker for source code
     "streetsidesoftware.code-spell-checker",
-    // Tailwind CSS 的官方 VS Code 插件
+    // Official Tailwind CSS VS Code extension
     "bradlc.vscode-tailwindcss",
-    // iconify 图标插件
+    // Iconify icons extension
     "antfu.iconify",
-    // i18n 插件
+    // i18n extension
     "Lokalise.i18n-ally",
-    // CSS 变量提示
+    // CSS variables autocomplete
     "vunguyentuan.vscode-css-variables",
-    // 在 package.json 中显示 PNPM catalog 的版本
+    // Display PNPM catalog versions in package.json
     "antfu.pnpm-catalog-lens"
   ],
   "unwantedRecommendations": [
-    // 和 volar 冲突
+    // Conflicts with Volar
     "octref.vetur"
   ]
 }

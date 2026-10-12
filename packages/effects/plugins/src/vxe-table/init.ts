@@ -21,7 +21,7 @@ import {
   VxeUI,
   VxeUpload,
 } from 'vxe-pc-ui';
-import enUS from 'vxe-pc-ui/lib/language/en-US'; // 导入默认的语言
+import enUS from 'vxe-pc-ui/lib/language/en-US'; // Import default language
 import zhCN from 'vxe-pc-ui/lib/language/zh-CN';
 import {
   VxeColgroup,
@@ -32,9 +32,9 @@ import {
 } from 'vxe-table';
 
 import { injectPluginsOptions } from '../plugins-context';
-import { extendsDefaultFormatter } from './extends'; // 是否加载过
+import { extendsDefaultFormatter } from './extends';
 
-// 是否加载过
+// Whether already loaded
 let isInit = false;
 
 let tableFormFactory: ((...args: any[]) => any) | undefined;
@@ -63,7 +63,7 @@ export function useTableForm(...args: any[]) {
   return factory(...args);
 }
 
-// 部分组件，如果没注册，vxe-table 会报错，这里实际没用组件，只是为了不报错，同时可以减少打包体积
+// Register minimal stubs for unused components to avoid vxe-table errors while reducing bundle size
 const createVirtualComponent = (name = '') => {
   return defineComponent({
     name,
@@ -115,7 +115,7 @@ export function setupVbenVxeTable(setupOptions: SetupVxeTable) {
 
   initVxeTable();
 
-  // 优先使用参数传入的 useVbenForm，否则清空让 context 注入生效
+  // Prioritize passed useVbenForm param, otherwise clear to let context injection take effect
   if (useVbenFormFromParam) {
     tableFormFactory = useVbenFormFromParam;
   }
@@ -130,9 +130,9 @@ export function setupVbenVxeTable(setupOptions: SetupVxeTable) {
     [() => isDark.value, () => locale.value],
     ([isDarkValue, localeValue]) => {
       VxeUI.setTheme(isDarkValue ? 'dark' : 'light');
-      // vxe-table 仅为其内置语言提供类型定义，应用通过模块增强扩展的
-      // 语言可能超出 VxeGlobalI18nLocale 联合范围，因此边界处需要断言，
-      // 未打包的自定义语言回退到 en-US
+      // vxe-table only types built-in locales; module-augmented locales
+      // may exceed VxeGlobalI18nLocale union, requiring boundary assertions;
+      // unbundled custom languages fall back to en-US
       VxeUI.setI18n(
         localeValue as any,
         localMap[localeValue] ?? localMap['en-US'],

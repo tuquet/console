@@ -12,13 +12,13 @@ declare module '@tiptap/core' {
 }
 
 export interface ImageUploadOptions {
-  /** 允许的文件类型，默认 'image/*' */
+  /** Allowed file types, default 'image/*' */
   accept?: string;
-  /** 最大文件大小(字节)，默认 5MB */
+  /** Max file size (bytes), default 5MB */
   maxSize?: number;
-  /** 上传失败回调，未提供时使用 alert 弹窗提示 */
+  /** Upload failure callback; falls back to alert modal if omitted */
   onUploadError?: (error: unknown) => void;
-  /** 上传函数，返回图片 URL，可选 onProgress 回调报告上传进度 */
+  /** Upload function returning image URL, optional onProgress callback */
   upload: (
     file: File,
     onProgress?: (percent: number) => void,
@@ -50,7 +50,7 @@ export interface VbenTiptapChangeEvent {
 
 export interface VbenTiptapExtensionOptions {
   imageUpload?: ImageUploadOptions;
-  /** 内部使用：追踪 blob URL 以便组件销毁时清理 */
+  /** Internal use: track blob URLs for cleanup on unmount */
   _blobUrlTracker?: Set<string>;
   placeholder?: string;
 }

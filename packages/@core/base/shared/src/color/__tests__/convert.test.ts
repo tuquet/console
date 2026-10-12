@@ -47,11 +47,11 @@ describe('color conversion functions', () => {
 
 describe('isValidColor', () => {
   it('isValidColor function', () => {
-    // 测试有效颜色
+    // Test valid colors
     expect(isValidColor('blue')).toBe(true);
     expect(isValidColor('#000000')).toBe(true);
 
-    // 测试无效颜色
+    // Test invalid colors
     expect(isValidColor('invalid color')).toBe(false);
     expect(isValidColor()).toBe(false);
   });

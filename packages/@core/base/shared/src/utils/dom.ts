@@ -10,7 +10,7 @@ export interface VisibleDomRect {
 }
 
 /**
- * 获取元素可见信息
+ * Get element visibility information
  * @param element
  */
 export function getElementVisibleRect(
@@ -43,7 +43,7 @@ export function getElementVisibleRect(
   const left = Math.max(rect.left, 0);
   const right = Math.min(rect.right, viewWidth);
 
-  // 如果元素完全不可见，则返回一个空的矩形
+  // If element is completely hidden, return empty DOMRect
   if (top >= viewHeight || bottom <= 0 || left >= viewWidth || right <= 0) {
     return {
       bottom: 0,
@@ -105,22 +105,22 @@ export function needsScrollbar(target?: HTMLElement | null) {
   const doc = document.documentElement;
   const body = document.body;
 
-  // 检查 body 的 overflow-y 样式
+  // Check body overflow-y style
   const overflowY = window.getComputedStyle(body).overflowY;
 
-  // 如果明确设置了需要滚动条的样式
+  // If scrollbar style is explicitly configured
   if (overflowY === 'scroll' || overflowY === 'auto') {
     return doc.scrollHeight > window.innerHeight;
   }
 
-  // 在其他情况下，根据 scrollHeight 和 innerHeight 比较判断
+  // Otherwise, compare scrollHeight and innerHeight
   return doc.scrollHeight > window.innerHeight;
 }
 
 export function triggerWindowResize(): void {
-  // 创建一个新的 resize 事件
+  // Create new resize event
   const resizeEvent = new Event('resize');
 
-  // 触发 window 的 resize 事件
+  // Dispatch window resize event
   window.dispatchEvent(resizeEvent);
 }

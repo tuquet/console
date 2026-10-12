@@ -49,8 +49,8 @@ interface KnipResult {
 }
 
 /**
- * 格式化依赖检查结果
- * @param result - 依赖检查结果
+ * Format dependency check results
+ * @param result - Dependency check results
  */
 function formatResult(result: KnipResult): void {
   let hasIssues = false;
@@ -87,7 +87,7 @@ function formatResult(result: KnipResult): void {
 }
 
 /**
- * 运行依赖检查
+ * Run dependency check
  */
 async function runKnipCheck(): Promise<void> {
   const cwd = process.cwd();
@@ -132,8 +132,8 @@ async function runKnipCheck(): Promise<void> {
 }
 
 /**
- * 定义依赖检查命令
- * @param cac - CAC实例
+ * Define dependency check command
+ * @param cac - CAC instance
  */
 function defineCheckDepCommand(cac: CAC): void {
   cac

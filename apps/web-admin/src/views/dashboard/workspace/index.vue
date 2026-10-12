@@ -170,10 +170,7 @@ onMounted(() => {
           >
             Quản Trị Workspace
           </h1>
-          <Badge
-            variant="outline"
-            class="font-mono text-xs uppercase text-sky-500 border-sky-500/30 bg-sky-500/10"
-          >
+          <Badge variant="outline" class="font-mono text-xs uppercase">
             Multi-Tenant
           </Badge>
         </div>
@@ -224,7 +221,7 @@ onMounted(() => {
             Tổng Workspace
           </span>
           <span
-            class="flex size-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400"
+            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
           >
             <Building2 class="size-4.5" />
           </span>
@@ -233,7 +230,7 @@ onMounted(() => {
           <span class="text-3xl font-extrabold tracking-tight text-foreground">
             {{ tenants.length }}
           </span>
-          <span class="text-xs font-semibold text-sky-400">Tenants</span>
+          <span class="text-xs font-medium text-muted-foreground">Tenants</span>
         </div>
         <div class="mt-2 text-xs text-muted-foreground truncate">
           Đang chọn:
@@ -250,7 +247,7 @@ onMounted(() => {
             Plugin Hệ Thống
           </span>
           <span
-            class="flex size-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400"
+            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
           >
             <Layers class="size-4.5" />
           </span>
@@ -259,10 +256,14 @@ onMounted(() => {
           <span class="text-3xl font-extrabold tracking-tight text-foreground">
             {{ plugins.length }}
           </span>
-          <span class="text-xs font-semibold text-emerald-400">Sẵn sàng</span>
+          <span class="text-xs font-semibold text-muted-foreground"
+            >Sẵn sàng</span
+          >
         </div>
-        <div class="mt-2 flex items-center gap-1.5 text-xs text-emerald-400">
-          <CheckCircle2 class="size-3.5" />
+        <div
+          class="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"
+        >
+          <CheckCircle2 class="size-3.5 text-emerald-500" />
           <span>Core Kernel & Storage Hoạt Động</span>
         </div>
       </div>
@@ -274,7 +275,7 @@ onMounted(() => {
             Specter Fleet Bridge
           </span>
           <span
-            class="flex size-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400"
+            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
           >
             <Terminal class="size-4.5" />
           </span>
@@ -283,9 +284,11 @@ onMounted(() => {
           <span class="text-2xl font-bold tracking-tight text-foreground">
             Sẵn Sàng
           </span>
-          <span class="inline-flex items-center gap-1 text-xs text-emerald-400">
+          <span
+            class="inline-flex items-center gap-1.5 text-xs text-foreground"
+          >
             <span
-              class="size-2 rounded-full bg-emerald-400 animate-pulse"
+              class="size-2 rounded-full bg-emerald-500 animate-pulse"
             ></span>
             Online
           </span>
@@ -303,7 +306,7 @@ onMounted(() => {
             Quản Trị Viên
           </span>
           <span
-            class="flex size-9 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400"
+            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
           >
             <ShieldCheck class="size-4.5" />
           </span>
@@ -319,7 +322,9 @@ onMounted(() => {
             }}
           </span>
         </div>
-        <div class="mt-2 text-xs text-sky-400">Quyền: Super Administrator</div>
+        <div class="mt-2 text-xs text-muted-foreground">
+          Quyền: Super Administrator
+        </div>
       </div>
     </div>
 
@@ -327,9 +332,18 @@ onMounted(() => {
     <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
       <Tabs default-value="tenants" class="w-full">
         <TabsList class="mb-4">
-          <TabsTrigger value="tenants"> Danh Sách Workspace </TabsTrigger>
-          <TabsTrigger value="plugins"> Plugin Cloud </TabsTrigger>
-          <TabsTrigger value="runners"> Kết Nối Specter Desk </TabsTrigger>
+          <TabsTrigger value="tenants" class="flex items-center gap-1.5">
+            <Building2 class="size-4 shrink-0" />
+            <span>Danh Sách Workspace</span>
+          </TabsTrigger>
+          <TabsTrigger value="plugins" class="flex items-center gap-1.5">
+            <Layers class="size-4 shrink-0" />
+            <span>Plugin Cloud</span>
+          </TabsTrigger>
+          <TabsTrigger value="runners" class="flex items-center gap-1.5">
+            <Terminal class="size-4 shrink-0" />
+            <span>Kết Nối Specter Desk</span>
+          </TabsTrigger>
         </TabsList>
 
         <!-- Tab 1: Tenants List -->
@@ -358,8 +372,8 @@ onMounted(() => {
                       </span>
                       <Badge
                         v-if="record.id === activeTenantId"
-                        variant="outline"
-                        class="border-sky-500/30 bg-sky-500/10 text-sky-400 text-xs font-normal"
+                        variant="secondary"
+                        class="text-xs font-normal"
                       >
                         Đang chọn
                       </Badge>
@@ -377,7 +391,7 @@ onMounted(() => {
                   <TableCell>
                     <Badge
                       variant="outline"
-                      class="font-mono text-xs uppercase text-sky-400 border-sky-500/30 bg-sky-500/10"
+                      class="font-mono text-xs uppercase"
                     >
                       {{ getPlanInfo(record.metadata?.plan).label }}
                     </Badge>
@@ -386,13 +400,16 @@ onMounted(() => {
                   <TableCell>
                     <Badge
                       variant="outline"
-                      :class="
-                        record.status === 'active'
-                          ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-                          : 'border-amber-500/30 bg-amber-500/10 text-amber-400'
-                      "
-                      class="text-xs uppercase font-normal"
+                      class="text-xs capitalize font-normal"
                     >
+                      <span
+                        class="mr-1.5 size-1.5 rounded-full"
+                        :class="
+                          record.status === 'active'
+                            ? 'bg-emerald-500'
+                            : 'bg-muted-foreground'
+                        "
+                      ></span>
                       {{ record.status }}
                     </Badge>
                   </TableCell>
@@ -461,7 +478,7 @@ onMounted(() => {
               class="rounded-lg border p-4 transition-all"
               :class="
                 tenant.id === activeTenantId
-                  ? 'border-sky-500 bg-sky-500/5'
+                  ? 'border-primary/70 bg-accent/30'
                   : 'border-border/60 bg-card/60'
               "
             >
@@ -476,29 +493,29 @@ onMounted(() => {
                 </div>
                 <Badge
                   v-if="tenant.id === activeTenantId"
-                  variant="outline"
-                  class="border-sky-500/30 bg-sky-500/10 text-sky-400 text-xs font-normal"
+                  variant="secondary"
+                  class="text-xs font-normal"
                 >
+                  <span
+                    class="mr-1.5 size-1.5 rounded-full bg-emerald-500"
+                  ></span>
                   Active
                 </Badge>
               </div>
 
               <div class="mt-3 flex flex-wrap items-center gap-2">
-                <Badge
-                  variant="outline"
-                  class="font-mono text-xs uppercase text-sky-400 border-sky-500/30 bg-sky-500/10"
-                >
+                <Badge variant="secondary" class="font-mono text-xs uppercase">
                   {{ getPlanInfo(tenant.metadata?.plan).label }}
                 </Badge>
-                <Badge
-                  variant="outline"
-                  :class="
-                    tenant.status === 'active'
-                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
-                      : 'border-amber-500/30 bg-amber-500/10 text-amber-400'
-                  "
-                  class="uppercase text-xs font-normal"
-                >
+                <Badge variant="outline" class="text-xs font-normal capitalize">
+                  <span
+                    class="mr-1.5 size-1.5 rounded-full"
+                    :class="
+                      tenant.status === 'active'
+                        ? 'bg-emerald-500'
+                        : 'bg-muted-foreground'
+                    "
+                  ></span>
                   {{ tenant.status }}
                 </Badge>
                 <span class="text-xs text-muted-foreground ml-auto">
@@ -601,15 +618,7 @@ onMounted(() => {
                   </TableCell>
 
                   <TableCell>
-                    <Badge
-                      variant="outline"
-                      :class="
-                        record.is_system
-                          ? 'border-sky-500/30 bg-sky-500/10 text-sky-400'
-                          : 'border-purple-500/30 bg-purple-500/10 text-purple-400'
-                      "
-                      class="text-xs font-normal"
-                    >
+                    <Badge variant="secondary" class="text-xs font-normal">
                       {{ record.is_system ? 'Core Kernel' : 'Module Service' }}
                     </Badge>
                   </TableCell>
@@ -617,8 +626,11 @@ onMounted(() => {
                   <TableCell class="text-right">
                     <Badge
                       variant="outline"
-                      class="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs uppercase font-normal"
+                      class="text-xs capitalize font-normal"
                     >
+                      <span
+                        class="mr-1.5 size-1.5 rounded-full bg-emerald-500"
+                      ></span>
                       {{ record.status }}
                     </Badge>
                   </TableCell>
@@ -652,10 +664,10 @@ onMounted(() => {
                     {{ plugin.description || 'Hệ thống plugin cốt lõi Tuquet' }}
                   </div>
                 </div>
-                <Badge
-                  variant="outline"
-                  class="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 uppercase text-xs font-normal"
-                >
+                <Badge variant="outline" class="text-xs capitalize font-normal">
+                  <span
+                    class="mr-1.5 size-1.5 rounded-full bg-emerald-500"
+                  ></span>
                   {{ plugin.status }}
                 </Badge>
               </div>
@@ -665,21 +677,10 @@ onMounted(() => {
                   class="rounded bg-muted/60 px-1.5 py-0.5 font-mono text-xs"
                   >{{ plugin.id }}</code
                 >
-                <Badge
-                  variant="outline"
-                  class="border-cyan-500/30 bg-cyan-500/10 text-cyan-400 font-mono text-xs"
-                >
+                <Badge variant="secondary" class="font-mono text-xs">
                   schema: {{ plugin.schema_name }}
                 </Badge>
-                <Badge
-                  variant="outline"
-                  :class="
-                    plugin.is_system
-                      ? 'border-sky-500/30 bg-sky-500/10 text-sky-400'
-                      : 'border-purple-500/30 bg-purple-500/10 text-purple-400'
-                  "
-                  class="text-xs font-normal"
-                >
+                <Badge variant="secondary" class="text-xs font-normal">
                   {{ plugin.is_system ? 'Core Kernel' : 'Module' }}
                 </Badge>
                 <span class="text-muted-foreground ml-auto font-mono"
@@ -702,12 +703,18 @@ onMounted(() => {
             </p>
 
             <div
-              class="my-4 overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-xs sm:text-sm text-emerald-400 border border-slate-800"
+              class="my-4 overflow-x-auto rounded-lg bg-muted/50 p-4 font-mono text-xs sm:text-sm text-foreground border border-border"
             >
-              # Bước 1: Mở terminal trên máy trạm của bạn<br />
-              tuquet login<br /><br />
-              # Trình duyệt sẽ mở cổng Desktop Bridge:<br />
-              https://admin.tuquet.com/auth/desktop
+              <span class="text-muted-foreground"
+                ># Bước 1: Mở terminal trên máy trạm của bạn</span
+              ><br />
+              <span class="font-semibold">tuquet login</span><br /><br />
+              <span class="text-muted-foreground"
+                ># Trình duyệt sẽ mở cổng Desktop Bridge:</span
+              ><br />
+              <span class="text-primary font-semibold"
+                >https://admin.tuquet.com/auth/desktop</span
+              >
             </div>
 
             <Button class="w-full sm:w-auto" @click="handleConnectCli()">

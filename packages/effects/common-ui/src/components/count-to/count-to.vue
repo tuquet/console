@@ -112,7 +112,7 @@ const numDec = computed(() => {
   }
 
   &-main {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: inherit;
     // font-size: 1.5rem;
 
     &-decimal {

@@ -55,9 +55,9 @@ const currentModelValue = computed(() => {
 const innerParams = ref({});
 const refOptions = ref<OptionsItem[]>([]);
 const loading = ref(false);
-// 首次是否加载过了
+// Whether loaded for the first time
 const isFirstLoaded = ref(false);
-// 标记是否有待处理的请求
+// Flag whether there is a pending request
 const hasPendingRequest = ref(false);
 
 const getOptions = computed(() => {
@@ -131,7 +131,7 @@ async function fetchApi() {
     return;
   }
 
-  // 如果正在加载，标记有待处理的请求并返回
+  // If currently loading, mark pending request and return
   if (loading.value) {
     hasPendingRequest.value = true;
     return;
@@ -144,7 +144,7 @@ async function fetchApi() {
     if (beforeFetch && isFunction(beforeFetch)) {
       finalParams = (await beforeFetch(cloneDeep(finalParams))) || finalParams;
     }
-    // 判断是否需要控制执行中断
+    // Check whether request execution abort is needed
     if (
       shouldFetch &&
       isFunction(shouldFetch) &&
@@ -172,10 +172,10 @@ async function fetchApi() {
     isFirstLoaded.value = false;
   } finally {
     loading.value = false;
-    // 如果有待处理的请求，立即触发新的请求
+    // If pending request exists, trigger new request immediately
     if (hasPendingRequest.value) {
       hasPendingRequest.value = false;
-      // 使用 nextTick 确保状态更新完成后再触发新请求
+      // Use nextTick to ensure state updates finish before triggering new request
       await nextTick();
       fetchApi();
     }
@@ -244,13 +244,13 @@ function emitChange() {
 }
 const componentRef = ref();
 defineExpose({
-  /** 获取options数据 */
+  /** Fetch options data */
   getOptions: () => unref(getOptions),
-  /** 获取当前值 */
+  /** Get current value */
   getValue: () => unref(currentModelValue),
-  /** 获取被包装的组件实例 */
+  /** Get wrapped component instance */
   getComponentRef: <T = any>() => componentRef.value as T,
-  /** 更新Api参数 */
+  /** Update API parameters */
   updateParam(newParams: Record<string, any>) {
     innerParams.value = newParams;
   },

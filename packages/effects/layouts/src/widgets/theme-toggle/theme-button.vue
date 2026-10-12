@@ -5,7 +5,7 @@ import { VbenButton } from '@vben-core/shadcn-ui';
 
 interface Props {
   /**
-   * 类型
+   * Type
    */
   type?: 'icon' | 'normal';
 }

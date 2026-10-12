@@ -102,7 +102,7 @@ const labelClass = computed(() =>
 
 <template>
   <component :is="tag" :class="cellClass" :colspan="span">
-    <!-- 边框模式：每个单元格仅承载 label 或 content -->
+    <!-- Bordered mode: each cell hosts only label or content -->
     <template v-if="bordered">
       <span v-if="hasLabel" :style="labelStyle">
         <VbenRenderContent :content="displayLabel" />
@@ -112,7 +112,7 @@ const labelClass = computed(() =>
       </span>
     </template>
 
-    <!-- 非边框模式：label + content 容器 -->
+    <!-- Non-bordered mode: label + content container -->
     <div v-else class="flex">
       <span v-if="hasLabel" :class="labelClass" :style="labelStyle">
         <VbenRenderContent :content="displayLabel" />

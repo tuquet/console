@@ -34,7 +34,7 @@ const unicorn: OxlintConfig = {
     'unicorn/no-document-cookie': 'error',
     'unicorn/no-empty-file': 'error',
     'unicorn/no-hex-escape': 'error',
-    // oxlint 实现较 eslint 更严格，会误报既有代码，暂关闭
+    // oxlint implementation is stricter than eslint and flags existing code; temporarily disabled
     'unicorn/no-immediate-mutation': 'off',
     'unicorn/no-instanceof-builtins': 'error',
     'unicorn/no-invalid-fetch-options': 'error',
@@ -43,7 +43,7 @@ const unicorn: OxlintConfig = {
     'unicorn/no-magic-array-flat-depth': 'error',
     'unicorn/no-negated-condition': 'error',
     'unicorn/no-negation-in-equality-check': 'error',
-    // 禁止通过“添加括号”自动修复嵌套三元运算
+    // Disallow autofixing nested ternaries by adding parentheses
     'unicorn/no-nested-ternary': 'off',
     'unicorn/no-new-array': 'error',
     'unicorn/no-new-buffer': 'error',
@@ -113,7 +113,7 @@ const unicorn: OxlintConfig = {
     'unicorn/prefer-string-slice': 'error',
     'unicorn/prefer-string-starts-ends-with': 'error',
     'unicorn/prefer-string-trim-start-end': 'error',
-    // oxlint 实现较 eslint 更严格（含 cloneDeep），暂关闭以保持迁移前行为
+    // oxlint implementation is stricter than eslint (including cloneDeep); temporarily disabled to preserve pre-migration behavior
     'unicorn/prefer-structured-clone': 'off',
     'unicorn/prefer-ternary': 'error',
     'unicorn/prefer-type-error': 'error',

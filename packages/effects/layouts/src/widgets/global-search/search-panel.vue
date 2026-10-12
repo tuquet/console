@@ -43,42 +43,42 @@ const isNavigating = ref(false);
 
 const handleSearch = useThrottleFn(search, 200);
 
-// 搜索函数，用于根据搜索关键词查找匹配的菜单项
+// Search function to find matching menu items by keyword
 function search(searchKey: string) {
-  // 去除搜索关键词的前后空格
+  // Trim whitespace from search keyword
   searchKey = searchKey.trim();
 
-  // 如果搜索关键词为空，清空搜索结果并返回
+  // Clear search results and return if keyword is empty
   if (!searchKey) {
     searchResults.value = [];
     return;
   }
-  // 将搜索关键词转换为小写，确保大小写不敏感的搜索
+  // Convert keyword to lowercase for case-insensitive matching
   searchKey = searchKey.toLowerCase();
 
-  // 使用搜索关键词创建正则表达式
+  // Create regex from keyword
   const reg = createSearchReg(searchKey);
 
-  // 初始化结果数组
+  // Initialize results array
   const results: MenuRecordRaw[] = [];
 
-  // 遍历搜索项
+  // Iterate search items
   traverseTreeValues(searchItems.value, (item) => {
-    // 如果菜单项的名称匹配正则表达式，将其添加到结果数组中
+    // If menu item name matches regex, add to results
     if (reg.test(item.name?.toLowerCase())) {
       results.push(item);
     }
   });
 
-  // 更新搜索结果
+  // Update search results
   searchResults.value = results;
 
-  // 如果有搜索结果，设置索引为 0
+  // Set active index to 0 if results exist
   if (results.length > 0) {
     activeIndex.value = 0;
   }
 
-  // 赋值索引为 0
+  // Set index to 0
   activeIndex.value = 0;
 }
 
@@ -166,7 +166,7 @@ function removeItem(index: number) {
   scrollIntoView();
 }
 
-// 存储所有需要转义的特殊字符
+// Store special characters that require escaping
 const code = new Set([
   '$',
   '(',
@@ -184,20 +184,20 @@ const code = new Set([
   '}',
 ]);
 
-// 转换函数，用于转义特殊字符
+// Escape special characters in string
 function transform(c: string) {
-  // 如果字符在特殊字符列表中，返回转义后的字符
-  // 如果不在，返回字符本身
+  // If char is in special list, return escaped char
+  // Otherwise return char directly
   return code.has(c) ? `\\${c}` : c;
 }
 
-// 创建搜索正则表达式
+// Create search regex
 function createSearchReg(key: string) {
-  // 将输入的字符串拆分为单个字符
-  // 对每个字符进行转义
-  // 然后用'.*'连接所有字符，创建正则表达式
+  // Split input into characters
+  // Escape each character
+  // Join escaped characters with '.*' to construct regex
   const keys = [...key].map((item) => transform(item)).join('.*');
-  // 返回创建的正则表达式
+  // Return created RegExp
   return new RegExp(`.*${keys}.*`);
 }
 
@@ -239,7 +239,7 @@ useEventListener('mousemove', () => {
 <template>
   <VbenScrollbar>
     <div class="flex! h-full justify-center px-2 sm:max-h-112.5">
-      <!-- 无搜索结果 -->
+      <!-- No search results -->
       <div
         v-if="keyword && searchResults.length === 0"
         class="text-center text-muted-foreground"
@@ -252,7 +252,7 @@ useEventListener('mousemove', () => {
           </span>
         </p>
       </div>
-      <!-- 历史搜索记录 & 没有搜索结果 -->
+      <!-- Search history & no search results -->
       <div
         v-if="!keyword && searchResults.length === 0"
         class="text-center text-muted-foreground"

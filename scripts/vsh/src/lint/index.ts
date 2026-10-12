@@ -16,55 +16,57 @@ interface LintCommandOptions {
 }
 
 /**
- * CPU 逻辑核心数阈值 4 核。
- * - 小于等于该值：视为低配机器，检查命令串行执行，避免瞬时占用飙升。
+ * CPU logical core threshold: 4 cores.
+ * - Below or equal: treated as low-spec machine, commands run serially to avoid resource spikes.
  */
 const CPU_CORE_THRESHOLD = 4;
 
 /**
- * 可用内存阈值 8 GB。
- * 仅当空余内存大于阈值且当前可用内存大于该值时，
- * oxfmt / oxlint 默认线程数才提升到 4，否则使用 2。
+ * Available memory threshold: 8 GB.
+ * Only when free and available memory exceed thresholds,
+ * default threads for oxfmt / oxlint increase to 4, otherwise 2.
  */
 const FREE_MEMORY_THRESHOLD = 8 * 1024 ** 3;
 
 /**
- * 一条命令：可执行文件名 + 参数数组。
+ * Single command: executable filename + arguments array.
  *
- * execa v10 移除了 execaCommand，execa(file, args?, options?) 的第一个参数是
- * 「可执行文件名」而非整条命令行；且默认不走 shell。因此统一用 [file, args] 数组形式，
- * 参数逐个传入、无需 shell 转义，跨平台行为一致（避免把整条字符串误当文件名）。
+ * execa v10 removed execaCommand; the first argument of execa(file, args?, options?) is
+ * the executable filename rather than the full command line, running without shell by default. Using [file, args] arrays
+ * avoids shell escaping and ensures consistent cross-platform behavior.
  */
 type Command = [file: string, args: string[]];
 
-/** 执行单条命令。 */
+/** Execute a single command. */
 function runCommand([file, args]: Command) {
   return execa(file, args, { stdio: 'inherit' });
 }
 
-/** 将命令还原为可读字符串，用于失败信息展示。 */
+/** Convert command to human-readable string for failure display. */
 function formatCommand([file, args]: Command) {
   return [file, ...args].join(' ');
 }
 
 /**
- * 统一的 lint 失败错误。
- * 相比 execa 的原始错误，会列出所有失败命令并给出修复提示。
+ * Unified lint failure error.
+ * Lists all failed commands and displays fix suggestions.
  */
 class LintError extends Error {
   constructor(failed: Command[]) {
     super(
       `Lint failed:\n${failed
         .map((command) => `  - ${formatCommand(command)}`)
-        .join('\n')}\n\n运行 ${colors.cyan('vsh lint --format')} 可自动修复。`,
+        .join(
+          '\n',
+        )}\n\nRun ${colors.cyan('vsh lint --format')} to automatically fix.`,
     );
     this.name = 'LintError';
   }
 }
 
 /**
- * 串行执行所有命令：一次只运行一个进程。
- * 保证一次能看到所有工具的报错（配置低的机器更友好）。
+ * Execute all commands serially: one process at a time.
+ * Ensures all tool errors are visible (friendlier to low-spec machines).
  */
 async function runSerial(commands: Command[]) {
   const failed: Command[] = [];
@@ -83,15 +85,15 @@ async function runSerial(commands: Command[]) {
 }
 
 /**
- * 并行执行所有命令：同时启动全部进程。
- * 等待全部结束后汇总失败命令，与串行模式保持一致的错误输出。
+ * Execute all commands in parallel: start all processes concurrently.
+ * Await all completions then summarize failed commands, consistent with serial output.
  */
 async function runParallel(commands: Command[]) {
   const subprocesses = commands.map((command) => runCommand(command));
 
   const results = await Promise.allSettled(subprocesses);
 
-  // 汇总所有失败的命令，与串行模式保持一致的错误输出
+  // Summarize all failed commands, consistent with serial mode error output
   const failed: Command[] = [];
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
@@ -108,8 +110,8 @@ async function runLint({ format, threads }: LintCommandOptions) {
   // process.env.FORCE_COLOR = '3';
   const cpuCores = availableParallelism();
 
-  // CPU 核心数充足且可用内存充足时，默认线程数提升到 4，否则维持 2；
-  // 用户通过 --threads 显式指定时优先使用其值。
+  // When CPU cores and available memory are sufficient, default threads increase to 4, otherwise 2;
+  // explicit --threads flag takes precedence.
   const defaultThreads =
     cpuCores > CPU_CORE_THRESHOLD && freemem() > FREE_MEMORY_THRESHOLD ? 4 : 2;
   const threadsArg = `--threads=${threads || defaultThreads}`;
@@ -131,8 +133,8 @@ async function runLint({ format, threads }: LintCommandOptions) {
     ['stylelint', ['**/*.{vue,css,less,scss}', '--cache']],
   ];
 
-  // 低配机器（CPU 核心数较少）串行执行，避免多进程并发导致瞬时占用飙升；
-  // 高配机器并行执行以缩短整体耗时。
+  // Low-spec machines (fewer CPU cores) run serially to avoid spikes;
+  // high-spec machines run in parallel to shorten total duration.
   await (cpuCores <= CPU_CORE_THRESHOLD
     ? runSerial(commands)
     : runParallel(commands));

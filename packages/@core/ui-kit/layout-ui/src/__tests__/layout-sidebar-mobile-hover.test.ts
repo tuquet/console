@@ -32,7 +32,7 @@ interface MountOptions {
 }
 
 /**
- * 挂载一个受控的 LayoutSidebar，验证移动端/桌面端 hover 事件对折叠状态的副作用（#8274）。
+ * Mount a controlled LayoutSidebar to verify side effects of mobile/desktop hover events on collapsed state (#8274).
  */
 function mountSidebar(options: MountOptions = {}) {
   const collapse = ref(options.collapse ?? false);
@@ -75,8 +75,8 @@ function getAside(): HTMLElement {
 
 async function fireMouse(type: 'mouseenter' | 'mouseleave') {
   const event = new MouseEvent(type);
-  // jsdom 的合成事件 offsetX 恒为 0，会命中 handleMouseenter 的左边缘 10px 守卫；
-  // 注入 20 模拟真实悬停在菜单区
+  // Synthetic offsetX in jsdom is always 0, which triggers handleMouseenter left edge 10px guard;
+  // Inject 20 to simulate actual hover inside menu area
   Object.defineProperty(event, 'offsetX', { value: 20 });
   getAside().dispatchEvent(event);
   await nextTick();

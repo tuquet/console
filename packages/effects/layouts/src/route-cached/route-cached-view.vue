@@ -18,7 +18,7 @@ const { removeCachedRoute } = tabbarStore;
 const { getEnabledTransition, getTransitionName } = useLayoutHook();
 
 /**
- * 是否启用tab
+ * Whether tabs are enabled
  */
 const enableTabbar = computed(() => preferences.tabbar.enable);
 
@@ -32,7 +32,7 @@ const computedCachedRouteKeys = computed(() => {
 });
 
 /**
- * 监听缓存路由变化，删除不存在的缓存路由
+ * Watch cached routes and remove stale routes
  */
 watch(computedCachedRouteKeys, (keys) => {
   unref(getCachedRoutes).forEach((item) => {
@@ -43,13 +43,13 @@ watch(computedCachedRouteKeys, (keys) => {
 });
 
 /**
- * 所有缓存的route
+ * All cached routes
  */
 const computedCachedRoutes = computed(() => {
   if (!unref(enableTabbar)) {
     return [];
   }
-  // 刷新路由可刷新缓存
+  // Refreshing route refreshes cache
   const excludeCachedTabKeys = unref(getExcludeCachedTabs);
   return [...unref(getCachedRoutes).values()].filter((item) => {
     const componentType: any = item.component.type || {};
@@ -62,7 +62,7 @@ const computedCachedRoutes = computed(() => {
 });
 
 /**
- * 是否显示
+ * Whether visible
  */
 const computedShowView = computed(() => unref(computedCachedRoutes).length > 0);
 

@@ -6,6 +6,7 @@ import { computed } from 'vue';
 import { TabsTrigger } from 'reka-ui';
 
 import { Tabs, TabsContent, TabsList } from '../../ui';
+import { VbenIcon } from '../icon';
 import { VbenTooltip } from '../tooltip';
 import TabsIndicator from './tabs-indicator.vue';
 
@@ -53,12 +54,25 @@ function activeClass(tab: string): string[] {
         <TabsTrigger
           :value="tab.value"
           :class="activeClass(tab.value)"
-          class="hover:text-primary z-20 size-full inline-flex items-center justify-center rounded-md text-sm font-medium whitespace-nowrap disabled:pointer-events-none disabled:opacity-50"
+          class="hover:text-primary z-20 size-full inline-flex items-center justify-center rounded-md text-sm font-medium whitespace-nowrap disabled:pointer-events-none disabled:opacity-50 py-1.5"
         >
-          <VbenTooltip :delay-duration="300" side="bottom">
+          <VbenTooltip :delay-duration="150" side="bottom">
             <template #trigger>
-              <div class="whitespace-nowrap overflow-hidden text-ellipsis px-1">
-                {{ tab.label }}
+              <div class="inline-flex items-center justify-center size-full">
+                <template v-if="tab.icon">
+                  <component
+                    :is="tab.icon"
+                    v-if="typeof tab.icon !== 'string'"
+                    class="size-4 shrink-0"
+                  />
+                  <VbenIcon v-else :icon="tab.icon" class="size-4 shrink-0" />
+                </template>
+                <span
+                  v-else
+                  class="whitespace-nowrap overflow-hidden text-ellipsis px-1"
+                >
+                  {{ tab.label }}
+                </span>
               </div>
             </template>
             {{ tab.label }}

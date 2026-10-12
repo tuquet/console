@@ -17,7 +17,7 @@ const collapsed = defineModel<boolean>({ default: false });
   >
     <slot :is-expanded="collapsed">
       {{ collapsed }}
-      <!-- <span>{{ isExpanded ? '收起' : '展开' }}</span> -->
+      <!-- <span>{{ isExpanded ? 'Collapse' : 'Expand' }}</span> -->
     </slot>
     <div
       :class="{ 'rotate-180': !collapsed }"

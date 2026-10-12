@@ -141,8 +141,8 @@ describe('filterTree immutability', () => {
     id: number;
   };
 
-  // 模拟 apps/*/src/router/routes 下的模块级路由常量。
-  // 它在每次登录或角色刷新时都会被 filterTree 重新过滤一次。
+  // Mock module-level route constants under apps/*/src/router/routes.
+  // Refiltered by filterTree on every login or role refresh.
   const buildTree = (): TreeNode[] => [
     {
       id: 1,
@@ -191,8 +191,8 @@ describe('filterTree immutability', () => {
   });
 
   it('should keep branch nodes by reference when no child is dropped', () => {
-    // 过滤前后子节点序列完全一致时，分支节点必须仍是原来的对象，
-    // 否则按引用缓存路由/菜单节点的调用方会视为内容发生变化。
+    // When child node sequence is unchanged, branch nodes must retain reference,
+    // otherwise callers caching nodes by reference consider content modified.
     const tree = buildTree();
 
     const result = filterTree(tree, () => true);
@@ -206,18 +206,18 @@ describe('filterTree immutability', () => {
   it('should only copy the branches on the path of a dropped node', () => {
     const tree = buildTree();
 
-    // 只丢弃深层的一个节点（id 6），其余分支应当保持原引用
+    // Only evict deep node (id 6); other branches must keep original reference
     const result = filterTree(tree, (node) => node.id !== 6);
 
     const sourceBranch = tree[0]?.children?.find((node) => node.id === 3);
     const resultBranch = result[0]?.children?.find((node) => node.id === 3);
 
-    // 受影响的分支：被复制，源节点不受影响
+    // Affected branch: cloned, source node untouched
     expect(resultBranch).not.toBe(sourceBranch);
     expect(sourceBranch?.children?.map((child) => child.id)).toEqual([4, 5, 6]);
     expect(resultBranch?.children?.map((child) => child.id)).toEqual([4, 5]);
 
-    // 未受影响的兄弟分支与根节点以外的分支：保持原引用
+    // Unaffected sibling branches retain original reference
     expect(result[0]?.children?.[0]).toBe(tree[0]?.children?.[0]);
     expect(result[0]?.children?.[2]).toBe(tree[0]?.children?.[2]);
     expect(result[1]).toBe(tree[1]);
@@ -225,15 +225,15 @@ describe('filterTree immutability', () => {
   });
 
   it('should keep returning nodes that an earlier filter run dropped', () => {
-    // 复现场景：低权限用户登录后，同一会话内再以更高权限重新生成路由。
-    // 修复前，上一次被过滤掉的子节点会被永久写回源数据，
-    // 导致后续过滤（即使是更宽松的条件）再也拿不到它们。
+    // Repro: low-privilege user logs in, then regenerates routes with higher privileges in same session.
+    // Before fix, previously filtered children were permanently written back to source,
+    // preventing subsequent broader filters from retrieving them.
     const tree = buildTree();
 
-    // 先用较窄的条件过滤一次（模拟低权限用户），丢弃 id 为 9 的子节点
+    // Filter with narrower condition first (low privilege), discarding id 9
     filterTree(tree, (node) => node.id !== 9);
 
-    // 再放宽条件（模拟更高权限用户），被丢弃的节点应当重新出现
+    // Loosen condition (higher privilege); discarded node must reappear
     const widened = filterTree(tree, () => true);
 
     expect(widened).toEqual(buildTree());

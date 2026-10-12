@@ -7,7 +7,7 @@ import {
   hasAuthority,
 } from '../generate-routes-frontend';
 
-// Mock 路由数据
+// Mock route data
 const mockRoutes = [
   {
     meta: {
@@ -104,9 +104,9 @@ describe('generateRoutesByFrontend', () => {
   });
 
   it('should not corrupt the source route table across repeated generations', async () => {
-    // 复现场景：低权限用户先登录，同一会话内再以更高权限重新生成路由。
-    // filterTree 曾把上一次过滤掉的子节点写回源路由表，
-    // 导致高权限用户再也拿不到那些路由。
+    // Repro scenario: low-privilege user logs in first, then routes regenerate with higher privileges in the same session.
+    // filterTree previously wrote filtered-out children back to the source route table,
+    // causing higher-privilege users to lose access to those routes.
     const routes = [
       {
         meta: { authority: ['admin', 'user'] },

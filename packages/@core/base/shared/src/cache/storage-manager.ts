@@ -8,10 +8,10 @@ import { LocalStorageDriver } from './local-storage-driver';
 import { MemoryStorageDriver } from './memory-storage-driver';
 
 /**
- * 存储管理器（策略模式）
- * - prefix（命名空间隔离）在此层处理
- * - TTL（过期机制）在此层处理
- * - Driver 只负责纯粹的 KV 存取
+ * Storage Manager (Strategy Pattern)
+ * - Handles prefix (namespace isolation) at this layer
+ * - Handles TTL (expiration) at this layer
+ * - Driver layer handles only raw KV access
  */
 class StorageManager {
   private driver: IStorageDriver;
@@ -28,7 +28,7 @@ class StorageManager {
   }
 
   /**
-   * 清除所有带前缀的存储项
+   * Clear all storage items with prefix
    */
   async clear(): Promise<void> {
     const allKeys = await this.driver.keys();
@@ -38,7 +38,7 @@ class StorageManager {
   }
 
   /**
-   * 清除所有过期的存储项
+   * Clear all expired storage items
    */
   async clearExpiredItems(): Promise<void> {
     const allKeys = await this.driver.keys();
@@ -54,10 +54,10 @@ class StorageManager {
   }
 
   /**
-   * 获取存储项
-   * @param key 键
-   * @param defaultValue 当项不存在或已过期时返回的默认值
-   * @returns 值，如果项已过期则返回默认值
+   * Get storage item
+   * @param key Key
+   * @param defaultValue Fallback value when absent or expired
+   * @returns Stored value, or defaultValue if expired
    */
   async getItem<T>(
     key: string,
@@ -70,7 +70,7 @@ class StorageManager {
       return defaultValue;
     }
 
-    // TTL 检查
+    // TTL check
     if (raw.expiry && Date.now() > raw.expiry) {
       await this.driver.removeItem(fullKey);
       return defaultValue;
@@ -80,7 +80,7 @@ class StorageManager {
   }
 
   /**
-   * 获取当前前缀下的所有存储键（已去除前缀部分）
+   * Get all storage keys under current prefix (stripped of prefix)
    */
   async keys(): Promise<string[]> {
     const allKeys = await this.driver.keys();
@@ -92,8 +92,8 @@ class StorageManager {
   }
 
   /**
-   * 移除存储项
-   * @param key 键
+   * Remove storage item
+   * @param key Key
    */
   async removeItem(key: string): Promise<void> {
     const fullKey = this.getFullKey(key);
@@ -101,10 +101,10 @@ class StorageManager {
   }
 
   /**
-   * 设置存储项
-   * @param key 键
-   * @param value 值
-   * @param ttl 存活时间（毫秒）
+   * Set storage item
+   * @param key Key
+   * @param value Value
+   * @param ttl Time-to-live in milliseconds
    */
   async setItem(key: string, value: unknown, ttl?: number): Promise<void> {
     const fullKey = this.getFullKey(key);
@@ -114,9 +114,9 @@ class StorageManager {
   }
 
   /**
-   * 根据运行环境创建默认驱动：
-   * - 浏览器环境（window.localStorage 可用）→ LocalStorageDriver
-   * - SSR / Node 环境 → MemoryStorageDriver
+   * Create default driver based on runtime environment:
+   * - Browser environment (window.localStorage available) -> LocalStorageDriver
+   * - SSR / Node environment -> MemoryStorageDriver
    */
   private createDefaultDriver(): IStorageDriver {
     try {
@@ -134,9 +134,9 @@ class StorageManager {
   }
 
   /**
-   * 获取完整的存储键（带前缀）
-   * @param key 原始键
-   * @returns 带前缀的完整键
+   * Get full storage key with prefix
+   * @param key Raw key
+   * @returns Full key with prefix
    */
   private getFullKey(key: string): string {
     return this.prefix ? `${this.prefix}-${key}` : key;

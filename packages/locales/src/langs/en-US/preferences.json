@@ -1,6 +1,6 @@
 {
   "title": "Preferences",
-  "subtitle": "Customize Preferences & Preview in Real Time",
+  "subtitle": "",
   "enableStickyPreferencesNavigationBar": "Enable sticky preferences navigation bar",
   "disableStickyPreferencesNavigationBar": "Disable sticky preferences navigation bar",
   "resetTip": "Data has changed, click to reset",
@@ -44,7 +44,7 @@
   "watermarkContent": "Please input Watermark content",
   "checkUpdates": "Periodic update check",
   "position": {
-    "title": "Preferences Postion",
+    "title": "Preferences Position",
     "header": "Header",
     "auto": "Auto",
     "fixed": "Fixed",
@@ -58,7 +58,7 @@
     "width": "Width",
     "visible": "Show Sidebar",
     "draggable": "Drag Sidebar Menu",
-    "collapsed": "Collpase Menu",
+    "collapsed": "Collapse Menu",
     "collapsedShowTitle": "Show Menu Title",
     "autoActivateChild": "Auto Activate SubMenu",
     "autoActivateChildTip": "`Enabled` to automatically activate the submenu while click menu.",
@@ -214,8 +214,36 @@
     "timezone": "Enable Timezone",
     "timezonePosition": "Timezone Position"
   },
+  "admin": {
+    "tabLabel": "Admin Extension",
+    "title": "Business Preferences",
+    "fields": {
+      "enableFormFullscreen": {
+        "label": "Enable Form Fullscreen Mode",
+        "tip": "Subprojects can read this extension configuration in their own business scenarios."
+      },
+      "tenantMode": {
+        "label": "Tenant Mode",
+        "options": {
+          "single": {
+            "label": "Single Tenant"
+          },
+          "multi": {
+            "label": "Multi Tenant"
+          }
+        }
+      },
+      "defaultTableSize": {
+        "label": "Default Page Size"
+      },
+      "reportTitle": {
+        "label": "Default Report Title",
+        "placeholder": "Please enter the default report title"
+      }
+    }
+  },
   "antd": {
-    "tabLabel": "Antd Extension",
+    "tabLabel": "Admin Extension",
     "title": "Business Preferences",
     "fields": {
       "enableFormFullscreen": {

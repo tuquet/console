@@ -70,10 +70,7 @@ onMounted(() => {
           >
             Giám Sát Nền Tảng
           </h1>
-          <Badge
-            variant="outline"
-            class="bg-cyan-500/10 text-cyan-400 border-cyan-500/30 font-mono text-xs uppercase"
-          >
+          <Badge variant="outline" class="font-mono text-xs uppercase">
             Live Telemetry
           </Badge>
         </div>
@@ -82,10 +79,11 @@ onMounted(() => {
         </p>
       </div>
 
-      <div class="flex w-full sm:w-auto">
+      <div class="flex items-center shrink-0">
         <Button
           :disabled="loading"
-          class="inline-flex items-center justify-center w-full sm:w-auto font-medium gap-1.5 h-9"
+          variant="outline"
+          class="inline-flex items-center justify-center font-medium gap-1.5 h-9 shrink-0"
           @click="loadAnalytics"
         >
           <RefreshCw class="size-3.5" :class="{ 'animate-spin': loading }" />
@@ -105,7 +103,7 @@ onMounted(() => {
             Tổng Workspace
           </span>
           <span
-            class="flex size-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400"
+            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
           >
             <Building2 class="size-4.5" />
           </span>
@@ -114,7 +112,10 @@ onMounted(() => {
           <span class="text-3xl font-extrabold tracking-tight text-foreground">
             {{ analyticsData.tenants.total }}
           </span>
-          <span class="text-xs font-semibold text-emerald-400">
+          <span
+            class="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground"
+          >
+            <span class="size-1.5 rounded-full bg-emerald-500"></span>
             {{ analyticsData.tenants.activeCount }} Đang hoạt động
           </span>
         </div>
@@ -139,7 +140,7 @@ onMounted(() => {
             Plugin Hệ Thống
           </span>
           <span
-            class="flex size-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400"
+            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
           >
             <Layers class="size-4.5" />
           </span>
@@ -148,7 +149,7 @@ onMounted(() => {
           <span class="text-3xl font-extrabold tracking-tight text-foreground">
             {{ analyticsData.plugins.total }}
           </span>
-          <span class="text-xs font-semibold text-sky-400">
+          <span class="text-xs font-medium text-muted-foreground">
             Dịch vụ Sẵn sàng
           </span>
         </div>
@@ -170,7 +171,7 @@ onMounted(() => {
             Specter Fleet Bridge
           </span>
           <span
-            class="flex size-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400"
+            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
           >
             <Terminal class="size-4.5" />
           </span>
@@ -179,9 +180,11 @@ onMounted(() => {
           <span class="text-2xl font-bold tracking-tight text-foreground">
             Sẵn Sàng
           </span>
-          <span class="inline-flex items-center gap-1 text-xs text-emerald-400">
+          <span
+            class="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
+          >
             <span
-              class="size-2 rounded-full bg-emerald-400 animate-pulse"
+              class="size-2 rounded-full bg-emerald-500 animate-pulse"
             ></span>
             Online
           </span>
@@ -203,7 +206,7 @@ onMounted(() => {
             Độ trễ API Edge
           </span>
           <span
-            class="flex size-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400"
+            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
           >
             <Activity class="size-4.5" />
           </span>
@@ -214,8 +217,10 @@ onMounted(() => {
           </span>
           <span class="text-sm font-medium text-muted-foreground">ms</span>
         </div>
-        <div class="mt-2 flex items-center gap-1.5 text-xs text-emerald-400">
-          <CheckCircle2 class="size-3.5" />
+        <div
+          class="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"
+        >
+          <CheckCircle2 class="size-3.5 text-emerald-500" />
           <span>Cloudflare Anycast & Supabase Khỏe mạnh</span>
         </div>
       </div>
@@ -236,10 +241,7 @@ onMounted(() => {
               Số lượng Workspace khởi tạo theo thời gian.
             </p>
           </div>
-          <Badge
-            variant="outline"
-            class="bg-blue-500/10 text-blue-400 border-blue-500/30 text-xs"
-          >
+          <Badge variant="secondary" class="text-xs">
             Tổng: {{ analyticsData.tenants.total }}
           </Badge>
         </div>
@@ -334,10 +336,8 @@ onMounted(() => {
                 PostgreSQL Multi-Tenant via Supabase
               </div>
             </div>
-            <Badge
-              variant="outline"
-              class="bg-green-500/10 text-green-400 border-green-500/30 text-xs"
-            >
+            <Badge variant="secondary" class="text-xs font-normal">
+              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
               HOẠT ĐỘNG TỐT
             </Badge>
           </div>
@@ -351,10 +351,8 @@ onMounted(() => {
                 {{ analyticsData.system.edgeProvider }}
               </div>
             </div>
-            <Badge
-              variant="outline"
-              class="bg-green-500/10 text-green-400 border-green-500/30 text-xs"
-            >
+            <Badge variant="secondary" class="text-xs font-normal">
+              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
               ONLINE
             </Badge>
           </div>
@@ -368,10 +366,8 @@ onMounted(() => {
                 SSO Loopback Daemon (:8765)
               </div>
             </div>
-            <Badge
-              variant="outline"
-              class="bg-blue-500/10 text-blue-400 border-blue-500/30 text-xs"
-            >
+            <Badge variant="secondary" class="text-xs font-normal">
+              <span class="mr-1.5 size-1.5 rounded-full bg-primary"></span>
               SẴN SÀNG GHÉP NỐI
             </Badge>
           </div>
@@ -385,10 +381,8 @@ onMounted(() => {
                 Plugin: core-iam (Schema: public)
               </div>
             </div>
-            <Badge
-              variant="outline"
-              class="bg-green-500/10 text-green-400 border-green-500/30 text-xs"
-            >
+            <Badge variant="secondary" class="text-xs font-normal">
+              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
               ACTIVE
             </Badge>
           </div>
@@ -402,10 +396,8 @@ onMounted(() => {
                 Plugin: runners (Schema: runners)
               </div>
             </div>
-            <Badge
-              variant="outline"
-              class="bg-green-500/10 text-green-400 border-green-500/30 text-xs"
-            >
+            <Badge variant="secondary" class="text-xs font-normal">
+              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
               ACTIVE
             </Badge>
           </div>

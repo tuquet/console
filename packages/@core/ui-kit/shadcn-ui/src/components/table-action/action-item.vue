@@ -45,7 +45,7 @@ function onCancel() {
 </script>
 
 <template>
-  <!-- 气泡确认 -->
+  <!-- Popconfirm -->
   <Popover v-if="action.popConfirm" v-model:open="open">
     <PopoverTrigger as-child>
       <VbenButton
@@ -80,7 +80,7 @@ function onCancel() {
     </PopoverContent>
   </Popover>
 
-  <!-- 普通按钮 -->
+  <!-- Standard button -->
   <VbenButton
     v-else
     :class="buttonClass"

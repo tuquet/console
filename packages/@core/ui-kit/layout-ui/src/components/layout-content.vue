@@ -7,11 +7,11 @@ import { computed } from 'vue';
 
 interface Props {
   /**
-   * 内容区域定宽
+   * Fixed width for content area
    */
   contentCompact: ContentCompactType;
   /**
-   * 定宽布局宽度
+   * Width for fixed-width layout
    */
   contentCompactWidth: number;
   padding: number;

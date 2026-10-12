@@ -139,10 +139,11 @@ function handleOpenAuthBridge() {
 
         <!-- Footer Note -->
         <div
-          class="rounded-lg bg-sky-500/10 p-3 border border-sky-500/20 text-xs text-sky-700 dark:text-sky-300"
+          class="rounded-lg bg-muted/50 p-3 border border-border text-xs text-muted-foreground"
         >
-          <strong>Mẹo:</strong> Sau khi hoàn tất đăng nhập, máy trạm của bạn sẽ
-          tự động xuất hiện trong danh sách thiết bị với trạng thái trực tuyến.
+          <strong class="text-foreground">Mẹo:</strong> Sau khi hoàn tất đăng
+          nhập, máy trạm của bạn sẽ tự động xuất hiện trong danh sách thiết bị
+          với trạng thái trực tuyến.
         </div>
       </div>
 

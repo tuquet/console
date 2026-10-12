@@ -34,7 +34,7 @@ function mergeStyle(
 </script>
 
 <template>
-  <!-- 垂直布局：标签独占一行，内容独占一行 -->
+  <!-- Vertical layout: label on its own row, content on its own row -->
   <template v-if="vertical">
     <tr>
       <DescriptionsCell
@@ -67,7 +67,7 @@ function mergeStyle(
     </tr>
   </template>
 
-  <!-- 水平 + 边框：每项拆分为 label(th) 与 content(td) -->
+  <!-- Horizontal + Bordered: each item split into label (th) and content (td) -->
   <tr v-else-if="bordered">
     <template v-for="(item, index) in row" :key="item.key ?? index">
       <DescriptionsCell
@@ -92,7 +92,7 @@ function mergeStyle(
     </template>
   </tr>
 
-  <!-- 水平 + 非边框：每项一个单元格，label 与 content 同列 -->
+  <!-- Horizontal + Non-bordered: each item in one cell, label and content in same column -->
   <tr v-else>
     <DescriptionsCell
       v-for="(item, index) in row"

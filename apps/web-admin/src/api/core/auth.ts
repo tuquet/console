@@ -1,14 +1,14 @@
 import { useAccessStore } from '@vben/stores';
 
 export namespace AuthApi {
-  /** 登录接口参数 */
+  /** Login API parameters */
   export interface LoginParams {
     captchaToken?: string;
     password?: string;
     username?: string;
   }
 
-  /** 登录接口返回值 */
+  /** Login API response */
   export interface LoginResult {
     accessToken: string;
     refreshToken?: string;
@@ -31,7 +31,7 @@ const getSupabaseConfig = () => {
 };
 
 /**
- * 登录 (Supabase GoTrue REST)
+ * Login (Supabase GoTrue REST)
  */
 export async function loginApi(
   data: AuthApi.LoginParams,
@@ -98,7 +98,7 @@ export async function loginApi(
 }
 
 /**
- * 刷新accessToken (Supabase GoTrue REST)
+ * Refresh accessToken (Supabase GoTrue REST)
  */
 export async function refreshTokenApi(): Promise<AuthApi.RefreshTokenResult> {
   const { anonKey, supabaseUrl } = getSupabaseConfig();
@@ -140,7 +140,7 @@ export async function refreshTokenApi(): Promise<AuthApi.RefreshTokenResult> {
 }
 
 /**
- * 退出登录 (Supabase GoTrue REST)
+ * Logout (Supabase GoTrue REST)
  */
 export async function logoutApi() {
   const { anonKey, supabaseUrl } = getSupabaseConfig();
@@ -164,14 +164,14 @@ export async function logoutApi() {
 }
 
 /**
- * 获取用户权限码 (Supabase Admin Console RBAC)
+ * Get user permission codes (Supabase Admin Console RBAC)
  */
 export async function getAccessCodesApi(): Promise<string[]> {
   return ['super', 'admin', 'user'];
 }
 
 /**
- * 找回密码 (Supabase GoTrue REST)
+ * Recover password (Supabase GoTrue REST)
  */
 export async function resetPasswordApi(email: string): Promise<void> {
   const { anonKey, supabaseUrl } = getSupabaseConfig();
@@ -194,13 +194,13 @@ export async function resetPasswordApi(email: string): Promise<void> {
       resJson.msg ||
       resJson.error_description ||
       resJson.message ||
-      'Không thể gửi email khôi phục mật khẩu';
+      'Failed to send password recovery email';
     throw new Error(errorMsg);
   }
 }
 
 /**
- * 更新密码 (Supabase GoTrue REST)
+ * Update password (Supabase GoTrue REST)
  */
 export async function updatePasswordApi(
   password: string,
@@ -211,7 +211,7 @@ export async function updatePasswordApi(
   const token = customToken || accessStore.accessToken;
 
   if (!token) {
-    throw new Error('Không tìm thấy phiên làm việc hoặc token khôi phục');
+    throw new Error('No active session or recovery token found');
   }
 
   const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
@@ -231,13 +231,13 @@ export async function updatePasswordApi(
       resJson.msg ||
       resJson.error_description ||
       resJson.message ||
-      'Cập nhật mật khẩu thất bại';
+      'Password update failed';
     throw new Error(errorMsg);
   }
 }
 
 /**
- * GitHub OAuth 登录 (Supabase GoTrue REST)
+ * GitHub OAuth Login (Supabase GoTrue REST)
  */
 export function loginWithGitHubApi(redirectTo?: string) {
   const { supabaseUrl } = getSupabaseConfig();

@@ -1,20 +1,20 @@
 # VXE Table Plugin
 
-基于 vxe-table 和 vxe-pc-ui 的表格组件插件。
+Table component plugin based on vxe-table and vxe-pc-ui.
 
-## 导出
+## Exports
 
-| 导出                  | 类型 | 说明           |
+| Export | Type | Description |
 | --------------------- | ---- | -------------- |
-| `setupVbenVxeTable`   | 函数 | 初始化配置函数 |
-| `useVbenVxeGrid`      | 函数 | 表格组合式函数 |
-| `VbenVxeGrid`         | 组件 | 表格组件       |
-| `VxeTableGridColumns` | 类型 | 表格列类型     |
-| `VxeTableGridOptions` | 类型 | 表格配置类型   |
-| `VxeGridProps`        | 类型 | 表格 Props     |
-| `VxeGridListeners`    | 类型 | 表格事件类型   |
+| `setupVbenVxeTable`   | Function | Initialization config function |
+| `useVbenVxeGrid`      | Function | Table composable function |
+| `VbenVxeGrid`         | Component | Table component |
+| `VxeTableGridColumns` | Type | Table columns type |
+| `VxeTableGridOptions` | Type | Table options type |
+| `VxeGridProps`        | Type | Table props type |
+| `VxeGridListeners`    | Type | Table events type |
 
-## 使用
+## Usage
 
 ```ts
 import {
@@ -24,9 +24,9 @@ import {
 } from '@vben/plugins/vxe-table';
 ```
 
-## 初始化
+## Initialization
 
-在应用入口处调用：
+Invoke at application entrypoint:
 
 ```ts
 import { setupVbenVxeTable } from '@vben/plugins/vxe-table';
@@ -34,13 +34,13 @@ import { useVbenForm } from '@vben-core/form-ui';
 
 setupVbenVxeTable({
   configVxeTable: (vxeUI) => {
-    // 配置 VXE Table
+    // Configure VXE Table
   },
   useVbenForm,
 });
 ```
 
-## 类型
+## Types
 
 ```ts
 import type {

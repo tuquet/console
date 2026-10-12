@@ -13,53 +13,53 @@ export type ApiComponentOptionsItem = {
 export type ApiComponentLabelFn = (item: ApiComponentOptionsItem) => string;
 
 export interface ApiComponentProps {
-  /** 组件 */
+  /** Component */
   component: Component;
-  /** 是否将value从数字转为string */
+  /** Convert numeric value to string */
   numberToString?: boolean;
-  /** 获取options数据的函数 */
+  /** Function to fetch options data */
   api?: (arg?: any) => Promise<ApiComponentOptionsItem[] | Record<string, any>>;
-  /** 传递给api的参数 */
+  /** Parameters passed to API */
   params?: Record<string, any>;
-  /** 从api返回的结果中提取options数组的字段名 */
+  /** Field name in API response containing options array */
   resultField?: string;
-  /** label字段名 */
+  /** Label field name */
   labelField?: string;
-  /** 通过选项数据自定义label */
+  /** Custom label formatter from option data */
   labelFn?: ApiComponentLabelFn;
-  /** children字段名，需要层级数据的组件可用 */
+  /** Children field name for hierarchical data */
   childrenField?: string;
-  /** value字段名 */
+  /** Value field name */
   valueField?: string;
-  /** disabled字段名 */
+  /** Disabled field name */
   disabledField?: string;
-  /** 组件接收options数据的属性名 */
+  /** Component prop name that accepts options data */
   optionsPropName?: string;
-  /** 是否立即调用api */
+  /** Whether to call API immediately */
   immediate?: boolean;
-  /** 每次`visibleEvent`事件发生时都重新请求数据 */
+  /** Re-fetch data every time `visibleEvent` fires */
   alwaysLoad?: boolean;
-  /** 在api请求之前的回调函数 */
+  /** Callback invoked before API request */
   beforeFetch?: AnyPromiseFunction<any, any>;
-  /** 在api请求之前的判断是否允许请求的回调函数 */
+  /** Pre-request predicate to determine whether request is allowed */
   shouldFetch?: AnyPromiseFunction<any, boolean>;
-  /** 在api请求之后的回调函数 */
+  /** Callback invoked after API request */
   afterFetch?: AnyPromiseFunction<any, any>;
-  /** 直接传入选项数据，也作为api返回空数据时的后备数据 */
+  /** Direct options data; also acts as fallback when API returns empty */
   options?: ApiComponentOptionsItem[];
-  /** 组件的插槽名称，用来显示一个"加载中"的图标 */
+  /** Component slot name for loading icon */
   loadingSlot?: string;
-  /** 触发api请求的事件名 */
+  /** Event name that triggers API request */
   visibleEvent?: string;
-  /** 组件的v-model属性名，默认为modelValue。部分组件可能为value */
+  /** Component v-model prop name (default: modelValue; some components use value) */
   modelPropName?: string;
   /**
-   * 自动选择
-   * - `first`：自动选择第一个选项
-   * - `last`：自动选择最后一个选项
-   * - `one`: 当请求的结果只有一个选项时，自动选择该选项
-   * - 函数：自定义选择逻辑，函数的参数为请求的结果数组，返回值为选择的选项
-   * - false：不自动选择(默认)
+   * Auto-select mode
+   * - `first`: Automatically select first option
+   * - `last`: Automatically select last option
+   * - `one`: Automatically select option when API returns exactly one option
+   * - Function: Custom selection predicate returning selected option
+   * - false: No auto-selection (default)
    */
   autoSelect?:
     | 'first'

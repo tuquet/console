@@ -1,8 +1,8 @@
 import type { IStorageDriver } from './types';
 
 /**
- * 内存存储驱动
- * 适用于测试环境和 SSR 场景，数据不持久化
+ * In-memory storage driver
+ * Suitable for test environments and SSR without persistence
  */
 class MemoryStorageDriver implements IStorageDriver {
   private store = new Map<string, unknown>();

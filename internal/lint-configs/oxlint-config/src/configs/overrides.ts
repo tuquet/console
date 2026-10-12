@@ -10,8 +10,8 @@ const overrides: OxlintConfig = {
       },
     },
     {
-      // 这些 @typescript-eslint 规则此前不作用于 .vue（旧 eslint glob 不含 .vue）。
-      // Vue 组件惯用 `interface Props extends XxxProps {}` 声明 props，保持迁移前行为放行。
+      // These @typescript-eslint rules previously did not apply to .vue (old eslint glob excluded .vue).
+      // Vue components idiomatically declare props with `interface Props extends XxxProps {}`; preserve pre-migration behavior.
       files: ['*.vue', '**/*.vue'],
       rules: {
         'typescript/no-empty-object-type': 'off',

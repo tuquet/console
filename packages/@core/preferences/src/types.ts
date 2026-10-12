@@ -96,74 +96,74 @@ interface PreferencesExtension<
 }
 
 interface AppPreferences {
-  /** 权限模式 */
+  /** Access control mode */
   accessMode: AccessModeType;
-  /** 登录注册页面布局 */
+  /** Auth page layout */
   authPageLayout: AuthPageLayoutType;
-  /** 检查更新轮询时间 */
+  /** Check updates polling interval */
   checkUpdatesInterval: number;
-  /** 是否开启灰色模式 */
+  /** Whether grayscale mode is active */
   colorGrayMode: boolean;
-  /** 是否开启色弱模式 */
+  /** Whether color-weak mode is active */
   colorWeakMode: boolean;
-  /** 是否开启紧凑模式 */
+  /** Whether compact mode is active */
   compact: boolean;
-  /** 是否开启内容紧凑模式 */
+  /** Whether content compact mode is active */
   contentCompact: ContentCompactType;
-  /** 内容紧凑宽度 */
+  /** Content compact width */
   contentCompactWidth: number;
-  /** 内容内边距 */
+  /** Content padding */
   contentPadding: number;
-  /** 内容底部内边距 */
+  /** Content bottom padding */
   contentPaddingBottom: number;
-  /** 内容左侧内边距 */
+  /** Content left padding */
   contentPaddingLeft: number;
-  /** 内容右侧内边距 */
+  /** Content right padding */
   contentPaddingRight: number;
-  /** 内容顶部内边距 */
+  /** Content top padding */
   contentPaddingTop: number;
-  /** 应用默认头像 */
+  /** Default application avatar */
   defaultAvatar: string;
-  /** 默认首页地址 */
+  /** Default home path */
   defaultHomePath: string;
-  /** 开启动态标题 */
+  /** Enable dynamic title */
   dynamicTitle: boolean;
-  /** 是否开启检查更新 */
+  /** Whether to check for updates */
   enableCheckUpdates: boolean;
-  /** 是否显示复制偏好设置按钮 */
+  /** Whether to show copy preferences button */
   enableCopyPreferences: boolean;
-  /** 是否显示偏好设置 */
+  /** Whether to show preferences */
   enablePreferences: boolean;
   /**
-   * @zh_CN 是否开启refreshToken
+   * Whether to enable refreshToken
    */
   enableRefreshToken: boolean;
   /**
-   * @zh_CN 是否开启首选项导航栏吸顶效果
+   * Whether preferences navbar is sticky
    */
   enableStickyPreferencesNavigationBar: boolean;
-  /** 是否移动端 */
+  /** Whether viewport is mobile */
   isMobile: boolean;
-  /** 布局方式 */
+  /** Layout mode */
   layout: LayoutType;
-  /** 支持的语言 */
+  /** Supported languages */
   locale: SupportedLanguagesType;
-  /** 登录过期模式 */
+  /** Login expiration mode */
   loginExpiredMode: LoginExpiredModeType;
-  /** 应用名 */
+  /** Application name */
   name: string;
-  /** 偏好设置按钮位置 */
+  /** Preferences button position */
   preferencesButtonPosition: PreferencesButtonPositionType;
   /**
-   * @zh_CN 应用时区
+   * Application timezone
    */
   timezone: string;
   /**
-   * @zh_CN 是否开启水印
+   * Whether watermark is enabled
    */
   watermark: boolean;
   /**
-   * @zh_CN 水印文案
+   * Watermark text
    */
   watermarkContent: string;
   /** z-index */
@@ -171,263 +171,263 @@ interface AppPreferences {
 }
 
 interface BreadcrumbPreferences {
-  /** 面包屑是否启用 */
+  /** Whether breadcrumbs are enabled */
   enable: boolean;
-  /** 面包屑是否只有一个时隐藏 */
+  /** Whether to hide breadcrumb when only one level */
   hideOnlyOne: boolean;
-  /** 面包屑首页图标是否可见 */
+  /** Whether home icon in breadcrumb is visible */
   showHome: boolean;
-  /** 面包屑图标是否可见 */
+  /** Whether breadcrumb icons are visible */
   showIcon: boolean;
-  /** 面包屑风格 */
+  /** Breadcrumb style */
   styleType: BreadcrumbStyleType;
 }
 
 interface CopyrightPreferences {
-  /** 版权公司名 */
+  /** Copyright company name */
   companyName: string;
-  /** 版权公司名链接 */
+  /** Copyright company URL */
   companySiteLink: string;
-  /** 版权日期 */
+  /** Copyright date */
   date: string;
-  /** 版权是否可见 */
+  /** Whether copyright is visible */
   enable: boolean;
-  /** 备案号 */
+  /** ICP license number */
   icp: string;
-  /** 备案号链接 */
+  /** ICP license URL */
   icpLink: string;
-  /** 设置面板是否显示*/
+  /** Whether preferences panel is visible */
   settingShow?: boolean;
 }
 
 interface FooterPreferences {
-  /** 底栏是否可见 */
+  /** Whether footer is visible */
   enable: boolean;
-  /** 底栏是否固定 */
+  /** Whether footer is fixed */
   fixed: boolean;
-  /** 底栏高度 */
+  /** Footer height */
   height: number;
 }
 
 interface HeaderPreferences {
-  /** 顶栏是否启用 */
+  /** Whether header is enabled */
   enable: boolean;
-  /** 顶栏高度 */
+  /** Header height */
   height: number;
-  /** 顶栏是否隐藏,css-隐藏 */
+  /** Whether header is hidden via CSS */
   hidden: boolean;
-  /** 顶栏菜单位置 */
+  /** Header menu align */
   menuAlign: LayoutHeaderMenuAlignType;
-  /** header显示模式 */
+  /** Header display mode */
   mode: LayoutHeaderModeType;
 }
 
 interface LogoPreferences {
-  /** logo是否可见 */
+  /** Whether logo is visible */
   enable: boolean;
-  /** logo图片适应方式 */
+  /** Logo object-fit mode */
   fit: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
-  /** logo高度， 只在 logoMode=full时生效 */
+  /** Logo height (effective only when logoMode=full) */
   fullLogoHeight?: number | string;
-  /** logo 展示类型，icon 图标模式， full 铺满logo区域 */
+  /** Logo display type: icon or full */
   logoMode: 'full' | 'icon';
-  /** logo text是否展示 */
+  /** Whether logo text is visible */
   showText: boolean;
-  /** logo地址 */
+  /** Logo URL */
   source: string;
-  /** 暗色主题logo地址 (可选，若不设置则使用 source) */
+  /** Dark theme Logo URL */
   sourceDark?: string;
 }
 
 interface NavigationPreferences {
-  /** 导航菜单手风琴模式 */
+  /** Menu accordion mode */
   accordion: boolean;
-  /** 导航菜单是否切割，只在 layout=mixed-nav 生效 */
+  /** Menu split mode (effective only in layout=mixed-nav) */
   split: boolean;
-  /** 导航菜单风格 */
+  /** Menu style */
   styleType: NavigationStyleType;
 }
 
 interface SidebarPreferences {
-  /** 点击目录时自动激活子菜单   */
+  /** Automatically activate sub-menu on directory click */
   autoActivateChild: boolean;
-  /** 侧边栏是否折叠 */
+  /** Whether sidebar is collapsed */
   collapsed: boolean;
-  /** 侧边栏折叠按钮是否可见 */
+  /** Whether sidebar collapse button is visible */
   collapsedButton: boolean;
-  /** 侧边栏折叠时，是否显示title */
+  /** Whether to show title when sidebar is collapsed */
   collapsedShowTitle: boolean;
-  /** 侧边栏折叠宽度 */
+  /** Sidebar collapsed width */
   collapseWidth: number;
-  /** 侧边栏菜单拖拽 */
+  /** Sidebar drag resize */
   draggable: boolean;
-  /** 侧边栏是否可见 */
+  /** Whether sidebar is visible */
   enable: boolean;
-  /** 菜单自动展开状态 */
+  /** Menu auto-expand state */
   expandOnHover: boolean;
-  /** 侧边栏扩展区域是否折叠 */
+  /** Whether sidebar extra area is collapsed */
   extraCollapse: boolean;
-  /** 侧边栏扩展区域折叠宽度 */
+  /** Sidebar extra area collapsed width */
   extraCollapsedWidth: number;
-  /** 侧边栏固定按钮是否可见 */
+  /** Whether sidebar pin button is visible */
   fixedButton: boolean;
-  /** 侧边栏是否隐藏 - css */
+  /** Whether sidebar is hidden via CSS */
   hidden: boolean;
-  /** 混合侧边栏宽度 */
+  /** Mixed sidebar width */
   mixedWidth: number;
-  /** 侧边栏宽度 */
+  /** Sidebar width */
   width: number;
 }
 
 interface ShortcutKeyPreferences {
-  /** 是否启用快捷键-全局 */
+  /** Whether global shortcuts are enabled */
   enable: boolean;
-  /** 是否启用全局关闭窗口快捷键 */
+  /** Enable global close window shortcut */
   globalEscape: boolean;
-  /** 是否启用全局锁屏快捷键 */
+  /** Enable global lockscreen shortcut */
   globalLockScreen: boolean;
-  /** 是否启用全局注销快捷键 */
+  /** Enable global logout shortcut */
   globalLogout: boolean;
-  /** 是否启用全局偏好设置快捷键 */
+  /** Enable global preferences shortcut */
   globalPreferences: boolean;
-  /** 是否启用全局搜索快捷键 */
+  /** Enable global search shortcut */
   globalSearch: boolean;
 }
 
 interface TabbarPreferences {
-  /** 是否开启多标签页拖拽 */
+  /** Enable tabbar drag reorder */
   draggable: boolean;
-  /** 是否开启多标签页 */
+  /** Whether tabbar is enabled */
   enable: boolean;
-  /** 标签页高度 */
+  /** Tabbar height */
   height: number;
-  /** 开启标签页缓存功能 */
+  /** Enable tab caching */
   keepAlive: boolean;
-  /** 限制最大数量 */
+  /** Max tabs limit */
   maxCount: number;
-  /** 是否点击中键时关闭标签 */
+  /** Whether middle-click closes tab */
   middleClickToClose: boolean;
-  /** 是否持久化标签 */
+  /** Whether to persist tabs */
   persist: boolean;
-  /** 是否开启多标签页图标 */
+  /** Show tab icons */
   showIcon: boolean;
-  /** 显示最大化按钮 */
+  /** Show maximize button */
   showMaximize: boolean;
-  /** 显示更多按钮 */
+  /** Show more button */
   showMore: boolean;
-  /** 显示刷新按钮 */
+  /** Show refresh button */
   showRefresh: boolean;
-  /** 标签页风格 */
+  /** Tabbar style */
   styleType: TabsStyleType;
-  /** 是否开启访问历史记录 */
+  /** Enable visit history */
   visitHistory: boolean;
-  /** 是否开启鼠标滚轮响应 */
+  /** Enable mouse wheel scroll */
   wheelable: boolean;
 }
 
 interface ThemePreferences {
-  /** 内置主题名 */
+  /** Built-in theme name */
   builtinType: BuiltinThemeType;
-  /** 错误色 */
+  /** Destructive color */
   colorDestructive: string;
-  /** 主题色 */
+  /** Primary theme color */
   colorPrimary: string;
-  /** 成功色 */
+  /** Success color */
   colorSuccess: string;
-  /** 警告色 */
+  /** Warning color */
   colorWarning: string;
-  /** 字体大小（单位：px） */
+  /** Font size in px */
   fontSize: number;
-  /** 当前主题 */
+  /** Current theme */
   mode: ThemeModeType;
-  /** 圆角 */
+  /** Border radius */
   radius: string;
-  /** 是否开启半深色header（只在theme='light'时生效） */
+  /** Semi-dark header (light theme only) */
   semiDarkHeader: boolean;
-  /** 是否开启半深色菜单（只在theme='light'时生效） */
+  /** Semi-dark menu (light theme only) */
   semiDarkSidebar: boolean;
-  /** 是否开启半深色子菜单（只在theme='light'时生效） */
+  /** Semi-dark sub-menu (light theme only) */
   semiDarkSidebarSub: boolean;
 }
 
 interface TransitionPreferences {
-  /** 页面切换动画是否启用 */
+  /** Whether page transition animations are enabled */
   enable: boolean;
-  // /** 是否开启页面加载loading */
+  // /** Whether page loading spinner is enabled */
   loading: boolean;
-  /** 页面切换动画 */
+  /** Page transition animation name */
   name: PageTransitionType | string;
-  /** 是否开启页面加载进度动画 */
+  /** Whether page progress bar is enabled */
   progress: boolean;
 }
 
 interface WidgetPreferences {
-  /** 是否启用全屏部件 */
+  /** Whether fullscreen widget is enabled */
   fullscreen: boolean;
-  /** 全屏按钮位置 */
+  /** Fullscreen button position */
   fullscreenButtonPosition: 'header' | 'none' | 'user-dropdown';
-  /** 是否启用全局搜索部件 */
+  /** Whether global search widget is enabled */
   globalSearch: boolean;
-  /** 全局搜索按钮位置 */
+  /** Global search button position */
   globalSearchButtonPosition: 'header' | 'none' | 'user-dropdown';
-  /** 是否启用语言切换部件 */
+  /** Whether language toggle widget is enabled */
   languageToggle: boolean;
-  /** 语言切换按钮位置 */
+  /** Language toggle button position */
   languageToggleButtonPosition: 'header' | 'none' | 'user-dropdown';
-  /** 是否开启锁屏功能 */
+  /** Whether lockscreen widget is enabled */
   lockScreen: boolean;
-  /** 锁屏按钮位置 */
+  /** Lockscreen button position */
   lockScreenButtonPosition: 'header' | 'none' | 'user-dropdown';
-  /** 退出登录按钮位置 */
+  /** Logout button position */
   logoutButtonPosition: 'header' | 'none' | 'user-dropdown';
-  /** 是否显示通知部件 */
+  /** Whether notification widget is visible */
   notification: boolean;
-  /** 通知按钮位置 */
+  /** Notification button position */
   notificationButtonPosition: 'header' | 'none' | 'user-dropdown';
-  /** 小部件排序 */
+  /** Widgets ordering */
   order: readonly string[];
-  /** 显示刷新按钮 */
+  /** Show refresh button */
   refresh: boolean;
-  /** 刷新按钮位置 */
+  /** Refresh button position */
   refreshButtonPosition: 'header' | 'none' | 'user-dropdown';
-  /** 是否显示侧边栏显示/隐藏部件 */
+  /** Whether sidebar toggle widget is visible */
   sidebarToggle: boolean;
-  /** 是否显示主题切换部件 */
+  /** Whether theme toggle widget is visible */
   themeToggle: boolean;
-  /** 主题切换按钮位置 */
+  /** Theme toggle button position */
   themeToggleButtonPosition: 'header' | 'none' | 'user-dropdown';
-  /** 是否显示时区部件 */
+  /** Whether timezone widget is visible */
   timezone: boolean;
-  /** 时区按钮位置 */
+  /** Timezone button position */
   timezoneButtonPosition: 'header' | 'none' | 'user-dropdown';
 }
 
 interface Preferences {
-  /** 全局配置 */
+  /** Global configuration */
   app: AppPreferences;
-  /** 顶栏配置 */
+  /** Header configuration */
   breadcrumb: BreadcrumbPreferences;
-  /** 版权配置 */
+  /** Copyright configuration */
   copyright: CopyrightPreferences;
-  /** 底栏配置 */
+  /** Footer configuration */
   footer: FooterPreferences;
-  /** 面包屑配置 */
+  /** Breadcrumb configuration */
   header: HeaderPreferences;
-  /** logo配置 */
+  /** Logo configuration */
   logo: LogoPreferences;
-  /** 导航配置 */
+  /** Navigation configuration */
   navigation: NavigationPreferences;
-  /** 快捷键配置 */
+  /** Shortcuts configuration */
   shortcutKeys: ShortcutKeyPreferences;
-  /** 侧边栏配置 */
+  /** Sidebar configuration */
   sidebar: SidebarPreferences;
-  /** 标签页配置 */
+  /** Tabbar configuration */
   tabbar: TabbarPreferences;
-  /** 主题配置 */
+  /** Theme configuration */
   theme: ThemePreferences;
-  /** 动画配置 */
+  /** Animation configuration */
   transition: TransitionPreferences;
-  /** 功能配置 */
+  /** Widget configuration */
   widget: WidgetPreferences;
 }
 

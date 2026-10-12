@@ -1,6 +1,6 @@
 // type Diff<T = any> = T;
 
-// 比较两个数组是否相等（忽略顺序）
+// Compare whether two arrays are equal (order-insensitive)
 
 function arraysEqual<T>(a: T[], b: T[]): boolean {
   if (a.length !== b.length) return false;
@@ -18,12 +18,12 @@ function arraysEqual<T>(a: T[], b: T[]): boolean {
   return true;
 }
 
-// 比较两个数组是否相等（顺序敏感）
+// Compare whether two arrays are equal (order-sensitive)
 function arraysStrictEqual<T>(a: T[], b: T[]): boolean {
   return a.length === b.length && a.every((value, index) => value === b[index]);
 }
 
-// 深度对比两个值
+// Deep diff between two values
 // function deepEqual<T>(oldVal: T, newVal: T): boolean {
 //   if (
 //     typeof oldVal === 'object' &&
@@ -39,7 +39,7 @@ function arraysStrictEqual<T>(a: T[], b: T[]): boolean {
 //   }
 // }
 
-// // diff 函数
+// diff function
 // function diff<T extends object>(
 //   oldObj: T,
 //   newObj: T,
@@ -105,10 +105,10 @@ function createDiff(arrayEquals: ArrayComparator) {
   };
 }
 
-// 数组比较（不含顺序）
+// Array comparison (order-insensitive)
 const diff = createDiff(arraysEqual);
 
-// 数组比较（含顺序）
+// Array comparison (order-sensitive)
 const diffStrict = createDiff(arraysStrictEqual);
 
 export { arraysEqual, arraysStrictEqual, diff, diffStrict };

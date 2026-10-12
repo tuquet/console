@@ -12,7 +12,7 @@ import { computed, onUnmounted, ref, useTemplateRef, watch } from 'vue';
 import { onSupportLanguagesChange } from '@vben/constants';
 import { useHoverToggle, useRefresh } from '@vben/hooks';
 import {
-  createIconifyIcon,
+  Globe,
   Languages,
   LockKeyhole,
   LogOut,
@@ -56,24 +56,24 @@ import { TimezoneButton } from '../timezone';
 
 interface Props {
   /**
-   * 头像
+   * Avatar
    */
   avatar?: string;
   /**
-   * 头像是否显示在线圆点
+   * Whether avatar displays online status indicator
    * @default true
    */
   avatarDot?: boolean;
   /**
-   * 头像在线圆点样式
+   * Avatar online status indicator class/style
    */
   avatarDotClass?: ClassType;
   /**
-   * @zh_CN 描述
+   * Description
    */
   description?: string;
   /**
-   * 菜单数组
+   * Menu items array
    */
   menus?: Array<{
     handler: AnyFunction;
@@ -82,16 +82,16 @@ interface Props {
   }>;
 
   /**
-   * 标签文本
+   * Tag text
    */
   tagText?: string;
   /**
-   * 文本
+   * Text label
    */
   text?: string;
-  /** 触发方式 */
+  /** Trigger method */
   trigger?: 'both' | 'click' | 'hover';
-  /** hover触发时，延迟响应的时间 */
+  /** Hover delay duration */
   hoverDelay?: number;
 }
 
@@ -139,7 +139,6 @@ const refGlobalSearch = useTemplateRef('refGlobalSearch');
 const refTimezone = useTemplateRef('refTimezone');
 const refNotification = useTemplateRef('refNotification');
 
-const TimezoneIcon = createIconifyIcon('fluent-mdl2:world-clock');
 const [openPopover, hoverWatcher] = useHoverToggle(
   [refTrigger, refContent],
   () => props.hoverDelay,
@@ -253,45 +252,45 @@ function handleSubmitLogout() {
   logoutModalApi.close();
 }
 
-// 设置 - 打开偏好设置抽屉
+// Settings - open preferences drawer
 function handleOpenSettings() {
   refPreferences.value?.open();
 }
 
-// 刷新当前页面
+// Refresh current page
 function handleRefresh() {
   openPopover.value = false;
   refresh();
 }
 
-// 搜索 - 不关闭 dropdown，直接触发 GlobalSearch 组件的弹框
+// Search - trigger GlobalSearch modal without closing dropdown
 function handleGlobalSearch() {
   refGlobalSearch.value?.open();
 }
 
-// 主题切换
+// Theme toggle
 function handleThemeToggleSelect(event?: Event) {
   event?.preventDefault();
   updatePreferences({ theme: { mode: isDark.value ? 'light' : 'dark' } });
 }
 
-// 时区
+// Timezone
 function handleTimezoneSelect() {
   refTimezone.value?.open();
 }
 
-// 全屏切换
+// Fullscreen toggle
 function handleFullscreenSelect() {
   toggleFullscreen();
 }
 
-// 通知
+// Notifications
 function handleNotificationSelect(event?: Event) {
   event?.preventDefault();
   refNotification.value?.toggle();
 }
 
-// 语言切换 - 阻止 Radix 默认关闭外层 dropdown，就地展开/收起 locale 列表
+// Locale switch - prevent Radix from closing outer dropdown, toggle inline
 const showLanguageList = ref(false);
 const languageList = ref<LanguageOption[]>([]);
 const unsubLang = onSupportLanguagesChange((langs) => {
@@ -303,9 +302,9 @@ function handleLanguageToggleSelect(event?: Event) {
   showLanguageList.value = !showLanguageList.value;
 }
 async function handleLocaleChange(event: Event, value: string) {
-  // 阻止默认关闭，让用户能继续看到选择结果；选完手动收起
+  // Prevent default close so user sees selection; collapse manually
   event.preventDefault();
-  // 菜单项来自运行时语言列表（可为自定义语言），此处为运行时边界断言
+  // Runtime assertion for custom language support
   const locale = value as SupportedLanguagesType;
   updatePreferences({ app: { locale } });
   await loadLocaleMessages(locale);
@@ -528,7 +527,7 @@ if (preferences.shortcutKeys.enable) {
             @select="handleTimezoneSelect"
           >
             <VbenIconButton class="mr-2" @click="handleTimezoneSelect">
-              <TimezoneIcon class="size-4" />
+              <Globe class="size-4" />
             </VbenIconButton>
             {{ $t('ui.widgets.timezone.setTimezone') }}
           </DropdownMenuItem>

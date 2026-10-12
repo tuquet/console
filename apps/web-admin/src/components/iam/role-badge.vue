@@ -14,27 +14,27 @@ const props = withDefaults(defineProps<Props>(), {
 
 const ROLE_MAP: Record<string, RoleConfig> = {
   admin: {
-    class: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+    class: 'bg-secondary text-secondary-foreground border-border',
     label: 'Admin',
   },
   developer: {
-    class: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
+    class: 'bg-secondary text-secondary-foreground border-border',
     label: 'Developer',
   },
   member: {
-    class: 'bg-zinc-500/15 text-zinc-300 border-zinc-500/30',
+    class: 'bg-muted text-muted-foreground border-border',
     label: 'Member',
   },
   owner: {
-    class: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
+    class: 'bg-primary/10 text-primary border-primary/20',
     label: 'Owner',
   },
   read_only: {
-    class: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    class: 'bg-muted text-muted-foreground border-border',
     label: 'Read Only',
   },
   viewer: {
-    class: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30',
+    class: 'bg-muted text-muted-foreground border-border',
     label: 'Viewer',
   },
 };

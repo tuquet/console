@@ -569,12 +569,12 @@ defineExpose({
         "
         class="tree-node focus:ring-grass8 my-0.5 rounded outline-hidden"
       >
-        <!-- 内容行通过 paddingLeft 控制缩进，不受 TreeItem 自身的渲染行为影响 -->
+        <!-- Content row controls indentation via paddingLeft, unaffected by TreeItem internal rendering -->
         <div
           class="flex items-center w-full p-1"
           :style="{ paddingLeft: `${item.level - 1 + 0.25}rem` }"
         >
-          <!-- 固定宽度展开区，有子节点时内部渲染箭头，无子节点时为空但宽度不变 -->
+          <!-- Fixed-width expand area: renders arrow when child nodes exist, empty with fixed width when none -->
           <div class="flex shrink-0 items-center justify-center w-5">
             <ChevronRight
               v-if="

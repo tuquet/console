@@ -265,20 +265,20 @@ const { formatDate } = useDateFormat();
             <RoleBadge :role="keyItem.role" />
           </div>
           <div
-            class="flex items-center justify-between rounded bg-black/40 px-2.5 py-1.5"
+            class="flex items-center justify-between rounded bg-muted/60 border border-border/40 px-2.5 py-1.5"
           >
-            <code class="font-mono text-xs text-sky-300">
+            <code class="font-mono text-xs text-foreground">
               {{ keyItem.key_prefix }}
             </code>
             <Button
               variant="ghost"
               size="icon"
-              class="p-0 size-5 text-sky-300 hover:text-sky-200"
+              class="p-0 size-5 text-muted-foreground hover:text-foreground"
               @click="copyToClipboard(keyItem.key_prefix, keyItem.name)"
             >
               <Check
                 v-if="isCopied(keyItem.name)"
-                class="size-3 text-green-500"
+                class="size-3 text-emerald-500"
               />
               <Copy v-else class="size-3" />
             </Button>

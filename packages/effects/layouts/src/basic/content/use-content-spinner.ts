@@ -4,17 +4,17 @@ import { useRouter } from 'vue-router';
 import { preferences } from '@vben/preferences';
 
 /**
- * 内容切换 loading：
- * - 延迟显示：导航在 showDelay 内完成时不渲染 spinner，
- *   避免快速跳转时闪现半遮罩造成卡顿感（issue #8289）；
- * - 最小展示：spinner 一旦显示，至少保留 minShowTime，避免一闪而过。
+ * Content transition loading spinner:
+ * - Delayed display: does not render spinner if navigation finishes within showDelay,
+ *   preventing jarring flash of overlay on fast navigations (issue #8289);
+ * - Minimum duration: once shown, spinner persists for at least minShowTime.
  */
 function useContentSpinner() {
   const spinning = ref(false);
   const startTime = ref(0);
   const router = useRouter();
-  const showDelay = 200; // 延迟显示时间：更快的导航不显示 loading
-  const minShowTime = 500; // 最小显示时间
+  const showDelay = 200; // Delay before showing spinner: fast navigations skip loading
+  const minShowTime = 500; // Minimum display duration
   const enableLoading = computed(() => preferences.transition.loading);
 
   let hideTimer: null | ReturnType<typeof setTimeout> = null;
@@ -36,7 +36,7 @@ function useContentSpinner() {
     }
   };
 
-  // 结束加载动画
+  // End loading animation
   const onEnd = (seq: number | undefined) => {
     if (!enableLoading.value || seq !== navSeq) {
       return;
@@ -45,7 +45,7 @@ function useContentSpinner() {
       clearTimeout(showTimer.id);
       showTimer = null;
     }
-    // spinner 尚未显示过（快速导航）：直接结束，不闪现
+    // Spinner never shown (fast navigation): exit immediately without flashing
     if (!spinning.value) {
       return;
     }
@@ -60,7 +60,7 @@ function useContentSpinner() {
     }
   };
 
-  // 路由前置守卫
+  // Router beforeEach guard
   router.beforeEach((to) => {
     if (to.meta.loaded || !enableLoading.value || to.meta.iframeSrc) {
       return true;
@@ -73,7 +73,7 @@ function useContentSpinner() {
       if (showTimer?.seq === seq) {
         showTimer = null;
       }
-      // 仅当仍是本次导航时才显示，避免陈旧定时器闪现
+      // Only display if current navigation is active, preventing stale timer flash
       if (seq === navSeq && !spinning.value) {
         startTime.value = performance.now();
         spinning.value = true;
@@ -83,7 +83,7 @@ function useContentSpinner() {
     return true;
   });
 
-  // 路由后置守卫
+  // Router afterEach guard
   router.afterEach((to) => {
     if (to.meta.loaded || !enableLoading.value || to.meta.iframeSrc) {
       return true;
