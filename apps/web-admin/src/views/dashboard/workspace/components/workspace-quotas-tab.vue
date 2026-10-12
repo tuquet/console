@@ -14,17 +14,12 @@ const props = withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-  <div class="space-y-6 pt-2">
-    <div>
-      <h3 class="text-base font-semibold text-foreground">
-        Hạn Ngạch Tài Nguyên (Gói {{ props.planName }})
-      </h3>
-      <p class="text-xs text-muted-foreground">
-        Hạn mức sử dụng thành viên, thiết bị và dung lượng lưu trữ.
-      </p>
-    </div>
+  <div class="space-y-4 pt-1">
+    <h3 class="text-base font-semibold text-foreground">
+      Hạn Ngạch Tài Nguyên (Gói {{ props.planName }})
+    </h3>
 
-    <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
       <!-- Quota 1: Members -->
       <div class="rounded-xl border border-border/60 bg-muted/20 p-4">
         <div class="flex items-center justify-between">

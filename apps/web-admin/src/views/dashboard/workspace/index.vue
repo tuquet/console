@@ -158,56 +158,53 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-6 p-4 sm:p-6">
-    <!-- Top Header: KISS, Concise & Polished -->
+  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+    <!-- Top Header: Streamlined, Flat & Compact -->
     <div
-      class="flex flex-col justify-between gap-4 rounded-xl border border-border/60 bg-card p-5 shadow-sm sm:flex-row sm:items-center"
+      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div>
-        <div class="flex items-center gap-2.5">
-          <h1
-            class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
-          >
-            Quản Trị Workspace
-          </h1>
-          <Badge variant="outline" class="font-mono text-xs uppercase">
-            Multi-Tenant
-          </Badge>
-        </div>
-        <p class="mt-1 text-sm text-muted-foreground">
-          Quản lý không gian làm việc, định danh tổ chức và kết nối Specter
-          Fleet.
-        </p>
+      <div class="flex items-center gap-2.5">
+        <h1
+          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+        >
+          Quản Trị Workspace
+        </h1>
+        <Badge variant="outline" class="font-mono text-xs uppercase">
+          Multi-Tenant
+        </Badge>
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+      <div class="flex flex-wrap items-center gap-2">
         <Button
-          class="inline-flex items-center justify-center w-full sm:w-auto font-medium"
+          size="sm"
+          class="h-8 gap-1.5 font-medium"
           @click="openCreateModal"
         >
-          <Plus class="size-3.5 mr-1" />
-          Tạo Workspace
+          <Plus class="size-3.5" />
+          <span>Tạo Workspace</span>
         </Button>
         <Button
           variant="outline"
-          class="inline-flex items-center justify-center w-full sm:w-auto"
+          size="sm"
+          class="h-8 gap-1.5 font-medium"
           @click="handleConnectCli()"
         >
-          <Terminal class="size-3.5 mr-1" />
-          Ghép Nối Specter Desk
+          <Terminal class="size-3.5" />
+          <span>Ghép Nối Specter Desk</span>
         </Button>
         <Button
           variant="outline"
+          size="icon"
           :disabled="loadingTenants"
-          class="inline-flex items-center justify-center w-full sm:w-auto"
+          class="size-8 shrink-0"
+          title="Làm mới"
           @click="fetchTenants"
         >
           <RefreshCw
-            class="size-3.5 mr-1"
+            class="size-3.5"
             :class="{ 'animate-spin': loadingTenants }"
           />
-          Làm Mới
         </Button>
       </div>
     </div>
@@ -215,7 +212,7 @@ onMounted(() => {
     <!-- 4 Platform Metric Cards -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <!-- Metric 1: Workspaces -->
-      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+      <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
             Tổng Workspace
@@ -241,7 +238,7 @@ onMounted(() => {
       </div>
 
       <!-- Metric 2: Plugins -->
-      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+      <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
             Plugin Hệ Thống
@@ -269,7 +266,7 @@ onMounted(() => {
       </div>
 
       <!-- Metric 3: Fleet Bridge -->
-      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+      <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
             Specter Fleet Bridge
@@ -300,7 +297,7 @@ onMounted(() => {
       </div>
 
       <!-- Metric 4: Admin Info -->
-      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+      <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
             Quản Trị Viên
@@ -329,7 +326,7 @@ onMounted(() => {
     </div>
 
     <!-- Main Content Container: Tabs -->
-    <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+    <div class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm">
       <Tabs default-value="tenants" class="w-full">
         <TabsList class="mb-4">
           <TabsTrigger value="tenants" class="flex items-center gap-1.5">

@@ -47,24 +47,20 @@ const { formatDate } = useDateFormat();
 </script>
 
 <template>
-  <div class="space-y-4 pt-2">
+  <div class="space-y-4 pt-1">
     <!-- Action bar inside tab -->
     <div
       class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"
     >
-      <div>
-        <h3 class="text-base font-semibold text-foreground">
-          Danh Sách Thành Viên ({{ props.members.length }})
-        </h3>
-        <p class="text-xs text-muted-foreground">
-          Quản lý danh sách thành viên và phân quyền truy cập.
-        </p>
-      </div>
+      <h3 class="text-base font-semibold text-foreground">
+        Danh Sách Thành Viên ({{ props.members.length }})
+      </h3>
       <Button
-        class="flex items-center justify-center gap-1.5"
+        size="sm"
+        class="h-8 gap-1.5 font-medium"
         @click="emit('invite')"
       >
-        <UserPlus class="size-4" />
+        <UserPlus class="size-3.5" />
         <span>Mời Thành Viên</span>
       </Button>
     </div>

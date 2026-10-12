@@ -289,15 +289,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-6 p-4 sm:p-6">
+  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
     <!-- Navigation Back Button -->
     <div>
       <Button
         variant="ghost"
-        class="flex items-center gap-1.5 p-0 h-auto text-muted-foreground hover:text-foreground"
+        size="sm"
+        class="flex items-center gap-1.5 px-0 h-7 text-xs text-muted-foreground hover:text-foreground"
         @click="router.push('/dashboard/workspace')"
       >
-        <ArrowLeft class="size-4" />
+        <ArrowLeft class="size-3.5" />
         <span>Danh Sách Workspace</span>
       </Button>
     </div>
@@ -317,7 +318,7 @@ onMounted(() => {
     <!-- Main Workspace Tabs -->
     <div
       v-if="detailData"
-      class="rounded-xl border border-border/60 bg-card p-5 shadow-sm"
+      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
     >
       <Tabs default-value="members" class="w-full">
         <TabsList class="mb-4">

@@ -45,15 +45,10 @@ const { formatDate } = useDateFormat();
 </script>
 
 <template>
-  <div class="space-y-6 pt-2">
-    <div>
-      <h3 class="text-base font-semibold text-foreground">
-        Thông Số & Khóa API
-      </h3>
-      <p class="text-xs text-muted-foreground">
-        Cấu hình tích hợp Specter CLI và CI/CD tự động hóa.
-      </p>
-    </div>
+  <div class="space-y-5 pt-1">
+    <h3 class="text-base font-semibold text-foreground">
+      Thông Số & Khóa API
+    </h3>
 
     <!-- Section 1: Specs -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -121,22 +116,18 @@ const { formatDate } = useDateFormat();
       <div
         class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"
       >
-        <div>
-          <div class="flex items-center gap-2">
-            <KeyRound class="size-4.5 text-amber-400" />
-            <h3 class="text-base font-semibold text-foreground">
-              Khóa API ({{ props.apiKeys.length }})
-            </h3>
-          </div>
-          <p class="text-xs text-muted-foreground">
-            Cung cấp quyền truy cập bảo mật cho CI/CD và runner automation.
-          </p>
+        <div class="flex items-center gap-2">
+          <KeyRound class="size-4.5 text-amber-400" />
+          <h3 class="text-base font-semibold text-foreground">
+            Khóa API ({{ props.apiKeys.length }})
+          </h3>
         </div>
         <Button
-          class="flex items-center justify-center gap-1.5"
+          size="sm"
+          class="h-8 gap-1.5 font-medium"
           @click="emit('createKey')"
         >
-          <Plus class="size-4" />
+          <Plus class="size-3.5" />
           <span>Tạo API Key</span>
         </Button>
       </div>

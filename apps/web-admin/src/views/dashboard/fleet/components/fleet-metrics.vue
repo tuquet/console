@@ -16,7 +16,7 @@ const props = withDefaults(defineProps<Props>(), {
 <template>
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <!-- Metric 1: Total Nodes -->
-    <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+    <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
       <div class="flex items-center justify-between">
         <span class="text-sm font-medium text-muted-foreground">
           Tổng Máy Trạm
@@ -41,7 +41,7 @@ const props = withDefaults(defineProps<Props>(), {
     </div>
 
     <!-- Metric 2: Online Nodes -->
-    <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+    <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
       <div class="flex items-center justify-between">
         <span class="text-sm font-medium text-muted-foreground">
           Đang Trực Tuyến
@@ -69,7 +69,7 @@ const props = withDefaults(defineProps<Props>(), {
     </div>
 
     <!-- Metric 3: Active Jobs -->
-    <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+    <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
       <div class="flex items-center justify-between">
         <span class="text-sm font-medium text-muted-foreground">
           Tác Vụ Đang Chạy
@@ -94,7 +94,7 @@ const props = withDefaults(defineProps<Props>(), {
     </div>
 
     <!-- Metric 4: Loopback Daemon -->
-    <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+    <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
       <div class="flex items-center justify-between">
         <span class="text-sm font-medium text-muted-foreground">
           Cổng Daemon Loopback

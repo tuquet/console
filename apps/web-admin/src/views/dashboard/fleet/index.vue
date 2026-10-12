@@ -122,48 +122,44 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-6 p-4 sm:p-6">
-    <!-- Top Header -->
+  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+    <!-- Top Header: Streamlined, Flat & Compact -->
     <div
-      class="flex flex-col justify-between gap-4 rounded-xl border border-border/60 bg-card p-5 shadow-sm sm:flex-row sm:items-center"
+      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div>
-        <div class="flex items-center gap-2.5">
-          <h1
-            class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
-          >
-            Quản Trị Máy Trạm
-          </h1>
-          <Badge variant="secondary" class="font-mono text-xs uppercase">
-            Specter Fleet
-          </Badge>
-        </div>
-        <p class="mt-1 text-sm text-muted-foreground">
-          Giám sát trạng thái hoạt động, năng lực phần cứng và kết nối Specter
-          CLI Daemon.
-        </p>
+      <div class="flex items-center gap-2.5">
+        <h1
+          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+        >
+          Quản Trị Máy Trạm
+        </h1>
+        <Badge variant="secondary" class="font-mono text-xs uppercase">
+          Specter Fleet
+        </Badge>
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+      <div class="flex flex-wrap items-center gap-2">
         <Button
-          class="inline-flex items-center justify-center w-full sm:w-auto font-medium"
+          size="sm"
+          class="h-8 gap-1.5 font-medium"
           @click="isConnectModalVisible = true"
         >
-          <Plus class="size-3.5 mr-1 shrink-0" />
+          <Plus class="size-3.5 shrink-0" />
           <span>Ghép Nối Máy Trạm</span>
         </Button>
         <Button
           variant="outline"
+          size="icon"
           :disabled="loading"
-          class="inline-flex items-center justify-center w-full sm:w-auto"
+          class="size-8 shrink-0"
+          title="Làm mới"
           @click="loadFleetData"
         >
           <RefreshCw
-            class="size-3.5 mr-1 shrink-0"
+            class="size-3.5 shrink-0"
             :class="{ 'animate-spin': loading }"
           />
-          <span>Làm Mới</span>
         </Button>
       </div>
     </div>
@@ -173,7 +169,7 @@ onMounted(() => {
 
     <!-- Main Content Container: Filter + Table/Cards -->
     <div
-      class="rounded-xl border border-border/60 bg-card p-5 shadow-sm space-y-4"
+      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-4"
     >
       <!-- Filter Bar -->
       <div

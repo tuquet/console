@@ -58,36 +58,32 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-6 p-4 sm:p-6">
-    <!-- Top Header: KISS & Clean -->
+  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+    <!-- Top Header: Streamlined, Flat & Compact -->
     <div
-      class="flex flex-col justify-between gap-4 rounded-xl border border-border/60 bg-card p-5 shadow-sm sm:flex-row sm:items-center"
+      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div>
-        <div class="flex items-center gap-2.5">
-          <h1
-            class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
-          >
-            Giám Sát Nền Tảng
-          </h1>
-          <Badge variant="outline" class="font-mono text-xs uppercase">
-            Live Telemetry
-          </Badge>
-        </div>
-        <p class="mt-1 text-sm text-muted-foreground">
-          Số liệu thời gian thực từ Tuquet Cloud và Specter Fleet.
-        </p>
+      <div class="flex items-center gap-2.5">
+        <h1
+          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+        >
+          Giám Sát Nền Tảng
+        </h1>
+        <Badge variant="outline" class="font-mono text-xs uppercase">
+          Live Telemetry
+        </Badge>
       </div>
 
       <div class="flex items-center shrink-0">
         <Button
           :disabled="loading"
           variant="outline"
-          class="inline-flex items-center justify-center font-medium gap-1.5 h-9 shrink-0"
+          size="icon"
+          class="size-8 shrink-0"
+          title="Làm mới"
           @click="loadAnalytics"
         >
           <RefreshCw class="size-3.5" :class="{ 'animate-spin': loading }" />
-          <span>Làm Mới</span>
         </Button>
       </div>
     </div>
@@ -96,7 +92,7 @@ onMounted(() => {
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <!-- Metric 1: Workspaces -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:border-border"
+        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:border-border"
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
@@ -133,7 +129,7 @@ onMounted(() => {
 
       <!-- Metric 2: System Plugins -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:border-border"
+        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:border-border"
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
@@ -164,7 +160,7 @@ onMounted(() => {
 
       <!-- Metric 3: Fleet CLI Daemon -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:border-border"
+        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:border-border"
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
@@ -199,7 +195,7 @@ onMounted(() => {
 
       <!-- Metric 4: API Edge Latency -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:border-border"
+        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:border-border"
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
@@ -230,17 +226,12 @@ onMounted(() => {
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <!-- Growth Timeline (2 cols on lg) -->
       <div
-        class="overflow-hidden rounded-xl border border-border/60 bg-card p-5 shadow-sm lg:col-span-2"
+        class="overflow-hidden rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm lg:col-span-2"
       >
         <div class="mb-4 flex items-center justify-between">
-          <div>
-            <h2 class="text-base font-semibold text-foreground">
-              Tăng Trưởng Workspace
-            </h2>
-            <p class="text-xs text-muted-foreground">
-              Số lượng Workspace khởi tạo theo thời gian.
-            </p>
-          </div>
+          <h2 class="text-base font-semibold text-foreground">
+            Tăng Trưởng Workspace
+          </h2>
           <Badge variant="secondary" class="text-xs">
             Tổng: {{ analyticsData.tenants.total }}
           </Badge>
@@ -260,15 +251,12 @@ onMounted(() => {
 
       <!-- Subscription Plans Donut (1 col on lg) -->
       <div
-        class="overflow-hidden rounded-xl border border-border/60 bg-card p-5 shadow-sm"
+        class="overflow-hidden rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
       >
         <div class="mb-4">
           <h2 class="text-base font-semibold text-foreground">
             Phân Bổ Gói Dịch Vụ
           </h2>
-          <p class="text-xs text-muted-foreground">
-            Tỷ lệ phân bổ các gói tài khoản trong hệ thống.
-          </p>
         </div>
 
         <div
@@ -288,15 +276,12 @@ onMounted(() => {
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <!-- Plugins Distribution -->
       <div
-        class="overflow-hidden rounded-xl border border-border/60 bg-card p-5 shadow-sm"
+        class="overflow-hidden rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
       >
         <div class="mb-4">
           <h2 class="text-base font-semibold text-foreground">
             Phân Loại Plugin
           </h2>
-          <p class="text-xs text-muted-foreground">
-            Tỷ lệ Core Kernel và Module mở rộng.
-          </p>
         </div>
 
         <div
@@ -316,14 +301,11 @@ onMounted(() => {
       </div>
 
       <!-- Infrastructure Status List -->
-      <div class="rounded-xl border border-border/60 bg-card p-5 shadow-sm">
+      <div class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm">
         <div class="mb-4">
           <h2 class="text-base font-semibold text-foreground">
             Trạng Thái Dịch Vụ Cốt Lõi
           </h2>
-          <p class="text-xs text-muted-foreground">
-            Trạng thái vận hành của các dịch vụ hệ thống.
-          </p>
         </div>
 
         <div class="divide-y divide-border/40">
