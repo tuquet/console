@@ -35,6 +35,15 @@ Toàn bộ console áp dụng phong cách thiết kế hiện đại của **Sha
 - **Backgrounds**: Dùng `bg-card` kết hợp hiệu ứng kính `backdrop-blur` cho các popover/dialogs.
 - **Không lồng ghép đa tầng**: Mỗi cụm thông tin dùng đúng 1 lớp Card phẳng, không lồng Card trong Card gây lãng phí padding.
 
+### 2.1. Quy chuẩn Semantic Design Tokens (@tuquet/vue-ui)
+- **Single Source of Truth (CSS Variables):** Cả Vben layout framework và component `@tuquet/vue-ui` đều chia sẻ cùng bộ Design Tokens HSL trong `internal/tailwind-config/src/theme.css` (`--background`, `--foreground`, `--primary`, `--border`, `--radius`).
+- **Nghiêm cấm Hardcode mã màu:** Tuyệt đối không dùng mã màu tĩnh (như `bg-[#0f172a]`, `text-black`, `border-[#e2e8f0]`). Bắt buộc dùng semantic classes:
+  - Nền & chữ: `bg-background`, `bg-card`, `text-foreground`, `text-muted-foreground`.
+  - Màu nhấn & thương hiệu: `bg-primary`, `text-primary-foreground`, `border-primary`.
+  - Đường viền: `border-border` hoặc `border-input`.
+  - Bo góc: `rounded-lg` (8px), `rounded-xl` (12px) kế thừa từ `--radius`.
+- **Đảm bảo đồng bộ:** Mọi thay đổi trong `preferences.ts` (`theme.mode: 'dark'`, `theme.builtinType: 'slate'`, `theme.radius: '0.5'`) sẽ tự động tác động đồng bộ lên 100% component giao diện.
+
 ---
 
 ## 3. Quy Chuẩn Icon: BẮT BUỘC DÙNG LUCIDE ICON
@@ -143,3 +152,19 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
    - Sau khi push, kiểm tra trạng thái CI: `gh run list -L 5`.
    - Xem log lỗi ngay khi có sự cố: `gh run view <run-id> --log-failed`.
    - **Hủy ngay lập tức các run thừa/treo**: Nếu phát hiện run CI bị lặp lại hoặc commit mới đã thay thế commit cũ, dùng lệnh `gh run cancel <run-id>` để lập tức giải phóng runner, bảo toàn phút build miễn phí.
+
+---
+
+## 8. Kiến Trúc Client API & Nguyên Tắc DRY
+- **Single Source of Truth cho Supabase HTTP:**
+  - Toàn bộ các yêu cầu HTTP tới Supabase (Auth, REST, RPC) trong `apps/web-admin` **BẮT BUỘC** phải sử dụng hàm dùng chung `supabaseRequest<T>()` từ [`src/api/core/supabase-client.ts`](file:///root/tuquet/admin/apps/web-admin/src/api/core/supabase-client.ts).
+  - Tuyệt đối không khai báo lặp lại hàm `getSupabaseConfig()` hoặc hardcode biến môi trường `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` tại các file `auth.ts`, `tenant.ts`, `user.ts`.
+
+---
+
+## 9. Chuẩn Giao Tiếp Mạng Cục Bộ (Private Network Access - PNA)
+- Khi web admin (`https://admin.tuquet.com`) thực hiện thăm dò hoặc gọi lệnh xuống daemon máy trạm (`http://127.0.0.1:8765`), trình duyệt Chromium 120+ sẽ hiển thị hộp thoại cấp quyền PNA (*"admin.tuquet.com muốn truy nhập các ứng dụng và dịch vụ khác trên thiết bị này"*).
+- **Yêu cầu kỹ thuật:**
+  1. Phía Daemon Rust (`cli`/`runner`): Bắt buộc bật `.allow_private_network(true)` trong cấu hình CORS Layer và kiểm duyệt nghiêm ngặt origin `*.tuquet.com`, `localhost`, `127.0.0.1`.
+  2. Phía Web Admin (`fleet.ts`): Lệnh probe qua `fetch` phải có `mode: 'no-cors'`, gắn `AbortController` timeout ngắn ($\le 1200\text{ms}$) và xử lý lỗi không chặn giao diện (non-blocking) để trang web vẫn hoạt động trơn tru nếu người dùng bấm "Chặn".
+
