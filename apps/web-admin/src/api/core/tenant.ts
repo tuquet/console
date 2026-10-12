@@ -1,4 +1,4 @@
-import { useAccessStore } from '@vben/stores';
+import { supabaseRequest } from './supabase-client';
 
 export interface TenantItem {
   avatar_url: null | string;
@@ -29,16 +29,6 @@ export interface SystemPluginItem {
   version: string;
 }
 
-const getSupabaseConfig = () => {
-  const supabaseUrl =
-    (import.meta.env.VITE_SUPABASE_URL as string) ||
-    'https://dswhacsoaxgpfnkaxnhz.supabase.co';
-  const anonKey =
-    (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ||
-    'sb_publishable_8Y-l9FtldJSSuFAWhzICqg_UobFOsua';
-  return { anonKey, supabaseUrl };
-};
-
 const ACTIVE_TENANT_KEY = 'TUQUET_ACTIVE_TENANT_ID';
 
 export function getActiveTenantId(): string {
@@ -50,42 +40,22 @@ export function setActiveTenantId(tenantId: string) {
 }
 
 /**
- * Lấy danh sách toàn bộ Tenants từ Supabase Cloud
+ * Fetch all tenants from Supabase Cloud
  */
 export async function getTenantsApi(): Promise<TenantItem[]> {
-  const { anonKey, supabaseUrl } = getSupabaseConfig();
-  const accessStore = useAccessStore();
-  const token = accessStore.accessToken;
-
-  const res = await fetch(
-    `${supabaseUrl}/rest/v1/tenants?select=*&order=created_at.desc`,
-    {
-      headers: {
-        apikey: anonKey,
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    },
+  return supabaseRequest<TenantItem[]>(
+    '/rest/v1/tenants?select=*&order=created_at.desc',
   );
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch tenants');
-  }
-
-  return (await res.json()) as TenantItem[];
 }
 
 /**
- * Tạo Workspace / Tenant mới
+ * Create a new workspace / tenant
  */
 export async function createTenantApi(data: {
   name: string;
   plan?: string;
   slug: string;
 }): Promise<TenantItem> {
-  const { anonKey, supabaseUrl } = getSupabaseConfig();
-  const accessStore = useAccessStore();
-  const token = accessStore.accessToken;
-
   const payload = {
     metadata: {
       plan: data.plan || 'pro',
@@ -96,47 +66,24 @@ export async function createTenantApi(data: {
     status: 'active',
   };
 
-  const res = await fetch(`${supabaseUrl}/rest/v1/tenants`, {
-    body: JSON.stringify(payload),
-    headers: {
-      'Content-Type': 'application/json',
-      Prefer: 'return=representation',
-      apikey: anonKey,
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  const result = await supabaseRequest<TenantItem | TenantItem[]>(
+    '/rest/v1/tenants',
+    {
+      body: JSON.stringify(payload),
+      method: 'POST',
+      preferRepresentation: true,
     },
-    method: 'POST',
-  });
+  );
 
-  if (!res.ok) {
-    const errorJson = await res.json().catch(() => ({}));
-    throw new Error(errorJson.message || 'Failed to create tenant');
-  }
-
-  const result = await res.json();
   return Array.isArray(result) ? result[0] : result;
 }
 
 /**
- * Lấy danh sách System Plugins từ Supabase Cloud
+ * Fetch system plugins from Supabase Cloud
  */
 export async function getSystemPluginsApi(): Promise<SystemPluginItem[]> {
-  const { anonKey, supabaseUrl } = getSupabaseConfig();
-  const accessStore = useAccessStore();
-  const token = accessStore.accessToken;
-
-  const res = await fetch(
-    `${supabaseUrl}/rest/v1/system_plugins?select=*&order=is_system.desc,name.asc`,
-    {
-      headers: {
-        apikey: anonKey,
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    },
+  return supabaseRequest<SystemPluginItem[]>(
+    '/rest/v1/system_plugins?select=*&order=is_system.desc,name.asc',
   );
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch system plugins');
-  }
-
-  return (await res.json()) as SystemPluginItem[];
 }
+

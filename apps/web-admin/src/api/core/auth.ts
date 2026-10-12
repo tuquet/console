@@ -1,14 +1,16 @@
 import { useAccessStore } from '@vben/stores';
 
+import { getSupabaseConfig } from './supabase-client';
+
 export namespace AuthApi {
-  /** 登录接口参数 */
+  /** Login API parameters */
   export interface LoginParams {
     captchaToken?: string;
     password?: string;
     username?: string;
   }
 
-  /** 登录接口返回值 */
+  /** Login API result */
   export interface LoginResult {
     accessToken: string;
     refreshToken?: string;
@@ -20,18 +22,8 @@ export namespace AuthApi {
   }
 }
 
-const getSupabaseConfig = () => {
-  const supabaseUrl =
-    (import.meta.env.VITE_SUPABASE_URL as string) ||
-    'https://dswhacsoaxgpfnkaxnhz.supabase.co';
-  const anonKey =
-    (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ||
-    'sb_publishable_8Y-l9FtldJSSuFAWhzICqg_UobFOsua';
-  return { anonKey, supabaseUrl };
-};
-
 /**
- * 登录 (Supabase GoTrue REST)
+ * User login (Supabase GoTrue REST)
  */
 export async function loginApi(
   data: AuthApi.LoginParams,
@@ -98,7 +90,7 @@ export async function loginApi(
 }
 
 /**
- * 刷新accessToken (Supabase GoTrue REST)
+ * Refresh access token (Supabase GoTrue REST)
  */
 export async function refreshTokenApi(): Promise<AuthApi.RefreshTokenResult> {
   const { anonKey, supabaseUrl } = getSupabaseConfig();
@@ -140,7 +132,7 @@ export async function refreshTokenApi(): Promise<AuthApi.RefreshTokenResult> {
 }
 
 /**
- * 退出登录 (Supabase GoTrue REST)
+ * User logout (Supabase GoTrue REST)
  */
 export async function logoutApi() {
   const { anonKey, supabaseUrl } = getSupabaseConfig();
@@ -164,14 +156,14 @@ export async function logoutApi() {
 }
 
 /**
- * 获取用户权限码 (Supabase Admin Console RBAC)
+ * Get user permission codes (Supabase Admin Console RBAC)
  */
 export async function getAccessCodesApi(): Promise<string[]> {
   return ['super', 'admin', 'user'];
 }
 
 /**
- * 找回密码 (Supabase GoTrue REST)
+ * Forgot password recovery (Supabase GoTrue REST)
  */
 export async function resetPasswordApi(email: string): Promise<void> {
   const { anonKey, supabaseUrl } = getSupabaseConfig();
@@ -200,7 +192,7 @@ export async function resetPasswordApi(email: string): Promise<void> {
 }
 
 /**
- * 更新密码 (Supabase GoTrue REST)
+ * Update user password (Supabase GoTrue REST)
  */
 export async function updatePasswordApi(
   password: string,
@@ -237,7 +229,7 @@ export async function updatePasswordApi(
 }
 
 /**
- * GitHub OAuth 登录 (Supabase GoTrue REST)
+ * GitHub OAuth authorization redirect (Supabase GoTrue REST)
  */
 export function loginWithGitHubApi(redirectTo?: string) {
   const { supabaseUrl } = getSupabaseConfig();
