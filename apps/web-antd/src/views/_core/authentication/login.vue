@@ -5,8 +5,11 @@ import type { Recordable } from '@vben/types';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 import { AuthenticationLogin, z } from '@vben/common-ui';
+import { SvgGithubIcon } from '@vben/icons';
 import { $t } from '@vben/locales';
+import { Button } from 'ant-design-vue';
 
+import { loginWithGitHubApi } from '#/api/core/auth';
 import { useAuthStore } from '#/store';
 import { loadTurnstile, TURNSTILE_SITE_KEY } from '#/utils/turnstile';
 
@@ -94,6 +97,10 @@ onBeforeUnmount(() => {
     } catch {}
   }
 });
+
+function handleGitHubLogin() {
+  loginWithGitHubApi();
+}
 </script>
 
 <template>
@@ -116,8 +123,29 @@ onBeforeUnmount(() => {
       :show-forget-password="true"
       :show-qrcode-login="false"
       :show-register="false"
-      :show-third-party-login="false"
+      :show-third-party-login="true"
       @submit="handleLogin"
-    />
+    >
+      <template #third-party-login>
+        <div class="mt-4 w-full">
+          <div class="relative my-3 flex items-center justify-between">
+            <span class="w-[28%] border-b border-input"></span>
+            <span class="text-center text-xs text-muted-foreground uppercase tracking-wider">
+              hoặc đăng nhập với
+            </span>
+            <span class="w-[28%] border-b border-input"></span>
+          </div>
+          <Button
+            block
+            size="large"
+            class="flex items-center justify-center gap-2 font-medium"
+            @click="handleGitHubLogin"
+          >
+            <SvgGithubIcon class="size-5" />
+            <span>Continue with GitHub</span>
+          </Button>
+        </div>
+      </template>
+    </AuthenticationLogin>
   </div>
 </template>

@@ -236,3 +236,14 @@ export async function updatePasswordApi(
   }
 }
 
+/**
+ * GitHub OAuth 登录 (Supabase GoTrue REST)
+ */
+export function loginWithGitHubApi(redirectTo?: string) {
+  const { supabaseUrl } = getSupabaseConfig();
+  const target = redirectTo || `${window.location.origin}/auth/callback`;
+  const authUrl = `${supabaseUrl}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(target)}`;
+  window.location.href = authUrl;
+}
+
+

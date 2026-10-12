@@ -95,6 +95,15 @@ const coreRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'AuthCallback',
+        path: 'callback',
+        component: () =>
+          import('#/views/_core/authentication/callback.vue'),
+        meta: {
+          title: 'Xác thực GitHub',
+        },
+      },
+      {
         name: 'DesktopBridge',
         path: 'desktop',
         component: () =>
