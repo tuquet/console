@@ -28,6 +28,7 @@
     "@lucide/vue": "catalog:",
     "@tuquet/vue-table": "catalog:",
     "@tuquet/vue-ui": "catalog:",
+    "@vben-core/shadcn-ui": "workspace:*",
     "@vben/access": "workspace:*",
     "@vben/common-ui": "workspace:*",
     "@vben/constants": "workspace:*",
