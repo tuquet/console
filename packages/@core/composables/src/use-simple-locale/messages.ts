@@ -14,7 +14,8 @@ export const messages: Partial<Record<Locale, Record<string, string>>> = {
     toggleSidebar: 'Toggle sidebar',
     confirmTitle: 'Please Confirm',
   },
-  'zh-CN': { // fallback
+  'zh-CN': {
+    // fallback
     cancel: 'Cancel',
     collapse: 'Collapse',
     confirm: 'Confirm',

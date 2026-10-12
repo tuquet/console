@@ -13,9 +13,7 @@ function updateCSSVariables(
 ): void {
   // Legacy implementation delayed stylesheet insertion with setTimeout; synchronous insertion
   // eliminates race conditions and duplicate tags.
-  
-  
-  
+
   const existingStyles = document.querySelectorAll<HTMLElement>(`#${id}`);
   existingStyles.forEach((element, index) => {
     if (index > 0) {

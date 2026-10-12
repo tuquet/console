@@ -64,7 +64,9 @@ export function useCustomFieldValue<T = any>(
   const field = inject(CUSTOM_FIELD_INJECTION_KEY, null);
 
   if (!field) {
-    console.warn('useCustomFieldValue can only be used inside a VbenForm field item');
+    console.warn(
+      'useCustomFieldValue can only be used inside a VbenForm field item',
+    );
     return {
       disabled: computed(() => false),
       error: computed(() => undefined),

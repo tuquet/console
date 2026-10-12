@@ -125,7 +125,9 @@ const parseAndValidateAspectRatio = (): null | number => {
 
   // Validate parsed result
   if (Number.isNaN(width) || Number.isNaN(height) || !width || !height) {
-    console.warn('Aspect ratio parsing failed: width and height must be positive numbers');
+    console.warn(
+      'Aspect ratio parsing failed: width and height must be positive numbers',
+    );
     return null;
   }
 

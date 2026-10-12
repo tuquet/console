@@ -4,12 +4,12 @@ Animation plugin based on @vueuse/motion.
 
 ## Exports
 
-| Export | Type | Description |
-| ----------------- | ---- | ---------- |
-| `Motion`          | Component | Motion component |
+| Export            | Type      | Description            |
+| ----------------- | --------- | ---------------------- |
+| `Motion`          | Component | Motion component       |
 | `MotionGroup`     | Component | Motion group component |
-| `MotionDirective` | Directive | Motion directive |
-| `MotionPlugin`    | Plugin | Vue plugin |
+| `MotionDirective` | Directive | Motion directive       |
+| `MotionPlugin`    | Plugin    | Vue plugin             |
 
 ## Usage
 

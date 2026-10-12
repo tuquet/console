@@ -108,7 +108,10 @@ defineExpose({
     </Transition>
     <DialogContent
       ref="contentRef"
-      :style="{ ...(zIndex ? { zIndex } : { zIndex: 1050 }), position: 'fixed' }"
+      :style="{
+        ...(zIndex ? { zIndex } : { zIndex: 1050 }),
+        position: 'fixed',
+      }"
       data-slot="dialog-content"
       @animationend="handleAnimationEvent"
       @animationcancel="handleAnimationEvent"

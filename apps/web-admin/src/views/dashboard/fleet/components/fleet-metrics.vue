@@ -61,7 +61,9 @@ const props = withDefaults(defineProps<Props>(), {
         >
       </div>
       <div class="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-        <span class="size-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+        <span
+          class="size-2 rounded-full bg-emerald-500 animate-pulse shrink-0"
+        ></span>
         <span>Nhận lệnh thực thi tự động</span>
       </div>
     </div>
@@ -111,7 +113,9 @@ const props = withDefaults(defineProps<Props>(), {
           v-if="props.metrics.loopback_online"
           class="inline-flex items-center gap-1.5 text-xs text-foreground"
         >
-          <span class="size-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+          <span
+            class="size-2 rounded-full bg-emerald-500 animate-pulse shrink-0"
+          ></span>
           Online
         </span>
         <span v-else class="text-xs text-muted-foreground"> Chờ kết nối </span>

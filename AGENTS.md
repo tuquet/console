@@ -36,6 +36,7 @@ Toàn bộ console áp dụng phong cách thiết kế hiện đại của **Sha
 - **Không lồng ghép đa tầng**: Mỗi cụm thông tin dùng đúng 1 lớp Card phẳng, không lồng Card trong Card gây lãng phí padding.
 
 ### 2.1. Quy chuẩn Semantic Design Tokens (@tuquet/vue-ui)
+
 - **Single Source of Truth (CSS Variables):** Cả Vben layout framework và component `@tuquet/vue-ui` đều chia sẻ cùng bộ Design Tokens HSL trong `internal/tailwind-config/src/theme.css` (`--background`, `--foreground`, `--primary`, `--border`, `--radius`).
 - **Nghiêm cấm Hardcode mã màu:** Tuyệt đối không dùng mã màu tĩnh (như `bg-[#0f172a]`, `text-black`, `border-[#e2e8f0]`). Bắt buộc dùng semantic classes:
   - Nền & chữ: `bg-background`, `bg-card`, `text-foreground`, `text-muted-foreground`.
@@ -156,6 +157,7 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
 ---
 
 ## 8. Kiến Trúc Client API & Nguyên Tắc DRY
+
 - **Single Source of Truth cho Supabase HTTP:**
   - Toàn bộ các yêu cầu HTTP tới Supabase (Auth, REST, RPC) trong `apps/web-admin` **BẮT BUỘC** phải sử dụng hàm dùng chung `supabaseRequest<T>()` từ [`src/api/core/supabase-client.ts`](file:///root/tuquet/admin/apps/web-admin/src/api/core/supabase-client.ts).
   - Tuyệt đối không khai báo lặp lại hàm `getSupabaseConfig()` hoặc hardcode biến môi trường `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` tại các file `auth.ts`, `tenant.ts`, `user.ts`.
@@ -163,8 +165,8 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
 ---
 
 ## 9. Chuẩn Giao Tiếp Mạng Cục Bộ (Private Network Access - PNA)
-- Khi web admin (`https://admin.tuquet.com`) thực hiện thăm dò hoặc gọi lệnh xuống daemon máy trạm (`http://127.0.0.1:8765`), trình duyệt Chromium 120+ sẽ hiển thị hộp thoại cấp quyền PNA (*"admin.tuquet.com muốn truy nhập các ứng dụng và dịch vụ khác trên thiết bị này"*).
+
+- Khi web admin (`https://admin.tuquet.com`) thực hiện thăm dò hoặc gọi lệnh xuống daemon máy trạm (`http://127.0.0.1:8765`), trình duyệt Chromium 120+ sẽ hiển thị hộp thoại cấp quyền PNA (_"admin.tuquet.com muốn truy nhập các ứng dụng và dịch vụ khác trên thiết bị này"_).
 - **Yêu cầu kỹ thuật:**
   1. Phía Daemon Rust (`cli`/`runner`): Bắt buộc bật `.allow_private_network(true)` trong cấu hình CORS Layer và kiểm duyệt nghiêm ngặt origin `*.tuquet.com`, `localhost`, `127.0.0.1`.
   2. Phía Web Admin (`fleet.ts`): Lệnh probe qua `fetch` phải có `mode: 'no-cors'`, gắn `AbortController` timeout ngắn ($\le 1200\text{ms}$) và xử lý lỗi không chặn giao diện (non-blocking) để trang web vẫn hoạt động trơn tru nếu người dùng bấm "Chặn".
-

@@ -10,10 +10,7 @@ import {
 } from '@vben-core/shadcn-ui';
 
 import { ExternalLink, RefreshCw, Terminal } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-} from '@tuquet/vue-ui';
+import { Badge, Button } from '@tuquet/vue-ui';
 
 import CliSnippetCard from '#/components/common/cli-snippet-card.vue';
 

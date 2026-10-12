@@ -4,15 +4,15 @@ Table component plugin based on vxe-table and vxe-pc-ui.
 
 ## Exports
 
-| Export | Type | Description |
-| --------------------- | ---- | -------------- |
-| `setupVbenVxeTable`   | Function | Initialization config function |
-| `useVbenVxeGrid`      | Function | Table composable function |
-| `VbenVxeGrid`         | Component | Table component |
-| `VxeTableGridColumns` | Type | Table columns type |
-| `VxeTableGridOptions` | Type | Table options type |
-| `VxeGridProps`        | Type | Table props type |
-| `VxeGridListeners`    | Type | Table events type |
+| Export                | Type      | Description                    |
+| --------------------- | --------- | ------------------------------ |
+| `setupVbenVxeTable`   | Function  | Initialization config function |
+| `useVbenVxeGrid`      | Function  | Table composable function      |
+| `VbenVxeGrid`         | Component | Table component                |
+| `VxeTableGridColumns` | Type      | Table columns type             |
+| `VxeTableGridOptions` | Type      | Table options type             |
+| `VxeGridProps`        | Type      | Table props type               |
+| `VxeGridListeners`    | Type      | Table events type              |
 
 ## Usage
 

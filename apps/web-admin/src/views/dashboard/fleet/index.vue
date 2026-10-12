@@ -298,10 +298,14 @@ onMounted(() => {
                 <div class="flex items-center gap-3 text-xs text-foreground">
                   <span class="inline-flex items-center gap-1 font-mono">
                     <Cpu class="size-3.5 shrink-0 text-muted-foreground" />
-                    <span class="leading-none">{{ record.cpu_cores }} Cores</span>
+                    <span class="leading-none"
+                      >{{ record.cpu_cores }} Cores</span
+                    >
                   </span>
                   <span class="inline-flex items-center gap-1 font-mono">
-                    <HardDrive class="size-3.5 shrink-0 text-muted-foreground" />
+                    <HardDrive
+                      class="size-3.5 shrink-0 text-muted-foreground"
+                    />
                     <span class="leading-none">{{ record.ram_gb }} GB</span>
                   </span>
                 </div>
