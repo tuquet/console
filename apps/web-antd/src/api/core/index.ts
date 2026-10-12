@@ -1,5 +1,6 @@
 export * from './analytics';
 export * from './auth';
+export * from './fleet';
 export * from './menu';
 export * from './supabase-client';
 export * from './tenant';

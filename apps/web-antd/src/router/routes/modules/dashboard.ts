@@ -33,6 +33,15 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'Fleet',
+        path: 'fleet',
+        component: () => import('#/views/dashboard/fleet/index.vue'),
+        meta: {
+          icon: 'lucide:laptop',
+          title: $t('page.dashboard.fleet'),
+        },
+      },
+      {
         name: 'WorkspaceDetail',
         path: 'workspace/:id',
         component: () => import('#/views/dashboard/workspace/detail.vue'),
