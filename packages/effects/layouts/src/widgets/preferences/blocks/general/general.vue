@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type { LanguageOption } from '@vben/constants';
+import type { SupportedLanguagesType } from '@vben/locales';
 
-import { onMounted, onUnmounted, ref, unref } from 'vue';
+import { onMounted, onUnmounted, ref, unref, watch } from 'vue';
 
 import { onSupportLanguagesChange } from '@vben/constants';
-import { $t } from '@vben/locales';
+import { $t, loadLocaleMessages } from '@vben/locales';
+import { preferences, updatePreferences } from '@vben/preferences';
 import { useTimezoneStore } from '@vben/stores';
 
 import InputItem from '../input-item.vue';
@@ -48,6 +50,40 @@ const timezoneOptionsRef = ref<
   }[]
 >([]);
 
+// Sync initial and reactive changes from preferences.app.locale to appLocale
+watch(
+  () => preferences.app.locale,
+  (locale) => {
+    if (locale && appLocale.value !== locale) {
+      appLocale.value = locale;
+    }
+  },
+  { immediate: true },
+);
+
+async function handleLocaleChange(val: string | undefined) {
+  if (!val) return;
+  const locale = val as SupportedLanguagesType;
+  appLocale.value = locale;
+  updatePreferences({
+    app: {
+      locale,
+    },
+  });
+  await loadLocaleMessages(locale);
+}
+
+async function handleTimezoneChange(val: string | undefined) {
+  if (!val) return;
+  appTimezone.value = val;
+  timezoneStore.setTimezone(val);
+  updatePreferences({
+    app: {
+      timezone: val,
+    },
+  });
+}
+
 onMounted(async () => {
   timezoneOptionsRef.value = await timezoneStore.getTimezoneOptions();
   // Get current timezone, e.g. Asia/Shanghai
@@ -59,10 +95,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <SelectItem v-model="appLocale" :items="languageList">
+  <SelectItem
+    :model-value="appLocale || preferences.app.locale"
+    :items="languageList"
+    @update:model-value="handleLocaleChange"
+  >
     {{ $t('preferences.language') }}
   </SelectItem>
-  <SelectItem v-model="appTimezone" :items="timezoneOptionsRef">
+  <SelectItem
+    :model-value="appTimezone"
+    :items="timezoneOptionsRef"
+    @update:model-value="handleTimezoneChange"
+  >
     {{ $t('preferences.timezone') }}
   </SelectItem>
   <SwitchItem v-model="appDynamicTitle">
