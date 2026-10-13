@@ -26,7 +26,6 @@ import {
   PinOff,
   RotateCw,
   Settings,
-  SlidersHorizontal,
 } from '@vben/icons';
 import { $t, loadLocaleMessages } from '@vben/locales';
 import {
@@ -302,18 +301,6 @@ const customPreferencesTab = computed(() => {
   return preferencesExtension.value;
 });
 
-const customTabLabel = computed(() => {
-  return customPreferencesTab.value?.tabLabel
-    ? $t(customPreferencesTab.value.tabLabel)
-    : '';
-});
-
-const customTabTitle = computed(() => {
-  const title =
-    customPreferencesTab.value?.title || customPreferencesTab.value?.tabLabel;
-  return title ? $t(title) : '';
-});
-
 const mergedDiffPreference = computed(() => {
   const result: Record<string, unknown> = {};
 
@@ -328,12 +315,8 @@ const mergedDiffPreference = computed(() => {
   return Object.keys(result).length > 0 ? result : undefined;
 });
 
-const showCustomTab = computed(() => {
-  return (customPreferencesTab.value?.fields.length ?? 0) > 0;
-});
-
 const tabs = computed((): SegmentedItem[] => {
-  const items: SegmentedItem[] = [
+  return [
     {
       icon: Palette,
       label: $t('preferences.appearance'),
@@ -355,16 +338,6 @@ const tabs = computed((): SegmentedItem[] => {
       value: 'general',
     },
   ];
-
-  if (showCustomTab.value) {
-    items.push({
-      icon: SlidersHorizontal,
-      label: customTabLabel.value,
-      value: 'custom',
-    });
-  }
-
-  return items;
 });
 
 const showBreadcrumbConfig = computed(() => {
@@ -496,7 +469,13 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
             <Block :title="$t('preferences.theme.radius')">
               <Radius v-model="themeRadius" />
             </Block>
-            <Block :title="$t('preferences.theme.fontSize')">
+            <Block :title="$t('preferences.typography.title')">
+              <Custom
+                v-if="customPreferencesTab?.fields.length"
+                :fields="customPreferencesTab.fields"
+                :values="customPreferences"
+                @update="handleCustomPreferencesUpdate"
+              />
               <FontSize v-model="themeFontSize" />
             </Block>
             <Block :title="$t('preferences.other')">
@@ -643,15 +622,6 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:shortcut-keys-lock-screen="shortcutKeysGlobalLockScreen"
                 v-model:shortcut-keys-logout="shortcutKeysGlobalLogout"
                 v-model:shortcut-keys-escape="shortcutKeysGlobalEscape"
-              />
-            </Block>
-          </template>
-          <template #custom>
-            <Block :title="customTabTitle">
-              <Custom
-                :fields="customPreferencesTab?.fields || []"
-                :values="customPreferences"
-                @update="handleCustomPreferencesUpdate"
               />
             </Block>
           </template>
