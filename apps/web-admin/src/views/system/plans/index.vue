@@ -61,7 +61,7 @@ onMounted(() => {
         >
           Gói Cước & Hạn Mức Dịch Vụ
         </h1>
-        <Badge variant="secondary" class="font-mono text-xs uppercase">
+        <Badge variant="secondary" class="text-xs uppercase font-medium">
           SaaS Plans
         </Badge>
       </div>
@@ -99,7 +99,7 @@ onMounted(() => {
           <span class="text-muted-foreground">({{ plans.length }} gói)</span>
         </div>
 
-        <div class="flex items-center gap-3 text-muted-foreground font-mono">
+        <div class="flex items-center gap-3 text-muted-foreground">
           <span
             >{{ plans.filter((p) => p.is_active).length }} Đang kích hoạt</span
           >
@@ -151,7 +151,7 @@ onMounted(() => {
                 </div>
                 <div
                   v-else
-                  class="font-semibold text-foreground text-sm font-mono"
+                  class="font-semibold text-foreground text-sm"
                 >
                   ${{ p.price_monthly_usd }}
                   <span class="text-xs font-normal text-muted-foreground"
@@ -162,7 +162,7 @@ onMounted(() => {
 
               <TableCell>
                 <div
-                  class="inline-flex items-center gap-1.5 text-xs text-foreground font-mono"
+                  class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
                 >
                   <Users class="size-3.5 text-muted-foreground shrink-0" />
                   <span>{{ p.max_members }} users</span>
@@ -171,7 +171,7 @@ onMounted(() => {
 
               <TableCell>
                 <div
-                  class="inline-flex items-center gap-1.5 text-xs text-foreground font-mono"
+                  class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
                 >
                   <HardDrive class="size-3.5 text-muted-foreground shrink-0" />
                   <span>{{ formatStorage(p.max_storage_mb) }}</span>
@@ -180,7 +180,7 @@ onMounted(() => {
 
               <TableCell>
                 <div
-                  class="inline-flex items-center gap-1.5 text-xs text-foreground font-mono"
+                  class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
                 >
                   <Cpu class="size-3.5 text-muted-foreground shrink-0" />
                   <span>{{ p.max_monthly_runs.toLocaleString() }} runs</span>
@@ -239,14 +239,14 @@ onMounted(() => {
           </div>
 
           <div
-            class="flex items-baseline gap-1 font-mono text-base font-bold text-foreground"
+            class="flex items-baseline gap-1 text-base font-bold text-foreground"
           >
             <span v-if="p.price_monthly_usd === 0">Miễn Phí</span>
             <span v-else>${{ p.price_monthly_usd }} / tháng</span>
           </div>
 
           <div
-            class="grid grid-cols-2 gap-2 text-xs font-mono text-muted-foreground"
+            class="grid grid-cols-2 gap-2 text-xs text-muted-foreground"
           >
             <div class="flex items-center gap-1.5">
               <Users class="size-3 shrink-0" />

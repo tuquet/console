@@ -65,7 +65,7 @@ onMounted(() => {
         >
           Vai Trò & Phân Quyền (RBAC)
         </h1>
-        <Badge variant="secondary" class="font-mono text-xs uppercase">
+        <Badge variant="secondary" class="text-xs uppercase font-medium">
           System Roles
         </Badge>
         <span v-if="!loading" class="text-xs font-medium text-muted-foreground">
@@ -232,7 +232,7 @@ onMounted(() => {
               >
                 Module: {{ moduleName }}
               </h3>
-              <Badge variant="outline" class="font-mono text-[11px] ml-auto">
+              <Badge variant="outline" class="text-2xs ml-auto">
                 {{ perms.length }} quyền
               </Badge>
             </div>

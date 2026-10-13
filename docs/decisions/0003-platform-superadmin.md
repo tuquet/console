@@ -1,4 +1,4 @@
-# ADR-002: Kiến Trúc Quản Trị Nền Tảng Platform Superadmin & Giám Sát Xuyên Tenant
+# ADR-003: Kiến Trúc Quản Trị Nền Tảng Platform Superadmin & Giám Sát Xuyên Tenant
 
 ## Trạng Thái (Status)
 
@@ -19,7 +19,7 @@ Tuy nhiên, đội ngũ vận hành hệ thống (**Platform Superadmin**) cần
 3. **Quản lý hợp đồng thuê bao SaaS (Platform Subscriptions):** Theo dõi toàn bộ các gói cước đang hoạt động, doanh thu định kỳ hàng tháng (MRR) và thời hạn gia hạn từ `billing.subscriptions` (schema `billing`).
 4. **Ma trận vai trò & quyền hạn (RBAC Catalog):** Trực quan hóa 4 System Roles và danh mục 36 quyền hạn vi hạt từ `public.permissions` trên 6 module dịch vụ (`runners`, `automa`, `core-iam`, `subscriptions`, `storage`, `webhooks`).
 
-Trước đây, hệ thống chưa có các tuyến đường này, hoặc bị phân mảnh trong các menu ERP cũ với số liệu giả lập (mock data).
+---
 
 ## Quyết Định Kiến Trúc (Decisions)
 
@@ -34,7 +34,7 @@ Trước đây, hệ thống chưa có các tuyến đường này, hoặc bị 
 
 ### 2. Tích Hợp Vào Nhóm Menu `/system` (KISS & Tối Giản Sidebar)
 
-- Thay vì mở thêm một nhóm menu cấp 1 làm phình to thanh điều hướng (vi phạm nguyên tắc tối đa 5 nhóm sidebar của RFC V2), toàn bộ 4 tuyến đường quản trị nền tảng được đặt làm route con của `/system`:
+- Toàn bộ 4 tuyến đường quản trị nền tảng được đặt làm route con của `/system`, đảm bảo thanh điều hướng không vượt quá 5 nhóm chính:
   - `/system/plugins` (Plugins hệ thống - Core IAM)
   - `/system/plans` (Gói cước SaaS - Subscriptions)
   - `/system/users` (Người dùng nền tảng - Superadmin Only)
@@ -45,17 +45,19 @@ Trước đây, hệ thống chưa có các tuyến đường này, hoặc bị 
 ### 3. Nguyên Tắc Read-First & Giám Sát Dữ Liệu Thật (Zero Mock Data)
 
 - Toàn bộ 4 view mới được thiết kế theo nguyên tắc Read-First & Telemetry:
-  - `/system/users`: Đọc trực tiếp từ `public.profiles` kèm đếm số lượng tenant.
+  - `/system/users`: Đọc trực tiếp từ `public.profiles` kết hợp đếm số lượng tenant.
   - `/system/audit-logs`: Đọc từ `public.audit_logs` với bộ lọc linh hoạt theo hành động và tenant, có modal xem chi tiết payload JSON.
   - `/system/subscriptions`: Đọc từ `billing.subscriptions` kết nối `tenants` và `plans` qua header `Accept-Profile: billing`.
   - `/system/roles`: Đọc từ `public.roles` và `public.permissions`.
-- Tuyệt đối không dùng dữ liệu giả. Khi cơ sở dữ liệu rỗng, hiển thị Empty State chuẩn với Lucide Icon.
+- Khi cơ sở dữ liệu rỗng, hiển thị Empty State chuẩn với Lucide Icon.
 
 ### 4. Chuẩn Hóa Mobile-First Dual View
 
 - Mọi trang danh sách đều có chế độ kép:
   - **Desktop (`hidden md:block`):** Bảng dữ liệu phẳng, viền `border-border/60`, hỗ trợ sắp xếp và thao tác nhanh.
   - **Mobile (`block md:hidden`):** Thẻ chạm cảm ứng (`Touch Card`) kích thước tối thiểu 40px touch target, loại bỏ hoàn toàn tràn viền hoặc cuộn ngang.
+
+---
 
 ## Các Phương Án Đã Cân Nhắc (Alternatives Considered)
 
@@ -67,13 +69,15 @@ Trước đây, hệ thống chưa có các tuyến đường này, hoặc bị 
 
 - **Bị từ chối (Tạm hoãn):** Việc xóa user khỏi Auth schema có thể gây cascade delete diện rộng ảnh hưởng tới dữ liệu lịch sử của nhiều tenant. Ở giai đoạn này, ưu tiên năng lực giám sát và khóa tài khoản qua trạng thái, chưa cung cấp nút xóa cứng trên UI.
 
+---
+
 ## Hệ Quả (Consequences)
 
 ### Tích cực:
 
 - Quản trị viên nền tảng có cái nhìn toàn cảnh 360 độ về người dùng, an ninh, doanh thu định kỳ và phân quyền hệ thống.
 - Bảo mật hai lớp: RLS ở cơ sở dữ liệu bảo vệ dữ liệu thực tế, `meta.authority` ở frontend định hướng giao diện chuẩn xác.
-- Tuân thủ 100% Cổng kiểm định cục bộ (Zero-Waste CI Gate): 98/98 unit tests passed, 0 lỗi TypeScript, 0 lỗi Lint, build thành công.
+- Vượt qua 100% Cổng kiểm định cục bộ (Zero-Waste CI Gate).
 
 ### Ràng buộc:
 

@@ -15,6 +15,7 @@ import {
 import { Badge, Button, toast } from '@tuquet/vue-ui';
 
 import { getRealAnalyticsDataApi } from '#/api';
+import { $t } from '#/locales';
 
 import GrowthChart from './growth-chart.vue';
 import PlansChart from './plans-chart.vue';
@@ -46,7 +47,7 @@ async function loadAnalytics() {
     const data = await getRealAnalyticsDataApi();
     analyticsData.value = data;
   } catch (error: any) {
-    toast.error(error.message || 'Không thể tải dữ liệu telemetry');
+    toast.error(error.message || 'Error loading telemetry data');
   } finally {
     loading.value = false;
   }
@@ -67,10 +68,10 @@ onMounted(() => {
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Giám Sát Nền Tảng
+          {{ $t('page.analytics.title') }}
         </h1>
-        <Badge variant="outline" class="font-mono text-xs uppercase">
-          Live Telemetry
+        <Badge variant="outline" class="text-xs uppercase font-medium">
+          {{ $t('page.analytics.badge') }}
         </Badge>
       </div>
 
@@ -80,7 +81,7 @@ onMounted(() => {
           variant="outline"
           size="icon"
           class="size-8 shrink-0"
-          title="Làm mới"
+          :title="$t('page.analytics.refresh')"
           @click="loadAnalytics"
         >
           <RefreshCw class="size-3.5" :class="{ 'animate-spin': loading }" />
@@ -96,7 +97,7 @@ onMounted(() => {
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Tổng Workspace
+            {{ $t('page.analytics.total_workspaces') }}
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -112,18 +113,11 @@ onMounted(() => {
             class="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground"
           >
             <span class="size-1.5 rounded-full bg-success"></span>
-            {{ analyticsData.tenants.activeCount }} Đang hoạt động
+            {{ analyticsData.tenants.activeCount }} {{ $t('page.analytics.active_workspaces') }}
           </span>
         </div>
         <div class="mt-2 text-xs text-muted-foreground">
-          Phân bổ:
-          <span class="font-medium text-foreground">
-            {{ analyticsData.tenants.planBreakdown.pro }} Pro
-          </span>
-          •
-          <span class="font-medium text-foreground">
-            {{ analyticsData.tenants.planBreakdown.free }} Free
-          </span>
+          {{ analyticsData.tenants.planBreakdown.pro }} Pro • {{ analyticsData.tenants.planBreakdown.free }} Free
         </div>
       </div>
 
@@ -133,7 +127,7 @@ onMounted(() => {
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Plugin Hệ Thống
+            {{ $t('page.analytics.system_plugins') }}
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -146,15 +140,14 @@ onMounted(() => {
             {{ analyticsData.plugins.total }}
           </span>
           <span class="text-xs font-medium text-muted-foreground">
-            Dịch vụ Sẵn sàng
+            {{ $t('page.analytics.ready') }}
           </span>
         </div>
         <div class="mt-2 text-xs text-muted-foreground">
-          Gồm:
           <span class="font-medium text-foreground">
-            {{ analyticsData.plugins.coreCount }} Core Kernel
+            {{ analyticsData.plugins.coreCount }} {{ $t('page.analytics.core_kernel') }}
           </span>
-          và các Module mở rộng
+          {{ $t('page.analytics.modules_extension') }}
         </div>
       </div>
 
@@ -164,7 +157,7 @@ onMounted(() => {
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Fleet Bridge
+            {{ $t('page.analytics.fleet_bridge') }}
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -174,17 +167,17 @@ onMounted(() => {
         </div>
         <div class="mt-3 flex items-baseline gap-2">
           <span class="text-2xl font-bold tracking-tight text-foreground">
-            Sẵn Sàng
+            {{ $t('page.analytics.ready') }}
           </span>
           <span
             class="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
           >
             <span class="size-2 rounded-full bg-success animate-pulse"></span>
-            Online
+            {{ $t('page.analytics.online') }}
           </span>
         </div>
         <div class="mt-2 font-mono text-xs text-muted-foreground">
-          Cổng SSO Loopback:
+          {{ $t('page.analytics.sso_port') }}:
           <span class="font-semibold text-foreground">
             :{{ analyticsData.fleet.loopbackPort }}
           </span>
@@ -197,7 +190,7 @@ onMounted(() => {
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Độ trễ API Edge
+            {{ $t('page.analytics.api_latency') }}
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -215,7 +208,7 @@ onMounted(() => {
           class="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"
         >
           <CheckCircle2 class="size-3.5 text-success" />
-          <span>Cloudflare Anycast & Supabase Khỏe mạnh</span>
+          <span>{{ $t('page.analytics.healthy_infra') }}</span>
         </div>
       </div>
     </div>
@@ -228,67 +221,71 @@ onMounted(() => {
       >
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-base font-semibold text-foreground">
-            Tăng Trưởng Workspace
+            Tăng Trưởng Workspace & Tài Nguyên
           </h2>
-          <Badge variant="secondary" class="text-xs">
-            Tổng: {{ analyticsData.tenants.total }}
-          </Badge>
+          <span class="text-xs text-muted-foreground">
+            Cập nhật theo tuần
+          </span>
         </div>
-
         <div
           v-if="loading"
-          class="flex h-64 items-center justify-center sm:h-80"
+          class="flex h-[260px] items-center justify-center text-sm text-muted-foreground"
         >
-          <div class="flex items-center gap-2 text-sm text-muted-foreground">
+          <div class="flex items-center gap-2">
             <Loader2 class="size-5 animate-spin text-primary" />
-            <span>Đang tải dữ liệu biểu đồ...</span>
+            <span>Loading...</span>
           </div>
         </div>
         <GrowthChart v-else :data="analyticsData.tenants.growth" />
       </div>
 
-      <!-- Subscription Plans Donut (1 col on lg) -->
+      <!-- Plan Distribution Donut Chart -->
       <div
-        class="overflow-hidden rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
+        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
       >
-        <div class="mb-4">
+        <div class="mb-4 flex items-center justify-between">
           <h2 class="text-base font-semibold text-foreground">
-            Phân Bổ Gói Dịch Vụ
+            Cơ Cấu Gói Dịch Vụ
           </h2>
+          <span class="text-xs text-muted-foreground">Thực tế</span>
         </div>
-
         <div
           v-if="loading"
-          class="flex h-64 items-center justify-center sm:h-80"
+          class="flex h-[260px] items-center justify-center text-sm text-muted-foreground"
         >
-          <div class="flex items-center gap-2 text-sm text-muted-foreground">
+          <div class="flex items-center gap-2">
             <Loader2 class="size-5 animate-spin text-primary" />
-            <span>Đang tải...</span>
+            <span>Loading...</span>
           </div>
         </div>
-        <PlansChart v-else :data="analyticsData.tenants.planBreakdown" />
+        <PlansChart
+          v-else
+          :data="analyticsData.tenants.planBreakdown"
+        />
       </div>
     </div>
 
-    <!-- Charts Row 2: Plugins Ecosystem & Infrastructure Health -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <!-- Plugins Distribution -->
+    <!-- Charts Row 2: Plugins Core vs Module Bar Chart & Infrastructure Status -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <!-- Plugins Bar Breakdown (2 cols on lg) -->
       <div
-        class="overflow-hidden rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
+        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm lg:col-span-2"
       >
-        <div class="mb-4">
+        <div class="mb-4 flex items-center justify-between">
           <h2 class="text-base font-semibold text-foreground">
-            Phân Loại Plugin
+            Phân Bổ Plugins Cốt Lõi (Kernel vs Module)
           </h2>
+          <span class="text-xs text-muted-foreground">
+            {{ analyticsData.plugins.total }} đã kích hoạt
+          </span>
         </div>
-
         <div
           v-if="loading"
-          class="flex h-64 items-center justify-center sm:h-80"
+          class="flex h-[220px] items-center justify-center text-sm text-muted-foreground"
         >
-          <div class="flex items-center gap-2 text-sm text-muted-foreground">
+          <div class="flex items-center gap-2">
             <Loader2 class="size-5 animate-spin text-primary" />
-            <span>Đang tải...</span>
+            <span>Loading...</span>
           </div>
         </div>
         <PluginsChart
@@ -304,7 +301,7 @@ onMounted(() => {
       >
         <div class="mb-4">
           <h2 class="text-base font-semibold text-foreground">
-            Trạng Thái Dịch Vụ Cốt Lõi
+            {{ $t('page.analytics.services_title') }}
           </h2>
         </div>
 
@@ -320,14 +317,14 @@ onMounted(() => {
             </div>
             <Badge variant="secondary" class="text-xs font-normal">
               <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
-              HOẠT ĐỘNG TỐT
+              {{ $t('page.analytics.operational') }}
             </Badge>
           </div>
 
           <div class="flex items-center justify-between py-3">
             <div>
               <div class="font-medium text-foreground">
-                Global CDN & Edge Delivery
+                {{ $t('page.analytics.edge_delivery') }}
               </div>
               <div class="text-xs text-muted-foreground">
                 {{ analyticsData.system.edgeProvider }}
@@ -335,27 +332,29 @@ onMounted(() => {
             </div>
             <Badge variant="secondary" class="text-xs font-normal">
               <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
-              ONLINE
-            </Badge>
-          </div>
-
-          <div class="flex items-center justify-between py-3">
-            <div>
-              <div class="font-medium text-foreground">Desktop Bridge</div>
-              <div class="text-xs text-muted-foreground">
-                SSO Loopback Daemon (:8765)
-              </div>
-            </div>
-            <Badge variant="secondary" class="text-xs font-normal">
-              <span class="mr-1.5 size-1.5 rounded-full bg-primary"></span>
-              SẴN SÀNG GHÉP NỐI
+              {{ $t('page.analytics.online') }}
             </Badge>
           </div>
 
           <div class="flex items-center justify-between py-3">
             <div>
               <div class="font-medium text-foreground">
-                Core Authentication & IAM
+                {{ $t('page.analytics.desktop_bridge') }}
+              </div>
+              <div class="text-xs text-muted-foreground">
+                {{ $t('page.analytics.desktop_bridge_desc') }}
+              </div>
+            </div>
+            <Badge variant="secondary" class="text-xs font-normal">
+              <span class="mr-1.5 size-1.5 rounded-full bg-primary"></span>
+              {{ $t('page.analytics.ready_to_pair') }}
+            </Badge>
+          </div>
+
+          <div class="flex items-center justify-between py-3">
+            <div>
+              <div class="font-medium text-foreground">
+                {{ $t('page.analytics.core_iam') }}
               </div>
               <div class="text-xs text-muted-foreground">
                 Plugin: core-iam (Schema: public)
@@ -363,14 +362,14 @@ onMounted(() => {
             </div>
             <Badge variant="secondary" class="text-xs font-normal">
               <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
-              ACTIVE
+              {{ $t('page.analytics.active') }}
             </Badge>
           </div>
 
           <div class="flex items-center justify-between py-3">
             <div>
               <div class="font-medium text-foreground">
-                Runners Execution Engine
+                {{ $t('page.analytics.runners_engine') }}
               </div>
               <div class="text-xs text-muted-foreground">
                 Plugin: runners (Schema: runners)
@@ -378,7 +377,7 @@ onMounted(() => {
             </div>
             <Badge variant="secondary" class="text-xs font-normal">
               <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
-              ACTIVE
+              {{ $t('page.analytics.active') }}
             </Badge>
           </div>
         </div>

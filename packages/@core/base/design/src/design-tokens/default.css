@@ -98,6 +98,14 @@
   --vis-primary-color: var(--primary);
   --vis-secondary-color: var(--muted);
   --vis-text-color: var(--muted-foreground);
+  --vis-tooltip-background-color: transparent !important;
+  --vis-tooltip-border-color: transparent !important;
+  --vis-tooltip-text-color: transparent !important;
+  --vis-tooltip-shadow-color: transparent !important;
+  --vis-tooltip-backdrop-filter: none !important;
+  --vis-tooltip-padding: 0 !important;
+  --vis-tooltip-box-shadow: none !important;
+  --vis-tooltip-border-radius: 0 !important;
 
   /* ============= custom ============= */
 
@@ -502,4 +510,14 @@
   --border: 220 13% 91%;
   --input: 220 13% 91%;
   --ring: 224 71.4% 4.1%;
+}
+
+/* Unovis Tooltip reset: remove default white box/padding so shadcn Card renders cleanly */
+.unovis-tooltip,
+[class*='-tooltip'],
+div[class*='tooltip_'] {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
 }

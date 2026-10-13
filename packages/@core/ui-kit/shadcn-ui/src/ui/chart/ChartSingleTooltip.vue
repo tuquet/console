@@ -72,6 +72,10 @@ function template(d: any, i: number, elements: (HTMLElement | SVGElement)[]) {
 
 <template>
   <VisTooltip
+    :attributes="{
+      style:
+        'background-color: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important;',
+    }"
     :horizontal-shift="20"
     :triggers="{
       [selector]: template,

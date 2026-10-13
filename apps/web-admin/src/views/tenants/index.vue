@@ -33,6 +33,7 @@ import {
   setActiveTenantId,
 } from '#/api';
 import { useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 import CreateWorkspaceModal from './components/modals/create-workspace-modal.vue';
 
@@ -84,7 +85,7 @@ async function fetchTenants() {
       setActiveTenantId(activeTenantId.value);
     }
   } catch (error: any) {
-    toast.error(error.message || 'Không thể tải danh sách Workspace');
+    toast.error(error.message || $t('page.workspace.fetch_failed'));
   } finally {
     loadingTenants.value = false;
   }
@@ -93,7 +94,7 @@ async function fetchTenants() {
 function handleSelectTenant(record: any) {
   activeTenantId.value = record.id;
   setActiveTenantId(record.id);
-  toast.success(`Đã chuyển sang Workspace: ${record.name}`);
+  toast.success($t('page.workspace.switched_to', { name: record.name }));
 }
 
 function handleConnectCli(record?: any) {
@@ -119,13 +120,13 @@ async function handleCreateTenant(payload: {
       plan: payload.plan,
       slug: payload.slug,
     });
-    toast.success(`Tạo thành công Workspace: ${created.name}`);
+    toast.success($t('page.workspace.create_success', { name: created.name }));
     isModalVisible.value = false;
     await fetchTenants();
     activeTenantId.value = created.id;
     setActiveTenantId(created.id);
   } catch (error: any) {
-    toast.error(error.message || 'Tạo Workspace thất bại');
+    toast.error(error.message || $t('page.workspace.create_failed'));
   } finally {
     creatingTenant.value = false;
   }
@@ -146,10 +147,10 @@ onMounted(() => {
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Quản Trị Workspace
+          {{ $t('page.workspace.title') }}
         </h1>
-        <Badge variant="outline" class="font-mono text-xs uppercase">
-          Multi-Tenant
+        <Badge variant="outline" class="text-xs uppercase font-medium">
+          {{ $t('page.workspace.badge') }}
         </Badge>
       </div>
 
@@ -161,7 +162,7 @@ onMounted(() => {
           @click="openCreateModal"
         >
           <Plus class="size-3.5" />
-          <span>Tạo Workspace</span>
+          <span>{{ $t('page.workspace.create_btn') }}</span>
         </Button>
         <Button
           variant="outline"
@@ -170,14 +171,14 @@ onMounted(() => {
           @click="handleConnectCli()"
         >
           <Terminal class="size-3.5" />
-          <span>Ghép Nối Máy Trạm</span>
+          <span>{{ $t('page.workspace.connect_btn') }}</span>
         </Button>
         <Button
           variant="outline"
           size="icon"
           :disabled="loadingTenants"
           class="size-8 shrink-0"
-          title="Làm mới"
+          :title="$t('page.workspace.refresh')"
           @click="fetchTenants"
         >
           <RefreshCw
@@ -194,7 +195,7 @@ onMounted(() => {
       <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Tổng Workspace
+            {{ $t('page.workspace.total_workspaces') }}
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -206,12 +207,14 @@ onMounted(() => {
           <span class="text-3xl font-extrabold tracking-tight text-foreground">
             {{ tenants.length }}
           </span>
-          <span class="text-xs font-medium text-muted-foreground">Tenants</span>
+          <span class="text-xs font-medium text-muted-foreground">
+            {{ $t('page.workspace.tenants_label') }}
+          </span>
         </div>
         <div class="mt-2 text-xs text-muted-foreground truncate">
-          Đang chọn:
+          {{ $t('page.workspace.selected') }}:
           <span class="font-semibold text-foreground">
-            {{ activeTenant?.name || 'Chưa chọn' }}
+            {{ activeTenant?.name || $t('page.workspace.not_selected') }}
           </span>
         </div>
       </div>
@@ -220,7 +223,7 @@ onMounted(() => {
       <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Workspace Đang Chọn
+            {{ $t('page.workspace.current_workspace') }}
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -232,7 +235,7 @@ onMounted(() => {
           <span
             class="text-xl font-bold tracking-tight text-foreground truncate"
           >
-            {{ activeTenant?.name || 'Chưa chọn' }}
+            {{ activeTenant?.name || $t('page.workspace.not_selected') }}
           </span>
         </div>
         <div class="mt-2 text-xs text-muted-foreground truncate font-mono">
@@ -244,7 +247,7 @@ onMounted(() => {
       <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Gói Dịch Vụ
+            {{ $t('page.workspace.service_plan') }}
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -271,7 +274,7 @@ onMounted(() => {
           </Badge>
         </div>
         <div class="mt-2 text-xs text-muted-foreground">
-          Được bảo chứng bởi Tuquet Cloud
+          {{ $t('page.workspace.certified_by_cloud') }}
         </div>
       </div>
 
@@ -279,7 +282,7 @@ onMounted(() => {
       <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Quản Trị Viên
+            {{ $t('page.workspace.administrator') }}
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -294,12 +297,12 @@ onMounted(() => {
             {{
               userStore.userInfo?.realName ||
               userStore.userInfo?.username ||
-              'Quản trị viên'
+              'Admin'
             }}
           </span>
         </div>
         <div class="mt-2 text-xs text-muted-foreground">
-          Quyền: Super Administrator
+          {{ $t('page.workspace.role_superadmin') }}
         </div>
       </div>
     </div>
@@ -312,11 +315,11 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <Building2 class="size-4.5 text-foreground" />
           <h2 class="text-base font-semibold text-foreground">
-            Danh Sách Workspace
+            {{ $t('page.workspace.list_title') }}
           </h2>
         </div>
         <span class="text-xs text-muted-foreground">
-          {{ tenants.length }} workspace khả dụng
+          {{ $t('page.workspace.available_count', [tenants.length]) }}
         </span>
       </div>
 
@@ -327,12 +330,12 @@ onMounted(() => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Tên Workspace</TableHead>
-              <TableHead>Định Danh Slug</TableHead>
-              <TableHead>Gói Dịch Vụ</TableHead>
-              <TableHead>Trạng Thái</TableHead>
-              <TableHead>Ngày Tạo</TableHead>
-              <TableHead class="text-right">Thao Tác</TableHead>
+              <TableHead>{{ $t('page.workspace.col_name') }}</TableHead>
+              <TableHead>{{ $t('page.workspace.col_slug') }}</TableHead>
+              <TableHead>{{ $t('page.workspace.col_plan') }}</TableHead>
+              <TableHead>{{ $t('page.workspace.col_status') }}</TableHead>
+              <TableHead>{{ $t('page.workspace.col_created_at') }}</TableHead>
+              <TableHead class="text-right">{{ $t('page.workspace.col_actions') }}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -347,7 +350,7 @@ onMounted(() => {
                     variant="secondary"
                     class="text-xs font-normal"
                   >
-                    Đang chọn
+                    {{ $t('page.workspace.action_selected') }}
                   </Badge>
                 </div>
               </TableCell>
@@ -361,13 +364,19 @@ onMounted(() => {
               </TableCell>
 
               <TableCell>
-                <Badge variant="outline" class="font-mono text-xs uppercase">
+                <Badge
+                  variant="outline"
+                  class="text-xs uppercase font-medium"
+                >
                   {{ getPlanInfo(record.metadata?.plan).label }}
                 </Badge>
               </TableCell>
 
               <TableCell>
-                <Badge variant="outline" class="text-xs capitalize font-normal">
+                <Badge
+                  variant="outline"
+                  class="text-xs capitalize font-normal"
+                >
                   <span
                     class="mr-1.5 size-1.5 rounded-full"
                     :class="
@@ -398,8 +407,8 @@ onMounted(() => {
                   >
                     {{
                       record.id === activeTenantId
-                        ? 'Đang hoạt động'
-                        : 'Kích Hoạt'
+                        ? $t('page.workspace.action_active')
+                        : $t('page.workspace.action_activate')
                     }}
                   </Button>
                   <Button
@@ -408,7 +417,7 @@ onMounted(() => {
                     class="h-7 text-xs"
                     @click="router.push(`/tenants/${record.id}`)"
                   >
-                    Chi Tiết
+                    {{ $t('page.workspace.action_detail') }}
                   </Button>
                   <Button
                     variant="outline"
@@ -416,7 +425,7 @@ onMounted(() => {
                     class="h-7 text-xs"
                     @click="handleConnectCli(record)"
                   >
-                    Ghép Nối Máy Trạm
+                    {{ $t('page.workspace.action_connect') }}
                   </Button>
                 </div>
               </TableCell>
@@ -427,7 +436,7 @@ onMounted(() => {
                 colspan="6"
                 class="h-24 text-center text-sm text-muted-foreground"
               >
-                Chưa có Workspace nào. Nhấn "+ Tạo Workspace" để bắt đầu.
+                {{ $t('page.workspace.empty_title') }}. {{ $t('page.workspace.empty_prompt') }}
               </TableCell>
             </TableRow>
           </TableBody>
@@ -460,12 +469,12 @@ onMounted(() => {
               variant="default"
               class="text-xs"
             >
-              Đang chọn
+              {{ $t('page.workspace.action_selected') }}
             </Badge>
           </div>
 
           <div class="mt-3 flex flex-wrap items-center gap-2">
-            <Badge variant="secondary" class="font-mono text-xs uppercase">
+            <Badge variant="secondary" class="text-xs uppercase font-medium">
               {{ getPlanInfo(tenant.metadata?.plan).label }}
             </Badge>
             <Badge variant="outline" class="text-xs font-normal capitalize">
@@ -484,14 +493,18 @@ onMounted(() => {
             </span>
           </div>
 
-          <div class="mt-4 flex flex-wrap gap-2 pt-2 border-t border-border/40">
+          <div
+            class="mt-4 flex flex-wrap gap-2 pt-2 border-t border-border/40"
+          >
             <Button
               size="sm"
               class="flex-1 h-8 text-xs"
-              :variant="tenant.id === activeTenantId ? 'secondary' : 'default'"
+              :variant="
+                tenant.id === activeTenantId ? 'secondary' : 'default'
+              "
               @click="handleSelectTenant(tenant)"
             >
-              {{ tenant.id === activeTenantId ? 'Đang chọn' : 'Kích Hoạt' }}
+              {{ tenant.id === activeTenantId ? $t('page.workspace.action_active') : $t('page.workspace.action_activate') }}
             </Button>
             <Button
               variant="outline"
@@ -499,7 +512,7 @@ onMounted(() => {
               class="h-8 text-xs"
               @click="router.push(`/tenants/${tenant.id}`)"
             >
-              Chi Tiết
+              {{ $t('page.workspace.action_detail') }}
             </Button>
             <Button
               variant="outline"
@@ -507,7 +520,7 @@ onMounted(() => {
               class="h-8 text-xs"
               @click="handleConnectCli(tenant)"
             >
-              Ghép Nối Máy Trạm
+              {{ $t('page.workspace.action_connect') }}
             </Button>
           </div>
         </div>
@@ -516,7 +529,7 @@ onMounted(() => {
           v-if="tenants.length === 0 && !loadingTenants"
           class="py-8 text-center text-sm text-muted-foreground"
         >
-          Chưa có Workspace nào. Nhấn "+ Tạo Workspace" để bắt đầu.
+          {{ $t('page.workspace.empty_title') }}. {{ $t('page.workspace.empty_prompt') }}
         </div>
       </div>
     </div>

@@ -131,12 +131,18 @@ watch(
       await nextTick();
       if (!contentRef.value) return;
       const innerContentRef = contentRef.value.getContentRef();
-      dialogRef.value = innerContentRef.$el;
+      dialogRef.value = innerContentRef?.$el ?? innerContentRef;
       // reopen modal reassign value
       const { offsetX, offsetY } = transform;
-      dialogRef.value.style.transform = shouldCentered.value
-        ? `translate(${offsetX}px, calc(-50% + ${offsetY}px))`
-        : `translate(${offsetX}px, ${offsetY}px)`;
+      if (dialogRef.value?.style) {
+        if (offsetX !== 0 || offsetY !== 0) {
+          dialogRef.value.style.transform = shouldCentered.value
+            ? `translate(${offsetX}px, calc(-50% + ${offsetY}px))`
+            : `translate(${offsetX}px, ${offsetY}px)`;
+        } else {
+          dialogRef.value.style.transform = '';
+        }
+      }
     }
   },
   { immediate: true },
@@ -237,6 +243,7 @@ function handleClosed() {
     <DialogContent
       ref="contentRef"
       :append-to="getAppendTo"
+      :centered="shouldCentered"
       :class="
         cn(
           'inset-x-0 top-[10vh] mx-auto flex w-130 flex-col p-0',
@@ -248,7 +255,7 @@ function handleClosed() {
               !shouldFullscreen,
             'top-0 left-0 size-full! max-h-full! max-w-full! transform-[translate(0,0)]!':
               shouldFullscreen,
-            'top-1/2': centered && !shouldFullscreen,
+            'top-1/2 -translate-y-1/2': centered && !shouldFullscreen,
             'duration-300': !dragging,
             hidden: isClosed,
           },

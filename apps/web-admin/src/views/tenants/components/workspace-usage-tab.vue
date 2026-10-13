@@ -65,7 +65,7 @@ const runsPercent = computed(() =>
               <span class="text-base font-semibold text-foreground">
                 {{ quota.plan_name }}
               </span>
-              <Badge variant="secondary" class="text-xs uppercase font-mono">
+              <Badge variant="secondary" class="text-xs uppercase font-medium">
                 ${{ subscription?.plan?.price_monthly_usd || 0 }}/tháng
               </Badge>
             </div>
@@ -106,7 +106,7 @@ const runsPercent = computed(() =>
             <Users class="size-4 text-muted-foreground" />
             <span>Thành Viên Workspace</span>
           </div>
-          <span class="font-mono text-xs text-muted-foreground">
+          <span class="text-xs font-medium text-foreground">
             {{ quota.used_members }} / {{ quota.max_members }}
           </span>
         </div>
@@ -134,7 +134,7 @@ const runsPercent = computed(() =>
             <Cpu class="size-4 text-muted-foreground" />
             <span>Runner Devices Kết Nối</span>
           </div>
-          <span class="font-mono text-xs text-muted-foreground">
+          <span class="text-xs font-medium text-foreground">
             {{ quota.used_devices }} / {{ quota.max_devices }}
           </span>
         </div>
@@ -162,7 +162,7 @@ const runsPercent = computed(() =>
             <HardDrive class="size-4 text-muted-foreground" />
             <span>Dung Lượng Lưu Trữ</span>
           </div>
-          <span class="font-mono text-xs text-muted-foreground">
+          <span class="text-xs font-medium text-foreground">
             {{ quota.used_storage_mb }} MB / {{ quota.max_storage_mb }} MB
           </span>
         </div>
@@ -190,7 +190,7 @@ const runsPercent = computed(() =>
             <PlayCircle class="size-4 text-muted-foreground" />
             <span>Lượt Chạy Hàng Tháng</span>
           </div>
-          <span class="font-mono text-xs text-muted-foreground">
+          <span class="text-xs font-medium text-foreground">
             {{ quota.used_monthly_runs }} / {{ quota.max_monthly_runs }}
           </span>
         </div>

@@ -140,7 +140,7 @@ const defaultPreferences: Preferences = {
     fullscreenButtonPosition: 'header',
     globalSearch: true,
     globalSearchButtonPosition: 'header',
-    languageToggle: false,
+    languageToggle: true,
     languageToggleButtonPosition: 'header',
     lockScreen: true,
     lockScreenButtonPosition: 'header',

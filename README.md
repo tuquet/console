@@ -16,11 +16,13 @@ Console quản trị tập trung, quản lý danh tính đa tổ chức (Multi-T
 
 Hệ thống được thiết kế theo nguyên tắc **KISS**, **YAGNI**, **Mobile-First Dual View** và kết nối trực tiếp với các schema chuyên biệt của Tuquet Cloud (`public`, `runners`, `automa`, `billing`):
 
+- **[Tổng Quan Kiến Trúc Hệ Thống (Architecture Overview)](docs/architecture/overview.md)**: Nền tảng IAM đa tổ chức, PostgREST multi-schema, 100% telemetry và phân quyền động DB.
+- **[Sổ Tay Đặc Tả 22 Tuyến Đường (Route Reference Manual)](docs/routes/README.md)**: Danh mục toàn diện 22 routes, sơ đồ phân cấp và ranh giới plugin.
+- **[Quy Chuẩn Thiết Kế Giao Diện & Design Tokens](docs/architecture/styling-guide.md)**: Semantic HSL Design Tokens và Typography SSOT.
 - **[Bản Ghi Quyết Định Kiến Trúc (ADRs)](docs/decisions/)**:
-  - [`ADR-001: Kiến Trúc Định Tuyến Admin V2 & Tích Hợp Telemetry Supabase`](docs/decisions/0001-admin-routing-v2.md)
-  - [`ADR-002: Kiến Trúc Quản Trị Nền Tảng Platform Superadmin & Giám Sát Xuyên Tenant`](docs/decisions/0002-superadmin-platform-governance.md)
-- **[Sổ Tay Đặc Tả Chi Tiết Từng Route (Route Reference Manual)](docs/routes/README.md)**: Danh mục toàn diện 18 routes, sơ đồ phân cấp và ranh giới plugin.
-- **[Tài Liệu Thiết Kế Định Tuyến Tổng Thể (RFC V2)](docs/routing_architecture.md)**
+  - [`ADR-001: Kiến Trúc Định Tuyến & Đa Schema PostgREST`](docs/decisions/0001-routing-architecture.md)
+  - [`ADR-002: Kiến Trúc Phông Chữ Self-Hosted & Typography SSOT`](docs/decisions/0002-typography-and-font-system.md)
+  - [`ADR-003: Kiến Trúc Quản Trị Nền Tảng Platform Superadmin & RLS Bypass`](docs/decisions/0003-platform-superadmin.md)
 - **[Bản Đồ Năng Lực (Capability Map)](docs/specs/capability-map.md)**
 
 ---

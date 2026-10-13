@@ -21,7 +21,10 @@ const chartData = computed(() => {
   ].filter((item) => item.value > 0);
 });
 
-const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))'];
+const colors = [
+  '#0284c7', // Core Kernel (System): Sky-600
+  '#10b981', // Service Modules: Emerald-500
+];
 </script>
 
 <template>

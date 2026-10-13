@@ -19,6 +19,7 @@
  */
 export interface SupportedLanguages {
   'en-US': 'English';
+  'vi-VN': 'Tiếng Việt';
   'zh-CN': 'Chinese (Simplified)';
 }
 

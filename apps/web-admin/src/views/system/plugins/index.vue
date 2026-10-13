@@ -54,7 +54,7 @@ onMounted(() => {
         >
           Plugins Hệ Thống
         </h1>
-        <Badge variant="secondary" class="font-mono text-xs uppercase">
+        <Badge variant="secondary" class="text-xs uppercase font-medium">
           System Catalog
         </Badge>
       </div>
@@ -94,7 +94,7 @@ onMounted(() => {
           >
         </div>
 
-        <div class="flex items-center gap-3 text-muted-foreground font-mono">
+        <div class="flex items-center gap-3 text-muted-foreground">
           <span>{{ plugins.filter((p) => p.is_core).length }} Core Kernel</span>
           <span>&bull;</span>
           <span>{{ plugins.filter((p) => !p.is_core).length }} Extensions</span>

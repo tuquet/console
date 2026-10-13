@@ -87,7 +87,7 @@ onMounted(() => {
         >
           Quy Trình Tự Động Hóa
         </h1>
-        <Badge variant="secondary" class="font-mono text-xs uppercase">
+        <Badge variant="secondary" class="text-xs uppercase font-medium">
           Visual Flow Graphs
         </Badge>
       </div>

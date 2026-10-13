@@ -154,7 +154,7 @@ function navigateToFleet() {
             <CreditCard class="size-4 text-muted-foreground" />
           </div>
           <div class="mt-3 flex items-center gap-2">
-            <Badge variant="default" class="text-xs uppercase font-mono">
+            <Badge variant="default" class="text-xs uppercase font-medium">
               {{ subscription?.plan?.name || 'Free Starter' }}
             </Badge>
             <span class="text-xs text-muted-foreground">

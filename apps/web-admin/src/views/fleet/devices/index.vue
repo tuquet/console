@@ -41,6 +41,7 @@ import {
   revokeFleetDeviceApi,
 } from '#/api';
 import { useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 import FleetMetrics from './components/fleet-metrics.vue';
 import ConnectFleetModal from './components/modals/connect-fleet-modal.vue';
@@ -165,10 +166,10 @@ onMounted(() => {
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Quản Trị Máy Trạm
+          {{ $t('page.fleet_view.title') }}
         </h1>
-        <Badge variant="secondary" class="font-mono text-xs uppercase">
-          Device Fleet
+        <Badge variant="secondary" class="text-xs uppercase font-medium">
+          {{ $t('page.fleet_view.badge') }}
         </Badge>
       </div>
 
@@ -180,14 +181,14 @@ onMounted(() => {
           @click="isConnectModalVisible = true"
         >
           <Plus class="size-3.5 shrink-0" />
-          <span>Ghép Nối Máy Trạm</span>
+          <span>{{ $t('page.fleet_view.connect_btn') }}</span>
         </Button>
         <Button
           variant="outline"
           size="icon"
           :disabled="loading"
           class="size-8 shrink-0"
-          title="Làm mới"
+          :title="$t('page.fleet_view.refresh')"
           @click="loadFleetData"
         >
           <RefreshCw
@@ -358,7 +359,7 @@ onMounted(() => {
 
               <!-- Driver Column -->
               <TableCell>
-                <Badge variant="secondary" class="uppercase text-xs font-mono">
+                <Badge variant="secondary" class="uppercase text-xs font-medium">
                   {{ record.driver_type }}
                 </Badge>
               </TableCell>
@@ -566,14 +567,14 @@ onMounted(() => {
         <h3 class="mt-3 text-sm font-semibold text-foreground">
           {{
             filterStatus === 'all'
-              ? 'Chưa có máy trạm nào'
-              : 'Không có máy trạm phù hợp bộ lọc'
+              ? $t('page.fleet_view.empty_all')
+              : $t('page.fleet_view.empty_filtered')
           }}
         </h3>
         <p class="mt-1 max-w-sm text-xs text-muted-foreground">
           {{
             filterStatus === 'all'
-              ? 'Ghép nối máy trạm chạy daemon để nhận và thực thi các tác vụ tự động.'
+              ? $t('page.fleet_view.empty_desc')
               : 'Thử chuyển sang bộ lọc khác hoặc kiểm tra lại kết nối thiết bị.'
           }}
         </p>
@@ -584,7 +585,7 @@ onMounted(() => {
           @click="isConnectModalVisible = true"
         >
           <Plus class="size-3.5" />
-          <span>Ghép Nối Máy Trạm</span>
+          <span>{{ $t('page.fleet_view.connect_btn') }}</span>
         </Button>
       </div>
     </div>

@@ -89,7 +89,7 @@ function handleLegendItemClick(d: BulletLegendItemInterface, i: number) {
       :margin="{ bottom: 10, left: 24, right: 12, top: 10 }"
       :style="{ height: isMounted ? '100%' : 'auto', width: '100%' }"
     >
-      <svg height="0" width="0">
+      <svg class="absolute" height="0" width="0">
         <defs>
           <linearGradient
             v-for="(color, i) in colors"
@@ -101,8 +101,8 @@ function handleLegendItemClick(d: BulletLegendItemInterface, i: number) {
             y2="1"
           >
             <template v-if="showGradient">
-              <stop offset="5%" :stop-color="color" stop-opacity="0.35" />
-              <stop offset="95%" :stop-color="color" stop-opacity="0.0" />
+              <stop offset="0%" :stop-color="color" stop-opacity="0.45" />
+              <stop offset="100%" :stop-color="color" stop-opacity="0.02" />
             </template>
             <template v-else>
               <stop offset="0%" :stop-color="color" />
@@ -123,9 +123,10 @@ function handleLegendItemClick(d: BulletLegendItemInterface, i: number) {
         <VisArea
           :attributes="{
             [Area.selectors.area]: {
-              fill: `url(#${chartRef}-color-${i})`,
+              fill: showGradient ? `url(#${chartRef}-color-${i})` : colors[i],
             },
           }"
+          :color="() => (showGradient ? `url(#${chartRef}-color-${i})` : colors[i])"
           :curve-type="curveType"
           :opacity="
             legendItems.find((item) => item.name === category)?.inactive
@@ -134,7 +135,6 @@ function handleLegendItemClick(d: BulletLegendItemInterface, i: number) {
           "
           :x="(_d: Data, i: number) => i"
           :y="(d: Data) => d[category]"
-          color="auto"
         />
       </template>
 
@@ -150,6 +150,7 @@ function handleLegendItemClick(d: BulletLegendItemInterface, i: number) {
           }"
           :color="colors[i]"
           :curve-type="curveType"
+          :line-width="2.5"
           :x="(_d: Data, i: number) => i"
           :y="(d: Data) => d[category]"
         />
@@ -159,8 +160,13 @@ function handleLegendItemClick(d: BulletLegendItemInterface, i: number) {
         v-if="showXAxis"
         :domain-line="false"
         :grid-line="false"
-        :tick-format="xFormatter ?? ((v: number) => data[v]?.[index])"
+        :num-ticks="data.length"
+        :tick-format="
+          xFormatter ??
+          ((v: number) => (Number.isInteger(v) ? (data[v]?.[index] ?? '') : ''))
+        "
         :tick-line="false"
+        :tick-values="data.map((_, i) => i)"
         tick-text-color="hsl(var(--muted-foreground))"
         type="x"
       />

@@ -1,7 +1,8 @@
 # Đặc Tả Route: Xác Thực & Tuyến Lõi (Authentication & Core Routes)
 
 > **Module File:** [`apps/web-admin/src/router/routes/core.ts`](../../apps/web-admin/src/router/routes/core.ts)  
-> **Layouts:** `AuthPageLayout` (cho các trang xác thực) và `BasicLayout` (cho khung quản trị)
+> **Layouts:** `AuthPageLayout` (cho các trang xác thực) và `BasicLayout` (cho khung quản trị)  
+> **Tài liệu kiến trúc:** [`docs/architecture/overview.md`](../architecture/overview.md)
 
 ---
 

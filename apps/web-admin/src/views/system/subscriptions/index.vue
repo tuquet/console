@@ -97,7 +97,7 @@ onMounted(() => {
         >
           Quản Lý Thuê Bao
         </h1>
-        <Badge variant="secondary" class="font-mono text-xs uppercase">
+        <Badge variant="secondary" class="text-xs uppercase font-medium">
           SaaS Billing
         </Badge>
         <span v-if="!loading" class="text-xs font-medium text-muted-foreground">
@@ -325,7 +325,7 @@ onMounted(() => {
               {{ sub.plan_name }} (${{ sub.price_monthly_usd }}/tháng)
             </span>
             <span
-              class="flex items-center gap-1 font-mono text-[11px] text-muted-foreground"
+              class="flex items-center gap-1 text-xs text-muted-foreground"
             >
               <Calendar class="size-3" />
               {{ formatDate(sub.current_period_end) }}

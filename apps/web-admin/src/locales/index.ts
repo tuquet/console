@@ -43,8 +43,11 @@ async function loadThirdPartyMessage(lang: SupportedLanguagesType) {
  * Load Day.js locale
  * @param lang
  */
-async function loadDayjsLocale(_lang: SupportedLanguagesType) {
-  const locale = await import('dayjs/locale/en');
+async function loadDayjsLocale(lang: SupportedLanguagesType) {
+  const locale =
+    lang === 'vi-VN'
+      ? await import('dayjs/locale/vi')
+      : await import('dayjs/locale/en');
   if (locale) {
     dayjs.locale(locale);
   }

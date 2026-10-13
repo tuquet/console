@@ -129,7 +129,7 @@ onMounted(() => {
               </div>
             </TableCell>
             <TableCell>
-              <Badge variant="outline" class="font-mono text-xs">
+              <Badge variant="outline" class="text-xs font-normal">
                 {{ log.action }}
               </Badge>
             </TableCell>
@@ -168,10 +168,10 @@ onMounted(() => {
         class="rounded-xl border border-border/60 bg-card p-4 shadow-sm space-y-2 text-xs"
       >
         <div class="flex items-center justify-between">
-          <Badge variant="outline" class="font-mono text-xs">
+          <Badge variant="outline" class="text-xs font-normal">
             {{ log.action }}
           </Badge>
-          <span class="font-mono text-[11px] text-muted-foreground">
+          <span class="text-xs text-muted-foreground">
             {{ formatDate(log.created_at) }}
           </span>
         </div>

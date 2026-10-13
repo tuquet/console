@@ -1,6 +1,6 @@
 # Spec: `data-access`
 
-> Module id: `data-access` (xem [capability-map.md](capability-map.md)) — **DRAFT, chờ duyệt** Kiến trúc: [routing_architecture.md](../routing_architecture.md) §4, §5, §7
+> Module id: `data-access` (xem [capability-map.md](capability-map.md)) — **ĐÃ HOÀN THÀNH** | Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
 
 ## Objective
 

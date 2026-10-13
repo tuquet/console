@@ -19,6 +19,7 @@ import {
 
 import { getFleetProxiesApi } from '#/api';
 import { useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 defineOptions({ name: 'FleetProxies' });
 
@@ -100,7 +101,7 @@ onMounted(() => {
         >
           Quản Trị Bể Proxy
         </h1>
-        <Badge variant="secondary" class="font-mono text-xs uppercase">
+        <Badge variant="secondary" class="text-xs uppercase font-medium">
           Proxy Pool
         </Badge>
       </div>
@@ -415,14 +416,14 @@ onMounted(() => {
         <h3 class="mt-3 text-sm font-semibold text-foreground">
           {{
             filterStatus === 'all'
-              ? 'Chưa có proxy nào trong bể'
+              ? $t('page.fleet_view.proxies_empty')
               : 'Không có proxy phù hợp bộ lọc'
           }}
         </h3>
         <p class="mt-1 max-w-sm text-xs text-muted-foreground">
           {{
             filterStatus === 'all'
-              ? 'Hạ tầng proxy trung tâm được cấu hình qua Bridge daemon hoặc cập nhật trực tiếp từ Tuquet Cloud.'
+              ? $t('page.fleet_view.proxies_empty_desc')
               : 'Thử chuyển sang bộ lọc khác để kiểm tra trạng thái proxy.'
           }}
         </p>

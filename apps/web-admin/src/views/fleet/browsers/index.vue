@@ -19,6 +19,7 @@ import {
 
 import { getFleetBrowsersApi } from '#/api';
 import { useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 defineOptions({ name: 'FleetBrowsers' });
 
@@ -95,7 +96,7 @@ onMounted(() => {
         >
           Hồ Sơ Trình Duyệt Đám Mây
         </h1>
-        <Badge variant="secondary" class="font-mono text-xs uppercase">
+        <Badge variant="secondary" class="text-xs uppercase font-medium">
           Cloud Anti-Detect
         </Badge>
       </div>
@@ -244,7 +245,7 @@ onMounted(() => {
 
               <TableCell>
                 <div class="flex items-center gap-1.5 text-xs">
-                  <Badge variant="outline" class="font-mono uppercase text-xs">
+                  <Badge variant="outline" class="uppercase text-xs font-medium">
                     {{ b.os_platform }}
                   </Badge>
                   <span class="font-mono text-muted-foreground">
@@ -421,14 +422,14 @@ onMounted(() => {
         <h3 class="mt-3 text-sm font-semibold text-foreground">
           {{
             filterStatus === 'all'
-              ? 'Chưa có hồ sơ trình duyệt nào'
+              ? $t('page.fleet_view.browsers_empty')
               : 'Không có hồ sơ trình duyệt phù hợp bộ lọc'
           }}
         </h3>
         <p class="mt-1 max-w-sm text-xs text-muted-foreground">
           {{
             filterStatus === 'all'
-              ? 'Hồ sơ Anti-Detect Cloud Browser được khởi tạo và đồng bộ tự động từ Runner daemon.'
+              ? $t('page.fleet_view.browsers_empty_desc')
               : 'Thử chuyển sang bộ lọc khác để kiểm tra trạng thái các profile.'
           }}
         </p>

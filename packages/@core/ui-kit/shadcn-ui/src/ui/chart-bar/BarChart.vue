@@ -128,8 +128,13 @@ const selectorsBar = computed(() =>
         v-if="showXAxis"
         :domain-line="false"
         :grid-line="false"
-        :tick-format="xFormatter ?? ((v: number) => data[v]?.[index])"
+        :num-ticks="data.length"
+        :tick-format="
+          xFormatter ??
+          ((v: number) => (Number.isInteger(v) ? (data[v]?.[index] ?? '') : ''))
+        "
         :tick-line="false"
+        :tick-values="data.map((_, i) => i)"
         tick-text-color="hsl(var(--muted-foreground))"
         type="x"
       />

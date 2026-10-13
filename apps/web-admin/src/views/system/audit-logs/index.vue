@@ -109,7 +109,7 @@ onMounted(() => {
         >
           Nhật Ký Kiểm Toán
         </h1>
-        <Badge variant="secondary" class="font-mono text-xs uppercase">
+        <Badge variant="secondary" class="text-xs uppercase font-medium">
           Global Audit Trail
         </Badge>
         <span v-if="!loading" class="text-xs font-medium text-muted-foreground">

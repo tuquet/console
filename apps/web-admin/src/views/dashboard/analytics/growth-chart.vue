@@ -12,7 +12,7 @@ const props = defineProps<{
 const chartData = computed(() => {
   if (!props.data || props.data.length === 0) return [];
   return props.data.map((d) => ({
-    count: d.count,
+    Workspace: d.count,
     date: d.date,
   }));
 });
@@ -23,8 +23,8 @@ const chartData = computed(() => {
     <AreaChart
       :data="chartData"
       index="date"
-      :categories="['count']"
-      :colors="['hsl(var(--chart-1))']"
+      :categories="['Workspace']"
+      :colors="['#38bdf8']"
       :show-gradient="true"
       class="h-full w-full"
     />

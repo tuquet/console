@@ -1,7 +1,7 @@
 # Spec: `automation-engine`
 
 > Module id: `automation-engine` (xem [capability-map.md](capability-map.md)) — **DRAFT, chờ duyệt**  
-> Kiến trúc nguồn: [`docs/routing_architecture.md`](../routing_architecture.md) §1.2, §3, §4, §7
+> Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
 
 ---
 

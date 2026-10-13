@@ -91,6 +91,18 @@
   --vis-primary-color: var(--primary);
   --vis-secondary-color: var(--muted);
   --vis-text-color: var(--muted-foreground);
+  --vis-tooltip-background-color: transparent !important;
+  --vis-tooltip-border-color: transparent !important;
+  --vis-tooltip-text-color: transparent !important;
+  --vis-tooltip-shadow-color: transparent !important;
+  --vis-tooltip-backdrop-filter: none !important;
+  --vis-tooltip-padding: 0 !important;
+  --vis-tooltip-box-shadow: none !important;
+  --vis-tooltip-border-radius: 0 !important;
+  --vis-dark-tooltip-background-color: transparent !important;
+  --vis-dark-tooltip-border-color: transparent !important;
+  --vis-dark-tooltip-text-color: transparent !important;
+  --vis-dark-tooltip-shadow-color: transparent !important;
 
   /* ============= Custom ============= */
 

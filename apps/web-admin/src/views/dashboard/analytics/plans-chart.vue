@@ -28,9 +28,9 @@ const chartData = computed(() => {
 });
 
 const colors = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
+  '#38bdf8', // Pro Plan: Sky Blue
+  '#94a3b8', // Free Tier: Slate Gray
+  '#a855f7', // Enterprise: Purple
 ];
 </script>
 

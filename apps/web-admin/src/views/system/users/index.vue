@@ -76,7 +76,7 @@ onMounted(() => {
         >
           Người Dùng Nền Tảng
         </h1>
-        <Badge variant="secondary" class="font-mono text-xs uppercase">
+        <Badge variant="secondary" class="text-xs uppercase font-medium">
           Superadmin Directory
         </Badge>
         <span v-if="!loading" class="text-xs font-medium text-muted-foreground">
@@ -270,7 +270,7 @@ onMounted(() => {
               <Building2 class="size-3.5 text-muted-foreground" />
               {{ user.tenant_count }} tổ chức
             </span>
-            <span class="flex items-center gap-1 font-mono text-[11px]">
+            <span class="flex items-center gap-1 text-xs">
               <Calendar class="size-3 text-muted-foreground" />
               {{ formatDate(user.created_at) }}
             </span>

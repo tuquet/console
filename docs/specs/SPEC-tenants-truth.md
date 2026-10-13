@@ -1,6 +1,6 @@
 # Spec: `tenants-truth`
 
-> Module id: `tenants-truth` (xem [capability-map.md](capability-map.md)) — **DRAFT, chờ duyệt** Kiến trúc nguồn: [`docs/routing_architecture.md`](../routing_architecture.md) §1.2, §3, §4, §7
+> Module id: `tenants-truth` (xem [capability-map.md](capability-map.md)) — **ĐÃ HOÀN THÀNH** | Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
 
 ---
 

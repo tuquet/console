@@ -1,6 +1,6 @@
-# Capability Map: Admin Routing V2
+# Bản Đồ Năng Lực Hệ Thống (Admin Capability Map)
 
-> Status: **ĐÃ DUYỆT** (2026-10-13, quyết định D1–D5 trong RFC §7) Kiến trúc nguồn: [`docs/routing_architecture.md`](../routing_architecture.md) (RFC V2)
+> Trạng thái: **ĐÃ HOÀN THÀNH** (100% 7/7 Modules) | Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
 
 | Module id | Trách nhiệm | Phụ thuộc |
 | :-- | :-- | :-- |

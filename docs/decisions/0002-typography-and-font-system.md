@@ -10,14 +10,16 @@
 
 ## Bối Cảnh (Context)
 
-Hệ thống quản trị Web Admin (`apps/web-admin`) trước đây gặp phải 2 hạn chế lớn về hiển thị và vận hành:
+Hệ thống quản trị Web Admin (`apps/web-admin`) cần đảm bảo tối ưu hiệu năng hiển thị và tính nhất quán kiểu chữ trên toàn bộ giao diện:
 
-1. **Độ trễ tải font-family từ Google CDN:** Tệp `index.html` tải 3 bộ font qua kết nối bên ngoài (`fonts.googleapis.com` / `fonts.gstatic.com`) với hơn 15 biến thể (weights và italics) của `Be Vietnam Pro`, `Inter`, và `Roboto`. Trong môi trường máy trạm hoặc doanh nghiệp có firewall chặn outbound, việc này gây nghẽn render-blocking, xuất hiện hiện tượng FOUT/FOIT (chữ giật/mất lúc đầu), và tăng thời gian tải trang ban đầu thêm từ 800ms - 2500ms.
-2. **Thiếu tiêu chuẩn Typography nhất quán:** Hệ thống không có tài liệu chuẩn (SSOT) về typography tại `skills/`. Các lập trình viên và AI Agent khi xây dựng giao diện thường sử dụng class Tailwind tự do (`text-3xl font-extrabold`, `text-xs font-semibold`, `text-[13px]`), làm mất đi sự đồng nhất giữa các bảng dữ liệu, card chỉ số và form nhập liệu.
+1. **Độc lập kết nối mạng bên ngoài (Zero Google CDN Dependency):** Việc tải font qua kết nối bên ngoài (`fonts.googleapis.com` / `fonts.gstatic.com`) trong môi trường máy trạm hoặc mạng doanh nghiệp có firewall gây nghẽn render-blocking, xuất hiện hiện tượng FOUT/FOIT (chữ giật/mất lúc đầu), và tăng thời gian tải trang ban đầu.
+2. **Tiêu chuẩn Typography nhất quán:** Cần thiết lập tài liệu chuẩn (SSOT) về typography để các màn hình, bảng dữ liệu, card chỉ số và form nhập liệu tuân thủ thang đo kích thước và độ đậm nhất quán.
+
+---
 
 ## Quyết Định Kiến Trúc (Decisions)
 
-### D1: Tự Host Bộ Ba Phông Chữ Không Chân (Zero Google CDN Dependency)
+### D1: Tự Host Bộ Ba Phông Chữ Không Chân (Self-Hosted Fonts)
 
 - **Quyết định:** Loại bỏ hoàn toàn các thẻ `<link rel="preconnect">` và stylesheet Google Fonts khỏi `apps/web-admin/index.html`.
 - Toàn bộ 3 font không chân (`Be Vietnam Pro`, `Inter`, `Roboto`) được đóng gói tự host qua `@fontsource/*` trong `@core/base/design/src/css/fonts.css` với định dạng WOFF2 nén hiện đại và kích hoạt thuộc tính `font-display: swap`.
@@ -36,7 +38,7 @@ Hệ thống quản trị Web Admin (`apps/web-admin`) trước đây gặp ph�
 ### D3: Thiết Lập Chuẩn Typography SSOT Tại `skills/rules/TYPOGRAPHY.md`
 
 - **Quyết định:** Soạn thảo `skills/rules/TYPOGRAPHY.md` làm tiêu chuẩn tham chiếu duy nhất cho toàn bộ hệ sinh thái Tuquet (Web Admin, Tauri Desktop, Extension).
-- Ràng buộc vào `skills/rules/AGENTS.md` và workspace `AGENTS.md` thành điều khoản bắt buộc:
+- Quy định các điều khoản bắt buộc:
   - Thang đo font-size 7 cấp (`text-2xs` đến `text-2xl`).
   - Ma trận kiểu chữ cho từng component: Table Headers (`text-xs font-semibold uppercase tracking-wider`), Table Cells (`text-sm font-normal`), KPI Values (`text-2xl font-bold tracking-tight`), Badges/IDs (`font-mono text-xs`).
   - Nghiêm cấm các class kích thước pixel tùy ý (`text-[13px]`, `text-[15px]`) và cấm dùng `italic` trên các thành phần điều hướng UI.
@@ -46,11 +48,16 @@ Hệ thống quản trị Web Admin (`apps/web-admin`) trước đây gặp ph�
 - **Quyết định:** Cập nhật `admin/internal/tailwind-config/src/theme.css` bổ sung token mở rộng `--text-2xs` (10px) và `--font-mono` (`JetBrains Mono`, `Fira Code`, system mono).
 - Đồng bộ hóa các class trong các component bảng (`TableHead.vue`, `TableCell.vue`) và các màn hình chính (`fleet/browsers`, `fleet/devices`, `dashboard/analytics`).
 
+---
+
 ## Hệ Quả (Consequences)
 
-- **Tích cực:**
-  - Loại bỏ hoàn toàn 100% request ra bên ngoài Google CDN; loại bỏ triệt để hiện tượng FOUT/FOIT.
-  - Người dùng có thể tùy biến phông chữ giao diện yêu thích ngay trong Preferences Drawer.
-  - AI Agent và kỹ sư phát triển có hợp đồng kiểm thử typography rõ ràng tại `skills/rules/TYPOGRAPHY.md`.
-- **Rủi ro & Biện pháp giảm thiểu:**
-  - Dung lượng bundle tăng ~250KB do chứa file WOFF2: Giảm thiểu bằng cách chỉ đóng gói các weights thiết yếu (400, 500, 600, 700) và tận dụng cơ chế chia nhỏ unicode-range (Latin & Vietnamese).
+### Tích cực:
+
+- Loại bỏ hoàn toàn 100% request ra bên ngoài Google CDN; loại bỏ triệt để hiện tượng FOUT/FOIT.
+- Người dùng có thể tùy biến phông chữ giao diện yêu thích ngay trong Preferences Drawer.
+- AI Agent và kỹ sư phát triển có hợp đồng kiểm thử typography rõ ràng tại `skills/rules/TYPOGRAPHY.md`.
+
+### Rủi ro & Biện pháp giảm thiểu:
+
+- Dung lượng bundle tăng ~250KB do chứa file WOFF2: Giảm thiểu bằng cách chỉ đóng gói các weights thiết yếu (400, 500, 600, 700) và tận dụng cơ chế chia nhỏ unicode-range (Latin & Vietnamese).

@@ -1,0 +1,14 @@
+{
+  "title": "Bản Giới Thiệu (Demos)",
+  "antd": "Ant Design Vue",
+  "vben": {
+    "title": "Dự Án",
+    "about": "Giới Thiệu",
+    "document": "Tài Liệu",
+    "antdv": "Phiên bản Ant Design Vue",
+    "antdv-next": "Phiên bản Antdv Next",
+    "naive-ui": "Phiên bản Naive UI",
+    "element-plus": "Phiên bản Element Plus",
+    "tdesign": "Phiên bản TDesign Vue"
+  }
+}

@@ -23,6 +23,10 @@ export const SUPPORT_LANGUAGES: LanguageOption<SupportedLanguagesType>[] = [
     label: 'English',
     value: 'en-US',
   },
+  {
+    label: 'Tiếng Việt',
+    value: 'vi-VN',
+  },
 ];
 
 // --- Dynamic Language List Management ---

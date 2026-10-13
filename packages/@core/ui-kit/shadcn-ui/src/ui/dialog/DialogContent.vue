@@ -29,6 +29,7 @@ const props = withDefaults(
     DialogContentProps & {
       animationType?: 'scale' | 'slide';
       appendTo?: HTMLElement | string;
+      centered?: boolean;
       class?: HTMLAttributes['class'];
       closeClass?: ClassType;
       closeDisabled?: boolean;
@@ -42,6 +43,7 @@ const props = withDefaults(
   {
     appendTo: 'body',
     animationType: 'slide',
+    centered: false,
     closeDisabled: false,
     showCloseButton: true,
   },
@@ -57,6 +59,7 @@ const delegatedProps = computed(() => {
     open: _open,
     showCloseButton: __,
     animationType: ___,
+    centered: ____,
     ...delegated
   } = props;
 

@@ -59,13 +59,13 @@ Trang Analytics không sử dụng bất kỳ số liệu giả hay mock data n�
 
 ---
 
-## 3. Các Tuyến Redirect Tương Thích Ngược (Backwards-Compatible Aliases)
+## 3. Tuyến Chuyển Hướng Tiện Ích (Navigation Shortcuts & Aliases)
 
-Để đảm bảo các bookmark cũ hoặc liên kết ngoài không bị hỏng sau khi tái cấu trúc:
+Hỗ trợ các đường dẫn tắt trực quan cho người dùng:
 
-- `/dashboard/workspace` $\rightarrow$ Tự động chuyển hướng tới `/tenants`.
-- `/dashboard/workspace/:id` $\rightarrow$ Tự động chuyển hướng tới `/tenants/:id`.
-- `/dashboard/fleet` $\rightarrow$ Tự động chuyển hướng tới `/fleet/devices`.
+- `/dashboard/workspace` $\rightarrow$ Chuyển hướng tới `/tenants`.
+- `/dashboard/workspace/:id` $\rightarrow$ Chuyển hướng tới `/tenants/:id`.
+- `/dashboard/fleet` $\rightarrow$ Chuyển hướng tới `/fleet/devices`.
 
 ---
 

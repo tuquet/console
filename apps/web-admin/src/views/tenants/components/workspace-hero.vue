@@ -64,7 +64,7 @@ const planName = computed(() => {
             <h1 class="text-lg sm:text-xl font-bold text-foreground truncate">
               {{ props.tenant.name }}
             </h1>
-            <Badge variant="secondary" class="font-mono uppercase text-xs">
+            <Badge variant="secondary" class="uppercase text-xs font-medium">
               {{ planName }}
             </Badge>
             <Badge variant="outline" class="text-xs font-normal">

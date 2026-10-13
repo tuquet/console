@@ -1,9 +1,9 @@
-# Tài Liệu Đặc Tả Chi Tiết Hệ Thống Định Tuyến (Admin Routing Reference)
+# Tài Liệu Đặc Tả Hệ Thống Định Tuyến (Admin Routing Reference)
 
-> **Mã tài liệu:** `REF-ADMIN-ROUTES-V2`  
-> **Phiên bản kiến trúc:** V2 (Grounded in `tuquet/cloud/supabase`)  
+> **Mã tài liệu:** `ARCH-ADMIN-ROUTES`  
 > **Áp dụng cho:** `tuquet/admin` (`apps/web-admin`)  
-> **Quyết định liên quan:** [`ADR-001`](../decisions/0001-admin-routing-v2.md) | [`RFC V2`](../routing_architecture.md)
+> **Tài liệu kiến trúc tổng thể:** [`docs/architecture/overview.md`](../architecture/overview.md)  
+> **Quyết định liên quan:** [`ADR-001: Định Tuyến & Đa Schema`](../decisions/0001-routing-architecture.md) | [`ADR-003: Platform Superadmin`](../decisions/0003-platform-superadmin.md)
 
 ---
 
@@ -119,9 +119,9 @@ Mọi route quản trị đều tuân thủ các quy tắc sau:
 
 ## 6. Liên Kết Chi Tiết Từng Module
 
-- [📘 Module Dashboard & Analytics](dashboard.md)
-- [🏢 Module Tenants / Workspaces](tenants.md)
-- [🖥️ Module Fleet & Runners](fleet.md)
-- [⚡ Module Automation Engine](automation.md)
-- [⚙️ Module System Catalog](system.md)
-- [🔐 Module Auth & Core](auth-and-core.md)
+- [Dashboard & Analytics](dashboard.md)
+- [Tenants / Workspaces](tenants.md)
+- [Fleet & Runners](fleet.md)
+- [Automation Engine](automation.md)
+- [System Catalog & Governance](system.md)
+- [Auth & Core Routes](auth.md)

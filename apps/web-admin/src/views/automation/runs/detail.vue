@@ -384,7 +384,7 @@ onUnmounted(() => {
           <span class="text-sm font-semibold text-foreground">
             Nhật Ký Thực Thi (Execution Logs)
           </span>
-          <Badge variant="outline" class="font-mono text-xs">
+          <Badge variant="outline" class="text-xs font-normal">
             {{ logs.length }} dòng
           </Badge>
         </div>

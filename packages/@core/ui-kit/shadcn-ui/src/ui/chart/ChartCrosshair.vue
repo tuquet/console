@@ -50,6 +50,13 @@ function color(_d: unknown, i: number) {
 </script>
 
 <template>
-  <VisTooltip :horizontal-shift="20" :vertical-shift="20" />
+  <VisTooltip
+    :attributes="{
+      style:
+        'background-color: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important;',
+    }"
+    :horizontal-shift="20"
+    :vertical-shift="20"
+  />
   <VisCrosshair :color="color" :template="template" />
 </template>

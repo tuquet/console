@@ -108,7 +108,7 @@ const { formatDate } = useDateFormat();
 
             <!-- Email Column -->
             <TableCell>
-              <span class="font-mono text-xs text-muted-foreground">
+              <span class="text-xs text-muted-foreground">
                 {{ record.email }}
               </span>
             </TableCell>
@@ -226,7 +226,7 @@ const { formatDate } = useDateFormat();
               <div class="font-medium text-foreground text-sm">
                 {{ member.full_name || 'Kỹ Sư Tuquet' }}
               </div>
-              <div class="font-mono text-xs text-muted-foreground">
+              <div class="text-xs text-muted-foreground">
                 {{ member.email }}
               </div>
             </div>

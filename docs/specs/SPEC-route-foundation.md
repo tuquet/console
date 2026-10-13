@@ -1,6 +1,6 @@
 # Spec: `route-foundation`
 
-> Module id: `route-foundation` (xem [capability-map.md](capability-map.md)) — **DRAFT, chờ duyệt** Kiến trúc nguồn: [`docs/routing_architecture.md`](../routing_architecture.md) §2, §3, §4, §6
+> Module id: `route-foundation` (xem [capability-map.md](capability-map.md)) — **ĐÃ HOÀN THÀNH** | Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
 
 ---
 

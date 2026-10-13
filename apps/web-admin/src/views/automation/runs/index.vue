@@ -19,6 +19,7 @@ import {
 
 import { calculateProgressPercentage, getCampaignRunsApi } from '#/api';
 import { useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 defineOptions({ name: 'AutomationRuns' });
 
@@ -105,7 +106,7 @@ onMounted(() => {
         >
           Phiên Chạy Chiến Dịch
         </h1>
-        <Badge variant="secondary" class="font-mono text-xs uppercase">
+        <Badge variant="secondary" class="text-xs uppercase font-medium">
           Campaign Runs
         </Badge>
       </div>
@@ -474,14 +475,14 @@ onMounted(() => {
         <h3 class="mt-3 text-sm font-semibold text-foreground">
           {{
             filterStatus === 'all'
-              ? 'Chưa có phiên chạy nào'
+              ? $t('page.runs_view.empty_title')
               : 'Không có phiên chạy phù hợp bộ lọc'
           }}
         </h3>
         <p class="mt-1 max-w-sm text-xs text-muted-foreground">
           {{
             filterStatus === 'all'
-              ? 'Các phiên chạy chiến dịch được phân phối và thực thi tự động qua các máy trạm Runner.'
+              ? $t('page.runs_view.empty_desc')
               : 'Thử chuyển sang bộ lọc khác để kiểm tra trạng thái các phiên chạy.'
           }}
         </p>

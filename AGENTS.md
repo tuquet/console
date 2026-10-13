@@ -159,7 +159,7 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
 ## 8. Kiến Trúc Client API & Nguyên Tắc DRY
 
 - **Single Source of Truth cho Supabase HTTP:**
-  - Toàn bộ các yêu cầu HTTP tới Supabase (Auth, REST, RPC) trong `apps/web-admin` **BẮT BUỘC** phải sử dụng hàm dùng chung `supabaseRequest<T>()` từ [`src/api/core/supabase-client.ts`](file:///root/tuquet/admin/apps/web-admin/src/api/core/supabase-client.ts).
+  - Toàn bộ các yêu cầu HTTP tới Supabase (Auth, REST, RPC) trong `apps/web-admin` **BẮT BUỘC** phải sử dụng hàm dùng chung `supabaseRequest<T>()` từ [`apps/web-admin/src/api/core/supabase-client.ts`](apps/web-admin/src/api/core/supabase-client.ts).
   - Tuyệt đối không khai báo lặp lại hàm `getSupabaseConfig()` hoặc hardcode biến môi trường `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` tại các file `auth.ts`, `tenant.ts`, `user.ts`.
 
 ---
@@ -170,3 +170,26 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
 - **Yêu cầu kỹ thuật:**
   1. Phía Daemon Rust (`cli`/`runner`): Bắt buộc bật `.allow_private_network(true)` trong cấu hình CORS Layer và kiểm duyệt nghiêm ngặt origin `*.tuquet.com`, `localhost`, `127.0.0.1`.
   2. Phía Web Admin (`fleet.ts`): Lệnh probe qua `fetch` phải có `mode: 'no-cors'`, gắn `AbortController` timeout ngắn ($\le 1200\text{ms}$) và xử lý lỗi không chặn giao diện (non-blocking) để trang web vẫn hoạt động trơn tru nếu người dùng bấm "Chặn".
+
+---
+
+## 10. Tiêu Chuẩn Soạn Thảo Tài Liệu & Cấu Trúc Thư Mục (Documentation Standards)
+
+### 10.1. Nguyên Tắc Tài Liệu Tiền Phát Hành (Pre-Release Clean Slate)
+- Đối với ứng dụng và tính năng chưa phát hành chính thức (pre-release), toàn bộ tài liệu kiến trúc, đặc tả tuyến đường và bản ghi quyết định phải được viết trực diện, chuẩn mực và định tính (Definitive Architecture).
+- **Tuyệt đối không sử dụng ngôn từ so sánh chuyển đổi phiên bản** (như "V1 vs V2", "phiên bản tiền nhiệm", "nợ kỹ thuật cũ", "sửa đổi so với bản trước", "tương thích ngược").
+- Mọi thành phần kiến trúc hiện hữu được coi là thiết kế tiêu chuẩn ban đầu của hệ thống.
+
+### 10.2. Phân Cấp Thư Mục Tài Liệu Chuẩn (`docs/`)
+Toàn bộ tài liệu kỹ thuật trong kho lưu trữ `tuquet/admin` bắt buộc phải được sắp xếp vào đúng 4 thư mục chuyên biệt:
+1. `docs/architecture/`: Tài liệu kiến trúc hệ thống tổng thể (`overview.md`) và quy chuẩn thiết kế giao diện (`styling-guide.md`). Nghiêm cấm để file lẻ tại thư mục gốc `docs/`.
+2. `docs/decisions/`: Chuỗi bản ghi quyết định kiến trúc (ADR) tuân thủ quy tắc:
+   - Đánh số tuần tự 4 chữ số: `0001-...`, `0002-...`, `0003-...` (không trùng số hiệu).
+   - Đặt tên file theo định dạng `kebab-case`, tuyệt đối không gắn hậu tố version (như `-v2`).
+3. `docs/routes/`: Sổ tay đặc tả kỹ thuật 22 routes, sơ đồ phân cấp và ranh giới plugin (`README.md`, `auth.md`, `dashboard.md`, `tenants.md`, `fleet.md`, `automation.md`, `system.md`).
+4. `docs/specs/`: Bản đồ năng lực (`capability-map.md`) và các bản đặc tả module (`SPEC-*.md`).
+
+### 10.3. Tính Khả Chuyển Của Đường Dẫn Trong Tài Liệu Git
+- Trong các tệp tin markdown (`*.md`) được commit vào kho lưu trữ, **BẮT BUỘC sử dụng đường dẫn tương đối** (ví dụ: `[access.ts](../../apps/web-admin/src/api/core/access.ts)`).
+- **Nghiêm cấm tuyệt đối** hardcode đường dẫn tuyệt đối của máy trạm cá nhân (như `file:///C:/Users/...` hoặc `file:///home/...`) vào tài liệu dự án để đảm bảo tài liệu luôn đọc và liên kết chính xác trên GitHub, GitLab và mọi môi trường hệ điều hành.
+

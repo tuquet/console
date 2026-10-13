@@ -1,30 +1,34 @@
-# Hướng dẫn Thiết kế Giao diện Chuẩn Màu sắc & Design Tokens (UI Styling Guide)
+# Hướng Dẫn Thiết Kế Giao Diện & Design Tokens (UI Styling Guide)
+
+> **Mã tài liệu:** `ARCH-STYLING-GUIDE`  
+> **Áp dụng cho:** `tuquet/admin` (`apps/web-admin`)  
+> **Tài liệu kiến trúc tổng thể:** [`docs/architecture/overview.md`](overview.md)  
+> **Quy chuẩn Typography:** [`docs/decisions/0002-typography-and-font-system.md`](../decisions/0002-typography-and-font-system.md)
 
 Tài liệu này là **Quy chuẩn Thiết kế Giao diện (SSOT)** áp dụng cho toàn bộ các màn hình, components và views trong hệ thống **Tuquet Admin**.
 
-Mục tiêu cốt lõi: Đảm bảo mọi màn hình khi lập trình viên hoặc AI code mới đều **tự động tương thích 100%** với:
-
+Mục tiêu cốt lõi: Đảm bảo mọi màn hình khi lập trình viên hoặc AI Agent xây dựng đều **tự động tương thích 100%** với:
 1. Cả 2 chế độ **Light Mode** & **Dark Mode**.
 2. Toàn bộ **14 Chế độ Màu sắc Built-in** (Blue, Violet, Pink, Green, Zinc, Rose, Orange, Deep-blue...) và màu Custom tùy biến.
-3. Không bao giờ phát sinh lỗi lệch tương phản (chữ đen trên nền đen, chữ trắng trên nền trắng).
+3. Độ tương phản hoàn hảo (không bao giờ xảy ra lỗi chữ đen trên nền đen hoặc chữ trắng trên nền trắng).
 
 ---
 
-## 1. Cơ chế Hoạt động của Chế độ Màu sắc Built-in
+## 1. Cơ Chế Hoạt Động Của Chế Độ Màu Sắc Built-in
 
 Hệ thống màu của Tuquet Admin sử dụng kiến trúc CSS Variables (HSL) động được quản lý bởi `@vben/preferences` và `@vben-core/shared/color`:
 
-1. **Preset Nguồn**: Được định nghĩa tại `packages/@core/preferences/src/constants.ts` với 14 bộ màu cơ bản (`default`, `violet`, `pink`, `yellow`, `sky-blue`, `green`, `zinc`, `deep-green`, `deep-blue`, `orange`, `rose`, `neutral`, `slate`, `gray`).
-2. **Bộ sinh màu động (Color Generator)**: Khi người dùng chọn một Preset hoặc nhập mã Hex tùy chọn, hàm `generatorColorVariables` (`packages/@core/base/shared/src/color/generator.ts`) phân tích màu qua thư viện `theme-colors` để sinh ra toàn bộ dải sắc thái:
+1. **Preset Nguồn:** Được định nghĩa tại `packages/@core/preferences/src/constants.ts` với 14 bộ màu cơ bản (`default`, `violet`, `pink`, `yellow`, `sky-blue`, `green`, `zinc`, `deep-green`, `deep-blue`, `orange`, `rose`, `neutral`, `slate`, `gray`).
+2. **Bộ sinh màu động (Color Generator):** Khi người dùng chọn một Preset hoặc nhập mã Hex tùy chọn, hàm `generatorColorVariables` (`packages/@core/base/shared/src/color/generator.ts`) phân tích màu qua thư viện `theme-colors` để sinh ra toàn bộ dải sắc thái:
    - `--primary-50`, `--primary-100`, ..., `--primary-500` (Main), ..., `--primary-950`
    - Ghi đè trực tiếp các biến `--primary`, `--primary-hover`, `--primary-active` vào thẻ `:root` (hoặc `html[data-theme="..."]`).
-3. **Cơ chế Dark/Light Mode**: Khi đổi Dark Mode, class `.dark` được thêm vào thẻ `<html>`, kích hoạt bộ tokens từ `packages/@core/base/design/src/design-tokens/dark.css`.
+3. **Cơ chế Dark/Light Mode:** Khi đổi Dark Mode, class `.dark` được thêm vào thẻ `<html>`, kích hoạt bộ tokens từ `packages/@core/base/design/src/design-tokens/dark.css`.
 
 ---
 
-## 2. Bảng Tra cứu Classes Chuẩn (Semantic Tokens Cheat Sheet)
+## 2. Bảng Tra Cứu Classes Chuẩn (Semantic Tokens Cheat Sheet)
 
-> [!IMPORTANT] **Quy tắc Bất Biến (Golden Invariant)**: **TUYỆT ĐỐI KHÔNG** sử dụng các class gán cứng màu sắc của Tailwind như:
+> [!IMPORTANT] **Quy tắc Bất Biến (Golden Invariant):** **TUYỆT ĐỐI KHÔNG** sử dụng các class gán cứng màu sắc của Tailwind như:
 >
 > - ❌ `bg-white`, `bg-black`, `bg-gray-100`, `bg-gray-50`
 > - ❌ `text-gray-900`, `text-black`, `text-gray-500`
@@ -53,15 +57,15 @@ Hệ thống màu của Tuquet Admin sử dụng kiến trúc CSS Variables (HSL
 | **Chữ phụ / Chú thích / Metadata** | `text-muted-foreground` | Xám trung tính (`#71717a`) | Xám bạc nhạt (`hsl(240 5% 64.9%)`) |
 | **Placeholder trong Input** | Tự động qua component hoặc `placeholder:text-muted-foreground` | Xám nhạt | Xám tối |
 
-### 2.3. Đường viền & Phân cách (Borders & Dividers)
+### 2.3. Đường Viền & Phân Cách (Borders & Dividers)
 
 | Mục đích sử dụng | Class Chuẩn | Ghi chú |
 | :-- | :-- | :-- |
 | **Viền mặc định** | `border border-border` | Chuẩn cho Card, Table, Input, Divider |
-| **Viền thanh mảnh, nhẹ nhàng** | `border border-border/60` | Khuyên dùng cho viền Card/Table hiện đại |
-| **Đường kẻ ngang phân cách** | `divide-y divide-border` | Dùng trong danh sách `<ul>` hoặc bảng |
+| **Viền thanh mảnh, tinh tế** | `border border-border/60` | Khuyên dùng cho viền Card/Table phong cách Shadcn |
+| **Đường kẻ ngang phân cách** | `divide-y divide-border` | Dùng trong danh sách `<ul>` hoặc bảng dữ liệu |
 
-### 2.4. Điểm nhấn & Nút bấm (Primary & Built-in Colors)
+### 2.4. Điểm Nhấn & Nút Bấm (Primary & Built-in Colors)
 
 | Mục đích sử dụng | Class Chuẩn | Cơ chế hoạt động |
 | :-- | :-- | :-- |
@@ -70,7 +74,7 @@ Hệ thống màu của Tuquet Admin sử dụng kiến trúc CSS Variables (HSL
 | **Text màu chủ đạo** | `text-primary hover:text-primary/80` | Link, biểu tượng hoặc text cần nhấn mạnh |
 | **Badge viền màu chủ đạo** | `bg-primary/10 text-primary border border-primary/20` | Tạo Badge đẹp mắt theo đúng theme hiện tại |
 
-### 2.5. Trạng thái Hệ thống (Semantic Status Colors)
+### 2.5. Trạng Thái Hệ Thống (Semantic Status Colors)
 
 | Trạng thái | Class Icon / Text | Class Badge / Nền |
 | :-- | :-- | :-- |
@@ -87,12 +91,9 @@ Khi tạo một trang mới hoặc component mới, hãy áp dụng cấu trúc 
 
 ```vue
 <template>
-  <!-- 1. Vỏ bọc ngoài cùng: dùng p-4/p-6, space-y-4 -->
   <div class="space-y-6 p-4 md:p-6">
     <!-- Header của trang -->
-    <div
-      class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
-    >
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h1 class="text-2xl font-bold tracking-tight text-foreground">
           Tên Màn Hình
@@ -119,18 +120,15 @@ Khi tạo một trang mới hoặc component mới, hãy áp dụng cấu trúc 
       </div>
     </div>
 
-    <!-- 2. Khối nội dung chính (Card): dùng bg-card text-card-foreground border border-border/60 -->
-    <div
-      class="rounded-xl border border-border/60 bg-card text-card-foreground shadow-xs"
-    >
-      <div class="p-6 border-b border-border/60">
+    <!-- Khối nội dung chính (Card) -->
+    <div class="rounded-xl border border-border/60 bg-card text-card-foreground shadow-xs">
+      <div class="border-b border-border/60 p-6">
         <h3 class="text-lg font-semibold text-foreground">
           Thông tin tổng hợp
         </h3>
       </div>
 
       <div class="p-6">
-        <!-- Badge trạng thái chuẩn -->
         <span
           class="inline-flex items-center rounded-full bg-success/10 px-2.5 py-0.5 text-xs font-medium text-success border border-success/20"
         >
@@ -144,10 +142,8 @@ Khi tạo một trang mới hoặc component mới, hãy áp dụng cấu trúc 
 
 ---
 
-## 4. Danh sách Kiểm tra Trước khi Hoàn thành (Self-Checklist)
+## 4. Danh Sách Tự Kiểm Tra (Self-Checklist)
 
-Mỗi khi viết xong một màn hình mới, hãy tự kiểm tra 3 bước sau:
-
-- [ ] **Test Dark Mode**: Chuyển giao diện sang Dark Mode $\rightarrow$ Không có khối nào bị nền trắng toát hoặc chữ bị chìm vào nền.
-- [ ] **Test Built-in Color**: Mở Preferences Drawer $\rightarrow$ Đổi Built-in sang `Green`, `Rose`, `Zinc` $\rightarrow$ Toàn bộ các nút bấm và điểm nhấn chính đổi màu đồng bộ theo theme.
-- [ ] **Clean Code**: Không có bất kỳ class màu cố định nào (`text-gray-*`, `bg-white`, `bg-blue-*`) tồn tại trong template.
+- [ ] **Test Dark Mode:** Chuyển giao diện sang Dark Mode $\rightarrow$ Không có khối nào bị nền trắng toát hoặc chữ bị chìm vào nền.
+- [ ] **Test Built-in Color:** Mở Preferences Drawer $\rightarrow$ Đổi Built-in sang `Green`, `Rose`, `Zinc` $\rightarrow$ Toàn bộ các nút bấm và điểm nhấn chính đổi màu đồng bộ theo theme.
+- [ ] **Clean Code:** Không có bất kỳ class màu cố định nào (`text-gray-*`, `bg-white`, `bg-blue-*`) tồn tại trong template.
