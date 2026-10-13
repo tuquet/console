@@ -160,15 +160,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="flex min-h-screen items-center justify-center bg-muted/30 p-4 dark:bg-neutral-950"
-  >
+  <div class="flex min-h-screen items-center justify-center bg-background p-4">
     <Card class="w-full max-w-lg shadow-lg border-border/60 p-6">
       <!-- Trạng thái đã ủy quyền thành công -->
       <template v-if="isAuthorized">
         <div class="text-center py-6 space-y-4">
           <div
-            class="mx-auto flex size-12 items-center justify-center rounded-full bg-green-500/10 text-green-500"
+            class="mx-auto flex size-12 items-center justify-center rounded-full bg-success/10 text-success"
           >
             <CheckCircle2 class="size-7" />
           </div>
@@ -204,7 +202,7 @@ onMounted(() => {
             <AvatarImage src="https://tuquet.com/icons/cli.svg" />
             <AvatarFallback>CLI</AvatarFallback>
           </Avatar>
-          <h3 class="text-xl font-bold">Kết Nối Specter Desk</h3>
+          <h3 class="text-xl font-bold">Kết Nối Máy Trạm</h3>
           <p class="text-xs text-muted-foreground">
             Đăng nhập tài khoản <strong>Tuquet</strong> để cấp quyền truy cập
             cho máy trạm.
@@ -222,7 +220,7 @@ onMounted(() => {
               }}</span>
               <Badge
                 variant="outline"
-                class="bg-blue-500/10 text-blue-400 border-blue-500/30"
+                class="bg-primary/10 text-primary border-primary/30"
               >
                 Local Workstation
               </Badge>
@@ -237,11 +235,11 @@ onMounted(() => {
       <template v-else>
         <div class="text-center pb-4">
           <div
-            class="inline-flex items-center justify-center p-3 bg-sky-500/10 rounded-full mb-3 text-sky-500"
+            class="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full mb-3 text-primary"
           >
             <Laptop class="size-8" />
           </div>
-          <h3 class="text-xl font-bold">Ủy Quyền Specter Desk</h3>
+          <h3 class="text-xl font-bold">Ủy Quyền Máy Trạm</h3>
           <p class="text-xs text-muted-foreground mt-1">
             Cấp quyền kết nối và đồng bộ tài nguyên với Tuquet Cloud.
           </p>
@@ -271,7 +269,7 @@ onMounted(() => {
             >
             <Badge
               variant="outline"
-              class="bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
+              class="bg-accent text-accent-foreground border-border"
             >
               {{ machineName }}
             </Badge>
@@ -298,7 +296,7 @@ onMounted(() => {
         </div>
 
         <div
-          class="mt-4 p-3 bg-amber-500/10 rounded-lg border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400"
+          class="mt-4 p-3 bg-warning/10 rounded-lg border border-warning/20 text-xs text-warning"
         >
           <strong>Lưu ý:</strong> Thiết bị này sẽ được cấp quyền thực thi tác vụ
           runner và quản lý profile trình duyệt trong Workspace đã chọn.

@@ -24,7 +24,10 @@ import {
 } from '@vueuse/core';
 
 import { defaultPreferences } from './config';
-import { updateCSSVariables } from './update-css-variables';
+import {
+  updateCSSVariables,
+  updateFontFamilyVariable,
+} from './update-css-variables';
 
 const STORAGE_KEYS = {
   CUSTOM: 'preferences-custom',
@@ -356,6 +359,10 @@ class PreferenceManager {
       Reflect.deleteProperty(this.customState, key);
     });
     Object.assign(this.customState, preferences);
+
+    if (Reflect.has(preferences, 'fontFamily')) {
+      updateFontFamilyVariable(preferences.fontFamily as string);
+    }
   }
 
   private resolveCustomPreferencesDefaults(

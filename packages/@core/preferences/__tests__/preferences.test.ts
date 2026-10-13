@@ -569,6 +569,49 @@ describe('preferences', () => {
       pageSize: 4,
     });
   });
+
+  it('updates documentElement style --font-family when custom fontFamily preference changes', async () => {
+    await preferenceManager.initPreferences({
+      extension: {
+        fields: [
+          {
+            component: 'select',
+            defaultValue: 'be-vietnam-pro',
+            key: 'fontFamily',
+            label: 'Font Family',
+            options: [
+              { label: 'Be Vietnam Pro', value: 'be-vietnam-pro' },
+              { label: 'Inter', value: 'inter' },
+              { label: 'Roboto', value: 'roboto' },
+              { label: 'System UI', value: 'system-ui' },
+            ],
+          },
+        ],
+        tabLabel: 'Typography',
+      },
+      namespace: 'font-preference-test',
+    });
+
+    expect(
+      document.documentElement.style.getPropertyValue('--font-family'),
+    ).toContain('Be Vietnam Pro');
+
+    preferenceManager.updateCustomPreferences({
+      fontFamily: 'inter',
+    });
+
+    expect(
+      document.documentElement.style.getPropertyValue('--font-family'),
+    ).toContain('Inter');
+
+    preferenceManager.updateCustomPreferences({
+      fontFamily: 'roboto',
+    });
+
+    expect(
+      document.documentElement.style.getPropertyValue('--font-family'),
+    ).toContain('Roboto');
+  });
 });
 
 describe('isDarkTheme', () => {

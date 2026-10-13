@@ -20,9 +20,11 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="border-t border-red-500/20 pt-6">
-    <div class="rounded-xl border border-red-500/30 bg-red-500/5 p-4 space-y-3">
-      <div class="flex items-center gap-2 text-red-400">
+  <div class="border-t border-destructive/20 pt-6">
+    <div
+      class="rounded-xl border border-destructive/30 bg-destructive/5 p-4 space-y-3"
+    >
+      <div class="flex items-center gap-2 text-destructive">
         <ShieldAlert class="size-4.5" />
         <h4 class="text-sm font-semibold">{{ props.title }}</h4>
       </div>

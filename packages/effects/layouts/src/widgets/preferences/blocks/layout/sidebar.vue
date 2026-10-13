@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { LayoutType } from '@vben/types';
 
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 
 import { $t } from '@vben/locales';
 
@@ -9,7 +9,15 @@ import CheckboxItem from '../checkbox-item.vue';
 import NumberFieldItem from '../number-field-item.vue';
 import SwitchItem from '../switch-item.vue';
 
-defineProps<{ currentLayout?: LayoutType; disabled: boolean }>();
+const props = defineProps<{ currentLayout?: LayoutType; disabled: boolean }>();
+
+const isSidebarNavMode = computed(() => {
+  return props.currentLayout === 'sidebar-nav';
+});
+
+const isSidebarEnableDisabled = computed(() => {
+  return props.disabled || isSidebarNavMode.value;
+});
 
 const sidebarEnable = defineModel<boolean>('sidebarEnable');
 const sidebarWidth = defineModel<number | undefined>('sidebarWidth', {
@@ -50,7 +58,11 @@ const handleCheckboxChange = () => {
 </script>
 
 <template>
-  <SwitchItem v-model="sidebarEnable" :disabled="disabled">
+  <SwitchItem
+    v-model="sidebarEnable"
+    :disabled="isSidebarEnableDisabled"
+    :tip="isSidebarNavMode ? $t('preferences.sidebar.visibleDisabledTip') : ''"
+  >
     {{ $t('preferences.sidebar.visible') }}
   </SwitchItem>
   <SwitchItem v-model="sidebarDraggable" :disabled="!sidebarEnable || disabled">

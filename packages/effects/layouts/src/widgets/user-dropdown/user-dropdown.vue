@@ -102,7 +102,7 @@ defineOptions({
 const props = withDefaults(defineProps<Props>(), {
   avatar: '',
   avatarDot: true,
-  avatarDotClass: 'bottom-0 right-1 border-2 size-4 bg-green-500',
+  avatarDotClass: 'bottom-0 right-1 border-2 size-4 bg-success',
   description: '',
   menus: () => [],
   tagText: '',
@@ -412,7 +412,7 @@ if (preferences.shortcutKeys.enable) {
                 <Badge
                   v-if="tagText"
                   variant="secondary"
-                  class="ml-2 text-green-400"
+                  class="ml-2 text-success"
                 >
                   {{ tagText }}
                 </Badge>

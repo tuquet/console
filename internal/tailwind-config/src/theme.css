@@ -7,7 +7,7 @@
  * to be overridden by utility classes.
  * Kept consistent with LAYER_ORDER_STATEMENT in internal/vite-config/src/plugins/css-layer.ts.
  */
-@layer properties, theme, base, ant, antd, el, td, components, utilities;
+@layer properties, theme, base, ant, antd, el, td, tuquet, components, utilities;
 
 @import 'tailwindcss';
 @import 'tw-animate-css';
@@ -30,6 +30,14 @@
   --font-sans:
     'Be Vietnam Pro', 'Inter', 'Roboto', -apple-system, blinkmacsystemfont,
     'Segoe UI', arial, sans-serif;
+  --font-mono:
+    'JetBrains Mono', 'Fira Code', ui-monospace, sfmono-regular, menlo, monaco,
+    consolas, monospace;
+
+  /* 7-Tier Modular Scale token extensions */
+  --text-2xs: 0.625rem;
+  /* stylelint-disable-next-line custom-property-pattern */
+  --text-2xs--line-height: 0.875rem;
 }
 
 @layer base {
@@ -61,6 +69,17 @@
 @theme inline {
   /* Font */
   --font-sans: var(--font-family);
+  --font-mono: var(
+    --font-mono,
+    'JetBrains Mono',
+    'Fira Code',
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace
+  );
 
   /* Border Radius */
   --radius-sm: calc(var(--radius) - 4px);

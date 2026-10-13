@@ -191,13 +191,13 @@ onMounted(async () => {
             </h1>
             <Badge
               variant="outline"
-              class="bg-purple-500/10 text-purple-400 border-purple-500/30 font-mono text-xs uppercase font-medium"
+              class="bg-primary/10 text-primary border-primary/30 font-mono text-xs uppercase font-medium"
             >
               Super Administrator
             </Badge>
             <Badge
               variant="outline"
-              class="bg-green-500/10 text-green-400 border-green-500/30 text-xs"
+              class="bg-success/10 text-success border-success/30 text-xs"
             >
               Active
             </Badge>
@@ -218,10 +218,7 @@ onMounted(async () => {
                 class="size-5 inline-flex items-center justify-center text-muted-foreground hover:text-foreground"
                 @click="copyToClipboard(userId, 'User ID')"
               >
-                <Check
-                  v-if="isCopied('User ID')"
-                  class="size-3 text-green-500"
-                />
+                <Check v-if="isCopied('User ID')" class="size-3 text-success" />
                 <Copy v-else class="size-3" />
               </button>
             </span>
@@ -411,7 +408,7 @@ onMounted(async () => {
               >
                 <div class="flex items-center gap-3">
                   <div
-                    class="flex size-9 items-center justify-center rounded-lg bg-green-500/10 text-green-400"
+                    class="flex size-9 items-center justify-center rounded-lg bg-success/10 text-success"
                   >
                     <ShieldCheck class="size-5" />
                   </div>
@@ -426,7 +423,7 @@ onMounted(async () => {
                 </div>
                 <Badge
                   variant="outline"
-                  class="bg-zinc-500/10 text-zinc-300 border-zinc-500/30"
+                  class="bg-muted text-muted-foreground border-border"
                 >
                   Sẵn sàng
                 </Badge>
@@ -437,7 +434,7 @@ onMounted(async () => {
               >
                 <div class="flex items-center gap-3">
                   <div
-                    class="flex size-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400"
+                    class="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary"
                   >
                     <CheckCircle2 class="size-5" />
                   </div>
@@ -452,7 +449,7 @@ onMounted(async () => {
                 </div>
                 <Badge
                   variant="outline"
-                  class="bg-green-500/10 text-green-400 border-green-500/30"
+                  class="bg-success/10 text-success border-success/30"
                 >
                   Hoạt động
                 </Badge>
@@ -478,14 +475,14 @@ onMounted(async () => {
             >
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <Building2 class="size-4.5 text-sky-400" />
+                  <Building2 class="size-4.5 text-primary" />
                   <span class="font-semibold text-foreground"
                     >Workspace Hiện Tại</span
                   >
                 </div>
                 <Badge
                   variant="outline"
-                  class="bg-blue-500/10 text-blue-400 border-blue-500/30 font-mono text-xs"
+                  class="bg-primary/10 text-primary border-primary/30 font-mono text-xs"
                 >
                   ACTIVE
                 </Badge>
@@ -497,7 +494,7 @@ onMounted(async () => {
                 <Button
                   size="sm"
                   variant="outline"
-                  @click="router.push('/dashboard/workspace')"
+                  @click="router.push('/tenants')"
                 >
                   Xem Tất Cả Workspace
                 </Button>
@@ -505,10 +502,7 @@ onMounted(async () => {
             </div>
 
             <!-- CLI Command -->
-            <CliSnippetCard
-              command="tuquet login"
-              label="Lệnh Ghép Nối Specter CLI"
-            />
+            <CliSnippetCard command="tuquet login" label="Lệnh Ghép Nối CLI" />
           </div>
         </TabsContent>
       </Tabs>

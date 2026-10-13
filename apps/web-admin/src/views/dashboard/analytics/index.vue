@@ -105,13 +105,13 @@ onMounted(() => {
           </span>
         </div>
         <div class="mt-3 flex items-baseline gap-2">
-          <span class="text-3xl font-extrabold tracking-tight text-foreground">
+          <span class="text-2xl font-bold tracking-tight text-foreground">
             {{ analyticsData.tenants.total }}
           </span>
           <span
             class="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground"
           >
-            <span class="size-1.5 rounded-full bg-emerald-500"></span>
+            <span class="size-1.5 rounded-full bg-success"></span>
             {{ analyticsData.tenants.activeCount }} Đang hoạt động
           </span>
         </div>
@@ -142,7 +142,7 @@ onMounted(() => {
           </span>
         </div>
         <div class="mt-3 flex items-baseline gap-2">
-          <span class="text-3xl font-extrabold tracking-tight text-foreground">
+          <span class="text-2xl font-bold tracking-tight text-foreground">
             {{ analyticsData.plugins.total }}
           </span>
           <span class="text-xs font-medium text-muted-foreground">
@@ -164,7 +164,7 @@ onMounted(() => {
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-medium text-muted-foreground">
-            Specter Fleet Bridge
+            Fleet Bridge
           </span>
           <span
             class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -179,9 +179,7 @@ onMounted(() => {
           <span
             class="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
           >
-            <span
-              class="size-2 rounded-full bg-emerald-500 animate-pulse"
-            ></span>
+            <span class="size-2 rounded-full bg-success animate-pulse"></span>
             Online
           </span>
         </div>
@@ -208,7 +206,7 @@ onMounted(() => {
           </span>
         </div>
         <div class="mt-3 flex items-baseline gap-2">
-          <span class="text-3xl font-extrabold tracking-tight text-foreground">
+          <span class="text-2xl font-bold tracking-tight text-foreground">
             {{ analyticsData.system.latencyMs }}
           </span>
           <span class="text-sm font-medium text-muted-foreground">ms</span>
@@ -216,7 +214,7 @@ onMounted(() => {
         <div
           class="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"
         >
-          <CheckCircle2 class="size-3.5 text-emerald-500" />
+          <CheckCircle2 class="size-3.5 text-success" />
           <span>Cloudflare Anycast & Supabase Khỏe mạnh</span>
         </div>
       </div>
@@ -321,7 +319,7 @@ onMounted(() => {
               </div>
             </div>
             <Badge variant="secondary" class="text-xs font-normal">
-              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
+              <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
               HOẠT ĐỘNG TỐT
             </Badge>
           </div>
@@ -336,16 +334,14 @@ onMounted(() => {
               </div>
             </div>
             <Badge variant="secondary" class="text-xs font-normal">
-              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
+              <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
               ONLINE
             </Badge>
           </div>
 
           <div class="flex items-center justify-between py-3">
             <div>
-              <div class="font-medium text-foreground">
-                Specter CLI Desktop Bridge
-              </div>
+              <div class="font-medium text-foreground">Desktop Bridge</div>
               <div class="text-xs text-muted-foreground">
                 SSO Loopback Daemon (:8765)
               </div>
@@ -366,7 +362,7 @@ onMounted(() => {
               </div>
             </div>
             <Badge variant="secondary" class="text-xs font-normal">
-              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
+              <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
               ACTIVE
             </Badge>
           </div>
@@ -374,14 +370,14 @@ onMounted(() => {
           <div class="flex items-center justify-between py-3">
             <div>
               <div class="font-medium text-foreground">
-                Specter Runners Execution Engine
+                Runners Execution Engine
               </div>
               <div class="text-xs text-muted-foreground">
                 Plugin: runners (Schema: runners)
               </div>
             </div>
             <Badge variant="secondary" class="text-xs font-normal">
-              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
+              <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
               ACTIVE
             </Badge>
           </div>

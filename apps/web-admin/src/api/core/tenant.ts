@@ -16,19 +16,6 @@ export interface TenantItem {
   updated_at: string;
 }
 
-export interface SystemPluginItem {
-  dependencies: string[];
-  description: null | string;
-  id: string;
-  installed_at: string;
-  is_system: boolean;
-  metadata: Record<string, any>;
-  name: string;
-  schema_name: string;
-  status: string;
-  version: string;
-}
-
 const ACTIVE_TENANT_KEY = 'TUQUET_ACTIVE_TENANT_ID';
 
 export function getActiveTenantId(): string {
@@ -81,13 +68,4 @@ export async function createTenantApi(data: {
   }
 
   return created;
-}
-
-/**
- * Fetch system plugins from Supabase Cloud
- */
-export async function getSystemPluginsApi(): Promise<SystemPluginItem[]> {
-  return supabaseRequest<SystemPluginItem[]>(
-    '/rest/v1/system_plugins?select=*&order=is_system.desc,name.asc',
-  );
 }

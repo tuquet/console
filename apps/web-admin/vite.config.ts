@@ -1,4 +1,4 @@
-import { defineConfig } from '@vben/vite-config';
+import { defineConfig, viteCssLayerPlugin } from '@vben/vite-config';
 
 export default defineConfig(async () => {
   return {
@@ -35,6 +35,12 @@ export default defineConfig(async () => {
       },
     },
     vite: {
+      plugins: [
+        viteCssLayerPlugin({
+          layerName: 'tuquet',
+          packageName: '@tuquet/vue-ui',
+        }),
+      ],
       resolve: {
         dedupe: ['vue', 'vue-router', 'pinia'],
       },

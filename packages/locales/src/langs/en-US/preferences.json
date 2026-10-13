@@ -57,6 +57,7 @@
     "title": "Sidebar",
     "width": "Width",
     "visible": "Show Sidebar",
+    "visibleDisabledTip": "Cannot disable sidebar in Sidebar Nav mode as it is the primary navigation. Use collapse instead.",
     "draggable": "Drag Sidebar Menu",
     "collapsed": "Collapse Menu",
     "collapsedShowTitle": "Show Menu Title",
@@ -68,6 +69,7 @@
   "tabbar": {
     "title": "Tabbar",
     "enable": "Enable Tab Bar",
+    "showRefresh": "Show Refresh Button",
     "icon": "Show Tabbar Icon",
     "showMore": "Show More Button",
     "showMaximize": "Show Maximize Button",
@@ -112,6 +114,7 @@
     "title": "Breadcrumb",
     "home": "Show Home Button",
     "enable": "Enable Breadcrumb",
+    "enableTip": "Breadcrumb is visible on desktop screens (≥1024px) when the header does not carry primary navigation menus.",
     "icon": "Show Breadcrumb Icon",
     "background": "background",
     "style": "Breadcrumb Style",
@@ -269,5 +272,14 @@
         "placeholder": "Please enter the default report title"
       }
     }
+  },
+  "typography": {
+    "title": "Typography",
+    "fontFamily": "UI Font Family",
+    "fontFamilyTip": "Switch interface font stack across Be Vietnam Pro, Inter, Roboto, and System UI",
+    "beVietnamPro": "Be Vietnam Pro (Recommended)",
+    "inter": "Inter (Modern / Neutral)",
+    "roboto": "Roboto (Google Classic)",
+    "systemUi": "System UI (Native OS)"
   }
 }

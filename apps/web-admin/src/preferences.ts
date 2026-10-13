@@ -1,14 +1,4 @@
-import {
-  defineOverridesPreferences,
-  definePreferencesExtension,
-} from '@vben/preferences';
-
-interface WebAdminPreferencesExtension {
-  defaultTableSize: number;
-  enableFormFullscreen: boolean;
-  reportTitle: string;
-  tenantMode: 'multi' | 'single';
-}
+import { defineOverridesPreferences } from '@vben/preferences';
 
 /**
  * @description Project preferences configuration
@@ -18,11 +8,11 @@ interface WebAdminPreferencesExtension {
 export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
-    defaultHomePath: '/dashboard/workspace',
+    defaultHomePath: '/dashboard/analytics',
     enablePreferences: true,
     locale: 'en-US',
     name: 'Specter',
-    preferencesButtonPosition: 'auto',
+    preferencesButtonPosition: 'header',
     authPageLayout: 'panel-right',
   },
   logo: {
@@ -32,92 +22,80 @@ export const overridesPreferences = defineOverridesPreferences({
     sourceDark: '/logo.svg',
   },
   breadcrumb: {
-    enable: true,
+    enable: false,
   },
   copyright: {
     companyName: 'tuquet',
     companySiteLink: 'https://tuquet.com',
     date: '2026',
-    enable: false,
+    enable: true,
     icp: '',
     icpLink: '',
-    settingShow: false,
+    settingShow: true,
   },
   footer: {
     enable: false,
+    fixed: true,
   },
   sidebar: {
     collapsed: false,
     width: 210,
   },
   tabbar: {
-    enable: true,
+    enable: false,
   },
   theme: {
-    builtinType: 'neutral',
+    builtinType: 'slate',
     colorPrimary: 'hsl(0 0% 98%)',
     mode: 'dark',
     radius: '0.5',
   },
   widget: {
-    fullscreen: true,
+    fullscreen: false,
     globalSearch: true,
     languageToggle: false,
-    lockScreen: true,
+    lockScreen: false,
     logoutButtonPosition: 'user-dropdown',
-    notification: true,
-    refresh: true,
+    notification: false,
+    refresh: false,
     sidebarToggle: true,
     themeToggle: true,
     timezone: false,
   },
 });
 
-export const preferencesExtension =
-  definePreferencesExtension<WebAdminPreferencesExtension>({
-    tabLabel: 'preferences.admin.tabLabel',
-    title: 'preferences.admin.title',
-    fields: [
-      {
-        component: 'switch',
-        defaultValue: true,
-        key: 'enableFormFullscreen',
-        label: 'preferences.admin.fields.enableFormFullscreen.label',
-        tip: 'preferences.admin.fields.enableFormFullscreen.tip',
-      },
-      {
-        component: 'select',
-        defaultValue: 'single',
-        key: 'tenantMode',
-        label: 'preferences.admin.fields.tenantMode.label',
-        options: [
-          {
-            label: 'preferences.admin.fields.tenantMode.options.single.label',
-            value: 'single',
-          },
-          {
-            label: 'preferences.admin.fields.tenantMode.options.multi.label',
-            value: 'multi',
-          },
-        ],
-      },
-      {
-        component: 'number',
-        componentProps: {
-          max: 200,
-          min: 10,
-          step: 10,
+export interface AdminCustomPreferences {
+  fontFamily: 'be-vietnam-pro' | 'inter' | 'roboto' | 'system-ui';
+}
+
+export const typographyPreferencesExtension = {
+  fields: [
+    {
+      component: 'select' as const,
+      defaultValue: 'be-vietnam-pro',
+      key: 'fontFamily',
+      label: 'preferences.typography.fontFamily',
+      options: [
+        {
+          label: 'preferences.typography.beVietnamPro',
+          value: 'be-vietnam-pro',
         },
-        defaultValue: 20,
-        key: 'defaultTableSize',
-        label: 'preferences.admin.fields.defaultTableSize.label',
-      },
-      {
-        component: 'input',
-        defaultValue: '',
-        key: 'reportTitle',
-        label: 'preferences.admin.fields.reportTitle.label',
-        placeholder: 'preferences.admin.fields.reportTitle.placeholder',
-      },
-    ],
-  });
+        {
+          label: 'preferences.typography.inter',
+          value: 'inter',
+        },
+        {
+          label: 'preferences.typography.roboto',
+          value: 'roboto',
+        },
+        {
+          label: 'preferences.typography.systemUi',
+          value: 'system-ui',
+        },
+      ],
+      tip: 'preferences.typography.fontFamilyTip',
+    },
+  ],
+  tabLabel: 'preferences.typography.title',
+  title: 'preferences.typography.title',
+};

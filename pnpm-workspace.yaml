@@ -46,6 +46,9 @@ catalog:
   '@ctrl/tinycolor': ^4.2.0
   '@eslint-community/eslint-plugin-eslint-comments': ^4.7.2
   '@eslint/js': ^10.0.1
+  '@fontsource/be-vietnam-pro': ^5.3.0
+  '@fontsource/inter': ^5.3.0
+  '@fontsource/roboto': ^5.3.0
   '@iconify/json': ^2.2.520
   '@iconify/tailwind4': ^1.2.3
   '@iconify/vue': ^5.0.1
@@ -76,6 +79,8 @@ catalog:
   '@tsdown/css': ^0.22.14
   '@tuquet/vue-table': 0.2.1
   '@tuquet/vue-ui': 0.2.1
+  '@unovis/ts': ^1.7.1
+  '@unovis/vue': ^1.7.1
   '@types/archiver': ^8.0.0
   '@types/html-minifier-terser': ^7.0.2
   '@types/json-bigint': ^1.0.4

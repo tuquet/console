@@ -448,10 +448,25 @@ const headerSlots = computed(() => {
     <!-- Footer -->
     <template v-if="preferences.footer.enable" #footer>
       <LayoutFooter>
-        <Copyright
-          v-if="preferences.copyright.enable"
-          v-bind="preferences.copyright"
-        />
+        <slot name="footer">
+          <Copyright
+            v-if="preferences.copyright.enable"
+            v-bind="preferences.copyright"
+          />
+          <div v-else class="text-xs text-muted-foreground">
+            Copyright © {{ preferences.copyright.date || '2026' }}
+            <a
+              v-if="preferences.copyright.companyName"
+              :href="
+                preferences.copyright.companySiteLink || 'javascript:void(0)'
+              "
+              class="mx-1 hover:text-primary-hover"
+              target="_blank"
+            >
+              {{ preferences.copyright.companyName }}
+            </a>
+          </div>
+        </slot>
       </LayoutFooter>
     </template>
 

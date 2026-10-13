@@ -38,6 +38,8 @@
   },
   "dependencies": {
     "@lucide/vue": "catalog:",
+    "@unovis/ts": "catalog:",
+    "@unovis/vue": "catalog:",
     "@vben-core/composables": "workspace:*",
     "@vben-core/design": "workspace:*",
     "@vben-core/icons": "workspace:*",

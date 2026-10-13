@@ -10,7 +10,13 @@ import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
 import { toast } from '@tuquet/vue-ui';
 import { defineStore } from 'pinia';
 
-import { getAccessCodesApi, getUserInfoApi, loginApi, logoutApi } from '#/api';
+import {
+  clearAccessCache,
+  getAccessCodesApi,
+  getUserInfoApi,
+  loginApi,
+  logoutApi,
+} from '#/api';
 import { $t } from '#/locales';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -108,6 +114,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function logout(redirect: boolean = true) {
+    clearAccessCache();
     try {
       await logoutApi();
     } catch {
@@ -138,6 +145,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function $reset() {
+    clearAccessCache();
     loginLoading.value = false;
   }
 

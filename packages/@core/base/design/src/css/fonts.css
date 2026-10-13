@@ -1,0 +1,18 @@
+/* Self-hosted Sans-serif font families (Zero Google CDN Latency) */
+
+/* 1. Be Vietnam Pro (Vietnamese-first Sans-serif) */
+@import '@fontsource/be-vietnam-pro/400.css';
+@import '@fontsource/be-vietnam-pro/500.css';
+@import '@fontsource/be-vietnam-pro/600.css';
+@import '@fontsource/be-vietnam-pro/700.css';
+
+/* 2. Inter (Modern International Sans-serif) */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+
+/* 3. Roboto (Google Classic Sans-serif) */
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';

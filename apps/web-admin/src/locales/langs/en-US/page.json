@@ -10,5 +10,30 @@
     "workspace": "Workspace",
     "workspaceDetail": "Workspace Detail",
     "fleet": "Specter Fleet"
+  },
+  "tenants": {
+    "title": "Workspaces",
+    "detail": "Workspace Detail"
+  },
+  "fleet": {
+    "title": "Fleet",
+    "devices": "Devices",
+    "browsers": "Browsers",
+    "proxies": "Proxies"
+  },
+  "automation": {
+    "title": "Automation",
+    "workflows": "Workflows",
+    "runs": "Campaign Runs",
+    "runDetail": "Run Detail"
+  },
+  "system": {
+    "title": "System",
+    "plugins": "Plugins",
+    "plans": "Plans",
+    "users": "Platform Users",
+    "auditLogs": "Global Audit Logs",
+    "subscriptions": "Subscriptions",
+    "roles": "Roles & Permissions"
   }
 }

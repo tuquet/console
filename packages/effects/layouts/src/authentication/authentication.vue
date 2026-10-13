@@ -7,7 +7,6 @@ import { preferences, usePreferences } from '@vben/preferences';
 
 import { Copyright } from '../basic/copyright';
 import AuthenticationFormView from './form.vue';
-import SloganIcon from './icons/slogan.vue';
 import Toolbar from './toolbar.vue';
 
 interface Props {
@@ -30,7 +29,7 @@ const props = withDefaults(defineProps<Props>(), {
   logoDark: '',
   pageDescription: '',
   pageTitle: '',
-  sloganImage: '',
+  sloganImage: '/illustrations/specter-waving.svg',
   toolbar: true,
   toolbarList: () => ['color', 'language', 'layout', 'theme'],
   clickLogo: () => {},
@@ -117,14 +116,11 @@ const logoSrc = computed(() => {
             '-enter-x': authPanelRight,
           }"
         >
-          <template v-if="sloganImage">
-            <img
-              :alt="appName"
-              :src="sloganImage"
-              class="h-64 w-2/5 animate-float"
-            />
-          </template>
-          <SloganIcon v-else :alt="appName" class="h-64 w-2/5 animate-float" />
+          <img
+            :alt="appName"
+            :src="sloganImage || '/illustrations/specter-waving.svg'"
+            class="h-64 w-2/5 animate-float object-contain"
+          />
           <div class="text-1xl mt-6 font-sans text-foreground lg:text-2xl">
             {{ pageTitle }}
           </div>

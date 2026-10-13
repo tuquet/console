@@ -1,74 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
-  <defs>
-    <!-- Nền Dark Theme chuẩn shadcn Zinc (zinc-950 -> zinc-900) -->
-    <linearGradient id="zincBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#18181b" />
-      <stop offset="60%" stop-color="#09090b" />
-      <stop offset="100%" stop-color="#030712" />
-    </linearGradient>
-
-    <!-- Viền tinh tế (zinc-700 / zinc-800) -->
-    <linearGradient id="zincBorder" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#3f3f46" stop-opacity="0.8" />
-      <stop offset="100%" stop-color="#27272a" stop-opacity="0.3" />
-    </linearGradient>
-
-    <!-- Gradient thân Specter Ghost (zinc-50 -> zinc-400) -->
-    <linearGradient id="ghostBody1" x1="30%" y1="0%" x2="70%" y2="100%">
-      <stop offset="0%" stop-color="#fafafa" />
-      <stop offset="40%" stop-color="#e4e4e7" />
-      <stop offset="100%" stop-color="#a1a1aa" />
-    </linearGradient>
-
-    <!-- Filter làm mờ vầng sáng chuẩn W3C SVG -->
-    <filter id="auraBlur1" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="24" />
-    </filter>
-
-    <!-- Hiệu ứng đổ bóng mờ phong cách Minimalist -->
-    <filter id="ghostShadow1" x="-30%" y="-30%" width="160%" height="170%">
-      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.55" />
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#ffffff" flood-opacity="0.08" />
-    </filter>
-  </defs>
-
-  <!-- Khung nền App Icon Squircle bo góc chuẩn (zinc-950) -->
-  <rect 
-    x="16" 
-    y="16" 
-    width="480" 
-    height="480" 
-    rx="108" 
-    ry="108" 
-    fill="url(#zincBg)" 
-    stroke="url(#zincBorder)" 
-    stroke-width="2.5" 
-  />
-
-  <!-- Vầng sáng quang (Aura Glow) chuẩn SVG Filter -->
-  <circle cx="256" cy="250" r="105" fill="#f4f4f5" opacity="0.08" filter="url(#auraBlur1)" />
-
-  <!-- Thân Specter Ghost -->
-  <path 
-    d="M 256,120 
-       C 185,120 144,175 144,245 
-       C 144,295 142,348 144,380 
-       C 145,395 166,398 176,386 
-       C 192,366 210,366 226,386 
-       C 236,398 256,398 266,386 
-       C 282,366 300,366 316,386 
-       C 328,400 350,395 351,380 
-       C 353,348 368,295 368,245 
-       C 368,175 327,120 256,120 Z" 
-    fill="url(#ghostBody1)" 
-    filter="url(#ghostShadow1)" 
-  />
-
-  <!-- Đôi mắt Specter (Màu zinc-950) -->
-  <ellipse cx="220" cy="235" rx="13" ry="20" fill="#09090b" />
-  <ellipse cx="292" cy="235" rx="13" ry="20" fill="#09090b" />
-
-  <!-- Điểm bắt sáng trong mắt -->
-  <circle cx="223" cy="228" r="4" fill="#fafafa" opacity="0.9" />
-  <circle cx="295" cy="228" r="4" fill="#fafafa" opacity="0.9" />
+<svg width="400" height="402" viewBox="0 0 400 402" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g opacity="0.15" filter="url(#filter0_f_7_66)">
+<path d="M200 361.739C288.366 361.739 360 290.105 360 201.739C360 113.374 288.366 41.7393 200 41.7393C111.634 41.7393 40 113.374 40 201.739C40 290.105 111.634 361.739 200 361.739Z" fill="#E4E4E7"/>
+</g>
+<path d="M200 0C101.217 0 44.1739 76.5217 44.1739 173.913C44.1739 243.478 41.3913 322.783 44.1739 367.304C45.5652 388.174 74.7826 392.348 88.6957 375.652C110.957 347.826 136 347.826 158.261 375.652C172.174 392.348 200 392.348 213.913 375.652C236.174 347.826 261.217 347.826 283.478 375.652C300.174 395.13 330.783 388.174 332.174 367.304C334.957 322.783 355.826 243.478 355.826 173.913C355.826 76.5217 298.783 0 200 0Z" fill="url(#paint0_linear_7_66)"/>
+<path d="M149.913 201.739C159.902 201.739 168 189.281 168 173.913C168 158.545 159.902 146.087 149.913 146.087C139.924 146.087 131.826 158.545 131.826 173.913C131.826 189.281 139.924 201.739 149.913 201.739Z" fill="#09090B"/>
+<path d="M250.087 201.739C260.076 201.739 268.174 189.281 268.174 173.913C268.174 158.545 260.076 146.087 250.087 146.087C240.098 146.087 232 158.545 232 173.913C232 189.281 240.098 201.739 250.087 201.739Z" fill="#09090B"/>
+<path opacity="0.95" d="M154.087 170.017C157.314 170.017 159.93 167.401 159.93 164.174C159.93 160.947 157.314 158.33 154.087 158.33C150.86 158.33 148.244 160.947 148.244 164.174C148.244 167.401 150.86 170.017 154.087 170.017Z" fill="white"/>
+<path opacity="0.95" d="M254.261 170.017C257.488 170.017 260.104 167.401 260.104 164.174C260.104 160.947 257.488 158.33 254.261 158.33C251.034 158.33 248.417 160.947 248.417 164.174C248.417 167.401 251.034 170.017 254.261 170.017Z" fill="white"/>
+<defs>
+<filter id="filter0_f_7_66" x="0" y="1.73926" width="400" height="400" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="20" result="effect1_foregroundBlur_7_66"/>
+</filter>
+<linearGradient id="paint0_linear_7_66" x1="136.804" y1="1.5039e-06" x2="316.101" y2="361.307" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FAFAFA"/>
+<stop offset="0.45" stop-color="#E4E4E7"/>
+<stop offset="1" stop-color="#A1A1AA"/>
+</linearGradient>
+</defs>
 </svg>

@@ -322,7 +322,7 @@ function clearPreferencesAndLogout() {
           <VbenTooltip side="bottom">
             <template #trigger>
               <PreferencesButton
-                class="mr-1"
+                class="mr-1 hidden md:flex"
                 @clear-preferences-and-logout="clearPreferencesAndLogout"
               />
             </template>

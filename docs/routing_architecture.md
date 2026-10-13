@@ -1,247 +1,213 @@
-# Tuquet Admin Routing Architecture Specification (Tuquet Cloud Aligned)
+# Tuquet Admin Routing Architecture (v2 — Grounded in `cloud/supabase`)
 
-> **Mã định danh tài liệu:** `RFC-2026-ADMIN-ROUTES-V1`  
-> **Áp dụng cho:** `tuquet/admin` (`apps/web-admin`), `admin.tuquet.com`  
-> **Tiêu chuẩn tham chiếu:** `tuquet/cloud` (`docs/architecture.md`, `docs/terminology_dictionary.md`), `tuquet/admin/AGENTS.md`  
-> **Nguyên tắc cốt lõi:** Micro-Kernel + Schema Plugins Isolation, NIST RBAC O(1), KISS & YAGNI, Mobile-First Dual View, 100% Real Telemetry.
-
----
-
-## 1. Bối Cảnh & Mục Tiêu
-
-Hệ thống quản trị **`admin.tuquet.com`** là bảng điều khiển vận hành trung tâm kết nối trực tiếp đến **Tuquet Cloud** (`tuquet/cloud` chạy trên nền tảng Supabase / PostgreSQL 15+).
-
-Hiện tại, hệ thống routes của Admin đang ở dạng phôi thai với cấu trúc phẳng gom toàn bộ trang dưới `/dashboard` (`/dashboard/workspace`, `/dashboard/fleet`, `/dashboard/analytics`). Cấu trúc này bộc lộ các hạn chế:
-
-1. **Lệch chuẩn thuật ngữ**: Sử dụng URL `/workspace` trong khi thực thể gốc trong cơ sở dữ liệu `tuquet/cloud` là `Tenant` (`public.tenants`).
-2. **Thiếu ánh xạ với Plugin Schemas**: `tuquet/cloud` mở rộng tính năng qua 5 isolated schema plugins (`runners`, `automa`, `billing`, `media`, `events`), nhưng web admin chưa có cấu trúc định tuyến tương ứng.
-3. **Vi phạm nguyên tắc SRP & Mở rộng**: Gom toàn bộ chức năng vào 1 file `dashboard.ts` gây phình to mã nguồn và khó phân quyền (RBAC).
-
-**Mục tiêu của kiến trúc này:** Chuẩn hóa toàn bộ hệ thống routes của Admin để **ánh xạ 1:1 với kiến trúc Micro-Kernel và Schema Plugins của Tuquet Cloud**, đồng thời giữ vững nguyên tắc **KISS & YAGNI** (tối đa 5 nhóm menu chính, không bloat giao diện).
+> **Mã tài liệu:** `RFC-2026-ADMIN-ROUTES-V2` (thay thế V1)  
+> **Áp dụng cho:** `tuquet/admin` (`apps/web-admin`)  
+> **Nguồn sự thật (đã đối soát trực tiếp):** `tuquet/cloud/supabase/migrations/*.sql`, `supabase/plugins/*/install.sql`, `plugin.json`, `config.toml`  
+> **Trạng thái:** **ACCEPTED & IMPLEMENTED** (100% 7/7 Modules đã nghiệm thu)  
+> **Tài liệu đặc tả từng route:** [`docs/routes/README.md`](routes/README.md) | **Quyết định kiến trúc:** [`ADR-001`](decisions/0001-admin-routing-v2.md), [`ADR-002`](decisions/0002-superadmin-platform-governance.md)
 
 ---
 
-## 2. Các Tiêu Chuẩn Kỹ Thuật Bắt Buộc (Invariants)
+## 1. Vì sao cần V2
 
-### 2.1. Phân định Data Layer (`Tenant`) và Presentation Layer (`Workspace`)
+V1 được viết dựa trên giả định, không đối chiếu schema thật. Khi đọc code `cloud/supabase` và `apps/web-admin/src/api`, phát hiện:
 
-- **Tầng dữ liệu & API (Canonical)**: Tên thực thể luôn là **`Tenant`** (`public.tenants`, `tenant_id`). Mọi API call, route canonical và state store phải sử dụng danh từ `tenant` (ví dụ: `/tenants`, `/tenants/:id`).
-- **Tầng hiển thị (Presentation Label)**: Nhãn hiển thị trên giao diện người dùng có thể là "Workspace" hoặc "Không gian làm việc" theo từ điển ngữ nghĩa kinh doanh, nhưng tài liệu kỹ thuật và URL chuẩn phải là `/tenants`.
-- **Tương thích ngược (Backward Compatibility)**: Thiết lập redirect alias từ `/dashboard/workspace` và `/workspace` về `/tenants`.
+### 1.1. Sự thật về backend (khác với V1)
 
-### 2.2. Quy Tắc Thuật Ngữ Bất Biến (Anti-Hallucination Lexicon)
+| # | Sự thật trong `cloud/supabase` | Hệ quả cho routing |
+| :-- | :-- | :-- |
+| B1 | **Không có sẵn Platform Super-Admin bypass.** RLS `public.tenants` mặc định chỉ trả về tenant mà user là thành viên (`get_user_tenant_ids()`). Đã giải quyết qua ADR-002 (`public.is_platform_admin()`). | Với user thông thường: multi-tenant member console. Với Superadmin: bypass RLS để giám sát toàn bộ nền tảng xuyên tenant (ADR-002). |
+| B2 | `public.audit_logs.tenant_id NOT NULL`, RLS theo `has_tenant_permission(tenant_id, 'audit:read')`. | Với user thường: audit log thuộc về **từng tenant** (`/tenants/:id?tab=audit`). Với Superadmin: xem audit log toàn hệ thống qua `/system/audit-logs` (ADR-002). |
+| B3 | Plugin registry thực tế: `core-iam`(public), `runners`(runners), `automa`(automa), `storage`(media), `subscriptions`(billing), `webhooks`(events). `automa` phụ thuộc `runners`. | Mỗi nhóm menu phải gắn với **plugin id** và ẩn khi plugin chưa `installed`. |
+| B4 | PostgREST expose `runners, automa, media, billing, events` nhưng **bảng ngoài `public` chỉ truy cập được qua header `Accept-Profile` / `Content-Profile`**. `extra_search_path` không làm bảng addressable qua URL. | `supabaseRequest()` hiện **không hỗ trợ schema** → mọi call tới `runners.*`, `billing.*`, `automa.*` đều hỏng. |
+| B5 | JWT hook `custom_access_token_hook` **cắt permissions ở 25** và chỉ cho **primary tenant**. Owner có 36 quyền (15 core + 7 runners + 6 automa + 3 subscriptions + 2 webhooks + 3 media). | **Không được** suy quyền giao diện từ JWT. Phải truy vấn DB (xem §4). |
+| B6 | RLS `SELECT` của `runners.*`, `automa.*` chỉ kiểm tra `is_tenant_member()`, không kiểm tra `*:read`. | Permission `*:read` chỉ là **gợi ý UX** (ẩn menu), không phải lớp bảo mật. Bảo mật nằm ở RLS. |
+| B7 | Gói cước thật nằm ở `billing.subscriptions` (1 dòng/tenant, có thể không tồn tại → backend coi là `free`, xem `check_tenant_quota`). | Không được đọc plan từ `tenants.metadata.plan`. |
+| B8 | `automa.execution_logs`, `automa.campaign_runs` **không nằm trong** publication `supabase_realtime` (chỉ có `inbox.otps`, `inbox.emails`). | "Real-time log streaming" của V1 không khả thi nếu không thêm migration → mặc định **polling**. |
+| B9 | Bảng `automa.campaign_runs` là **lần chạy**, không có bảng "campaign" định nghĩa. Có thêm `automa.schedules` mà V1 bỏ sót. | Route nên là `/automation/runs`, không phải `/automation/campaigns`. |
+| B10 | **Không có bảng API key** ở bất kỳ schema nào. Credential headless thật là `runners.devices.device_token_hash` qua RPC `enroll_device`. | Tab "API Keys" hiện tại không có backend. |
 
-Tuân thủ nghiêm ngặt [**`cloud/docs/terminology_dictionary.md`**](file:///root/tuquet/cloud/docs/terminology_dictionary.md):
+### 1.2. Nợ kỹ thuật trong admin hiện tại (vi phạm AGENTS.md §5 — No Mock Data)
 
-- **Máy trạm / Nút tính toán**: Sử dụng **`Runner`** hoặc **`Device`** (`runners.devices`). Tuyệt đối **CẤM** dùng `worker`, `bot`, `agent node`.
-- **Trình duyệt ảo**: Sử dụng **`Browser`** (`runners.browsers`). Tuyệt đối **CẤM** gọi là `browser profile` (để tránh xung đột với hồ sơ người dùng `public.profiles`).
-- **Lưu trữ đám mây**: Sử dụng **`Storage`** hoặc **`Media`** (`media.assets`). Tuyệt đối **CẤM** dùng `vault` trong môi trường cloud (`vault` chỉ tồn tại trong `tuquet-automa` offline).
-- **Điều phối tác vụ**: Sử dụng **`Workflow`** (`automa.workflows`), **`Campaign Run`** (`automa.campaign_runs`), và **`Execution Log`** (`automa.execution_logs`).
+| File | Vấn đề |
+| :-- | :-- |
+| [`fleet.ts`](../apps/web-admin/src/api/core/fleet.ts) | Gọi `/rest/v1/devices` không có `Accept-Profile: runners` → lỗi → rơi về `localStorage` / `getInitialFallbackNodes()` (dữ liệu giả). |
+| [`workspace-detail.ts`](../apps/web-admin/src/api/core/workspace-detail.ts) | Gọi `/rest/v1/machines` (bảng không tồn tại) → fallback `1`; `used_storage_mb` hardcode `1240/480/120`; quota hardcode thay vì `billing.plans`. |
+| `workspace-detail.ts` `inviteWorkspaceMemberApi` | Gửi `role` (text) + `token`, nhưng bảng cần `role_id UUID`, `token_hash`, `invited_by NOT NULL` → **luôn thất bại**, lỗi bị nuốt bằng `console.warn`. |
+| `workspace-detail.ts` `updateWorkspaceMemberApi` | Không ghi `member_roles`; dùng role `developer` không tồn tại trong `public.roles`. |
+| `workspace-detail.ts` API keys | Lưu khóa vào `tenants.metadata.api_keys` — không backend nào xác thực khóa này. |
+| [`analytics.ts`](../apps/web-admin/src/api/core/analytics.ts), `tenant.ts` | Plan đọc từ `metadata.plan`, mặc định `'pro'`. |
+| [`user.ts`](../apps/web-admin/src/api/core/user.ts), [`auth.ts`](../apps/web-admin/src/api/core/auth.ts) | `roles: ['super','admin']` và access codes hardcode. |
 
-### 2.3. Triết Lý Thiết Kế KISS & YAGNI
-
-- **Tối đa 5 nhóm module chính** trên thanh sidebar để người quản trị tập trung cao độ.
-- **Loại bỏ hoàn toàn**: Chrome virtual tabbar trong SPA (`tabbar: { enable: false }`), widget chọn múi giờ, lock screen thừa thãi, breadcrumb lặp lại tên trang.
-- **Biểu tượng giao diện**: 100% sử dụng **Lucide Icons** (`lucide:...`). Tuyệt đối cấm emoji.
-- **Mobile-First Dual View**: Mọi màn hình danh sách hỗ trợ **Dual View** — hiển thị bảng dữ liệu (Data Table) trên Desktop (`≥ 768px`) và tự động chuyển sang thẻ cảm ứng (Touch Cards) trên Mobile (`< 768px`).
+> [!IMPORTANT] Đổi URL mà không sửa tầng dữ liệu chỉ là "sơn lại" — các trang mới (`/fleet/browsers`, `/automation/*`, `/system/plans`) sẽ hỏng ngay vì lỗi B4. **Tầng dữ liệu là điều kiện tiên quyết của routing.**
 
 ---
 
-## 3. Bản Đồ Định Tuyến Tổng Thể (Site Map & Tree Structure)
+## 2. Nguyên tắc V2
+
+1. **Route = Plugin boundary.** Mỗi nhóm menu ánh xạ đúng 1 plugin id trong `public.system_plugins`. Plugin không `installed` → nhóm menu không được đăng ký.
+2. **Tenant-scoped, cross-tenant list.** Mọi bảng nghiệp vụ đều có `tenant_id`. Trang danh sách hiển thị hợp các tenant user thuộc về (đúng như RLS trả về), có cột Tenant và bộ lọc `?tenant=<uuid>` trên URL. Không thêm tenant switcher vào header (tuân thủ AGENTS §1.2).
+3. **Platform catalog ≠ tenant data.** `/system` chỉ chứa dữ liệu không thuộc tenant: `system_plugins`, `billing.plans`.
+4. **Permission từ DB, không từ JWT.** (B5)
+5. **URL dùng danh từ của DB**: `tenants`, `devices`, `browsers`, `proxies`, `workflows`, `runs`, `plugins`, `plans`. Nhãn UI có thể là "Workspace".
+6. **Tối đa 5 nhóm sidebar**, read-first. CRUD chỉ khi đã có trong code hiện tại (Tenants, Members).
+
+---
+
+## 3. Bản đồ định tuyến
 
 ```text
-/ (Root Layout - BasicLayout)
-│
-├── 📊 /dashboard (Tổng quan & Đo lường)
-│   └── /analytics                  # Telemetry thời gian thực, phân bổ plan, độ trễ edge
-│
-├── 🏢 /tenants (Base Kernel IAM - Schema: public)
-│   ├── /tenants                    # Danh sách Tenant (Dual-view Table/Card, Bộ lọc Status/Plan)
-│   └── /tenants/:id                # Chi tiết Tenant (Thông tin, Thành viên, Phân quyền, Hạn mức)
-│
-├── ⚡ /fleet (Plugin: runners - Schema: runners)
-│   ├── /fleet/devices              # Workstations & Compute Nodes (PNA loopback probe :8765)
-│   ├── /fleet/browsers             # Cloud Anti-detect Browsers (GoLogin-style seeds)
-│   └── /fleet/proxies              # Kho Proxy Pool (HTTP/SOCKS5, health check latency)
-│
-├── 🤖 /automation (Plugin: automa - Schema: automa)
-│   ├── /automation/workflows       # Quản lý DAG Workflows (JSON AST, draft/published)
-│   ├── /automation/campaigns       # Lịch sử chiến dịch chạy phân tán (Campaign Runs)
-│   └── /automation/campaigns/:id   # Real-time Execution Logs (stream log từng block)
-│
-└── 🛡️ /system (System Operations & Core Plugins)
-    ├── /system/plugins             # Master Plugins Registry (public.system_plugins)
-    ├── /system/plans               # SaaS Subscription Plans (billing.plans)
-    └── /system/audit-logs          # Toàn bộ nhật ký kiểm toán hệ thống (public.audit_logs)
+/                                   BasicLayout
+├── /dashboard                      [core-iam]        lucide:layout-dashboard
+│   └── /dashboard/analytics
+├── /tenants                        [core-iam]        lucide:building-2     label: Workspaces
+│   ├── /tenants                    list (Dual View)
+│   └── /tenants/:id                detail, tab qua ?tab=
+│         tabs: overview | members | usage | audit
+├── /fleet                          [runners]         lucide:cpu
+│   ├── /fleet/devices              ?tenant=&status=
+│   ├── /fleet/browsers             ?tenant=&status=
+│   └── /fleet/proxies              ?tenant=&status=
+├── /automation                     [automa]          lucide:workflow
+│   ├── /automation/workflows       ?tenant=&status=
+│   ├── /automation/runs            ?tenant=&status=&workflow=
+│   └── /automation/runs/:id        run detail + execution logs (polling)
+└── /system                         [core-iam]        lucide:shield-check
+    ├── /system/plugins             public.system_plugins
+    ├── /system/plans               [subscriptions]   billing.plans
+    ├── /system/users               [core-iam]        authority: superadmin (public.profiles)
+    ├── /system/audit-logs          [core-iam]        authority: superadmin (public.audit_logs)
+    ├── /system/subscriptions       [subscriptions]   authority: superadmin (billing.subscriptions)
+    └── /system/roles               [core-iam]        authority: superadmin (public.roles, permissions)
+
+Core (giữ nguyên): /auth/login, /auth/register, /auth/forget-password,
+/auth/reset-password, /auth/callback, /auth/desktop, /profile
 ```
 
+**Thay đổi so với V1:**
+
+| V1 | V2 | Lý do |
+| :-- | :-- | :-- |
+| `/system/audit-logs` | `/tenants/:id?tab=audit` (User) & `/system/audit-logs` (Superadmin) | B2 & ADR-002: Tenant audit cho user, global audit cho superadmin |
+| `/automation/campaigns[/:id]` | `/automation/runs[/:id]` | B9 — bảng là `campaign_runs`; nhãn UI "Campaign Runs" |
+| Tab "API Keys" | Loại bỏ (chờ quyết định D4) | B10 — không có backend |
+| Tab "Members & RBAC" | Tab `members` (gán role thật qua `member_roles`) | Sửa lỗi ghi role |
+| "Quotas" từ hằng số | Tab `usage` từ `billing.subscriptions` + `plans` + `usage_meters` | B7, No Mock |
+| Real-time streaming | Polling 3s khi run ở trạng thái `pending/queued/running` | B8 |
+| `/tenants/:id` lồng route con theo tab | Một route, tab qua query `?tab=` | KISS — không nhân route |
+
 ---
 
-## 4. Chi Tiết Từng Route Module
+## 4. Ma trận route — permission — nguồn dữ liệu
 
-### 4.1. Module 1: Dashboard (`/dashboard`)
+Permission id lấy **nguyên văn** từ `public.permissions` (seed trong migrations/plugins).
 
-- **Mục đích**: Cung cấp bức tranh tổng thể về sức khỏe hệ thống và phân bổ tài nguyên.
-- **Nguồn dữ liệu**: Truy vấn trực tiếp từ `public.tenants`, `public.system_plugins`, và probe độ trễ REST API.
-- **File route**: `src/router/routes/modules/dashboard.ts`
-
-| Route Path | Tên Route | Component Path | Icon Lucide | Quyền (Permission) |
+| Route | Name | Plugin | Permission (UX gate) | Schema.Table (header) |
 | :-- | :-- | :-- | :-- | :-- |
-| `/dashboard` | `Dashboard` | Redirect: `/dashboard/analytics` | `lucide:layout-dashboard` | Authenticated |
-| `/dashboard/analytics` | `Analytics` | `#/views/dashboard/analytics/index.vue` | `lucide:area-chart` | Authenticated |
+| `/dashboard/analytics` | `Analytics` | core-iam | — (authenticated) | `public.tenants`, `public.system_plugins`, `billing.subscriptions` |
+| `/tenants` | `Tenants` | core-iam | `tenants:read` | `public.tenants` |
+| `/tenants/:id` | `TenantDetail` | core-iam | `tenants:read` | `public.tenants`, `tenant_members`, `member_roles`, `roles` |
+| ↳ `?tab=usage` | — | subscriptions | `quota:read` | `billing.subscriptions`, `billing.plans`, `billing.usage_meters` |
+| ↳ `?tab=audit` | — | core-iam | `audit:read` | `public.audit_logs` |
+| `/fleet/devices` | `FleetDevices` | runners | `runners:devices:read` | `runners.devices` (`Accept-Profile: runners`) |
+| `/fleet/browsers` | `FleetBrowsers` | runners | `runners:browsers:read` | `runners.browsers` |
+| `/fleet/proxies` | `FleetProxies` | runners | `runners:proxies:read` | `runners.proxies` |
+| `/automation/workflows` | `AutomationWorkflows` | automa | `automa:workflows:read` | `automa.workflows` (RLS đã lọc `deleted_at IS NULL`) |
+| `/automation/runs` | `AutomationRuns` | automa | `automa:campaigns:read` | `automa.campaign_runs` |
+| `/automation/runs/:id` | `AutomationRunDetail` | automa | `automa:logs:read` | `automa.campaign_runs`, `automa.execution_logs` |
+| `/system/plugins` | `SystemPlugins` | core-iam | `plugins:read` | `public.system_plugins` |
+| `/system/plans` | `SystemPlans` | subscriptions | `subscriptions:read` | `billing.plans` |
+| `/system/users` | `SystemUsers` | core-iam | `superadmin` | `public.profiles` |
+| `/system/audit-logs` | `SystemAuditLogs` | core-iam | `superadmin` | `public.audit_logs` |
+| `/system/subscriptions` | `SystemSubscriptions` | subscriptions | `superadmin` | `billing.subscriptions` (`Accept-Profile: billing`) |
+| `/system/roles` | `SystemRoles` | core-iam | `superadmin` | `public.roles`, `permissions` |
+
+**Tính quyền hiệu lực (không cần sửa backend)** — một request PostgREST với RLS hiện có:
+
+```http
+GET /rest/v1/tenant_members?user_id=eq.<uid>&status=eq.active
+    &select=tenant_id,member_roles(roles(name,role_permissions(permission_id)))
+```
+
+→ Hợp (union) tất cả `permission_id` = danh sách quyền cho menu. Đồng thời giữ map `tenant_id → permissions` để ẩn/hiện tab trong `/tenants/:id`.
+
+**Danh sách plugin đã cài:** `GET /rest/v1/system_plugins?status=eq.installed&select=id` (RLS cho phép mọi authenticated).
 
 ---
 
-### 4.2. Module 2: Tenancy & IAM (`/tenants`)
+## 5. Hợp đồng tầng dữ liệu (điều kiện tiên quyết)
 
-- **Mục đích**: Quản trị không gian làm việc (Tenants), phân quyền thành viên (NIST RBAC), hạn mức và khóa API Headless.
-- **Nguồn dữ liệu**: `public.tenants`, `public.tenant_members`, `public.roles`, `public.permissions`, `billing.subscriptions`, `billing.usage_meters`.
-- **File route**: `src/router/routes/modules/tenants.ts`
+Mở rộng hàm dùng chung duy nhất `supabaseRequest()` (AGENTS §8) — không tạo client mới:
 
-| Route Path | Tên Route | Component Path | Icon Lucide | Quyền (Permission) |
-| :-- | :-- | :-- | :-- | :-- |
-| `/tenants` | `Tenants` | `#/views/tenants/index.vue` | `lucide:building-2` | `tenants:read` |
-| `/tenants/:id` | `TenantDetail` | `#/views/tenants/detail.vue` | `lucide:settings` | `tenants:read` |
+```ts
+export interface SupabaseRequestOptions extends RequestInit {
+  preferRepresentation?: boolean;
+  /** PostgREST schema profile. Default: 'public'. */
+  schema?: 'automa' | 'billing' | 'events' | 'media' | 'public' | 'runners';
+}
+// GET/HEAD  -> headers['Accept-Profile']  = schema
+// khác      -> headers['Content-Profile'] = schema
+```
 
-> **Cấu trúc Tab trong `TenantDetail` (`/tenants/:id`):**
->
-> 1. **Tổng quan (Overview)**: Tên, vanity slug, trạng thái (`active`, `suspended`, `archived`), ngày khởi tạo.
-> 2. **Thành viên & Vai trò (Members & RBAC)**: Quản lý danh sách thành viên (`tenant_members`), phân bổ System Role (`owner`, `admin`, `member`, `viewer`) hoặc Custom Tenant Role.
-> 3. **Hạn mức & Sử dụng (Quotas & Metering)**: Thước đo thời gian thực từ `billing.usage_meters` (số thiết bị, dung lượng storage MB, số lượt chạy automa/tháng).
-> 4. **Khóa API (API Keys)**: Quản lý access keys headless cho CLI/Runner kết nối trực tiếp.
+Quy tắc:
 
----
-
-### 4.3. Module 3: Compute Fleet & Browsers (`/fleet`)
-
-- **Mục đích**: Giám sát máy trạm vật lý (`runners.devices`), trình duyệt vân tay cố định (`runners.browsers`), và kho proxy đa giao thức (`runners.proxies`).
-- **Nguồn dữ liệu**: Schema `runners` (`runners.devices`, `runners.browsers`, `runners.proxies`, `runners.node_browsers`).
-- **File route**: `src/router/routes/modules/fleet.ts`
-
-| Route Path | Tên Route | Component Path | Icon Lucide | Quyền (Permission) |
-| :-- | :-- | :-- | :-- | :-- |
-| `/fleet` | `Fleet` | Redirect: `/fleet/devices` | `lucide:cpu` | `runners:devices:read` |
-| `/fleet/devices` | `FleetDevices` | `#/views/fleet/devices/index.vue` | `lucide:laptop` | `runners:devices:read` |
-| `/fleet/browsers` | `FleetBrowsers` | `#/views/fleet/browsers/index.vue` | `lucide:globe` | `runners:browsers:read` |
-| `/fleet/proxies` | `FleetProxies` | `#/views/fleet/proxies/index.vue` | `lucide:network` | `runners:proxies:read` |
-
-> **Đặc tả tính năng từng tab:**
->
-> - **Devices**: Hiển thị thông số OS, CPU cores, RAM GB, trạng thái heartbeat (`idle`, `busy`, `offline`). Tích hợp nút probe trực tiếp cổng local loopback `:8765` với cờ `no-cors` và timeout $\le 1200\text{ms}$.
-> - **Browsers**: Hiển thị danh sách cloud browser, engine version (Chromium 148+), seed vân tay (`fingerprint_seed`), và hệ điều hành giả lập (`windows`, `macos`, `linux`).
-> - **Proxies**: Danh sách proxy HTTP/HTTPS/SOCKS5, hiển thị quốc gia (country_code), độ trễ (latency_ms), và cờ gán với thiết bị/browser.
+- Lỗi PostgREST phải nổi lên UI (toast + empty/error state). **Cấm** fallback sang `localStorage`, hằng số hoặc dữ liệu mẫu.
+- Bảng rỗng → empty state có hướng dẫn (ví dụ: "Chưa có Runner — dùng `specter enroll`").
 
 ---
 
-### 4.4. Module 4: Automation Engine (`/automation`)
+## 6. Tương thích ngược
 
-- **Mục đích**: Quản trị quy trình tự động hóa đồ thị DAG (`automa.workflows`) và giám sát tiến độ thực thi chiến dịch (`automa.campaign_runs`).
-- **Nguồn dữ liệu**: Schema `automa` (`automa.workflows`, `automa.campaign_runs`, `automa.execution_logs`).
-- **File route**: `src/router/routes/modules/automation.ts`
+| Đường dẫn cũ               | Đích mới               |
+| :------------------------- | :--------------------- |
+| `/dashboard/workspace`     | `/tenants`             |
+| `/dashboard/workspace/:id` | `/tenants/:id`         |
+| `/dashboard/fleet`         | `/fleet/devices`       |
+| `/dashboard`               | `/dashboard/analytics` |
 
-| Route Path | Tên Route | Component Path | Icon Lucide | Quyền (Permission) |
-| :-- | :-- | :-- | :-- | :-- |
-| `/automation` | `Automation` | Redirect: `/automation/workflows` | `lucide:play-circle` | `automa:workflows:read` |
-| `/automation/workflows` | `AutomationWorkflows` | `#/views/automation/workflows/index.vue` | `lucide:workflow` | `automa:workflows:read` |
-| `/automation/campaigns` | `AutomationCampaigns` | `#/views/automation/campaigns/index.vue` | `lucide:activity` | `automa:campaigns:read` |
-| `/automation/campaigns/:id` | `CampaignRunDetail` | `#/views/automation/campaigns/detail.vue` | `lucide:file-text` | `automa:logs:read` |
-
-> **Đặc tả tính năng:**
->
-> - **Workflows**: Danh sách kịch bản tự động hóa, phiên bản (SemVer), trạng thái (`draft`, `published`, `archived`), số lượng nodes/blocks.
-> - **Campaigns**: Trạng thái phiên chạy (`pending`, `queued`, `running`, `completed`, `failed`), runner thực thi, tổng số tác vụ, tỷ lệ thành công.
-> - **Campaign Detail**: Luồng streaming log từng block theo thời gian thực (Trace, Debug, Info, Warn, Error).
+Cập nhật đồng bộ: `preferences.ts → defaultHomePath`, `user.ts → homePath` (`/dashboard/analytics`), và 5 lời gọi `router.push('/dashboard/workspace…')` trong `profile/index.vue`, `workspace/index.vue`, `workspace/detail.vue`.
 
 ---
 
-### 4.5. Module 5: System Operations & Platform Settings (`/system`)
+## 7. Quyết định đã chốt (2026-10-13)
 
-- **Mục đích**: Dành cho Quản trị viên nền tảng (Platform Operators / Super-Admins) để giám sát các plugin hệ thống và cấu hình gói thuê bao.
-- **Nguồn dữ liệu**: `public.system_plugins`, `billing.plans`, `public.audit_logs`.
-- **File route**: `src/router/routes/modules/system.ts`
+| ID | Quyết định |
+| :-- | :-- |
+| D1 | **Hai chế độ truy cập.** Superadmin thấy toàn bộ dữ liệu mọi tenant. User thường áp dụng chuẩn RLS hiện hành (chỉ tenant mình là thành viên, quyền theo `role_permissions`). Xem §7.1. |
+| D2 | Quyền hiệu lực tính từ DB bằng query PostgREST ở §4 — không thêm RPC. |
+| D3 | Log run dùng polling 3s. |
+| D4 | Ẩn tab API Keys khỏi giao diện cho tới khi `cloud` có bảng/API key thật; khi đó mở lại theo backend mới. |
+| D5 | `automa.schedules`, `media.assets`, `events.*` chưa vào menu. |
 
-| Route Path | Tên Route | Component Path | Icon Lucide | Quyền (Permission) |
-| :-- | :-- | :-- | :-- | :-- |
-| `/system` | `System` | Redirect: `/system/plugins` | `lucide:shield-check` | `plugins:read` |
-| `/system/plugins` | `SystemPlugins` | `#/views/system/plugins/index.vue` | `lucide:blocks` | `plugins:read` |
-| `/system/plans` | `BillingPlans` | `#/views/system/plans/index.vue` | `lucide:credit-card` | `billing:read` |
-| `/system/audit-logs` | `SystemAuditLogs` | `#/views/system/audit/index.vue` | `lucide:scroll-text` | `audit:read` |
+### 7.1. Superadmin (cần thay đổi ở repo `cloud`)
 
-> **Đặc tả tính năng:**
->
-> - **Plugins**: Danh sách 6 core plugins (`core-iam`, `runners`, `automa`, `storage`, `subscriptions`, `webhooks`), phiên bản, trạng thái schema (`installed`), cờ bảo vệ `is_system`.
-> - **Plans**: Cấu hình các gói SaaS (Free, Pro, Enterprise), hạn mức tối đa `max_members`, `max_storage_mb`, `max_monthly_runs`.
-> - **Audit Logs**: Lịch sử kiểm toán toàn bộ thao tác người dùng (Actor, Action, Entity Type, Client IP `INET`).
+Backend hiện **không có** khái niệm superadmin (cột `auth.users.is_super_admin` của GoTrue không vào JWT và không được RLS dùng). Đề xuất tối giản:
 
----
+- **Nguồn danh tính:** `auth.users.raw_app_meta_data.platform_role = 'superadmin'`. `app_metadata` chỉ service role ghi được → user không tự nâng quyền. Hook `custom_access_token_hook` dùng `jsonb_set` nên giữ nguyên key này trong JWT.
+- **Hàm kiểm tra O(1):** `public.is_platform_admin()` = `COALESCE(auth.jwt() -> 'app_metadata' ->> 'platform_role', '') = 'superadmin'`.
+- **RLS bổ sung (permissive, cộng thêm, không sửa policy cũ):** mỗi bảng nghiệp vụ thêm 1 policy `FOR SELECT TO authenticated USING (public.is_platform_admin())` — `public.tenants`, `tenant_members`, `member_roles`, `roles`, `tenant_invitations`, `audit_logs`, `runners.*`, `automa.*`, `billing.*` (gồm `plans` không active), `media.assets`, `events.*`.
+- **Phía admin:** đọc `platform_role` từ JWT (đã ký, tin cậy được). Superadmin nhận toàn bộ `public.permissions` làm quyền UX; vẫn áp dụng gate theo plugin (schema chưa cài thì không có dữ liệu).
+- **Hạn chế đã chấp nhận:** thu hồi quyền superadmin có hiệu lực khi token refresh (mặc định ≤ 1h).
 
-### 4.6. Core & Authentication Routes (Giữ nguyên chuẩn hiện hành)
+Cho tới khi migration `cloud` được merge, admin vẫn chạy đúng ở chế độ user thường (superadmin chỉ thấy các tenant mình là thành viên).
 
-Nằm trong `src/router/routes/core.ts`:
+**Lỗi phát hiện ở repo `cloud` (báo cáo, không sửa từ repo này):**
 
-- `/auth/login`: Đăng nhập email/mật khẩu & GitHub OAuth.
-- `/auth/register`: Đăng ký tài khoản mới.
-- `/auth/forget-password` & `/auth/reset-password`: Luồng khôi phục mật khẩu.
-- `/auth/callback`: Tiếp nhận Supabase GoTrue OAuth redirect (`https://admin.tuquet.com/auth/callback`).
-- `/auth/desktop`: Trang SSO loopback bridge chuyển token về cho Tuquet CLI/Desk (`127.0.0.1:8765`).
-- `/profile`: Thông tin cá nhân của người dùng hiện tại (`public.profiles`).
+- `supabase/seed.sql` seed gói cước vào `public.tenant_subscriptions` (không tồn tại) thay vì `billing.subscriptions` → dữ liệu seed không có subscription.
+- Quyền bị trùng nghĩa: core `billing:read/manage` vs plugin `subscriptions:read/manage`.
+- Cap 25 permission trong JWT đã nhỏ hơn số quyền của owner (36).
 
 ---
 
-## 5. Ma Trận Ánh Xạ Đường Dẫn Cũ Sang Chuẩn Mới
+## 8. Thứ tự triển khai (đầu vào cho capability map)
 
-| Đường dẫn hiện tại | Đường dẫn chuẩn hóa | Schema / Table Backend tương ứng | Trạng thái tương thích ngược |
-| :-- | :-- | :-- | :-- |
-| `/dashboard/analytics` | `/dashboard/analytics` | `public.tenants`, `public.system_plugins` | Giữ nguyên URL |
-| `/dashboard/workspace` | `/tenants` | `public.tenants` | Redirect alias `/dashboard/workspace` $\rightarrow$ `/tenants` |
-| `/dashboard/workspace/:id` | `/tenants/:id` | `public.tenants`, `public.tenant_members` | Redirect alias `/dashboard/workspace/:id` $\rightarrow$ `/tenants/:id` |
-| `/dashboard/fleet` | `/fleet/devices` | `runners.devices` | Redirect alias `/dashboard/fleet` $\rightarrow$ `/fleet/devices` |
-| _(Mới)_ | `/fleet/browsers` | `runners.browsers` | Bổ sung mới cho tính năng Cloud Browser |
-| _(Mới)_ | `/fleet/proxies` | `runners.proxies` | Bổ sung mới cho tính năng Quản lý Proxy |
-| _(Mới)_ | `/automation/workflows` | `automa.workflows` | Bổ sung mới cho Automa Workflow Engine |
-| _(Mới)_ | `/automation/campaigns` | `automa.campaign_runs` | Bổ sung mới cho Automa Campaign Coordinator |
-| _(Mới)_ | `/system/plugins` | `public.system_plugins` | Bổ sung mới cho Kiểm tra Trạng thái Plugin |
-| _(Mới)_ | `/system/plans` | `billing.plans` | Bổ sung mới cho Bảng cước & Hạn mức |
-| _(Mới)_ | `/system/audit-logs` | `public.audit_logs` | Bổ sung mới cho Nhật ký kiểm toán |
+```mermaid
+flowchart LR
+  A["data-access: schema profile + DB permissions + plugin registry"] --> B["route-foundation: tách module, redirect"]
+  B --> C["tenants-truth: members/roles, usage, audit thật"]
+  B --> D["fleet-inventory: devices/browsers/proxies"]
+  B --> E["automation-engine: workflows/runs/logs"]
+  B --> F["system-catalog: plugins/plans"]
+```
 
----
-
-## 6. Lộ Trình Triển Khai Kỹ Thuật (Implementation Roadmap)
-
-### Giai đoạn 1: Chuẩn hóa Routes & Decouple Modules (Không gây gián đoạn)
-
-1. Tách file `dashboard.ts` hiện tại thành các file module riêng biệt trong `src/router/routes/modules/`:
-   - `dashboard.ts` (chỉ giữ `/dashboard/analytics`)
-   - `tenants.ts` (`/tenants`, `/tenants/:id` kèm redirect alias cho `/dashboard/workspace`)
-   - `fleet.ts` (`/fleet/devices` kèm redirect alias cho `/dashboard/fleet`)
-2. Di chuyển các view hiện tại:
-   - `views/dashboard/workspace/` $\rightarrow$ `views/tenants/`
-   - `views/dashboard/fleet/` $\rightarrow$ `views/fleet/devices/`
-3. Cập nhật các liên kết nội bộ trong component và menu breadcrumb.
-
-### Giai đoạn 2: Mở rộng Fleet (Cloud Browsers & Proxy Pool)
-
-1. Thêm view `views/fleet/browsers/index.vue` kết nối bảng `runners.browsers`.
-2. Thêm view `views/fleet/proxies/index.vue` kết nối bảng `runners.proxies`.
-3. Tích hợp tab điều hướng mượt mà trong giao diện `/fleet`.
-
-### Giai đoạn 3: Tích hợp Automa Engine
-
-1. Xây dựng view danh sách Workflows (`views/automation/workflows/index.vue`) từ `automa.workflows`.
-2. Xây dựng view danh sách và chi tiết Campaign Runs (`views/automation/campaigns/index.vue` và `detail.vue`) hiển thị logs từ `automa.execution_logs`.
-
-### Giai đoạn 4: System Operations & Plugin Registry
-
-1. Xây dựng view giám sát trạng thái 6 Core Plugins (`views/system/plugins/index.vue`) từ `public.system_plugins`.
-2. Xây dựng view quản lý Gói cước SaaS (`views/system/plans/index.vue`) từ `billing.plans`.
-3. Xây dựng view Nhật ký kiểm toán (`views/system/audit/index.vue`) từ `public.audit_logs`.
-
----
-
-## 7. Kết Luận
-
-Kiến trúc định tuyến trên giúp **`admin.tuquet.com`**:
-
-1. Đồng bộ hoàn hảo với mô hình **Micro-Kernel + Isolated Schema Plugins** của `tuquet/cloud`.
-2. Đảm bảo tính độc lập, dễ dàng mở rộng khi có thêm các dynamic plugin mới trong tương lai mà không cần cấu trúc lại toàn bộ hệ thống.
-3. Giữ trọn vẹn triết lý **KISS & YAGNI**, trải nghiệm mượt mà trên cả máy tính lẫn thiết bị di động với chuẩn **Shadcn Slate** và **Lucide Icons**.
+Chi tiết module, phạm vi và tiêu chí nghiệm thu: [`docs/specs/capability-map.md`](specs/capability-map.md).

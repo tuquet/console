@@ -36,7 +36,11 @@ const disableItem = computed(() => {
 </script>
 
 <template>
-  <SwitchItem v-model="breadcrumbEnable" :disabled="disabled">
+  <SwitchItem
+    v-model="breadcrumbEnable"
+    :disabled="disabled"
+    :tip="$t('preferences.breadcrumb.enableTip')"
+  >
     {{ $t('preferences.breadcrumb.enable') }}
   </SwitchItem>
   <SwitchItem v-model="breadcrumbHideOnlyOne" :disabled="disableItem">

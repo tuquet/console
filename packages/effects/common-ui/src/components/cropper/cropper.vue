@@ -897,21 +897,21 @@ defineExpose({ getCropImage });
 }
 
 .cropper-view {
-  @apply absolute top-0 right-0 bottom-0 left-0 outline-1 outline-blue-500 select-none;
+  @apply absolute top-0 right-0 bottom-0 left-0 outline-1 outline-primary select-none;
 }
 
 /* Crop box guides */
 .cropper-dashed-h {
-  @apply absolute top-1/3 left-0 block h-1/3 w-full border-t border-b border-dashed border-gray-200/50;
+  @apply absolute top-1/3 left-0 block h-1/3 w-full border-t border-b border-dashed border-border/50;
 }
 
 .cropper-dashed-v {
-  @apply absolute top-0 left-1/3 block h-full w-1/3 border-r border-l border-dashed border-gray-200/50;
+  @apply absolute top-0 left-1/3 block h-full w-1/3 border-r border-l border-dashed border-border/50;
 }
 
 /* Crop box drag area */
 .cropper-move-area {
-  @apply absolute top-0 left-0 block h-full w-full cursor-move bg-white/10;
+  @apply absolute top-0 left-0 block h-full w-full cursor-move bg-primary-foreground/10;
 }
 
 /* Border drag handle lines */
@@ -919,7 +919,7 @@ defineExpose({ getCropImage });
 .cropper-line-n,
 .cropper-line-w,
 .cropper-line-s {
-  @apply absolute block bg-blue-500/10;
+  @apply absolute block bg-primary/10;
 }
 
 .cropper-line-e {
@@ -940,11 +940,11 @@ defineExpose({ getCropImage });
 
 /* Drag points */
 .cropper-point {
-  @apply absolute flex h-2 w-2 items-center justify-center bg-blue-500;
+  @apply absolute flex h-2 w-2 items-center justify-center bg-primary;
 }
 
 .cropper-point-inner {
-  @apply block h-1.5 w-1.5 bg-white;
+  @apply block h-1.5 w-1.5 bg-primary-foreground;
 }
 
 /* Corner drag handle positions and cursors */

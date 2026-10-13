@@ -40,7 +40,11 @@ const style = computed((): CSSProperties => {
 
   const compactStyle: CSSProperties =
     contentCompact === 'compact'
-      ? { margin: '0 auto', width: `${props.contentCompactWidth}px` }
+      ? {
+          margin: '0 auto',
+          maxWidth: '100%',
+          width: `min(100%, ${props.contentCompactWidth}px)`,
+        }
       : {};
   return {
     ...compactStyle,

@@ -28,6 +28,7 @@ const style = computed((): CSSProperties => {
     height: `${height}px`,
     marginBottom: show ? '0' : `-${height}px`,
     position: fixed ? 'fixed' : 'static',
+    right: fixed ? 0 : undefined,
     transform: show ? 'translateY(0)' : 'translateY(100%)',
     width,
     zIndex,
@@ -39,7 +40,7 @@ const style = computed((): CSSProperties => {
   <footer
     :style="style"
     data-layout-region="footer"
-    class="bottom-0 w-full shrink-0 bg-background-deep transition-all duration-200"
+    class="bottom-0 right-0 w-full shrink-0 border-t border-border bg-card/90 backdrop-blur-sm transition-all duration-200"
   >
     <slot></slot>
   </footer>

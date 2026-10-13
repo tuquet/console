@@ -44,6 +44,9 @@
     }
   },
   "dependencies": {
+    "@fontsource/be-vietnam-pro": "catalog:",
+    "@fontsource/inter": "catalog:",
+    "@fontsource/roboto": "catalog:",
     "@iconify/json": "catalog:"
   }
 }

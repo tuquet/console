@@ -4,6 +4,9 @@
   --font-family:
     'Be Vietnam Pro', 'Inter', 'Roboto', -apple-system, blinkmacsystemfont,
     'Segoe UI', 'Helvetica Neue', arial, 'Noto Sans', sans-serif;
+  --font-mono:
+    'JetBrains Mono', 'Fira Code', ui-monospace, sfmono-regular, menlo, monaco,
+    consolas, monospace;
 
   /* Default background color of <body />...etc */
   --background: 0 0% 100%;
@@ -83,6 +86,18 @@
 
   /* Border radius for card, input and buttons */
   --radius: 0.5rem;
+
+  /* Chart colors (shadcn standard) */
+  --chart-1: 199 89% 48%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 271 81% 56%;
+  --chart-4: 38 92% 50%;
+  --chart-5: 340 75% 55%;
+
+  /* Unovis CSS tokens */
+  --vis-primary-color: var(--primary);
+  --vis-secondary-color: var(--muted);
+  --vis-text-color: var(--muted-foreground);
 
   /* ============= custom ============= */
 

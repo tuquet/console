@@ -14,11 +14,11 @@ interface Props extends MenuRecordBadgeRaw {
 const props = withDefaults(defineProps<Props>(), {});
 
 const variantsMap: Record<string, string> = {
-  default: 'bg-gray-500',
+  default: 'bg-muted-foreground',
   destructive: 'bg-destructive',
   primary: 'bg-primary',
-  success: 'bg-green-500',
-  warning: 'bg-yellow-500',
+  success: 'bg-success',
+  warning: 'bg-warning',
 };
 
 const isDot = computed(() => props.badgeType === 'dot');

@@ -5,13 +5,15 @@ import { $t } from '#/locales';
 const routes: RouteRecordRaw[] = [
   {
     meta: {
+      hideChildrenInMenu: true,
       icon: 'lucide:layout-dashboard',
       order: -1,
+      plugin: 'core-iam',
       title: $t('page.dashboard.title'),
     },
     name: 'Dashboard',
     path: '/dashboard',
-    redirect: '/dashboard/workspace',
+    redirect: '/dashboard/analytics',
     children: [
       {
         name: 'Analytics',
@@ -23,32 +25,32 @@ const routes: RouteRecordRaw[] = [
           title: $t('page.dashboard.analytics'),
         },
       },
+      // Backwards-compatible aliases (hidden in menu)
       {
-        name: 'Workspace',
+        name: 'WorkspaceRedirect',
         path: 'workspace',
-        component: () => import('#/views/dashboard/workspace/index.vue'),
-        meta: {
-          icon: 'lucide:layers',
-          title: $t('page.dashboard.workspace'),
-        },
-      },
-      {
-        name: 'Fleet',
-        path: 'fleet',
-        component: () => import('#/views/dashboard/fleet/index.vue'),
-        meta: {
-          icon: 'lucide:laptop',
-          title: $t('page.dashboard.fleet'),
-        },
-      },
-      {
-        name: 'WorkspaceDetail',
-        path: 'workspace/:id',
-        component: () => import('#/views/dashboard/workspace/detail.vue'),
+        redirect: '/tenants',
         meta: {
           hideInMenu: true,
-          icon: 'lucide:layout-grid',
-          title: $t('page.dashboard.workspaceDetail'),
+          title: '',
+        },
+      },
+      {
+        name: 'WorkspaceDetailRedirect',
+        path: 'workspace/:id',
+        redirect: (to) => `/tenants/${to.params.id}`,
+        meta: {
+          hideInMenu: true,
+          title: '',
+        },
+      },
+      {
+        name: 'FleetRedirect',
+        path: 'fleet',
+        redirect: '/fleet/devices',
+        meta: {
+          hideInMenu: true,
+          title: '',
         },
       },
     ],

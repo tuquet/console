@@ -1,6 +1,8 @@
-import type { SystemPluginItem, TenantItem } from './tenant';
+import type { SystemPluginItem } from './system';
+import type { TenantItem } from './tenant';
 
-import { getSystemPluginsApi, getTenantsApi } from './tenant';
+import { getSystemPluginsApi } from './system';
+import { getTenantsApi } from './tenant';
 
 export interface PlanBreakdown {
   enterprise: number;
@@ -91,8 +93,8 @@ export async function getRealAnalyticsDataApi(): Promise<RealAnalyticsData> {
   });
 
   // Plugins count
-  const coreCount = plugins.filter((p) => p.is_system).length;
-  const moduleCount = plugins.filter((p) => !p.is_system).length;
+  const coreCount = plugins.filter((p) => p.is_core ?? p.is_system).length;
+  const moduleCount = plugins.filter((p) => !(p.is_core ?? p.is_system)).length;
 
   return {
     fleet: {

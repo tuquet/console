@@ -25,7 +25,7 @@ function escapeRegExp(value: string): string {
  * variables written by utility classes.
  */
 const LAYER_ORDER_STATEMENT =
-  '@layer properties, theme, base, ant, antd, el, td, components, utilities;';
+  '@layer properties, theme, base, ant, antd, el, td, tuquet, components, utilities;';
 
 /**
  * Wraps CSS from specified packages inside @layer:
@@ -49,7 +49,10 @@ export function viteCssLayerPlugin(
   const list = Array.isArray(rules) ? rules : [rules];
   const matchers = list.map(({ layerName, packageName }) => ({
     layerName,
-    regex: new RegExp(`${escapeRegExp(packageName)}[\\\\/].+\\.css$`, 'i'),
+    regex: new RegExp(
+      `${escapeRegExp(packageName).replaceAll('/', String.raw`[\\/]`)}${String.raw`[\\/]`}.+\\.css$`,
+      'i',
+    ),
   }));
   return {
     name: 'vite-plugin-css-layer',

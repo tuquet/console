@@ -90,10 +90,6 @@ const preferencesPositionItems = computed((): SelectOption[] => [
     label: $t('preferences.position.userDropdown'),
     value: 'user-dropdown',
   },
-  {
-    label: $t('common.notShow'),
-    value: 'none',
-  },
 ]);
 
 const positionMap: Record<string, string> = {

@@ -223,8 +223,19 @@ function usePreferences() {
     const isUserDropdownPosition =
       preferencesButtonPosition === 'user-dropdown';
 
-    // If fixed position is set
+    // If explicit position is configured
     if (preferencesButtonPosition !== 'auto') {
+      // Anti-Lockout Invariant: If header is disabled or hidden while position is 'header',
+      // automatically fallback to floating fixed button so user is never locked out of settings
+      const headerUnavailable = !header.enable || headerHidden;
+      if (isHeaderPosition && headerUnavailable) {
+        return {
+          fixed: true,
+          header: false,
+          userDropdown: false,
+        };
+      }
+
       return {
         fixed: preferencesButtonPosition === 'fixed',
         header: isHeaderPosition,
@@ -237,6 +248,7 @@ function usePreferences() {
       contentIsMaximize ||
       isFullContent.value ||
       isMobile.value ||
+      !header.enable ||
       !isShowHeaderNav.value;
 
     return {

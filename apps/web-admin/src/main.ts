@@ -1,7 +1,10 @@
 import { initPreferences } from '@vben/preferences';
 import { unmountGlobalLoading } from '@vben/utils';
 
-import { overridesPreferences, preferencesExtension } from './preferences';
+import {
+  overridesPreferences,
+  typographyPreferencesExtension,
+} from './preferences';
 
 // Auto-reload on stale chunk failures after new deployments
 if (typeof window !== 'undefined') {
@@ -21,9 +24,9 @@ async function initApplication() {
   const namespace = `${import.meta.env.VITE_APP_NAMESPACE}-${appVersion}-${env}`;
 
   try {
-    // Initialize app preferences
+    // Initialize app preferences with typography extension
     await initPreferences({
-      extension: preferencesExtension,
+      extension: typographyPreferencesExtension,
       namespace,
       overrides: overridesPreferences,
     });

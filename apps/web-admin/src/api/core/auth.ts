@@ -1,5 +1,6 @@
 import { useAccessStore } from '@vben/stores';
 
+import { getEffectiveAccessApi } from './access';
 import { getSupabaseConfig } from './supabase-client';
 
 export namespace AuthApi {
@@ -159,7 +160,8 @@ export async function logoutApi() {
  * Get user permission codes (Supabase Admin Console RBAC)
  */
 export async function getAccessCodesApi(): Promise<string[]> {
-  return ['super', 'admin', 'user'];
+  const access = await getEffectiveAccessApi();
+  return access.permissions;
 }
 
 /**

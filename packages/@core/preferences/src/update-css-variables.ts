@@ -129,4 +129,35 @@ function isDarkTheme(theme: string) {
   return dark;
 }
 
-export { isDarkTheme, updateCSSVariables };
+const FONT_FAMILY_MAP: Record<string, string> = {
+  'be-vietnam-pro':
+    "'Be Vietnam Pro', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  inter:
+    "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  roboto:
+    "'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
+  'system-ui':
+    "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+};
+
+/**
+ * Update font-family CSS variable on document root
+ * @param fontKey - Identifier of the font family ('be-vietnam-pro', 'inter', 'roboto', 'system-ui')
+ */
+function updateFontFamilyVariable(fontKey?: string) {
+  if (typeof document === 'undefined' || !document.documentElement) {
+    return;
+  }
+  const resolvedFont =
+    (fontKey && (FONT_FAMILY_MAP[fontKey] || fontKey)) ||
+    FONT_FAMILY_MAP['be-vietnam-pro'] ||
+    'sans-serif';
+  document.documentElement.style.setProperty('--font-family', resolvedFont);
+}
+
+export {
+  FONT_FAMILY_MAP,
+  isDarkTheme,
+  updateCSSVariables,
+  updateFontFamilyVariable,
+};

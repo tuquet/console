@@ -2,6 +2,7 @@ import type { UserInfo } from '@vben/types';
 
 import { useAccessStore } from '@vben/stores';
 
+import { getEffectiveAccessApi } from './access';
 import { supabaseRequest } from './supabase-client';
 
 /**
@@ -15,7 +16,11 @@ export async function getUserInfoApi(): Promise<UserInfo> {
     throw new Error('Not authenticated');
   }
 
-  const user = await supabaseRequest<any>('/auth/v1/user');
+  const [user, effectiveAccess] = await Promise.all([
+    supabaseRequest<any>('/auth/v1/user'),
+    getEffectiveAccessApi(),
+  ]);
+
   const meta = user.user_metadata || {};
   const realName =
     meta.full_name ||
@@ -25,12 +30,16 @@ export async function getUserInfoApi(): Promise<UserInfo> {
   const avatar =
     meta.avatar_url || 'https://avatars.githubusercontent.com/u/tuquet';
 
+  const roles = effectiveAccess.isSuperadmin
+    ? ['superadmin', ...effectiveAccess.permissions]
+    : effectiveAccess.permissions;
+
   return {
     avatar,
-    desc: user.email || 'Specteristrator',
-    homePath: '/dashboard/workspace',
+    desc: user.email || 'Specter Administrator',
+    homePath: '/dashboard/analytics',
     realName,
-    roles: ['super', 'admin'],
+    roles,
     token,
     userId: user.id,
     username: user.email || 'admin',

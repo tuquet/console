@@ -21,4 +21,5 @@ export { preferencesManager };
 
 export * from './constants';
 export type * from './types';
+export * from './update-css-variables';
 export * from './use-preferences';

@@ -30,7 +30,7 @@ const props = withDefaults(defineProps<Props>(), {
   alt: 'avatar',
   as: 'button',
   dot: false,
-  dotClass: 'bg-green-500',
+  dotClass: 'bg-success',
   fit: 'cover',
 });
 

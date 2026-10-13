@@ -35,7 +35,6 @@
     "commit": "czg",
     "dev": "pnpm -F @tuquet/admin-web run dev",
     "dev:admin": "pnpm -F @tuquet/admin-web run dev",
-    "dev:antd": "pnpm -F @tuquet/admin-web run dev",
     "format": "vsh lint --format",
     "lint": "vsh lint",
     "postinstall": "pnpm -r run --if-present stub",
