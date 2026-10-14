@@ -19,23 +19,34 @@
     "title": "Fleet",
     "desc": "Manage execution devices, browser profiles, and proxy pools",
     "devices": "Devices",
+    "devices_desc": "Manage runner nodes, workstations, and daemon connectivity",
     "browsers": "Browser Profiles",
-    "proxies": "Proxy Pool"
+    "browsers_desc": "Manage anti-detect virtual browser profiles and fingerprinting",
+    "proxies": "Proxy Pool",
+    "proxies_desc": "Manage rotating proxy infrastructure and network routing"
   },
   "automation": {
     "title": "Automation",
     "workflows": "Workflows",
+    "workflows_desc": "Manage workflows and dispatch automation DAGs",
     "runs": "Workflow Runs",
+    "runs_desc": "Monitor execution progress and logs across runner nodes",
     "runDetail": "Run Detail"
   },
   "system": {
     "title": "System",
     "plugins": "Plugins",
+    "plugins_desc": "Catalog of platform extension modules and core plugins",
     "plans": "Plans",
+    "plans_desc": "Configure resource quotas and service tiers for organizations",
     "users": "Platform Users",
+    "users_desc": "Superadmin directory and global operational permissions",
     "auditLogs": "Global Audit Logs",
+    "auditLogs_desc": "Audit trail tracking security events, user activity, and system actions",
     "subscriptions": "Subscriptions",
-    "roles": "Roles & Permissions"
+    "subscriptions_desc": "Manage billing cycles, tier entitlements, and contract status",
+    "roles": "Roles & Permissions",
+    "roles_desc": "Access control model and administrative privileges"
   },
   "analytics": {
     "title": "Platform Analytics",

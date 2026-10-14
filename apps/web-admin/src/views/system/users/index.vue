@@ -145,10 +145,10 @@ function getInitials(name: null | string): string {
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Người dùng nền tảng
+          {{ $t('page.system.users') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          Danh bạ quản trị viên cấp cao và phân quyền vận hành toàn hệ thống
+          {{ $t('page.system.users_desc') }}
         </p>
       </div>
 

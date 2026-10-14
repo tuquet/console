@@ -169,10 +169,10 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Gói cước & hạn mức dịch vụ
+          {{ $t('page.system.plans') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          Cấu hình định mức tài nguyên và biểu phí dịch vụ cho các tổ chức
+          {{ $t('page.system.plans_desc') }}
         </p>
       </div>
 

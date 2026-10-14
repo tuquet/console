@@ -163,10 +163,10 @@ function refresh() {
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Quy trình
+          {{ $t('page.automation.workflows') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          Quản lý quy trình và điều phối luồng tự động hóa
+          {{ $t('page.automation.workflows_desc') }}
         </p>
       </div>
 

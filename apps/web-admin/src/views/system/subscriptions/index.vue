@@ -185,11 +185,10 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscriptionItem>({
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Quản lý thuê bao
+          {{ $t('page.system.subscriptions') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          Theo dõi chu kỳ thanh toán, gói dịch vụ và trạng thái hợp đồng các tổ
-          chức
+          {{ $t('page.system.subscriptions_desc') }}
         </p>
       </div>
 

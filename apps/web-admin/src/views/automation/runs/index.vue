@@ -177,10 +177,10 @@ watch(
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Lịch sử chạy
+          {{ $t('page.automation.runs') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          Theo dõi tiến độ và nhật ký thực thi workflow trên các runner nodes
+          {{ $t('page.automation.runs_desc') }}
         </p>
       </div>
 

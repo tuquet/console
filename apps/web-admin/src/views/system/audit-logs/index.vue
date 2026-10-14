@@ -188,11 +188,10 @@ function refresh() {
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Nhật ký kiểm toán
+          {{ $t('page.system.auditLogs') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          Theo dõi lịch sử truy vết bảo mật, hành vi người dùng và nhật ký tác
-          vụ hệ thống
+          {{ $t('page.system.auditLogs_desc') }}
         </p>
       </div>
 

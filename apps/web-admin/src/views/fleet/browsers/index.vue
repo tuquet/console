@@ -173,10 +173,10 @@ watch(
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Browser profiles
+          {{ $t('page.fleet.browsers') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          Quản lý profile và vân tay trình duyệt anti-detect
+          {{ $t('page.fleet.browsers_desc') }}
         </p>
       </div>
 

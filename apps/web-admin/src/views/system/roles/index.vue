@@ -64,10 +64,10 @@ onMounted(() => {
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Vai trò & phân quyền RBAC
+          {{ $t('page.system.roles') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          Mô hình kiểm soát truy cập và đặc quyền quản trị hệ thống
+          {{ $t('page.system.roles_desc') }}
         </p>
       </div>
 

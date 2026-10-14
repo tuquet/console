@@ -19,23 +19,34 @@
     "title": "Fleet",
     "desc": "Quản lý thiết bị runner, browser profiles và proxy pool",
     "devices": "Thiết bị",
+    "devices_desc": "Quản lý thiết bị runner, máy trạm và trạng thái kết nối daemon",
     "browsers": "Browser profiles",
-    "proxies": "Proxy pool"
+    "browsers_desc": "Quản lý profile và vân tay trình duyệt anti-detect",
+    "proxies": "Proxy pool",
+    "proxies_desc": "Quản lý proxy xoay vòng và định tuyến mạng"
   },
   "automation": {
     "title": "Tự động hóa",
     "workflows": "Quy trình",
-    "runs": "Lịch sử chạy",
+    "workflows_desc": "Quản lý quy trình và điều phối luồng tự động hóa",
+    "runs": "Phiên chạy",
+    "runs_desc": "Theo dõi tiến độ và nhật ký thực thi quy trình trên các runner node",
     "runDetail": "Chi tiết phiên chạy"
   },
   "system": {
     "title": "Hệ thống",
     "plugins": "Plugins",
-    "plans": "Gói dịch vụ",
+    "plugins_desc": "Danh mục tiện ích và module chức năng mở rộng nền tảng",
+    "plans": "Gói cước",
+    "plans_desc": "Cấu hình định mức tài nguyên và biểu phí dịch vụ cho các tổ chức",
     "users": "Người dùng nền tảng",
+    "users_desc": "Danh bạ quản trị viên cấp cao và phân quyền vận hành toàn hệ thống",
     "auditLogs": "Nhật ký kiểm toán",
+    "auditLogs_desc": "Theo dõi lịch sử truy vết bảo mật, hành vi người dùng và tác vụ hệ thống",
     "subscriptions": "Đăng ký gói",
-    "roles": "Vai trò & quyền hạn"
+    "subscriptions_desc": "Theo dõi chu kỳ thanh toán, gói dịch vụ và trạng thái hợp đồng",
+    "roles": "Vai trò & quyền hạn",
+    "roles_desc": "Mô hình kiểm soát truy cập và đặc quyền quản trị hệ thống"
   },
   "analytics": {
     "title": "Phân tích nền tảng",

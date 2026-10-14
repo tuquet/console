@@ -2,7 +2,7 @@
 
 > **Mã đặc tả:** SPEC-route-consolidation-automation-fleet  
 > **Sáng kiến:** Tinh Gọn Cấu Trúc Menu và Router Tree  
-> **Trạng thái:** DRAFT - Chờ phê duyệt  
+> **Trạng thái:** DRAFT - Chờ phê duyệt
 
 ---
 
@@ -20,6 +20,7 @@
 Hợp nhất phân hệ Quản trị thiết bị - Fleet và Tự động hóa - Automation thành một khối điều hướng thống nhất.
 
 Lợi ích:
+
 - Giảm tải số lượng menu cấp 1 trên sidebar từ 5 xuống 4 mục: Bảng điều khiển, Quản trị workspace, Tự động hóa, Hệ thống.
 - Gom toàn bộ quy trình tự động hóa và hạ tầng thực thi gồm máy trạm runner, profile trình duyệt, cổng proxy vào cùng một không gian làm việc.
 
@@ -28,6 +29,7 @@ Lợi ích:
 ## 3. Cấu Trúc Router Tree Mới
 
 Tuyến đường gốc:
+
 - Tên: Automation
 - Đường dẫn: `/automation`
 - Điều hướng mặc định: `/automation/workflows`
@@ -35,6 +37,7 @@ Tuyến đường gốc:
 - Thứ tự: 20
 
 Danh sách menu con:
+
 1. Quy trình: `/automation/workflows` - icon `lucide:git-branch` - quyền `automa:workflows:read`
 2. Lịch sử chạy: `/automation/runs` - icon `lucide:play-circle` - quyền `automa:campaigns:read`
 3. Thiết bị: `/automation/devices` - icon `lucide:laptop` - quyền `runners:devices:read`
@@ -42,9 +45,11 @@ Danh sách menu con:
 5. Proxy pool: `/automation/proxies` - icon `lucide:network` - quyền `runners:proxies:read`
 
 Tuyến đường ẩn:
+
 - Chi tiết phiên chạy: `/automation/runs/:id` - icon `lucide:file-text` - quyền `automa:logs:read`
 
 Tuyến đường chuyển tiếp giữ liên kết cũ:
+
 - `/fleet` chuyển tiếp về `/automation/devices`
 - `/fleet/devices` chuyển tiếp về `/automation/devices`
 - `/fleet/browsers` chuyển tiếp về `/automation/browsers`

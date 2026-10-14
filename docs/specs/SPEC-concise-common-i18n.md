@@ -1,7 +1,7 @@
 # Spec: Tiêu Chuẩn i18n Tối Giản & Tái Sử Dụng Từ Vựng Dùng Chung (Concise & Reusable Common i18n)
 
 > **Module ID:** `concise-common-i18n`  
-> **Nguyên tắc cốt lõi:** *Nói ít hiểu nhiều (Brevity & Anti-Verbosity)* — Tối giản nhãn nút, loại bỏ lặp từ ngữ cảnh, tối ưu tái sử dụng các từ vựng dùng chung (`$t('common.*')`).
+> **Nguyên tắc cốt lõi:** _Nói ít hiểu nhiều (Brevity & Anti-Verbosity)_ — Tối giản nhãn nút, loại bỏ lặp từ ngữ cảnh, tối ưu tái sử dụng các từ vựng dùng chung (`$t('common.*')`).
 
 ---
 
@@ -91,9 +91,15 @@ admin/
 ### Ví dụ Thực Tế: Nút Tạo Workspace & Các Nút Thao Tác Header
 
 #### Trước (Dài dòng, thừa thãi, hardcode):
+
 ```vue
 <!-- Lặp từ "workspace", nút dài chiếm diện tích, text "Làm mới" hardcode tiếng Việt -->
-<Button variant="outline" size="sm" class="gap-1.5" @click="() => gridApi.reload()">
+<Button
+  variant="outline"
+  size="sm"
+  class="gap-1.5"
+  @click="() => gridApi.reload()"
+>
   <RefreshCw class="size-3.5" />
   <span>Làm mới</span>
 </Button>
@@ -104,6 +110,7 @@ admin/
 ```
 
 #### Sau (Tối giản, chuẩn "nói ít hiểu nhiều", tái sử dụng `common`):
+
 ```vue
 <!-- Ngắn gọn, súc tích, ngữ cảnh trang đã là Workspace, icon Plus bổ trợ hoàn hảo -->
 <Button
@@ -123,6 +130,7 @@ admin/
 ```
 
 ### Quy Tắc Rà Soát (The Brevity Rules):
+
 1. **Quy tắc ngữ cảnh đơn vị (Context Scoping):** Nếu trang đang mang tiêu đề "Workspace" hoặc "Người dùng", các nút thêm mới trên trang đó chỉ cần mang nhãn `Tạo` (`Create`) hoặc `Thêm` (`Add`), không nối đuôi danh từ của trang.
 2. **Quy tắc ưu tiên `common` (Common-First Resolution):** Bất kỳ nhãn nào có tần suất xuất hiện $\ge 2$ màn hình (`Làm mới`, `Đặt lại`, `Tìm kiếm`, `Lọc`, `Tạo`, `Chi tiết`, `Xóa`, `Sửa`) BẮT BUỘC phải nằm ở `$t('common.<action>')`.
 3. **Quy tắc Sentence Case tiếng Việt:**
@@ -167,4 +175,4 @@ admin/
 ## 9. Open Questions
 
 1. Đối với các nút tạo tài nguyên có nhiều loại (ví dụ: "Thêm thành viên" vs "Tạo workspace" trong cùng 1 modal con), có áp dụng rút gọn nhãn thành "Thêm" khi ngữ cảnh modal đã ghi rõ tiêu đề không?  
-   *(Khuyến nghị: Trong modal có tiêu đề "Mời thành viên mới", nút submit chỉ cần là "Mời" hoặc "Thêm").*
+   _(Khuyến nghị: Trong modal có tiêu đề "Mời thành viên mới", nút submit chỉ cần là "Mời" hoặc "Thêm")._

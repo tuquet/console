@@ -194,10 +194,10 @@ watch(
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Proxy pool
+          {{ $t('page.fleet.proxies') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          Quản lý proxy xoay vòng và định tuyến mạng
+          {{ $t('page.fleet.proxies_desc') }}
         </p>
       </div>
 

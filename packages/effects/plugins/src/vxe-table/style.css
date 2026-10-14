@@ -1,4 +1,4 @@
-@import "vxe-pc-ui/lib/form/style/style.css";
+@import 'vxe-pc-ui/lib/form/style/style.css';
 
 @reference "@vben/tailwind-config/theme";
 
@@ -202,5 +202,3 @@
     padding-left: 0;
   }
 }
-
-

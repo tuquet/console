@@ -116,4 +116,3 @@
     6. Kiểm định chất lượng: vue-tsc đạt 0 lỗi, 89 test files và 667 unit tests pass 100%, build-local.sh triển khai thành công lên Nginx cục bộ và Tailscale mesh.
   - Verify: `pnpm --filter @tuquet/admin-web run typecheck` đạt 0 lỗi, `pnpm test:unit` pass 667/667, `bash ./scripts/build-local.sh` thành công.
   - Files: `packages/effects/plugins/src/vxe-table/init.ts`, `packages/effects/plugins/src/vxe-table/index.ts`, `packages/effects/plugins/src/vxe-table/style.css`, `apps/web-admin/src/adapter/vxe-table.ts`, `apps/web-admin/src/views/automation/runs/detail.vue`, `apps/web-admin/src/views/fleet/devices/components/modals/node-detail-modal.vue`, `apps/web-admin/src/views/tenants/components/workspace-overview-tab.vue`, `apps/web-admin/src/views/_core/profile/index.vue`, `apps/web-admin/src/views/tenants/components/modals/*.vue`.
-

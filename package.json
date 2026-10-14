@@ -90,7 +90,7 @@
     "vite": "catalog:",
     "vitest": "catalog:",
     "vue": "catalog:",
-    "vue-i18n-extract": "^2.0.7",
+    "vue-i18n-extract": "catalog:",
     "vue-tsc": "catalog:"
   },
   "engines": {

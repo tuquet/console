@@ -180,10 +180,10 @@ function refresh() {
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Plugins hệ thống
+          {{ $t('page.system.plugins') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          Danh mục tiện ích mở rộng và module chức năng mở rộng nền tảng
+          {{ $t('page.system.plugins_desc') }}
         </p>
       </div>
 
