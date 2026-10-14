@@ -50,6 +50,8 @@
     --tw-translate-x: 0;
     --tw-translate-y: 0;
     --tw-translate-z: 0;
+    --tw-ring-color: hsl(var(--ring) / 50%);
+    --tw-ring-offset-color: hsl(var(--background));
   }
 
   html,
@@ -664,5 +666,15 @@ html.grayscale-mode {
   [data-slot='dialog-content'],
   [data-slot='alert-dialog-content'] {
     transform: none;
+  }
+
+  /* Eliminate white ring-offset halo and overly bright 2px focus ring in Dark Mode */
+  [class*='focus-visible:ring-']:focus-visible,
+  [class*='focus:ring-']:focus {
+    --tw-ring-offset-width: 0px !important;
+    --tw-ring-offset-shadow: 0 0 #0000 !important;
+    --tw-ring-color: hsl(var(--ring) / 65%);
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 1px
+      var(--tw-ring-color, hsl(var(--ring) / 65%)) !important;
   }
 }

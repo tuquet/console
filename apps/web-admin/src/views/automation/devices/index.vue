@@ -222,8 +222,9 @@ const [Grid, gridApi] = useVbenVxeGrid<FleetDeviceItem>({
       {
         field: 'actions',
         title: 'Thao tác',
-        width: 160,
+        minWidth: 185,
         align: 'right',
+        showOverflow: false,
         slots: { default: 'actions-cell' },
       },
     ],

@@ -8,6 +8,8 @@ import { useUserStore } from '@vben/stores';
 
 import {
   Building2,
+  Check,
+  Eye,
   Plus,
   RefreshCw,
   ShieldCheck,
@@ -106,6 +108,7 @@ async function handleCreateTenant(payload: {
 }
 
 const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
+  separator: false,
   formOptions: {
     schema: [
       {
@@ -143,20 +146,21 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
         label: 'Tìm kiếm',
         componentProps: {
           placeholder: 'Tìm theo tên hoặc slug workspace...',
-          clearable: true,
         },
       },
     ],
     layout: 'vertical',
     showCollapseButton: false,
+    submitOnChange: true,
+    submitOnEnter: true,
     submitButtonOptions: {
       content: $t('common.filter'),
     },
     resetButtonOptions: {
       content: $t('common.reset'),
     },
-    actionWrapperClass: 'flex items-center justify-end gap-2 pt-2 sm:pt-6',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3',
+    actionWrapperClass: 'flex items-center justify-end gap-2',
+    wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3',
   },
   gridOptions: {
     border: false,
@@ -223,38 +227,39 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
       {
         field: 'name',
         title: 'Tổ chức',
-        minWidth: 240,
+        minWidth: 220,
         slots: { default: 'name-cell' },
       },
       {
         field: 'slug',
         title: 'Slug',
-        width: 150,
+        minWidth: 140,
         slots: { default: 'slug-cell' },
       },
       {
         field: 'plan',
         title: 'Gói cước',
-        width: 140,
+        minWidth: 120,
         slots: { default: 'plan-cell' },
       },
       {
         field: 'status',
         title: 'Trạng thái',
-        width: 130,
+        minWidth: 130,
         slots: { default: 'status-cell' },
       },
       {
         field: 'created_at',
         title: 'Ngày tạo',
-        width: 150,
+        minWidth: 140,
         slots: { default: 'date-cell' },
       },
       {
         field: 'actions',
         title: 'Thao tác',
-        width: 220,
+        minWidth: 280,
         align: 'right',
+        showOverflow: false,
         slots: { default: 'actions-cell' },
       },
     ],
@@ -526,30 +531,36 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
             <Button
               size="sm"
               :variant="row.id === activeTenantId ? 'secondary' : 'default'"
-              class="h-7 text-xs"
+              class="h-7 px-2.5 text-xs gap-1"
               @click="handleSelectTenant(row)"
             >
-              {{
-                row.id === activeTenantId
-                  ? $t('page.workspace.action_active')
-                  : $t('page.workspace.action_activate')
-              }}
+              <Check v-if="row.id === activeTenantId" class="size-3 shrink-0" />
+              <span>
+                {{
+                  row.id === activeTenantId
+                    ? $t('page.workspace.action_selected')
+                    : $t('page.workspace.action_activate')
+                }}
+              </span>
             </Button>
             <Button
               variant="outline"
               size="sm"
-              class="h-7 text-xs"
+              class="h-7 px-2.5 text-xs gap-1"
               @click="router.push(`/tenants/${row.id}`)"
             >
-              {{ $t('page.workspace.action_detail') }}
+              <Eye class="size-3 shrink-0" />
+              <span>{{ $t('page.workspace.action_detail') }}</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
-              class="h-7 text-xs"
+              class="h-7 px-2 text-xs gap-1"
+              :title="$t('page.workspace.action_connect')"
               @click="handleConnectCli(row)"
             >
-              {{ $t('page.workspace.action_connect') }}
+              <Terminal class="size-3 shrink-0" />
+              <span>CLI</span>
             </Button>
           </div>
         </template>
