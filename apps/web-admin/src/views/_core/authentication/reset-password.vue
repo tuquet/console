@@ -66,6 +66,7 @@ async function handleSubmit() {
         <Input
           v-model="password"
           type="password"
+          autocomplete="new-password"
           placeholder="Nhập mật khẩu mới, tối thiểu 6 ký tự"
           class="h-10"
         />
@@ -78,6 +79,7 @@ async function handleSubmit() {
         <Input
           v-model="confirmPassword"
           type="password"
+          autocomplete="new-password"
           placeholder="Nhập lại mật khẩu mới"
           class="h-10"
         />

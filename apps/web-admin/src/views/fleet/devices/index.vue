@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { FleetDeviceItem, FleetMetricsData } from '#/api';
 
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { Cpu, Eye, HardDrive, Laptop, Plus, RefreshCw } from '@lucide/vue';
@@ -236,10 +236,6 @@ watch(
     gridApi.reload();
   },
 );
-
-onMounted(() => {
-  checkDaemonHealth();
-});
 </script>
 
 <template>

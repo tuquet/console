@@ -27,8 +27,7 @@ export async function getUserInfoApi(): Promise<UserInfo> {
     meta.display_name ||
     user.email?.split('@')[0] ||
     'Specter';
-  const avatar =
-    meta.avatar_url || 'https://avatars.githubusercontent.com/u/tuquet';
+  const avatar = meta.avatar_url || '';
 
   const roles = effectiveAccess.isSuperadmin
     ? ['superadmin', ...effectiveAccess.permissions]

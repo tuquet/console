@@ -3,7 +3,7 @@ import type { PlatformSubscriptionItem } from '#/api';
 
 import { computed, ref } from 'vue';
 
-import { Building2, DollarSign, RefreshCw } from '@lucide/vue';
+import { Building2, CreditCard, DollarSign, RefreshCw } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';

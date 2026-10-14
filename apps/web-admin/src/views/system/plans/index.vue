@@ -3,7 +3,7 @@ import type { BillingPlanItem } from '#/api';
 
 import { ref } from 'vue';
 
-import { Cpu, HardDrive, RefreshCw, Users } from '@lucide/vue';
+import { Cpu, CreditCard, HardDrive, RefreshCw, Users } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';

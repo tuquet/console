@@ -25,6 +25,7 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: 'VbenInputPassword',
       componentProps: {
+        autocomplete: 'new-password',
         passwordStrength: true,
         placeholder: $t('authentication.password'),
       },
@@ -40,17 +41,20 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: 'VbenInputPassword',
       componentProps: {
+        autocomplete: 'new-password',
         placeholder: $t('authentication.confirmPassword'),
       },
       dependencies: {
-        rules(values) {
+        resolve({ values }) {
           const { password } = values;
-          return z
-            .string({ error: $t('authentication.passwordTip') })
-            .min(1, { message: $t('authentication.passwordTip') })
-            .refine((value) => value === password, {
-              message: $t('authentication.confirmPasswordTip'),
-            });
+          return {
+            rules: z
+              .string({ error: $t('authentication.passwordTip') })
+              .min(1, { message: $t('authentication.passwordTip') })
+              .refine((value) => value === password, {
+                message: $t('authentication.confirmPasswordTip'),
+              }),
+          };
         },
         triggerFields: ['password'],
       },

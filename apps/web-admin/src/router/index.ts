@@ -23,7 +23,7 @@ const router = createRouter({
     if (savedPosition) {
       return savedPosition;
     }
-    if (to.hash) {
+    if (to.hash && !to.hash.includes('=')) {
       return { behavior: 'smooth', el: to.hash };
     }
     // If navigating on the same path (e.g. query string tab or filter changes),
