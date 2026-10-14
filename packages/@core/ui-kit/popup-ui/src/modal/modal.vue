@@ -14,6 +14,7 @@ import {
 
 import { usePriorityValues, useSimpleLocale } from '@vben-core/composables';
 import { Expand, Shrink } from '@vben-core/icons';
+import { usePreferences } from '@vben-core/preferences';
 import {
   Dialog,
   DialogContent,
@@ -46,14 +47,14 @@ const props = withDefaults(defineProps<Props>(), {
 const components = globalShareState.getComponents();
 
 const contentRef = ref();
-// @ts-expect-error unused
 const wrapperRef = ref<HTMLElement>();
-const dialogRef = ref();
+const dialogRef = ref<HTMLElement>();
 const headerRef = ref();
 // @ts-expect-error unused
 const footerRef = ref();
 
 const { $t } = useSimpleLocale();
+const { globalEscapeShortcutKey } = usePreferences();
 const state = props.modalApi?.useStore?.();
 
 const id = useId();
@@ -122,6 +123,72 @@ const { dragging, transform } = useModalDraggable(
 const firstOpened = ref(false);
 const isClosed = ref(true);
 
+function hasFocusableWrapperContent() {
+  return Boolean(
+    wrapperRef.value?.querySelector(
+      'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  );
+}
+
+function focusConfirmButton() {
+  dialogRef.value
+    ?.querySelector<HTMLElement>('[data-slot="modal-confirm"]')
+    ?.focus();
+}
+
+function handleDocumentKeyDown(e: KeyboardEvent) {
+  if (
+    e.key !== 'Enter' ||
+    e.defaultPrevented ||
+    e.isComposing ||
+    e.altKey ||
+    e.ctrlKey ||
+    e.metaKey ||
+    e.shiftKey ||
+    e.repeat ||
+    !state?.value?.isOpen ||
+    !openAutoFocus.value ||
+    !showFooter.value ||
+    !showConfirmButton.value ||
+    confirmDisabled.value ||
+    confirmLoading.value ||
+    submitting.value
+  ) {
+    return;
+  }
+
+  const target = e.target;
+  if (target instanceof Element) {
+    if (target.closest('[role="menuitem"]')) {
+      return;
+    }
+    if (
+      dialogRef.value?.contains(target) &&
+      target.closest(
+        'input, textarea, select, [contenteditable="true"], a[href], button:not([data-slot="modal-confirm"])',
+      )
+    ) {
+      return;
+    }
+  }
+
+  e.preventDefault();
+  props.modalApi?.onConfirm();
+}
+
+watch(
+  () => Boolean(state?.value?.isOpen && openAutoFocus.value),
+  (enabled, _, onCleanup) => {
+    if (!enabled || typeof document === 'undefined') return;
+    document.addEventListener('keydown', handleDocumentKeyDown);
+    onCleanup(() => {
+      document.removeEventListener('keydown', handleDocumentKeyDown);
+    });
+  },
+  { immediate: true },
+);
+
 watch(
   () => state?.value?.isOpen,
   async (v) => {
@@ -135,11 +202,19 @@ watch(
       // reopen modal reassign value
       const { offsetX, offsetY } = transform;
       if (dialogRef.value?.style) {
-        if (offsetX !== 0 || offsetY !== 0) {
-          dialogRef.value.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-        } else {
-          dialogRef.value.style.transform = '';
-        }
+        dialogRef.value.style.transform =
+          offsetX !== 0 || offsetY !== 0
+            ? `translate(${offsetX}px, ${offsetY}px)`
+            : '';
+      }
+      if (
+        openAutoFocus.value &&
+        !hasFocusableWrapperContent() &&
+        showConfirmButton.value &&
+        !confirmDisabled.value &&
+        !submitting.value
+      ) {
+        focusConfirmButton();
       }
     }
   },
@@ -183,7 +258,11 @@ function interactOutside(e: Event) {
   }
 }
 function escapeKeyDown(e: KeyboardEvent) {
-  if (!closeOnPressEscape.value || submitting.value) {
+  if (
+    !closeOnPressEscape.value ||
+    !globalEscapeShortcutKey.value ||
+    submitting.value
+  ) {
     e.preventDefault();
   }
 }
@@ -191,6 +270,16 @@ function escapeKeyDown(e: KeyboardEvent) {
 function handleOpenAutoFocus(e: Event) {
   if (!openAutoFocus.value) {
     e?.preventDefault();
+    return;
+  }
+  if (
+    !hasFocusableWrapperContent() &&
+    showConfirmButton.value &&
+    !confirmDisabled.value &&
+    !submitting.value
+  ) {
+    e?.preventDefault();
+    focusConfirmButton();
   }
 }
 
@@ -236,6 +325,7 @@ function handleClosed() {
   <Dialog
     :modal="false"
     :open="state?.isOpen"
+    :unmount-on-hide="Boolean(state?.isOpen || !getForceMount)"
     @update:open="() => (!submitting ? modalApi?.close() : undefined)"
   >
     <DialogContent
@@ -258,7 +348,6 @@ function handleClosed() {
           modalClass,
         )
       "
-      :force-mount="getForceMount"
       :modal="modal"
       :open="state?.isOpen"
       :show-close-button="closable"
@@ -367,6 +456,7 @@ function handleClosed() {
           <component
             :is="components.PrimaryButton || VbenButton"
             v-if="showConfirmButton"
+            data-slot="modal-confirm"
             :disabled="confirmDisabled"
             :loading="confirmLoading || submitting"
             @click="() => modalApi?.onConfirm()"

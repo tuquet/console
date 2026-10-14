@@ -13,11 +13,7 @@ import {
   Notification,
   UserDropdown,
 } from '@vben/layouts';
-import {
-  preferences,
-  updatePreferences,
-  usePreferences,
-} from '@vben/preferences';
+import { preferences, usePreferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 import { openWindow } from '@vben/utils';
 
@@ -83,36 +79,8 @@ const userStore = useUserStore();
 const authStore = useAuthStore();
 const accessStore = useAccessStore();
 const { destroyWatermark, updateWatermark } = useWatermark();
-const { isDark, isMobile } = usePreferences();
+const { isDark } = usePreferences();
 
-// Tự động tối ưu giao diện: Bật đầy đủ trên Desktop và tinh giản trên Mobile
-let userDesktopTabbar = preferences.tabbar.enable;
-watch(
-  isMobile,
-  (mobile) => {
-    if (mobile) {
-      userDesktopTabbar = preferences.tabbar.enable;
-      updatePreferences({
-        tabbar: { enable: false },
-        widget: {
-          fullscreen: false,
-          lockScreen: false,
-          refresh: false,
-        },
-      });
-    } else {
-      updatePreferences({
-        tabbar: { enable: userDesktopTabbar },
-        widget: {
-          fullscreen: true,
-          lockScreen: true,
-          refresh: true,
-        },
-      });
-    }
-  },
-  { immediate: true },
-);
 const showDot = computed(() =>
   notifications.value.some((item) => !item.isRead),
 );

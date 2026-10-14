@@ -1,6 +1,6 @@
 # Spec: `automation-engine`
 
-> Module id: `automation-engine` (xem [capability-map.md](capability-map.md)) — **DRAFT, chờ duyệt**  
+> Module id: `automation-engine` (xem [capability-map.md](capability-map.md)) — **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**  
 > Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
 
 ---

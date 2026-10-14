@@ -2,7 +2,7 @@
 import type { BuiltinThemePreset } from '@vben/preferences';
 import type { BuiltinThemeType } from '@vben/types';
 
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
 import { UserRoundPen } from '@vben/icons';
 import { $t } from '@vben/locales';
@@ -18,7 +18,7 @@ defineOptions({
 const props = defineProps<{ isDark: boolean }>();
 
 const colorInput = ref();
-const modelValue = defineModel<BuiltinThemeType>({ default: 'default' });
+const modelValue = defineModel<BuiltinThemeType>({ default: 'neutral' });
 const themeColorPrimary = defineModel<string | undefined>('themeColorPrimary', {
   default: undefined,
 });
@@ -92,33 +92,26 @@ function typeView(name: BuiltinThemeType) {
 
 function handleSelect(theme: BuiltinThemePreset) {
   modelValue.value = theme.type;
+  if (theme.type !== 'custom') {
+    const primaryColor = props.isDark
+      ? theme.darkPrimaryColor || theme.primaryColor
+      : theme.primaryColor;
+    const nextColor = primaryColor || theme.color;
+    if (nextColor && themeColorPrimary.value !== nextColor) {
+      themeColorPrimary.value = nextColor;
+    }
+  }
 }
 
 function handleInputChange(e: Event) {
   const target = e.target as HTMLInputElement;
+  modelValue.value = 'custom';
   updateThemeColorPrimary(convertToHsl(target.value));
 }
 
 function selectColor() {
   colorInput.value?.[0]?.click?.();
 }
-
-watch(
-  () => [modelValue.value, props.isDark] as [BuiltinThemeType, boolean],
-  ([themeType, isDark]) => {
-    const theme = builtinThemePresets.value.find(
-      (item) => item.type === themeType,
-    );
-    if (theme && theme.type !== 'custom') {
-      const primaryColor = isDark
-        ? theme.darkPrimaryColor || theme.primaryColor
-        : theme.primaryColor;
-
-      themeColorPrimary.value = primaryColor || theme.color;
-    }
-  },
-  { immediate: true },
-);
 </script>
 
 <template>

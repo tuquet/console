@@ -87,13 +87,12 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomaCampaignRunItem>({
 
           let filtered = data;
           if (formValues?.status && formValues.status !== 'all') {
-            if (formValues.status === 'pending') {
-              filtered = filtered.filter(
-                (r) => r.status === 'pending' || r.status === 'queued',
-              );
-            } else {
-              filtered = filtered.filter((r) => r.status === formValues.status);
-            }
+            filtered =
+              formValues.status === 'pending'
+                ? filtered.filter(
+                    (r) => r.status === 'pending' || r.status === 'queued',
+                  )
+                : filtered.filter((r) => r.status === formValues.status);
           }
 
           if (formValues?.search) {

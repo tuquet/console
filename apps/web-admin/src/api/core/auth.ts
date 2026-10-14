@@ -1,7 +1,11 @@
 import { useAccessStore } from '@vben/stores';
 
 import { getEffectiveAccessApi } from './access';
-import { getSupabaseConfig } from './supabase-client';
+import {
+  getSupabaseConfig,
+  isJwtTokenExpired,
+  tryRefreshSupabaseToken,
+} from './supabase-client';
 
 export namespace AuthApi {
   /** Login API parameters */
@@ -94,40 +98,12 @@ export async function loginApi(
  * Refresh accessToken (Supabase GoTrue REST)
  */
 export async function refreshTokenApi(): Promise<AuthApi.RefreshTokenResult> {
-  const { anonKey, supabaseUrl } = getSupabaseConfig();
-  const accessStore = useAccessStore();
-  const currentRefreshToken = accessStore.refreshToken;
-
-  if (!currentRefreshToken) {
-    throw new Error('No refresh token available');
+  const newToken = await tryRefreshSupabaseToken();
+  if (!newToken) {
+    throw new Error('Session refresh failed');
   }
-
-  const response = await fetch(
-    `${supabaseUrl}/auth/v1/token?grant_type=refresh_token`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: anonKey,
-      },
-      body: JSON.stringify({ refresh_token: currentRefreshToken }),
-    },
-  );
-
-  const resJson = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    throw new Error(
-      resJson.msg || resJson.error_description || 'Session refresh failed',
-    );
-  }
-
-  if (resJson.refresh_token) {
-    accessStore.setRefreshToken(resJson.refresh_token);
-  }
-
   return {
-    data: resJson.access_token,
+    data: newToken,
     status: 200,
   };
 }
@@ -140,7 +116,7 @@ export async function logoutApi() {
   const accessStore = useAccessStore();
   const token = accessStore.accessToken;
 
-  if (token) {
+  if (token && !isJwtTokenExpired(token)) {
     try {
       await fetch(`${supabaseUrl}/auth/v1/logout`, {
         method: 'POST',

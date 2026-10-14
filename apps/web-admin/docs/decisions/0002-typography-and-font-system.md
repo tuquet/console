@@ -19,20 +19,19 @@ Hệ thống quản trị Web Admin (`apps/web-admin`) cần đảm bảo tối 
 
 ## Quyết Định Kiến Trúc (Decisions)
 
-### D1: Tự Host Bộ Ba Phông Chữ Không Chân (Self-Hosted Fonts)
+### D1: Tự Host Phông Chữ Không Chân (Self-Hosted Fonts)
 
 - **Quyết định:** Loại bỏ hoàn toàn các thẻ `<link rel="preconnect">` và stylesheet Google Fonts khỏi `apps/web-admin/index.html`.
-- Toàn bộ 3 font không chân (`Be Vietnam Pro`, `Inter`, `Roboto`) được đóng gói tự host qua `@fontsource/*` trong `@core/base/design/src/css/fonts.css` với định dạng WOFF2 nén hiện đại và kích hoạt thuộc tính `font-display: swap`.
+- Hai font không chân chuẩn Google Fonts (`Inter`, `Roboto`) được đóng gói tự host qua `@fontsource/*` trong `@core/base/design/src/css/fonts.css` với định dạng WOFF2 nén hiện đại (hỗ trợ đầy đủ bộ ký tự `latin` và `vietnamese`) và kích hoạt thuộc tính `font-display: swap`.
 - Ứng dụng hoạt động 100% offline với độ trễ tải phông bằng 0ms từ bộ nhớ cục bộ.
 
 ### D2: Tích Hợp Chuyển Đổi Phông Chữ Qua Preferences Extension
 
-- **Quyết định:** Tận dụng hệ thống `PreferencesExtension` của `@vben/preferences` để mở rộng trường cài đặt kiểu chữ (`fontFamily`) trong Preferences Drawer.
-- Hỗ trợ 4 tùy chọn:
-  1. `be-vietnam-pro`: Be Vietnam Pro (Khuyên dùng cho tiếng Việt)
-  2. `inter`: Inter (Hiện đại / Chuẩn quốc tế)
-  3. `roboto`: Roboto (Google Classic)
-  4. `system-ui`: Phông mặc định của hệ điều hành
+- **Quyết định:** Tận dụng hệ thống `PreferencesExtension` của `@vben/preferences` để mở rộng trường cài đặt kiểu chữ (`fontFamily`) trong Preferences Drawer, ưu tiên **`Inter`** làm mặc định (`defaultValue: 'inter'`).
+- Hỗ trợ 3 tùy chọn:
+  1. `inter`: Inter (Mặc định / Khuyến nghị — Chuẩn quốc tế & bảng dữ liệu mật độ cao)
+  2. `roboto`: Roboto (Google Classic)
+  3. `system-ui`: Phông mặc định của hệ điều hành
 - Lắng nghe cập nhật và gán trực tiếp biến CSS `--font-family` lên `document.documentElement.style`, cho phép người dùng thay đổi phông chữ giao diện tức thì (hot-switch) không cần tải lại trang, đồng thời tự động lưu vào `localStorage`.
 
 ### D3: Thiết Lập Chuẩn Typography SSOT Tại `skills/rules/TYPOGRAPHY.md`

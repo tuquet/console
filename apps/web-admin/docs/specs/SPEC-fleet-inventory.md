@@ -1,45 +1,45 @@
 # Spec: `fleet-inventory`
 
-> Module id: `fleet-inventory` (xem [capability-map.md](capability-map.md)) — **DRAFT, chờ duyệt**  
-> Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
+> Module id: `fleet-inventory` (xem [capability-map.md](capability-map.md)) — **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**  
+> Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md) | Hợp nhất đường dẫn tại [`SPEC-route-consolidation-automation-fleet.md`](SPEC-route-consolidation-automation-fleet.md)
 
 ---
 
 ## 1. Objective & Scope
 
-Module này hoàn thiện phân hệ Quản Trị Máy Trạm & Hạ Tầng Chạy Tự Động (**Specter Fleet**) bao gồm 3 màn hình nghiệp vụ:
+Module này hoàn thiện phân hệ Quản Trị Máy Trạm & Hạ Tầng Chạy Tự Động (**Specter Fleet**) bao gồm 3 màn hình nghiệp vụ (nay được hợp nhất dưới `/automation/*`):
 
-1. `/fleet/devices` (Quản trị Thiết bị / Physical Devices & Edge Worker Nodes)
-2. `/fleet/browsers` (Quản trị Hồ sơ Trình duyệt / Cloud Anti-Detect Browser Profiles)
-3. `/fleet/proxies` (Quản trị Bể Proxy / Proxy Network Pool)
+1. `/automation/devices` (Quản trị Thiết bị / Physical Devices & Edge Worker Nodes)
+2. `/automation/browsers` (Quản trị Hồ sơ Trình duyệt / Cloud Anti-Detect Browser Profiles)
+3. `/automation/proxies` (Quản trị Bể Proxy / Proxy Network Pool)
 
 Toàn bộ dữ liệu được truy vấn **100% đo đếm thực tế** từ schema `runners` của Tuquet Cloud thông qua header `Accept-Profile: runners`.
 
 ### Trong phạm vi:
 
 1. **Loại bỏ hoàn toàn Fake / Mock Data:**
-   - Xóa bỏ hoàn toàn hàm `getInitialFallbackNodes()`, biến cache `TUQUET_FLEET_NODES_CACHE`, và cơ chế fallback `localStorage` trong `apps/web-admin/src/api/core/fleet.ts`.
+   - Xóa bỏ hoàn toàn hàm `getInitialFallbackNodes()`, biến cache `TUQUET_FLEET_NODES_CACHE`, và cơ chế fallback `localStorage` (nay được hợp nhất tại `apps/web-admin/src/api/core/automation.ts`).
    - Kết nối trực tiếp tới `runners.devices`, `runners.browsers`, và `runners.proxies` với `{ schema: 'runners' }`.
    - Khi bảng dữ liệu rỗng (0 rows), hiển thị Empty State chuẩn mực với icon Lucide tương ứng và thông điệp hướng dẫn rõ ràng (tuân thủ AGENTS.md §5).
-2. **Quản trị Thiết Bị (`/fleet/devices`):**
+2. **Quản trị Thiết Bị (`/automation/devices`):**
    - Đọc dữ liệu từ `runners.devices` (`id`, `tenant_id`, `name`, `machine_fingerprint`, `status`, `version`, `os_info`, `cpu_cores`, `ram_mb`, `capabilities`, `active_jobs`, `last_heartbeat_at`, `registered_at`, `metadata`).
    - Hỗ trợ trạng thái thiết bị theo đúng enum `runners.device_status`: `all`, `idle`, `busy`, `offline`, `maintenance`.
    - Thăm dò Loopback Specter CLI Daemon (:8765) không chặn (non-blocking) qua `probeLocalDaemonApi()`.
    - Thu hồi thiết bị qua API `DELETE /rest/v1/devices?id=eq.${id}` với `{ schema: 'runners' }`.
    - Hỗ trợ bộ lọc URL query parameters: `?tenant=&status=`.
-   - Dual View: Bảng đầy đủ trên Desktop (`hidden md:block`), Thẻ Compact chạm cảm ứng trên Mobile (`block md:hidden`).
-3. **Quản trị Hồ Sơ Trình Duyệt (`/fleet/browsers`):**
+   - Bảng dữ liệu chuẩn `useVbenVxeGrid`.
+3. **Quản trị Hồ Sơ Trình Duyệt (`/automation/browsers`):**
    - Đọc dữ liệu từ `runners.browsers` (`id`, `tenant_id`, `name`, `browser_type`, `engine_version`, `os_platform`, `os_version`, `cpu_cores`, `ram_gb`, `status`, `proxy_id`, `locked_by_device_id`, `cookies_count`, `storage_size_bytes`, `created_at`, `last_synced_at`).
    - Liên kết PostgREST foreign tables: `locked_by_device:locked_by_device_id(name)` và `proxy:proxy_id(host,port,protocol)`.
    - Trạng thái profile: `all`, `idle`, `running`, `syncing`, `error`.
    - Hỗ trợ bộ lọc URL query parameters: `?tenant=&status=`.
-   - Dual View: Desktop table và Mobile cards.
-4. **Quản trị Bể Proxy (`/fleet/proxies`):**
+   - Bảng dữ liệu chuẩn `useVbenVxeGrid`.
+4. **Quản trị Bể Proxy (`/automation/proxies`):**
    - Đọc dữ liệu từ `runners.proxies` (`id`, `tenant_id`, `host`, `port`, `protocol`, `country_code`, `city`, `status`, `latency_ms`, `is_residential`, `error_count`, `last_checked_at`).
    - Trạng thái proxy: `all`, `active`, `failing`, `testing`, `disabled`.
    - Trực quan hóa độ trễ `latency_ms` (xanh: $< 300$ms, vàng: $300-800$ms, đỏ: $> 800$ms hoặc timeout).
    - Hỗ trợ bộ lọc URL query parameters: `?tenant=&status=`.
-   - Dual View: Desktop table và Mobile cards.
+   - Bảng dữ liệu chuẩn `useVbenVxeGrid`.
 5. **Tiêu chuẩn Giao diện & Kỹ thuật:**
    - 100% Lucide Icons, không dùng emoji (AGENTS.md §3).
    - Semantic tokens Shadcn Slate (`bg-card`, `border-border/60`, `rounded-xl`, etc.) (AGENTS.md §2).
@@ -54,7 +54,7 @@ Toàn bộ dữ liệu được truy vấn **100% đo đếm thực tế** từ 
 
 ## 2. Public Interfaces & Data Structures
 
-### 2.1. Data Models (`apps/web-admin/src/api/core/fleet.ts`)
+### 2.1. Data Models (`apps/web-admin/src/api/core/automation.ts`)
 
 ```ts
 export type DeviceStatus =
@@ -211,7 +211,7 @@ export async function getFleetProxiesApi(params?: {
 
 ### Automated Vitest Unit Tests:
 
-- `apps/web-admin/src/api/core/__tests__/fleet.test.ts`:
+- `apps/web-admin/src/api/core/__tests__/automation.test.ts`:
   - Kiểm tra `mapRawDeviceToFleetNode` chuyển đổi đúng `ram_mb` sang MB, nhận diện `capabilities` mảng/object, và gán default hợp lệ.
   - Kiểm tra `calculateFleetMetrics` tính toán chính xác tổng nodes, số node trực tuyến (`idle` + `busy`), và tổng jobs.
   - Kiểm tra `buildFleetFilterQuery` tạo đúng PostgREST query string với `tenant_id=eq.` và `status=eq.`.

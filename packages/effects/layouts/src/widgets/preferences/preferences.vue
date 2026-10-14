@@ -57,6 +57,12 @@ const listen = computed(() => {
         result[`update:${key}${capitalizeFirstLetter(subKey)}`] = async (
           val: any,
         ) => {
+          const currentVal = (preferences as Record<string, any>)[key]?.[
+            subKey
+          ];
+          if (!Array.isArray(val) && currentVal === val) {
+            return;
+          }
           updatePreferences({ [key]: { [subKey]: val } });
           if (key === 'app' && subKey === 'locale') {
             await loadLocaleMessages(val);

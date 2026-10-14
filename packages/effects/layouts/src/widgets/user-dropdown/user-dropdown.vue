@@ -131,6 +131,7 @@ const [LogoutModal, logoutModalApi] = useVbenModal({
   onConfirm() {
     handleSubmitLogout();
   },
+  openAutoFocus: true,
 });
 
 const refTrigger = useTemplateRef('refTrigger');
@@ -326,26 +327,34 @@ async function handleLocaleChange(event: Event, value: string) {
   openPopover.value = false;
 }
 
-if (preferences.shortcutKeys.enable) {
-  const keys = useMagicKeys();
-  const logoutKey = keys['Alt+KeyQ'];
-  const lockKey = keys['Alt+KeyL'];
+const keys = useMagicKeys({
+  onEventFired(e) {
+    if (e.type !== 'keydown' || !e.altKey) return;
+    if (
+      (e.code === 'KeyQ' && enableLogoutShortcutKey.value) ||
+      (e.code === 'KeyL' && enableLockScreenShortcutKey.value)
+    ) {
+      e.preventDefault();
+    }
+  },
+});
+const logoutKey = keys['Alt+KeyQ'];
+const lockKey = keys['Alt+KeyL'];
 
-  if (logoutKey) {
-    whenever(logoutKey, () => {
-      if (enableLogoutShortcutKey.value) {
-        handleLogout();
-      }
-    });
-  }
+if (logoutKey) {
+  whenever(logoutKey, () => {
+    if (enableLogoutShortcutKey.value) {
+      handleLogout();
+    }
+  });
+}
 
-  if (lockKey) {
-    whenever(lockKey, () => {
-      if (enableLockScreenShortcutKey.value) {
-        handleOpenLock();
-      }
-    });
-  }
+if (lockKey) {
+  whenever(lockKey, () => {
+    if (enableLockScreenShortcutKey.value) {
+      handleOpenLock();
+    }
+  });
 }
 </script>
 

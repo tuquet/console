@@ -10,7 +10,9 @@ export const overridesPreferences = defineOverridesPreferences({
   app: {
     defaultHomePath: '/dashboard/analytics',
     enablePreferences: true,
+    enableRefreshToken: true,
     locale: 'en-US',
+    loginExpiredMode: 'modal',
     name: 'Specter',
     preferencesButtonPosition: 'header',
     authPageLayout: 'panel-right',
@@ -45,7 +47,7 @@ export const overridesPreferences = defineOverridesPreferences({
     enable: false,
   },
   theme: {
-    builtinType: 'slate',
+    builtinType: 'neutral',
     colorPrimary: 'hsl(0 0% 98%)',
     mode: 'dark',
     radius: '0.5',
@@ -65,21 +67,17 @@ export const overridesPreferences = defineOverridesPreferences({
 });
 
 export interface AdminCustomPreferences {
-  fontFamily: 'be-vietnam-pro' | 'inter' | 'roboto' | 'system-ui';
+  fontFamily: 'inter' | 'roboto' | 'system-ui';
 }
 
 export const typographyPreferencesExtension = {
   fields: [
     {
       component: 'select' as const,
-      defaultValue: 'be-vietnam-pro',
+      defaultValue: 'inter',
       key: 'fontFamily',
       label: 'preferences.typography.fontFamily',
       options: [
-        {
-          label: 'preferences.typography.beVietnamPro',
-          value: 'be-vietnam-pro',
-        },
         {
           label: 'preferences.typography.inter',
           value: 'inter',

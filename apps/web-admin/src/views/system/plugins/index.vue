@@ -148,20 +148,27 @@ const [Grid, gridApi] = useVbenVxeGrid<SystemPluginItem>({
 
 function getPluginIcon(pluginId: string) {
   switch (pluginId?.toLowerCase()) {
-    case 'core-iam':
-      return ShieldCheck;
-    case 'runners':
-      return Zap;
-    case 'automa':
+    case 'automa': {
       return Workflow;
-    case 'subscriptions':
-      return CreditCard;
-    case 'storage':
+    }
+    case 'core-iam': {
+      return ShieldCheck;
+    }
+    case 'runners': {
+      return Zap;
+    }
+    case 'storage': {
       return HardDrive;
-    case 'webhooks':
+    }
+    case 'subscriptions': {
+      return CreditCard;
+    }
+    case 'webhooks': {
       return Webhook;
-    default:
+    }
+    default: {
       return Database;
+    }
   }
 }
 

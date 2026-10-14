@@ -1,6 +1,6 @@
 # Spec: `system-catalog`
 
-> Module id: `system-catalog` (xem [capability-map.md](capability-map.md)) — **DRAFT, chờ duyệt**  
+> Module id: `system-catalog` (xem [capability-map.md](capability-map.md)) — **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**  
 > Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
 
 ---

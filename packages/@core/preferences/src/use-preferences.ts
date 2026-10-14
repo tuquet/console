@@ -8,9 +8,6 @@ import { isDarkTheme } from './update-css-variables';
 function usePreferences() {
   const preferences = preferencesManager.getPreferences();
   const customPreferences = preferencesManager.getCustomPreferences();
-  const initialPreferences = preferencesManager.getInitialPreferences();
-  const initialCustomPreferences =
-    preferencesManager.getInitialCustomPreferences();
   const preferencesExtension = computed(() =>
     preferencesManager.getPreferencesExtension(),
   );
@@ -19,6 +16,7 @@ function usePreferences() {
    * Uses diffStrict: array fields like icon ordering require order-sensitive comparison
    */
   const diffPreference = computed(() => {
+    const initialPreferences = preferencesManager.getInitialPreferences();
     // Exclude runtime-only viewport state (isMobile) from diff calculation
     const baseline = {
       ...initialPreferences,
@@ -31,6 +29,8 @@ function usePreferences() {
   });
 
   const diffCustomPreference = computed(() => {
+    const initialCustomPreferences =
+      preferencesManager.getInitialCustomPreferences();
     return diff(initialCustomPreferences, customPreferences);
   });
 

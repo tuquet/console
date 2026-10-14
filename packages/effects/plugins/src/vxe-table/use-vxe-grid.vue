@@ -134,7 +134,8 @@ const [Form, formApi] = useTableForm({
     const formValues = await formApi.getValues();
     formApi.setLatestSubmissionValues(formValues);
     // If value changed, submitOnChange triggers refresh; manually refresh only when submitOnChange is false or value unchanged
-    if (isEqual(prevValues, formValues) || !formOptions.value?.submitOnChange) {
+    const isSubmitOnChange = formOptions.value?.submitOnChange ?? true;
+    if (isEqual(prevValues, formValues) || !isSubmitOnChange) {
       props.api.reload(formValues);
     }
   },
@@ -147,6 +148,8 @@ const [Form, formApi] = useTableForm({
   submitButtonOptions: {
     content: computed(() => $t('common.search')),
   },
+  submitOnChange: true,
+  submitOnEnter: true,
   wrapperClass: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
 });
 

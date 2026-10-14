@@ -1,7 +1,7 @@
 # Đặc Tả Route: Tenants / Workspaces (Không Gian Làm Việc)
 
 > **Đường dẫn chính:** `/tenants` (Danh sách) và `/tenants/:id` (Chi tiết Workspace)  
-> **Module File:** [`apps/web-admin/src/router/routes/modules/tenants.ts`](../../apps/web-admin/src/router/routes/modules/tenants.ts)  
+> **Module File:** [`src/router/routes/modules/tenants.ts`](../../src/router/routes/modules/tenants.ts)  
 > **Plugin Quản Lý:** `core-iam`  
 > **Quyền Truy Cập (`meta.authority`):** `['superadmin', 'tenants:read']`  
 > **Biểu tượng:** `lucide:building-2`
@@ -16,7 +16,7 @@
   name: 'TenantsRoot',
   redirect: '/tenants',
   meta: {
-    title: 'Workspaces',
+    title: $t('page.tenants.title'),
     icon: 'lucide:building-2',
     plugin: 'core-iam',
     authority: ['superadmin', 'tenants:read'],
@@ -29,7 +29,8 @@
       name: 'Tenants',
       component: () => import('#/views/tenants/index.vue'),
       meta: {
-        title: 'Danh sách Workspace',
+        title: $t('page.tenants.title'),
+        icon: 'lucide:building-2',
         authority: ['superadmin', 'tenants:read'],
       },
     },
@@ -38,7 +39,8 @@
       name: 'TenantDetail',
       component: () => import('#/views/tenants/detail.vue'),
       meta: {
-        title: 'Chi tiết Workspace',
+        title: $t('page.tenants.detail'),
+        icon: 'lucide:layout-grid',
         authority: ['superadmin', 'tenants:read'],
         hideInMenu: true,
       },
@@ -54,30 +56,28 @@
 ### 2.1. Nguồn Dữ Liệu
 
 - Bảng: `public.tenants`
-- API Client: [`getTenantsApi()`](../../apps/web-admin/src/api/core/tenant.ts)
-- Bộ lọc & Tìm kiếm: Tìm kiếm theo Tên (`name`), Slug (`slug`), Gói thuê bao (`plan`), hoặc Trạng thái (`active`, `suspended`, `archived`).
+- API Client: [`getTenantsApi()`](../../src/api/core/tenant.ts)
+- Bộ lọc & Tìm kiếm (`formOptions`): Tìm kiếm theo Tên (`name`), Slug (`slug`), Gói thuê bao (`plan`), hoặc Trạng thái (`active`, `suspended`, `archived`).
 
-### 2.2. Thiết Kế Kép (Dual View)
+### 2.2. Bảng Dữ Liệu `useVbenVxeGrid` & Biểu Mẫu `VxeForm`
 
-- **Desktop (`hidden md:block`):**
-  - Hiển thị bảng dữ liệu với các cột: Tên Workspace (kèm Avatar/Badge), Slug, Gói cước (Pro / Free / Enterprise), Vùng triển khai (Region), Ngày tạo, Trạng thái (Badge), Nút Thao tác.
-- **Mobile (`block md:hidden`):**
-  - Thẻ chạm cảm ứng (`Touch Card`) kích thước lớn, chứa tiêu đề, trạng thái, ngày tạo và nút "Chi tiết" chiều cao tối thiểu 40px.
+- Hiển thị bảng dữ liệu `useVbenVxeGrid` với các cột: Tên Workspace (kèm Avatar/Badge), Slug, Gói cước (`Free`, `Pro`, `Enterprise`), Số thành viên, Ngày tạo, Trạng thái (Badge), Nút Thao tác.
 - **Hành Động Người Dùng:**
-  - Nút **"Tạo Workspace Mới"** mở modal [`create-workspace-modal.vue`](../../apps/web-admin/src/views/tenants/components/modals/create-workspace-modal.vue) &rarr; gọi `createTenantApi({ name, slug, plan })`.
+  - Nút **`$t('common.create')`** (`Tạo` / `Create` kèm icon `<Plus />`) mở modal [`create-workspace-modal.vue`](../../src/views/tenants/components/modals/create-workspace-modal.vue) (sử dụng `VxeForm`) &rarr; gọi `createTenantApi({ name, slug, plan })`.
+  - Nút **`$t('common.refresh')`** (`Làm mới` / `Refresh`) tải lại dữ liệu lưới.
 
 ---
 
 ## 3. Route Chi Tiết: `/tenants/:id`
 
-Chi tiết Workspace được thiết kế dạng **Single Route với 4 Tabs nội dung**, trạng thái tab được đồng bộ 2 chiều với URL query `?tab=`:
+Chi tiết Workspace được thiết kế dạng **Single Route với 4 Tabs nội dung**, trạng thái tab được đồng bộ 2 chiều với URL query `?tab=` (bảo toàn vị trí cuộn, không remount component):
 
 | Tab Value | Component Con | Mục Đích & Nguồn Dữ Liệu Thực Tế |
 | :-- | :-- | :-- |
-| **`overview`** _(mặc định)_ | [`workspace-overview-tab.vue`](../../apps/web-admin/src/views/tenants/components/workspace-overview-tab.vue) | Hiển thị thông tin tổng quan, thời gian tạo, định danh duy nhất (UUID), trạng thái kết nối Cloud, card thống kê nhanh. |
-| **`members`** | [`workspace-members-tab.vue`](../../apps/web-admin/src/views/tenants/components/workspace-members-tab.vue) | Quản lý danh sách thành viên từ `public.tenant_members` kết nối `public.profiles` và bảng phân quyền `public.member_roles`. Có nút mời thành viên, sửa vai trò, xóa thành viên. |
-| **`usage`** | [`workspace-usage-tab.vue`](../../apps/web-admin/src/views/tenants/components/workspace-usage-tab.vue) | Đo đếm tài nguyên thực tế: Quota từ `billing.subscriptions` và `billing.plans` (schema `billing`), dung lượng lưu trữ, số lượng thiết bị Runners đã kết nối. |
-| **`audit`** | [`workspace-audit-tab.vue`](../../apps/web-admin/src/views/tenants/components/workspace-audit-tab.vue) | Nhật ký kiểm toán bảo mật từ `public.audit_logs` có điều kiện lọc nghiêm ngặt `tenant_id = :id`. |
+| **`overview`** _(mặc định)_ | [`workspace-overview-tab.vue`](../../src/views/tenants/components/workspace-overview-tab.vue) | Hiển thị thông tin tổng quan qua `VxeForm`, thời gian tạo, định danh duy nhất (UUID), trạng thái kết nối Cloud, card thống kê nhanh. |
+| **`members`** | [`workspace-members-tab.vue`](../../src/views/tenants/components/workspace-members-tab.vue) | Quản lý danh sách thành viên từ `public.tenant_members` kết nối `public.profiles` và bảng phân quyền `public.member_roles`. Có modal `VxeForm` mời thành viên, sửa vai trò, xóa thành viên. |
+| **`usage`** | [`workspace-usage-tab.vue`](../../src/views/tenants/components/workspace-usage-tab.vue) | Đo đếm tài nguyên thực tế: Quota từ `billing.subscriptions` và `billing.plans` (schema `billing`), dung lượng lưu trữ, số lượng thiết bị Runners đã kết nối. |
+| **`audit`** | [`workspace-audit-tab.vue`](../../src/views/tenants/components/workspace-audit-tab.vue) | Nhật ký kiểm toán bảo mật từ `public.audit_logs` có điều kiện lọc nghiêm ngặt `tenant_id = :id`. |
 
 ### 3.1. Quy Trình Mời & Phân Quyền Thành Viên (RBAC Flow)
 

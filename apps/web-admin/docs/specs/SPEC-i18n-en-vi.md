@@ -1,5 +1,7 @@
 # Spec: Tiêu Chuẩn Đa Ngôn Ngữ i18n (en-US / vi-VN) Mặc Định en-US
 
+> **Module id:** `i18n-en-vi` (xem [`capability-map.md`](capability-map.md)) — **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**
+
 ## 1. Objective (Mục Tiêu)
 
 Thiết lập tiêu chuẩn quốc tế hóa (i18n) nhất quán, chuẩn hóa và toàn diện cho Tuquet Admin (`@tuquet/admin-web`, `@vben/locales`, `@vben/constants`, `@vben/preferences`):
@@ -7,8 +9,8 @@ Thiết lập tiêu chuẩn quốc tế hóa (i18n) nhất quán, chuẩn hóa v
 1. **Chuẩn hóa cặp ngôn ngữ chính**: Hỗ trợ 2 ngôn ngữ chuẩn: **Tiếng Anh (`en-US`)** và **Tiếng Việt (`vi-VN`)**, với ngôn ngữ mặc định toàn hệ thống là **`en-US`**.
 2. **Khắc phục tình trạng hardcode text tự do**: Chấm dứt việc gõ trực tiếp chuỗi văn bản cứng vào component Vue; quy định 100% văn bản giao diện người dùng (headers, table columns, action buttons, modals, badges, empty states, toast messages) phải thông qua hàm dịch `$t(...)`.
 3. **Phân tầng 2 lớp độc lập (Two-Tier SSOT Architecture)**:
-   - **Framework Core Tier (`@vben/locales`)**: Chứa các từ vựng dùng chung của nền tảng (common, auth, preferences, layout, profile, ui).
-   - **Business App Tier (`web-admin`)**: Chứa từ vựng nghiệp vụ chuyên biệt của từng màn hình (dashboard, tenants, fleet, automation, system).
+   - **Framework Core Tier (`@vben/locales`)**: Chứa các từ vựng dùng chung của nền tảng (`common`, `term`, `authentication`, `preferences`, `profile`, `ui`).
+   - **Business App Tier (`web-admin`)**: Chứa từ vựng nghiệp vụ chuyên biệt của từng màn hình (`page.json` cho dashboard, tenants, automation, system).
 4. **Trải nghiệm chuyển ngữ tức thì (Zero-Flicker Instant Toggle)**: Đồng bộ mượt mà giữa nút chuyển ngôn ngữ (`LanguageToggle`), `localStorage` (`preferences-locale`), HTML `lang` attribute, và thư viện định dạng thời gian `dayjs`.
 
 ---
@@ -59,12 +61,14 @@ admin/
 │   │   └── langs/
 │   │       ├── en-US/                   # Framework Core English
 │   │       │   ├── common.json
+│   │       │   ├── term.json
 │   │       │   ├── authentication.json
 │   │       │   ├── preferences.json
 │   │       │   ├── profile.json
 │   │       │   └── ui.json
 │   │       └── vi-VN/                   # Framework Core Tiếng Việt (Tạo mới, đối xứng 100%)
 │   │           ├── common.json
+│   │           ├── term.json
 │   │           ├── authentication.json
 │   │           ├── preferences.json
 │   │           ├── profile.json
@@ -77,11 +81,9 @@ admin/
     │   ├── index.ts                     # Setup i18n của app, nạp dayjs locale ('en' / 'vi')
     │   └── langs/
     │       ├── en-US/                   # Business App English
-    │       │   ├── page.json            # dashboard, fleet, tenants, automation, system
-    │       │   └── demos.json
+    │       │   └── page.json            # dashboard, tenants, automation, system
     │       └── vi-VN/                   # Business App Tiếng Việt (Tạo mới, đối xứng 100%)
-    │           ├── page.json
-    │           └── demos.json
+    │           └── page.json
     └── views/                           # Toàn bộ template Vue gọi $t('...') thay vì hardcode
 ```
 
@@ -98,22 +100,21 @@ admin/
 ```
 
 - **Scope chung (Core)**:
-  - `common.actions.create` (`Create` / `Tạo mới`)
-  - `common.actions.confirm` (`Confirm` / `Xác nhận`)
-  - `common.actions.cancel` (`Cancel` / `Hủy`)
-  - `common.status.online` (`Online` / `Trực tuyến`)
-  - `common.status.offline` (`Offline` / `Ngoại tuyến`)
-  - `common.status.active` (`Active` / `Hoạt động`)
+  - `common.create` (`Create` / `Tạo`)
+  - `common.confirm` (`Confirm` / `Xác nhận`)
+  - `common.cancel` (`Cancel` / `Hủy`)
+  - `term.workspace` (`Workspace` / `Workspace`)
+  - `term.workflow` (`Workflow` / `Quy trình`)
   - `ui.table.empty` (`No data available` / `Không có dữ liệu`)
 
 - **Scope màn hình nghiệp vụ (Business Pages - `page.json`)**:
-  - `page.workspace.title` (`Workspace Management` / `Quản Trị Workspace`)
-  - `page.workspace.total_tenants` (`Total Workspaces` / `Tổng Workspace`)
-  - `page.workspace.current_active` (`Selected Workspace` / `Workspace Đang Chọn`)
-  - `page.workspace.plan_tier` (`Service Plan` / `Gói Dịch Vụ`)
-  - `page.fleet.title` (`Device Fleet` / `Quản Trị Máy Trạm`)
-  - `page.fleet.connect_workstation` (`Connect Workstation` / `Ghép Nối Máy Trạm`)
-  - `page.automation.runs_title` (`Automation Runs` / `Phiên Chạy Tự Động`)
+  - `page.workspace.title` (`Workspace Management` / `Quản trị workspace`)
+  - `page.workspace.total_tenants` (`Total Workspaces` / `Tổng workspace`)
+  - `page.workspace.current_active` (`Selected Workspace` / `Workspace đang chọn`)
+  - `page.workspace.plan_tier` (`Service Plan` / `Gói dịch vụ`)
+  - `page.fleet.title` (`Device Fleet` / `Quản trị máy trạm`)
+  - `page.fleet.connect_workstation` (`Connect Workstation` / `Ghép nối máy trạm`)
+  - `page.automation.runs_title` (`Automation Runs` / `Phiên chạy tự động`)
 
 ### 5.2. Mẫu Sử Dụng Trong Component Vue
 
@@ -125,7 +126,7 @@ admin/
     <h1 class="text-lg font-semibold">{{ $t('page.workspace.title') }}</h1>
     <button @click="openCreateModal">
       <Plus class="size-4" />
-      <span>{{ $t('common.actions.create') }}</span>
+      <span>{{ $t('common.create') }}</span>
     </button>
   </div>
 </template>
@@ -168,23 +169,23 @@ function handleNotify() {
 - **Tuyệt Đối Không Làm (Never)**:
   - Không hardcode chuỗi text trực tiếp trong code Vue template hoặc logic thông báo toast.
   - Không xóa bỏ hoặc sửa lệch cấu trúc key giữa `en-US` và `vi-VN`.
-  - Không tải file font CDN bên ngoài để phục vụ ký tự tiếng Việt (đã có `@fontsource` tự host Be Vietnam Pro, Inter, Roboto).
+  - Không tải file font CDN bên ngoài để phục vụ ký tự tiếng Việt (đã có `@fontsource` tự host Inter, Roboto).
 
 ---
 
 ## 8. Success Criteria (Tiêu Chí Hoàn Thành Nghiệm Thu)
 
-1. [ ] **Registry Song Ngữ**: `@vben-core/typings` và `@vben/constants` khai báo đầy đủ 2 ngôn ngữ: `en-US` (English) và `vi-VN` (Tiếng Việt).
-2. [ ] **Bộ Từ Điển Đối Xứng 100%**:
-   - `packages/locales/src/langs/vi-VN/` đầy đủ 5 file (`common`, `authentication`, `preferences`, `profile`, `ui`) dịch chuẩn xác, đối xứng với `en-US`.
-   - `apps/web-admin/src/locales/langs/vi-VN/` đầy đủ `page.json` và `demos.json`, dịch trọn vẹn toàn bộ các trang Admin.
-3. [ ] **Mặc Định Chuẩn `en-US`**:
+1. [x] **Registry Song Ngữ**: `@vben-core/typings` và `@vben/constants` khai báo đầy đủ 2 ngôn ngữ: `en-US` (English) và `vi-VN` (Tiếng Việt).
+2. [x] **Bộ Từ Điển Đối Xứng 100%**:
+   - `packages/locales/src/langs/vi-VN/` đầy đủ 6 file (`common`, `term`, `authentication`, `preferences`, `profile`, `ui`) dịch chuẩn xác, đối xứng với `en-US`.
+   - `apps/web-admin/src/locales/langs/vi-VN/` đầy đủ `page.json`, dịch trọn vẹn toàn bộ các trang Admin.
+3. [x] **Mặc Định Chuẩn `en-US`**:
    - Trình duyệt truy cập lần đầu tiên khi chưa có `localStorage` sẽ hiển thị toàn bộ giao diện bằng Tiếng Anh (`en-US`).
-4. [ ] **Nút Đổi Ngôn Ngữ Hoạt Động Mượt Mà**:
+4. [x] **Nút Đổi Ngôn Ngữ Hoạt Động Mượt Mà**:
    - Dropdown tại Header hiển thị 2 lựa chọn: `English` và `Tiếng Việt`.
    - Click chọn chuyển tức thì toàn bộ text trên menu, breadcrumb, header, bảng, nút bấm mà không cần reload trang (F5).
    - Định dạng ngày tháng `formatDate` chuyển đổi tương ứng theo locale được chọn.
-5. [ ] **Typecheck & Test Pass**: `pnpm --filter @vben/preferences test` và `pnpm --filter @vben/locales test` chạy thành công.
+5. [x] **Typecheck & Test Pass**: `pnpm --filter @vben/preferences test` và `pnpm --filter @vben/locales test` chạy thành công.
 
 ---
 

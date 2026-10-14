@@ -2,7 +2,7 @@
 import type { LanguageOption } from '@vben/constants';
 import type { SupportedLanguagesType } from '@vben/locales';
 
-import { onMounted, onUnmounted, ref, unref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 import { onSupportLanguagesChange } from '@vben/constants';
 import { $t, loadLocaleMessages } from '@vben/locales';
@@ -61,6 +61,16 @@ watch(
   { immediate: true },
 );
 
+watch(
+  () => preferences.app.timezone,
+  (timezone) => {
+    if (timezone && appTimezone.value !== timezone) {
+      appTimezone.value = timezone;
+    }
+  },
+  { immediate: true },
+);
+
 async function handleLocaleChange(val: string | undefined) {
   if (!val) return;
   const locale = val as SupportedLanguagesType;
@@ -86,11 +96,6 @@ async function handleTimezoneChange(val: string | undefined) {
 
 onMounted(async () => {
   timezoneOptionsRef.value = await timezoneStore.getTimezoneOptions();
-  // Get current timezone, e.g. Asia/Shanghai
-  const timezoneValue = unref(timezoneStore.timezone);
-  if (timezoneValue) {
-    appTimezone.value = timezoneValue;
-  }
 });
 </script>
 
@@ -103,7 +108,7 @@ onMounted(async () => {
     {{ $t('preferences.language') }}
   </SelectItem>
   <SelectItem
-    :model-value="appTimezone"
+    :model-value="appTimezone || preferences.app.timezone"
     :items="timezoneOptionsRef"
     @update:model-value="handleTimezoneChange"
   >

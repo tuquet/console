@@ -109,4 +109,31 @@ describe('usePreferences - anti-lockout safeguards', () => {
       app: { locale: 'vi-VN' },
     });
   });
+
+  it('keeps diffPreference undefined when builtinType is neutral default and resets cleanly after change', async () => {
+    const { diffPreference } = usePreferences();
+
+    expect(preferencesManager.getPreferences().theme.builtinType).toBe(
+      'neutral',
+    );
+    expect(diffPreference.value).toBeUndefined();
+
+    preferencesManager.updatePreferences({
+      theme: { builtinType: 'violet' },
+    });
+
+    expect(diffPreference.value).toEqual({
+      theme: {
+        builtinType: 'violet',
+        colorPrimary: 'hsl(245 82% 67%)',
+      },
+    });
+
+    await preferencesManager.resetPreferences();
+
+    expect(preferencesManager.getPreferences().theme.builtinType).toBe(
+      'neutral',
+    );
+    expect(diffPreference.value).toBeUndefined();
+  });
 });

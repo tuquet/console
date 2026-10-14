@@ -616,11 +616,10 @@ describe('preferences', () => {
         fields: [
           {
             component: 'select',
-            defaultValue: 'be-vietnam-pro',
+            defaultValue: 'inter',
             key: 'fontFamily',
             label: 'Font Family',
             options: [
-              { label: 'Be Vietnam Pro', value: 'be-vietnam-pro' },
               { label: 'Inter', value: 'inter' },
               { label: 'Roboto', value: 'roboto' },
               { label: 'System UI', value: 'system-ui' },
@@ -634,15 +633,7 @@ describe('preferences', () => {
 
     expect(
       document.documentElement.style.getPropertyValue('--font-family'),
-    ).toContain('Be Vietnam Pro');
-
-    preferenceManager.updateCustomPreferences({
-      fontFamily: 'inter',
-    });
-
-    expect(
-      document.documentElement.style.getPropertyValue('--font-family'),
-    ).toContain('Inter');
+    ).toMatch(/^'Inter'/);
 
     preferenceManager.updateCustomPreferences({
       fontFamily: 'roboto',
@@ -650,7 +641,15 @@ describe('preferences', () => {
 
     expect(
       document.documentElement.style.getPropertyValue('--font-family'),
-    ).toContain('Roboto');
+    ).toMatch(/^'Roboto'/);
+
+    preferenceManager.updateCustomPreferences({
+      fontFamily: 'system-ui',
+    });
+
+    expect(
+      document.documentElement.style.getPropertyValue('--font-family'),
+    ).toMatch(/^system-ui/);
   });
 });
 

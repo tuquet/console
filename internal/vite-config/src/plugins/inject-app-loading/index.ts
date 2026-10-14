@@ -26,7 +26,7 @@ async function viteInjectAppLoadingPlugin(
   const injectScript = `
   <script data-app-loading="inject-js">
   var theme = localStorage.getItem(${cacheName});
-  document.documentElement.classList.toggle('dark', /dark/.test(theme));
+  document.documentElement.classList.toggle('dark', theme ? /dark/.test(theme) : true);
 </script>
 `;
 

@@ -17,6 +17,7 @@ import {
   useSimpleLocale,
 } from '@vben-core/composables';
 import { X } from '@vben-core/icons';
+import { usePreferences } from '@vben-core/preferences';
 import {
   Separator,
   Sheet,
@@ -58,6 +59,7 @@ provide('DISMISSABLE_DRAWER_ID', id);
 const wrapperRef = ref<HTMLElement>();
 const { $t } = useSimpleLocale();
 const { isMobile } = useIsMobile();
+const { globalEscapeShortcutKey } = usePreferences();
 
 const state = props.drawerApi?.useStore?.();
 
@@ -119,7 +121,11 @@ function interactOutside(e: Event) {
   }
 }
 function escapeKeyDown(e: KeyboardEvent) {
-  if (!closeOnPressEscape.value || submitting.value) {
+  if (
+    !closeOnPressEscape.value ||
+    !globalEscapeShortcutKey.value ||
+    submitting.value
+  ) {
     e.preventDefault();
   }
 }
@@ -160,9 +166,11 @@ const isClosed = ref(true);
 watch(
   () => state?.value?.isOpen,
   (value) => {
-    isClosed.value = false;
-    if (value && !unref(hasOpened)) {
-      hasOpened.value = true;
+    if (value) {
+      isClosed.value = false;
+      if (!unref(hasOpened)) {
+        hasOpened.value = true;
+      }
     }
   },
   { immediate: true },
@@ -179,6 +187,7 @@ const getForceMount = computed(() => {
   <Sheet
     :modal="false"
     :open="state?.isOpen"
+    :unmount-on-hide="Boolean(state?.isOpen || !getForceMount)"
     @update:open="() => drawerApi?.close()"
   >
     <SheetContent
@@ -199,7 +208,6 @@ const getForceMount = computed(() => {
       :open="state?.isOpen"
       :side="placement"
       :z-index="zIndex"
-      :force-mount="getForceMount"
       :overlay-blur="overlayBlur"
       @close-auto-focus="handleFocusOutside"
       @closed="handleClosed"

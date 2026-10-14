@@ -12,7 +12,7 @@ import { getFleetProxiesApi } from '#/api';
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
-defineOptions({ name: 'FleetProxies' });
+defineOptions({ name: 'AutomationProxies' });
 
 const route = useRoute();
 const { formatDate } = useDateFormat();
@@ -194,10 +194,10 @@ watch(
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          {{ $t('page.fleet.proxies') }}
+          {{ $t('page.automation.proxies') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          {{ $t('page.fleet.proxies_desc') }}
+          {{ $t('page.automation.proxies_desc') }}
         </p>
       </div>
 

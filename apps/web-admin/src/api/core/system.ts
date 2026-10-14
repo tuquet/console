@@ -28,14 +28,24 @@ export interface BillingPlanItem {
   price_monthly_usd: number;
 }
 
+export interface PlatformUserWorkspaceSummary {
+  role_name: string;
+  status: string;
+  tenant_id: string;
+  tenant_name: string;
+  tenant_slug: string;
+}
+
 export interface PlatformUserItem {
   avatar_url: null | string;
   created_at: string;
   email?: null | string;
   full_name: null | string;
   id: string;
+  primary_role?: string;
   tenant_count: number;
   updated_at: string;
+  workspaces?: PlatformUserWorkspaceSummary[];
 }
 
 export interface GlobalAuditLogItem {
@@ -166,8 +176,10 @@ export async function getSystemPluginsApi(): Promise<SystemPluginItem[]> {
     );
     if (!Array.isArray(data)) return [];
     return data.map((row) => mapRawPlugin(row));
-  } catch (error) {
-    console.error('[System] Failed to load system plugins:', error);
+  } catch (error: any) {
+    if (!error?.isAuthError) {
+      console.error('[System] Failed to load system plugins:', error);
+    }
     return [];
   }
 }
@@ -183,10 +195,33 @@ export async function getBillingPlansApi(): Promise<BillingPlanItem[]> {
     );
     if (!Array.isArray(data)) return [];
     return data.map((row) => mapRawBillingPlan(row));
-  } catch (error) {
-    console.error('[System] Failed to load billing plans:', error);
+  } catch (error: any) {
+    if (!error?.isAuthError) {
+      console.error('[System] Failed to load billing plans:', error);
+    }
     return [];
   }
+}
+
+export const ROLE_PRIORITY: Record<string, number> = {
+  admin: 2,
+  member: 1,
+  owner: 3,
+  viewer: 0,
+};
+
+/**
+ * Pure function: Sắp xếp danh sách tên vai trò theo thứ tự ưu tiên giảm dần (owner > admin > member > viewer)
+ */
+export function sortRoleNamesByPriority(roleNames: string[]): string[] {
+  if (!Array.isArray(roleNames)) return [];
+  return roleNames
+    .filter(Boolean)
+    .toSorted(
+      (a, b) =>
+        (ROLE_PRIORITY[b.toLowerCase()] ?? 0) -
+        (ROLE_PRIORITY[a.toLowerCase()] ?? 0),
+    );
 }
 
 /**
@@ -194,11 +229,39 @@ export async function getBillingPlansApi(): Promise<BillingPlanItem[]> {
  */
 export function mapRawPlatformUser(raw: any): PlatformUserItem {
   let tenantCount = 0;
+  const workspaces: PlatformUserWorkspaceSummary[] = [];
+
   if (Array.isArray(raw.tenant_members)) {
-    tenantCount = raw.tenant_members[0]?.count ?? raw.tenant_members.length;
+    const firstItem = raw.tenant_members[0];
+    if (firstItem && typeof firstItem.count === 'number') {
+      tenantCount = firstItem.count;
+    } else {
+      tenantCount = raw.tenant_members.length;
+      for (const tm of raw.tenant_members) {
+        if (!tm || typeof tm !== 'object') continue;
+        const assignedRoles: string[] = Array.isArray(tm.member_roles)
+          ? sortRoleNamesByPriority(
+              tm.member_roles.map((mr: any) => mr?.roles?.name),
+            )
+          : [];
+        const topRole = assignedRoles[0] || 'member';
+        const tenantObj = tm.tenants || {};
+        workspaces.push({
+          role_name: topRole,
+          status: tm.status || 'active',
+          tenant_id: String(tm.tenant_id || tenantObj.id || ''),
+          tenant_name: tenantObj.name || 'Workspace',
+          tenant_slug: tenantObj.slug || '',
+        });
+      }
+    }
   } else if (typeof raw.tenant_members?.count === 'number') {
     tenantCount = raw.tenant_members.count;
   }
+
+  const sortedRoles = sortRoleNamesByPriority(
+    workspaces.map((w) => w.role_name),
+  );
 
   return {
     avatar_url: raw.avatar_url ?? null,
@@ -206,9 +269,157 @@ export function mapRawPlatformUser(raw: any): PlatformUserItem {
     email: raw.email ?? null,
     full_name: raw.full_name || 'Người dùng ẩn danh',
     id: String(raw.id ?? ''),
+    primary_role: sortedRoles[0],
     tenant_count: Number(tenantCount) || 0,
     updated_at: raw.updated_at || raw.created_at || new Date().toISOString(),
+    workspaces,
   };
+}
+
+/**
+ * Pure function: Lọc danh sách người dùng nền tảng theo tổ chức, vai trò và từ khóa đa trường
+ */
+export function filterPlatformUsers(
+  users: PlatformUserItem[],
+  filters?: {
+    role_filter?: string;
+    search?: string;
+    tenant_filter?: string;
+  },
+): PlatformUserItem[] {
+  if (!Array.isArray(users)) return [];
+  let result = users;
+
+  if (filters?.tenant_filter === 'has_tenants') {
+    result = result.filter((u) => u.tenant_count > 0);
+  } else if (filters?.tenant_filter === 'no_tenants') {
+    result = result.filter((u) => u.tenant_count === 0);
+  }
+
+  if (filters?.role_filter && filters.role_filter !== 'all') {
+    const roleTarget = filters.role_filter.toLowerCase().trim();
+    result = result.filter(
+      (u) =>
+        u.primary_role?.toLowerCase() === roleTarget ||
+        u.workspaces?.some((w) => w.role_name.toLowerCase() === roleTarget),
+    );
+  }
+
+  if (filters?.search?.trim()) {
+    const kw = filters.search.toLowerCase().trim();
+    result = result.filter(
+      (u) =>
+        (u.full_name && u.full_name.toLowerCase().includes(kw)) ||
+        (u.email && u.email.toLowerCase().includes(kw)) ||
+        u.id.toLowerCase().includes(kw) ||
+        u.workspaces?.some(
+          (w) =>
+            w.tenant_name.toLowerCase().includes(kw) ||
+            w.tenant_slug.toLowerCase().includes(kw),
+        ),
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Pure function: Lọc danh sách vai trò hệ thống theo phân loại, module quyền hạn và từ khóa
+ */
+export function filterSystemRoles(
+  roles: SystemRoleItem[],
+  filters?: {
+    module?: string;
+    role_type?: string;
+    search?: string;
+  },
+  permissionsCatalog?: SystemPermissionItem[],
+): SystemRoleItem[] {
+  if (!Array.isArray(roles)) return [];
+  let result = roles;
+
+  if (filters?.role_type === 'system') {
+    result = result.filter((r) => r.is_system);
+  } else if (filters?.role_type === 'custom') {
+    result = result.filter((r) => !r.is_system);
+  }
+
+  if (filters?.module && filters.module !== 'all') {
+    const modTarget = filters.module.toLowerCase().trim();
+    const modulePermIds = new Set(
+      (permissionsCatalog || [])
+        .filter((p) => p.module.toLowerCase() === modTarget)
+        .map((p) => p.id),
+    );
+    result = result.filter((r) =>
+      r.permissions.some(
+        (permId) =>
+          modulePermIds.has(permId) ||
+          permId.toLowerCase().startsWith(`${modTarget}:`),
+      ),
+    );
+  }
+
+  if (filters?.search?.trim()) {
+    const kw = filters.search.toLowerCase().trim();
+    result = result.filter(
+      (r) =>
+        r.name.toLowerCase().includes(kw) ||
+        r.id.toLowerCase().includes(kw) ||
+        (r.description && r.description.toLowerCase().includes(kw)) ||
+        r.permissions.some((p) => p.toLowerCase().includes(kw)),
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Pure function: Lọc danh sách quyền hạn hệ thống theo module, vai trò sở hữu và từ khóa
+ */
+export function filterSystemPermissions(
+  permissions: SystemPermissionItem[],
+  filters?: {
+    module?: string;
+    role?: string;
+    search?: string;
+  },
+  roles?: SystemRoleItem[],
+): SystemPermissionItem[] {
+  if (!Array.isArray(permissions)) return [];
+  let result = permissions;
+
+  if (filters?.module && filters.module !== 'all') {
+    const modTarget = filters.module.toLowerCase().trim();
+    result = result.filter((p) => p.module.toLowerCase() === modTarget);
+  }
+
+  if (filters?.role && filters.role !== 'all' && Array.isArray(roles)) {
+    const roleTarget = filters.role.toLowerCase().trim();
+    const matchedRole = roles.find(
+      (r) =>
+        r.name.toLowerCase() === roleTarget ||
+        r.id.toLowerCase() === roleTarget,
+    );
+    if (matchedRole) {
+      const allowedSet = new Set(matchedRole.permissions);
+      result = result.filter((p) => allowedSet.has(p.id));
+    } else {
+      result = [];
+    }
+  }
+
+  if (filters?.search?.trim()) {
+    const kw = filters.search.toLowerCase().trim();
+    result = result.filter(
+      (p) =>
+        p.id.toLowerCase().includes(kw) ||
+        p.module.toLowerCase().includes(kw) ||
+        (p.description && p.description.toLowerCase().includes(kw)),
+    );
+  }
+
+  return result;
 }
 
 /**
@@ -300,19 +511,29 @@ export function groupPermissionsByModule(
 export async function getPlatformUsersApi(params?: {
   search?: string;
 }): Promise<PlatformUserItem[]> {
+  const searchSuffix = params?.search
+    ? `&full_name=ilike.${encodeURIComponent(`*${params.search}*`)}`
+    : '';
   try {
-    let url =
-      '/rest/v1/profiles?select=*,tenant_members(count)&order=created_at.desc';
-    if (params?.search) {
-      const q = encodeURIComponent(`*${params.search}*`);
-      url += `&full_name=ilike.${q}`;
-    }
-    const data = await supabaseRequest<any[]>(url);
+    const richUrl = `/rest/v1/profiles?select=*,tenant_members(id,status,tenant_id,tenants(id,name,slug),member_roles(roles(id,name)))&order=created_at.desc${searchSuffix}`;
+    const data = await supabaseRequest<any[]>(richUrl);
     if (!Array.isArray(data)) return [];
     return data.map((row) => mapRawPlatformUser(row));
-  } catch (error) {
-    console.error('[System] Failed to load platform users:', error);
-    return [];
+  } catch (error: any) {
+    if (error?.isAuthError) {
+      return [];
+    }
+    try {
+      const fallbackUrl = `/rest/v1/profiles?select=*,tenant_members(count)&order=created_at.desc${searchSuffix}`;
+      const fallbackData = await supabaseRequest<any[]>(fallbackUrl);
+      if (!Array.isArray(fallbackData)) return [];
+      return fallbackData.map((row) => mapRawPlatformUser(row));
+    } catch (fallbackError: any) {
+      if (!fallbackError?.isAuthError) {
+        console.error('[System] Failed to load platform users:', fallbackError);
+      }
+      return [];
+    }
   }
 }
 
@@ -336,8 +557,10 @@ export async function getGlobalAuditLogsApi(filter?: {
     const data = await supabaseRequest<any[]>(url);
     if (!Array.isArray(data)) return [];
     return data.map((row) => mapRawGlobalAuditLog(row));
-  } catch (error) {
-    console.error('[System] Failed to load global audit logs:', error);
+  } catch (error: any) {
+    if (!error?.isAuthError) {
+      console.error('[System] Failed to load global audit logs:', error);
+    }
     return [];
   }
 }
@@ -355,8 +578,10 @@ export async function getPlatformSubscriptionsApi(): Promise<
     );
     if (!Array.isArray(data)) return [];
     return data.map((row) => mapRawPlatformSubscription(row));
-  } catch (error) {
-    console.error('[System] Failed to load platform subscriptions:', error);
+  } catch (error: any) {
+    if (!error?.isAuthError) {
+      console.error('[System] Failed to load platform subscriptions:', error);
+    }
     return [];
   }
 }
@@ -371,8 +596,10 @@ export async function getSystemRolesApi(): Promise<SystemRoleItem[]> {
     );
     if (!Array.isArray(data)) return [];
     return data.map((row) => mapRawSystemRole(row));
-  } catch (error) {
-    console.error('[System] Failed to load system roles:', error);
+  } catch (error: any) {
+    if (!error?.isAuthError) {
+      console.error('[System] Failed to load system roles:', error);
+    }
     return [];
   }
 }
@@ -393,8 +620,10 @@ export async function getSystemPermissionsApi(): Promise<
       id: String(row.id ?? ''),
       module: row.module || 'other',
     }));
-  } catch (error) {
-    console.error('[System] Failed to load system permissions:', error);
+  } catch (error: any) {
+    if (!error?.isAuthError) {
+      console.error('[System] Failed to load system permissions:', error);
+    }
     return [];
   }
 }

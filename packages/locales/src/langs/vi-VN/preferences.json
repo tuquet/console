@@ -276,9 +276,8 @@
   "typography": {
     "title": "Kiểu Chữ (Typography)",
     "fontFamily": "Phông Chữ Giao Diện",
-    "fontFamilyTip": "Chuyển đổi phông chữ giữa Be Vietnam Pro, Inter, Roboto và System UI",
-    "beVietnamPro": "Be Vietnam Pro (Khuyến nghị)",
-    "inter": "Inter (Hiện đại / Trung tính)",
+    "fontFamilyTip": "Chuyển đổi phông chữ giữa Inter, Roboto và System UI",
+    "inter": "Inter (Mặc định / Khuyến nghị)",
     "roboto": "Roboto (Google Classic)",
     "systemUi": "System UI (Hệ điều hành gốc)"
   }

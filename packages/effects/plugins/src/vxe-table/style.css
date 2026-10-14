@@ -54,13 +54,23 @@
 
 .vxe-table--header-wrapper {
   background-color: hsl(var(--muted) / 30%);
-  border-bottom: 1px solid hsl(var(--border) / 50%);
+  border-bottom: 1px solid hsl(var(--border) / 60%);
 }
 
 .vxe-table--header-wrapper th {
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   color: hsl(var(--muted-foreground));
+}
+
+.vxe-header--column .vxe-cell,
+.vxe-body--column .vxe-cell {
+  padding-right: 0.875rem !important;
+  padding-left: 0.875rem !important;
+}
+
+.vxe-table--body .vxe-body--column {
+  border-bottom: 1px solid hsl(var(--border) / 40%);
 }
 
 .vxe-pager {

@@ -5,7 +5,12 @@ import { useRouter } from 'vue-router';
 
 import { LOGIN_PATH } from '@vben/constants';
 import { preferences } from '@vben/preferences';
-import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
+import {
+  resetAllStores,
+  useAccessStore,
+  useTabbarStore,
+  useUserStore,
+} from '@vben/stores';
 
 import { toast } from '@tuquet/vue-ui';
 import { defineStore } from 'pinia';
@@ -18,11 +23,13 @@ import {
   logoutApi,
 } from '#/api';
 import { $t } from '#/locales';
+import { router as appRouter } from '#/router';
 
 export const useAuthStore = defineStore('auth', () => {
   const accessStore = useAccessStore();
   const userStore = useUserStore();
-  const router = useRouter();
+  const tabbarStore = useTabbarStore();
+  const router = useRouter() || appRouter;
 
   const loginLoading = ref(false);
 
@@ -60,6 +67,8 @@ export const useAuthStore = defineStore('auth', () => {
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
+          // Reload current route view so tables/metrics re-fetch with the new token
+          await tabbarStore.refresh(router);
         } else if (onSuccess) {
           await onSuccess?.();
         } else {
@@ -138,6 +147,32 @@ export const useAuthStore = defineStore('auth', () => {
     });
   }
 
+  /**
+   * Single canonical handler when both accessToken and refreshToken are expired/invalid.
+   * Respects `preferences.app.loginExpiredMode` ('modal' vs 'page').
+   */
+  async function handleSessionExpired(): Promise<'modal' | 'redirect'> {
+    clearAccessCache();
+    accessStore.setAccessToken(null);
+    accessStore.setRefreshToken(null);
+
+    if (
+      preferences.app.loginExpiredMode === 'modal' &&
+      accessStore.isAccessChecked
+    ) {
+      accessStore.setLoginExpired(true);
+      return 'modal';
+    }
+
+    toast.warning('Phiên đăng nhập đã hết hạn', {
+      description: 'Vui lòng đăng nhập lại để tiếp tục làm việc.',
+      duration: 4000,
+    });
+
+    await logout(true);
+    return 'redirect';
+  }
+
   async function fetchUserInfo() {
     const userInfo = await getUserInfoApi();
     userStore.setUserInfo(userInfo);
@@ -153,6 +188,7 @@ export const useAuthStore = defineStore('auth', () => {
     $reset,
     authLogin,
     fetchUserInfo,
+    handleSessionExpired,
     loginLoading,
     logout,
   };

@@ -42,13 +42,12 @@ Hệ thống quản trị `admin.tuquet.com` (`apps/web-admin`) kết nối tr�
 
 ### D5: Tuân Thủ Triết Lý Giao Diện Tối Giản (KISS & YAGNI)
 
-- **Quyết định:** Tắt Chrome tabbar ảo trong SPA (`preferences.tabbar.enable = false`). Tối giản header chỉ giữ Logo, nút chuyển Theme và Avatar người dùng. Giới hạn sidebar trong tối đa 5 nhóm chức năng chính.
+- **Quyết định:** Tắt Chrome tabbar ảo trong SPA (`preferences.tabbar.enable = false`). Tối giản header chỉ giữ Logo, nút chuyển Theme/Ngôn ngữ và Avatar người dùng. Tinh gọn sidebar trong **4 nhóm chức năng chính** (`/dashboard`, `/tenants`, `/automation`, `/system` — xem [`ADR-004`](0004-vxe-grid-form-and-i18n-terminology.md)).
 
-### D6: Tiêu Chuẩn Giao Diện Kép (Mobile-First Dual View)
+### D6: Tiêu Chuẩn Bảng Dữ Liệu Đáp Ứng Di Động (Đã nâng cấp bởi [`ADR-004`](0004-vxe-grid-form-and-i18n-terminology.md))
 
-- **Quyết định:** Mọi màn hình danh sách dữ liệu bắt buộc triển khai Dual View:
-  - **Desktop (`hidden md:block`):** Bảng dữ liệu phẳng với sắp xếp và lọc chi tiết.
-  - **Mobile (`block md:hidden`):** Thẻ chạm cảm ứng compact (`Touch Cards`), chiều cao touch target tối thiểu 40px, loại bỏ hoàn toàn cuộn ngang.
+- **Quyết định ban đầu:** Triển khai Dual View (`hidden md:block` Table + `block md:hidden` Touch Cards).
+- **Cập nhật theo [`ADR-004`](0004-vxe-grid-form-and-i18n-terminology.md):** Chuẩn hóa 100% các màn hình danh sách sang `useVbenVxeGrid` (`VxeTable`) và các biểu mẫu sang `VxeForm` với cuộn ngang tự nhiên (`overflow-x: auto`), bộ lọc tích hợp `formOptions`, và phân trang căn giữa tối ưu cho cả Desktop lẫn Mobile.
 
 ---
 

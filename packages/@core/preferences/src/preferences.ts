@@ -11,11 +11,7 @@ import type {
 import { markRaw, reactive, readonly, watch } from 'vue';
 
 import { MemoryStorageDriver, StorageManager } from '@vben-core/shared/cache';
-import {
-  isMacOs,
-  merge,
-  mergeWithArrayOverride,
-} from '@vben-core/shared/utils';
+import { isMacOs, mergeWithArrayOverride } from '@vben-core/shared/utils';
 
 import {
   breakpointsTailwind,
@@ -24,7 +20,9 @@ import {
 } from '@vueuse/core';
 
 import { defaultPreferences } from './config';
+import { BUILT_IN_THEME_PRESETS } from './constants';
 import {
+  isDarkTheme,
   updateCSSVariables,
   updateFontFamilyVariable,
 } from './update-css-variables';
@@ -132,7 +130,12 @@ class PreferenceManager {
     this.cache = new StorageManager({ prefix: namespace });
 
     // Merge initial preferences: preceding objects take precedence; trailing objects fill missing fields
-    this.initialPreferences = merge({}, overrides, defaultPreferences);
+    this.initialPreferences = mergeWithArrayOverride(
+      {},
+      overrides,
+      defaultPreferences,
+    );
+    this.syncBuiltinThemeColor(this.initialPreferences);
     this.customPreferencesExtension = extension ?? null;
     this.initialCustomPreferences = this.resolveCustomPreferencesDefaults(
       this.customPreferencesExtension,
@@ -171,6 +174,7 @@ class PreferenceManager {
 
     // Setup listeners
     this.setupWatcher();
+    (this.debouncedSave as any)?.cancel?.();
 
     // Initialize platform identity
     this.initPlatform();
@@ -520,6 +524,27 @@ class PreferenceManager {
           });
         }
       });
+  }
+
+  private syncBuiltinThemeColor(preference: Preferences) {
+    const { builtinType, mode } = preference.theme ?? {};
+    if (!builtinType || builtinType === 'custom') {
+      return;
+    }
+    const preset = BUILT_IN_THEME_PRESETS.find(
+      (item) => item.type === builtinType,
+    );
+    if (!preset) {
+      return;
+    }
+    const isDark = isDarkTheme(mode);
+    const color = isDark
+      ? preset.darkPrimaryColor || preset.primaryColor
+      : preset.primaryColor;
+    const resolvedColor = color || preset.color;
+    if (resolvedColor) {
+      preference.theme.colorPrimary = resolvedColor;
+    }
   }
 
   /**

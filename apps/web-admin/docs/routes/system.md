@@ -1,7 +1,7 @@
 # Đặc Tả Route: System Catalog & Superadmin Platform (Danh Mục Hệ Thống & Quản Trị Nền Tảng)
 
 > **Đường dẫn chính:** `/system/*`  
-> **Module File:** [`apps/web-admin/src/router/routes/modules/system.ts`](../../apps/web-admin/src/router/routes/modules/system.ts)  
+> **Module File:** [`src/router/routes/modules/system.ts`](../../src/router/routes/modules/system.ts)  
 > **Biểu tượng:** `lucide:shield-check`
 
 ---
@@ -14,10 +14,10 @@
   name: 'System',
   redirect: '/system/plugins',
   meta: {
-    title: 'Hệ Thống',
+    title: $t('page.system.title'),
     icon: 'lucide:shield-check',
     plugin: 'core-iam',
-    order: 40,
+    order: 30,
   },
   children: [
     {
@@ -25,7 +25,7 @@
       name: 'SystemPlugins',
       component: () => import('#/views/system/plugins/index.vue'),
       meta: {
-        title: 'Plugins Hệ Thống',
+        title: $t('page.system.plugins'),
         icon: 'lucide:puzzle',
         plugin: 'core-iam',
         authority: ['superadmin', 'plugins:read'],
@@ -36,7 +36,7 @@
       name: 'SystemPlans',
       component: () => import('#/views/system/plans/index.vue'),
       meta: {
-        title: 'Gói Cước & Quotas',
+        title: $t('page.system.plans'),
         icon: 'lucide:credit-card',
         plugin: 'subscriptions',
         authority: ['superadmin', 'subscriptions:read'],
@@ -47,7 +47,7 @@
       name: 'SystemUsers',
       component: () => import('#/views/system/users/index.vue'),
       meta: {
-        title: 'Người Dùng Nền Tảng',
+        title: $t('page.system.users'),
         icon: 'lucide:users',
         plugin: 'core-iam',
         authority: ['superadmin'],
@@ -58,7 +58,7 @@
       name: 'SystemAuditLogs',
       component: () => import('#/views/system/audit-logs/index.vue'),
       meta: {
-        title: 'Nhật Ký Kiểm Toán',
+        title: $t('page.system.auditLogs'),
         icon: 'lucide:scroll-text',
         plugin: 'core-iam',
         authority: ['superadmin'],
@@ -69,7 +69,7 @@
       name: 'SystemSubscriptions',
       component: () => import('#/views/system/subscriptions/index.vue'),
       meta: {
-        title: 'Quản Lý Thuê Bao',
+        title: $t('page.system.subscriptions'),
         icon: 'lucide:receipt',
         plugin: 'subscriptions',
         authority: ['superadmin'],
@@ -80,7 +80,7 @@
       name: 'SystemRoles',
       component: () => import('#/views/system/roles/index.vue'),
       meta: {
-        title: 'Vai Trò & Phân Quyền',
+        title: $t('page.system.roles'),
         icon: 'lucide:key-round',
         plugin: 'core-iam',
         authority: ['superadmin'],
@@ -96,9 +96,9 @@
 
 ### 2.1. Quản Lý Plugins: `/system/plugins`
 
-- **Mục Đích:** Kiểm soát và hiển thị tình trạng các plugin vi dịch vụ (Microservice Pillars) đã cài đặt vào Tuquet Cloud.
+- **Mục Đích:** Kiểm soát và hiển thị tình trạng các plugin vi dịch vụ (Microservice Pillars) đã cài đặt vào Tuquet Cloud qua bảng `useVbenVxeGrid`.
 - **Nguồn Dữ Liệu:** Bảng `public.system_plugins`.
-- **API Client:** [`getSystemPluginsApi()`](../../apps/web-admin/src/api/core/system.ts).
+- **API Client:** [`getSystemPluginsApi()`](../../src/api/core/system.ts).
 - **Quy Tắc Nhận Diện 6 Core Kernel Plugins:**
   - Hệ thống áp dụng hàm thuần khiết `isCorePlugin(id)` để phân định 6 module nhân cốt lõi:
     1. `core-iam` (Multi-Tenant IAM & Auth)
@@ -111,38 +111,38 @@
 
 ### 2.2. Gói Cước & Hạn Mức Quotas: `/system/plans`
 
-- **Mục Đích:** Quản lý bảng giá thuê bao SaaS toàn hệ thống và các giới hạn tài nguyên phân bổ cho từng hạng thành viên.
+- **Mục Đích:** Quản lý bảng giá thuê bao SaaS toàn hệ thống và các giới hạn tài nguyên phân bổ cho từng hạng thành viên (`useVbenVxeGrid`).
 - **Nguồn Dữ Liệu:** Bảng `billing.plans` (schema `billing`).
-- **API Client:** [`getBillingPlansApi()`](../../apps/web-admin/src/api/core/system.ts) với `{ schema: 'billing' }`.
+- **API Client:** [`getBillingPlansApi()`](../../src/api/core/system.ts) với `{ schema: 'billing' }`.
 - **Quyền Hạn Yêu Cầu:** `['superadmin', 'subscriptions:read']`.
 
 ### 2.3. Người Dùng Nền Tảng: `/system/users` (Superadmin Only)
 
-- **Mục Đích:** Quản lý danh bạ tài khoản người dùng đăng ký trên toàn nền tảng Tuquet Cloud, số lượng workspace tham gia, ngày gia nhập.
-- **Nguồn Dữ Liệu:** Bảng `public.profiles` kết hợp đếm `tenant_members`.
-- **API Client:** [`getPlatformUsersApi()`](../../apps/web-admin/src/api/core/system.ts).
+- **Mục Đích:** Quản lý danh bạ tài khoản người dùng đăng ký trên toàn nền tảng Tuquet Cloud theo chuẩn **Enterprise User Directory** (`useVbenVxeGrid`), hỗ trợ tìm kiếm đa trường (Họ tên, Email, UUID, Tên/Slug Workspace), lọc theo trạng thái tổ chức và vai trò, sao chép UUID 1 chạm, và hộp thoại **User Inspector Dialog** hiển thị danh sách Workspace tham gia kèm điều hướng trực tiếp tới `/tenants/:id`.
+- **Nguồn Dữ Liệu:** Bảng `public.profiles` kết hợp liên kết `public.tenant_members` (`tenants`, `member_roles(roles)`).
+- **API Client & Helpers:** [`getPlatformUsersApi()`](../../src/api/core/system.ts) và [`filterPlatformUsers()`](../../src/api/core/system.ts).
 - **Quyền Hạn Yêu Cầu:** `authority: ['superadmin']`.
 
 ### 2.4. Nhật Ký Kiểm Toán Toàn Cầu: `/system/audit-logs` (Superadmin Only)
 
-- **Mục Đích:** Giám sát nhật ký an ninh, phân quyền và thao tác dữ liệu trên toàn bộ hệ thống không phân biệt tenant.
+- **Mục Đích:** Giám sát nhật ký an ninh, phân quyền và thao tác dữ liệu trên toàn bộ hệ thống không phân biệt tenant (`useVbenVxeGrid`).
 - **Nguồn Dữ Liệu:** Bảng `public.audit_logs`.
-- **API Client:** [`getGlobalAuditLogsApi()`](../../apps/web-admin/src/api/core/system.ts).
+- **API Client:** [`getGlobalAuditLogsApi()`](../../src/api/core/system.ts).
 - **Tính Năng:** Lọc theo hành động/tenant, hộp thoại xem chi tiết payload JSON `old_values` và `new_values`.
 - **Quyền Hạn Yêu Cầu:** `authority: ['superadmin']`.
 
 ### 2.5. Quản Lý Thuê Bao Toàn Hệ Thống: `/system/subscriptions` (Superadmin Only)
 
-- **Mục Đích:** Giám sát hợp đồng thuê bao SaaS của tất cả các tenant, theo dõi doanh thu định kỳ (MRR) và trạng thái thanh toán.
+- **Mục Đích:** Giám sát hợp đồng thuê bao SaaS của tất cả các tenant, theo dõi doanh thu định kỳ (MRR) và trạng thái thanh toán (`useVbenVxeGrid`).
 - **Nguồn Dữ Liệu:** Bảng `billing.subscriptions` kết nối `tenants` và `plans` (schema `billing`).
-- **API Client:** [`getPlatformSubscriptionsApi()`](../../apps/web-admin/src/api/core/system.ts) với `{ schema: 'billing' }`.
+- **API Client:** [`getPlatformSubscriptionsApi()`](../../src/api/core/system.ts) với `{ schema: 'billing' }`.
 - **Quyền Hạn Yêu Cầu:** `authority: ['superadmin']`, plugin `subscriptions`.
 
 ### 2.6. Vai Trò & Phân Quyền Hệ Thống: `/system/roles` (Superadmin Only)
 
-- **Mục Đích:** Trực quan hóa ma trận RBAC gồm 4 vai trò hệ thống (`owner`, `admin`, `member`, `viewer`) và danh mục 36 quyền hạt nhân trong `public.permissions` gom theo module.
+- **Mục Đích:** Quản trị và tra cứu ma trận RBAC theo chuẩn **Enterprise Policy Console** với 2 bảng `useVbenVxeGrid` (`RolesGrid` cho 4 System Roles `owner`, `admin`, `member`, `viewer` và `PermissionsGrid` cho 36 quyền hạt nhân trong `public.permissions`), hỗ trợ lọc chéo Module $\leftrightarrow$ Role, hiển thị trực tiếp `RoleBadge` sở hữu từng quyền, sao chép nhanh mã quyền và hộp thoại **Role Policy Inspector Dialog** gom nhóm quyền hạn theo từng module.
 - **Nguồn Dữ Liệu:** Bảng `public.roles`, `public.permissions`, `public.role_permissions`.
-- **API Client:** [`getSystemRolesApi()`](../../apps/web-admin/src/api/core/system.ts) và [`getSystemPermissionsApi()`](../../apps/web-admin/src/api/core/system.ts).
+- **API Client & Helpers:** [`getSystemRolesApi()`](../../src/api/core/system.ts), [`getSystemPermissionsApi()`](../../src/api/core/system.ts), [`filterSystemRoles()`](../../src/api/core/system.ts), và [`filterSystemPermissions()`](../../src/api/core/system.ts).
 - **Quyền Hạn Yêu Cầu:** `authority: ['superadmin']`.
 
 ---

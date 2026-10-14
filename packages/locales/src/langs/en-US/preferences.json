@@ -276,9 +276,8 @@
   "typography": {
     "title": "Typography",
     "fontFamily": "UI Font Family",
-    "fontFamilyTip": "Switch interface font stack across Be Vietnam Pro, Inter, Roboto, and System UI",
-    "beVietnamPro": "Be Vietnam Pro (Recommended)",
-    "inter": "Inter (Modern / Neutral)",
+    "fontFamilyTip": "Switch interface font stack across Inter, Roboto, and System UI",
+    "inter": "Inter (Recommended / Default)",
     "roboto": "Roboto (Google Classic)",
     "systemUi": "System UI (Native OS)"
   }

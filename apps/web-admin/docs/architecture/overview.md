@@ -25,17 +25,19 @@ Hệ thống kết nối trực tiếp đến **Tuquet Cloud** (`tuquet/cloud/su
 
 1. **KISS & YAGNI (Keep It Simple, Stupid & You Aren't Gonna Need It):**
    - Loại bỏ thanh Tabbar Chrome ảo trong SPA (`preferences.tabbar.enable = false`) để tiết kiệm không gian màn hình.
-   - Header tối giản với đúng 3 thành phần: Logo Tuquet, nút chuyển Dark/Light Slate, Avatar & Menu người dùng.
-   - Sidebar giới hạn trong tối đa 5 nhóm chức năng chính.
+   - Header tối giản với các thành phần cốt lõi: Logo Tuquet, chuyển đổi Ngôn ngữ/Theme, Avatar & Menu người dùng.
+   - Sidebar tinh gọn trong **4 nhóm chức năng chính**: `Dashboard`, `Workspaces`, `Automation`, `System`.
 2. **Dữ Liệu Đo Đếm Thực Tế (100% Real Telemetry — Zero Mock Data):**
    - Tuyệt đối không dùng Mock Data hay số liệu giả lập. Toàn bộ số liệu trên console phản ánh chính xác trạng thái thực tế từ cơ sở dữ liệu và telemetry máy trạm.
    - Khi bảng dữ liệu rỗng, hiển thị Empty State chuẩn mực kèm biểu tượng Lucide và hướng dẫn kết nối.
-3. **Ưu Tiên Thiết Kế Di Động (Mobile-First Dual View):**
-   - **Desktop (`hidden md:block`):** Data Table phẳng, viền `border-border/60`, hỗ trợ lọc, sắp xếp và phân trang.
-   - **Mobile (`block md:hidden`):** Touch Cards cảm ứng, touch target tối thiểu 40px, loại bỏ hoàn toàn tràn vỡ layout hoặc cuộn ngang.
-4. **Quy Chuẩn Semantic Design Tokens & Iconography:**
+3. **Chuẩn Hóa Bảng Dữ Liệu & Biểu Mẫu (`useVbenVxeGrid` & `VxeForm`):**
+   - Toàn bộ các màn hình danh sách sử dụng `useVbenVxeGrid` (`VxeTable`) từ [`src/adapter/vxe-table.ts`](../../src/adapter/vxe-table.ts), tích hợp thanh lọc `formOptions`, đường kẻ semantic token tinh tế (`--vxe-ui-table-border-color: hsl(var(--border) / 40%)`), cuộn ngang tự nhiên (`overflow-x: auto`) và phân trang căn giữa trên thiết bị di động (xem [`ADR-004`](../decisions/0004-vxe-grid-form-and-i18n-terminology.md)).
+   - Toàn bộ trang chi tiết và hộp thoại modal sử dụng `VxeForm`, `VxeFormItem`, `VxeFormGroup`.
+   - Bảo toàn vị trí cuộn và triệt tiêu hiệu ứng nháy trang khi thay đổi URL query nội trang (`?tab=`, `?status=`).
+4. **Quy Chuẩn Semantic Design Tokens, Iconography & Từ Điển 3 Tầng:**
    - Chia sẻ bộ Design Tokens HSL trong `internal/tailwind-config/src/theme.css` (`--background`, `--foreground`, `--primary`, `--border`, `--radius`).
    - Duy nhất sử dụng [Lucide Icons](https://lucide.dev/) (`@lucide/vue`), nghiêm cấm sử dụng Emoji làm biểu tượng hệ thống.
+   - Hệ thống đa ngôn ngữ (`en-US` / `vi-VN`) phân tách 3 tầng từ điển: `common.json` (hành động phổ quát), `term.json` (thuật ngữ miền chuẩn), và `page.json` (nhãn đặc thù màn hình), tuân thủ nghiêm ngặt **Sentence case** tiếng Việt và nguyên tắc _Brevity_ (nói ít hiểu nhiều).
 
 ---
 
@@ -53,7 +55,7 @@ Tuquet Cloud phân tách dữ liệu thành các schema chuyên biệt nhằm đ
 
 ### Hợp Đồng Giao Tiếp API Client:
 
-Toàn bộ các truy vấn HTTP tới Supabase sử dụng hàm dùng chung `supabaseRequest<T>()` tại [`apps/web-admin/src/api/core/supabase-client.ts`](../../apps/web-admin/src/api/core/supabase-client.ts):
+Toàn bộ các truy vấn HTTP tới Supabase sử dụng hàm dùng chung `supabaseRequest<T>()` tại [`src/api/core/supabase-client.ts`](../../src/api/core/supabase-client.ts):
 
 ```typescript
 export interface SupabaseRequestOptions extends RequestInit {
@@ -102,19 +104,19 @@ flowchart TD
 
 ## 5. Bộ Lọc Định Tuyến Plugin Gate (`plugin-gate.ts`)
 
-Mỗi cụm route nghiệp vụ trong hệ thống được gắn liền với một **Plugin ID** trong bảng `public.system_plugins`:
+Mỗi tuyến đường nghiệp vụ trong hệ thống được gắn liền với một **Plugin ID** trong bảng `public.system_plugins`:
 
 ```mermaid
 graph LR
-    CoreIAM["core-iam"] --> D["/dashboard"]
-    CoreIAM --> T["/tenants"]
+    CoreIAM["core-iam"] --> D["/dashboard/analytics"]
+    CoreIAM --> T["/tenants, /tenants/:id"]
     CoreIAM --> S1["/system/plugins, /system/users, /system/audit-logs, /system/roles"]
-    Runners["runners"] --> F["/fleet (devices, browsers, proxies)"]
-    Automa["automa"] --> A["/automation (workflows, runs)"]
+    Automa["automa"] --> A1["/automation/workflows, /automation/runs, /automation/runs/:id"]
+    Runners["runners"] --> A2["/automation/devices, /automation/browsers, /automation/proxies"]
     Subs["subscriptions"] --> S2["/system/plans, /system/subscriptions"]
 ```
 
-Khi ứng dụng khởi chạy, hàm thuần khiết `filterRoutesByPlugins(routes, installedPluginIds)` tự động ẩn toàn bộ các nhánh route có plugin chưa mang trạng thái `installed`.
+Khi ứng dụng khởi chạy, hàm thuần khiết [`filterRoutesByPlugins(routes, installedPluginIds)`](../../src/router/plugin-gate.ts) tự động ẩn toàn bộ các nhánh route có plugin chưa mang trạng thái `installed`. Trong nhóm hợp nhất `/automation`, từng tuyến con được lọc độc lập theo `automa` hoặc `runners`.
 
 ---
 
@@ -128,32 +130,31 @@ Khi ứng dụng khởi chạy, hàm thuần khiết `filterRoutesByPlugins(rout
 
 ## 7. Cây Định Tuyến Tổng Thể (Master Route Tree)
 
-Hệ thống quản trị bao gồm **22 tuyến đường** chuẩn mực:
+Hệ thống quản trị bao gồm **22 tuyến đường** chuẩn mực phân bổ trong **4 nhóm Sidebar chính** (15 tuyến nghiệp vụ) và cụm xác thực lõi (7 tuyến):
 
 ```text
 /                                   BasicLayout (Chuyển hướng mặc định -> /dashboard/analytics)
 ├── /dashboard                      [core-iam]        lucide:layout-dashboard
 │   └── /dashboard/analytics        Thống kê Telemetry thực tế từ Cloud & Loopback
 ├── /tenants                        [core-iam]        lucide:building-2
-│   ├── /tenants                    Danh sách Workspace (Dual View)
+│   ├── /tenants                    Danh sách Workspace (VxeGrid)
 │   └── /tenants/:id                Chi tiết Workspace (4 tabs: overview, members, usage, audit)
-├── /fleet                          [runners]         lucide:cpu
-│   ├── /fleet/devices              Thiết bị & Nodes Specter Desk / Cloud VPS
-│   ├── /fleet/browsers             Phiên bản Chromium tự động hóa
-│   └── /fleet/proxies              Pool Proxy mạng phân tán
-├── /automation                     [automa]          lucide:workflow
-│   ├── /automation/workflows       Sơ đồ kịch bản Canvas Workflows
-│   ├── /automation/runs            Lịch sử các đợt chạy chiến dịch
-│   └── /automation/runs/:id        Chi tiết lần chạy & Terminal Logs Viewer (Polling 3s)
+├── /automation                     [automa|runners]  lucide:workflow
+│   ├── /automation/workflows       [automa]          Sơ đồ kịch bản Canvas Workflows
+│   ├── /automation/runs            [automa]          Lịch sử các đợt chạy chiến dịch
+│   ├── /automation/runs/:id        [automa]          Chi tiết lần chạy & Terminal Logs Viewer (Polling 3s)
+│   ├── /automation/devices         [runners]         Thiết bị & Nodes Specter Desk / Cloud VPS
+│   ├── /automation/browsers        [runners]         Hồ sơ trình duyệt Chromium tự động hóa
+│   └── /automation/proxies         [runners]         Pool Proxy mạng phân tán
 └── /system                         [core-iam]        lucide:shield-check
-    ├── /system/plugins             Danh mục Microservice Plugins đã cài đặt
+    ├── /system/plugins             [core-iam]        Danh mục Microservice Plugins đã cài đặt
     ├── /system/plans               [subscriptions]   Bảng giá cước & Quotas SaaS
     ├── /system/users               [superadmin]      Người dùng toàn nền tảng
     ├── /system/audit-logs          [superadmin]      Nhật ký kiểm toán an ninh toàn cầu
     ├── /system/subscriptions       [superadmin]      Quản lý hợp đồng thuê bao các Workspace
     └── /system/roles               [superadmin]      Ma trận 4 System Roles & 36 Permissions
 
-Core & Auth (AuthPageLayout):
+Core & Auth (AuthPageLayout & BasicLayout):
 /auth/login, /auth/register, /auth/forget-password, /auth/reset-password, /auth/callback, /auth/desktop, /profile
 ```
 

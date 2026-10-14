@@ -114,7 +114,10 @@ const DEFAULT_TIME_ZONE_OPTIONS: TimezoneOption[] = [
   },
 ];
 
-export const COLOR_PRESETS = [...BUILT_IN_THEME_PRESETS].slice(0, 7);
+export const COLOR_PRESETS = [
+  ...BUILT_IN_THEME_PRESETS.slice(0, 7),
+  ...BUILT_IN_THEME_PRESETS.filter((item) => item.type === 'neutral'),
+];
 
 export { BUILT_IN_THEME_PRESETS, DEFAULT_TIME_ZONE_OPTIONS };
 

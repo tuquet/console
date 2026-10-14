@@ -16,11 +16,11 @@ Module `platform-foundation` thiết lập và chuẩn hóa toàn bộ nền t�
 1. **Kiến Trúc Monorepo & Phân Tầng Package:**
    - Chuẩn hóa ranh giới 39 packages theo cấu trúc 4 tầng: Base Primitives (`@vben-core/*`), State & Composables, UI-Kit Primitives, và Effects/Domain Integrations (`@vben/*`).
    - Quản lý phiên bản tập trung qua `pnpm-workspace.yaml` bằng catalog (`catalog:`), loại bỏ hardcode version số lẻ tại package con.
-2. **Hạ Tầng Build Cục Bộ & Xem Trước Tailscale (`build:local`):**
-   - Tự động hóa kiểm tra tài nguyên đĩa cứng VPS ($\le 85\%$), dọn cache `.turbo` khi cần thiết.
+2. **Hạ Tầng Build Cục Bộ (`build:local`):**
+   - Tự động hóa kiểm tra tài nguyên đĩa cứng ($\le 85\%$), dọn cache `.turbo` khi cần thiết.
    - Giới hạn bộ nhớ Node heap `--max-old-space-size=4096` tránh lỗi OOM khi biên dịch DTS.
    - Ghi nhận telemetry bản build vào `apps/web-admin/dist/.build-meta.json`.
-   - Nạp lại Nginx graceful reload và phục vụ qua mạng Tailscale Mesh (`http://100.68.217.61/`) với Zero WAN Port Exposure.
+   - Nạp lại Nginx graceful reload và phục vụ qua cổng loopback cục bộ (`http://127.0.0.1/`) với Zero WAN Port Exposure.
 3. **Quản Lý Vòng Đời PWA & Header Chống Cache:**
    - Cấu hình Vite PWA với `registerType: 'autoUpdate'`, `workbox.skipWaiting: true`, và `workbox.clientsClaim: true`.
    - Nginx phục vụ `sw.js`, `manifest.webmanifest`, và `_app-config-*.js` với `Cache-Control: no-cache, no-store, must-revalidate; Expires: 0`.
@@ -96,18 +96,18 @@ graph TD
 
 Kịch bản thực thi 5 giai đoạn nghiêm ngặt:
 
-1. **Kiểm tra an toàn VPS:** Đo đếm dung lượng đĩa `df /`. Nếu $> 85\%$, tự động dọn dẹp các thư mục cache tạm `.turbo`.
+1. **Kiểm tra an toàn đĩa cứng:** Đo đếm dung lượng đĩa `df /`. Nếu $> 85\%$, tự động dọn dẹp các thư mục cache tạm `.turbo`.
 2. **Kiểm tra hồi quy:** Chạy toàn bộ test suites cho Core Preferences:
    ```bash
    pnpm test:unit packages/@core/preferences/__tests__/preferences.test.ts
    ```
 3. **Biên dịch đóng gói:** Thiết lập `NODE_OPTIONS="--max-old-space-size=4096"` và thực thi Vite production build cho `@tuquet/admin-web`.
-4. **Ghi nhận Metadata:** Xuất file `.build-meta.json` chứa commit hash rút gọn, timestamp ISO, và Tailscale URL.
+4. **Ghi nhận Metadata:** Xuất file `.build-meta.json` chứa commit hash rút gọn và timestamp ISO.
 5. **Nạp lại Web Server:** `nginx -t -q && systemctl reload nginx`.
 
 ### 3.2. Cấu Hình Nginx & Header Chống Cache
 
-Tệp `/etc/nginx/sites-enabled/tuquet-admin.conf` lắng nghe độc quyền trên `100.68.217.61:80` (Tailscale) và `127.0.0.1:80`:
+Tệp cấu hình Nginx lắng nghe nội bộ trên `127.0.0.1:80`:
 
 ```nginx
 # Service Worker và Webmanifest: Bắt buộc không lưu cache
@@ -156,12 +156,12 @@ export async function getFleetDevicesApi(status?: string) {
 }
 ```
 
-### 4.2. Mobile-First Dual View Pattern
+### 4.2. Bảng Dữ Liệu `useVbenVxeGrid` & Biểu Mẫu `VxeForm`
 
-Mọi view chứa bảng dữ liệu danh sách đều phân tách thành 2 tầng độc lập:
+Mọi view chứa bảng dữ liệu danh sách và biểu mẫu sử dụng adapter `#/adapter/vxe-table`:
 
-1. **Desktop View (`hidden md:block`):** Bảng phẳng viền `border-border/60`, hỗ trợ lọc và sắp xếp.
-2. **Mobile View (`block md:hidden`):** Danh sách Card cảm ứng, chiều cao nút bấm tối thiểu 40px, loại bỏ hoàn toàn tràn cuộn ngang.
+1. **Data Grid (`useVbenVxeGrid`):** Bảng phẳng viền semantic token `border-border/40`, tích hợp lọc `formOptions`, cuộn ngang tự nhiên và phân trang căn giữa trên thiết bị di động.
+2. **Forms (`VxeForm`):** Áp dụng đồng nhất cho các trang chi tiết và hộp thoại modal.
 
 ### 4.3. Lucide Icons Only Invariant
 
@@ -178,7 +178,7 @@ Mọi view chứa bảng dữ liệu danh sách đều phân tách thành 2 tầ
 | **Type Integrity** | `pnpm run check:type` | `vue-tsc` kết thúc với **0 lỗi** trên 39 packages. |
 | **Code Formatting** | `oxfmt --check` | Toàn bộ tệp mã nguồn tuân thủ cấu hình chuẩn. |
 | **Linting** | `oxlint` + `eslint` + `stylelint` | **0 warnings, 0 errors**. |
-| **Local Verification** | `pnpm run build:local` | Nginx phản hồi HTTP 200 trên `http://100.68.217.61/`. |
+| **Local Verification** | `pnpm run build:local` | Nginx phản hồi HTTP 200 trên `http://127.0.0.1/`. |
 
 ---
 

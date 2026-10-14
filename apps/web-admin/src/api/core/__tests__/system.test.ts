@@ -2,6 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { supabaseRequest } from '../supabase-client';
 import {
+  filterPlatformUsers,
+  filterSystemPermissions,
+  filterSystemRoles,
   getBillingPlansApi,
   getGlobalAuditLogsApi,
   getPlatformSubscriptionsApi,
@@ -240,6 +243,30 @@ describe('system core api & helpers', () => {
       expect(users[0]?.tenant_count).toBe(3);
     });
 
+    it('should fallback to tenant_members(count) when rich relational query fails in getPlatformUsersApi', async () => {
+      vi.mocked(supabaseRequest)
+        .mockRejectedValueOnce(new Error('PGRST200: relation not found'))
+        .mockResolvedValueOnce([
+          {
+            created_at: '2026-10-10T00:00:00Z',
+            email: 'fallback@tuquet.com',
+            full_name: 'Fallback User',
+            id: 'u-fallback',
+            tenant_members: [{ count: 2 }],
+          },
+        ]);
+
+      const users = await getPlatformUsersApi();
+
+      expect(supabaseRequest).toHaveBeenCalledTimes(2);
+      expect(supabaseRequest).toHaveBeenLastCalledWith(
+        expect.stringContaining('select=*,tenant_members(count)'),
+      );
+      expect(users).toHaveLength(1);
+      expect(users[0]?.id).toBe('u-fallback');
+      expect(users[0]?.tenant_count).toBe(2);
+    });
+
     it('should query getGlobalAuditLogsApi from public.audit_logs', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
@@ -345,6 +372,190 @@ describe('system core api & helpers', () => {
       expect(Object.keys(grouped)).toEqual(['runners', 'automa']);
       expect(grouped.runners).toHaveLength(2);
       expect(grouped.automa).toHaveLength(1);
+    });
+  });
+
+  describe('enterprise IAM directory & RBAC filter helpers', () => {
+    it('should map raw profile with detailed tenant_members and resolve primary_role', () => {
+      const raw = {
+        avatar_url: null,
+        created_at: '2026-10-05T00:00:00Z',
+        email: 'architect@tuquet.com',
+        full_name: 'Cloud Architect',
+        id: 'uuid-arch-01',
+        tenant_members: [
+          {
+            id: 'tm-1',
+            member_roles: [{ roles: { name: 'member' } }],
+            status: 'active',
+            tenant_id: 't-alpha',
+            tenants: { id: 't-alpha', name: 'Alpha Lab', slug: 'alpha-lab' },
+          },
+          {
+            id: 'tm-2',
+            member_roles: [{ roles: { name: 'owner' } }],
+            status: 'active',
+            tenant_id: 't-beta',
+            tenants: { id: 't-beta', name: 'Beta Corp', slug: 'beta-corp' },
+          },
+        ],
+      };
+
+      const result = mapRawPlatformUser(raw);
+      expect(result.tenant_count).toBe(2);
+      expect(result.primary_role).toBe('owner');
+      expect(result.workspaces).toHaveLength(2);
+      expect(result.workspaces?.[0]?.tenant_name).toBe('Alpha Lab');
+      expect(result.workspaces?.[1]?.role_name).toBe('owner');
+    });
+
+    it('should filter platform users by tenant_filter, role_filter, and multi-field search (name, email, UUID, workspace)', () => {
+      const users = [
+        mapRawPlatformUser({
+          email: 'founder@tuquet.com',
+          full_name: 'Alice Founder',
+          id: '11111111-aaaa-bbbb-cccc-000000000001',
+          tenant_members: [
+            {
+              member_roles: [{ roles: { name: 'owner' } }],
+              status: 'active',
+              tenant_id: 't-1',
+              tenants: { id: 't-1', name: 'Tuquet HQ', slug: 'tuquet-hq' },
+            },
+            {
+              member_roles: [{ roles: { name: 'member' } }],
+              status: 'active',
+              tenant_id: 't-2',
+              tenants: { id: 't-2', name: 'Tuquet Labs', slug: 'tuquet-labs' },
+            },
+          ],
+        }),
+        mapRawPlatformUser({
+          email: 'ops@tuquet.com',
+          full_name: 'Bob Operator',
+          id: '22222222-dddd-eeee-ffff-000000000002',
+          tenant_members: [],
+        }),
+      ];
+
+      expect(
+        filterPlatformUsers(users, { tenant_filter: 'has_tenants' }),
+      ).toHaveLength(1);
+      expect(
+        filterPlatformUsers(users, { tenant_filter: 'no_tenants' }),
+      ).toHaveLength(1);
+      expect(filterPlatformUsers(users, { role_filter: 'owner' })).toHaveLength(
+        1,
+      );
+      // Secondary workspace role match (primary_role is 'owner', second workspace role is 'member')
+      expect(
+        filterPlatformUsers(users, { role_filter: 'member' }),
+      ).toHaveLength(1);
+      expect(filterPlatformUsers(users, { role_filter: 'admin' })).toHaveLength(
+        0,
+      );
+
+      // Search by UUID fragment
+      expect(
+        filterPlatformUsers(users, { search: '22222222-dddd' }),
+      ).toHaveLength(1);
+      // Search by Email
+      expect(
+        filterPlatformUsers(users, { search: 'founder@tuquet.com' }),
+      ).toHaveLength(1);
+      // Search by Workspace slug/name
+      expect(filterPlatformUsers(users, { search: 'tuquet-hq' })).toHaveLength(
+        1,
+      );
+    });
+
+    it('should filter system roles by role_type, module, and keyword', () => {
+      const permsCatalog = [
+        {
+          description: 'Manage tenants',
+          id: 'tenants:manage',
+          module: 'core-iam',
+        },
+        {
+          description: 'Manage devices',
+          id: 'runners:devices:manage',
+          module: 'runners',
+        },
+      ];
+      const roles = [
+        {
+          created_at: '2026-10-01T00:00:00Z',
+          description: 'Full access owner',
+          id: 'r-owner',
+          is_system: true,
+          name: 'owner',
+          permissions: ['tenants:manage', 'runners:devices:manage'],
+        },
+        {
+          created_at: '2026-10-02T00:00:00Z',
+          description: 'Custom runner operator',
+          id: 'r-custom',
+          is_system: false,
+          name: 'runner_ops',
+          permissions: ['runners:devices:manage'],
+        },
+      ];
+
+      expect(
+        filterSystemRoles(roles, { role_type: 'system' }, permsCatalog),
+      ).toHaveLength(1);
+      expect(
+        filterSystemRoles(roles, { role_type: 'custom' }, permsCatalog),
+      ).toHaveLength(1);
+      expect(
+        filterSystemRoles(roles, { module: 'core-iam' }, permsCatalog),
+      ).toHaveLength(1);
+      expect(
+        filterSystemRoles(roles, { search: 'runner_ops' }, permsCatalog),
+      ).toHaveLength(1);
+    });
+
+    it('should filter system permissions by module, owning role, and keyword', () => {
+      const perms = [
+        {
+          description: 'Manage tenants',
+          id: 'tenants:manage',
+          module: 'core-iam',
+        },
+        {
+          description: 'Read devices',
+          id: 'runners:devices:read',
+          module: 'runners',
+        },
+      ];
+      const roles = [
+        {
+          created_at: '2026-10-01T00:00:00Z',
+          description: 'Owner',
+          id: 'r-owner',
+          is_system: true,
+          name: 'owner',
+          permissions: ['tenants:manage', 'runners:devices:read'],
+        },
+        {
+          created_at: '2026-10-01T00:00:00Z',
+          description: 'Viewer',
+          id: 'r-viewer',
+          is_system: true,
+          name: 'viewer',
+          permissions: ['runners:devices:read'],
+        },
+      ];
+
+      expect(
+        filterSystemPermissions(perms, { module: 'core-iam' }, roles),
+      ).toHaveLength(1);
+      expect(
+        filterSystemPermissions(perms, { role: 'viewer' }, roles),
+      ).toHaveLength(1);
+      expect(
+        filterSystemPermissions(perms, { search: 'devices:read' }, roles),
+      ).toHaveLength(1);
     });
   });
 });

@@ -1,6 +1,6 @@
 # Đặc Tả Route: Xác Thực & Tuyến Lõi (Authentication & Core Routes)
 
-> **Module File:** [`apps/web-admin/src/router/routes/core.ts`](../../apps/web-admin/src/router/routes/core.ts)  
+> **Module File:** [`src/router/routes/core.ts`](../../src/router/routes/core.ts)  
 > **Layouts:** `AuthPageLayout` (cho các trang xác thực) và `BasicLayout` (cho khung quản trị)  
 > **Tài liệu kiến trúc:** [`docs/architecture/overview.md`](../architecture/overview.md)
 
@@ -22,7 +22,7 @@
       name: 'Profile',
       component: () => import('#/views/_core/profile/index.vue'),
       meta: {
-        title: 'Hồ sơ người dùng',
+        title: $t('page.auth.profile'),
         icon: 'lucide:user',
         hideInMenu: true,
       },
@@ -33,22 +33,22 @@
 
 - **Chức Năng:**
   - `/`: Tự động chuyển hướng tới trang chủ mặc định (`/dashboard/analytics`).
-  - `/profile`: Cho phép người dùng cập nhật thông tin cá nhân (Họ tên, ảnh đại diện, email) lưu trực tiếp vào `public.profiles`.
+  - `/profile`: Cho phép người dùng cập nhật thông tin cá nhân (Họ tên, ảnh đại diện, email) lưu trực tiếp vào `public.profiles` thông qua biểu mẫu `VxeForm`.
 
 ---
 
 ### 1.2. Cụm Tuyến Xác Thực (`/auth/*`)
 
-Sử dụng container giao diện chuyên dụng `AuthPageLayout` (`apps/web-admin/src/layouts/auth.vue`):
+Sử dụng container giao diện chuyên dụng `AuthPageLayout` ([`src/layouts/auth.vue`](../../src/layouts/auth.vue)):
 
 | Đường Dẫn (Path) | Tên Tuyến (Name) | Component Triển Khai | Mô Tả Nghiệp Vụ & Dòng Dữ Liệu |
 | :-- | :-- | :-- | :-- |
-| **`/auth/login`** | `Login` | [`login.vue`](../../apps/web-admin/src/views/_core/authentication/login.vue) | Đăng nhập bằng Email/Password hoặc Đăng nhập qua GitHub OAuth. |
-| **`/auth/register`** | `Register` | [`register.vue`](../../apps/web-admin/src/views/_core/authentication/register.vue) | Đăng ký tài khoản quản trị mới, ghi nhận user vào Supabase Auth. |
-| **`/auth/forget-password`** | `ForgetPassword` | [`forget-password.vue`](../../apps/web-admin/src/views/_core/authentication/forget-password.vue) | Gửi email khôi phục mật khẩu thông qua Supabase Auth Service. |
-| **`/auth/reset-password`** | `ResetPassword` | [`reset-password.vue`](../../apps/web-admin/src/views/_core/authentication/reset-password.vue) | Nhận token khôi phục và thiết lập mật khẩu mới. |
-| **`/auth/callback`** | `AuthCallback` | [`callback.vue`](../../apps/web-admin/src/views/_core/authentication/callback.vue) | Điểm tiếp nhận chuyển hướng (redirect URI) từ GitHub OAuth, bóc tách `access_token` và thiết lập phiên làm việc. |
-| **`/auth/desktop`** | `DesktopBridge` | [`desktop-bridge.vue`](../../apps/web-admin/src/views/_core/authentication/desktop-bridge.vue) | Cổng ủy quyền máy trạm (Specter Desk Authorization), đẩy phiên đăng nhập về cổng loopback `http://127.0.0.1:8765/sso/callback`. |
+| **`/auth/login`** | `Login` | [`login.vue`](../../src/views/_core/authentication/login.vue) | Đăng nhập bằng Email/Password hoặc Đăng nhập qua GitHub OAuth. |
+| **`/auth/register`** | `Register` | [`register.vue`](../../src/views/_core/authentication/register.vue) | Đăng ký tài khoản quản trị mới, ghi nhận user vào Supabase Auth. |
+| **`/auth/forget-password`** | `ForgetPassword` | [`forget-password.vue`](../../src/views/_core/authentication/forget-password.vue) | Gửi email khôi phục mật khẩu thông qua Supabase Auth Service. |
+| **`/auth/reset-password`** | `ResetPassword` | [`reset-password.vue`](../../src/views/_core/authentication/reset-password.vue) | Nhận token khôi phục và thiết lập mật khẩu mới. |
+| **`/auth/callback`** | `AuthCallback` | [`callback.vue`](../../src/views/_core/authentication/callback.vue) | Điểm tiếp nhận chuyển hướng (redirect URI) từ GitHub OAuth, bóc tách `access_token` và thiết lập phiên làm việc. |
+| **`/auth/desktop`** | `DesktopBridge` | [`desktop-bridge.vue`](../../src/views/_core/authentication/desktop-bridge.vue) | Cổng ủy quyền máy trạm (Specter Desk Authorization), đẩy phiên đăng nhập về cổng loopback `http://127.0.0.1:8765/sso/callback`. |
 
 ---
 

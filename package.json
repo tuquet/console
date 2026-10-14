@@ -29,6 +29,7 @@
     "changeset": "pnpm exec changeset",
     "check": "pnpm run check:circular && pnpm run check:dep && pnpm run check:type && pnpm check:cspell",
     "check:circular": "vsh check-circular",
+    "check:console": "node ./scripts/check-console.mjs",
     "check:cspell": "cspell lint \"**/*.ts\" \"**/README.md\" \".changeset/*.md\" --no-progress",
     "check:dep": "vsh check-dep",
     "check:i18n": "vue-i18n-extract report --vueFiles './apps/web-admin/src/**/*.?(vue|ts)' --languageFiles './apps/web-admin/src/locales/langs/**/*.json'",

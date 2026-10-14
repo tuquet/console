@@ -12,14 +12,9 @@ import { $t } from '@vben/locales';
 async function initSetupVbenForm() {
   setupVbenForm<ComponentType>({
     config: {
-      // Default base model property name is v-model:value
-      baseModelPropName: 'value',
-
-      // Specific components use v-model:checked or v-model:fileList
+      // @tuquet/vue-ui components follow Vue 3 standard v-model (modelValue / onUpdate:modelValue)
+      baseModelPropName: 'modelValue',
       modelPropNameMap: {
-        Checkbox: 'checked',
-        Radio: 'checked',
-        Switch: 'checked',
         Upload: 'fileList',
       },
     },

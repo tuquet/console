@@ -43,7 +43,7 @@ Toàn bộ console áp dụng phong cách thiết kế hiện đại của **Sha
   - Màu nhấn & thương hiệu: `bg-primary`, `text-primary-foreground`, `border-primary`.
   - Đường viền: `border-border` hoặc `border-input`.
   - Bo góc: `rounded-lg` (8px), `rounded-xl` (12px) kế thừa từ `--radius`.
-- **Đảm bảo đồng bộ:** Mọi thay đổi trong `preferences.ts` (`theme.mode: 'dark'`, `theme.builtinType: 'slate'`, `theme.radius: '0.5'`) sẽ tự động tác động đồng bộ lên 100% component giao diện.
+- **Đảm bảo đồng bộ:** Mọi thay đổi trong `preferences.ts` (`theme.mode: 'dark'`, `theme.builtinType: 'neutral'`, `theme.radius: '0.5'`) sẽ tự động tác động đồng bộ lên 100% component giao diện.
 
 ---
 

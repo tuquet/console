@@ -84,6 +84,14 @@ Hệ thống màu của Tuquet Admin sử dụng kiến trúc CSS Variables (HSL
 | **Lỗi / Xóa (Destructive / Offline)** | `text-destructive` | `bg-destructive text-destructive-foreground` hoặc `bg-destructive/10 text-destructive` |
 | **Thông tin (Info)** | `text-info` | `bg-info/10 text-info` |
 
+### 2.6. Bảng Dữ Liệu `useVbenVxeGrid` & Biểu Mẫu `VxeForm`
+
+Toàn bộ bảng dữ liệu và biểu mẫu sử dụng adapter [`src/adapter/vxe-table.ts`](../../src/adapter/vxe-table.ts) (xem [`ADR-004`](../decisions/0004-vxe-grid-form-and-i18n-terminology.md)) được đồng bộ hóa với hệ thống biến CSS HSL tại `packages/effects/plugins/src/vxe-table/style.css`:
+
+- Đường kẻ phân tách bảng: `--vxe-ui-table-border-color: hsl(var(--border) / 40%)`
+- Đường kẻ kéo giãn cột: `--vxe-ui-table-resizable-line-color: hsl(var(--border) / 50%)`
+- Nền header & dòng dữ liệu: tự động nhận `--card`, `--muted`, `--foreground` theo Light/Dark Mode và 14 Built-in Themes.
+
 ---
 
 ## 3. Khuôn Mẫu Thực Hành Chuẩn (Component Boilerplate)

@@ -1,7 +1,7 @@
 # Spec: Tiêu Chuẩn i18n Tối Giản & Tái Sử Dụng Từ Vựng Dùng Chung (Concise & Reusable Common i18n)
 
-> **Module ID:** `concise-common-i18n`  
-> **Nguyên tắc cốt lõi:** _Nói ít hiểu nhiều (Brevity & Anti-Verbosity)_ — Tối giản nhãn nút, loại bỏ lặp từ ngữ cảnh, tối ưu tái sử dụng các từ vựng dùng chung (`$t('common.*')`).
+> **Module ID:** `concise-common-i18n` (xem [`capability-map.md`](capability-map.md)) — **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**  
+> **Nguyên tắc cốt lõi:** _Nói ít hiểu nhiều (Brevity & Anti-Verbosity)_ — Tối giản nhãn nút, loại bỏ lặp từ ngữ cảnh, tối ưu tái sử dụng các từ vựng dùng chung (`$t('common.*')`) và từ điển thuật ngữ chuẩn (`$t('term.*')`).
 
 ---
 
@@ -13,8 +13,8 @@
      - Nút trên trang Quản trị workspace: Đổi từ `Tạo workspace` / `Create Workspace` sang nhãn ngắn gọn chuẩn xác `Tạo` / `Create` kết hợp biểu tượng `<Plus />`.
      - Nút Làm mới trên các trang: Tái sử dụng `common.refresh` thay vì khai báo text cục bộ hoặc hardcode.
      - Nút Tìm kiếm / Đặt lại trong các form lọc (VXE Grid Form): Thống nhất tái sử dụng `common.search` / `common.reset` thay cho việc gán chuỗi tùy ý rải rác (`Lọc kết quả`, `Tìm kiếm`).
-2. **Bộ từ vựng dùng chung (Reusable Framework Common Tier - `@vben/locales`):**
-   - Mở rộng và chuẩn hóa toàn bộ các hành động phổ quát trong `common.json`:
+2. **Bộ từ vựng dùng chung & Thuật ngữ miền chuẩn (`@vben/locales`):**
+   - Mở rộng và chuẩn hóa toàn bộ các hành động phổ quát trong `common.json` và danh từ miền trong `term.json`:
      - `create`: `"Tạo"` / `"Create"` (thay thế cho `"Tạo Mới"` và cấm dùng các nhãn thừa như `"Tạo workspace"`, `"Tạo plugin"` khi nút nằm ngay trong trang tương ứng).
      - `add`: `"Thêm"` / `"Add"`.
      - `edit`: `"Sửa"` / `"Edit"` (hoặc `"Chỉnh sửa"`).
@@ -40,7 +40,7 @@
 
 - **Framework i18n:** `vue-i18n` (v9/v10 Composition API mode).
 - **Core Packages:**
-  - `@vben/locales`: SSOT từ điển framework (`packages/locales/src/langs/en-US/common.json`, `vi-VN/common.json`).
+  - `@vben/locales`: SSOT từ điển framework (`packages/locales/src/langs/en-US/{common,term}.json`, `vi-VN/{common,term}.json`).
   - `@tuquet/admin-web`: Views và Components (`apps/web-admin/src/views/`).
   - `@tuquet/vue-ui`: Button, Badge, Dialog, Modal.
   - `@lucide/vue`: Iconography chuẩn (`Plus`, `RefreshCw`, `Search`, etc.).
@@ -68,17 +68,21 @@ pnpm run build:local
 admin/
 ├── packages/
 │   └── locales/src/langs/
-│       ├── en-US/common.json          # Mở rộng & chuẩn hóa từ vựng dùng chung (Create, Add, Filter, v.v.)
-│       └── vi-VN/common.json          # Sentence case chuẩn tiếng Việt (Tạo, Thêm, Lọc, Làm mới, v.v.)
+│       ├── en-US/
+│       │   ├── common.json            # Mở rộng & chuẩn hóa từ vựng dùng chung (Create, Add, Filter, v.v.)
+│       │   └── term.json              # Từ điển thuật ngữ miền chuẩn (Workspace, Workflow, Device, v.v.)
+│       └── vi-VN/
+│           ├── common.json            # Sentence case chuẩn tiếng Việt (Tạo, Thêm, Lọc, Làm mới, v.v.)
+│           └── term.json              # Sentence case thuật ngữ miền tiếng Việt
 └── apps/web-admin/src/
     ├── locales/langs/
     │   ├── en-US/page.json            # Tinh gọn nhãn đặc thù màn hình (loại bỏ lặp từ, dùng common)
     │   └── vi-VN/page.json            # Tinh gọn nhãn đặc thù màn hình
     └── views/
         ├── tenants/index.vue          # Nút Tạo (Plus + $t('common.create')), nút Làm mới ($t('common.refresh'))
-        ├── fleet/devices/index.vue    # Chuẩn hóa nút Connect/Refresh dùng common
-        ├── fleet/browsers/index.vue   # Chuẩn hóa nút Refresh/Filter
-        ├── fleet/proxies/index.vue    # Chuẩn hóa nút Refresh/Filter
+        ├── automation/devices/        # Chuẩn hóa nút Connect/Refresh dùng common
+        ├── automation/browsers/       # Chuẩn hóa nút Refresh/Filter
+        ├── automation/proxies/        # Chuẩn hóa nút Refresh/Filter
         ├── automation/workflows/      # Chuẩn hóa nút Refresh/Search
         ├── automation/runs/           # Chuẩn hóa nút Refresh/Search
         └── system/                    # users, roles, plugins, plans, subscriptions, audit-logs (Chuẩn hóa nút & filter)
@@ -143,7 +147,7 @@ admin/
 
 1. **TypeScript Compilation:** Chạy `pnpm --filter @tuquet/admin-web run typecheck` để đảm bảo không gãy interface hay missing keys.
 2. **Key Consistency Verification:** Đảm bảo cả hai file `en-US/common.json` và `vi-VN/common.json` đồng bộ 100% về danh sách keys.
-3. **UI Appearance & Local Verification:** Kiểm tra trực quan qua Tailscale local build (`http://100.68.217.61/`) đảm bảo độ gọn gàng của nút bấm trên cả mobile lẫn desktop.
+3. **UI Appearance & Local Verification:** Kiểm tra trực quan qua local build (`http://127.0.0.1/`) đảm bảo độ gọn gàng của nút bấm trên cả mobile lẫn desktop.
 
 ---
 
@@ -164,11 +168,11 @@ admin/
 
 ## 8. Success Criteria (Tiêu Chí Nghiệm Thu)
 
-- [ ] Toàn bộ các nút hành động (Tạo, Làm mới, Lọc, Đặt lại) trên trang `tenants`, `fleet`, `automation`, `system` chuyển sang sử dụng `$t('common.*')` với nhãn súc tích.
-- [ ] Nút tạo trên trang Quản trị workspace hiển thị ngắn gọn là `Tạo` (vi-VN) / `Create` (en-US).
-- [ ] Toàn bộ từ vựng trong `vi-VN/common.json` được chuẩn hóa về Sentence case (không viết hoa từng từ).
-- [ ] Chạy `typecheck` đạt code 0.
-- [ ] Build local (`pnpm run build:local`) thành công 100%.
+- [x] Toàn bộ các nút hành động (Tạo, Làm mới, Lọc, Đặt lại) trên trang `tenants`, `automation`, `system` chuyển sang sử dụng `$t('common.*')` với nhãn súc tích.
+- [x] Nút tạo trên trang Quản trị workspace hiển thị ngắn gọn là `Tạo` (vi-VN) / `Create` (en-US).
+- [x] Toàn bộ từ vựng trong `vi-VN/common.json` và `vi-VN/term.json` được chuẩn hóa về Sentence case (không viết hoa từng từ).
+- [x] Chạy `typecheck` đạt code 0.
+- [x] Build local (`pnpm run build:local`) thành công 100%.
 
 ---
 

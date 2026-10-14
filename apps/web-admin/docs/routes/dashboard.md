@@ -1,8 +1,8 @@
 # Đặc Tả Route: Dashboard & Telemetry Analytics
 
 > **Đường dẫn:** `/dashboard` &rarr; `/dashboard/analytics`  
-> **Module File:** [`apps/web-admin/src/router/routes/modules/dashboard.ts`](../../apps/web-admin/src/router/routes/modules/dashboard.ts)  
-> **Component:** [`apps/web-admin/src/views/dashboard/analytics/index.vue`](../../apps/web-admin/src/views/dashboard/analytics/index.vue)  
+> **Module File:** [`src/router/routes/modules/dashboard.ts`](../../src/router/routes/modules/dashboard.ts)  
+> **Component:** [`src/views/dashboard/analytics/index.vue`](../../src/views/dashboard/analytics/index.vue)  
 > **Plugin Quản Lý:** `core-iam`  
 > **Biểu tượng:** `lucide:layout-dashboard` / `lucide:area-chart`
 
@@ -16,7 +16,7 @@
   name: 'Dashboard',
   redirect: '/dashboard/analytics',
   meta: {
-    title: 'Dashboard',
+    title: $t('page.dashboard.title'),
     icon: 'lucide:layout-dashboard',
     plugin: 'core-iam',
     order: -1,
@@ -28,15 +28,11 @@
       name: 'Analytics',
       component: () => import('#/views/dashboard/analytics/index.vue'),
       meta: {
-        title: 'Thống kê',
+        title: $t('page.dashboard.analytics'),
         icon: 'lucide:area-chart',
         affixTab: true,
       },
     },
-    // Backwards-compatible aliases
-    { path: 'workspace', redirect: '/tenants', meta: { hideInMenu: true } },
-    { path: 'workspace/:id', redirect: (to) => `/tenants/${to.params.id}`, meta: { hideInMenu: true } },
-    { path: 'fleet', redirect: '/fleet/devices', meta: { hideInMenu: true } },
   ]
 }
 ```
@@ -45,7 +41,7 @@
 
 ## 2. Nguồn Dữ Liệu Thực Tế (100% Real Telemetry)
 
-Trang Analytics không sử dụng bất kỳ số liệu giả hay mock data nào. Dữ liệu được đo đếm trực tiếp qua hàm [`getRealAnalyticsDataApi()`](../../apps/web-admin/src/api/core/analytics.ts):
+Trang Analytics không sử dụng bất kỳ số liệu giả hay mock data nào. Dữ liệu được đo đếm trực tiếp qua hàm [`getRealAnalyticsDataApi()`](../../src/api/core/analytics.ts):
 
 | Chỉ Số Telemetry | Bảng Dữ Liệu Nguồn | Cách Tính Toán |
 | :-- | :-- | :-- |
@@ -59,17 +55,7 @@ Trang Analytics không sử dụng bất kỳ số liệu giả hay mock data n�
 
 ---
 
-## 3. Tuyến Chuyển Hướng Tiện Ích (Navigation Shortcuts & Aliases)
-
-Hỗ trợ các đường dẫn tắt trực quan cho người dùng:
-
-- `/dashboard/workspace` $\rightarrow$ Chuyển hướng tới `/tenants`.
-- `/dashboard/workspace/:id` $\rightarrow$ Chuyển hướng tới `/tenants/:id`.
-- `/dashboard/fleet` $\rightarrow$ Chuyển hướng tới `/fleet/devices`.
-
----
-
-## 4. Lưu Ý Kỹ Thuật (Gotchas & Guardrails)
+## 3. Lưu Ý Kỹ Thuật (Gotchas & Guardrails)
 
 1. **Private Network Access (PNA):**
    - Trình duyệt Chromium có thể hiển thị thông báo cấp quyền khi web admin truy vấn `127.0.0.1:8765`.

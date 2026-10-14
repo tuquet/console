@@ -2,7 +2,7 @@
   /** Base z-index for popups **/
   --popup-z-index: 2000;
   --font-family:
-    'Be Vietnam Pro', 'Inter', 'Roboto', -apple-system, blinkmacsystemfont,
+    'Inter', 'Google Sans', 'Roboto', -apple-system, blinkmacsystemfont,
     'Segoe UI', 'Helvetica Neue', arial, 'Noto Sans', sans-serif;
   --font-mono:
     'JetBrains Mono', 'Fira Code', ui-monospace, sfmono-regular, menlo, monaco,

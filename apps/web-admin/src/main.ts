@@ -1,4 +1,4 @@
-import { initPreferences } from '@vben/preferences';
+import { initPreferences, updatePreferences } from '@vben/preferences';
 import { unmountGlobalLoading } from '@vben/utils';
 
 import {
@@ -30,6 +30,14 @@ async function initApplication() {
       namespace,
       overrides: overridesPreferences,
     });
+    if (overridesPreferences.app) {
+      updatePreferences({
+        app: {
+          enableRefreshToken: overridesPreferences.app.enableRefreshToken,
+          loginExpiredMode: overridesPreferences.app.loginExpiredMode,
+        },
+      });
+    }
 
     // Bootstrap and mount Vue application logic and views
     const { bootstrap } = await import('./bootstrap');

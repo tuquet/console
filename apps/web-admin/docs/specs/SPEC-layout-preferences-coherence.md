@@ -1,5 +1,7 @@
 # Spec: Layout & Preferences Coherence (Audit & Hardening)
 
+> **Module id:** `layout-preferences-coherence` (see [`capability-map.md`](capability-map.md)) — **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**
+
 ## Objective
 
 Khắc phục triệt để các bất thường và rủi ro use-case trong hệ thống Layout & Preferences của Tuquet Admin (`@tuquet/admin-web`, `@vben/preferences`, `@vben/layouts`, `@vben-core/layout-ui`), đảm bảo:

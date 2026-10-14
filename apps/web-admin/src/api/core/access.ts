@@ -1,6 +1,6 @@
 import { useAccessStore } from '@vben/stores';
 
-import { supabaseRequest } from './supabase-client';
+import { decodeJwtPayload, supabaseRequest } from './supabase-client';
 
 export interface TenantMembershipQueryResult {
   tenant_id: string;
@@ -22,32 +22,6 @@ export interface EffectiveAccess {
   isSuperadmin: boolean;
   permissions: string[];
   tenantPermissions: Record<string, string[]>;
-}
-
-/**
- * Safely decodes the payload of a JWT token using standard Web APIs.
- */
-function decodeJwtPayload(token?: null | string): any {
-  if (!token || typeof token !== 'string') {
-    return null;
-  }
-  const parts = token.split('.');
-  if (parts.length < 2) {
-    return null;
-  }
-  try {
-    const base64Url = parts[1];
-    if (!base64Url) return null;
-    const base64 = base64Url.replaceAll('-', '+').replaceAll('_', '/');
-    const padLength = (4 - (base64.length % 4)) % 4;
-    const padded = base64.padEnd(base64.length + padLength, '=');
-    const binary = atob(padded);
-    const bytes = Uint8Array.from(binary, (c) => c.codePointAt(0) ?? 0);
-    const jsonStr = new TextDecoder('utf-8').decode(bytes);
-    return JSON.parse(jsonStr);
-  } catch {
-    return null;
-  }
 }
 
 /**
@@ -146,6 +120,7 @@ export async function getEffectiveAccessApi(): Promise<EffectiveAccess> {
       const allPermRows = await supabaseRequest<Array<{ id: string }>>(
         '/rest/v1/permissions?select=id',
       );
+      cachedToken = accessStore.accessToken || token;
       const permissions = (allPermRows || [])
         .map((r) => r.id)
         .filter(Boolean)
@@ -167,6 +142,7 @@ export async function getEffectiveAccessApi(): Promise<EffectiveAccess> {
     const membershipRows = await supabaseRequest<TenantMembershipQueryResult[]>(
       `/rest/v1/tenant_members?user_id=eq.${encodeURIComponent(userId)}&status=eq.active&select=tenant_id,member_roles(roles(role_permissions(permission_id)))`,
     );
+    cachedToken = accessStore.accessToken || token;
 
     const flattened = flattenMemberships(membershipRows || []);
     return {

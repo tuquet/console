@@ -26,11 +26,11 @@
 /* Dark mode uses .dark class selector, not prefers-color-scheme */
 @custom-variant dark (&:is(.dark *));
 
-/* Explicitly pin Tailwind v4 dynamic spacing for classes like w-150/h-55 and Vietnamese-first font */
+/* Explicitly pin Tailwind v4 dynamic spacing for classes like w-150/h-55 and Inter-first font */
 @theme {
   --spacing: 0.25rem;
   --font-sans:
-    'Be Vietnam Pro', 'Inter', 'Roboto', -apple-system, blinkmacsystemfont,
+    'Inter', 'Google Sans', 'Roboto', -apple-system, blinkmacsystemfont,
     'Segoe UI', arial, sans-serif;
   --font-mono:
     'JetBrains Mono', 'Fira Code', ui-monospace, sfmono-regular, menlo, monaco,
@@ -56,8 +56,8 @@
   body {
     font-family: var(
       --font-family,
-      'Be Vietnam Pro',
       'Inter',
+      'Google Sans',
       'Roboto',
       -apple-system,
       BlinkMacSystemFont,

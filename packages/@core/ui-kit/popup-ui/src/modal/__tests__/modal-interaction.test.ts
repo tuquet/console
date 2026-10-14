@@ -6,6 +6,7 @@ import { ELEMENT_ID_MAIN_CONTENT } from '@vben-core/shared/constants';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { useVbenDrawer } from '../../drawer/use-drawer';
 import { useVbenModal } from '../use-modal';
 
 vi.mock('@vben-core/preferences', () => ({
@@ -21,6 +22,7 @@ interface MountOptions {
   closeOnPressEscape?: boolean;
   onCancel?: () => void;
   onConfirm?: () => void;
+  openAutoFocus?: boolean;
 }
 
 /**
@@ -40,6 +42,7 @@ async function mountModal(options: MountOptions = {}) {
       confirmText: 'Confirm',
       closeOnClickModal: options.closeOnClickModal ?? true,
       closeOnPressEscape: options.closeOnPressEscape ?? true,
+      openAutoFocus: options.openAutoFocus ?? false,
       title: 'Interaction modal',
       ...(options.onCancel ? { onCancel: options.onCancel } : {}),
       ...(options.onConfirm ? { onConfirm: options.onConfirm } : {}),
@@ -199,5 +202,76 @@ describe('vben modal interactions', () => {
     await settle();
 
     expect(modalApi.store.state.isOpen).toBe(true);
+  });
+
+  it('focuses confirm button and fires confirm on Enter when openAutoFocus is true', async () => {
+    const onConfirm = vi.fn();
+    await mountModal({ onConfirm, openAutoFocus: true });
+    const confirmButton = buttonByText('Confirm');
+
+    expect(confirmButton).toBeInstanceOf(HTMLElement);
+    expect(document.activeElement).toBe(confirmButton);
+
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        bubbles: true,
+        cancelable: true,
+        key: 'Enter',
+      }),
+    );
+    await nextTick();
+
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes on Escape after a persistent drawer is opened and closed', async () => {
+    let modalApi: ReturnType<typeof useVbenModal>[1] | undefined;
+    let drawerApi: ReturnType<typeof useVbenDrawer>[1] | undefined;
+
+    const Consumer = defineComponent(() => {
+      const [Modal, mApi] = useVbenModal({
+        destroyOnClose: false,
+        title: 'Confirm modal',
+      });
+      const [Drawer, dApi] = useVbenDrawer({
+        destroyOnClose: false,
+        title: 'Preferences drawer',
+      });
+      modalApi = mApi;
+      drawerApi = dApi;
+      return () => h('div', [h(Modal), h(Drawer)]);
+    });
+
+    const host = document.createElement('div');
+    document.body.append(host);
+    activeApp = createApp(() => h(Consumer));
+    activeApp.mount(host);
+    await nextTick();
+
+    if (!modalApi || !drawerApi) {
+      throw new Error('modal or drawer api was not captured');
+    }
+
+    modalApi.open();
+    await nextTick();
+    await nextTick();
+    await modalApi.close();
+    await nextTick();
+    await nextTick();
+
+    drawerApi.open();
+    await nextTick();
+    await nextTick();
+    await drawerApi.close();
+    await nextTick();
+    await nextTick();
+
+    modalApi.open();
+    await nextTick();
+    await nextTick();
+    expect(modalApi.store.state.isOpen).toBe(true);
+
+    pressEscape();
+    await expect.poll(() => modalApi?.store.state.isOpen).toBe(false);
   });
 });

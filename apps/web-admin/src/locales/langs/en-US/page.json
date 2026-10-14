@@ -6,24 +6,11 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "analytics": "Analytics",
-    "workspace": "Workspace",
-    "workspaceDetail": "Workspace Detail",
-    "fleet": "Fleet"
+    "analytics": "Analytics"
   },
   "tenants": {
     "title": "Workspaces",
     "detail": "Workspace Detail"
-  },
-  "fleet": {
-    "title": "Fleet",
-    "desc": "Manage execution devices, browser profiles, and proxy pools",
-    "devices": "Devices",
-    "devices_desc": "Manage runner nodes, workstations, and daemon connectivity",
-    "browsers": "Browser Profiles",
-    "browsers_desc": "Manage anti-detect virtual browser profiles and fingerprinting",
-    "proxies": "Proxy Pool",
-    "proxies_desc": "Manage rotating proxy infrastructure and network routing"
   },
   "automation": {
     "title": "Automation",
@@ -31,7 +18,13 @@
     "workflows_desc": "Manage workflows and dispatch automation DAGs",
     "runs": "Workflow Runs",
     "runs_desc": "Monitor execution progress and logs across runner nodes",
-    "runDetail": "Run Detail"
+    "runDetail": "Run Detail",
+    "devices": "Devices",
+    "devices_desc": "Manage runner nodes, workstations, and daemon connectivity",
+    "browsers": "Browser Profiles",
+    "browsers_desc": "Manage anti-detect virtual browser profiles and fingerprinting",
+    "proxies": "Proxy Pool",
+    "proxies_desc": "Manage rotating proxy infrastructure and network routing"
   },
   "system": {
     "title": "System",

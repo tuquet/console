@@ -1,8 +1,13 @@
 import type { RouteRecordRaw } from 'vue-router';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { filterRoutesByPlugins } from '../plugin-gate';
+import automationRoutes from '../routes/modules/automation';
+
+vi.mock('#/locales', () => ({
+  $t: (key: string) => key,
+}));
 
 describe('filterRoutesByPlugins', () => {
   it('should return empty array for empty routes input', () => {
@@ -35,13 +40,13 @@ describe('filterRoutesByPlugins', () => {
   it('should retain route if required plugin is installed', () => {
     const routes: RouteRecordRaw[] = [
       {
-        path: '/fleet',
-        name: 'Fleet',
+        path: '/automation',
+        name: 'Automation',
         meta: { plugin: 'runners' },
         children: [
           {
             path: 'devices',
-            name: 'Devices',
+            name: 'AutomationDevices',
           },
         ],
       } as unknown as RouteRecordRaw,
@@ -49,7 +54,7 @@ describe('filterRoutesByPlugins', () => {
 
     const result = filterRoutesByPlugins(routes, ['core-iam', 'runners']);
     expect(result).toHaveLength(1);
-    expect(result[0]?.name).toBe('Fleet');
+    expect(result[0]?.name).toBe('Automation');
     expect(result[0]?.children).toHaveLength(1);
   });
 
@@ -149,5 +154,34 @@ describe('filterRoutesByPlugins', () => {
     expect(result).toHaveLength(1);
     expect(result[0]?.name).toBe('Standalone');
     expect(result[0]?.children).toHaveLength(0);
+  });
+
+  it('should gate automa and runners child routes independently inside consolidated /automation module', () => {
+    const onlyAutoma = filterRoutesByPlugins(automationRoutes, [
+      'core-iam',
+      'automa',
+    ]);
+    expect(onlyAutoma).toHaveLength(1);
+    expect(onlyAutoma[0]?.children?.map((c) => c.name)).toEqual([
+      'AutomationWorkflows',
+      'AutomationRuns',
+      'AutomationRunDetail',
+    ]);
+
+    const onlyRunners = filterRoutesByPlugins(automationRoutes, [
+      'core-iam',
+      'runners',
+    ]);
+    expect(onlyRunners).toHaveLength(1);
+    expect(onlyRunners[0]?.children?.map((c) => c.name)).toEqual([
+      'AutomationDevices',
+      'AutomationBrowsers',
+      'AutomationProxies',
+    ]);
+
+    const neitherInstalled = filterRoutesByPlugins(automationRoutes, [
+      'core-iam',
+    ]);
+    expect(neitherInstalled).toHaveLength(0);
   });
 });

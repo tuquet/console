@@ -6,24 +6,11 @@
   },
   "dashboard": {
     "title": "Bảng điều khiển",
-    "analytics": "Phân tích",
-    "workspace": "Workspace",
-    "workspaceDetail": "Chi tiết workspace",
-    "fleet": "Fleet"
+    "analytics": "Phân tích"
   },
   "tenants": {
     "title": "Quản trị workspace",
     "detail": "Chi tiết workspace"
-  },
-  "fleet": {
-    "title": "Fleet",
-    "desc": "Quản lý thiết bị runner, browser profiles và proxy pool",
-    "devices": "Thiết bị",
-    "devices_desc": "Quản lý thiết bị runner, máy trạm và trạng thái kết nối daemon",
-    "browsers": "Browser profiles",
-    "browsers_desc": "Quản lý profile và vân tay trình duyệt anti-detect",
-    "proxies": "Proxy pool",
-    "proxies_desc": "Quản lý proxy xoay vòng và định tuyến mạng"
   },
   "automation": {
     "title": "Tự động hóa",
@@ -31,7 +18,13 @@
     "workflows_desc": "Quản lý quy trình và điều phối luồng tự động hóa",
     "runs": "Phiên chạy",
     "runs_desc": "Theo dõi tiến độ và nhật ký thực thi quy trình trên các runner node",
-    "runDetail": "Chi tiết phiên chạy"
+    "runDetail": "Chi tiết phiên chạy",
+    "devices": "Thiết bị",
+    "devices_desc": "Quản lý thiết bị runner, máy trạm và trạng thái kết nối daemon",
+    "browsers": "Browser profiles",
+    "browsers_desc": "Quản lý profile và vân tay trình duyệt anti-detect",
+    "proxies": "Proxy pool",
+    "proxies_desc": "Quản lý proxy xoay vòng và định tuyến mạng"
   },
   "system": {
     "title": "Hệ thống",

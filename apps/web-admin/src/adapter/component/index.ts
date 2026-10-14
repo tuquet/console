@@ -32,15 +32,12 @@ import {
 const withDefaultPlaceholder = (
   component: Component,
   type: 'input' | 'select',
+  defaultClass?: string,
 ) => {
   return defineComponent({
     name: component.name,
     inheritAttrs: false,
     setup: (props: any, { attrs, expose, slots }) => {
-      const placeholder =
-        props?.placeholder ||
-        attrs?.placeholder ||
-        $t(`ui.placeholder.${type}`);
       const innerRef = ref();
       expose(
         new Proxy(
@@ -51,8 +48,135 @@ const withDefaultPlaceholder = (
           },
         ),
       );
-      return () =>
-        h(component, { placeholder, ...props, ...attrs, ref: innerRef }, slots);
+      return () => {
+        const placeholder =
+          props?.placeholder ||
+          attrs?.placeholder ||
+          $t(`ui.placeholder.${type}`);
+
+        if (type === 'input') {
+          const rawValue =
+            props?.modelValue ??
+            attrs?.modelValue ??
+            props?.value ??
+            attrs?.value;
+          const modelValue = rawValue ?? '';
+
+          const handleUpdate = (val: any) => {
+            if (typeof attrs['onUpdate:modelValue'] === 'function') {
+              attrs['onUpdate:modelValue'](val);
+            }
+            if (typeof attrs['onUpdate:value'] === 'function') {
+              attrs['onUpdate:value'](val);
+            }
+            if (typeof props['onUpdate:modelValue'] === 'function') {
+              props['onUpdate:modelValue'](val);
+            }
+            if (typeof props['onUpdate:value'] === 'function') {
+              props['onUpdate:value'](val);
+            }
+            if (typeof attrs.onChange === 'function') {
+              attrs.onChange(val);
+            }
+            if (typeof props.onChange === 'function') {
+              props.onChange(val);
+            }
+          };
+
+          const restAttrs: Record<string, any> = { ...props, ...attrs };
+          delete restAttrs.value;
+          delete restAttrs.modelValue;
+          delete restAttrs['onUpdate:value'];
+          delete restAttrs['onUpdate:modelValue'];
+          delete restAttrs.onChange;
+          delete restAttrs.onInput;
+          delete restAttrs.clearable;
+
+          return h(
+            component,
+            {
+              ...restAttrs,
+              class: [defaultClass, restAttrs.class],
+              modelValue,
+              'onUpdate:modelValue': handleUpdate,
+              placeholder,
+              ref: innerRef,
+            },
+            slots,
+          );
+        }
+
+        return h(
+          component,
+          { placeholder, ...props, ...attrs, ref: innerRef },
+          slots,
+        );
+      };
+    },
+  });
+};
+
+const createBooleanAdapter = (component: Component) => {
+  return defineComponent({
+    name: component.name,
+    inheritAttrs: false,
+    setup: (props: any, { attrs, slots }) => {
+      return () => {
+        const rawValue =
+          props?.modelValue ??
+          attrs?.modelValue ??
+          props?.checked ??
+          attrs?.checked ??
+          props?.value ??
+          attrs?.value;
+        const modelValue = Boolean(rawValue);
+
+        const handleUpdate = (val: boolean) => {
+          if (typeof attrs['onUpdate:modelValue'] === 'function') {
+            attrs['onUpdate:modelValue'](val);
+          }
+          if (typeof attrs['onUpdate:checked'] === 'function') {
+            attrs['onUpdate:checked'](val);
+          }
+          if (typeof attrs['onUpdate:value'] === 'function') {
+            attrs['onUpdate:value'](val);
+          }
+          if (typeof props['onUpdate:modelValue'] === 'function') {
+            props['onUpdate:modelValue'](val);
+          }
+          if (typeof props['onUpdate:checked'] === 'function') {
+            props['onUpdate:checked'](val);
+          }
+          if (typeof props['onUpdate:value'] === 'function') {
+            props['onUpdate:value'](val);
+          }
+          if (typeof attrs.onChange === 'function') {
+            attrs.onChange(val);
+          }
+          if (typeof props.onChange === 'function') {
+            props.onChange(val);
+          }
+        };
+
+        const restAttrs: Record<string, any> = { ...props, ...attrs };
+        delete restAttrs.checked;
+        delete restAttrs.value;
+        delete restAttrs.modelValue;
+        delete restAttrs['onUpdate:checked'];
+        delete restAttrs['onUpdate:value'];
+        delete restAttrs['onUpdate:modelValue'];
+        delete restAttrs.onChange;
+
+        return h(
+          component,
+          {
+            ...restAttrs,
+            modelValue,
+            'onUpdate:modelValue': handleUpdate,
+          },
+          slots,
+        );
+      };
     },
   });
 };
@@ -134,6 +258,8 @@ export interface ComponentPropsMap {
   Upload: Record<string, any>;
 }
 
+const INPUT_DEFAULT_CLASS = 'h-9 bg-background/90 text-xs shadow-2xs';
+
 async function initComponentAdapter() {
   const components: Partial<Record<ComponentType, Component>> = {
     ApiCascader: FallbackComponent,
@@ -141,30 +267,39 @@ async function initComponentAdapter() {
     ApiTreeSelect: FallbackComponent,
     AutoComplete: FallbackComponent,
     Cascader: FallbackComponent,
-    Checkbox: (props: any, { attrs, slots }: any) =>
-      h(Checkbox, { ...props, ...attrs }, slots),
+    Checkbox: createBooleanAdapter(Checkbox),
     CheckboxGroup: FallbackComponent,
     DatePicker: FallbackComponent,
     DefaultButton: (props, { attrs, slots }) => {
-      return h(Button, { ...props, ...attrs, variant: 'outline' }, slots);
+      return h(
+        Button,
+        { size: 'sm', ...props, ...attrs, variant: 'outline' },
+        slots,
+      );
     },
     Divider: (props, { attrs }) =>
       h(Separator, { class: 'my-4', ...props, ...attrs }),
     IconPicker: withDefaultPlaceholder(IconPicker, 'select'),
-    Input: withDefaultPlaceholder(Input, 'input'),
+    Input: withDefaultPlaceholder(Input, 'input', INPUT_DEFAULT_CLASS),
     InputNumber: withDefaultPlaceholder(
       (props: any, { attrs }: any) =>
         h(Input, { type: 'number', ...props, ...attrs }),
       'input',
+      INPUT_DEFAULT_CLASS,
     ),
     InputPassword: withDefaultPlaceholder(
       (props: any, { attrs }: any) =>
         h(Input, { type: 'password', ...props, ...attrs }),
       'input',
+      INPUT_DEFAULT_CLASS,
     ),
-    Mentions: withDefaultPlaceholder(Input, 'input'),
+    Mentions: withDefaultPlaceholder(Input, 'input', INPUT_DEFAULT_CLASS),
     PrimaryButton: (props, { attrs, slots }) => {
-      return h(Button, { ...props, ...attrs, variant: 'default' }, slots);
+      return h(
+        Button,
+        { size: 'sm', ...props, ...attrs, variant: 'default' },
+        slots,
+      );
     },
     Radio: (props, { attrs }) =>
       h('input', {
@@ -242,8 +377,12 @@ async function initComponentAdapter() {
     }, 'select'),
     Space: (props, { attrs, slots }) =>
       h('div', { class: 'flex items-center gap-2', ...props, ...attrs }, slots),
-    Switch,
-    Textarea: withDefaultPlaceholder(Textarea, 'input'),
+    Switch: createBooleanAdapter(Switch),
+    Textarea: withDefaultPlaceholder(
+      Textarea,
+      'input',
+      'bg-background/90 text-xs shadow-2xs',
+    ),
     TimePicker: FallbackComponent,
     TreeSelect: FallbackComponent,
     Upload: FallbackComponent,

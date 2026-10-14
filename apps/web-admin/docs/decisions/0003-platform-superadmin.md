@@ -29,12 +29,12 @@ Tuy nhiên, đội ngũ vận hành hệ thống (**Platform Superadmin**) cần
   - Hàm `public.is_platform_admin()` kiểm tra JWT claim `raw_app_meta_data.platform_role = 'superadmin'`.
   - Các chính sách bảo mật RLS trên `public.profiles`, `public.audit_logs`, `public.tenants`, `billing.subscriptions` bổ sung nhánh cho phép `is_platform_admin()` đọc toàn bộ dữ liệu.
 - **Tầng Giao Diện (`tuquet/admin`):**
-  - Khi xác thực phiên làm việc trong [`apps/web-admin/src/api/core/access.ts`](../../apps/web-admin/src/api/core/access.ts), nếu tài khoản là superadmin, hệ thống tự động gán vai trò `superadmin` vào bộ quyền hiệu lực.
+  - Khi xác thực phiên làm việc trong [`src/api/core/access.ts`](../../src/api/core/access.ts), nếu tài khoản là superadmin, hệ thống tự động gán vai trò `superadmin` vào bộ quyền hiệu lực.
   - Các route quản trị nền tảng được gắn cứng `meta.authority: ['superadmin']`. Đối với người dùng thông thường, router hoàn toàn ẩn các mục này khỏi menu và chặn điều hướng trực tiếp.
 
 ### 2. Tích Hợp Vào Nhóm Menu `/system` (KISS & Tối Giản Sidebar)
 
-- Toàn bộ 4 tuyến đường quản trị nền tảng được đặt làm route con của `/system`, đảm bảo thanh điều hướng không vượt quá 5 nhóm chính:
+- Toàn bộ 4 tuyến đường quản trị nền tảng được đặt làm route con của `/system`, đảm bảo thanh điều hướng chỉ gồm 4 nhóm chính (`/dashboard`, `/tenants`, `/automation`, `/system`):
   - `/system/plugins` (Plugins hệ thống - Core IAM)
   - `/system/plans` (Gói cước SaaS - Subscriptions)
   - `/system/users` (Người dùng nền tảng - Superadmin Only)
@@ -51,11 +51,9 @@ Tuy nhiên, đội ngũ vận hành hệ thống (**Platform Superadmin**) cần
   - `/system/roles`: Đọc từ `public.roles` và `public.permissions`.
 - Khi cơ sở dữ liệu rỗng, hiển thị Empty State chuẩn với Lucide Icon.
 
-### 4. Chuẩn Hóa Mobile-First Dual View
+### 4. Chuẩn Hóa Bảng Dữ Liệu `useVbenVxeGrid` (Theo [`ADR-004`](0004-vxe-grid-form-and-i18n-terminology.md))
 
-- Mọi trang danh sách đều có chế độ kép:
-  - **Desktop (`hidden md:block`):** Bảng dữ liệu phẳng, viền `border-border/60`, hỗ trợ sắp xếp và thao tác nhanh.
-  - **Mobile (`block md:hidden`):** Thẻ chạm cảm ứng (`Touch Card`) kích thước tối thiểu 40px touch target, loại bỏ hoàn toàn tràn viền hoặc cuộn ngang.
+- Các trang danh sách quản trị nền tảng (`/system/users`, `/system/audit-logs`, `/system/subscriptions`) sử dụng `useVbenVxeGrid` (`VxeTable`) đồng nhất với thanh lọc `formOptions`, đường kẻ semantic token `border-border/40`, hỗ trợ cuộn ngang tự nhiên và phân trang đáp ứng trên cả Desktop và Mobile.
 
 ---
 

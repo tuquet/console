@@ -20,6 +20,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           authority: ['superadmin', 'automa:workflows:read'],
           icon: 'lucide:git-branch',
+          plugin: 'automa',
           title: $t('page.automation.workflows'),
         },
       },
@@ -30,37 +31,41 @@ const routes: RouteRecordRaw[] = [
         meta: {
           authority: ['superadmin', 'automa:campaigns:read'],
           icon: 'lucide:play-circle',
+          plugin: 'automa',
           title: $t('page.automation.runs'),
         },
       },
       {
         name: 'AutomationDevices',
         path: 'devices',
-        component: () => import('#/views/fleet/devices/index.vue'),
+        component: () => import('#/views/automation/devices/index.vue'),
         meta: {
           authority: ['superadmin', 'runners:devices:read'],
           icon: 'lucide:laptop',
-          title: $t('page.fleet.devices'),
+          plugin: 'runners',
+          title: $t('page.automation.devices'),
         },
       },
       {
         name: 'AutomationBrowsers',
         path: 'browsers',
-        component: () => import('#/views/fleet/browsers/index.vue'),
+        component: () => import('#/views/automation/browsers/index.vue'),
         meta: {
           authority: ['superadmin', 'runners:browsers:read'],
           icon: 'lucide:globe',
-          title: $t('page.fleet.browsers'),
+          plugin: 'runners',
+          title: $t('page.automation.browsers'),
         },
       },
       {
         name: 'AutomationProxies',
         path: 'proxies',
-        component: () => import('#/views/fleet/proxies/index.vue'),
+        component: () => import('#/views/automation/proxies/index.vue'),
         meta: {
           authority: ['superadmin', 'runners:proxies:read'],
           icon: 'lucide:network',
-          title: $t('page.fleet.proxies'),
+          plugin: 'runners',
+          title: $t('page.automation.proxies'),
         },
       },
       {
@@ -71,6 +76,7 @@ const routes: RouteRecordRaw[] = [
           authority: ['superadmin', 'automa:logs:read'],
           hideInMenu: true,
           icon: 'lucide:file-text',
+          plugin: 'automa',
           title: $t('page.automation.runDetail'),
         },
       },

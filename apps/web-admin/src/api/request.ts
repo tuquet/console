@@ -28,21 +28,12 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   });
 
   /**
-   * Re-authentication logic
+   * Re-authentication logic (delegates to AuthStore SSOT)
    */
   async function doReAuthenticate() {
-    console.warn('Access token or refresh token is invalid or expired. ');
-    const accessStore = useAccessStore();
+    console.warn('Access token or refresh token is invalid or expired.');
     const authStore = useAuthStore();
-    accessStore.setAccessToken(null);
-    if (
-      preferences.app.loginExpiredMode === 'modal' &&
-      accessStore.isAccessChecked
-    ) {
-      accessStore.setLoginExpired(true);
-    } else {
-      await authStore.logout();
-    }
+    await authStore.handleSessionExpired();
   }
 
   /**

@@ -103,28 +103,36 @@ const logoSrc = computed(() => {
     </slot>
 
     <!-- System presentation -->
-    <div v-if="!authPanelCenter" class="relative hidden w-0 flex-1 lg:block">
+    <div
+      v-if="!authPanelCenter"
+      class="relative hidden w-0 flex-1 border-x border-border/50 lg:block dark:border-white/[0.05]"
+    >
       <div
-        class="absolute inset-0 size-full bg-background-deep dark:bg-[#070709]"
+        class="absolute inset-0 size-full bg-[#fafafa] dark:bg-[#0a0a0a]"
       >
         <div class="login-background absolute top-0 left-0 size-full"></div>
         <div
           :key="authPanelLeft ? 'left' : authPanelRight ? 'right' : 'center'"
-          class="mr-20 flex-col-center h-full"
+          class="relative flex-col-center size-full"
           :class="{
             'enter-x': authPanelLeft,
             '-enter-x': authPanelRight,
           }"
         >
-          <img
-            :alt="appName"
-            :src="sloganImage || '/illustrations/specter-waving.svg'"
-            class="h-64 w-2/5 animate-float object-contain"
-          />
-          <div class="text-1xl mt-6 font-sans text-foreground lg:text-2xl">
+          <slot name="slogan">
+            <img
+              :alt="appName"
+              :src="sloganImage || '/illustrations/specter-waving.svg'"
+              class="h-64 w-2/5 animate-float object-contain"
+            />
+          </slot>
+          <div
+            v-if="pageTitle"
+            class="text-1xl mt-6 font-sans text-foreground lg:text-2xl"
+          >
             {{ pageTitle }}
           </div>
-          <div class="mt-2 dark:text-muted-foreground">
+          <div v-if="pageDescription" class="mt-2 dark:text-muted-foreground">
             {{ pageDescription }}
           </div>
         </div>
@@ -169,24 +177,30 @@ const logoSrc = computed(() => {
 
 <style scoped>
 .login-background {
-  background: linear-gradient(
-    154deg,
-    #07070915 30%,
-    hsl(var(--primary) / 30%) 48%,
-    #07070915 64%
+  background-image: radial-gradient(
+    rgb(20 20 19 / 7%) 1px,
+    transparent 1px
   );
-  filter: blur(100px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(
+    circle at 50% 50%,
+    transparent 38%,
+    rgb(0 0 0 / 55%) 100%
+  );
 }
 
 .dark {
   .login-background {
-    background: linear-gradient(
-      154deg,
-      #07070915 30%,
-      hsl(var(--primary) / 20%) 48%,
-      #07070915 64%
+    background-image: radial-gradient(
+      rgb(232 232 236 / 6%) 1px,
+      transparent 1px
     );
-    filter: blur(100px);
+    background-size: 24px 24px;
+    mask-image: radial-gradient(
+      circle at 50% 50%,
+      transparent 38%,
+      rgb(0 0 0 / 55%) 100%
+    );
   }
 }
 </style>

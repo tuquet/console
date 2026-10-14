@@ -12,7 +12,7 @@ import { getFleetBrowsersApi } from '#/api';
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
-defineOptions({ name: 'FleetBrowsers' });
+defineOptions({ name: 'AutomationBrowsers' });
 
 const route = useRoute();
 const { formatDate } = useDateFormat();
@@ -173,10 +173,10 @@ watch(
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          {{ $t('page.fleet.browsers') }}
+          {{ $t('page.automation.browsers') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          {{ $t('page.fleet.browsers_desc') }}
+          {{ $t('page.automation.browsers_desc') }}
         </p>
       </div>
 

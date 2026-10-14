@@ -5,6 +5,11 @@ import { preferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 import { startProgress, stopProgress } from '@vben/utils';
 
+import {
+  isJwtTokenExpired,
+  setSupabaseUnauthorizedHandler,
+  tryRefreshSupabaseToken,
+} from '#/api';
 import { accessRoutes, coreRouteNames } from '#/router/routes';
 import { useAuthStore } from '#/store';
 
@@ -49,6 +54,17 @@ function setupAccessGuard(router: Router) {
     const userStore = useUserStore();
     const authStore = useAuthStore();
 
+    // If an accessToken exists but its JWT exp has passed, attempt silent refresh first
+    if (accessStore.accessToken && isJwtTokenExpired(accessStore.accessToken)) {
+      const refreshedToken = await tryRefreshSupabaseToken();
+      if (!refreshedToken) {
+        const mode = await authStore.handleSessionExpired();
+        if (mode === 'modal') {
+          return false;
+        }
+      }
+    }
+
     // Core routes bypass access interceptor
     if (coreRouteNames.includes(to.name as string)) {
       if (to.path === LOGIN_PATH && accessStore.accessToken) {
@@ -78,6 +94,14 @@ function setupAccessGuard(router: Router) {
       // Explicitly allowed without access authentication
       if (to.meta.ignoreAccess) {
         return true;
+      }
+
+      if (
+        preferences.app.loginExpiredMode === 'modal' &&
+        accessStore.isAccessChecked
+      ) {
+        accessStore.setLoginExpired(true);
+        return false;
       }
 
       // Unauthorized: redirect to login page
@@ -159,6 +183,11 @@ function setupAccessGuard(router: Router) {
  * @param router
  */
 function createRouterGuard(router: Router) {
+  /** Register global 401 / expired JWT handler for Supabase REST client */
+  setSupabaseUnauthorizedHandler(async () => {
+    await useAuthStore().handleSessionExpired();
+  });
+
   /** Common */
   setupCommonGuard(router);
   /** Access control */

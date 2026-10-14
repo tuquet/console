@@ -2,7 +2,7 @@ export * from './access';
 export * from './analytics';
 export * from './auth';
 export * from './automation';
-export * from './fleet';
+export * from './billing';
 export * from './menu';
 export * from './supabase-client';
 export * from './system';

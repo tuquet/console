@@ -34,7 +34,7 @@ import FleetMetrics from './components/fleet-metrics.vue';
 import ConnectFleetModal from './components/modals/connect-fleet-modal.vue';
 import NodeDetailModal from './components/modals/node-detail-modal.vue';
 
-defineOptions({ name: 'FleetDevices' });
+defineOptions({ name: 'AutomationDevices' });
 
 const route = useRoute();
 const { formatDate } = useDateFormat();
@@ -248,10 +248,10 @@ watch(
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          {{ $t('page.fleet.title') }}
+          {{ $t('page.automation.devices') }}
         </h1>
         <p class="text-xs text-muted-foreground">
-          {{ $t('page.fleet.desc') }}
+          {{ $t('page.automation.devices_desc') }}
         </p>
       </div>
 

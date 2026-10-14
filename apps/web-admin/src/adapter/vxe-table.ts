@@ -8,6 +8,10 @@ import { h } from 'vue';
 import {
   setupVbenVxeTable,
   useVbenVxeGrid as useGrid,
+  VxeForm,
+  VxeFormGather,
+  VxeFormGroup,
+  VxeFormItem,
 } from '@vben/plugins/vxe-table';
 
 import { Button } from '@tuquet/vue-ui';
@@ -18,8 +22,11 @@ setupVbenVxeTable({
   configVxeTable: (vxeUI) => {
     vxeUI.setConfig({
       grid: {
-        align: 'center',
+        align: 'left',
         border: false,
+        cellConfig: {
+          height: 54,
+        },
         columnConfig: {
           resizable: true,
         },
@@ -38,9 +45,12 @@ setupVbenVxeTable({
           showActiveMsg: true,
           showResponseMsg: false,
         },
-        round: true,
+         round: true,
+        rowConfig: {
+          isHover: true,
+        },
         showOverflow: true,
-        size: 'small',
+        size: 'medium',
       } as VxeTableGridOptions,
     });
 
@@ -94,17 +104,6 @@ export const useVbenVxeGrid = <
     ...rest,
   );
 
-import {
-  VxeForm as _VxeForm,
-  VxeFormGather as _VxeFormGather,
-  VxeFormGroup as _VxeFormGroup,
-  VxeFormItem as _VxeFormItem,
-} from 'vxe-pc-ui';
-
-export const VxeForm = _VxeForm;
-export const VxeFormItem = _VxeFormItem;
-export const VxeFormGroup = _VxeFormGroup;
-export const VxeFormGather = _VxeFormGather;
+export { VxeForm, VxeFormGather, VxeFormGroup, VxeFormItem };
 
 export type * from '@vben/plugins/vxe-table';
-export type * from 'vxe-pc-ui';
