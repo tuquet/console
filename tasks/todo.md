@@ -511,3 +511,76 @@
 - [x] Linter and formatter pass with 0 errors (`oxlint` & `oxfmt`)
 - [x] Production build succeeds (`pnpm --filter @tuquet/admin-web run build`)
 - [x] Ready for human review
+
+
+---
+
+## Tasks 28–30: Interactive 3D Specter Ghost Banner (`specter-3d-ghost-banner`)
+
+## Task 28: Xây dựng component `SpecterGhostBanner` (`specter-ghost-banner.vue`)
+
+**Description:** Tạo component `apps/web-admin/src/components/common/specter-ghost-banner.vue` dựng mô hình 3D Specter Ghost bằng Three.js với vật liệu sứ mờ (Matte Ceramic), tà áo biến dạng sóng hài 3D theo thời gian thực, đôi mắt đen đính ngôi sao 4 cánh trắng liếc theo chuột, đôi má hồng dịu, miệng cười và cánh tay phải vẫy chào (tăng tốc độ vẫy + nảy người khi click/hover), kèm hiệu ứng `<Spotlight />` và cơ chế giải phóng tài nguyên GPU triệt để.
+
+**Acceptance criteria:**
+- [x] Component xuất các hàm toán học thuần khiết (`stepGhostPointer`, `computeSkirtWaveDisplacement`) để phục vụ kiểm thử đơn vị và dựng cảnh 3D 60fps.
+- [x] Con ma 3D có đủ 3 đặc trưng của `specter-waving.svg`: mắt có ngôi sao 4 cánh lấp lánh liếc theo chuột, má hồng nhẹ/trung tính, tay phải vẫy chào tự nhiên và phản hồi khi click.
+- [x] Tự động thích ứng ánh sáng và bóng đổ dưới chân theo Dark mode (`#0a0a0a`) và Light mode (`#fafafa`), giải phóng hoàn toàn WebGL context khi unmount.
+
+**Verification:**
+- [x] Typecheck succeeds: `pnpm --dir apps/web-admin run typecheck`
+
+**Dependencies:** None
+
+**Files likely touched:**
+- `apps/web-admin/src/components/common/specter-ghost-banner.vue`
+
+**Estimated scope:** Small (1 file)
+
+---
+
+## Task 29: Tích hợp chế độ `ghost 3d` vào bộ chuyển đổi trong `auth.vue`
+
+**Description:** Cập nhật `apps/web-admin/src/layouts/auth.vue` để hỗ trợ 4 chế độ banner (`phone` · `robot 3d` · `ghost 3d` · `random`), lưu lựa chọn vào `localStorage` (`specter:auth-banner-mode`) và xoay vòng ngẫu nhiên giữa cả 3 cảnh khi chọn `random`.
+
+**Acceptance criteria:**
+- [x] Thanh chuyển đổi ở góc dưới bên trái hiển thị đủ 4 nút: `phone`, `robot 3d`, `ghost 3d`, `random`.
+- [x] Chuyển đổi mượt mà giữa `HairlinePhoneBanner`, `SplineRobotBanner`, và `SpecterGhostBanner`.
+
+**Verification:**
+- [x] Typecheck succeeds: `pnpm --dir apps/web-admin run typecheck`
+
+**Dependencies:** Task 28
+
+**Files likely touched:**
+- `apps/web-admin/src/layouts/auth.vue`
+
+**Estimated scope:** XS (1 file)
+
+---
+
+## Task 30: Viết Unit Tests (`specter-ghost-banner.test.ts`) & Kiểm định Build
+
+**Description:** Viết unit tests trong `apps/web-admin/src/components/common/__tests__/specter-ghost-banner.test.ts` kiểm tra các hàm toán học chuyển động (`stepGhostPointer`, `computeSkirtWaveDisplacement`), vòng đời mount/unmount của `SpecterGhostBanner`, và chạy kiểm tra `typecheck` + `build:admin`.
+
+**Acceptance criteria:**
+- [x] Unit tests trong `specter-ghost-banner.test.ts` pass 100%.
+- [x] `pnpm --dir apps/web-admin run typecheck` và `pnpm run build:admin` đạt 0 lỗi.
+
+**Verification:**
+- [x] Tests pass: `pnpm exec vitest run apps/web-admin/src/components/common/__tests__/specter-ghost-banner.test.ts`
+- [x] Build succeeds: `pnpm run build:admin`
+
+**Dependencies:** Task 28, Task 29
+
+**Files likely touched:**
+- `apps/web-admin/src/components/common/__tests__/specter-ghost-banner.test.ts`
+- `apps/web-admin/docs/specs/SPEC-specter-3d-ghost-banner.md`
+
+**Estimated scope:** Small (2 files)
+
+---
+
+## Checkpoint: After Tasks 28–30
+- [x] All unit tests pass (`vitest run`)
+- [x] Typecheck passes with 0 errors (`pnpm --dir apps/web-admin run typecheck`)
+- [x] Production build succeeds (`pnpm run build:admin`)

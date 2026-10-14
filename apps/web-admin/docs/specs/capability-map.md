@@ -23,13 +23,14 @@
 | `digital-commerce` | Plugin cửa hàng sản phẩm số (`commerce`): Danh mục & biến thể sản phẩm số (Tài khoản/Key `serial_stock`, Tài nguyên Specter `specter_resource`, File tải về `digital_file`, Nạp Xu `wallet_credit`), Kho hàng chống bán trùng (`FOR UPDATE SKIP LOCKED`), máy trạng thái đơn hàng (`commerce.orders`) và bộ điều phối giao hàng tự động (Auto-Fulfillment) | `payment-gateway` |
 | `admin-commerce-portal` | Giao diện Web kép trong `apps/web-admin`: (1) Platform Admin quản trị sản phẩm, nạp kho hàng loạt (bulk stock), cấu hình cổng thanh toán & duyệt lệnh `manual_review`; (2) Tenant Portal nạp Ví Xu, mua sản phẩm số và nhận tài nguyên ngay trong dashboard | `payment-gateway`, `digital-commerce`, `system-iam-vxe-grid` |
 | `public-storefront` | Giao diện Web Storefront công khai (`/store`) cho khách vãng lai (Guest Checkout): xem danh mục công khai, thanh toán tức thì qua Chuyển khoản NH / MoMo / Stripe / Crypto (Realtime Polling) và nhận sản phẩm ngay qua `claim_token` bảo mật | `payment-gateway`, `digital-commerce` |
+| `specter-3d-ghost-banner` | Bộ sưu tập 3 banner tương tác trên trang xác thực (`AuthPageLayout`): `HairlinePhoneBanner` (`phone`), `SplineRobotBanner` (`robot 3d`), và `SpecterGhostBanner` (`ghost 3d` — Three.js WebGL 60fps với tà áo lượn sóng, mắt ngôi sao 4 cánh liếc theo chuột, tay vẫy chào) kèm thanh chọn 4 chế độ lưu `localStorage` | `platform-foundation` |
 
 **Phụ thuộc ngoài (repo `cloud`):**
 
 - `cloud:platform-superadmin` — `public.is_platform_admin()` + policy SELECT bổ sung. Đã hoàn tất tích hợp tại local migration `tuquet/cloud`.
 - `cloud:payment-gateway` (`schema: billing` mở rộng + `supabase/functions/payment-webhook`) & `cloud:digital-commerce` (`supabase/plugins/commerce`, `schema: commerce`).
 
-Build order: `platform-foundation` → (`data-access`, `layout-preferences-coherence`, `i18n-en-vi`) → `route-foundation` → (`tenants-truth`, `fleet-inventory`, `automation-engine`, `system-catalog`) → (`superadmin-routes`, `concise-common-i18n`, `route-consolidation-automation-fleet`) → `docs-and-admin-coherence` → (`automation-api-and-i18n-unification`, `system-iam-vxe-grid`) → `payment-gateway` → `digital-commerce` → (`admin-commerce-portal`, `public-storefront`)
+Build order: `platform-foundation` → (`data-access`, `layout-preferences-coherence`, `i18n-en-vi`, `specter-3d-ghost-banner`) → `route-foundation` → (`tenants-truth`, `fleet-inventory`, `automation-engine`, `system-catalog`) → (`superadmin-routes`, `concise-common-i18n`, `route-consolidation-automation-fleet`) → `docs-and-admin-coherence` → (`automation-api-and-i18n-unification`, `system-iam-vxe-grid`) → `payment-gateway` → `digital-commerce` → (`admin-commerce-portal`, `public-storefront`)
 
 Danh sách Spec module:
 
@@ -50,5 +51,6 @@ Danh sách Spec module:
 - [`SPEC-system-iam-vxe-grid.md`](SPEC-system-iam-vxe-grid.md)
 - [`SPEC-payment-gateway.md`](SPEC-payment-gateway.md)
 - [`SPEC-digital-commerce.md`](SPEC-digital-commerce.md)
-- `SPEC-admin-commerce-portal.md` _(Planned)_
+- [`SPEC-admin-commerce-portal.md`](SPEC-admin-commerce-portal.md)
+- [`SPEC-specter-3d-ghost-banner.md`](SPEC-specter-3d-ghost-banner.md)
 - `SPEC-public-storefront.md` _(Planned)_
