@@ -1,0 +1,1072 @@
+<script lang="ts" setup>
+import type {
+  CommerceCategoryItem,
+  CommerceOrderDeliveryItem,
+  CommerceProductItem,
+  CommerceProductType,
+  CommerceProductVariantItem,
+  PaymentChannelType,
+  PaymentGatewayItem,
+  PaymentIntentItem,
+  TenantItem,
+  TenantWalletItem,
+} from '#/api';
+
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+import {
+  Building2,
+  Check,
+  Coins,
+  Copy,
+  CreditCard,
+  Download,
+  ExternalLink,
+  FileDown,
+  KeyRound,
+  PackageCheck,
+  QrCode,
+  RefreshCw,
+  Search,
+  Server,
+  ShoppingBag,
+  Sparkles,
+  Wallet,
+} from '@lucide/vue';
+import {
+  Badge,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  toast,
+} from '@tuquet/vue-ui';
+
+import {
+  createCheckoutOrderApi,
+  filterCommerceProducts,
+  getActivePaymentGatewaysApi,
+  getActiveTenantId,
+  getCommerceCategoriesApi,
+  getCommerceProductsApi,
+  getOrderDeliveriesApi,
+  getPaymentIntentStatusApi,
+  getTenantsApi,
+  getTenantWalletApi,
+  setActiveTenantId,
+} from '#/api';
+import { $t } from '#/locales';
+
+defineOptions({ name: 'CommerceStore' });
+
+const router = useRouter();
+
+const loading = ref(false);
+const tenants = ref<TenantItem[]>([]);
+const selectedTenantId = ref<string>(getActiveTenantId());
+const wallet = ref<null | TenantWalletItem>(null);
+const categories = ref<CommerceCategoryItem[]>([]);
+const products = ref<CommerceProductItem[]>([]);
+const gateways = ref<PaymentGatewayItem[]>([]);
+
+const selectedCategoryId = ref<string>('all');
+const selectedProductType = ref<string>('all');
+const searchKeyword = ref<string>('');
+
+// Map product_id -> selected variant_id
+const selectedVariantByProduct = ref<Record<string, string>>({});
+
+// Checkout Dialog state
+const checkoutOpen = ref(false);
+const activeProduct = ref<CommerceProductItem | null>(null);
+const activeVariant = ref<CommerceProductVariantItem | null>(null);
+const checkoutQty = ref<number>(1);
+const selectedGatewayId = ref<string>('internal_wallet');
+const submittingOrder = ref(false);
+
+// Active external payment intent waiting for payment
+const pendingIntent = ref<null | PaymentIntentItem>(null);
+const pendingOrderId = ref<null | string>(null);
+const pendingOrderCode = ref<string>('');
+const checkingStatus = ref(false);
+let pollTimer: null | ReturnType<typeof setInterval> = null;
+
+// Instant Deliverables Dialog state
+const deliveryOpen = ref(false);
+const deliveredOrderCode = ref<string>('');
+const deliveredItems = ref<CommerceOrderDeliveryItem[]>([]);
+
+const PRODUCT_TYPE_MAP: Record<
+  CommerceProductType,
+  {
+    label: string;
+    variant: 'default' | 'destructive' | 'outline' | 'secondary';
+  }
+> = {
+  digital_file: { label: 'Tệp số / Source', variant: 'outline' },
+  serial_stock: { label: 'Tài khoản / Key', variant: 'default' },
+  specter_resource: { label: 'Tài nguyên Specter', variant: 'secondary' },
+  wallet_credit: { label: 'Gói nạp Xu', variant: 'outline' },
+};
+
+const filteredProducts = computed(() => {
+  return filterCommerceProducts(products.value, {
+    category_id: selectedCategoryId.value,
+    product_type: selectedProductType.value,
+    search: searchKeyword.value,
+  });
+});
+
+const externalGateways = computed(() =>
+  gateways.value.filter((g) => g.is_active && g.channel !== 'internal_wallet'),
+);
+
+const currentGateway = computed<null | PaymentGatewayItem>(() => {
+  if (selectedGatewayId.value === 'internal_wallet') {
+    return null;
+  }
+  return (
+    externalGateways.value.find((g) => g.id === selectedGatewayId.value) || null
+  );
+});
+
+const totalCheckoutCredits = computed(() => {
+  if (!activeVariant.value) return 0;
+  return activeVariant.value.price_credits * Math.max(1, checkoutQty.value);
+});
+
+const walletBalance = computed(() => wallet.value?.balance_credits ?? 0);
+
+const hasEnoughWalletCredits = computed(
+  () => walletBalance.value >= totalCheckoutCredits.value,
+);
+
+const estimatedFiatAmount = computed(() => {
+  if (!currentGateway.value) return 0;
+  return totalCheckoutCredits.value * currentGateway.value.rate_per_credit;
+});
+
+function getProductTypeBadge(type: CommerceProductType) {
+  return PRODUCT_TYPE_MAP[type] || { label: type, variant: 'outline' as const };
+}
+
+function getSelectedVariant(
+  product: CommerceProductItem,
+): CommerceProductVariantItem | null {
+  const variants = product.variants || [];
+  if (variants.length === 0) return null;
+  const chosenId = selectedVariantByProduct.value[product.id];
+  return variants.find((v) => v.id === chosenId) || variants[0] || null;
+}
+
+function selectVariant(productId: string, variantId: string) {
+  selectedVariantByProduct.value = {
+    ...selectedVariantByProduct.value,
+    [productId]: variantId,
+  };
+}
+
+function isVariantInStock(variant: CommerceProductVariantItem | null): boolean {
+  if (!variant || !variant.is_active) return false;
+  if (variant.stock_mode === 'unlimited') return true;
+  return variant.available_stock > 0;
+}
+
+async function loadStoreData() {
+  loading.value = true;
+  try {
+    const [tenantRows, categoryRows, productRows, gatewayRows] =
+      await Promise.all([
+        getTenantsApi().catch(() => [] as TenantItem[]),
+        getCommerceCategoriesApi().catch(() => [] as CommerceCategoryItem[]),
+        getCommerceProductsApi().catch(() => [] as CommerceProductItem[]),
+        getActivePaymentGatewaysApi().catch(() => [] as PaymentGatewayItem[]),
+      ]);
+
+    tenants.value = tenantRows;
+    categories.value = categoryRows;
+    products.value = productRows;
+    gateways.value = gatewayRows;
+
+    const initialMap: Record<string, string> = {};
+    for (const p of productRows) {
+      if (p.variants && p.variants.length > 0 && p.variants[0]) {
+        initialMap[p.id] = p.variants[0].id;
+      }
+    }
+    selectedVariantByProduct.value = initialMap;
+
+    if (
+      (!selectedTenantId.value ||
+        !tenantRows.some((t) => t.id === selectedTenantId.value)) &&
+      tenantRows.length > 0 &&
+      tenantRows[0]
+    ) {
+      selectedTenantId.value = tenantRows[0].id;
+      setActiveTenantId(selectedTenantId.value);
+    }
+
+    if (selectedTenantId.value) {
+      wallet.value = await getTenantWalletApi(selectedTenantId.value).catch(
+        () => null,
+      );
+    }
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleTenantChange(event: Event) {
+  const target = event.target as HTMLSelectElement;
+  const nextId = target.value;
+  selectedTenantId.value = nextId;
+  setActiveTenantId(nextId);
+  if (nextId) {
+    wallet.value = await getTenantWalletApi(nextId).catch(() => null);
+  }
+}
+
+function openCheckoutModal(product: CommerceProductItem) {
+  const variant = getSelectedVariant(product);
+  if (!variant) {
+    toast.error('Sản phẩm này chưa có biến thể SKU khả dụng');
+    return;
+  }
+  stopPolling();
+  activeProduct.value = product;
+  activeVariant.value = variant;
+  checkoutQty.value = Math.max(1, variant.min_qty || 1);
+  selectedGatewayId.value = 'internal_wallet';
+  pendingIntent.value = null;
+  pendingOrderId.value = null;
+  pendingOrderCode.value = '';
+  checkoutOpen.value = true;
+}
+
+function stopPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+}
+
+function startPollingIntent(intentId: string, orderId: string) {
+  stopPolling();
+  pollTimer = setInterval(async () => {
+    await checkPendingPaymentStatus(intentId, orderId, true);
+  }, 3000);
+}
+
+async function checkPendingPaymentStatus(
+  intentId: string,
+  orderId: string,
+  silent = false,
+) {
+  if (checkingStatus.value) return;
+  checkingStatus.value = true;
+  try {
+    const updated = await getPaymentIntentStatusApi(intentId);
+    if (!updated) return;
+    pendingIntent.value = updated;
+
+    if (updated.status === 'succeeded') {
+      stopPolling();
+      toast.success('Thanh toán thành công! Đang mở tài nguyên bàn giao...');
+      const deliveries = await getOrderDeliveriesApi(orderId).catch(() => []);
+      deliveredOrderCode.value = pendingOrderCode.value;
+      deliveredItems.value = deliveries;
+      checkoutOpen.value = false;
+      deliveryOpen.value = true;
+      await loadStoreData();
+    } else if (updated.status === 'manual_review' && !silent) {
+      toast.info(
+        'Lệnh chuyển khoản đang chờ Quản trị viên đối soát thủ công (manual_review)',
+      );
+    } else if (!silent) {
+      toast.info('Hệ thống đang chờ nhận tín hiệu thanh toán từ cổng nạp...');
+    }
+  } finally {
+    checkingStatus.value = false;
+  }
+}
+
+async function handleCreateOrder() {
+  if (!activeProduct.value || !activeVariant.value) return;
+  if (!selectedTenantId.value) {
+    toast.error('Vui lòng chọn Workspace trước khi mua hàng');
+    return;
+  }
+
+  const isInternalWallet = selectedGatewayId.value === 'internal_wallet';
+  if (isInternalWallet && !hasEnoughWalletCredits.value) {
+    toast.error(
+      'Số dư Ví Xu không đủ. Vui lòng nạp thêm Xu hoặc chọn cổng khác.',
+    );
+    return;
+  }
+
+  const chosenGw = currentGateway.value;
+  const paymentMethod: PaymentChannelType = isInternalWallet
+    ? 'internal_wallet'
+    : chosenGw?.channel || 'bank_transfer';
+
+  submittingOrder.value = true;
+  try {
+    const res = await createCheckoutOrderApi({
+      buyer_tenant_id: selectedTenantId.value,
+      gateway_code: isInternalWallet ? 'internal_wallet' : chosenGw?.id || null,
+      items: [
+        {
+          quantity: checkoutQty.value,
+          variant_id: activeVariant.value.id,
+        },
+      ],
+      payment_method: paymentMethod,
+    });
+
+    if (res.order.status === 'completed' || isInternalWallet) {
+      toast.success(`Đã thanh toán & giao hàng đơn ${res.order.order_code}`);
+      deliveredOrderCode.value = res.order.order_code;
+      deliveredItems.value = res.fulfillment?.deliveries || [];
+      checkoutOpen.value = false;
+      deliveryOpen.value = true;
+      await loadStoreData();
+    } else {
+      pendingOrderId.value = res.order.id;
+      pendingOrderCode.value = res.order.order_code;
+      pendingIntent.value = res.payment_intent;
+      startPollingIntent(res.payment_intent.id, res.order.id);
+      toast.success(
+        `Đã khởi tạo lệnh thanh toán ${res.payment_intent.transfer_code}`,
+      );
+    }
+  } catch (error: any) {
+    toast.error(error?.message || 'Không thể khởi tạo đơn hàng');
+  } finally {
+    submittingOrder.value = false;
+  }
+}
+
+const serialLinesText = computed(() => {
+  return deliveredItems.value
+    .filter((d) => d.delivery_type === 'serial_stock')
+    .map(
+      (d) =>
+        d.delivered_payload?.serial ||
+        d.delivered_payload?.secret_line ||
+        JSON.stringify(d.delivered_payload),
+    )
+    .join('\n');
+});
+
+async function copyText(text: string, label = 'dữ liệu') {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.success(`Đã sao chép ${label}`);
+  } catch {
+    toast.error('Không thể sao chép vào bộ nhớ tạm');
+  }
+}
+
+function downloadSerialTxt() {
+  if (!serialLinesText.value) return;
+  const blob = new Blob([serialLinesText.value], {
+    type: 'text/plain;charset=utf-8',
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${deliveredOrderCode.value || 'deliveries'}.txt`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+onMounted(() => {
+  loadStoreData();
+});
+
+onBeforeUnmount(() => {
+  stopPolling();
+});
+</script>
+
+<template>
+  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+    <!-- Top Header & Workspace Wallet Banner -->
+    <div
+      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div class="flex flex-col gap-1">
+        <h1
+          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+        >
+          {{ $t('page.commerce.store') }}
+        </h1>
+        <p class="text-xs text-muted-foreground">
+          {{ $t('page.commerce.store_desc') }}
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Workspace Selector -->
+        <div
+          class="flex items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-1.5"
+        >
+          <Building2 class="size-3.5 text-muted-foreground" />
+          <select
+            :value="selectedTenantId"
+            class="bg-transparent text-xs font-medium text-foreground focus:outline-none"
+            @change="handleTenantChange"
+          >
+            <option
+              v-for="tenant in tenants"
+              :key="tenant.id"
+              :value="tenant.id"
+            >
+              {{ tenant.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Xu Wallet Pill -->
+        <div
+          class="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-1.5"
+        >
+          <Coins class="size-4 text-primary" />
+          <span class="text-xs text-muted-foreground">Số dư:</span>
+          <span class="font-mono text-sm font-bold text-foreground">
+            {{ walletBalance.toLocaleString('en-US') }} Xu
+          </span>
+          <Button
+            size="sm"
+            variant="default"
+            class="ml-1 h-6 px-2 text-2xs"
+            @click="router.push('/commerce/wallet')"
+          >
+            + Nạp Xu
+          </Button>
+        </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          class="gap-1.5"
+          @click="router.push('/commerce/orders')"
+        >
+          <PackageCheck class="size-3.5 text-muted-foreground" />
+          Đơn đã mua
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          class="gap-1.5"
+          @click="router.push('/store')"
+        >
+          <ExternalLink class="size-3.5 text-muted-foreground" />
+          Storefront công khai
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          class="gap-1.5"
+          @click="loadStoreData"
+        >
+          <RefreshCw
+            class="size-3.5 text-muted-foreground"
+            :class="{ 'animate-spin': loading }"
+          />
+          {{ $t('common.refresh') }}
+        </Button>
+      </div>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div
+      class="flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div class="flex flex-wrap items-center gap-1.5">
+        <Button
+          size="sm"
+          :variant="selectedCategoryId === 'all' ? 'default' : 'outline'"
+          class="h-8 text-xs"
+          @click="selectedCategoryId = 'all'"
+        >
+          Tất cả danh mục
+        </Button>
+        <Button
+          v-for="cat in categories"
+          :key="cat.id"
+          size="sm"
+          :variant="selectedCategoryId === cat.id ? 'default' : 'outline'"
+          class="h-8 text-xs"
+          @click="selectedCategoryId = cat.id"
+        >
+          {{ cat.name }}
+        </Button>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <select
+          v-model="selectedProductType"
+          class="h-8 rounded-md border border-border bg-background px-2.5 text-xs text-foreground focus:outline-none"
+        >
+          <option value="all">Tất cả loại tài nguyên</option>
+          <option value="serial_stock">Tài khoản / License key</option>
+          <option value="specter_resource">Tài nguyên Specter</option>
+          <option value="digital_file">Tệp số / Source</option>
+          <option value="wallet_credit">Gói nạp Xu</option>
+        </select>
+
+        <div class="relative w-full sm:w-64">
+          <Search
+            class="pointer-events-none absolute top-2.5 left-2.5 size-3.5 text-muted-foreground"
+          />
+          <input
+            v-model="searchKeyword"
+            type="text"
+            placeholder="Tìm sản phẩm hoặc mã SKU..."
+            class="h-8 w-full rounded-md border border-border bg-background pr-3 pl-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div
+      v-if="!loading && filteredProducts.length === 0"
+      class="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/60 bg-card/50 py-14 text-center"
+    >
+      <ShoppingBag class="size-10 text-muted-foreground/50" />
+      <h3 class="mt-3 text-base font-semibold text-foreground">
+        Chưa có sản phẩm phù hợp
+      </h3>
+      <p class="mt-1 max-w-md text-xs text-muted-foreground">
+        Hãy thử đổi bộ lọc danh mục hoặc từ khóa tìm kiếm, hoặc thêm sản phẩm
+        mới trong mục Quản trị cửa hàng.
+      </p>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div
+        v-for="product in filteredProducts"
+        :key="product.id"
+        class="flex flex-col justify-between rounded-xl border border-border/60 bg-card p-5 transition-all hover:border-primary/40 hover:shadow-sm"
+      >
+        <div class="space-y-3">
+          <!-- Type & Visibility Row -->
+          <div class="flex items-center justify-between gap-2">
+            <Badge
+              :variant="getProductTypeBadge(product.product_type).variant"
+              class="text-2xs"
+            >
+              {{ getProductTypeBadge(product.product_type).label }}
+            </Badge>
+            <span
+              v-if="getSelectedVariant(product)"
+              class="font-mono text-2xs text-muted-foreground"
+            >
+              SKU: {{ getSelectedVariant(product)?.sku }}
+            </span>
+          </div>
+
+          <!-- Product Title & Description -->
+          <div>
+            <h3 class="text-base font-semibold text-foreground">
+              {{ product.name }}
+            </h3>
+            <p class="mt-1 line-clamp-2 text-xs text-muted-foreground">
+              {{
+                product.short_description ||
+                product.description ||
+                'Giao hàng tự động 24/7 ngay sau khi thanh toán.'
+              }}
+            </p>
+          </div>
+
+          <!-- Variant Selector Pills -->
+          <div
+            v-if="product.variants && product.variants.length > 0"
+            class="space-y-1.5 pt-1"
+          >
+            <span
+              class="text-2xs font-semibold tracking-wider text-muted-foreground uppercase"
+            >
+              Chọn phân loại (SKU)
+            </span>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                v-for="variant in product.variants"
+                :key="variant.id"
+                type="button"
+                class="rounded-lg border px-2.5 py-1 text-left text-xs transition-colors"
+                :class="
+                  getSelectedVariant(product)?.id === variant.id
+                    ? 'border-primary bg-primary/10 font-semibold text-primary'
+                    : 'border-border/70 bg-background text-foreground hover:border-primary/40'
+                "
+                @click="selectVariant(product.id, variant.id)"
+              >
+                {{ variant.name }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price, Stock & Buy CTA -->
+        <div
+          class="mt-5 flex items-end justify-between border-t border-border/50 pt-4"
+        >
+          <div class="space-y-0.5">
+            <div class="flex items-baseline gap-1.5">
+              <span class="font-mono text-xl font-bold text-foreground">
+                {{
+                  (
+                    getSelectedVariant(product)?.price_credits ?? 0
+                  ).toLocaleString('en-US')
+                }}
+                Xu
+              </span>
+              <span
+                v-if="
+                  getSelectedVariant(product)?.compare_at_credits &&
+                  (getSelectedVariant(product)?.compare_at_credits ?? 0) >
+                    (getSelectedVariant(product)?.price_credits ?? 0)
+                "
+                class="font-mono text-xs text-muted-foreground line-through"
+              >
+                {{
+                  getSelectedVariant(
+                    product,
+                  )?.compare_at_credits?.toLocaleString('en-US')
+                }}
+                Xu
+              </span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs">
+              <span
+                v-if="getSelectedVariant(product)?.stock_mode === 'unlimited'"
+                class="font-medium text-success"
+              >
+                ● Sẵn hàng (Không giới hạn)
+              </span>
+              <span
+                v-else-if="
+                  (getSelectedVariant(product)?.available_stock ?? 0) > 0
+                "
+                class="font-medium text-success"
+              >
+                ● Tồn kho:
+                {{ getSelectedVariant(product)?.available_stock }}
+              </span>
+              <span v-else class="font-medium text-destructive">
+                ● Tạm hết hàng
+              </span>
+            </div>
+          </div>
+
+          <Button
+            size="sm"
+            :disabled="!isVariantInStock(getSelectedVariant(product))"
+            class="gap-1.5"
+            @click="openCheckoutModal(product)"
+          >
+            <ShoppingBag class="size-3.5" />
+            Mua ngay
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multi-Channel Checkout Dialog -->
+    <Dialog v-model:open="checkoutOpen">
+      <DialogContent class="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle class="flex items-center gap-2 text-base font-semibold">
+            <ShoppingBag class="size-4 text-primary" />
+            {{
+              pendingIntent
+                ? `Thanh toán đơn hàng ${pendingOrderCode}`
+                : `Xác nhận mua: ${activeProduct?.name || ''}`
+            }}
+          </DialogTitle>
+          <DialogDescription class="text-xs text-muted-foreground">
+            {{
+              pendingIntent
+                ? 'Quét mã QR hoặc chuyển khoản chính xác nội dung bên dưới để hệ thống giao hàng tự động.'
+                : 'Chọn số lượng và phương thức thanh toán (trừ Ví Xu tức thì hoặc chuyển khoản trực tiếp).'
+            }}
+          </DialogDescription>
+        </DialogHeader>
+
+        <!-- Step 1: Configure Quantity & Payment Gateway -->
+        <div v-if="!pendingIntent && activeVariant" class="space-y-4 py-2">
+          <div
+            class="flex items-center justify-between rounded-lg border border-border/60 bg-muted/30 p-3"
+          >
+            <div>
+              <p class="text-sm font-semibold text-foreground">
+                {{ activeVariant.name }}
+              </p>
+              <p class="font-mono text-xs text-muted-foreground">
+                SKU: {{ activeVariant.sku }}
+              </p>
+            </div>
+            <div class="text-right">
+              <p class="font-mono text-base font-bold text-primary">
+                {{ activeVariant.price_credits.toLocaleString('en-US') }} Xu
+              </p>
+              <p class="text-2xs text-muted-foreground">Đơn giá / sản phẩm</p>
+            </div>
+          </div>
+
+          <!-- Quantity Input -->
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-medium text-foreground">
+              Số lượng cần mua
+            </label>
+            <input
+              v-model.number="checkoutQty"
+              type="number"
+              :min="activeVariant.min_qty || 1"
+              :max="activeVariant.max_qty || 100"
+              class="h-8 w-24 rounded-md border border-border bg-background px-2.5 text-right font-mono text-sm text-foreground focus:border-primary focus:outline-none"
+            />
+          </div>
+
+          <!-- Payment Method Selection -->
+          <div class="space-y-2">
+            <label
+              class="text-2xs font-semibold tracking-wider text-muted-foreground uppercase"
+            >
+              Phương thức thanh toán
+            </label>
+
+            <!-- Option 1: Instant Xu Wallet -->
+            <button
+              type="button"
+              class="flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors"
+              :class="
+                selectedGatewayId === 'internal_wallet'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border/60 bg-card hover:border-primary/40'
+              "
+              @click="selectedGatewayId = 'internal_wallet'"
+            >
+              <div class="flex items-center gap-2.5">
+                <Wallet class="size-4 text-primary" />
+                <div>
+                  <p class="text-sm font-semibold text-foreground">
+                    Ví Xu trả trước (Giao hàng tức thì)
+                  </p>
+                  <p class="text-xs text-muted-foreground">
+                    Số dư hiện tại:
+                    <span class="font-mono font-semibold text-foreground">
+                      {{ walletBalance.toLocaleString('en-US') }} Xu
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <Badge
+                :variant="hasEnoughWalletCredits ? 'default' : 'destructive'"
+                class="text-2xs"
+              >
+                {{ hasEnoughWalletCredits ? 'Đủ Xu' : 'Thiếu Xu' }}
+              </Badge>
+            </button>
+
+            <!-- External Payment Gateways -->
+            <button
+              v-for="gw in externalGateways"
+              :key="gw.id"
+              type="button"
+              class="flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors"
+              :class="
+                selectedGatewayId === gw.id
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border/60 bg-card hover:border-primary/40'
+              "
+              @click="selectedGatewayId = gw.id"
+            >
+              <div class="flex items-center gap-2.5">
+                <CreditCard class="size-4 text-primary" />
+                <div>
+                  <p class="text-sm font-semibold text-foreground">
+                    {{ gw.name }}
+                  </p>
+                  <p class="text-xs text-muted-foreground">
+                    Tỷ giá: 1 Xu =
+                    {{ gw.rate_per_credit.toLocaleString('en-US') }}
+                    {{ gw.currency }}
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" class="font-mono text-2xs">
+                {{ gw.currency }}
+              </Badge>
+            </button>
+          </div>
+
+          <!-- Total Summary -->
+          <div
+            class="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 p-3"
+          >
+            <span class="text-xs font-medium text-muted-foreground">
+              Tổng thanh toán
+            </span>
+            <div class="text-right">
+              <p class="font-mono text-lg font-bold text-foreground">
+                {{ totalCheckoutCredits.toLocaleString('en-US') }} Xu
+              </p>
+              <p
+                v-if="currentGateway"
+                class="font-mono text-xs text-muted-foreground"
+              >
+                ≈ {{ estimatedFiatAmount.toLocaleString('en-US') }}
+                {{ currentGateway.currency }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2">
+            <Button variant="outline" size="sm" @click="checkoutOpen = false">
+              {{ $t('common.cancel') }}
+            </Button>
+            <Button
+              size="sm"
+              :disabled="
+                submittingOrder ||
+                (selectedGatewayId === 'internal_wallet' &&
+                  !hasEnoughWalletCredits)
+              "
+              class="gap-1.5"
+              @click="handleCreateOrder"
+            >
+              <Sparkles class="size-3.5" />
+              {{
+                selectedGatewayId === 'internal_wallet'
+                  ? 'Thanh toán bằng Xu & Nhận ngay'
+                  : 'Tạo mã thanh toán'
+              }}
+            </Button>
+          </div>
+        </div>
+
+        <!-- Step 2: External Gateway QR & Transfer Code Instructions -->
+        <div v-else-if="pendingIntent" class="space-y-4 py-2">
+          <div
+            v-if="pendingIntent.checkout_payload?.qr_image_url"
+            class="flex flex-col items-center justify-center rounded-xl border border-border/60 bg-white p-4"
+          >
+            <img
+              :src="pendingIntent.checkout_payload.qr_image_url"
+              alt="Payment QR"
+              class="h-52 w-52 object-contain"
+            />
+            <span class="mt-2 text-2xs font-medium text-slate-600">
+              Quét mã VietQR để điền sẵn số tiền và nội dung chuyển khoản
+            </span>
+          </div>
+
+          <div
+            class="space-y-2 rounded-lg border border-border/60 bg-muted/30 p-3.5 text-xs"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-muted-foreground">Số tiền cần chuyển:</span>
+              <span class="font-mono text-sm font-bold text-foreground">
+                {{ pendingIntent.pay_amount.toLocaleString('en-US') }}
+                {{ pendingIntent.pay_currency }}
+              </span>
+            </div>
+
+            <div
+              v-if="pendingIntent.checkout_payload?.bank_name"
+              class="flex items-center justify-between"
+            >
+              <span class="text-muted-foreground">Ngân hàng / Ví:</span>
+              <span class="font-medium text-foreground">
+                {{ pendingIntent.checkout_payload.bank_name }} —
+                {{ pendingIntent.checkout_payload.account_no }}
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-muted-foreground">Nội dung chuyển khoản:</span>
+              <div class="flex items-center gap-1.5">
+                <code
+                  class="rounded bg-primary/15 px-2 py-0.5 font-mono text-sm font-bold text-primary"
+                >
+                  {{ pendingIntent.transfer_code }}
+                </code>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  class="h-6 px-2 text-2xs"
+                  @click="
+                    copyText(pendingIntent.transfer_code, 'mã chuyển khoản')
+                  "
+                >
+                  <Copy class="size-3" />
+                </Button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span class="text-muted-foreground">Trạng thái:</span>
+              <Badge variant="secondary" class="text-2xs">
+                {{ pendingIntent.status }} (Tự động kiểm tra 3s/lần)
+              </Badge>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              @click="
+                () => {
+                  stopPolling();
+                  checkoutOpen = false;
+                }
+              "
+            >
+              Đóng
+            </Button>
+            <Button
+              size="sm"
+              class="gap-1.5"
+              :disabled="checkingStatus"
+              @click="
+                () =>
+                  pendingIntent &&
+                  pendingOrderId &&
+                  checkPendingPaymentStatus(
+                    pendingIntent.id,
+                    pendingOrderId,
+                    false,
+                  )
+              "
+            >
+              <RefreshCw
+                class="size-3.5"
+                :class="{ 'animate-spin': checkingStatus }"
+              />
+              Kiểm tra đã thanh toán
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Instant Fulfillment Deliverables Dialog -->
+    <Dialog v-model:open="deliveryOpen">
+      <DialogContent class="sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle class="flex items-center gap-2 text-base font-semibold">
+            <Check class="size-4 text-success" />
+            Bàn giao tài nguyên — Đơn {{ deliveredOrderCode }}
+          </DialogTitle>
+          <DialogDescription class="text-xs text-muted-foreground">
+            Hệ thống đã hoàn tất xuất kho tự động. Bạn có thể sao chép hoặc tải
+            xuống ngay bên dưới, hoặc tra cứu lại bất kỳ lúc nào tại mục Đơn
+            hàng & bàn giao.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div class="space-y-4 py-2">
+          <!-- Serialized Stock Block -->
+          <div v-if="serialLinesText" class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span
+                class="flex items-center gap-1.5 text-xs font-semibold text-foreground"
+              >
+                <KeyRound class="size-3.5 text-primary" />
+                Dữ liệu tài khoản / License key ({{
+                  deliveredItems.filter(
+                    (d) => d.delivery_type === 'serial_stock',
+                  ).length
+                }}
+                dòng)
+              </span>
+              <div class="flex items-center gap-1.5">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  class="h-7 gap-1 text-xs"
+                  @click="copyText(serialLinesText, 'toàn bộ danh sách')"
+                >
+                  <Copy class="size-3" />
+                  Sao chép tất cả
+                </Button>
+                <Button
+                  size="sm"
+                  variant="default"
+                  class="h-7 gap-1 text-xs"
+                  @click="downloadSerialTxt"
+                >
+                  <Download class="size-3" />
+                  Tải .txt
+                </Button>
+              </div>
+            </div>
+            <textarea
+              readonly
+              :value="serialLinesText"
+              rows="6"
+              class="w-full rounded-lg border border-border bg-muted/40 p-3 font-mono text-xs text-foreground focus:outline-none"
+            ></textarea>
+          </div>
+
+          <!-- Other Deliverable Items (Specter Resource / Digital File / Wallet Credit) -->
+          <div
+            v-for="item in deliveredItems.filter(
+              (d) => d.delivery_type !== 'serial_stock',
+            )"
+            :key="item.id"
+            class="rounded-lg border border-border/60 bg-muted/20 p-3.5 text-xs"
+          >
+            <div class="flex items-center justify-between">
+              <span
+                class="flex items-center gap-1.5 font-semibold text-foreground"
+              >
+                <Server
+                  v-if="item.delivery_type === 'specter_resource'"
+                  class="size-3.5 text-primary"
+                />
+                <FileDown
+                  v-else-if="item.delivery_type === 'digital_file'"
+                  class="size-3.5 text-primary"
+                />
+                <QrCode v-else class="size-3.5 text-primary" />
+                {{ getProductTypeBadge(item.delivery_type).label }}
+              </span>
+              <Badge variant="default" class="text-2xs">Đã kích hoạt</Badge>
+            </div>
+            <pre
+              class="mt-2 overflow-x-auto rounded bg-background p-2 font-mono text-2xs text-muted-foreground"
+              >{{ JSON.stringify(item.delivered_payload, null, 2) }}</pre>
+            <div
+              v-if="item.delivered_payload?.download_url"
+              class="mt-2 flex justify-end"
+            >
+              <a
+                :href="item.delivered_payload.download_url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+              >
+                <ExternalLink class="size-3" />
+                Tải tệp xuống
+              </a>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  </div>
+</template>

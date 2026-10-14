@@ -3,7 +3,7 @@
 > **Module ID:** `digital-commerce`  
 > **Phụ thuộc:** `payment-gateway` (`schema: billing`), `fleet-inventory` (`schema: runners`), `automation-engine` (`schema: automa`), `storage` (`schema: media`)  
 > **Áp dụng cho:** `tuquet/cloud` (`supabase/plugins/commerce`) & `tuquet/admin` (`apps/web-admin/src/api/core/commerce.ts`)  
-> **Trạng thái:** **DRAFT — CHỜ DUYỆT (PHASE 1: SPECIFY)**
+> **Trạng thái:** **ACCEPTED & IMPLEMENTED**
 
 ---
 
@@ -230,11 +230,11 @@ Tất cả hàm RPC trong `schema: commerce` được khai báo với `SECURITY 
 
 ## 5. Verification & Success Criteria (Tiêu Chí Nghiệm Thu)
 
-1. [ ] **Database Plugin & Schema Audit**:
+1. [x] **Database Plugin & Schema Audit**:
    - Plugin `cloud/supabase/plugins/commerce/` có đầy đủ `plugin.json`, `install.sql`, `uninstall.sql`, `README.md` và bài kiểm thử `cloud/tests/db/08_verify_commerce_plugin.sql`.
    - Tất cả 7 bảng trong `schema: commerce` bật RLS 100%, các hàm `SECURITY DEFINER` ghim `SET search_path = ''`.
-2. [ ] **Zero Double-Selling & Auto-Fulfillment**:
+2. [x] **Zero Double-Selling & Auto-Fulfillment**:
    - Kiểm thử xác nhận: (a) Mua `serial_stock` bằng Ví Xu trừ Xu và xuất đúng số lượng serial không trùng lặp; (b) Mua `specter_resource` (`automa_workflow`, `proxy_pool`, `plan_upgrade`) tự động tạo bản ghi trong `automa.workflows`, `runners.proxies`, `billing.subscriptions`; (c) Thanh toán đơn hàng qua `billing.settle_payment_intent` tự động kích hoạt `commerce.fulfill_order` (hoặc chuyển sang `manual_review` khi thiếu tiền/quá hạn); (d) Guest Checkout tra cứu được sản phẩm bàn giao qua `claim_token`.
-3. [ ] **Typed Client API (`apps/web-admin/src/api/core/commerce.ts`)**:
+3. [x] **Typed Client API (`apps/web-admin/src/api/core/commerce.ts`)**:
    - Cung cấp đầy đủ API client có kiểu tĩnh cho `categories`, `products`, `product_variants`, `orders`, `order_deliveries`, `importStockBatch`, `createCheckoutOrder`, `fulfillOrder`, `getGuestOrderDeliveries`.
    - Pass 100% unit tests trong `apps/web-admin/src/api/core/__tests__/commerce.test.ts`, `vue-tsc` (0 lỗi) và `oxlint` (0 cảnh báo).

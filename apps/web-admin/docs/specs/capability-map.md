@@ -1,6 +1,6 @@
 # Bản Đồ Năng Lực Hệ Thống (Admin Capability Map)
 
-> Trạng thái: **ĐÃ HOÀN THÀNH** (100% 14/14 Modules) | Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
+> Trạng thái: **ĐÃ HOÀN THÀNH** (100% 18/18 Modules) | Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
 
 | Module id | Trách nhiệm | Phụ thuộc |
 | :-- | :-- | :-- |
@@ -53,4 +53,4 @@ Danh sách Spec module:
 - [`SPEC-digital-commerce.md`](SPEC-digital-commerce.md)
 - [`SPEC-admin-commerce-portal.md`](SPEC-admin-commerce-portal.md)
 - [`SPEC-specter-3d-ghost-banner.md`](SPEC-specter-3d-ghost-banner.md)
-- `SPEC-public-storefront.md` _(Planned)_
+- [`SPEC-public-storefront.md`](SPEC-public-storefront.md)

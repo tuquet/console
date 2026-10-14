@@ -3,6 +3,7 @@ export * from './analytics';
 export * from './auth';
 export * from './automation';
 export * from './billing';
+export * from './commerce';
 export * from './menu';
 export * from './supabase-client';
 export * from './system';

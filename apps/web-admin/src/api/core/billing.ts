@@ -174,15 +174,16 @@ export function mapRawPaymentIntent(raw: any): PaymentIntentItem {
 /**
  * Fetch active public payment gateways (safe for both Authenticated Tenants & Public Storefront)
  */
-export async function getActivePaymentGatewaysApi(): Promise<
-  PaymentGatewayItem[]
-> {
+export async function getActivePaymentGatewaysApi(options?: {
+  skipAuth?: boolean;
+}): Promise<PaymentGatewayItem[]> {
   const rows = await supabaseRequest<any[]>(
     '/rest/v1/rpc/get_active_gateways',
     {
       body: JSON.stringify({}),
       method: 'POST',
       schema: 'billing',
+      skipAuth: options?.skipAuth,
     },
   );
   return Array.isArray(rows)
@@ -316,4 +317,57 @@ export async function approveManualPaymentIntentAdminApi(
       schema: 'billing',
     },
   );
+}
+
+/**
+ * Platform Admin: Upsert a payment gateway configuration (toggle active status, rate_per_credit, public_config).
+ */
+export async function upsertPaymentGatewayAdminApi(
+  payload: Partial<PaymentGatewayItem> & { id: string },
+): Promise<PaymentGatewayItem> {
+  const rows = await supabaseRequest<any[]>(
+    '/rest/v1/payment_gateways?on_conflict=id',
+    {
+      body: JSON.stringify(payload),
+      headers: {
+        Prefer: 'resolution=merge-duplicates,return=representation',
+      },
+      method: 'POST',
+      preferRepresentation: true,
+      schema: 'billing',
+    },
+  );
+  return mapRawPaymentGateway(Array.isArray(rows) ? rows[0] : rows);
+}
+
+/**
+ * Pure helper to filter wallet transactions for VXE Grid
+ */
+export function filterWalletTransactions(
+  items: WalletTransactionItem[],
+  filters?: { search?: string; tx_type?: string },
+): WalletTransactionItem[] {
+  if (!Array.isArray(items) || items.length === 0) {
+    return [];
+  }
+
+  let result = items;
+  if (filters?.tx_type && filters.tx_type !== 'all') {
+    result = result.filter((tx) => tx.tx_type === filters.tx_type);
+  }
+
+  if (filters?.search) {
+    const kw = String(filters.search).toLowerCase().trim();
+    if (kw) {
+      result = result.filter(
+        (tx) =>
+          (tx.description && tx.description.toLowerCase().includes(kw)) ||
+          (tx.reference_id && tx.reference_id.toLowerCase().includes(kw)) ||
+          (tx.reference_type && tx.reference_type.toLowerCase().includes(kw)) ||
+          tx.id.toLowerCase().includes(kw),
+      );
+    }
+  }
+
+  return result;
 }

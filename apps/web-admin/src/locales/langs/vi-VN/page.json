@@ -26,6 +26,19 @@
     "proxies": "Proxy pool",
     "proxies_desc": "Quản lý proxy xoay vòng và định tuyến mạng"
   },
+  "commerce": {
+    "title": "Cửa hàng & ví Xu",
+    "store": "Cửa hàng số",
+    "store_desc": "Mua tài khoản, license key, proxy Specter, quy trình tự động hóa và tệp số",
+    "orders": "Đơn hàng & bàn giao",
+    "orders_desc": "Theo dõi trạng thái đơn hàng và nhận tài khoản, proxy, tệp số đã bàn giao",
+    "wallet": "Ví Xu",
+    "wallet_desc": "Quản lý số dư Ví Xu trả trước, nạp Xu đa kênh và sổ cái biến động số dư",
+    "admin": "Quản trị cửa hàng & cổng nạp",
+    "admin_desc": "Quản trị sản phẩm số, nạp kho hàng loạt, duyệt thanh toán thủ công và cấu hình cổng nạp",
+    "publicStore": "Cửa hàng tài nguyên số Tuquet",
+    "publicStore_desc": "Cửa hàng sản phẩm số tự động giao hàng 24/7 không cần đăng nhập"
+  },
   "system": {
     "title": "Hệ thống",
     "plugins": "Plugins",

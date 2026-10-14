@@ -3,6 +3,7 @@ import { useAccessStore } from '@vben/stores';
 export type SupabaseSchema =
   | 'automa'
   | 'billing'
+  | 'commerce'
   | 'events'
   | 'media'
   | 'public'

@@ -26,6 +26,19 @@
     "proxies": "Proxy Pool",
     "proxies_desc": "Manage rotating proxy infrastructure and network routing"
   },
+  "commerce": {
+    "title": "Commerce & Wallet",
+    "store": "Digital Store",
+    "store_desc": "Purchase accounts, license keys, Specter proxies, workflows, and digital files",
+    "orders": "Orders & Deliverables",
+    "orders_desc": "Track digital orders and retrieve fulfilled credentials, proxies, and files",
+    "wallet": "Xu Wallet",
+    "wallet_desc": "Manage workspace prepaid Xu balance, multi-channel top-ups, and ledger history",
+    "admin": "Store & Gateways Admin",
+    "admin_desc": "Manage digital products, bulk stock imports, manual review approvals, and payment gateways",
+    "publicStore": "Tuquet Digital Store",
+    "publicStore_desc": "Instant 24/7 digital products store with automated fulfillment"
+  },
   "system": {
     "title": "System",
     "plugins": "Plugins",

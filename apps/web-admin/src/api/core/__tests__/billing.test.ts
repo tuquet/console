@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   approveManualPaymentIntentAdminApi,
   createPaymentIntentApi,
+  filterWalletTransactions,
   getActivePaymentGatewaysApi,
   getManualReviewIntentsAdminApi,
   getTenantWalletApi,
@@ -11,6 +12,7 @@ import {
   mapRawPaymentIntent,
   mapRawTenantWallet,
   mapRawWalletTransaction,
+  upsertPaymentGatewayAdminApi,
 } from '../billing';
 import { supabaseRequest } from '../supabase-client';
 
@@ -241,6 +243,72 @@ describe('billing & payment-gateway core api', () => {
         }),
       );
       expect(approval.settled).toBe(true);
+    });
+
+    it('upserts payment gateway configuration via upsertPaymentGatewayAdminApi and filters wallet transactions', async () => {
+      vi.mocked(supabaseRequest).mockResolvedValueOnce([
+        {
+          channel: 'bank_transfer',
+          currency: 'VND',
+          driver: 'sepay',
+          id: 'bank_vietqr',
+          is_active: true,
+          name: 'VietQR 24/7',
+          public_config: { account_no: '99998888' },
+          rate_per_credit: 1000,
+          sort_order: 10,
+        },
+      ]);
+
+      const gw = await upsertPaymentGatewayAdminApi({
+        id: 'bank_vietqr',
+        is_active: true,
+        rate_per_credit: 1000,
+      });
+
+      expect(supabaseRequest).toHaveBeenCalledWith(
+        '/rest/v1/payment_gateways?on_conflict=id',
+        expect.objectContaining({
+          method: 'POST',
+          preferRepresentation: true,
+          schema: 'billing',
+        }),
+      );
+      expect(gw.id).toBe('bank_vietqr');
+      expect(gw.rate_per_credit).toBe(1000);
+
+      const txs = [
+        mapRawWalletTransaction({
+          amount_credits: 500,
+          balance_after_credits: 500,
+          description: 'Nap Xu VietQR TQ1122',
+          id: 'tx-1',
+          reference_id: 'intent-1',
+          reference_type: 'payment_intent',
+          tenant_id: 't-1',
+          tx_type: 'topup',
+          wallet_id: 'w-1',
+        }),
+        mapRawWalletTransaction({
+          amount_credits: -150,
+          balance_after_credits: 350,
+          description: 'Mua Proxy ORD-261014-AA11',
+          id: 'tx-2',
+          reference_id: 'ord-1',
+          reference_type: 'commerce_order',
+          tenant_id: 't-1',
+          tx_type: 'purchase',
+          wallet_id: 'w-1',
+        }),
+      ];
+
+      expect(filterWalletTransactions(txs, { tx_type: 'topup' })).toHaveLength(
+        1,
+      );
+      expect(
+        filterWalletTransactions(txs, { search: 'ORD-261014' }),
+      ).toHaveLength(1);
+      expect(filterWalletTransactions([], { search: 'any' })).toEqual([]);
     });
   });
 });

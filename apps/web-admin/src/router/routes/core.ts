@@ -113,6 +113,18 @@ const coreRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    component: () => import('#/views/commerce/public-store/index.vue'),
+    meta: {
+      hideInBreadcrumb: true,
+      hideInMenu: true,
+      hideInTab: true,
+      ignoreAccess: true,
+      title: $t('page.commerce.publicStore'),
+    },
+    name: 'PublicStorefront',
+    path: '/store',
+  },
 ];
 
 export { coreRoutes, fallbackNotFoundRoute };

@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { filterRoutesByPlugins } from '../plugin-gate';
 import automationRoutes from '../routes/modules/automation';
+import commerceRoutes from '../routes/modules/commerce';
 
 vi.mock('#/locales', () => ({
   $t: (key: string) => key,
@@ -180,6 +181,35 @@ describe('filterRoutesByPlugins', () => {
     ]);
 
     const neitherInstalled = filterRoutesByPlugins(automationRoutes, [
+      'core-iam',
+    ]);
+    expect(neitherInstalled).toHaveLength(0);
+  });
+
+  it('should gate commerce and subscriptions child routes inside /commerce module', () => {
+    const bothInstalled = filterRoutesByPlugins(commerceRoutes, [
+      'core-iam',
+      'commerce',
+      'subscriptions',
+    ]);
+    expect(bothInstalled).toHaveLength(1);
+    expect(bothInstalled[0]?.children?.map((c) => c.name)).toEqual([
+      'CommerceStore',
+      'CommerceOrders',
+      'CommerceWallet',
+      'CommerceAdmin',
+    ]);
+
+    const onlySubscriptions = filterRoutesByPlugins(commerceRoutes, [
+      'core-iam',
+      'subscriptions',
+    ]);
+    expect(onlySubscriptions).toHaveLength(1);
+    expect(onlySubscriptions[0]?.children?.map((c) => c.name)).toEqual([
+      'CommerceWallet',
+    ]);
+
+    const neitherInstalled = filterRoutesByPlugins(commerceRoutes, [
       'core-iam',
     ]);
     expect(neitherInstalled).toHaveLength(0);
