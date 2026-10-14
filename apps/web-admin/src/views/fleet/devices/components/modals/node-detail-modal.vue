@@ -2,13 +2,6 @@
 import type { FleetNodeItem } from '#/api';
 
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@vben-core/shadcn-ui';
-
-import {
   Check,
   CheckCircle2,
   Copy,
@@ -30,8 +23,13 @@ import {
   AlertDialogTrigger,
   Badge,
   Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from '@tuquet/vue-ui';
 
+import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
 import { useClipboard, useDateFormat } from '#/composables';
 
 interface Props {
@@ -54,7 +52,7 @@ const { formatDate } = useDateFormat();
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogContent class="sm:max-w-lg">
       <DialogHeader>
-        <DialogTitle>Thông Tin Chi Tiết Máy Trạm</DialogTitle>
+        <DialogTitle>Chi tiết thiết bị</DialogTitle>
       </DialogHeader>
 
       <div v-if="props.node" class="space-y-5 py-2">
@@ -91,114 +89,136 @@ const { formatDate } = useDateFormat();
             ></span>
             {{
               props.node.status === 'idle'
-                ? 'Sẵn Sàng'
+                ? 'Sẵn sàng'
                 : props.node.status === 'busy'
-                  ? 'Đang Bận'
+                  ? 'Đang bận'
                   : props.node.status === 'maintenance'
-                    ? 'Bảo Trì'
+                    ? 'Bảo trì'
                     : props.node.status === 'disabled'
-                      ? 'Vô Hiệu'
-                      : 'Ngoại Tuyến'
+                      ? 'Vô hiệu'
+                      : 'Ngoại tuyến'
             }}
           </Badge>
         </div>
 
-        <!-- Specs Grid -->
-        <div class="grid grid-cols-2 gap-3 text-xs">
-          <div class="rounded-lg border border-border/60 bg-card p-3 space-y-1">
-            <div class="text-muted-foreground inline-flex items-center gap-1.5">
-              <Cpu class="size-3.5 shrink-0 text-muted-foreground" />
-              <span class="leading-none">Vi Xử Lý (CPU)</span>
-            </div>
-            <div class="font-semibold text-foreground text-sm">
-              {{ props.node.cpu_cores }} Cores
-            </div>
-          </div>
+        <!-- Device Specs & Identity Form via VXE UI Form -->
+        <div class="rounded-xl border border-border/60 bg-muted/20 p-4">
+          <VxeForm
+            :data="props.node"
+            custom-layout
+            readonly
+            size="small"
+            class="w-full"
+          >
+            <!-- Hardware Specs Group -->
+            <VxeFormItem title="CPU" span="12">
+              <template #default>
+                <div
+                  class="flex items-center gap-1.5 font-semibold text-foreground text-sm"
+                >
+                  <Cpu class="size-3.5 text-muted-foreground shrink-0" />
+                  <span>{{ props.node.cpu_cores }} Cores</span>
+                </div>
+              </template>
+            </VxeFormItem>
 
-          <div class="rounded-lg border border-border/60 bg-card p-3 space-y-1">
-            <div class="text-muted-foreground inline-flex items-center gap-1.5">
-              <HardDrive class="size-3.5 shrink-0 text-muted-foreground" />
-              <span class="leading-none">Bộ Nhớ (RAM)</span>
-            </div>
-            <div class="font-semibold text-foreground text-sm">
-              {{ props.node.ram_gb }} GB
-            </div>
-          </div>
+            <VxeFormItem title="RAM" span="12">
+              <template #default>
+                <div
+                  class="flex items-center gap-1.5 font-semibold text-foreground text-sm"
+                >
+                  <HardDrive class="size-3.5 text-muted-foreground shrink-0" />
+                  <span>{{ props.node.ram_gb }} GB</span>
+                </div>
+              </template>
+            </VxeFormItem>
 
-          <div class="rounded-lg border border-border/60 bg-card p-3 space-y-1">
-            <div class="text-muted-foreground inline-flex items-center gap-1.5">
-              <Globe class="size-3.5 shrink-0 text-muted-foreground" />
-              <span class="leading-none">Hệ Điều Hành</span>
-            </div>
-            <div class="font-semibold text-foreground uppercase">
-              {{ props.node.os_info }}
-            </div>
-          </div>
+            <VxeFormItem title="Hệ điều hành" span="12">
+              <template #default>
+                <div
+                  class="flex items-center gap-1.5 font-medium text-foreground capitalize text-xs"
+                >
+                  <Globe class="size-3.5 text-muted-foreground shrink-0" />
+                  <span>{{ props.node.os_info }}</span>
+                </div>
+              </template>
+            </VxeFormItem>
 
-          <div class="rounded-lg border border-border/60 bg-card p-3 space-y-1">
-            <div class="text-muted-foreground inline-flex items-center gap-1.5">
-              <CheckCircle2 class="size-3.5 shrink-0 text-muted-foreground" />
-              <span class="leading-none">Driver Thực Thi</span>
-            </div>
-            <div class="font-semibold text-foreground uppercase">
-              {{ props.node.driver_type }}
-            </div>
-          </div>
-        </div>
+            <VxeFormItem title="Driver" span="12">
+              <template #default>
+                <div
+                  class="flex items-center gap-1.5 font-medium text-foreground capitalize text-xs"
+                >
+                  <CheckCircle2
+                    class="size-3.5 text-muted-foreground shrink-0"
+                  />
+                  <span>{{ props.node.driver_type }}</span>
+                </div>
+              </template>
+            </VxeFormItem>
 
-        <!-- Identity Details -->
-        <div
-          class="space-y-3 rounded-xl border border-border/60 bg-muted/20 p-4 text-xs"
-        >
-          <div class="flex items-center justify-between">
-            <span class="text-muted-foreground">Mã Thiết Bị (ID):</span>
-            <div class="flex items-center gap-1.5 font-mono text-foreground">
-              <span>{{ props.node.id }}</span>
-              <button
-                type="button"
-                class="size-5 inline-flex items-center justify-center text-muted-foreground hover:text-foreground"
-                @click="copyToClipboard(props.node.id, 'Node ID')"
-              >
-                <Check v-if="isCopied('Node ID')" class="size-3 text-success" />
-                <Copy v-else class="size-3" />
-              </button>
-            </div>
-          </div>
+            <!-- Network & Identity Group -->
+            <VxeFormItem title="Mã thiết bị" span="24">
+              <template #default>
+                <div
+                  class="flex items-center gap-2 font-mono text-xs text-foreground"
+                >
+                  <span class="truncate">{{ props.node.id }}</span>
+                  <button
+                    type="button"
+                    class="size-5 inline-flex items-center justify-center text-muted-foreground hover:text-foreground shrink-0"
+                    @click="copyToClipboard(props.node.id, 'Node ID')"
+                  >
+                    <Check
+                      v-if="isCopied('Node ID')"
+                      class="size-3 text-success"
+                    />
+                    <Copy v-else class="size-3" />
+                  </button>
+                </div>
+              </template>
+            </VxeFormItem>
 
-          <div class="flex items-center justify-between">
-            <span class="text-muted-foreground">Địa Chỉ Mạng (IP):</span>
-            <span class="font-mono text-foreground">{{
-              props.node.ip_address
-            }}</span>
-          </div>
+            <VxeFormItem title="Địa chỉ IP" span="12">
+              <template #default>
+                <span class="font-mono text-xs text-foreground">{{
+                  props.node.ip_address
+                }}</span>
+              </template>
+            </VxeFormItem>
 
-          <div class="flex items-center justify-between">
-            <span class="text-muted-foreground">Phiên Bản Daemon:</span>
-            <Badge variant="outline" class="font-mono text-xs">
-              {{ props.node.version || 'v0.8.4' }}
-            </Badge>
-          </div>
+            <VxeFormItem title="Phiên bản daemon" span="12">
+              <template #default>
+                <Badge variant="outline" class="font-mono text-xs">
+                  {{ props.node.version || 'v0.8.4' }}
+                </Badge>
+              </template>
+            </VxeFormItem>
 
-          <div class="flex items-center justify-between">
-            <span class="text-muted-foreground">Tác Vụ Đang Xử Lý:</span>
-            <span class="font-semibold text-foreground"
-              >{{ props.node.active_jobs }} jobs</span
-            >
-          </div>
+            <VxeFormItem title="Tác vụ đang chạy" span="12">
+              <template #default>
+                <span class="font-semibold text-foreground text-xs"
+                  >{{ props.node.active_jobs }} jobs</span
+                >
+              </template>
+            </VxeFormItem>
 
-          <div class="flex items-center justify-between">
-            <span class="text-muted-foreground">Thời Điểm Ping Cuối:</span>
-            <span class="text-foreground">{{
-              formatDate(props.node.last_heartbeat_at)
-            }}</span>
-          </div>
+            <VxeFormItem title="Ping cuối" span="12">
+              <template #default>
+                <span class="text-xs text-foreground">{{
+                  formatDate(props.node.last_heartbeat_at)
+                }}</span>
+              </template>
+            </VxeFormItem>
 
-          <div class="flex items-center justify-between">
-            <span class="text-muted-foreground">Ngày Ghép Nối:</span>
-            <span class="text-foreground">{{
-              formatDate(props.node.registered_at)
-            }}</span>
-          </div>
+            <VxeFormItem title="Ngày kết nối" span="24">
+              <template #default>
+                <span class="text-xs text-foreground">{{
+                  formatDate(props.node.registered_at)
+                }}</span>
+              </template>
+            </VxeFormItem>
+          </VxeForm>
         </div>
 
         <!-- Actions -->
@@ -207,23 +227,23 @@ const { formatDate } = useDateFormat();
             <AlertDialogTrigger as-child>
               <Button variant="destructive" class="flex items-center gap-1.5">
                 <ShieldAlert class="size-4 shrink-0" />
-                <span>Thu Hồi Quyền</span>
+                <span>Thu hồi quyền</span>
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  Xác nhận thu hồi quyền máy trạm?
+                  Xác nhận thu hồi thiết bị?
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  Máy trạm "{{ props.node.name }}" sẽ không thể kết nối tới
-                  Tuquet Cloud cho tới khi được ghép nối lại.
+                  Thiết bị "{{ props.node.name }}" sẽ ngắt kết nối với hệ thống
+                  cho đến khi được kết nối lại.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Hủy</AlertDialogCancel>
                 <AlertDialogAction @click="emit('revoke', props.node)">
-                  Thu Hồi
+                  Thu hồi
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

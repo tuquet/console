@@ -1,7 +1,7 @@
 # Spec: Superadmin Platform Routes (Module `superadmin-routes`)
 
 > **Mã đặc tả:** `SPEC-superadmin-routes`  
-> **Thuộc sáng kiến:** Kiến trúc định tuyến Admin V2 & Phân quyền Nền tảng  
+> **Thuộc sáng kiến:** Kiến Trúc Định Tuyến & Phân Quyền Nền Tảng  
 > **Tài liệu liên quan:** [`Kiến trúc nền tảng`](../architecture/overview.md), [`ADR-001`](../decisions/0001-routing-architecture.md), [`ADR-003`](../decisions/0003-platform-superadmin.md), [`capability-map.md`](capability-map.md)  
 > **Trạng thái:** **ACCEPTED & IMPLEMENTED** (Đã hoàn thành triển khai và kiểm thử 2026-10-13)
 

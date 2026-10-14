@@ -84,4 +84,29 @@ describe('usePreferences - anti-lockout safeguards', () => {
       userDropdown: false,
     });
   });
+
+  it('does not produce diffPreference when only isMobile is toggled', () => {
+    const { diffPreference } = usePreferences();
+
+    // Baseline is identical
+    expect(diffPreference.value).toBeUndefined();
+
+    // Toggle runtime isMobile
+    preferencesManager.updatePreferences({
+      app: { isMobile: true },
+    });
+
+    // Should NOT report diffPreference because isMobile is runtime viewport state
+    expect(diffPreference.value).toBeUndefined();
+
+    // Change an actual user preference
+    preferencesManager.updatePreferences({
+      app: { locale: 'vi-VN' },
+    });
+
+    // Now it should report the real user preference diff
+    expect(diffPreference.value).toEqual({
+      app: { locale: 'vi-VN' },
+    });
+  });
 });

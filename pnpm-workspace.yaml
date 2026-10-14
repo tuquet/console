@@ -77,10 +77,8 @@ catalog:
   '@tiptap/starter-kit': ^3.30.3
   '@tiptap/vue-3': ^3.30.3
   '@tsdown/css': ^0.22.14
-  '@tuquet/vue-table': 0.2.1
-  '@tuquet/vue-ui': 0.2.1
-  '@unovis/ts': ^1.7.1
-  '@unovis/vue': ^1.7.1
+  '@tuquet/vue-table': 0.2.2
+  '@tuquet/vue-ui': 0.3.0
   '@types/archiver': ^8.0.0
   '@types/html-minifier-terser': ^7.0.2
   '@types/json-bigint': ^1.0.4
@@ -91,6 +89,8 @@ catalog:
   '@types/qs': ^6.15.1
   '@types/sortablejs': ^1.15.9
   '@typescript-eslint/parser': ^8.68.0
+  '@unovis/ts': ^1.7.1
+  '@unovis/vue': ^1.7.1
   '@vitejs/plugin-vue': ^6.0.9
   '@vitejs/plugin-vue-jsx': ^5.1.6
   '@vue/compiler-sfc': 3.5.41

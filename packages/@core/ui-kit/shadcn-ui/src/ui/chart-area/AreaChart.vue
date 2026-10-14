@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
 import type { BulletLegendItemInterface } from '@unovis/ts';
+
 import type { Component } from 'vue';
 
 import type { BaseChartProps } from '../chart';
@@ -126,7 +127,9 @@ function handleLegendItemClick(d: BulletLegendItemInterface, i: number) {
               fill: showGradient ? `url(#${chartRef}-color-${i})` : colors[i],
             },
           }"
-          :color="() => (showGradient ? `url(#${chartRef}-color-${i})` : colors[i])"
+          :color="
+            () => (showGradient ? `url(#${chartRef}-color-${i})` : colors[i])
+          "
           :curve-type="curveType"
           :opacity="
             legendItems.find((item) => item.name === category)?.inactive
@@ -185,7 +188,7 @@ function handleLegendItemClick(d: BulletLegendItemInterface, i: number) {
         type="y"
       />
 
-      <slot />
+      <slot></slot>
     </VisXYContainer>
   </div>
 </template>

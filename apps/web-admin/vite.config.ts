@@ -1,10 +1,15 @@
-import { defineConfig, viteCssLayerPlugin } from '@vben/vite-config';
+import { defineConfig } from '@vben/vite-config';
 
 export default defineConfig(async () => {
   return {
     application: {
       pwa: true,
       pwaOptions: {
+        registerType: 'autoUpdate',
+        workbox: {
+          clientsClaim: true,
+          skipWaiting: true,
+        },
         manifest: {
           background_color: '#09090b',
           description:
@@ -35,12 +40,7 @@ export default defineConfig(async () => {
       },
     },
     vite: {
-      plugins: [
-        viteCssLayerPlugin({
-          layerName: 'tuquet',
-          packageName: '@tuquet/vue-ui',
-        }),
-      ],
+      plugins: [],
       resolve: {
         dedupe: ['vue', 'vue-router', 'pinia'],
       },

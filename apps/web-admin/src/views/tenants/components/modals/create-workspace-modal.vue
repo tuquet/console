@@ -12,6 +12,8 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
+import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
+
 interface Props {
   loading?: boolean;
   open: boolean;
@@ -67,44 +69,56 @@ function handleOk() {
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogContent class="sm:max-w-lg">
       <DialogHeader>
-        <DialogTitle>Tạo Workspace Mới</DialogTitle>
+        <DialogTitle>Tạo workspace mới</DialogTitle>
       </DialogHeader>
 
-      <div class="space-y-5 py-2">
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">
-            Tên Workspace <span class="text-destructive ml-0.5">*</span>
-          </label>
-          <Input
-            v-model="name"
-            placeholder="Ví dụ: Core Engineering"
-            @input="handleNameChange"
-          />
-        </div>
+      <div class="py-2">
+        <VxeForm
+          :data="{ name, slug, plan }"
+          custom-layout
+          size="small"
+          class="w-full space-y-3"
+        >
+          <VxeFormItem title="Tên workspace" span="24">
+            <template #default>
+              <Input
+                v-model="name"
+                placeholder="Ví dụ: Core Engineering"
+                class="h-10"
+                @input="handleNameChange"
+              />
+            </template>
+          </VxeFormItem>
 
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">
-            Mã định danh (Slug) <span class="text-destructive ml-0.5">*</span>
-          </label>
-          <Input v-model="slug" placeholder="Ví dụ: core-eng" />
-          <p class="mt-1.5 text-xs text-muted-foreground">
-            Dùng trong định danh URL. Chỉ gồm chữ thường, số và dấu gạch ngang.
-          </p>
-        </div>
+          <VxeFormItem title="Mã slug định danh" span="24">
+            <template #default>
+              <div class="space-y-1.5 w-full">
+                <Input
+                  v-model="slug"
+                  placeholder="Ví dụ: core-eng"
+                  class="h-10"
+                />
+                <p class="text-xs text-muted-foreground">
+                  Dùng trong định danh URL. Chỉ gồm chữ thường, số và dấu gạch
+                  ngang.
+                </p>
+              </div>
+            </template>
+          </VxeFormItem>
 
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">
-            Gói Dịch Vụ
-          </label>
-          <select
-            v-model="plan"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="pro">Pro (Khuyên dùng)</option>
-            <option value="free">Free Tier</option>
-            <option value="enterprise">Enterprise Custom</option>
-          </select>
-        </div>
+          <VxeFormItem title="Gói dịch vụ" span="24">
+            <template #default>
+              <select
+                v-model="plan"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="pro">Pro - Khuyên dùng</option>
+                <option value="free">Free Tier</option>
+                <option value="enterprise">Enterprise Custom</option>
+              </select>
+            </template>
+          </VxeFormItem>
+        </VxeForm>
       </div>
 
       <DialogFooter class="flex items-center justify-end gap-2 pt-2">
@@ -116,7 +130,7 @@ function handleOk() {
           Hủy
         </Button>
         <Button :disabled="props.loading" @click="handleOk">
-          Tạo Workspace
+          Tạo workspace
         </Button>
       </DialogFooter>
     </DialogContent>

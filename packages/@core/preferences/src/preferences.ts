@@ -87,7 +87,7 @@ class PreferenceManager {
    * Get initial preferences
    */
   getInitialPreferences = () => {
-    return this.initialPreferences;
+    return this.cloneValue(this.initialPreferences);
   };
 
   /**
@@ -139,11 +139,17 @@ class PreferenceManager {
     );
 
     // Load cached preferences, filling in fields not explicitly configured
-    const cachedPreferences = (await this.loadFromCache()) || {};
+    const cachedPreferences = ((await this.loadFromCache()) || {}) as Record<
+      string,
+      any
+    >;
     // Fix dirty data: earlier versions used defu(merge) which concats arrays, causing widget.order
     // to bloat with duplicate keys on every update.
     // Deduplicate here after loading cache, preserving first occurrence.
     this.sanitizeCachedArray(cachedPreferences, 'widget', 'order');
+    if (cachedPreferences.app) {
+      delete (cachedPreferences.app as Record<string, unknown>).isMobile;
+    }
     const mergedPreference = mergeWithArrayOverride(
       {},
       cachedPreferences, // User cached preferences take priority
@@ -176,15 +182,32 @@ class PreferenceManager {
    * Reset preferences to initial state
    */
   resetPreferences = async () => {
-    // Reset state to initial preferences
-    Object.assign(this.state, this.initialPreferences);
-    this.replaceCustomPreferences(this.initialCustomPreferences);
+    // Cancel any pending debounced saves to prevent re-caching obsolete states
+    (this.debouncedSave as any)?.cancel?.();
+
+    // Preserve dynamic runtime viewport state across reset
+    const currentIsMobile = this.state.app.isMobile;
+
+    // Reset state to initial preferences using deep-clone baseline isolation
+    Object.assign(this.state, this.cloneValue(this.initialPreferences));
+    this.replaceCustomPreferences(
+      this.cloneValue(this.initialCustomPreferences),
+    );
+
+    // Restore dynamic viewport status so mobile state is preserved
+    this.state.app.isMobile = currentIsMobile;
 
     // Trigger UI updates directly
     this.handleUpdates(this.state);
 
-    // Save preferences to cache
-    await this.saveToCache();
+    // Pristine Cache Purge on Reset: cleanly purge STORAGE_KEYS from storage
+    // so subsequent F5 page reloads never restore stale user overrides
+    await Promise.all([
+      this.cache.removeItem(STORAGE_KEYS.MAIN),
+      this.cache.removeItem(STORAGE_KEYS.CUSTOM),
+      this.cache.removeItem(STORAGE_KEYS.LOCALE),
+      this.cache.removeItem(STORAGE_KEYS.THEME),
+    ]);
   };
 
   /**
@@ -437,7 +460,12 @@ class PreferenceManager {
    */
   private async saveToCache() {
     try {
-      await this.cache.setItem(STORAGE_KEYS.MAIN, this.state);
+      const stateToCache = this.cloneValue(this.state);
+      if (stateToCache.app) {
+        delete (stateToCache.app as unknown as Record<string, unknown>)
+          .isMobile;
+      }
+      await this.cache.setItem(STORAGE_KEYS.MAIN, stateToCache);
       await this.cache.setItem(STORAGE_KEYS.LOCALE, this.state.app.locale);
       await this.cache.setItem(STORAGE_KEYS.THEME, this.state.theme.mode);
 

@@ -1,30 +1,22 @@
 <script lang="ts" setup>
 import type { BillingPlanItem } from '#/api';
 
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 
-import { Cpu, CreditCard, HardDrive, RefreshCw, Users } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  toast,
-} from '@tuquet/vue-ui';
+import { Cpu, HardDrive, RefreshCw, Users } from '@lucide/vue';
+import { Badge, Button } from '@tuquet/vue-ui';
 
+import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getBillingPlansApi } from '#/api';
 import { useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 defineOptions({ name: 'SystemPlans' });
 
 const { formatDate } = useDateFormat();
 
-const loading = ref(true);
-const plans = ref<BillingPlanItem[]>([]);
+const plansCount = ref(0);
+const activePlansCount = ref(0);
 
 function formatStorage(mb: number): string {
   if (mb >= 1024) {
@@ -33,19 +25,137 @@ function formatStorage(mb: number): string {
   return `${mb} MB`;
 }
 
-async function loadPlans() {
-  loading.value = true;
-  try {
-    plans.value = await getBillingPlansApi();
-  } catch (error: any) {
-    toast.error(error.message || 'Không thể tải danh sách gói cước');
-  } finally {
-    loading.value = false;
-  }
-}
+const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
+  formOptions: {
+    schema: [
+      {
+        component: 'Select',
+        fieldName: 'status',
+        label: 'Trạng thái',
+        defaultValue: 'all',
+        componentProps: {
+          placeholder: 'Tất cả trạng thái',
+          options: [
+            { label: 'Tất cả trạng thái', value: 'all' },
+            { label: 'Đang kích hoạt', value: 'active' },
+            { label: 'Tạm dừng', value: 'paused' },
+          ],
+        },
+      },
+      {
+        component: 'Input',
+        fieldName: 'search',
+        label: 'Tìm kiếm',
+        componentProps: {
+          placeholder: 'Tìm theo tên gói cước hoặc mã ID...',
+          clearable: true,
+        },
+      },
+    ],
+    layout: 'vertical',
+    showCollapseButton: false,
+    submitButtonOptions: {
+      content: $t('common.filter'),
+    },
+    resetButtonOptions: {
+      content: $t('common.reset'),
+    },
+    actionWrapperClass: 'flex items-center justify-end gap-2 pt-2 sm:pt-6',
+    wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3',
+  },
+  gridOptions: {
+    border: false,
+    round: true,
+    showOverflow: true,
+    pagerConfig: {
+      pageSize: 15,
+      pageSizes: [10, 15, 30],
+    },
+    proxyConfig: {
+      autoLoad: true,
+      ajax: {
+        query: async (
+          { page }: { page?: { currentPage?: number; pageSize?: number } },
+          formValues: Record<string, any>,
+        ) => {
+          const data = await getBillingPlansApi();
+          plansCount.value = data.length;
+          activePlansCount.value = data.filter((p) => p.is_active).length;
 
-onMounted(() => {
-  loadPlans();
+          let filtered = data;
+          if (formValues?.status === 'active') {
+            filtered = filtered.filter((p) => p.is_active);
+          } else if (formValues?.status === 'paused') {
+            filtered = filtered.filter((p) => !p.is_active);
+          }
+
+          if (formValues?.search) {
+            const kw = String(formValues.search).toLowerCase().trim();
+            filtered = filtered.filter(
+              (p) =>
+                p.name.toLowerCase().includes(kw) ||
+                p.id.toLowerCase().includes(kw),
+            );
+          }
+
+          const currentPage = page?.currentPage || 1;
+          const pageSize = page?.pageSize || 15;
+          const start = (currentPage - 1) * pageSize;
+          const end = start + pageSize;
+
+          return {
+            items: filtered.slice(start, end),
+            total: filtered.length,
+          };
+        },
+      },
+    },
+    columns: [
+      {
+        field: 'name',
+        title: 'Tên gói',
+        minWidth: 200,
+        slots: { default: 'name-cell' },
+      },
+      {
+        field: 'price_monthly_usd',
+        title: 'Giá cước',
+        width: 140,
+        slots: { default: 'price-cell' },
+      },
+      {
+        field: 'max_members',
+        title: 'Hạn mức thành viên',
+        width: 170,
+        slots: { default: 'members-cell' },
+      },
+      {
+        field: 'max_storage_mb',
+        title: 'Dung lượng',
+        width: 140,
+        slots: { default: 'storage-cell' },
+      },
+      {
+        field: 'max_monthly_runs',
+        title: 'Lượt chạy / tháng',
+        width: 160,
+        slots: { default: 'runs-cell' },
+      },
+      {
+        field: 'is_active',
+        title: 'Trạng thái',
+        width: 130,
+        slots: { default: 'status-cell' },
+      },
+      {
+        field: 'created_at',
+        title: 'Ngày tạo',
+        minWidth: 150,
+        align: 'right',
+        slots: { default: 'date-cell' },
+      },
+    ],
+  },
 });
 </script>
 
@@ -55,37 +165,33 @@ onMounted(() => {
     <div
       class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div class="flex items-center gap-2.5">
+      <div class="flex flex-col gap-1">
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Gói Cước & Hạn Mức Dịch Vụ
+          Gói cước & hạn mức dịch vụ
         </h1>
-        <Badge variant="secondary" class="text-xs uppercase font-medium">
-          SaaS Plans
-        </Badge>
+        <p class="text-xs text-muted-foreground">
+          Cấu hình định mức tài nguyên và biểu phí dịch vụ cho các tổ chức
+        </p>
       </div>
 
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
           size="icon"
-          :disabled="loading"
           class="size-8 shrink-0"
-          title="Làm mới"
-          @click="loadPlans"
+          :title="$t('common.refresh')"
+          @click="gridApi.reload()"
         >
-          <RefreshCw
-            class="size-3.5 shrink-0"
-            :class="{ 'animate-spin': loading }"
-          />
+          <RefreshCw class="size-3.5 shrink-0" />
         </Button>
       </div>
     </div>
 
     <!-- Main Container -->
     <div
-      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-4"
+      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-sm space-y-4"
     >
       <!-- Stats Bar -->
       <div
@@ -94,196 +200,93 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <CreditCard class="size-4 text-muted-foreground" />
           <span class="text-sm font-semibold text-foreground">
-            Danh Sách Gói Dịch Vụ
+            Danh sách gói dịch vụ
           </span>
-          <span class="text-muted-foreground">({{ plans.length }} gói)</span>
+          <span class="text-muted-foreground">· {{ plansCount }} gói</span>
         </div>
 
         <div class="flex items-center gap-3 text-muted-foreground">
-          <span
-            >{{ plans.filter((p) => p.is_active).length }} Đang kích hoạt</span
-          >
+          <span>{{ activePlansCount }} đang kích hoạt</span>
         </div>
       </div>
 
-      <!-- Desktop Table -->
-      <div
-        v-if="plans.length > 0"
-        class="hidden md:block overflow-x-auto rounded-lg border border-border/60"
-      >
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Tên Gói</TableHead>
-              <TableHead>Giá Cước</TableHead>
-              <TableHead>Hạn Mức Thành Viên</TableHead>
-              <TableHead>Dung Lượng</TableHead>
-              <TableHead>Lượt Chạy / Tháng</TableHead>
-              <TableHead>Trạng Thái</TableHead>
-              <TableHead class="text-right">Ngày Tạo</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-for="p in plans" :key="p.id">
-              <TableCell>
-                <div class="flex items-center gap-2.5">
-                  <div
-                    class="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground"
-                  >
-                    <CreditCard class="size-4" />
-                  </div>
-                  <div>
-                    <div class="font-medium text-foreground">
-                      {{ p.name }}
-                    </div>
-                    <div class="font-mono text-xs text-muted-foreground">
-                      {{ p.id }}
-                    </div>
-                  </div>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <div v-if="p.price_monthly_usd === 0">
-                  <Badge variant="secondary" class="text-xs font-normal">
-                    Miễn Phí
-                  </Badge>
-                </div>
-                <div
-                  v-else
-                  class="font-semibold text-foreground text-sm"
-                >
-                  ${{ p.price_monthly_usd }}
-                  <span class="text-xs font-normal text-muted-foreground"
-                    >/tháng</span
-                  >
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <div
-                  class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
-                >
-                  <Users class="size-3.5 text-muted-foreground shrink-0" />
-                  <span>{{ p.max_members }} users</span>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <div
-                  class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
-                >
-                  <HardDrive class="size-3.5 text-muted-foreground shrink-0" />
-                  <span>{{ formatStorage(p.max_storage_mb) }}</span>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <div
-                  class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
-                >
-                  <Cpu class="size-3.5 text-muted-foreground shrink-0" />
-                  <span>{{ p.max_monthly_runs.toLocaleString() }} runs</span>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <Badge variant="outline" class="text-xs font-normal">
-                  <span
-                    class="mr-1.5 size-1.5 rounded-full"
-                    :class="p.is_active ? 'bg-success' : 'bg-muted-foreground'"
-                  ></span>
-                  {{ p.is_active ? 'Kích Hoạt' : 'Tạm Dừng' }}
-                </Badge>
-              </TableCell>
-
-              <TableCell class="text-right text-xs text-muted-foreground">
-                {{ formatDate(p.created_at) }}
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-
-      <!-- Mobile Touch Cards -->
-      <div v-if="plans.length > 0" class="block space-y-3 md:hidden">
-        <div
-          v-for="p in plans"
-          :key="p.id"
-          class="rounded-xl border border-border/60 bg-muted/10 p-4 space-y-3"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2.5">
-              <div
-                class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
-              >
-                <CreditCard class="size-4.5" />
+      <!-- Table Grid -->
+      <Grid class="plans-vxe-grid">
+        <template #name-cell="{ row }">
+          <div class="flex items-center gap-2.5 py-1">
+            <div
+              class="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground"
+            >
+              <CreditCard class="size-4" />
+            </div>
+            <div class="text-left">
+              <div class="font-medium text-foreground">
+                {{ row.name }}
               </div>
-              <div>
-                <div class="font-semibold text-foreground text-sm">
-                  {{ p.name }}
-                </div>
-                <div class="font-mono text-xs text-muted-foreground">
-                  {{ p.id }}
-                </div>
+              <div class="font-mono text-xs text-muted-foreground">
+                {{ row.id }}
               </div>
             </div>
+          </div>
+        </template>
 
-            <Badge variant="outline" class="text-xs font-normal">
-              <span
-                class="mr-1.5 size-1.5 rounded-full"
-                :class="p.is_active ? 'bg-success' : 'bg-muted-foreground'"
-              ></span>
-              {{ p.is_active ? 'Kích Hoạt' : 'Tạm Dừng' }}
+        <template #price-cell="{ row }">
+          <div v-if="row.price_monthly_usd === 0">
+            <Badge variant="secondary" class="text-xs font-normal">
+              Miễn phí
             </Badge>
           </div>
-
-          <div
-            class="flex items-baseline gap-1 text-base font-bold text-foreground"
-          >
-            <span v-if="p.price_monthly_usd === 0">Miễn Phí</span>
-            <span v-else>${{ p.price_monthly_usd }} / tháng</span>
+          <div v-else class="font-semibold text-foreground text-sm">
+            ${{ row.price_monthly_usd }}
+            <span class="text-xs font-normal text-muted-foreground"
+              >/tháng</span
+            >
           </div>
+        </template>
 
+        <template #members-cell="{ row }">
           <div
-            class="grid grid-cols-2 gap-2 text-xs text-muted-foreground"
+            class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
           >
-            <div class="flex items-center gap-1.5">
-              <Users class="size-3 shrink-0" />
-              <span>{{ p.max_members }} users</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <HardDrive class="size-3 shrink-0" />
-              <span>{{ formatStorage(p.max_storage_mb) }}</span>
-            </div>
-            <div class="col-span-2 flex items-center gap-1.5">
-              <Cpu class="size-3 shrink-0" />
-              <span
-                >{{ p.max_monthly_runs.toLocaleString() }} runs / tháng</span
-              >
-            </div>
+            <Users class="size-3.5 text-muted-foreground shrink-0" />
+            <span>{{ row.max_members }} users</span>
           </div>
-        </div>
-      </div>
+        </template>
 
-      <!-- Empty State -->
-      <div
-        v-if="plans.length === 0 && !loading"
-        class="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/60 py-12 text-center"
-      >
-        <div
-          class="flex size-12 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground"
-        >
-          <CreditCard class="size-6" />
-        </div>
-        <h3 class="mt-3 text-sm font-semibold text-foreground">
-          Chưa có gói cước nào được tạo
-        </h3>
-        <p class="mt-1 max-w-sm text-xs text-muted-foreground">
-          Các gói dịch vụ được khởi tạo và cấu hình từ plugin subscriptions của
-          Tuquet Cloud.
-        </p>
-      </div>
+        <template #storage-cell="{ row }">
+          <div
+            class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
+          >
+            <HardDrive class="size-3.5 text-muted-foreground shrink-0" />
+            <span>{{ formatStorage(row.max_storage_mb) }}</span>
+          </div>
+        </template>
+
+        <template #runs-cell="{ row }">
+          <div
+            class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
+          >
+            <Cpu class="size-3.5 text-muted-foreground shrink-0" />
+            <span>{{ row.max_monthly_runs.toLocaleString() }} runs</span>
+          </div>
+        </template>
+
+        <template #status-cell="{ row }">
+          <Badge variant="outline" class="text-xs font-normal">
+            <span
+              class="mr-1.5 size-1.5 rounded-full"
+              :class="row.is_active ? 'bg-success' : 'bg-muted-foreground'"
+            ></span>
+            {{ row.is_active ? 'Kích hoạt' : 'Tạm dừng' }}
+          </Badge>
+        </template>
+
+        <template #date-cell="{ row }">
+          <span class="text-xs text-muted-foreground">
+            {{ formatDate(row.created_at) }}
+          </span>
+        </template>
+      </Grid>
     </div>
   </div>
 </template>

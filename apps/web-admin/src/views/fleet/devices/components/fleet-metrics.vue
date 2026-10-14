@@ -3,6 +3,8 @@ import type { FleetMetricsData } from '#/api';
 
 import { CheckCircle2, Cpu, Laptop, Terminal } from '@lucide/vue';
 
+import { $t } from '#/locales';
+
 interface Props {
   loading?: boolean;
   metrics: FleetMetricsData;
@@ -19,7 +21,7 @@ const props = withDefaults(defineProps<Props>(), {
     <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
       <div class="flex items-center justify-between">
         <span class="text-sm font-medium text-muted-foreground">
-          Tổng Máy Trạm
+          {{ $t('page.fleet_view.metric_total_nodes') }}
         </span>
         <span
           class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -32,11 +34,11 @@ const props = withDefaults(defineProps<Props>(), {
           {{ props.metrics.total_nodes }}
         </span>
         <span class="text-xs font-medium text-muted-foreground">
-          Thiết bị
+          {{ $t('page.fleet_view.metric_devices_unit') }}
         </span>
       </div>
       <div class="mt-2 text-xs text-muted-foreground">
-        Đã đăng ký vào hệ thống
+        {{ $t('page.fleet_view.metric_registered_desc') }}
       </div>
     </div>
 
@@ -44,7 +46,7 @@ const props = withDefaults(defineProps<Props>(), {
     <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
       <div class="flex items-center justify-between">
         <span class="text-sm font-medium text-muted-foreground">
-          Đang Trực Tuyến
+          {{ $t('page.fleet_view.metric_online_nodes') }}
         </span>
         <span
           class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -57,14 +59,14 @@ const props = withDefaults(defineProps<Props>(), {
           {{ props.metrics.online_nodes }}
         </span>
         <span class="text-xs font-medium text-muted-foreground">
-          Sẵn sàng
+          {{ $t('page.fleet_view.metric_ready_unit') }}
         </span>
       </div>
       <div class="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
         <span
           class="size-2 rounded-full bg-success animate-pulse shrink-0"
         ></span>
-        <span>Nhận lệnh thực thi tự động</span>
+        <span>{{ $t('page.fleet_view.metric_auto_exec_desc') }}</span>
       </div>
     </div>
 
@@ -72,7 +74,7 @@ const props = withDefaults(defineProps<Props>(), {
     <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
       <div class="flex items-center justify-between">
         <span class="text-sm font-medium text-muted-foreground">
-          Tác Vụ Đang Chạy
+          {{ $t('page.fleet_view.metric_active_jobs') }}
         </span>
         <span
           class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -85,11 +87,11 @@ const props = withDefaults(defineProps<Props>(), {
           {{ props.metrics.active_jobs }}
         </span>
         <span class="text-xs font-medium text-muted-foreground">
-          Runner Jobs
+          {{ $t('page.fleet_view.metric_jobs_unit') }}
         </span>
       </div>
       <div class="mt-2 text-xs text-muted-foreground">
-        Tiến trình Win32 Job Object
+        {{ $t('page.fleet_view.metric_active_jobs_desc') }}
       </div>
     </div>
 
@@ -97,7 +99,7 @@ const props = withDefaults(defineProps<Props>(), {
     <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
       <div class="flex items-center justify-between">
         <span class="text-sm font-medium text-muted-foreground">
-          Cổng Daemon Loopback
+          {{ $t('page.fleet_view.metric_loopback_port') }}
         </span>
         <span
           class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
@@ -116,12 +118,14 @@ const props = withDefaults(defineProps<Props>(), {
           <span
             class="size-2 rounded-full bg-success animate-pulse shrink-0"
           ></span>
-          Online
+          {{ $t('page.fleet_view.online') }}
         </span>
-        <span v-else class="text-xs text-muted-foreground"> Chờ kết nối </span>
+        <span v-else class="text-xs text-muted-foreground">
+          {{ $t('page.fleet_view.standby') }}
+        </span>
       </div>
       <div class="mt-2 font-mono text-xs text-muted-foreground">
-        Process Supervisor
+        {{ $t('page.fleet_view.process_supervisor') }}
       </div>
     </div>
   </div>

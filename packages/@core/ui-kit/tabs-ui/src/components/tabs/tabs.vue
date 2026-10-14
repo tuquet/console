@@ -148,9 +148,3 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
     </TransitionGroup>
   </div>
 </template>
-
-<style scoped>
-.tabs__extra {
-  transform: translateY(-50%);
-}
-</style>

@@ -1,47 +1,40 @@
 import type { RouteRecordRaw } from 'vue-router';
 
-import { $t } from '#/locales';
-
 const routes: RouteRecordRaw[] = [
   {
     meta: {
-      icon: 'lucide:cpu',
-      order: 20,
-      plugin: 'runners',
-      title: $t('page.fleet.title'),
+      hideInMenu: true,
+      title: '',
     },
-    name: 'Fleet',
+    name: 'FleetLegacy',
     path: '/fleet',
-    redirect: '/fleet/devices',
+    redirect: '/automation/devices',
     children: [
       {
-        name: 'FleetDevices',
+        name: 'FleetDevicesRedirect',
         path: 'devices',
-        component: () => import('#/views/fleet/devices/index.vue'),
+        redirect: '/automation/devices',
         meta: {
-          authority: ['superadmin', 'runners:devices:read'],
-          icon: 'lucide:laptop',
-          title: $t('page.fleet.devices'),
+          hideInMenu: true,
+          title: '',
         },
       },
       {
-        name: 'FleetBrowsers',
+        name: 'FleetBrowsersRedirect',
         path: 'browsers',
-        component: () => import('#/views/fleet/browsers/index.vue'),
+        redirect: '/automation/browsers',
         meta: {
-          authority: ['superadmin', 'runners:browsers:read'],
-          icon: 'lucide:globe',
-          title: $t('page.fleet.browsers'),
+          hideInMenu: true,
+          title: '',
         },
       },
       {
-        name: 'FleetProxies',
+        name: 'FleetProxiesRedirect',
         path: 'proxies',
-        component: () => import('#/views/fleet/proxies/index.vue'),
+        redirect: '/automation/proxies',
         meta: {
-          authority: ['superadmin', 'runners:proxies:read'],
-          icon: 'lucide:network',
-          title: $t('page.fleet.proxies'),
+          hideInMenu: true,
+          title: '',
         },
       },
     ],

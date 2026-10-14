@@ -32,17 +32,17 @@ export interface BaseChartProps<T extends Record<string, any>> {
    * Function to format X label
    */
   xFormatter?: (
-    tick: number | Date,
+    tick: Date | number,
     i: number,
-    ticks: number[] | Date[],
+    ticks: Date[] | number[],
   ) => string;
   /**
    * Function to format Y label
    */
   yFormatter?: (
-    tick: number | Date,
+    tick: Date | number,
     i: number,
-    ticks: number[] | Date[],
+    ticks: Date[] | number[],
   ) => string;
   /**
    * Controls the visibility of the X axis.

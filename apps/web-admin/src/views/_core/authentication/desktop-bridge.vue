@@ -52,7 +52,7 @@ async function loadTenants() {
     const list = await getTenantsApi();
     if (list && list.length > 0) {
       tenantOptions.value = list.map((t) => ({
-        label: `${t.name} (${t.slug})`,
+        label: `${t.name} · ${t.slug}`,
         value: t.id,
       }));
       selectedTenant.value = tenantOptions.value[0]?.value || '';
@@ -202,17 +202,17 @@ onMounted(() => {
             <AvatarImage src="https://tuquet.com/icons/cli.svg" />
             <AvatarFallback>CLI</AvatarFallback>
           </Avatar>
-          <h3 class="text-xl font-bold">Kết Nối Máy Trạm</h3>
+          <h3 class="text-xl font-bold">Kết nối thiết bị</h3>
           <p class="text-xs text-muted-foreground">
             Đăng nhập tài khoản <strong>Tuquet</strong> để cấp quyền truy cập
-            cho máy trạm.
+            cho thiết bị.
           </p>
 
           <div class="rounded-lg bg-muted p-4 text-left">
             <span
-              class="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1"
+              class="text-xs font-semibold text-muted-foreground block mb-1"
             >
-              Máy trạm yêu cầu:
+              Thiết bị yêu cầu:
             </span>
             <div class="flex items-center justify-between">
               <span class="text-sm font-medium text-foreground">{{
@@ -227,7 +227,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <Button class="w-full h-10" @click="goToLogin"> Đăng Nhập </Button>
+          <Button class="w-full h-10" @click="goToLogin"> Đăng nhập </Button>
         </div>
       </template>
 
@@ -239,7 +239,7 @@ onMounted(() => {
           >
             <Laptop class="size-8" />
           </div>
-          <h3 class="text-xl font-bold">Ủy Quyền Máy Trạm</h3>
+          <h3 class="text-xl font-bold">Ủy quyền thiết bị</h3>
           <p class="text-xs text-muted-foreground mt-1">
             Cấp quyền kết nối và đồng bộ tài nguyên với Tuquet Cloud.
           </p>
@@ -249,9 +249,7 @@ onMounted(() => {
           class="space-y-4 rounded-xl border border-border/60 bg-muted/40 p-4"
         >
           <div class="flex items-center justify-between">
-            <span class="text-xs text-muted-foreground uppercase tracking-wider"
-              >Tài khoản</span
-            >
+            <span class="text-xs text-muted-foreground">Tài khoản</span>
             <div class="flex items-center space-x-2">
               <Avatar class="size-6">
                 <AvatarImage :src="userAvatar" />
@@ -264,9 +262,7 @@ onMounted(() => {
           </div>
 
           <div class="flex items-center justify-between">
-            <span class="text-xs text-muted-foreground uppercase tracking-wider"
-              >Thiết bị</span
-            >
+            <span class="text-xs text-muted-foreground">Thiết bị</span>
             <Badge
               variant="outline"
               class="bg-accent text-accent-foreground border-border"
@@ -276,8 +272,7 @@ onMounted(() => {
           </div>
 
           <div>
-            <span
-              class="text-xs text-muted-foreground uppercase tracking-wider block mb-2"
+            <span class="text-xs text-muted-foreground block mb-2"
               >Workspace</span
             >
             <select
@@ -318,7 +313,7 @@ onMounted(() => {
             :disabled="loading"
             @click="handleAuthorize"
           >
-            {{ loading ? 'Đang xử lý...' : 'Cấp Quyền' }}
+            {{ loading ? 'Đang xử lý...' : 'Cấp quyền' }}
           </Button>
         </div>
       </template>

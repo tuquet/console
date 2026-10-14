@@ -6,8 +6,7 @@ const routes: RouteRecordRaw[] = [
   {
     meta: {
       icon: 'lucide:workflow',
-      order: 30,
-      plugin: 'automa',
+      order: 20,
       title: $t('page.automation.title'),
     },
     name: 'Automation',
@@ -32,6 +31,36 @@ const routes: RouteRecordRaw[] = [
           authority: ['superadmin', 'automa:campaigns:read'],
           icon: 'lucide:play-circle',
           title: $t('page.automation.runs'),
+        },
+      },
+      {
+        name: 'AutomationDevices',
+        path: 'devices',
+        component: () => import('#/views/fleet/devices/index.vue'),
+        meta: {
+          authority: ['superadmin', 'runners:devices:read'],
+          icon: 'lucide:laptop',
+          title: $t('page.fleet.devices'),
+        },
+      },
+      {
+        name: 'AutomationBrowsers',
+        path: 'browsers',
+        component: () => import('#/views/fleet/browsers/index.vue'),
+        meta: {
+          authority: ['superadmin', 'runners:browsers:read'],
+          icon: 'lucide:globe',
+          title: $t('page.fleet.browsers'),
+        },
+      },
+      {
+        name: 'AutomationProxies',
+        path: 'proxies',
+        component: () => import('#/views/fleet/proxies/index.vue'),
+        meta: {
+          authority: ['superadmin', 'runners:proxies:read'],
+          icon: 'lucide:network',
+          title: $t('page.fleet.proxies'),
         },
       },
       {

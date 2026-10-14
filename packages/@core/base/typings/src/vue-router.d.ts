@@ -53,7 +53,7 @@ interface RouteMeta {
    */
   domCached?: boolean;
   /**
-   * Use full path as key (default: true)
+   * Use full path as key (default: false)
    */
   fullPathKey?: boolean;
   /**
@@ -89,6 +89,11 @@ interface RouteMeta {
    * @default false
    */
   ignoreAccess?: boolean;
+  /**
+   * Ignore route transition animation
+   * @default false
+   */
+  ignoreTransition?: boolean;
   /**
    * Enable KeepAlive caching
    */

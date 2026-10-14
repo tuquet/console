@@ -139,7 +139,7 @@ exports[`defaultPreferences immutability test > should not modify the config obj
     "fullscreenButtonPosition": "header",
     "globalSearch": true,
     "globalSearchButtonPosition": "header",
-    "languageToggle": false,
+    "languageToggle": true,
     "languageToggleButtonPosition": "header",
     "lockScreen": true,
     "lockScreenButtonPosition": "header",

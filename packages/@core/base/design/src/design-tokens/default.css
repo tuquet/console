@@ -516,8 +516,8 @@
 .unovis-tooltip,
 [class*='-tooltip'],
 div[class*='tooltip_'] {
+  padding: 0 !important;
   background-color: transparent !important;
   border: none !important;
-  padding: 0 !important;
   box-shadow: none !important;
 }

@@ -111,7 +111,7 @@ export async function getInstalledPluginsApi(): Promise<string[]> {
 
 ## Boundaries
 
-- **Always:** đi qua `supabaseRequest`; giữ tương thích chữ ký cũ (`schema` là tùy chọn); chạy đủ quality gate trước commit.
+- **Always:** đi qua `supabaseRequest`; duy trì thiết kế chuẩn (`schema` là tùy chọn, mặc định `public`); chạy đủ quality gate trước commit.
 - **Ask first:** sửa repo `cloud`; đổi `accessMode` của Vben; thêm store Pinia mới.
 - **Never:** tin `user_metadata` để xác định superadmin (user tự sửa được); dùng `permissions` trong JWT (bị cắt ở 25); fallback dữ liệu/quyền giả; push khi chưa qua gate.
 

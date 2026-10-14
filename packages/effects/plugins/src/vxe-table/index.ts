@@ -4,6 +4,28 @@ export * from './use-vxe-grid';
 
 export { default as VbenVxeGrid } from './use-vxe-grid.vue';
 export type {
+  VxeFormDefines,
+  VxeFormEvents,
+  VxeFormGroupProps,
+  VxeFormInstance,
+  VxeFormItemProps,
+  VxeFormProps,
+  VxeFormPropTypes,
+} from 'vxe-pc-ui';
+
+import {
+  VxeForm as _VxeForm,
+  VxeFormGather as _VxeFormGather,
+  VxeFormGroup as _VxeFormGroup,
+  VxeFormItem as _VxeFormItem,
+} from 'vxe-pc-ui';
+
+export const VxeForm = _VxeForm;
+export const VxeFormItem = _VxeFormItem;
+export const VxeFormGroup = _VxeFormGroup;
+export const VxeFormGather = _VxeFormGather;
+
+export type {
   VxeGridListeners,
   VxeGridProps,
   VxeGridPropTypes,

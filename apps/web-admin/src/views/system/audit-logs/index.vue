@@ -1,17 +1,9 @@
 <script lang="ts" setup>
 import type { GlobalAuditLogItem } from '#/api';
 
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 
-import {
-  Building2,
-  Eye,
-  RefreshCw,
-  ScrollText,
-  Search,
-  ShieldCheck,
-  User,
-} from '@lucide/vue';
+import { Eye, RefreshCw, ShieldCheck, User } from '@lucide/vue';
 import {
   Badge,
   Button,
@@ -20,49 +12,138 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  Input,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  toast,
 } from '@tuquet/vue-ui';
 
+import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getGlobalAuditLogsApi } from '#/api';
 import { useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 defineOptions({ name: 'SystemAuditLogs' });
 
 const { formatDate } = useDateFormat();
 
-const loading = ref(true);
-const logs = ref<GlobalAuditLogItem[]>([]);
-const actionFilter = ref('');
-const tenantFilter = ref('');
-
 const selectedLog = ref<GlobalAuditLogItem | null>(null);
 const detailOpen = ref(false);
 
-async function loadAuditLogs() {
-  loading.value = true;
-  try {
-    logs.value = await getGlobalAuditLogsApi({
-      action: actionFilter.value.trim() || undefined,
-      tenantId: tenantFilter.value.trim() || undefined,
-      limit: 100,
-    });
-  } catch (error: any) {
-    toast.error(error.message || 'Không thể tải nhật ký kiểm toán toàn cầu');
-  } finally {
-    loading.value = false;
-  }
-}
+const [Grid, gridApi] = useVbenVxeGrid<GlobalAuditLogItem>({
+  formOptions: {
+    schema: [
+      {
+        component: 'Input',
+        fieldName: 'action',
+        label: 'Hành động',
+        componentProps: {
+          placeholder: 'auth:login, member:invite...',
+        },
+      },
+      {
+        component: 'Input',
+        fieldName: 'tenantId',
+        label: 'Mã định danh tổ chức',
+        componentProps: {
+          placeholder: 'Tenant UUID...',
+        },
+      },
+    ],
+    layout: 'vertical',
+    showCollapseButton: false,
+    submitButtonOptions: {
+      content: $t('common.filter'),
+    },
+    resetButtonOptions: {
+      content: $t('common.reset'),
+    },
+    actionWrapperClass: 'flex items-center justify-end gap-2 pt-2 sm:pt-6',
+    wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3',
+  },
+  gridOptions: {
+    border: false,
+    round: true,
+    showOverflow: true,
+    pagerConfig: {
+      pageSize: 15,
+      pageSizes: [10, 15, 30, 50],
+    },
+    proxyConfig: {
+      autoLoad: true,
+      ajax: {
+        query: async (
+          { page }: { page?: { currentPage?: number; pageSize?: number } },
+          formValues: Record<string, any>,
+        ) => {
+          const action = formValues?.action
+            ? String(formValues.action).trim()
+            : undefined;
+          const tenantId = formValues?.tenantId
+            ? String(formValues.tenantId).trim()
+            : undefined;
 
-function handleSearch() {
-  loadAuditLogs();
-}
+          const data = await getGlobalAuditLogsApi({
+            action: action || undefined,
+            tenantId: tenantId || undefined,
+            limit: 100,
+          });
+
+          const currentPage = page?.currentPage || 1;
+          const pageSize = page?.pageSize || 15;
+          const start = (currentPage - 1) * pageSize;
+          const end = start + pageSize;
+
+          return {
+            items: data.slice(start, end),
+            total: data.length,
+          };
+        },
+      },
+    },
+    columns: [
+      {
+        field: 'created_at',
+        title: 'Thời gian',
+        width: 170,
+        slots: { default: 'time-cell' },
+      },
+      {
+        field: 'action',
+        title: 'Hành động',
+        width: 160,
+        slots: { default: 'action-cell' },
+      },
+      {
+        field: 'entity_type',
+        title: 'Thực thể',
+        minWidth: 160,
+        slots: { default: 'entity-cell' },
+      },
+      {
+        field: 'tenant_id',
+        title: 'Tenant ID',
+        width: 150,
+        slots: { default: 'tenant-cell' },
+      },
+      {
+        field: 'actor_id',
+        title: 'Tác nhân',
+        width: 140,
+        slots: { default: 'actor-cell' },
+      },
+      {
+        field: 'ip_address',
+        title: 'IP',
+        width: 140,
+        slots: { default: 'ip-cell' },
+      },
+      {
+        field: 'actions',
+        title: 'Chi tiết',
+        width: 100,
+        align: 'right',
+        slots: { default: 'detail-cell' },
+      },
+    ],
+  },
+});
 
 function openDetail(log: GlobalAuditLogItem) {
   selectedLog.value = log;
@@ -92,9 +173,9 @@ function getActionBadgeVariant(
   return 'outline';
 }
 
-onMounted(() => {
-  loadAuditLogs();
-});
+function refresh() {
+  gridApi.reload();
+}
 </script>
 
 <template>
@@ -103,238 +184,94 @@ onMounted(() => {
     <div
       class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div class="flex items-center gap-2.5">
+      <div class="flex flex-col gap-1">
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Nhật Ký Kiểm Toán
+          Nhật ký kiểm toán
         </h1>
-        <Badge variant="secondary" class="text-xs uppercase font-medium">
-          Global Audit Trail
-        </Badge>
-        <span v-if="!loading" class="text-xs font-medium text-muted-foreground">
-          ({{ logs.length }} sự kiện gần nhất)
-        </span>
+        <p class="text-xs text-muted-foreground">
+          Theo dõi lịch sử truy vết bảo mật, hành vi người dùng và nhật ký tác
+          vụ hệ thống
+        </p>
       </div>
 
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
-          size="sm"
-          :disabled="loading"
-          @click="loadAuditLogs"
-          class="gap-1.5"
+          size="icon"
+          class="size-8 shrink-0"
+          :title="$t('common.refresh')"
+          @click="refresh"
         >
-          <RefreshCw
-            class="size-3.5 text-muted-foreground"
-            :class="{ 'animate-spin': loading }"
-          />
-          Làm mới
+          <RefreshCw class="size-3.5 shrink-0" />
         </Button>
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-      <div class="relative flex-1">
-        <Search
-          class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-        />
-        <Input
-          v-model="actionFilter"
-          placeholder="Lọc theo hành động (ví dụ: auth:login, member:invite)..."
-          class="pl-9"
-          @keydown.enter="handleSearch"
-        />
-      </div>
-      <div class="w-full sm:w-64">
-        <Input
-          v-model="tenantFilter"
-          placeholder="Lọc theo Tenant UUID..."
-          @keydown.enter="handleSearch"
-        />
-      </div>
-      <Button variant="secondary" size="sm" @click="handleSearch">
-        Áp dụng lọc
-      </Button>
-    </div>
-
-    <!-- Desktop Table View -->
+    <!-- Table View (Desktop) -->
     <div
-      class="hidden overflow-hidden rounded-xl border border-border/60 bg-card md:block"
+      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-xs space-y-4"
     >
-      <Table>
-        <TableHeader>
-          <TableRow class="hover:bg-transparent">
-            <TableHead class="w-[170px]">Thời gian</TableHead>
-            <TableHead>Hành động</TableHead>
-            <TableHead>Thực thể</TableHead>
-            <TableHead>Tenant ID</TableHead>
-            <TableHead>Tác nhân (Actor)</TableHead>
-            <TableHead>IP</TableHead>
-            <TableHead class="text-right">Chi tiết</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <template v-if="loading">
-            <TableRow v-for="i in 5" :key="i">
-              <TableCell colspan="7" class="h-12 text-center">
-                <div
-                  class="mx-auto h-4 w-48 animate-pulse rounded bg-muted"
-                ></div>
-              </TableCell>
-            </TableRow>
-          </template>
+      <Grid class="audit-logs-vxe-grid">
+        <template #time-cell="{ row }">
+          <span class="font-mono text-xs text-muted-foreground">
+            {{ formatDate(row.created_at) }}
+          </span>
+        </template>
 
-          <template v-else-if="logs.length === 0">
-            <TableRow>
-              <TableCell colspan="7" class="h-44 text-center">
-                <div
-                  class="flex flex-col items-center justify-center gap-2 text-muted-foreground"
-                >
-                  <ScrollText class="size-8 stroke-[1.5]" />
-                  <p class="text-sm font-medium">
-                    Không có nhật ký nào được ghi nhận
-                  </p>
-                  <p class="text-xs text-muted-foreground/80">
-                    Thử tìm với hành động hoặc tenant ID khác.
-                  </p>
-                </div>
-              </TableCell>
-            </TableRow>
-          </template>
+        <template #action-cell="{ row }">
+          <Badge
+            :variant="getActionBadgeVariant(row.action)"
+            class="font-mono text-xs"
+          >
+            {{ row.action }}
+          </Badge>
+        </template>
 
-          <template v-else>
-            <TableRow
-              v-for="log in logs"
-              :key="log.id"
-              class="transition-colors hover:bg-muted/40"
+        <template #entity-cell="{ row }">
+          <div class="flex items-center gap-1.5 text-xs font-mono">
+            <span class="text-foreground">{{ row.entity_type }}</span>
+            <span class="text-muted-foreground/70"
+              >#{{ row.entity_id.slice(0, 8) }}</span
             >
-              <TableCell class="font-mono text-xs text-muted-foreground">
-                {{ formatDate(log.created_at) }}
-              </TableCell>
-              <TableCell>
-                <Badge
-                  :variant="getActionBadgeVariant(log.action)"
-                  class="font-mono text-xs"
-                >
-                  {{ log.action }}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div class="flex items-center gap-1.5 text-xs font-mono">
-                  <span class="text-foreground">{{ log.entity_type }}</span>
-                  <span class="text-muted-foreground/70"
-                    >#{{ log.entity_id.slice(0, 8) }}</span
-                  >
-                </div>
-              </TableCell>
-              <TableCell>
-                <code
-                  class="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground"
-                >
-                  {{ log.tenant_id.slice(0, 8) }}...
-                </code>
-              </TableCell>
-              <TableCell>
-                <div
-                  class="flex items-center gap-1 text-xs text-muted-foreground"
-                >
-                  <User class="size-3 text-muted-foreground/70" />
-                  <span class="font-mono">{{
-                    log.actor_id ? log.actor_id.slice(0, 8) : 'Hệ thống'
-                  }}</span>
-                </div>
-              </TableCell>
-              <TableCell class="font-mono text-xs text-muted-foreground">
-                {{ log.ip_address || '—' }}
-              </TableCell>
-              <TableCell class="text-right">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="size-8"
-                  @click="openDetail(log)"
-                >
-                  <Eye class="size-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          </template>
-        </TableBody>
-      </Table>
-    </div>
+          </div>
+        </template>
 
-    <!-- Mobile Card View -->
-    <div class="block space-y-3 md:hidden">
-      <template v-if="loading">
-        <div
-          v-for="i in 3"
-          :key="i"
-          class="h-32 animate-pulse rounded-xl border border-border/60 bg-card p-4"
-        ></div>
-      </template>
+        <template #tenant-cell="{ row }">
+          <code
+            class="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground"
+          >
+            {{ row.tenant_id.slice(0, 8) }}...
+          </code>
+        </template>
 
-      <template v-else-if="logs.length === 0">
-        <div
-          class="flex flex-col items-center justify-center gap-2 rounded-xl border border-border/60 bg-card p-8 text-center text-muted-foreground"
-        >
-          <ScrollText class="size-8 stroke-[1.5]" />
-          <p class="text-sm font-medium">Không có nhật ký nào</p>
-        </div>
-      </template>
-
-      <template v-else>
-        <div
-          v-for="log in logs"
-          :key="log.id"
-          class="rounded-xl border border-border/60 bg-card p-4 space-y-2.5"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <Badge
-              :variant="getActionBadgeVariant(log.action)"
-              class="font-mono text-xs"
-            >
-              {{ log.action }}
-            </Badge>
-            <span class="font-mono text-[11px] text-muted-foreground">
-              {{ formatDate(log.created_at) }}
+        <template #actor-cell="{ row }">
+          <div class="flex items-center gap-1 text-xs text-muted-foreground">
+            <User class="size-3 text-muted-foreground/70" />
+            <span class="font-mono">
+              {{ row.actor_id ? row.actor_id.slice(0, 8) : 'Hệ thống' }}
             </span>
           </div>
+        </template>
 
-          <div class="text-xs space-y-1">
-            <div class="flex items-center gap-1.5 text-foreground font-mono">
-              <span class="font-semibold">{{ log.entity_type }}</span>
-              <span class="text-muted-foreground"
-                >#{{ log.entity_id.slice(0, 12) }}</span
-              >
-            </div>
-            <div
-              class="flex items-center justify-between text-muted-foreground"
-            >
-              <span class="flex items-center gap-1 font-mono text-[11px]">
-                <Building2 class="size-3" />
-                {{ log.tenant_id.slice(0, 8) }}
-              </span>
-              <span class="font-mono text-[11px]">{{
-                log.ip_address || 'no-ip'
-              }}</span>
-            </div>
-          </div>
+        <template #ip-cell="{ row }">
+          <span class="font-mono text-xs text-muted-foreground">
+            {{ row.ip_address || '—' }}
+          </span>
+        </template>
 
-          <div class="pt-2 border-t border-border/40 flex justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              class="w-full text-xs gap-1.5"
-              @click="openDetail(log)"
-            >
-              <Eye class="size-3.5" />
-              Xem chi tiết JSON
-            </Button>
-          </div>
-        </div>
-      </template>
+        <template #detail-cell="{ row }">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="size-8"
+            @click="openDetail(row as GlobalAuditLogItem)"
+          >
+            <Eye class="size-4" />
+          </Button>
+        </template>
+      </Grid>
     </div>
 
     <!-- Detail Dialog -->
@@ -343,7 +280,7 @@ onMounted(() => {
         <DialogHeader>
           <DialogTitle class="flex items-center gap-2 text-base">
             <ShieldCheck class="size-4 text-primary" />
-            Chi tiết Sự Kiện Kiểm Toán #{{ selectedLog?.id }}
+            Chi tiết sự kiện kiểm toán #{{ selectedLog?.id }}
           </DialogTitle>
           <DialogDescription class="font-mono text-xs">
             Hành động: {{ selectedLog?.action }} | Tenant:
@@ -356,9 +293,7 @@ onMounted(() => {
           class="space-y-3 max-h-[60vh] overflow-y-auto text-xs"
         >
           <div>
-            <h4 class="font-semibold text-foreground mb-1">
-              Dữ liệu Mới (New Values)
-            </h4>
+            <h4 class="font-semibold text-foreground mb-1">Dữ liệu mới</h4>
             <pre
               class="rounded-lg bg-muted p-3 font-mono overflow-x-auto text-[11px]"
               >{{
@@ -367,9 +302,7 @@ onMounted(() => {
           </div>
 
           <div>
-            <h4 class="font-semibold text-foreground mb-1">
-              Dữ liệu Cũ (Old Values)
-            </h4>
+            <h4 class="font-semibold text-foreground mb-1">Dữ liệu cũ</h4>
             <pre
               class="rounded-lg bg-muted p-3 font-mono overflow-x-auto text-[11px]"
               >{{
@@ -385,10 +318,10 @@ onMounted(() => {
               {{ selectedLog.actor_id || 'Hệ thống' }}
             </div>
             <div>
-              <strong>IP Address:</strong> {{ selectedLog.ip_address || '—' }}
+              <strong>IP address:</strong> {{ selectedLog.ip_address || '—' }}
             </div>
             <div class="col-span-2 truncate">
-              <strong>User Agent:</strong> {{ selectedLog.user_agent || '—' }}
+              <strong>User agent:</strong> {{ selectedLog.user_agent || '—' }}
             </div>
           </div>
         </div>

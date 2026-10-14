@@ -12,6 +12,7 @@
 ## 1. Tổng Quan Hệ Thống (System Overview)
 
 `admin.tuquet.com` là bảng điều khiển quản trị tập trung (Admin Console) của **Hệ sinh thái Tuquet**, đảm nhiệm 3 nhiệm vụ cốt lõi:
+
 1. **Multi-Tenant IAM:** Quản lý danh tính, phân quyền thành viên và tổ chức không gian làm việc (Workspaces / Tenants).
 2. **Runners Fleet Control:** Điều phối và giám sát hạ tầng máy trạm phân tán (Specter Desk, Headless Runners, Chromium automation profiles, Proxy pool).
 3. **Automa Engine Telemetry:** Giám sát kịch bản quy trình tự động hóa (Workflows), tiến độ các đợt chạy (Campaign Runs) và nhật ký thực thi (Execution Logs).
@@ -84,6 +85,7 @@ flowchart TD
 ```
 
 ### 4.1. Chế Độ Multi-Tenant Member (User Thông Thường)
+
 - **Cô lập RLS:** Người dùng chỉ có thể xem và thao tác trên những tenant mà họ là thành viên thông qua hàm `get_user_tenant_ids()`.
 - **Động hóa quyền hạn từ Database:**
   - Tuyệt đối không suy quyền giao diện từ JWT claim (JWT hook bị giới hạn 25 permissions, trong khi Owner có tới 36 quyền).
@@ -91,6 +93,7 @@ flowchart TD
   - Kết quả được lưu bộ nhớ đệm (single-flight in-memory cache) cho mỗi phiên làm việc để tối ưu số lần gọi mạng.
 
 ### 4.2. Chế Độ Platform Superadmin (Quản Trị Nền Tảng)
+
 - **Nhận diện danh tính:** Tài khoản sở hữu claim `raw_app_meta_data.platform_role = 'superadmin'` trong bảng `auth.users` (chỉ có thể gán bởi service role backend).
 - **Cơ chế Bypass RLS:** Hàm bảo mật `public.is_platform_admin()` kiểm tra claim trên; các chính sách RLS cho phép tài khoản superadmin đọc toàn bộ dữ liệu trên mọi tenant (`public.tenants`, `public.profiles`, `public.audit_logs`, `billing.subscriptions`).
 - **Giao diện:** Router gán quyền `superadmin` vào bộ quyền hiệu lực, mở khóa 4 màn hình quản trị cấp cao tại `/system/users`, `/system/audit-logs`, `/system/subscriptions`, `/system/roles`.
@@ -159,5 +162,6 @@ Core & Auth (AuthPageLayout):
 ## 8. Tiêu Chuẩn Giao Tiếp Mạng Cục Bộ (Private Network Access - PNA)
 
 Khi Admin Console thực hiện thăm dò hoặc chuyển giao phiên đăng nhập SSO xuống daemon máy trạm Specter Desk (`http://127.0.0.1:8765`):
+
 1. **Lệnh Probe Analytics:** Gửi qua `fetch` với `mode: 'no-cors'` và `AbortController` timeout tối đa $1200\text{ms}$. Lỗi mạng được xử lý ngầm (non-blocking) để đảm bảo trang web vẫn render bình thường ngay cả khi daemon chưa khởi động.
 2. **Desktop SSO Bridge (`/auth/desktop`):** Nhận `redirect_uri=http://127.0.0.1:8765/sso/callback`, xác thực phiên với Tuquet Cloud và POST token về loopback port cục bộ.

@@ -248,6 +248,6 @@ export async function deleteWorkspaceApi(tenantId: string): Promise<void>;
 
 ## 6. Status & Sign-off Request
 
-Spec này được xây dựng bám sát RFC V2 và Capability Map đã duyệt.
+Spec này được xây dựng bám sát kiến trúc hệ thống và Capability Map đã duyệt.
 
 > [!IMPORTANT] **Theo quy trình Spec-Driven Development, Agent dừng turn tại đây để User xem xét và phê duyệt `SPEC-tenants-truth.md` trước khi tiến hành lập kế hoạch chi tiết (Phase 2: Plan & Tasks) và triển khai mã nguồn.**

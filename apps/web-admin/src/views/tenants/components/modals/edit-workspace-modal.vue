@@ -14,6 +14,8 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
+import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
+
 interface Props {
   loading?: boolean;
   open: boolean;
@@ -59,23 +61,32 @@ function handleOk() {
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Cài Đặt & Cập Nhật Workspace</DialogTitle>
+        <DialogTitle>Cài đặt và cập nhật workspace</DialogTitle>
       </DialogHeader>
 
-      <div class="space-y-5 py-2">
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">
-            Tên Workspace / Tổ Chức
-          </label>
-          <Input v-model="name" placeholder="Ví dụ: Core Engineering" />
-        </div>
+      <div class="py-2">
+        <VxeForm
+          :data="{ name, slug }"
+          custom-layout
+          size="small"
+          class="w-full space-y-3"
+        >
+          <VxeFormItem title="Tên workspace" span="24">
+            <template #default>
+              <Input
+                v-model="name"
+                placeholder="Ví dụ: Core Engineering"
+                class="h-10"
+              />
+            </template>
+          </VxeFormItem>
 
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">
-            Mã Slug (Định danh URL)
-          </label>
-          <Input v-model="slug" placeholder="core-eng" />
-        </div>
+          <VxeFormItem title="Mã slug định danh URL" span="24">
+            <template #default>
+              <Input v-model="slug" placeholder="core-eng" class="h-10" />
+            </template>
+          </VxeFormItem>
+        </VxeForm>
       </div>
 
       <DialogFooter class="flex items-center justify-end gap-2 pt-2">
@@ -86,7 +97,7 @@ function handleOk() {
         >
           Hủy
         </Button>
-        <Button :disabled="props.loading" @click="handleOk"> Cập Nhật </Button>
+        <Button :disabled="props.loading" @click="handleOk"> Cập nhật </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

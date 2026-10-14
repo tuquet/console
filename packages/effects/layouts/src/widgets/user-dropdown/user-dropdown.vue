@@ -119,6 +119,7 @@ const {
   globalSearchShortcutKey,
   isDark,
   preferencesButtonPosition,
+  isMobile,
 } = usePreferences();
 const { refresh } = useRefresh();
 const { toggle: toggleFullscreen } = useFullscreen();
@@ -161,11 +162,14 @@ watch(
 const showLockInDropdown = computed(
   () =>
     preferences.widget.lockScreen &&
-    preferences.widget.lockScreenButtonPosition === 'user-dropdown',
+    (preferences.widget.lockScreenButtonPosition === 'user-dropdown' ||
+      isMobile.value),
 );
 
 const showLogoutInDropdown = computed(
-  () => preferences.widget.logoutButtonPosition === 'user-dropdown',
+  () =>
+    preferences.widget.logoutButtonPosition === 'user-dropdown' ||
+    isMobile.value,
 );
 
 const showGlobalSearchInDropdown = computed(
@@ -177,19 +181,22 @@ const showGlobalSearchInDropdown = computed(
 const showThemeToggleInDropdown = computed(
   () =>
     preferences.widget.themeToggle &&
-    preferences.widget.themeToggleButtonPosition === 'user-dropdown',
+    (preferences.widget.themeToggleButtonPosition === 'user-dropdown' ||
+      isMobile.value),
 );
 
 const showLanguageToggleInDropdown = computed(
   () =>
     preferences.widget.languageToggle &&
-    preferences.widget.languageToggleButtonPosition === 'user-dropdown',
+    (preferences.widget.languageToggleButtonPosition === 'user-dropdown' ||
+      isMobile.value),
 );
 
 const showTimezoneInDropdown = computed(
   () =>
     preferences.widget.timezone &&
-    preferences.widget.timezoneButtonPosition === 'user-dropdown',
+    (preferences.widget.timezoneButtonPosition === 'user-dropdown' ||
+      isMobile.value),
 );
 
 const showFullscreenInDropdown = computed(
@@ -210,17 +217,23 @@ const showRefreshInDropdown = computed(
     preferences.widget.refreshButtonPosition === 'user-dropdown',
 );
 
-const hasAnyInDropdown = computed(
+const showPreferencesInDropdown = computed(() => {
+  return (
+    preferences.app.enablePreferences &&
+    (preferencesButtonPosition.value.userDropdown || isMobile.value)
+  );
+});
+
+const hasUtilityInDropdown = computed(
   () =>
-    showLockInDropdown.value ||
-    showLogoutInDropdown.value ||
     showGlobalSearchInDropdown.value ||
     showThemeToggleInDropdown.value ||
     showLanguageToggleInDropdown.value ||
     showTimezoneInDropdown.value ||
     showFullscreenInDropdown.value ||
     showNotificationInDropdown.value ||
-    showRefreshInDropdown.value,
+    showRefreshInDropdown.value ||
+    showPreferencesInDropdown.value,
 );
 
 const altView = computed(() => (isWindowsOs() ? 'Alt' : '⌥'));
@@ -254,6 +267,7 @@ function handleSubmitLogout() {
 
 // Settings - open preferences drawer
 function handleOpenSettings() {
+  openPopover.value = false;
   refPreferences.value?.open();
 }
 
@@ -358,7 +372,7 @@ if (preferences.shortcutKeys.enable) {
   </LogoutModal>
 
   <Preferences
-    v-if="preferencesButtonPosition.userDropdown"
+    v-if="showPreferencesInDropdown"
     ref="refPreferences"
     :show-button="false"
     @clear-preferences-and-logout="emit('clearPreferencesAndLogout')"
@@ -392,7 +406,9 @@ if (preferences.shortcutKeys.enable) {
         </div>
       </div>
     </DropdownMenuTrigger>
-    <DropdownMenuContent class="mr-2 min-w-60 p-0 pb-1">
+    <DropdownMenuContent
+      class="mr-2 min-w-60 max-h-[85vh] overflow-y-auto p-0 pb-1"
+    >
       <div ref="refContent">
         <DropdownMenuLabel class="flex items-center p-3">
           <VbenAvatar
@@ -435,48 +451,9 @@ if (preferences.shortcutKeys.enable) {
           </VbenIconButton>
           {{ menu.text }}
         </DropdownMenuItem>
-        <template v-if="showLockInDropdown || showLogoutInDropdown">
-          <DropdownMenuSeparator v-if="showLockInDropdown" />
-          <DropdownMenuItem
-            v-if="showLockInDropdown"
-            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-            @click="handleOpenLock"
-          >
-            <VbenIconButton class="mr-2" @click="handleOpenLock">
-              <LockKeyhole class="size-4" />
-            </VbenIconButton>
-            {{ $t('ui.widgets.lockScreen.title') }}
-            <DropdownMenuShortcut v-if="enableLockScreenShortcutKey">
-              {{ altView }} L
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator v-if="showLogoutInDropdown" />
-          <DropdownMenuItem
-            v-if="showLogoutInDropdown"
-            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-            @click="handleLogout"
-          >
-            <VbenIconButton class="mr-2" @click="handleLogout">
-              <LogOut class="size-4" />
-            </VbenIconButton>
-            {{ $t('common.logout') }}
-            <DropdownMenuShortcut v-if="enableLogoutShortcutKey">
-              {{ altView }} Q
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </template>
-        <template
-          v-if="
-            showGlobalSearchInDropdown ||
-            showThemeToggleInDropdown ||
-            showLanguageToggleInDropdown ||
-            showTimezoneInDropdown ||
-            showFullscreenInDropdown ||
-            showNotificationInDropdown ||
-            showRefreshInDropdown
-          "
-        >
-          <DropdownMenuSeparator />
+
+        <template v-if="hasUtilityInDropdown">
+          <DropdownMenuSeparator v-if="menus?.length" />
           <DropdownMenuItem
             v-if="showGlobalSearchInDropdown"
             class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
@@ -557,20 +534,47 @@ if (preferences.shortcutKeys.enable) {
             </VbenIconButton>
             {{ $t('preferences.widget.refresh') }}
           </DropdownMenuItem>
+          <DropdownMenuItem
+            v-if="showPreferencesInDropdown"
+            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
+            @click="handleOpenSettings"
+          >
+            <VbenIconButton class="mr-2" @click="handleOpenSettings">
+              <Settings class="size-4" />
+            </VbenIconButton>
+            {{ $t('preferences.title') }}
+          </DropdownMenuItem>
         </template>
-        <DropdownMenuSeparator
-          v-if="hasAnyInDropdown || preferencesButtonPosition.userDropdown"
-        />
-        <DropdownMenuItem
-          v-if="preferencesButtonPosition.userDropdown"
-          class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-          @click="handleOpenSettings"
-        >
-          <VbenIconButton class="mr-2" @click="handleOpenSettings">
-            <Settings class="size-4" />
-          </VbenIconButton>
-          {{ $t('preferences.title') }}
-        </DropdownMenuItem>
+
+        <template v-if="showLockInDropdown || showLogoutInDropdown">
+          <DropdownMenuSeparator v-if="menus?.length || hasUtilityInDropdown" />
+          <DropdownMenuItem
+            v-if="showLockInDropdown"
+            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
+            @click="handleOpenLock"
+          >
+            <VbenIconButton class="mr-2" @click="handleOpenLock">
+              <LockKeyhole class="size-4" />
+            </VbenIconButton>
+            {{ $t('ui.widgets.lockScreen.title') }}
+            <DropdownMenuShortcut v-if="enableLockScreenShortcutKey">
+              {{ altView }} L
+            </DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            v-if="showLogoutInDropdown"
+            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
+            @click="handleLogout"
+          >
+            <VbenIconButton class="mr-2" @click="handleLogout">
+              <LogOut class="size-4" />
+            </VbenIconButton>
+            {{ $t('common.logout') }}
+            <DropdownMenuShortcut v-if="enableLogoutShortcutKey">
+              {{ altView }} Q
+            </DropdownMenuShortcut>
+          </DropdownMenuItem>
+        </template>
       </div>
     </DropdownMenuContent>
   </DropdownMenu>

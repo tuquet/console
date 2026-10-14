@@ -73,8 +73,8 @@ const notifications = ref<NotificationItem[]>([
     date: '1 day ago',
     isRead: false,
     message: 'Explore Tuquet documentation and operational guides.',
-    title: 'Tuquet Documentation',
-    link: 'https://doc.vben.pro',
+    title: 'Documentation',
+    link: 'https://docs.tuquet.com',
   },
 ]);
 
@@ -127,12 +127,12 @@ const menus = computed(() => [
   },
   {
     handler: () => {
-      openWindow('https://tuquet.com', {
+      openWindow('https://docs.tuquet.com', {
         target: '_blank',
       });
     },
     icon: BookOpenText,
-    text: 'Tuquet Home',
+    text: $t('common.documentation'),
   },
   {
     handler: () => {

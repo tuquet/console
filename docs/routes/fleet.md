@@ -92,6 +92,6 @@
 ## 3. Lưu Ý Kỹ Thuật (Gotchas & Guardrails)
 
 1. **Loại Bỏ Hoàn Toàn Mock Data Fallback:**
-   - Hệ thống cũ tự ý fallback về dữ liệu giả lập trong `localStorage` hoặc hàm `getInitialFallbackNodes()` khi truy vấn thất bại. Hệ thống V2 đã loại bỏ triệt để fallback này. Nếu không có thiết bị hoặc API trả về mảng rỗng, giao diện hiển thị Empty State sạch sẽ với biểu tượng Lucide `Laptop`.
+   - Hệ thống không sử dụng dữ liệu giả lập hay fallback `localStorage`. Nếu không có thiết bị hoặc API trả về mảng rỗng, giao diện hiển thị Empty State sạch sẽ với biểu tượng Lucide `Laptop`.
 2. **Bắt Buộc Schema runners:**
    - Schema `runners` không nằm trong đường dẫn mặc định của PostgREST. Mọi yêu cầu HTTP phải qua `supabaseRequest(url, { schema: 'runners' })` để tự động kèm header `Accept-Profile: runners`.

@@ -66,7 +66,7 @@ async function handleSubmit() {
         <Input
           v-model="password"
           type="password"
-          placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
+          placeholder="Nhập mật khẩu mới, tối thiểu 6 ký tự"
           class="h-10"
         />
       </div>

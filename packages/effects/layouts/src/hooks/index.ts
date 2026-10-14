@@ -4,7 +4,8 @@ import type {
   RouteLocationNormalizedLoadedGeneric,
 } from 'vue-router';
 
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { preferences, usePreferences } from '@vben/preferences';
 
@@ -54,6 +55,34 @@ export function transformComponent(
  */
 export function useLayoutHook() {
   const { keepAlive } = usePreferences();
+
+  let router: ReturnType<typeof useRouter> | undefined;
+  try {
+    router = useRouter();
+  } catch {
+    // Router may not be injected in unit test environments
+  }
+
+  const isSamePathNavigation = ref(false);
+
+  if (router) {
+    router.beforeEach((to, from) => {
+      // Intra-page navigation: if navigating within the same route path
+      // (such as query string or hash changes for tabs/filters), suppress transition animation
+      const isInitialNav = !from.matched || from.matched.length === 0;
+      isSamePathNavigation.value = !isInitialNav && from.path === to.path;
+    });
+
+    router.afterEach(() => {
+      if (isSamePathNavigation.value) {
+        // Reset after microtask DOM patching so subsequent route transitions work normally
+        setTimeout(() => {
+          isSamePathNavigation.value = false;
+        }, 0);
+      }
+    });
+  }
+
   /**
    * Whether to use animations
    */
@@ -65,9 +94,19 @@ export function useLayoutHook() {
 
   /**
    * Get route transition animation
-   * @param _route
+   * @param route
    */
-  function getTransitionName(_route: RouteLocationNormalizedLoaded) {
+  function getTransitionName(route?: RouteLocationNormalizedLoaded) {
+    // Suppress animation when navigating on the same route path (e.g. query tab changes)
+    if (isSamePathNavigation.value) {
+      return undefined;
+    }
+
+    // Suppress animation if explicitly requested in route meta
+    if (route?.meta?.ignoreTransition) {
+      return undefined;
+    }
+
     // Do not use animation if disabled in preferences
     const { tabbar, transition } = preferences;
     const transitionName = transition.name;
@@ -80,14 +119,7 @@ export function useLayoutHook() {
       return transitionName;
     }
 
-    // Do not use animation if page was already loaded
-    // if (route.meta.loaded) {
-    //   return;
-    // }
     // Pages already open and loaded skip transition animation
-    // const inTabs = getCachedTabs.value.includes(route.name as string);
-
-    // return inTabs && route.meta.loaded ? undefined : transitionName;
     return transitionName;
   }
 

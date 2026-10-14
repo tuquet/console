@@ -264,19 +264,19 @@ onMounted(() => {
         <TabsList class="mb-4">
           <TabsTrigger value="overview" class="flex items-center gap-1.5">
             <LayoutDashboard class="size-4 shrink-0" />
-            <span>Tổng Quan</span>
+            <span>Tổng quan</span>
           </TabsTrigger>
           <TabsTrigger value="members" class="flex items-center gap-1.5">
             <Users class="size-4 shrink-0" />
-            <span>Thành Viên ({{ detailData.members.length }})</span>
+            <span>Thành viên · {{ detailData.members.length }}</span>
           </TabsTrigger>
           <TabsTrigger value="usage" class="flex items-center gap-1.5">
             <Gauge class="size-4 shrink-0" />
-            <span>Hạn Ngạch & Tài Nguyên</span>
+            <span>Hạn ngạch & tài nguyên</span>
           </TabsTrigger>
           <TabsTrigger value="audit" class="flex items-center gap-1.5">
             <History class="size-4 shrink-0" />
-            <span>Nhật Ký An Ninh</span>
+            <span>Nhật ký an ninh</span>
           </TabsTrigger>
         </TabsList>
 

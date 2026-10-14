@@ -49,13 +49,19 @@ export function useLayoutScroll(router: LayoutScrollRouter = useRouter()) {
       currentHistoryPosition !== nextHistoryPosition;
   });
 
-  const removeAfterHook = router.afterEach(async (to, _from, failure) => {
+  const removeAfterHook = router.afterEach(async (to, from, failure) => {
     const nextHistoryPosition = getHistoryPosition();
 
     if (!failure) {
       await nextTick();
       const scrollElement = getLayoutScrollElement();
       if (scrollElement) {
+        // If navigating within the same route path (e.g. query tab changes or filters),
+        // preserve the current scroll position instead of resetting to top: 0
+        const isSamePath = Boolean(
+          from?.matched?.length && to.path === from.path,
+        );
+
         const savedPosition =
           isHistoryNavigation && nextHistoryPosition !== undefined
             ? scrollPositions.get(nextHistoryPosition)
@@ -65,7 +71,7 @@ export function useLayoutScroll(router: LayoutScrollRouter = useRouter()) {
           const hashTarget = getHashTarget(scrollElement, to.hash);
           if (hashTarget) {
             hashTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          } else {
+          } else if (!isSamePath) {
             scrollElement.scrollTo({ top: 0 });
           }
         } else {

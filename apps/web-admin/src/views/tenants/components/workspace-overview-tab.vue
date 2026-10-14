@@ -7,8 +7,6 @@ import { useRouter } from 'vue-router';
 import {
   Check,
   Copy,
-  Cpu,
-  CreditCard,
   Edit2,
   ExternalLink,
   Layers,
@@ -17,6 +15,7 @@ import {
 } from '@lucide/vue';
 import { Badge, Button, toast } from '@tuquet/vue-ui';
 
+import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
 import { useDateFormat } from '#/composables';
 
 interface Props {
@@ -55,134 +54,130 @@ async function copyTenantId() {
 }
 
 function navigateToFleet() {
-  router.push(`/fleet/devices?tenant=${props.tenant.id}`);
+  router.push(`/automation/devices?tenant=${props.tenant.id}`);
 }
 </script>
 
 <template>
   <div class="space-y-4">
-    <!-- Grid Cards Overview -->
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <!-- Card 1: Identity & Metadata -->
+    <!-- Workspace Detail Specifications Form (VXE UI Form) -->
+    <div
+      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-4"
+    >
       <div
-        class="flex flex-col justify-between rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
+        class="flex items-center justify-between border-b border-border/40 pb-3"
       >
-        <div>
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-medium text-muted-foreground"
-              >Định Danh Tổ Chức</span
-            >
-            <Layers class="size-4 text-muted-foreground" />
-          </div>
-          <div class="mt-3">
-            <div class="text-sm font-semibold text-foreground">
-              {{ tenant.name }}
-            </div>
-            <div class="mt-1 font-mono text-xs text-muted-foreground">
-              {{ tenant.slug }}
-            </div>
-          </div>
+        <div class="flex items-center gap-2">
+          <Layers class="size-4 text-muted-foreground" />
+          <h2 class="text-sm font-semibold text-foreground">
+            Chi tiết workspace
+          </h2>
         </div>
+        <Badge variant="outline" class="text-xs font-normal">
+          <span
+            class="mr-1.5 size-1.5 rounded-full"
+            :class="
+              tenant.status === 'active' ? 'bg-success' : 'bg-muted-foreground'
+            "
+          ></span>
+          {{ tenant.status === 'active' ? 'Đang hoạt động' : 'Tạm dừng' }}
+        </Badge>
+      </div>
 
-        <div class="mt-4 pt-3 border-t border-border/40 space-y-2">
-          <div class="flex items-center justify-between text-xs">
-            <span class="text-muted-foreground">Tenant ID:</span>
-            <button
-              class="flex items-center gap-1 font-mono text-xs hover:text-foreground text-muted-foreground transition-colors"
-              title="Nhấn để sao chép Tenant ID"
-              @click="copyTenantId"
+      <VxeForm
+        :data="tenant"
+        custom-layout
+        readonly
+        size="small"
+        class="w-full"
+      >
+        <VxeFormItem title="Tên workspace" span="12" class="sm:col-span-6">
+          <template #default>
+            <span class="font-semibold text-foreground text-sm">{{
+              tenant.name
+            }}</span>
+          </template>
+        </VxeFormItem>
+
+        <VxeFormItem title="Mã slug" span="12" class="sm:col-span-6">
+          <template #default>
+            <span class="font-mono text-xs text-muted-foreground">{{
+              tenant.slug
+            }}</span>
+          </template>
+        </VxeFormItem>
+
+        <VxeFormItem title="Tenant ID" span="12" class="sm:col-span-6">
+          <template #default>
+            <div
+              class="flex items-center gap-2 font-mono text-xs text-foreground"
             >
-              <span
-                >{{ tenant.id.slice(0, 8) }}...{{ tenant.id.slice(-4) }}</span
+              <span>{{ tenant.id }}</span>
+              <button
+                type="button"
+                class="size-5 inline-flex items-center justify-center text-muted-foreground hover:text-foreground shrink-0"
+                title="Sao chép Tenant ID"
+                @click="copyTenantId"
               >
-              <Check v-if="copiedId" class="size-3 text-success" />
-              <Copy v-else class="size-3" />
-            </button>
-          </div>
-          <div class="flex items-center justify-between text-xs">
-            <span class="text-muted-foreground">Ngày tạo:</span>
-            <span class="text-foreground">{{
+                <Check v-if="copiedId" class="size-3 text-success" />
+                <Copy v-else class="size-3" />
+              </button>
+            </div>
+          </template>
+        </VxeFormItem>
+
+        <VxeFormItem title="Ngày khởi tạo" span="12" class="sm:col-span-6">
+          <template #default>
+            <span class="text-xs text-foreground">{{
               formatDateOnly(tenant.created_at)
             }}</span>
-          </div>
-        </div>
-      </div>
+          </template>
+        </VxeFormItem>
 
-      <!-- Card 2: Runner Fleet Status -->
-      <div
-        class="flex flex-col justify-between rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
-      >
-        <div>
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-medium text-muted-foreground"
-              >Hạ Tầng Runner Devices</span
-            >
-            <Cpu class="size-4 text-muted-foreground" />
-          </div>
-          <div class="mt-3 flex items-baseline gap-2">
-            <span class="text-2xl font-bold tracking-tight text-foreground">
-              {{ activeDevicesCount }}
-            </span>
-            <span class="text-xs text-muted-foreground">
-              / {{ totalDevicesCount }} máy trực tuyến
-            </span>
-          </div>
-        </div>
+        <VxeFormItem title="Gói dịch vụ" span="12" class="sm:col-span-6">
+          <template #default>
+            <div class="flex items-center gap-2">
+              <Badge variant="default" class="text-xs font-medium">
+                {{ subscription?.plan?.name || 'Free Starter' }}
+              </Badge>
+              <span class="text-xs text-muted-foreground font-mono">
+                ${{ subscription?.plan?.price_monthly_usd || 0 }}/tháng
+              </span>
+            </div>
+          </template>
+        </VxeFormItem>
 
-        <div class="mt-4 pt-3 border-t border-border/40">
-          <Button
-            variant="outline"
-            size="sm"
-            class="w-full text-xs h-8 flex items-center justify-center gap-1.5"
-            @click="navigateToFleet"
-          >
-            <span>Quản Lý Fleet Devices</span>
-            <ExternalLink class="size-3.5" />
-          </Button>
-        </div>
-      </div>
-
-      <!-- Card 3: Subscription & Quota Tier -->
-      <div
-        class="flex flex-col justify-between rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
-      >
-        <div>
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-medium text-muted-foreground"
-              >Gói Thuê Bao Hiện Tại</span
-            >
-            <CreditCard class="size-4 text-muted-foreground" />
-          </div>
-          <div class="mt-3 flex items-center gap-2">
-            <Badge variant="default" class="text-xs uppercase font-medium">
-              {{ subscription?.plan?.name || 'Free Starter' }}
-            </Badge>
-            <span class="text-xs text-muted-foreground">
-              ${{ subscription?.plan?.price_monthly_usd || 0 }}/tháng
-            </span>
-          </div>
-        </div>
-
-        <div
-          class="mt-4 pt-3 border-t border-border/40 text-xs flex justify-between items-center text-muted-foreground"
-        >
-          <span>Trạng thái subscription:</span>
-          <Badge variant="outline" class="text-xs capitalize">
-            {{ subscription?.status || 'Active' }}
-          </Badge>
-        </div>
-      </div>
+        <VxeFormItem title="Hạ tầng thiết bị" span="12" class="sm:col-span-6">
+          <template #default>
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-foreground text-sm font-mono">{{
+                activeDevicesCount
+              }}</span>
+              <span class="text-xs text-muted-foreground"
+                >/ {{ totalDevicesCount }} máy trực tuyến</span
+              >
+              <Button
+                variant="ghost"
+                size="sm"
+                class="h-6 px-2 text-xs ml-auto gap-1 text-primary hover:text-primary"
+                @click="navigateToFleet"
+              >
+                <span>Xem thiết bị</span>
+                <ExternalLink class="size-3" />
+              </Button>
+            </div>
+          </template>
+        </VxeFormItem>
+      </VxeForm>
     </div>
 
     <!-- Quick Operations Card -->
     <div
       class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
     >
-      <div
-        class="text-xs font-semibold text-foreground uppercase tracking-wider mb-3"
-      >
-        Thao Tác Quản Trị
-      </div>
+      <h3 class="text-xs font-semibold text-foreground mb-3">
+        Thao tác quản trị
+      </h3>
       <div class="flex flex-wrap gap-2.5">
         <Button
           size="sm"
@@ -193,8 +188,8 @@ function navigateToFleet() {
           <Check class="size-3.5" />
           <span>{{
             isCurrentActive
-              ? 'Đang Là Workspace Mặc Định'
-              : 'Đặt Làm Workspace CLI'
+              ? 'Đang là workspace mặc định'
+              : 'Đặt làm workspace CLI'
           }}</span>
         </Button>
 
@@ -205,7 +200,7 @@ function navigateToFleet() {
           @click="emit('connectCli')"
         >
           <Terminal class="size-3.5" />
-          <span>Ghép Nối Máy Trạm</span>
+          <span>Kết nối thiết bị</span>
         </Button>
 
         <Button
@@ -215,7 +210,7 @@ function navigateToFleet() {
           @click="emit('editWorkspace')"
         >
           <Edit2 class="size-3.5" />
-          <span>Chỉnh Sửa Tên & Slug</span>
+          <span>Chỉnh sửa tên & slug</span>
         </Button>
 
         <Button
@@ -225,7 +220,7 @@ function navigateToFleet() {
           @click="emit('deleteWorkspace')"
         >
           <Trash2 class="size-3.5" />
-          <span>Lưu Trữ / Xóa</span>
+          <span>Lưu trữ / xóa</span>
         </Button>
       </div>
     </div>

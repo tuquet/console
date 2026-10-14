@@ -28,10 +28,19 @@ const [UpdateNoticeModal, modalApi] = useVbenModal({
   closable: false,
   closeOnPressEscape: false,
   closeOnClickModal: false,
-  onConfirm() {
+  async onConfirm() {
     lastVersionTag.value = currentVersionTag.value;
+    if ('serviceWorker' in navigator) {
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
+        }
+      } catch (error) {
+        console.error('Failed to notify waiting service worker:', error);
+      }
+    }
     window.location.reload();
-    // handleSubmitLogout();
   },
 });
 

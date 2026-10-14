@@ -14,7 +14,20 @@ import { defineComponent, h, ref } from 'vue';
 import { globalShareState, IconPicker } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
-import { Button, Input, Switch, Textarea, toast } from '@tuquet/vue-ui';
+import {
+  Button,
+  Checkbox,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Separator,
+  Switch,
+  Textarea,
+  toast,
+} from '@tuquet/vue-ui';
 
 const withDefaultPlaceholder = (
   component: Component,
@@ -128,20 +141,15 @@ async function initComponentAdapter() {
     ApiTreeSelect: FallbackComponent,
     AutoComplete: FallbackComponent,
     Cascader: FallbackComponent,
-    Checkbox: (props, { attrs }) =>
-      h('input', {
-        class: 'size-4 rounded border-border text-primary',
-        type: 'checkbox',
-        ...props,
-        ...attrs,
-      }),
+    Checkbox: (props: any, { attrs, slots }: any) =>
+      h(Checkbox, { ...props, ...attrs }, slots),
     CheckboxGroup: FallbackComponent,
     DatePicker: FallbackComponent,
     DefaultButton: (props, { attrs, slots }) => {
       return h(Button, { ...props, ...attrs, variant: 'outline' }, slots);
     },
     Divider: (props, { attrs }) =>
-      h('hr', { class: 'my-4 border-border/60', ...props, ...attrs }),
+      h(Separator, { class: 'my-4', ...props, ...attrs }),
     IconPicker: withDefaultPlaceholder(IconPicker, 'select'),
     Input: withDefaultPlaceholder(Input, 'input'),
     InputNumber: withDefaultPlaceholder(
@@ -168,20 +176,70 @@ async function initComponentAdapter() {
     RadioGroup: FallbackComponent,
     RangePicker: FallbackComponent,
     Rate: FallbackComponent,
-    Select: withDefaultPlaceholder(
-      (props: any, { attrs, slots }: any) =>
-        h(
-          'select',
-          {
-            class:
-              'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-            ...props,
-            ...attrs,
-          },
-          slots,
-        ),
-      'select',
-    ),
+    Select: withDefaultPlaceholder((props: any, { attrs }: any) => {
+      const options: Array<{
+        disabled?: boolean;
+        label?: string;
+        title?: string;
+        value: any;
+      }> = props?.options || attrs?.options || [];
+      const rawValue =
+        props?.modelValue ?? attrs?.modelValue ?? props?.value ?? attrs?.value;
+      const modelValue =
+        rawValue !== undefined && rawValue !== null
+          ? String(rawValue)
+          : undefined;
+      const placeholder =
+        props?.placeholder || attrs?.placeholder || $t('ui.placeholder.select');
+      const disabled = props?.disabled ?? attrs?.disabled ?? false;
+
+      const handleUpdate = (val: any) => {
+        if (attrs['onUpdate:modelValue']) attrs['onUpdate:modelValue'](val);
+        if (attrs['onUpdate:value']) attrs['onUpdate:value'](val);
+        if (props['onUpdate:modelValue']) props['onUpdate:modelValue'](val);
+        if (props['onUpdate:value']) props['onUpdate:value'](val);
+        if (attrs.onChange) attrs.onChange(val);
+        if (props.onChange) props.onChange(val);
+      };
+
+      return h(
+        Select,
+        {
+          disabled,
+          modelValue,
+          'onUpdate:modelValue': handleUpdate,
+        },
+        () => [
+          h(
+            SelectTrigger,
+            {
+              class:
+                'h-9 w-full bg-background/90 text-xs shadow-2xs transition-colors hover:bg-accent/40',
+            },
+            () => h(SelectValue, { placeholder }),
+          ),
+          h(
+            SelectContent,
+            {
+              class: 'z-popup min-w-[8rem]',
+            },
+            () =>
+              options.map((opt) =>
+                h(
+                  SelectItem,
+                  {
+                    class: 'text-xs cursor-pointer',
+                    disabled: opt.disabled,
+                    key: String(opt.value),
+                    value: String(opt.value),
+                  },
+                  () => opt.label ?? opt.title ?? String(opt.value),
+                ),
+              ),
+          ),
+        ],
+      );
+    }, 'select'),
     Space: (props, { attrs, slots }) =>
       h('div', { class: 'flex items-center gap-2', ...props, ...attrs }, slots),
     Switch,

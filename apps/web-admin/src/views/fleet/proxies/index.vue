@@ -1,22 +1,13 @@
 <script lang="ts" setup>
 import type { FleetProxyItem } from '#/api';
 
-import { computed, onMounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 import { Activity, Network, RefreshCw } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  toast,
-} from '@tuquet/vue-ui';
+import { Badge, Button } from '@tuquet/vue-ui';
 
+import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getFleetProxiesApi } from '#/api';
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
@@ -24,39 +15,9 @@ import { $t } from '#/locales';
 defineOptions({ name: 'FleetProxies' });
 
 const route = useRoute();
-const router = useRouter();
 const { formatDate } = useDateFormat();
 
-const loading = ref(true);
-const proxies = ref<FleetProxyItem[]>([]);
-
-const VALID_STATUSES = new Set([
-  'active',
-  'all',
-  'disabled',
-  'failing',
-  'testing',
-]);
-
-const filterStatus = computed({
-  get() {
-    const s = route.query.status as string;
-    return VALID_STATUSES.has(s) ? s : 'all';
-  },
-  set(val: string) {
-    router.replace({
-      query: {
-        ...route.query,
-        status: val === 'all' ? undefined : val,
-      },
-    });
-  },
-});
-
-const filteredProxies = computed(() => {
-  if (filterStatus.value === 'all') return proxies.value;
-  return proxies.value.filter((p) => p.status === filterStatus.value);
-});
+const allProxies = ref<FleetProxyItem[]>([]);
 
 function getLatencyBadgeClass(latency: null | number) {
   if (latency === null || latency === undefined) return 'text-muted-foreground';
@@ -65,28 +26,162 @@ function getLatencyBadgeClass(latency: null | number) {
   return 'text-destructive font-semibold';
 }
 
-async function loadProxies() {
-  loading.value = true;
-  try {
-    const tenantId = (route.query.tenant as string) || undefined;
-    proxies.value = await getFleetProxiesApi({ tenantId });
-  } catch (error: any) {
-    toast.error(error.message || 'Không thể tải danh sách proxy');
-  } finally {
-    loading.value = false;
-  }
-}
+const [Grid, gridApi] = useVbenVxeGrid<FleetProxyItem>({
+  formOptions: {
+    schema: [
+      {
+        component: 'Select',
+        fieldName: 'status',
+        label: 'Trạng thái',
+        defaultValue: (route.query.status as string) || 'all',
+        componentProps: {
+          placeholder: 'Tất cả trạng thái',
+          options: [
+            { label: 'Tất cả trạng thái', value: 'all' },
+            { label: 'Hoạt động', value: 'active' },
+            { label: 'Lỗi kết nối', value: 'failing' },
+            { label: 'Đang kiểm tra', value: 'testing' },
+            { label: 'Vô hiệu', value: 'disabled' },
+          ],
+        },
+      },
+      {
+        component: 'Select',
+        fieldName: 'type',
+        label: 'Phân loại',
+        defaultValue: 'all',
+        componentProps: {
+          placeholder: 'Tất cả phân loại',
+          options: [
+            { label: 'Tất cả phân loại', value: 'all' },
+            { label: 'Residential', value: 'residential' },
+            { label: 'Datacenter', value: 'datacenter' },
+          ],
+        },
+      },
+      {
+        component: 'Input',
+        fieldName: 'search',
+        label: 'Tìm kiếm',
+        componentProps: {
+          placeholder: 'Tìm theo IP, port hoặc quốc gia...',
+          clearable: true,
+        },
+      },
+    ],
+    layout: 'vertical',
+    showCollapseButton: false,
+    submitButtonOptions: {
+      content: $t('common.filter'),
+    },
+    resetButtonOptions: {
+      content: $t('common.reset'),
+    },
+    actionWrapperClass: 'flex items-center justify-end gap-2 pt-2 sm:pt-6',
+    wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3',
+  },
+  gridOptions: {
+    border: false,
+    round: true,
+    showOverflow: true,
+    pagerConfig: {
+      pageSize: 15,
+      pageSizes: [10, 15, 30, 50],
+    },
+    proxyConfig: {
+      autoLoad: true,
+      ajax: {
+        query: async (
+          { page }: { page?: { currentPage?: number; pageSize?: number } },
+          formValues: Record<string, any>,
+        ) => {
+          const tenantId = (route.query.tenant as string) || undefined;
+          const data = await getFleetProxiesApi({ tenantId });
+          allProxies.value = data;
+
+          let filtered = data;
+          if (formValues?.status && formValues.status !== 'all') {
+            filtered = filtered.filter((p) => p.status === formValues.status);
+          }
+
+          if (formValues?.type && formValues.type !== 'all') {
+            if (formValues.type === 'residential') {
+              filtered = filtered.filter((p) => p.is_residential);
+            } else if (formValues.type === 'datacenter') {
+              filtered = filtered.filter((p) => !p.is_residential);
+            }
+          }
+
+          if (formValues?.search) {
+            const kw = String(formValues.search).toLowerCase().trim();
+            filtered = filtered.filter(
+              (p) =>
+                p.host.toLowerCase().includes(kw) ||
+                String(p.port).includes(kw) ||
+                (p.country_code && p.country_code.toLowerCase().includes(kw)) ||
+                (p.city && p.city.toLowerCase().includes(kw)),
+            );
+          }
+
+          const currentPage = page?.currentPage || 1;
+          const pageSize = page?.pageSize || 15;
+          const start = (currentPage - 1) * pageSize;
+          const end = start + pageSize;
+
+          return {
+            items: filtered.slice(start, end),
+            total: filtered.length,
+          };
+        },
+      },
+    },
+    columns: [
+      {
+        field: 'host',
+        title: 'Địa chỉ proxy',
+        minWidth: 220,
+        slots: { default: 'proxy-cell' },
+      },
+      {
+        field: 'country_code',
+        title: 'Vị trí & phân loại',
+        width: 190,
+        slots: { default: 'location-cell' },
+      },
+      {
+        field: 'latency_ms',
+        title: 'Độ trễ',
+        width: 130,
+        slots: { default: 'latency-cell' },
+      },
+      {
+        field: 'error_count',
+        title: 'Lỗi',
+        width: 100,
+        slots: { default: 'error-cell' },
+      },
+      {
+        field: 'status',
+        title: 'Trạng thái',
+        width: 140,
+        slots: { default: 'status-cell' },
+      },
+      {
+        field: 'last_checked_at',
+        title: 'Kiểm tra cuối',
+        width: 160,
+        slots: { default: 'date-cell' },
+      },
+    ],
+  },
+});
 
 watch(
   () => route.query.tenant,
   () => {
-    loadProxies();
+    gridApi.reload();
   },
 );
-
-onMounted(() => {
-  loadProxies();
-});
 </script>
 
 <template>
@@ -95,339 +190,152 @@ onMounted(() => {
     <div
       class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div class="flex items-center gap-2.5">
+      <div class="flex flex-col gap-1">
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Quản Trị Bể Proxy
+          Proxy pool
         </h1>
-        <Badge variant="secondary" class="text-xs uppercase font-medium">
-          Proxy Pool
-        </Badge>
+        <p class="text-xs text-muted-foreground">
+          Quản lý proxy xoay vòng và định tuyến mạng
+        </p>
       </div>
 
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
-          size="icon"
-          :disabled="loading"
-          class="size-8 shrink-0"
-          title="Làm mới"
-          @click="loadProxies"
+          size="sm"
+          class="gap-1.5"
+          :title="$t('common.refresh')"
+          @click="() => gridApi.reload()"
         >
-          <RefreshCw
-            class="size-3.5 shrink-0"
-            :class="{ 'animate-spin': loading }"
-          />
+          <RefreshCw class="size-3.5" />
+          {{ $t('common.refresh') }}
         </Button>
       </div>
     </div>
 
     <!-- Main Container -->
     <div
-      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-4"
+      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-sm space-y-4"
     >
-      <!-- Filter Bar -->
       <div
-        class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/40 pb-4"
+        class="flex items-center gap-2 border-b border-border/40 pb-3 px-3 sm:px-0 pt-2 sm:pt-0"
       >
-        <div class="flex items-center gap-2">
-          <Network class="size-4 shrink-0 text-muted-foreground" />
-          <span class="text-sm font-semibold text-foreground">
-            Danh Sách Proxy
-          </span>
-          <span class="text-xs text-muted-foreground">
-            ({{ filteredProxies.length }} / {{ proxies.length }})
-          </span>
-        </div>
-
-        <div
-          class="inline-flex rounded-lg border border-border/60 bg-muted/40 p-1"
-        >
-          <button
-            type="button"
-            class="rounded-md px-3 py-1 text-xs font-medium transition-all"
-            :class="
-              filterStatus === 'all'
-                ? 'bg-background text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="filterStatus = 'all'"
-          >
-            Tất Cả ({{ proxies.length }})
-          </button>
-          <button
-            type="button"
-            class="rounded-md px-3 py-1 text-xs font-medium transition-all"
-            :class="
-              filterStatus === 'active'
-                ? 'bg-background text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="filterStatus = 'active'"
-          >
-            Hoạt Động ({{
-              proxies.filter((p) => p.status === 'active').length
-            }})
-          </button>
-          <button
-            type="button"
-            class="rounded-md px-3 py-1 text-xs font-medium transition-all"
-            :class="
-              filterStatus === 'failing'
-                ? 'bg-background text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="filterStatus = 'failing'"
-          >
-            Lỗi ({{ proxies.filter((p) => p.status === 'failing').length }})
-          </button>
-          <button
-            type="button"
-            class="rounded-md px-3 py-1 text-xs font-medium transition-all"
-            :class="
-              filterStatus === 'testing'
-                ? 'bg-background text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="filterStatus = 'testing'"
-          >
-            Kiểm Tra ({{
-              proxies.filter((p) => p.status === 'testing').length
-            }})
-          </button>
-          <button
-            type="button"
-            class="rounded-md px-3 py-1 text-xs font-medium transition-all"
-            :class="
-              filterStatus === 'disabled'
-                ? 'bg-background text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="filterStatus = 'disabled'"
-          >
-            Vô Hiệu ({{
-              proxies.filter((p) => p.status === 'disabled').length
-            }})
-          </button>
-        </div>
+        <Network class="size-4 shrink-0 text-muted-foreground" />
+        <span class="text-sm font-semibold text-foreground">
+          Danh sách proxy
+        </span>
+        <span class="text-xs text-muted-foreground">
+          · {{ allProxies.length }} tổng số
+        </span>
       </div>
 
-      <!-- Desktop Table -->
-      <div
-        v-if="filteredProxies.length > 0"
-        class="hidden md:block overflow-x-auto rounded-lg border border-border/60"
-      >
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Địa Chỉ Proxy</TableHead>
-              <TableHead>Vị Trí & Loại</TableHead>
-              <TableHead>Độ Trễ</TableHead>
-              <TableHead>Lỗi Tích Lũy</TableHead>
-              <TableHead>Trạng Thái</TableHead>
-              <TableHead class="text-right">Kiểm Tra Cuối</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-for="p in filteredProxies" :key="p.id">
-              <TableCell>
-                <div class="flex items-center gap-2.5">
-                  <div
-                    class="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground"
-                  >
-                    <Network class="size-4" />
-                  </div>
-                  <div>
-                    <div class="font-mono font-medium text-foreground text-xs">
-                      {{ p.protocol }}://{{ p.host }}:{{ p.port }}
-                    </div>
-                    <div
-                      v-if="p.username"
-                      class="text-xs text-muted-foreground font-mono"
-                    >
-                      Auth: {{ p.username }}
-                    </div>
-                  </div>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <div class="flex items-center gap-2 text-xs">
-                  <span
-                    v-if="p.country_code"
-                    class="font-semibold text-foreground uppercase"
-                  >
-                    {{ p.country_code }}
-                  </span>
-                  <span v-if="p.city" class="text-muted-foreground">
-                    ({{ p.city }})
-                  </span>
-                  <Badge
-                    :variant="p.is_residential ? 'secondary' : 'outline'"
-                    class="text-xs font-normal"
-                  >
-                    {{ p.is_residential ? 'Residential' : 'Datacenter' }}
-                  </Badge>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <div class="flex items-center gap-1.5 text-xs font-mono">
-                  <Activity class="size-3.5 shrink-0 text-muted-foreground" />
-                  <span :class="getLatencyBadgeClass(p.latency_ms)">
-                    {{
-                      p.latency_ms !== null && p.latency_ms !== undefined
-                        ? `${p.latency_ms} ms`
-                        : '—'
-                    }}
-                  </span>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <span
-                  class="font-mono text-xs"
-                  :class="
-                    p.error_count > 0
-                      ? 'text-destructive font-semibold'
-                      : 'text-muted-foreground'
-                  "
-                >
-                  {{ p.error_count }} lỗi
-                </span>
-              </TableCell>
-
-              <TableCell>
-                <Badge variant="outline" class="text-xs font-normal">
-                  <span
-                    class="mr-1.5 size-1.5 rounded-full"
-                    :class="{
-                      'bg-success': p.status === 'active',
-                      'bg-destructive': p.status === 'failing',
-                      'bg-warning animate-pulse': p.status === 'testing',
-                      'bg-muted-foreground': p.status === 'disabled',
-                    }"
-                  ></span>
-                  {{
-                    p.status === 'active'
-                      ? 'Hoạt Động'
-                      : p.status === 'failing'
-                        ? 'Lỗi Kết Nối'
-                        : p.status === 'testing'
-                          ? 'Đang Test'
-                          : 'Vô Hiệu'
-                  }}
-                </Badge>
-              </TableCell>
-
-              <TableCell class="text-right text-xs text-muted-foreground">
-                {{ formatDate(p.last_checked_at) }}
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-
-      <!-- Mobile Touch Cards -->
-      <div v-if="filteredProxies.length > 0" class="block space-y-3 md:hidden">
-        <div
-          v-for="p in filteredProxies"
-          :key="p.id"
-          class="rounded-xl border border-border/60 bg-muted/10 p-4 space-y-3"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2.5">
-              <div
-                class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
-              >
-                <Network class="size-4.5" />
-              </div>
-              <div>
-                <div class="font-mono font-medium text-foreground text-xs">
-                  {{ p.protocol }}://{{ p.host }}:{{ p.port }}
-                </div>
-                <div class="text-xs text-muted-foreground">
-                  {{ p.is_residential ? 'Residential' : 'Datacenter' }}
-                  <span v-if="p.country_code">
-                    &bull; {{ p.country_code }}</span
-                  >
-                </div>
-              </div>
+      <Grid class="proxies-vxe-grid">
+        <template #proxy-cell="{ row }">
+          <div class="flex items-center gap-2.5">
+            <div
+              class="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground shrink-0"
+            >
+              <Network class="size-4" />
             </div>
+            <div
+              class="min-w-0 font-mono text-xs font-medium text-foreground truncate"
+            >
+              {{ row.protocol }}://{{ row.host }}:{{ row.port }}
+            </div>
+          </div>
+        </template>
 
-            <Badge variant="outline" class="text-xs font-normal">
-              <span
-                class="mr-1.5 size-1.5 rounded-full"
-                :class="{
-                  'bg-success': p.status === 'active',
-                  'bg-destructive': p.status === 'failing',
-                  'bg-warning animate-pulse': p.status === 'testing',
-                  'bg-muted-foreground': p.status === 'disabled',
-                }"
-              ></span>
-              {{
-                p.status === 'active'
-                  ? 'Hoạt Động'
-                  : p.status === 'failing'
-                    ? 'Lỗi'
-                    : p.status === 'testing'
-                      ? 'Test'
-                      : 'Vô Hiệu'
-              }}
+        <template #location-cell="{ row }">
+          <div class="flex items-center gap-2 text-xs">
+            <span
+              v-if="row.country_code"
+              class="font-semibold text-foreground uppercase"
+            >
+              {{ row.country_code }}
+            </span>
+            <span v-if="row.city" class="text-muted-foreground truncate">
+              · {{ row.city }}
+            </span>
+            <Badge
+              :variant="row.is_residential ? 'secondary' : 'outline'"
+              class="text-2xs font-normal shrink-0"
+            >
+              {{ row.is_residential ? 'Residential' : 'Datacenter' }}
             </Badge>
           </div>
+        </template>
 
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            <div class="flex items-center gap-1.5 font-mono">
-              <Activity class="size-3.5 shrink-0 text-muted-foreground" />
-              <span :class="getLatencyBadgeClass(p.latency_ms)">
-                {{
-                  p.latency_ms !== null && p.latency_ms !== undefined
-                    ? `${p.latency_ms} ms`
-                    : '—'
-                }}
-              </span>
-            </div>
-            <div class="flex items-center gap-1.5 text-muted-foreground">
-              <span>{{ p.error_count }} lỗi</span>
-            </div>
+        <template #latency-cell="{ row }">
+          <div class="flex items-center gap-1.5 text-xs font-mono">
+            <Activity class="size-3.5 shrink-0 text-muted-foreground" />
+            <span :class="getLatencyBadgeClass(row.latency_ms)">
+              {{
+                row.latency_ms !== null && row.latency_ms !== undefined
+                  ? `${row.latency_ms} ms`
+                  : '—'
+              }}
+            </span>
           </div>
+        </template>
 
-          <div
-            class="flex items-center justify-between border-t border-border/40 pt-2 text-xs text-muted-foreground"
+        <template #error-cell="{ row }">
+          <span
+            class="font-mono text-xs"
+            :class="
+              row.error_count > 0
+                ? 'text-destructive font-semibold'
+                : 'text-muted-foreground'
+            "
           >
-            <span>Kiểm tra: {{ formatDate(p.last_checked_at) }}</span>
-            <span class="font-mono">{{ p.city || '—' }}</span>
-          </div>
-        </div>
-      </div>
+            {{ row.error_count }} lỗi
+          </span>
+        </template>
 
-      <!-- Empty State -->
-      <div
-        v-if="filteredProxies.length === 0 && !loading"
-        class="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/60 py-12 text-center"
-      >
-        <div
-          class="flex size-12 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground"
-        >
-          <Network class="size-6" />
-        </div>
-        <h3 class="mt-3 text-sm font-semibold text-foreground">
-          {{
-            filterStatus === 'all'
-              ? $t('page.fleet_view.proxies_empty')
-              : 'Không có proxy phù hợp bộ lọc'
-          }}
-        </h3>
-        <p class="mt-1 max-w-sm text-xs text-muted-foreground">
-          {{
-            filterStatus === 'all'
-              ? $t('page.fleet_view.proxies_empty_desc')
-              : 'Thử chuyển sang bộ lọc khác để kiểm tra trạng thái proxy.'
-          }}
-        </p>
-      </div>
+        <template #status-cell="{ row }">
+          <Badge variant="outline" class="text-xs font-normal">
+            <span
+              class="mr-1.5 size-1.5 rounded-full"
+              :class="{
+                'bg-success': row.status === 'active',
+                'bg-destructive': row.status === 'failing',
+                'bg-warning animate-pulse': row.status === 'testing',
+                'bg-muted-foreground': row.status === 'disabled',
+              }"
+            ></span>
+            {{
+              row.status === 'active'
+                ? 'Hoạt động'
+                : row.status === 'failing'
+                  ? 'Lỗi kết nối'
+                  : row.status === 'testing'
+                    ? 'Đang test'
+                    : 'Vô hiệu'
+            }}
+          </Badge>
+        </template>
+
+        <template #date-cell="{ row }">
+          <span class="text-xs text-muted-foreground">
+            {{ formatDate(row.last_checked_at) }}
+          </span>
+        </template>
+
+        <template #empty>
+          <div
+            class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground"
+          >
+            <Network
+              class="size-10 stroke-[1.5] text-muted-foreground/60 mb-3"
+            />
+            <p class="text-sm font-medium text-foreground">Chưa có proxy nào</p>
+            <p class="text-xs text-muted-foreground max-w-sm mt-1">
+              Proxy được điều phối qua Bridge daemon hoặc cấu hình hệ thống.
+            </p>
+          </div>
+        </template>
+      </Grid>
     </div>
   </div>
 </template>

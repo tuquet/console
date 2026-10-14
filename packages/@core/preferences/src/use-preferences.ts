@@ -19,7 +19,15 @@ function usePreferences() {
    * Uses diffStrict: array fields like icon ordering require order-sensitive comparison
    */
   const diffPreference = computed(() => {
-    return diffStrict(initialPreferences, preferences);
+    // Exclude runtime-only viewport state (isMobile) from diff calculation
+    const baseline = {
+      ...initialPreferences,
+      app: {
+        ...initialPreferences.app,
+        isMobile: preferences.app.isMobile,
+      },
+    };
+    return diffStrict(baseline, preferences);
   });
 
   const diffCustomPreference = computed(() => {

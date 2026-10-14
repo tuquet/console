@@ -244,6 +244,46 @@ describe('preferences', () => {
     expect(preferenceManager.getPreferences()).toEqual(defaultPreferences);
   });
 
+  it('preserves runtime isMobile status across resetPreferences', async () => {
+    // Set isMobile to true (as when browsing on mobile viewport)
+    preferenceManager.updatePreferences({
+      app: { isMobile: true, locale: 'vi-VN' },
+      theme: { mode: 'light' },
+    });
+
+    expect(preferenceManager.getPreferences().app.isMobile).toBe(true);
+    expect(preferenceManager.getPreferences().app.locale).toBe('vi-VN');
+
+    // Reset preferences
+    await preferenceManager.resetPreferences();
+
+    // isMobile MUST remain true (not clobbered by defaultPreferences.isMobile=false)
+    expect(preferenceManager.getPreferences().app.isMobile).toBe(true);
+    // User preferences MUST be reset to default
+    expect(preferenceManager.getPreferences().app.locale).toBe('en-US');
+    expect(preferenceManager.getPreferences().theme.mode).toBe('dark');
+  });
+
+  it('purges cached preferences on reset without re-saving obsolete state', async () => {
+    await preferenceManager.initPreferences({
+      namespace: 'testReset',
+    });
+
+    preferenceManager.updatePreferences({
+      theme: { mode: 'light' },
+    });
+
+    await preferenceManager.resetPreferences();
+
+    // Cache must have been removed
+    expect(localStorage.removeItem).toHaveBeenCalledWith(
+      'testReset-preferences',
+    );
+    expect(localStorage.removeItem).toHaveBeenCalledWith(
+      'testReset-preferences-custom',
+    );
+  });
+
   it('does not update undefined preferences', () => {
     const originalPreferences = preferenceManager.getPreferences();
 

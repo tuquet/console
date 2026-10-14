@@ -332,7 +332,7 @@ function clearPreferencesAndLogout() {
         <template v-else-if="slot.name === 'theme-toggle'">
           <VbenTooltip side="bottom">
             <template #trigger>
-              <ThemeToggle class="mr-1" />
+              <ThemeToggle class="mr-1 hidden md:flex" />
             </template>
             {{ $t('preferences.theme.title') }}
           </VbenTooltip>
@@ -340,23 +340,23 @@ function clearPreferencesAndLogout() {
         <template v-else-if="slot.name === 'language-toggle'">
           <VbenTooltip side="bottom">
             <template #trigger>
-              <LanguageToggle class="mr-1" />
+              <LanguageToggle class="mr-1 hidden md:flex" />
             </template>
             {{ $t('preferences.widget.languageToggle') }}
           </VbenTooltip>
         </template>
         <template v-else-if="slot.name === 'fullscreen'">
           <VbenFullScreen
-            class="mr-1"
+            class="mr-1 hidden md:flex"
             :tooltip="$t('preferences.widget.fullscreen')"
           />
         </template>
         <template v-else-if="slot.name === 'timezone'">
-          <TimezoneButton class="mr-1" />
+          <TimezoneButton class="mr-1 hidden md:flex" />
         </template>
         <template v-else-if="slot.name === 'lock-screen-btn'">
           <VbenIconButton
-            class="mr-1"
+            class="mr-1 hidden md:flex"
             :tooltip="$t('ui.widgets.lockScreen.title')"
             @click="handleOpenLock"
           >
@@ -365,7 +365,7 @@ function clearPreferencesAndLogout() {
         </template>
         <template v-else-if="slot.name === 'logout-btn'">
           <VbenIconButton
-            class="mr-1"
+            class="mr-1 hidden md:flex"
             :tooltip="$t('common.logout')"
             @click="handleLogout"
           >

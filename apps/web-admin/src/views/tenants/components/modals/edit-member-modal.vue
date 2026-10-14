@@ -13,6 +13,8 @@ import {
   Input,
 } from '@tuquet/vue-ui';
 
+import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
+
 interface Props {
   loading?: boolean;
   member: null | WorkspaceMember;
@@ -78,67 +80,74 @@ function handleOk() {
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Chỉnh Sửa Phân Quyền Thành Viên</DialogTitle>
+        <DialogTitle>Chỉnh sửa phân quyền thành viên</DialogTitle>
       </DialogHeader>
 
-      <div class="space-y-5 py-2">
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">
-            Email Định Danh
-          </label>
-          <Input
-            :model-value="props.member?.email"
-            disabled
-            class="bg-muted/40 font-mono text-xs"
-          />
-        </div>
+      <div class="py-2">
+        <VxeForm
+          :data="{ selectedRoleId, status }"
+          custom-layout
+          size="small"
+          class="w-full space-y-3"
+        >
+          <VxeFormItem title="Email định danh" span="24">
+            <template #default>
+              <Input
+                :model-value="props.member?.email"
+                disabled
+                class="bg-muted/40 font-mono text-xs h-10"
+              />
+            </template>
+          </VxeFormItem>
 
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">
-            Họ Và Tên Hiển Thị
-          </label>
-          <Input
-            :model-value="props.member?.full_name || props.member?.email"
-            disabled
-            class="bg-muted/40 text-xs"
-          />
-        </div>
+          <VxeFormItem title="Họ và tên hiển thị" span="24">
+            <template #default>
+              <Input
+                :model-value="props.member?.full_name || props.member?.email"
+                disabled
+                class="bg-muted/40 text-xs h-10"
+              />
+            </template>
+          </VxeFormItem>
 
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">
-            Vai Trò IAM (Quyền Hạn)
-          </label>
-          <select
-            v-model="selectedRoleId"
-            :disabled="props.member?.role?.name === 'owner'"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option
-              v-if="props.member?.role?.name === 'owner'"
-              :value="props.member.role.id"
-            >
-              Chủ sở hữu (owner) - Bất biến
-            </option>
-            <option v-for="role in props.roles" :key="role.id" :value="role.id">
-              {{ role.display_name }} ({{ role.name }})
-            </option>
-          </select>
-        </div>
+          <VxeFormItem title="Vai trò IAM" span="24">
+            <template #default>
+              <select
+                v-model="selectedRoleId"
+                :disabled="props.member?.role?.name === 'owner'"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option
+                  v-if="props.member?.role?.name === 'owner'"
+                  :value="props.member.role.id"
+                >
+                  Chủ sở hữu owner - Bất biến
+                </option>
+                <option
+                  v-for="role in props.roles"
+                  :key="role.id"
+                  :value="role.id"
+                >
+                  {{ role.display_name }} · {{ role.name }}
+                </option>
+              </select>
+            </template>
+          </VxeFormItem>
 
-        <div>
-          <label class="block text-sm font-medium text-foreground mb-2">
-            Trạng Thái Hoạt Động
-          </label>
-          <select
-            v-model="status"
-            :disabled="props.member?.role?.name === 'owner'"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="active">Hoạt động (Active)</option>
-            <option value="suspended">Tạm khóa (Suspended)</option>
-            <option value="invited">Chờ chấp thuận (Invited)</option>
-          </select>
-        </div>
+          <VxeFormItem title="Trạng thái hoạt động" span="24">
+            <template #default>
+              <select
+                v-model="status"
+                :disabled="props.member?.role?.name === 'owner'"
+                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="active">Hoạt động</option>
+                <option value="suspended">Tạm khóa</option>
+                <option value="invited">Chờ chấp thuận</option>
+              </select>
+            </template>
+          </VxeFormItem>
+        </VxeForm>
       </div>
 
       <DialogFooter class="flex items-center justify-end gap-2 pt-2">
@@ -150,7 +159,7 @@ function handleOk() {
           Hủy
         </Button>
         <Button :disabled="props.loading" @click="handleOk">
-          Lưu Thay Đổi
+          Lưu thay đổi
         </Button>
       </DialogFooter>
     </DialogContent>

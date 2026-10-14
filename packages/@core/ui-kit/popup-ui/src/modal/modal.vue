@@ -136,9 +136,7 @@ watch(
       const { offsetX, offsetY } = transform;
       if (dialogRef.value?.style) {
         if (offsetX !== 0 || offsetY !== 0) {
-          dialogRef.value.style.transform = shouldCentered.value
-            ? `translate(${offsetX}px, calc(-50% + ${offsetY}px))`
-            : `translate(${offsetX}px, ${offsetY}px)`;
+          dialogRef.value.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
         } else {
           dialogRef.value.style.transform = '';
         }
@@ -246,16 +244,14 @@ function handleClosed() {
       :centered="shouldCentered"
       :class="
         cn(
-          'inset-x-0 top-[10vh] mx-auto flex w-130 flex-col p-0',
+          'flex w-full max-w-[calc(100vw-2rem)] sm:w-130 flex-col p-0',
           shouldFullscreen ? 'rounded-none' : 'rounded-(--radius)',
           {
             'border border-border': bordered,
             'shadow-3xl': !bordered,
-            'max-h-[min(80%,calc(100dvh-20px))] max-w-[calc(100vw-20px)]':
-              !shouldFullscreen,
-            'top-0 left-0 size-full! max-h-full! max-w-full! transform-[translate(0,0)]!':
+            'max-h-[min(80%,calc(100dvh-20px))]': !shouldFullscreen,
+            'top-0! left-0! size-full! max-h-full! max-w-full! translate-none! transform-none!':
               shouldFullscreen,
-            'top-1/2 -translate-y-1/2': centered && !shouldFullscreen,
             'duration-300': !dragging,
             hidden: isClosed,
           },

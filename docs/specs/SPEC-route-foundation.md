@@ -12,7 +12,7 @@ Module này tái cấu trúc toàn bộ hệ thống định tuyến (router) c�
 
 1. **Tách module định tuyến:**
    - Phân rã `modules/dashboard.ts` thành 5 file module trong `src/router/routes/modules/`:
-     - `dashboard.ts`: Chỉ chứa `/dashboard/analytics`, cấu hình redirect mặc định và các alias tương thích ngược (`/dashboard/workspace` → `/tenants`, `/dashboard/fleet` → `/fleet/devices`).
+     - `dashboard.ts`: Chỉ chứa `/dashboard/analytics`, cấu hình redirect mặc định và các tuyến chuyển hướng tiện ích (`/dashboard/workspace` → `/tenants`, `/dashboard/fleet` → `/fleet/devices`).
      - `tenants.ts`: Khai báo `/tenants` (danh sách Workspace) và `/tenants/:id` (chi tiết Workspace).
      - `fleet.ts`: Khai báo `/fleet/devices`, `/fleet/browsers`, `/fleet/proxies`.
      - `automation.ts`: Khai báo `/automation/workflows`, `/automation/runs`, `/automation/runs/:id`.
@@ -126,9 +126,9 @@ apps/web-admin/src/
 | `system.ts` | `/system/plugins` | `SystemPlugins` | `core-iam` | `['superadmin', 'plugins:read']` | `lucide:puzzle` |
 | `system.ts` | `/system/plans` | `SystemPlans` | `subscriptions` | `['superadmin', 'subscriptions:read']` | `lucide:credit-card` |
 
-### 4.2. Tương Thích Ngược & Chuyển Hướng (Redirect Aliases)
+### 4.2. Tuyến Chuyển Hướng Tiện Ích (Navigation Shortcuts & Redirects)
 
-Trong `modules/dashboard.ts`, các route cũ được khai báo dưới dạng redirect với cờ `meta.hideInMenu: true`:
+Trong `modules/dashboard.ts`, các đường dẫn phụ trợ được khai báo dưới dạng redirect với cờ `meta.hideInMenu: true`:
 
 - `/dashboard` → redirect `/dashboard/analytics`
 - `/dashboard/workspace` → redirect `/tenants`
@@ -261,6 +261,6 @@ Các placeholder view mới (`browsers`, `proxies`, `workflows`, `runs`, `plugin
 
 ## 7. Status & Sign-off Request
 
-Spec này được xây dựng dựa trên RFC V2 và Capability Map đã duyệt.
+Spec này được xây dựng dựa trên kiến trúc hệ thống và Capability Map đã duyệt.
 
 > [!IMPORTANT] **Theo quy trình Spec-Driven Development, Agent dừng turn tại đây để User xem xét và phê duyệt `SPEC-route-foundation.md` trước khi tiến hành lập kế hoạch chi tiết (Phase 2: Plan & Tasks) và triển khai mã nguồn.**

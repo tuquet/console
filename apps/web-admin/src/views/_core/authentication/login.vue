@@ -131,9 +131,7 @@ function handleGitHubLogin() {
         <div class="mt-4 w-full">
           <div class="relative my-3 flex items-center justify-between">
             <span class="w-[28%] border-b border-input"></span>
-            <span
-              class="text-center text-xs text-muted-foreground uppercase tracking-wider"
-            >
+            <span class="text-center text-xs text-muted-foreground">
               hoặc đăng nhập với
             </span>
             <span class="w-[28%] border-b border-input"></span>

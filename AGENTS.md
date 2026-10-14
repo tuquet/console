@@ -176,12 +176,15 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
 ## 10. Tiêu Chuẩn Soạn Thảo Tài Liệu & Cấu Trúc Thư Mục (Documentation Standards)
 
 ### 10.1. Nguyên Tắc Tài Liệu Tiền Phát Hành (Pre-Release Clean Slate)
+
 - Đối với ứng dụng và tính năng chưa phát hành chính thức (pre-release), toàn bộ tài liệu kiến trúc, đặc tả tuyến đường và bản ghi quyết định phải được viết trực diện, chuẩn mực và định tính (Definitive Architecture).
 - **Tuyệt đối không sử dụng ngôn từ so sánh chuyển đổi phiên bản** (như "V1 vs V2", "phiên bản tiền nhiệm", "nợ kỹ thuật cũ", "sửa đổi so với bản trước", "tương thích ngược").
 - Mọi thành phần kiến trúc hiện hữu được coi là thiết kế tiêu chuẩn ban đầu của hệ thống.
 
 ### 10.2. Phân Cấp Thư Mục Tài Liệu Chuẩn (`docs/`)
+
 Toàn bộ tài liệu kỹ thuật trong kho lưu trữ `tuquet/admin` bắt buộc phải được sắp xếp vào đúng 4 thư mục chuyên biệt:
+
 1. `docs/architecture/`: Tài liệu kiến trúc hệ thống tổng thể (`overview.md`) và quy chuẩn thiết kế giao diện (`styling-guide.md`). Nghiêm cấm để file lẻ tại thư mục gốc `docs/`.
 2. `docs/decisions/`: Chuỗi bản ghi quyết định kiến trúc (ADR) tuân thủ quy tắc:
    - Đánh số tuần tự 4 chữ số: `0001-...`, `0002-...`, `0003-...` (không trùng số hiệu).
@@ -190,6 +193,6 @@ Toàn bộ tài liệu kỹ thuật trong kho lưu trữ `tuquet/admin` bắt bu
 4. `docs/specs/`: Bản đồ năng lực (`capability-map.md`) và các bản đặc tả module (`SPEC-*.md`).
 
 ### 10.3. Tính Khả Chuyển Của Đường Dẫn Trong Tài Liệu Git
+
 - Trong các tệp tin markdown (`*.md`) được commit vào kho lưu trữ, **BẮT BUỘC sử dụng đường dẫn tương đối** (ví dụ: `[access.ts](../../apps/web-admin/src/api/core/access.ts)`).
 - **Nghiêm cấm tuyệt đối** hardcode đường dẫn tuyệt đối của máy trạm cá nhân (như `file:///C:/Users/...` hoặc `file:///home/...`) vào tài liệu dự án để đảm bảo tài liệu luôn đọc và liên kết chính xác trên GitHub, GitLab và mọi môi trường hệ điều hành.
-

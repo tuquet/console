@@ -18,6 +18,7 @@ import {
   getSystemRolesApi,
   groupPermissionsByModule,
 } from '#/api';
+import { $t } from '#/locales';
 
 defineOptions({ name: 'SystemRoles' });
 
@@ -59,18 +60,15 @@ onMounted(() => {
     <div
       class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div class="flex items-center gap-2.5">
+      <div class="flex flex-col gap-1">
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Vai Trò & Phân Quyền (RBAC)
+          Vai trò & phân quyền RBAC
         </h1>
-        <Badge variant="secondary" class="text-xs uppercase font-medium">
-          System Roles
-        </Badge>
-        <span v-if="!loading" class="text-xs font-medium text-muted-foreground">
-          ({{ roles.length }} vai trò, {{ permissions.length }} quyền hạn)
-        </span>
+        <p class="text-xs text-muted-foreground">
+          Mô hình kiểm soát truy cập và đặc quyền quản trị hệ thống
+        </p>
       </div>
 
       <div class="flex items-center gap-2">
@@ -78,6 +76,7 @@ onMounted(() => {
           variant="outline"
           size="sm"
           :disabled="loading"
+          :title="$t('common.refresh')"
           @click="loadData"
           class="gap-1.5"
         >
@@ -85,7 +84,7 @@ onMounted(() => {
             class="size-3.5 text-muted-foreground"
             :class="{ 'animate-spin': loading }"
           />
-          Làm mới
+          {{ $t('common.refresh') }}
         </Button>
       </div>
     </div>
@@ -102,7 +101,7 @@ onMounted(() => {
         class="gap-1.5"
       >
         <ShieldCheck class="size-4 text-primary" />
-        Vai Trò Hệ Thống ({{ roles.length }})
+        Vai trò hệ thống ({{ roles.length }})
       </Button>
       <Button
         variant="ghost"
@@ -114,7 +113,7 @@ onMounted(() => {
         class="gap-1.5"
       >
         <KeyRound class="size-4 text-muted-foreground" />
-        Danh Mục Quyền Hạn ({{ permissions.length }})
+        Danh mục quyền hạn ({{ permissions.length }})
       </Button>
     </div>
 
@@ -150,9 +149,7 @@ onMounted(() => {
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
                   <Lock class="size-4 text-primary" />
-                  <h3
-                    class="text-base font-semibold text-foreground uppercase tracking-wider"
-                  >
+                  <h3 class="text-base font-semibold text-foreground">
                     {{ role.name }}
                   </h3>
                 </div>
@@ -227,9 +224,7 @@ onMounted(() => {
               class="flex items-center gap-2 border-b border-border/40 pb-2.5"
             >
               <Folder class="size-4 text-primary" />
-              <h3
-                class="font-semibold text-foreground uppercase tracking-wider text-xs"
-              >
+              <h3 class="font-semibold text-foreground text-xs">
                 Module: {{ moduleName }}
               </h3>
               <Badge variant="outline" class="text-2xs ml-auto">

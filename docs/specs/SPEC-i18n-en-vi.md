@@ -118,21 +118,21 @@ admin/
 ### 5.2. Mẫu Sử Dụng Trong Component Vue
 
 **Chuẩn cú pháp trong `<template>`:**
+
 ```html
 <template>
   <div class="flex items-center justify-between">
-    <h1 class="text-lg font-semibold">
-      {{ $t('page.workspace.title') }}
-    </h1>
-    <Button @click="openCreateModal">
+    <h1 class="text-lg font-semibold">{{ $t('page.workspace.title') }}</h1>
+    <button @click="openCreateModal">
       <Plus class="size-4" />
       <span>{{ $t('common.actions.create') }}</span>
-    </Button>
+    </button>
   </div>
 </template>
 ```
 
 **Chuẩn cú pháp trong `<script setup lang="ts">`:**
+
 ```typescript
 import { $t } from '#/locales';
 
@@ -191,7 +191,7 @@ function handleNotify() {
 ## 9. Open Questions (Câu Hỏi Mở Chờ Xác Nhận)
 
 1. **Cấu trúc lưu trữ của `page.json` trong `web-admin`**:
-   - *Phương án A (Khuyến nghị - KISS)*: Dùng 1 file `page.json` duy nhất cho `web-admin` (gồm các block `page.workspace`, `page.fleet`, `page.automation`, `page.analytics`, `page.system`), gọn nhẹ và dễ bảo trì.
-   - *Phương án B*: Tách nhỏ thành từng file theo route module (`workspace.json`, `fleet.json`, `automation.json`, `system.json`).
+   - _Phương án A (Khuyến nghị - KISS)_: Dùng 1 file `page.json` duy nhất cho `web-admin` (gồm các block `page.workspace`, `page.fleet`, `page.automation`, `page.analytics`, `page.system`), gọn nhẹ và dễ bảo trì.
+   - _Phương án B_: Tách nhỏ thành từng file theo route module (`workspace.json`, `fleet.json`, `automation.json`, `system.json`).
 2. **Quy tắc hiển thị tên thương hiệu & thuật ngữ kỹ thuật**:
-   - Các thuật ngữ như `Multi-Tenant`, `SSO`, `Loopback Daemon`, `Runner`, `Bridge`, `Proxy` có giữ nguyên tiếng Anh trong bản `vi-VN` không (ví dụ: `Cổng SSO Loopback`, `Máy trạm Runner`), hay chuyển ngữ hoàn toàn sang thuần Việt? *(Khuyến nghị: Giữ nguyên thuật ngữ kỹ thuật chuẩn quốc tế để người vận hành hệ thống dễ hiểu)*.
+   - Các thuật ngữ như `Multi-Tenant`, `SSO`, `Loopback Daemon`, `Runner`, `Bridge`, `Proxy` có giữ nguyên tiếng Anh trong bản `vi-VN` không (ví dụ: `Cổng SSO Loopback`, `Máy trạm Runner`), hay chuyển ngữ hoàn toàn sang thuần Việt? _(Khuyến nghị: Giữ nguyên thuật ngữ kỹ thuật chuẩn quốc tế để người vận hành hệ thống dễ hiểu)_.

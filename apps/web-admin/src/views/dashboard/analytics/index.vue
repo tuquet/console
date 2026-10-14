@@ -64,15 +64,15 @@ onMounted(() => {
     <div
       class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div class="flex items-center gap-2.5">
+      <div>
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
           {{ $t('page.analytics.title') }}
         </h1>
-        <Badge variant="outline" class="text-xs uppercase font-medium">
+        <p class="text-xs text-muted-foreground">
           {{ $t('page.analytics.badge') }}
-        </Badge>
+        </p>
       </div>
 
       <div class="flex items-center shrink-0">
@@ -81,7 +81,7 @@ onMounted(() => {
           variant="outline"
           size="icon"
           class="size-8 shrink-0"
-          :title="$t('page.analytics.refresh')"
+          :title="$t('common.refresh')"
           @click="loadAnalytics"
         >
           <RefreshCw class="size-3.5" :class="{ 'animate-spin': loading }" />
@@ -113,11 +113,13 @@ onMounted(() => {
             class="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground"
           >
             <span class="size-1.5 rounded-full bg-success"></span>
-            {{ analyticsData.tenants.activeCount }} {{ $t('page.analytics.active_workspaces') }}
+            {{ analyticsData.tenants.activeCount }}
+            {{ $t('page.analytics.active_workspaces') }}
           </span>
         </div>
         <div class="mt-2 text-xs text-muted-foreground">
-          {{ analyticsData.tenants.planBreakdown.pro }} Pro • {{ analyticsData.tenants.planBreakdown.free }} Free
+          {{ analyticsData.tenants.planBreakdown.pro }} Pro •
+          {{ analyticsData.tenants.planBreakdown.free }} Free
         </div>
       </div>
 
@@ -145,7 +147,8 @@ onMounted(() => {
         </div>
         <div class="mt-2 text-xs text-muted-foreground">
           <span class="font-medium text-foreground">
-            {{ analyticsData.plugins.coreCount }} {{ $t('page.analytics.core_kernel') }}
+            {{ analyticsData.plugins.coreCount }}
+            {{ $t('page.analytics.core_kernel') }}
           </span>
           {{ $t('page.analytics.modules_extension') }}
         </div>
@@ -221,10 +224,10 @@ onMounted(() => {
       >
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-base font-semibold text-foreground">
-            Tăng Trưởng Workspace & Tài Nguyên
+            {{ $t('page.analytics.growth_timeline') }}
           </h2>
           <span class="text-xs text-muted-foreground">
-            Cập nhật theo tuần
+            {{ $t('page.analytics.weekly_updates') }}
           </span>
         </div>
         <div
@@ -245,9 +248,11 @@ onMounted(() => {
       >
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-base font-semibold text-foreground">
-            Cơ Cấu Gói Dịch Vụ
+            {{ $t('page.analytics.plans_structure') }}
           </h2>
-          <span class="text-xs text-muted-foreground">Thực tế</span>
+          <span class="text-xs text-muted-foreground">
+            {{ $t('page.analytics.actual') }}
+          </span>
         </div>
         <div
           v-if="loading"
@@ -258,10 +263,7 @@ onMounted(() => {
             <span>Loading...</span>
           </div>
         </div>
-        <PlansChart
-          v-else
-          :data="analyticsData.tenants.planBreakdown"
-        />
+        <PlansChart v-else :data="analyticsData.tenants.planBreakdown" />
       </div>
     </div>
 
@@ -273,10 +275,10 @@ onMounted(() => {
       >
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-base font-semibold text-foreground">
-            Phân Bổ Plugins Cốt Lõi (Kernel vs Module)
+            {{ $t('page.analytics.plugins_distribution') }}
           </h2>
           <span class="text-xs text-muted-foreground">
-            {{ analyticsData.plugins.total }} đã kích hoạt
+            {{ analyticsData.plugins.total }} {{ $t('page.analytics.active') }}
           </span>
         </div>
         <div
@@ -309,10 +311,10 @@ onMounted(() => {
           <div class="flex items-center justify-between py-3">
             <div>
               <div class="font-medium text-foreground">
-                Tuquet Cloud Database
+                {{ $t('page.analytics.service_database') }}
               </div>
               <div class="text-xs text-muted-foreground">
-                PostgreSQL Multi-Tenant via Supabase
+                {{ $t('page.analytics.service_database_desc') }}
               </div>
             </div>
             <Badge variant="secondary" class="text-xs font-normal">
@@ -354,30 +356,15 @@ onMounted(() => {
           <div class="flex items-center justify-between py-3">
             <div>
               <div class="font-medium text-foreground">
-                {{ $t('page.analytics.core_iam') }}
+                {{ $t('page.analytics.service_gateway') }}
               </div>
               <div class="text-xs text-muted-foreground">
-                Plugin: core-iam (Schema: public)
+                {{ $t('page.analytics.service_gateway_desc') }}
               </div>
             </div>
             <Badge variant="secondary" class="text-xs font-normal">
               <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
-              {{ $t('page.analytics.active') }}
-            </Badge>
-          </div>
-
-          <div class="flex items-center justify-between py-3">
-            <div>
-              <div class="font-medium text-foreground">
-                {{ $t('page.analytics.runners_engine') }}
-              </div>
-              <div class="text-xs text-muted-foreground">
-                Plugin: runners (Schema: runners)
-              </div>
-            </div>
-            <Badge variant="secondary" class="text-xs font-normal">
-              <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
-              {{ $t('page.analytics.active') }}
+              {{ $t('page.analytics.operational') }}
             </Badge>
           </div>
         </div>

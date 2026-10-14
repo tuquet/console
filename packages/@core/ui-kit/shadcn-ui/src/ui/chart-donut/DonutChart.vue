@@ -143,7 +143,7 @@ const totalValue = computed(() =>
         :value="(d: Data) => d[category]"
       />
 
-      <slot />
+      <slot></slot>
     </VisSingleContainer>
   </div>
 </template>

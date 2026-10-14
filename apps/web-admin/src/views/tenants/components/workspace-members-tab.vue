@@ -27,6 +27,7 @@ import {
 
 import RoleBadge from '#/components/iam/role-badge.vue';
 import { useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 interface Props {
   loading?: boolean;
@@ -53,11 +54,11 @@ const { formatDate } = useDateFormat();
       class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"
     >
       <h3 class="text-base font-semibold text-foreground">
-        Danh Sách Thành Viên ({{ props.members.length }})
+        Danh sách thành viên · {{ props.members.length }}
       </h3>
       <Button size="sm" class="h-8 gap-1.5 font-medium" @click="emit('invite')">
         <UserPlus class="size-3.5" />
-        <span>Mời Thành Viên</span>
+        <span>{{ $t('common.add') }}</span>
       </Button>
     </div>
 
@@ -68,12 +69,12 @@ const { formatDate } = useDateFormat();
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Thành Viên</TableHead>
+            <TableHead>Thành viên</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Vai Trò</TableHead>
-            <TableHead>Trạng Thái</TableHead>
-            <TableHead>Ngày Tham Gia</TableHead>
-            <TableHead class="text-right">Thao Tác</TableHead>
+            <TableHead>Vai trò</TableHead>
+            <TableHead>Trạng thái</TableHead>
+            <TableHead>Ngày tham gia</TableHead>
+            <TableHead class="text-right">Thao tác</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -94,13 +95,13 @@ const { formatDate } = useDateFormat();
                 </Avatar>
                 <div>
                   <div class="font-medium text-foreground">
-                    {{ record.full_name || 'Kỹ Sư Tuquet' }}
+                    {{ record.full_name || 'Kỹ sư Tuquet' }}
                   </div>
                   <div
                     v-if="record.role?.name === 'owner'"
                     class="text-xs text-primary font-medium"
                   >
-                    Chủ Sở Hữu
+                    Chủ sở hữu
                   </div>
                 </div>
               </div>
@@ -158,7 +159,7 @@ const { formatDate } = useDateFormat();
                   @click="emit('edit', record)"
                 >
                   <Edit3 class="size-3.5" />
-                  <span>Sửa</span>
+                  <span>{{ $t('common.edit') }}</span>
                 </Button>
                 <template v-if="record.role?.name !== 'owner'">
                   <span class="text-muted-foreground/40">•</span>
@@ -169,7 +170,7 @@ const { formatDate } = useDateFormat();
                         size="sm"
                         class="p-0 h-auto text-destructive hover:text-destructive text-xs"
                       >
-                        Xóa
+                        {{ $t('common.delete') }}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -224,7 +225,7 @@ const { formatDate } = useDateFormat();
             </Avatar>
             <div>
               <div class="font-medium text-foreground text-sm">
-                {{ member.full_name || 'Kỹ Sư Tuquet' }}
+                {{ member.full_name || 'Kỹ sư Tuquet' }}
               </div>
               <div class="text-xs text-muted-foreground">
                 {{ member.email }}

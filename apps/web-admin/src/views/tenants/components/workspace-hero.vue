@@ -13,6 +13,7 @@ import {
 import { Avatar, AvatarFallback, Badge, Button } from '@tuquet/vue-ui';
 
 import { useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 interface Props {
   isCurrentActive: boolean;
@@ -64,7 +65,7 @@ const planName = computed(() => {
             <h1 class="text-lg sm:text-xl font-bold text-foreground truncate">
               {{ props.tenant.name }}
             </h1>
-            <Badge variant="secondary" class="uppercase text-xs font-medium">
+            <Badge variant="secondary" class="text-xs font-medium">
               {{ planName }}
             </Badge>
             <Badge variant="outline" class="text-xs font-normal">
@@ -109,7 +110,7 @@ const planName = computed(() => {
           @click="emit('setActive')"
         >
           <CheckCircle2 class="size-3.5" />
-          <span>Đặt Làm Chính</span>
+          <span>Đặt làm chính</span>
         </Button>
 
         <Badge
@@ -118,7 +119,7 @@ const planName = computed(() => {
           class="flex items-center gap-1.5 px-2.5 py-1 font-medium text-xs"
         >
           <span class="size-1.5 rounded-full bg-success"></span>
-          <span>Active Workspace</span>
+          <span>Active</span>
         </Badge>
 
         <Button
@@ -128,7 +129,7 @@ const planName = computed(() => {
           @click="emit('connectCli')"
         >
           <Terminal class="size-3.5" />
-          <span>Ghép Nối CLI</span>
+          <span>Ghép nối CLI</span>
         </Button>
 
         <Button
@@ -138,7 +139,7 @@ const planName = computed(() => {
           @click="emit('openSettings')"
         >
           <Settings class="size-3.5" />
-          <span>Cài Đặt</span>
+          <span>Cài đặt</span>
         </Button>
 
         <Button
@@ -146,7 +147,7 @@ const planName = computed(() => {
           size="icon"
           class="size-8 shrink-0"
           :disabled="props.loading"
-          title="Làm mới"
+          :title="$t('common.refresh')"
           @click="emit('refresh')"
         >
           <RefreshCw

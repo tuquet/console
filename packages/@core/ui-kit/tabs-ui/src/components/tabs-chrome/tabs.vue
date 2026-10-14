@@ -182,11 +182,6 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
   @apply cursor-pointer;
 }
 
-.tabs-chrome__extra,
-.tabs-chrome__divider {
-  transform: translateY(-50%);
-}
-
 .tabs-chrome__item:not(.dragging):hover:not(.is-active)
   + .tabs-chrome__item
   .tabs-chrome__divider {

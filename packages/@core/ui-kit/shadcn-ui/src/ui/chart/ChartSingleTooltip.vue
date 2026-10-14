@@ -1,5 +1,7 @@
 <script setup lang="ts">
+/* eslint-disable vue/one-component-per-file */
 import type { BulletLegendItemInterface } from '@unovis/ts';
+
 import type { Component } from 'vue';
 
 import { createApp } from 'vue';

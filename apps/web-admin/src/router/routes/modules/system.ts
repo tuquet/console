@@ -6,7 +6,7 @@ const routes: RouteRecordRaw[] = [
   {
     meta: {
       icon: 'lucide:shield-check',
-      order: 40,
+      order: 30,
       plugin: 'core-iam',
       title: $t('page.system.title'),
     },

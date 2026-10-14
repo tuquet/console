@@ -2,13 +2,17 @@ import type { SupportedLanguagesType } from '@vben-core/typings';
 
 import type { SetupVxeTable } from './types';
 
-import { defineComponent, watch } from 'vue';
+import { watch } from 'vue';
 
 import { usePreferences } from '@vben/preferences';
 
 import {
   VxeButton,
   VxeCheckbox,
+  VxeForm,
+  VxeFormGather,
+  VxeFormGroup,
+  VxeFormItem,
   VxeIcon,
   VxeInput,
   VxeLoading,
@@ -63,13 +67,6 @@ export function useTableForm(...args: any[]) {
   return factory(...args);
 }
 
-// Register minimal stubs for unused components to avoid vxe-table errors while reducing bundle size
-const createVirtualComponent = (name = '') => {
-  return defineComponent({
-    name,
-  });
-};
-
 export function initVxeTable() {
   if (isInit) {
     return;
@@ -85,9 +82,10 @@ export function initVxeTable() {
   // VxeUI.component(VxeButtonGroup);
   VxeUI.component(VxeCheckbox);
   // VxeUI.component(VxeCheckboxGroup);
-  VxeUI.component(createVirtualComponent('VxeForm'));
-  // VxeUI.component(VxeFormGather);
-  // VxeUI.component(VxeFormItem);
+  VxeUI.component(VxeForm);
+  VxeUI.component(VxeFormItem);
+  VxeUI.component(VxeFormGroup);
+  VxeUI.component(VxeFormGather);
   VxeUI.component(VxeIcon);
   VxeUI.component(VxeInput);
   // VxeUI.component(VxeList);

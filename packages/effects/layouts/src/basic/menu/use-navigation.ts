@@ -23,12 +23,23 @@ function useNavigation() {
     initRouteMetaMap();
   });
 
+  const getRoute = (path: string): RouteRecordNormalized | undefined => {
+    let route = routeMetaMap.get(path);
+    if (!route) {
+      initRouteMetaMap();
+      route =
+        routeMetaMap.get(path) ??
+        router.getRoutes().find((r) => r.path === path);
+    }
+    return route;
+  };
+
   // Check if route should open in new window
   const shouldOpenInNewWindow = (path: string): boolean => {
     if (isHttpUrl(path)) {
       return true;
     }
-    const route = routeMetaMap.get(path);
+    const route = getRoute(path);
     // Return true if external link or configured to open in new window
     return !!(route?.meta?.link || route?.meta?.openInNewWindow);
   };
@@ -39,7 +50,7 @@ function useNavigation() {
 
   const navigation = async (path: string) => {
     try {
-      const route = routeMetaMap.get(path);
+      const route = getRoute(path);
       const { openInNewWindow = false, query = {}, link } = route?.meta ?? {};
 
       // Check for external link

@@ -7,7 +7,6 @@ import { useRoute, useRouter } from 'vue-router';
 import {
   AlertCircle,
   ArrowLeft,
-  CheckCircle2,
   Clock,
   GitBranch,
   Laptop,
@@ -31,6 +30,7 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
+import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
 import {
   calculateProgressPercentage,
   cancelCampaignRunApi,
@@ -190,7 +190,7 @@ onUnmounted(() => {
             <h1
               class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
             >
-              {{ run?.name || 'Chi Tiết Phiên Chạy' }}
+              {{ run?.name || 'Chi tiết phiên chạy' }}
             </h1>
             <Badge v-if="run" variant="outline" class="text-xs font-normal">
               <span
@@ -206,14 +206,14 @@ onUnmounted(() => {
               ></span>
               {{
                 run.status === 'running'
-                  ? 'Đang Chạy'
+                  ? 'Đang chạy'
                   : run.status === 'completed'
-                    ? 'Hoàn Thành'
+                    ? 'Hoàn thành'
                     : run.status === 'failed'
-                      ? 'Thất Bại'
+                      ? 'Thất bại'
                       : run.status === 'cancelled'
-                        ? 'Đã Hủy'
-                        : 'Đang Chờ'
+                        ? 'Đã hủy'
+                        : 'Đang chờ'
               }}
             </Badge>
           </div>
@@ -230,7 +230,7 @@ onUnmounted(() => {
           class="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-3 py-1 text-xs text-muted-foreground"
         >
           <span class="size-2 rounded-full bg-success animate-pulse"></span>
-          <span>Live Polling (3s)</span>
+          <span>Live polling 3s</span>
         </div>
 
         <AlertDialog v-if="isActive">
@@ -242,21 +242,21 @@ onUnmounted(() => {
               class="gap-1.5 h-8 text-xs font-medium"
             >
               <XCircle class="size-3.5" />
-              <span>Hủy Phiên Chạy</span>
+              <span>Hủy phiên chạy</span>
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Hủy phiên chạy chiến dịch?</AlertDialogTitle>
+              <AlertDialogTitle>Hủy phiên chạy workflow?</AlertDialogTitle>
               <AlertDialogDescription>
-                Tiến trình tự động hóa đang thực thi trên máy trạm runner sẽ bị
-                dừng lại lập tức.
+                Tiến trình tự động hóa đang thực thi trên runner node sẽ bị dừng
+                lại ngay lập tức.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Đóng</AlertDialogCancel>
               <AlertDialogAction @click="handleCancelRun">
-                Xác Nhận Hủy
+                Xác nhận hủy
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -278,98 +278,80 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Error Banner (if run failed) -->
-    <div
-      v-if="run?.error_message"
-      class="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-xs text-destructive"
-    >
-      <AlertCircle class="size-4 shrink-0 mt-0.5" />
-      <div>
-        <div class="font-semibold">Chi Tiết Lỗi Thực Thi:</div>
-        <div class="mt-1 font-mono break-all">{{ run.error_message }}</div>
-      </div>
-    </div>
-
-    <!-- Overview Specs Grid -->
+    <!-- Overview Form via VXE UI Form -->
     <div
       v-if="run"
-      class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
     >
-      <!-- Metric 1: Workflow -->
-      <div
-        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm space-y-1"
-      >
-        <div
-          class="flex items-center justify-between text-xs text-muted-foreground"
-        >
-          <span>Quy Trình</span>
-          <GitBranch class="size-3.5 text-muted-foreground" />
-        </div>
-        <div class="text-sm font-semibold text-foreground truncate">
-          {{ run.workflow ? run.workflow.name : 'Chưa gắn workflow' }}
-        </div>
-        <div class="text-xs text-muted-foreground">Bản vẽ quy trình Automa</div>
-      </div>
+      <VxeForm :data="run" custom-layout readonly size="small" class="w-full">
+        <VxeFormItem title="Quy trình" span="12" class="sm:col-span-6">
+          <template #default>
+            <div class="flex items-center gap-2 text-sm">
+              <GitBranch class="size-4 text-muted-foreground shrink-0" />
+              <span class="font-medium text-foreground truncate">
+                {{ run.workflow ? run.workflow.name : 'Chưa gắn quy trình' }}
+              </span>
+            </div>
+          </template>
+        </VxeFormItem>
 
-      <!-- Metric 2: Runner Device -->
-      <div
-        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm space-y-1"
-      >
-        <div
-          class="flex items-center justify-between text-xs text-muted-foreground"
-        >
-          <span>Máy Trạm Thực Thi</span>
-          <Laptop class="size-3.5 text-muted-foreground" />
-        </div>
-        <div class="text-sm font-semibold text-foreground truncate">
-          {{ run.runner ? run.runner.name : 'Điều phối tự động' }}
-        </div>
-        <div class="text-xs text-muted-foreground">Runner Node</div>
-      </div>
+        <VxeFormItem title="Thiết bị thực thi" span="12" class="sm:col-span-6">
+          <template #default>
+            <div class="flex items-center gap-2 text-sm">
+              <Laptop class="size-4 text-muted-foreground shrink-0" />
+              <span class="font-medium text-foreground truncate">
+                {{ run.runner ? run.runner.name : 'Điều phối tự động' }}
+              </span>
+            </div>
+          </template>
+        </VxeFormItem>
 
-      <!-- Metric 3: Duration -->
-      <div
-        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm space-y-1"
-      >
-        <div
-          class="flex items-center justify-between text-xs text-muted-foreground"
-        >
-          <span>Thời Lượng</span>
-          <Clock class="size-3.5 text-muted-foreground" />
-        </div>
-        <div class="text-sm font-semibold text-foreground font-mono">
-          {{ formatDuration(run.started_at, run.ended_at) }}
-        </div>
-        <div class="text-xs text-muted-foreground">
-          Bắt đầu: {{ formatDate(run.started_at) }}
-        </div>
-      </div>
+        <VxeFormItem title="Thời lượng" span="12" class="sm:col-span-6">
+          <template #default>
+            <div class="flex items-center gap-2 text-sm font-mono">
+              <Clock class="size-4 text-muted-foreground shrink-0" />
+              <span class="font-semibold text-foreground">
+                {{ formatDuration(run.started_at, run.ended_at) }}
+              </span>
+              <span class="text-xs text-muted-foreground font-sans">
+                · Bắt đầu: {{ formatDate(run.started_at) }}
+              </span>
+            </div>
+          </template>
+        </VxeFormItem>
 
-      <!-- Metric 4: Tasks Progress -->
-      <div
-        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm space-y-1"
-      >
-        <div
-          class="flex items-center justify-between text-xs text-muted-foreground"
-        >
-          <span>Tiến Độ Tác Vụ</span>
-          <CheckCircle2 class="size-3.5 text-success" />
-        </div>
-        <div class="flex items-baseline justify-between">
-          <span class="text-sm font-semibold text-foreground font-mono">
-            {{ run.completed_tasks }} / {{ run.total_tasks }} tasks
-          </span>
-          <span class="text-xs font-mono font-bold text-primary">
-            {{ progressPct }}%
-          </span>
-        </div>
-        <div class="h-1.5 w-full rounded-full bg-muted overflow-hidden mt-1">
-          <div
-            class="h-full rounded-full bg-primary transition-all"
-            :style="{ width: `${progressPct}%` }"
-          ></div>
-        </div>
-      </div>
+        <VxeFormItem title="Tiến độ tác vụ" span="12" class="sm:col-span-6">
+          <template #default>
+            <div class="flex items-center gap-3 w-full max-w-sm">
+              <div class="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                <div
+                  class="h-full rounded-full bg-primary transition-all"
+                  :style="{ width: `${progressPct}%` }"
+                ></div>
+              </div>
+              <span
+                class="text-xs font-mono font-medium text-foreground shrink-0"
+              >
+                {{ run.completed_tasks }} / {{ run.total_tasks }} tasks ·
+                {{ progressPct }}%
+              </span>
+            </div>
+          </template>
+        </VxeFormItem>
+
+        <VxeFormItem v-if="run.error_message" title="Lỗi thực thi" span="24">
+          <template #default>
+            <div
+              class="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive w-full"
+            >
+              <AlertCircle class="size-4 shrink-0 mt-0.5" />
+              <div class="font-mono break-all leading-relaxed">
+                {{ run.error_message }}
+              </div>
+            </div>
+          </template>
+        </VxeFormItem>
+      </VxeForm>
     </div>
 
     <!-- Execution Logs Console Section -->
@@ -382,7 +364,7 @@ onUnmounted(() => {
         <div class="flex items-center gap-2">
           <Terminal class="size-4 text-muted-foreground" />
           <span class="text-sm font-semibold text-foreground">
-            Nhật Ký Thực Thi (Execution Logs)
+            Nhật ký thực thi
           </span>
           <Badge variant="outline" class="text-xs font-normal">
             {{ logs.length }} dòng

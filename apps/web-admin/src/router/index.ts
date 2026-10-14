@@ -19,11 +19,19 @@ const router = createRouter({
       : createWebHistory(import.meta.env.VITE_BASE),
   // Initial route list to be mounted into router
   routes,
-  scrollBehavior: (to, _from, savedPosition) => {
+  scrollBehavior: (to, from, savedPosition) => {
     if (savedPosition) {
       return savedPosition;
     }
-    return to.hash ? { behavior: 'smooth', el: to.hash } : { left: 0, top: 0 };
+    if (to.hash) {
+      return { behavior: 'smooth', el: to.hash };
+    }
+    // If navigating on the same path (e.g. query string tab or filter changes),
+    // preserve current scroll position instead of resetting to top: 0
+    if (from?.matched?.length && to.path === from.path) {
+      return false;
+    }
+    return { left: 0, top: 0 };
   },
   // Prohibit trailing slash if strict
   // strict: true,

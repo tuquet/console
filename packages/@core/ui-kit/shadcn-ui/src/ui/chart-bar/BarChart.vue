@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
 import type { BulletLegendItemInterface } from '@unovis/ts';
+
 import type { Component } from 'vue';
 
 import type { BaseChartProps } from '../chart';
@@ -153,7 +154,7 @@ const selectorsBar = computed(() =>
         type="y"
       />
 
-      <slot />
+      <slot></slot>
     </VisXYContainer>
   </div>
 </template>

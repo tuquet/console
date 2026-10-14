@@ -259,7 +259,7 @@ export async function revokeFleetDeviceApi(deviceId: string): Promise<void> {
 export const revokeFleetNodeApi = revokeFleetDeviceApi;
 
 /**
- * Lấy danh sách hồ sơ trình duyệt đám mây từ schema runners.browsers
+ * Lấy danh sách browser profiles từ schema runners.browsers
  */
 export async function getFleetBrowsersApi(params?: {
   status?: string;
@@ -281,7 +281,7 @@ export async function getFleetBrowsersApi(params?: {
 }
 
 /**
- * Lấy danh sách bể proxy từ schema runners.proxies
+ * Lấy danh sách proxy pool từ schema runners.proxies
  */
 export async function getFleetProxiesApi(params?: {
   status?: string;

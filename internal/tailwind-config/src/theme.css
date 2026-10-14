@@ -20,6 +20,8 @@
 @source '../../../apps/';
 @source '../../../docs/';
 @source '../../../playground/';
+@source '../../../node_modules/.pnpm/@tuquet+vue-ui*/**/*.mjs';
+@source '../../../../lib/packages/vue-ui/src/**/*.{vue,ts}';
 
 /* Dark mode uses .dark class selector, not prefers-color-scheme */
 @custom-variant dark (&:is(.dark *));
@@ -641,4 +643,12 @@ html.invert-mode {
 
 html.grayscale-mode {
   @apply grayscale;
+}
+
+@layer utilities {
+  /* Prevent legacy composite transform from conflicting with Tailwind v4 CSS translate properties */
+  [data-slot='dialog-content'],
+  [data-slot='alert-dialog-content'] {
+    transform: none;
+  }
 }

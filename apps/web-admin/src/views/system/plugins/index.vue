@@ -1,45 +1,173 @@
 <script lang="ts" setup>
 import type { SystemPluginItem } from '#/api';
 
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 
-import { Layers, Puzzle, RefreshCw } from '@lucide/vue';
 import {
-  Badge,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  toast,
-} from '@tuquet/vue-ui';
+  CreditCard,
+  Database,
+  HardDrive,
+  Layers,
+  RefreshCw,
+  ShieldCheck,
+  Webhook,
+  Workflow,
+  Zap,
+} from '@lucide/vue';
+import { Badge, Button } from '@tuquet/vue-ui';
 
+import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSystemPluginsApi } from '#/api';
 import { useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 defineOptions({ name: 'SystemPlugins' });
 
 const { formatDate } = useDateFormat();
 
-const loading = ref(true);
-const plugins = ref<SystemPluginItem[]>([]);
+const allPlugins = ref<SystemPluginItem[]>([]);
 
-async function loadPlugins() {
-  loading.value = true;
-  try {
-    plugins.value = await getSystemPluginsApi();
-  } catch (error: any) {
-    toast.error(error.message || 'Không thể tải danh sách plugins hệ thống');
-  } finally {
-    loading.value = false;
+const [Grid, gridApi] = useVbenVxeGrid<SystemPluginItem>({
+  formOptions: {
+    schema: [
+      {
+        component: 'Select',
+        fieldName: 'is_core',
+        label: 'Phân loại',
+        defaultValue: 'all',
+        componentProps: {
+          placeholder: 'Tất cả phân loại',
+          options: [
+            { label: 'Tất cả phân loại', value: 'all' },
+            { label: 'Core Kernel', value: 'core' },
+            { label: 'Extension', value: 'extension' },
+          ],
+        },
+      },
+      {
+        component: 'Input',
+        fieldName: 'keyword',
+        label: 'Tìm kiếm',
+        componentProps: {
+          placeholder: 'Tên plugin hoặc định danh...',
+        },
+      },
+    ],
+    layout: 'vertical',
+    showCollapseButton: false,
+    submitButtonOptions: {
+      content: $t('common.filter'),
+    },
+    resetButtonOptions: {
+      content: $t('common.reset'),
+    },
+    actionWrapperClass: 'flex items-center justify-end gap-2 pt-2 sm:pt-6',
+    wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3',
+  },
+  gridOptions: {
+    border: false,
+    round: true,
+    showOverflow: true,
+    pagerConfig: {
+      pageSize: 15,
+      pageSizes: [10, 15, 30, 50],
+    },
+    proxyConfig: {
+      autoLoad: true,
+      ajax: {
+        query: async (
+          { page }: { page?: { currentPage?: number; pageSize?: number } },
+          formValues: Record<string, any>,
+        ) => {
+          const data = await getSystemPluginsApi();
+          allPlugins.value = data;
+
+          let filtered = data;
+          if (formValues?.is_core === 'core') {
+            filtered = filtered.filter((p) => p.is_core);
+          } else if (formValues?.is_core === 'extension') {
+            filtered = filtered.filter((p) => !p.is_core);
+          }
+
+          if (formValues?.keyword) {
+            const kw = formValues.keyword.toLowerCase().trim();
+            filtered = filtered.filter(
+              (p) =>
+                p.name.toLowerCase().includes(kw) ||
+                p.id.toLowerCase().includes(kw),
+            );
+          }
+
+          const currentPage = page?.currentPage || 1;
+          const pageSize = page?.pageSize || 15;
+          const start = (currentPage - 1) * pageSize;
+          const end = start + pageSize;
+
+          return {
+            items: filtered.slice(start, end),
+            total: filtered.length,
+          };
+        },
+      },
+    },
+    columns: [
+      {
+        field: 'name',
+        title: 'Plugin',
+        minWidth: 220,
+        slots: { default: 'plugin-cell' },
+      },
+      {
+        field: 'is_core',
+        title: 'Phân loại',
+        width: 150,
+        slots: { default: 'type-cell' },
+      },
+      {
+        field: 'version',
+        title: 'Phiên bản & schema',
+        minWidth: 200,
+        slots: { default: 'version-cell' },
+      },
+      {
+        field: 'status',
+        title: 'Trạng thái',
+        width: 140,
+        slots: { default: 'status-cell' },
+      },
+      {
+        field: 'installed_at',
+        title: 'Ngày cài đặt',
+        minWidth: 150,
+        align: 'right',
+        slots: { default: 'date-cell' },
+      },
+    ],
+  },
+});
+
+function getPluginIcon(pluginId: string) {
+  switch (pluginId?.toLowerCase()) {
+    case 'core-iam':
+      return ShieldCheck;
+    case 'runners':
+      return Zap;
+    case 'automa':
+      return Workflow;
+    case 'subscriptions':
+      return CreditCard;
+    case 'storage':
+      return HardDrive;
+    case 'webhooks':
+      return Webhook;
+    default:
+      return Database;
   }
 }
 
-onMounted(() => {
-  loadPlugins();
-});
+function refresh() {
+  gridApi.reload();
+}
 </script>
 
 <template>
@@ -48,37 +176,33 @@ onMounted(() => {
     <div
       class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div class="flex items-center gap-2.5">
+      <div class="flex flex-col gap-1">
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Plugins Hệ Thống
+          Plugins hệ thống
         </h1>
-        <Badge variant="secondary" class="text-xs uppercase font-medium">
-          System Catalog
-        </Badge>
+        <p class="text-xs text-muted-foreground">
+          Danh mục tiện ích mở rộng và module chức năng mở rộng nền tảng
+        </p>
       </div>
 
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
           size="icon"
-          :disabled="loading"
           class="size-8 shrink-0"
-          title="Làm mới"
-          @click="loadPlugins"
+          :title="$t('common.refresh')"
+          @click="refresh"
         >
-          <RefreshCw
-            class="size-3.5 shrink-0"
-            :class="{ 'animate-spin': loading }"
-          />
+          <RefreshCw class="size-3.5 shrink-0" />
         </Button>
       </div>
     </div>
 
     <!-- Main Container -->
     <div
-      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-4"
+      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-sm space-y-4"
     >
       <!-- Stats Bar -->
       <div
@@ -87,169 +211,90 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <Layers class="size-4 text-muted-foreground" />
           <span class="text-sm font-semibold text-foreground">
-            Danh Sách Plugins
+            Danh sách plugins
           </span>
           <span class="text-muted-foreground"
-            >({{ plugins.length }} tổng số)</span
+            >· {{ allPlugins.length }} tổng số</span
           >
         </div>
 
         <div class="flex items-center gap-3 text-muted-foreground">
-          <span>{{ plugins.filter((p) => p.is_core).length }} Core Kernel</span>
+          <span
+            >{{ allPlugins.filter((p) => p.is_core).length }} Core Kernel</span
+          >
           <span>&bull;</span>
-          <span>{{ plugins.filter((p) => !p.is_core).length }} Extensions</span>
+          <span
+            >{{ allPlugins.filter((p) => !p.is_core).length }} Extensions</span
+          >
         </div>
       </div>
 
-      <!-- Desktop Table -->
-      <div
-        v-if="plugins.length > 0"
-        class="hidden md:block overflow-x-auto rounded-lg border border-border/60"
-      >
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Plugin</TableHead>
-              <TableHead>Phân Loại</TableHead>
-              <TableHead>Phiên Bản & Schema</TableHead>
-              <TableHead>Trạng Thái</TableHead>
-              <TableHead class="text-right">Ngày Cài Đặt</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-for="p in plugins" :key="p.id">
-              <TableCell>
-                <div class="flex items-center gap-2.5">
-                  <div
-                    class="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground"
-                  >
-                    <Puzzle class="size-4" />
-                  </div>
-                  <div>
-                    <div class="font-medium text-foreground">
-                      {{ p.name }}
-                    </div>
-                    <div class="font-mono text-xs text-muted-foreground">
-                      {{ p.id }}
-                    </div>
-                  </div>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <Badge
-                  :variant="p.is_core ? 'default' : 'secondary'"
-                  class="text-xs font-normal"
-                >
-                  {{ p.is_core ? 'Core Kernel' : 'Extension' }}
-                </Badge>
-              </TableCell>
-
-              <TableCell>
-                <div class="flex items-center gap-2 text-xs font-mono">
-                  <Badge variant="outline" class="font-mono text-xs">
-                    v{{ p.version }}
-                  </Badge>
-                  <span v-if="p.schema_name" class="text-muted-foreground">
-                    schema: {{ p.schema_name }}
-                  </span>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <Badge variant="outline" class="text-xs font-normal">
-                  <span
-                    class="mr-1.5 size-1.5 rounded-full"
-                    :class="{
-                      'bg-success': p.status === 'installed',
-                      'bg-muted-foreground': p.status === 'disabled',
-                      'bg-warning': p.status === 'pending',
-                    }"
-                  ></span>
-                  {{
-                    p.status === 'installed'
-                      ? 'Đã Cài Đặt'
-                      : p.status === 'disabled'
-                        ? 'Tạm Dừng'
-                        : 'Đang Chờ'
-                  }}
-                </Badge>
-              </TableCell>
-
-              <TableCell class="text-right text-xs text-muted-foreground">
-                {{ formatDate(p.installed_at) }}
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-
-      <!-- Mobile Touch Cards -->
-      <div v-if="plugins.length > 0" class="block space-y-3 md:hidden">
-        <div
-          v-for="p in plugins"
-          :key="p.id"
-          class="rounded-xl border border-border/60 bg-muted/10 p-4 space-y-3"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2.5">
-              <div
-                class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
-              >
-                <Puzzle class="size-4.5" />
+      <!-- Table Grid -->
+      <Grid class="plugins-vxe-grid">
+        <template #plugin-cell="{ row }">
+          <div class="flex items-center gap-2.5 py-1">
+            <div
+              class="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground shrink-0"
+            >
+              <component :is="getPluginIcon(row.id)" class="size-4" />
+            </div>
+            <div class="text-left">
+              <div class="font-medium text-foreground">
+                {{ row.name }}
               </div>
-              <div>
-                <div class="font-semibold text-foreground text-sm">
-                  {{ p.name }}
-                </div>
-                <div class="font-mono text-xs text-muted-foreground">
-                  {{ p.id }}
-                </div>
+              <div class="font-mono text-xs text-muted-foreground">
+                {{ row.id }}
               </div>
             </div>
+          </div>
+        </template>
 
-            <Badge
-              :variant="p.is_core ? 'default' : 'secondary'"
-              class="text-xs font-normal"
-            >
-              {{ p.is_core ? 'Core' : 'Extension' }}
+        <template #type-cell="{ row }">
+          <Badge
+            :variant="row.is_core ? 'default' : 'secondary'"
+            class="text-xs font-normal"
+          >
+            {{ row.is_core ? 'Core Kernel' : 'Extension' }}
+          </Badge>
+        </template>
+
+        <template #version-cell="{ row }">
+          <div class="flex items-center gap-2 text-xs font-mono">
+            <Badge variant="outline" class="font-mono text-xs">
+              v{{ row.version }}
             </Badge>
+            <span v-if="row.schema_name" class="text-muted-foreground">
+              schema: {{ row.schema_name }}
+            </span>
           </div>
+        </template>
 
-          <p
-            v-if="p.description"
-            class="text-xs text-muted-foreground line-clamp-2"
-          >
-            {{ p.description }}
-          </p>
+        <template #status-cell="{ row }">
+          <Badge variant="outline" class="text-xs font-normal">
+            <span
+              class="mr-1.5 size-1.5 rounded-full"
+              :class="{
+                'bg-success': row.status === 'installed',
+                'bg-muted-foreground': row.status === 'disabled',
+                'bg-warning': row.status === 'pending',
+              }"
+            ></span>
+            {{
+              row.status === 'installed'
+                ? 'Đã cài đặt'
+                : row.status === 'disabled'
+                  ? 'Tạm dừng'
+                  : 'Đang chờ'
+            }}
+          </Badge>
+        </template>
 
-          <div
-            class="flex items-center justify-between border-t border-border/40 pt-2 text-xs text-muted-foreground"
-          >
-            <span class="font-mono">v{{ p.version }}</span>
-            <span>{{ formatDate(p.installed_at) }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <div
-        v-if="plugins.length === 0 && !loading"
-        class="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/60 py-12 text-center"
-      >
-        <div
-          class="flex size-12 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground"
-        >
-          <Puzzle class="size-6" />
-        </div>
-        <h3 class="mt-3 text-sm font-semibold text-foreground">
-          Chưa có plugin nào được cài đặt
-        </h3>
-        <p class="mt-1 max-w-sm text-xs text-muted-foreground">
-          Các plugin hệ thống được cấu hình và đăng ký tự động khi cài đặt
-          Tuquet Cloud.
-        </p>
-      </div>
+        <template #date-cell="{ row }">
+          <span class="text-xs text-muted-foreground">
+            {{ formatDate(row.installed_at) }}
+          </span>
+        </template>
+      </Grid>
     </div>
   </div>
 </template>

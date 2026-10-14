@@ -33,6 +33,7 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
+import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
 import {
   getActiveTenantId,
   getUserInfoApi,
@@ -187,11 +188,11 @@ onMounted(async () => {
             <h1
               class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
             >
-              {{ fullName || 'Kỹ Sư Tuquet' }}
+              {{ fullName || 'Kỹ sư Tuquet' }}
             </h1>
             <Badge
               variant="outline"
-              class="bg-primary/10 text-primary border-primary/30 font-mono text-xs uppercase font-medium"
+              class="bg-primary/10 text-primary border-primary/30 text-xs font-medium"
             >
               Super Administrator
             </Badge>
@@ -235,7 +236,7 @@ onMounted(async () => {
           @click="fetchProfile"
         >
           <RefreshCw class="size-4" :class="{ 'animate-spin': loading }" />
-          <span>Làm Mới</span>
+          <span>Làm mới</span>
         </Button>
       </div>
     </div>
@@ -246,93 +247,99 @@ onMounted(async () => {
     >
       <Tabs default-value="info" class="w-full">
         <TabsList class="grid w-full max-w-xs grid-cols-3 mb-6">
-          <TabsTrigger value="info">Hồ Sơ</TabsTrigger>
-          <TabsTrigger value="security">Bảo Mật</TabsTrigger>
+          <TabsTrigger value="info">Hồ sơ</TabsTrigger>
+          <TabsTrigger value="security">Bảo mật</TabsTrigger>
           <TabsTrigger value="workspace">Workspace</TabsTrigger>
         </TabsList>
 
-        <!-- Tab 1: Thông Tin Cá Nhân -->
+        <!-- Tab 1: Hồ sơ cá nhân -->
         <TabsContent value="info">
           <div class="max-w-2xl space-y-5 pt-1">
             <div>
               <h3 class="text-base font-semibold text-foreground">
-                Hồ Sơ Cá Nhân
+                Hồ sơ cá nhân
               </h3>
               <p class="text-xs text-muted-foreground">
                 Thông tin hiển thị trên các Workspace của bạn.
               </p>
             </div>
 
-            <!-- Field 1: Họ và tên -->
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-foreground">
-                Họ và Tên
-              </label>
-              <div class="relative">
-                <Input
-                  v-model="fullName"
-                  placeholder="Ví dụ: Nguyễn Đình Tứ"
-                  class="h-10 pl-9"
-                />
-                <User
-                  class="size-4 text-muted-foreground absolute left-3 top-3 pointer-events-none"
-                />
-              </div>
-            </div>
+            <VxeForm
+              :data="{ fullName, email, avatarUrl, bio }"
+              custom-layout
+              size="small"
+              class="w-full space-y-3"
+            >
+              <VxeFormItem title="Họ và tên" span="24">
+                <template #default>
+                  <div class="relative w-full">
+                    <Input
+                      v-model="fullName"
+                      placeholder="Ví dụ: Nguyễn Đình Tứ"
+                      class="h-10 pl-9"
+                    />
+                    <User
+                      class="size-4 text-muted-foreground absolute left-3 top-3 pointer-events-none"
+                    />
+                  </div>
+                </template>
+              </VxeFormItem>
 
-            <!-- Field 2: Email -->
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-foreground">
-                Email Đăng Nhập
-              </label>
-              <div class="relative">
-                <Input :value="email" disabled class="h-10 pl-9 bg-muted" />
-                <Mail
-                  class="size-4 text-muted-foreground absolute left-3 top-3 pointer-events-none"
-                />
-              </div>
-              <p class="text-xs text-muted-foreground">
-                Email định danh tài khoản, không thể thay đổi trực tiếp.
-              </p>
-            </div>
+              <VxeFormItem title="Email đăng nhập" span="24">
+                <template #default>
+                  <div class="space-y-1.5 w-full">
+                    <div class="relative w-full">
+                      <Input
+                        :value="email"
+                        disabled
+                        class="h-10 pl-9 bg-muted"
+                      />
+                      <Mail
+                        class="size-4 text-muted-foreground absolute left-3 top-3 pointer-events-none"
+                      />
+                    </div>
+                    <p class="text-xs text-muted-foreground">
+                      Email định danh tài khoản, không thể thay đổi trực tiếp.
+                    </p>
+                  </div>
+                </template>
+              </VxeFormItem>
 
-            <!-- Field 3: Avatar URL -->
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-foreground">
-                Ảnh Đại Diện (URL)
-              </label>
-              <Input
-                v-model="avatarUrl"
-                placeholder="https://..."
-                class="h-10"
-              />
-            </div>
+              <VxeFormItem title="Ảnh đại diện URL" span="24">
+                <template #default>
+                  <Input
+                    v-model="avatarUrl"
+                    placeholder="https://..."
+                    class="h-10"
+                  />
+                </template>
+              </VxeFormItem>
 
-            <!-- Field 4: Bio / Ghi chú -->
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-foreground">
-                Tiểu Sử
-              </label>
-              <Textarea
-                v-model="bio"
-                placeholder="Kỹ sư phần mềm / DevOps..."
-                :rows="3"
-              />
-            </div>
+              <VxeFormItem title="Tiểu sử" span="24">
+                <template #default>
+                  <Textarea
+                    v-model="bio"
+                    placeholder="Kỹ sư phần mềm, DevOps..."
+                    :rows="3"
+                  />
+                </template>
+              </VxeFormItem>
 
-            <!-- Save Button -->
-            <div class="pt-2">
-              <Button
-                class="flex items-center gap-2 h-10"
-                :disabled="savingProfile"
-                @click="handleSaveProfile"
-              >
-                <Save class="size-4" />
-                <span>{{
-                  savingProfile ? 'Đang lưu...' : 'Lưu Thay Đổi'
-                }}</span>
-              </Button>
-            </div>
+              <VxeFormItem span="24">
+                <template #default>
+                  <Button
+                    class="flex items-center gap-2 h-10 mt-1"
+                    :disabled="savingProfile"
+                    @click="handleSaveProfile"
+                  >
+                    <Save class="size-4" />
+                    <span>{{
+                      savingProfile ? 'Đang lưu...' : 'Lưu thay đổi'
+                    }}</span>
+                  </Button>
+                </template>
+              </VxeFormItem>
+            </VxeForm>
           </div>
         </TabsContent>
 
@@ -341,66 +348,71 @@ onMounted(async () => {
           <div class="max-w-2xl space-y-6 pt-1">
             <div>
               <h3 class="text-base font-semibold text-foreground">
-                Đổi Mật Khẩu
+                Đổi mật khẩu
               </h3>
               <p class="text-xs text-muted-foreground">
                 Cập nhật mật khẩu mới cho tài khoản đăng nhập.
               </p>
             </div>
 
-            <!-- New Password -->
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-foreground">
-                Mật Khẩu Mới
-              </label>
-              <div class="relative">
-                <Input
-                  v-model="newPassword"
-                  type="password"
-                  placeholder="Tối thiểu 6 ký tự"
-                  class="h-10 pl-9"
-                />
-                <Lock
-                  class="size-4 text-muted-foreground absolute left-3 top-3 pointer-events-none"
-                />
-              </div>
-            </div>
+            <VxeForm
+              :data="{ newPassword, confirmPassword }"
+              custom-layout
+              size="small"
+              class="w-full space-y-3"
+            >
+              <VxeFormItem title="Mật khẩu mới" span="24">
+                <template #default>
+                  <div class="relative w-full">
+                    <Input
+                      v-model="newPassword"
+                      type="password"
+                      placeholder="Tối thiểu 6 ký tự"
+                      class="h-10 pl-9"
+                    />
+                    <Lock
+                      class="size-4 text-muted-foreground absolute left-3 top-3 pointer-events-none"
+                    />
+                  </div>
+                </template>
+              </VxeFormItem>
 
-            <!-- Confirm Password -->
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-foreground">
-                Xác Nhận Mật Khẩu
-              </label>
-              <div class="relative">
-                <Input
-                  v-model="confirmPassword"
-                  type="password"
-                  placeholder="Nhập lại mật khẩu mới"
-                  class="h-10 pl-9"
-                />
-                <Lock
-                  class="size-4 text-muted-foreground absolute left-3 top-3 pointer-events-none"
-                />
-              </div>
-            </div>
+              <VxeFormItem title="Xác nhận mật khẩu" span="24">
+                <template #default>
+                  <div class="relative w-full">
+                    <Input
+                      v-model="confirmPassword"
+                      type="password"
+                      placeholder="Nhập lại mật khẩu mới"
+                      class="h-10 pl-9"
+                    />
+                    <Lock
+                      class="size-4 text-muted-foreground absolute left-3 top-3 pointer-events-none"
+                    />
+                  </div>
+                </template>
+              </VxeFormItem>
 
-            <div>
-              <Button
-                class="flex items-center gap-2 h-10"
-                :disabled="savingPassword"
-                @click="handleSavePassword"
-              >
-                <KeyRound class="size-4" />
-                <span>{{
-                  savingPassword ? 'Đang lưu...' : 'Lưu Mật Khẩu'
-                }}</span>
-              </Button>
-            </div>
+              <VxeFormItem span="24">
+                <template #default>
+                  <Button
+                    class="flex items-center gap-2 h-10 mt-1"
+                    :disabled="savingPassword"
+                    @click="handleSavePassword"
+                  >
+                    <KeyRound class="size-4" />
+                    <span>{{
+                      savingPassword ? 'Đang lưu...' : 'Lưu mật khẩu'
+                    }}</span>
+                  </Button>
+                </template>
+              </VxeFormItem>
+            </VxeForm>
 
             <!-- Security Overview Cards -->
             <div class="border-t border-border/40 pt-5 space-y-4">
               <h4 class="text-sm font-semibold text-foreground">
-                Tình Trạng Bảo Mật
+                Tình trạng bảo mật
               </h4>
 
               <div
@@ -414,7 +426,7 @@ onMounted(async () => {
                   </div>
                   <div>
                     <div class="text-sm font-medium text-foreground">
-                      Xác Thực Hai Yếu Tố (MFA)
+                      Xác thực 2 lớp MFA
                     </div>
                     <div class="text-xs text-muted-foreground">
                       Bảo vệ tài khoản qua mã OTP hoặc FIDO2
@@ -440,7 +452,7 @@ onMounted(async () => {
                   </div>
                   <div>
                     <div class="text-sm font-medium text-foreground">
-                      Phiên Đăng Nhập
+                      Phiên đăng nhập
                     </div>
                     <div class="text-xs text-muted-foreground">
                       Mã hóa JWT tự động gia hạn an toàn
@@ -463,7 +475,7 @@ onMounted(async () => {
           <div class="max-w-2xl space-y-5 pt-1">
             <div>
               <h3 class="text-base font-semibold text-foreground">
-                Workspace Đang Hoạt Động
+                Workspace đang hoạt động
               </h3>
               <p class="text-xs text-muted-foreground">
                 Không gian làm việc mặc định của tài khoản hiện tại.
@@ -477,14 +489,14 @@ onMounted(async () => {
                 <div class="flex items-center gap-2">
                   <Building2 class="size-4.5 text-primary" />
                   <span class="font-semibold text-foreground"
-                    >Workspace Hiện Tại</span
+                    >Workspace hiện tại</span
                   >
                 </div>
                 <Badge
                   variant="outline"
                   class="bg-primary/10 text-primary border-primary/30 font-mono text-xs"
                 >
-                  ACTIVE
+                  Active
                 </Badge>
               </div>
               <div class="text-xs text-muted-foreground font-mono">
@@ -496,13 +508,13 @@ onMounted(async () => {
                   variant="outline"
                   @click="router.push('/tenants')"
                 >
-                  Xem Tất Cả Workspace
+                  Xem tất cả workspace
                 </Button>
               </div>
             </div>
 
             <!-- CLI Command -->
-            <CliSnippetCard command="tuquet login" label="Lệnh Ghép Nối CLI" />
+            <CliSnippetCard command="tuquet login" label="Lệnh ghép nối CLI" />
           </div>
         </TabsContent>
       </Tabs>

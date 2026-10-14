@@ -95,6 +95,32 @@ describe('useLayoutScroll', () => {
     expect(element.scrollTo).toHaveBeenCalledWith({ top: 0 });
   });
 
+  it('should preserve scroll position and not scroll to top on same-path query navigation', async () => {
+    window.history.replaceState({ position: 0 }, '');
+    const element = createScrollElement();
+    element.scrollTop = 240;
+    const routerMock = createRouterMock();
+    mountLayoutScroll(routerMock.router);
+    const { afterHook, beforeGuard } = routerMock.getHooks();
+
+    const fromRoute = {
+      path: '/tenants/detail/1',
+      fullPath: '/tenants/detail/1?tab=overview',
+      matched: [{ path: '/tenants/detail/1' }],
+    } as any;
+    const toRoute = {
+      path: '/tenants/detail/1',
+      fullPath: '/tenants/detail/1?tab=members',
+      matched: [{ path: '/tenants/detail/1' }],
+      hash: '',
+    } as any;
+
+    await beforeGuard(toRoute, fromRoute, vi.fn());
+    await afterHook(toRoute, fromRoute, undefined);
+
+    expect(element.scrollTo).not.toHaveBeenCalled();
+  });
+
   it('should scroll a hash target into view', async () => {
     window.history.replaceState({ position: 0 }, '');
     const element = createScrollElement();

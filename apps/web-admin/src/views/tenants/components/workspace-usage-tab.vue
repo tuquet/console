@@ -65,7 +65,7 @@ const runsPercent = computed(() =>
               <span class="text-base font-semibold text-foreground">
                 {{ quota.plan_name }}
               </span>
-              <Badge variant="secondary" class="text-xs uppercase font-medium">
+              <Badge variant="secondary" class="text-xs font-medium">
                 ${{ subscription?.plan?.price_monthly_usd || 0 }}/tháng
               </Badge>
             </div>

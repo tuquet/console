@@ -15,8 +15,6 @@ import { initSetupVbenForm } from './adapter/form';
 import App from './app.vue';
 import { router } from './router';
 
-import '@tuquet/vue-ui/style.css';
-
 async function bootstrap(namespace: string) {
   // Initialize component adapter
   await initComponentAdapter();

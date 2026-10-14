@@ -47,7 +47,7 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'FleetRedirect',
         path: 'fleet',
-        redirect: '/fleet/devices',
+        redirect: '/automation/devices',
         meta: {
           hideInMenu: true,
           title: '',

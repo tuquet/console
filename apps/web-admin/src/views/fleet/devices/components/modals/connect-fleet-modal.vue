@@ -1,16 +1,16 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
 
+import { ExternalLink, RefreshCw, Terminal } from '@lucide/vue';
 import {
+  Badge,
+  Button,
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@vben-core/shadcn-ui';
-
-import { ExternalLink, RefreshCw, Terminal } from '@lucide/vue';
-import { Badge, Button } from '@tuquet/vue-ui';
+} from '@tuquet/vue-ui';
 
 import CliSnippetCard from '#/components/common/cli-snippet-card.vue';
 
@@ -42,7 +42,7 @@ function handleOpenAuthBridge() {
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogContent class="sm:max-w-lg">
       <DialogHeader>
-        <DialogTitle>Ghép Nối Máy Trạm</DialogTitle>
+        <DialogTitle>Kết nối thiết bị</DialogTitle>
       </DialogHeader>
 
       <div class="space-y-5 py-2">
@@ -53,7 +53,7 @@ function handleOpenAuthBridge() {
           <div class="flex items-center gap-2">
             <Terminal class="size-4 text-primary shrink-0" />
             <span class="text-sm font-medium text-foreground">
-              Cổng Loopback Daemon
+              Cổng daemon local
             </span>
             <Badge variant="outline" class="font-mono text-xs">
               :{{ props.loopbackPort }}
@@ -95,16 +95,16 @@ function handleOpenAuthBridge() {
               1
             </span>
             <span class="text-sm font-semibold text-foreground">
-              Khởi động và đăng nhập trên máy trạm
+              Đăng nhập qua CLI trên thiết bị
             </span>
           </div>
           <p class="text-xs text-muted-foreground ml-7">
-            Mở terminal trên máy trạm của bạn và chạy lệnh kết nối:
+            Mở terminal trên thiết bị của bạn và chạy lệnh kết nối:
           </p>
           <div class="ml-7">
             <CliSnippetCard
               command="tuquet login"
-              label="LỆNH ĐĂNG NHẬP CLI"
+              label="Lệnh đăng nhập CLI"
               copied-label="Lệnh đăng nhập"
             />
           </div>
@@ -124,7 +124,7 @@ function handleOpenAuthBridge() {
           </div>
           <p class="text-xs text-muted-foreground ml-7">
             Trình duyệt sẽ tự động chuyển tiếp tới màn hình cấp quyền xác thực
-            Desktop. Bạn cũng có thể mở thủ công:
+            desktop. Bạn cũng có thể mở thủ công:
           </p>
           <div class="ml-7">
             <Button
@@ -132,7 +132,7 @@ function handleOpenAuthBridge() {
               @click="handleOpenAuthBridge"
             >
               <ExternalLink class="size-3.5 shrink-0" />
-              <span>Mở Trang Ủy Quyền Desktop SSO</span>
+              <span>Mở trang ủy quyền desktop SSO</span>
             </Button>
           </div>
         </div>
@@ -142,8 +142,8 @@ function handleOpenAuthBridge() {
           class="rounded-lg bg-muted/50 p-3 border border-border text-xs text-muted-foreground"
         >
           <strong class="text-foreground">Mẹo:</strong> Sau khi hoàn tất đăng
-          nhập, máy trạm của bạn sẽ tự động xuất hiện trong danh sách thiết bị
-          với trạng thái trực tuyến.
+          nhập, thiết bị của bạn sẽ tự động xuất hiện trong danh sách với trạng
+          thái trực tuyến.
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BulletLegendItemInterface } from '@unovis/ts';
+
 import type { Component } from 'vue';
 
 import { createApp } from 'vue';
@@ -11,7 +12,7 @@ import ChartTooltip from './ChartTooltip.vue';
 
 const props = withDefaults(
   defineProps<{
-    colors: string[];
+    colors?: string[];
     customTooltip?: Component;
     index: string;
     items: BulletLegendItemInterface[];

@@ -61,6 +61,52 @@ describe('useAccessStore', () => {
     expect(store.tabs[0]?.query).toEqual({ id: '1' });
   });
 
+  it('defaults to path as key when query string changes without fullPathKey', () => {
+    const store = useTabbarStore();
+    const tab1: any = {
+      fullPath: '/tenants?tab=overview',
+      meta: {},
+      name: 'Tenants',
+      path: '/tenants',
+      query: { tab: 'overview' },
+    };
+    store.addTab(tab1);
+    expect(store.tabs.length).toBe(1);
+    expect(store.tabs[0]?.key).toBe('/tenants');
+
+    const tab2: any = {
+      ...tab1,
+      fullPath: '/tenants?tab=members',
+      query: { tab: 'members' },
+    };
+    store.addTab(tab2);
+    expect(store.tabs.length).toBe(1);
+    expect(store.tabs[0]?.key).toBe('/tenants');
+    expect(store.tabs[0]?.query).toEqual({ tab: 'members' });
+  });
+
+  it('uses fullPath as key when fullPathKey is explicitly true', () => {
+    const store = useTabbarStore();
+    const tab1: any = {
+      fullPath: '/detail?id=1',
+      meta: { fullPathKey: true },
+      name: 'Detail',
+      path: '/detail',
+      query: { id: '1' },
+    };
+    store.addTab(tab1);
+    expect(store.tabs.length).toBe(1);
+    expect(store.tabs[0]?.key).toBe('/detail?id=1');
+
+    const tab2: any = {
+      ...tab1,
+      fullPath: '/detail?id=2',
+      query: { id: '2' },
+    };
+    store.addTab(tab2);
+    expect(store.tabs.length).toBe(2);
+  });
+
   it('closes all tabs', async () => {
     const store = useTabbarStore();
     store.addTab({

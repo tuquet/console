@@ -8,6 +8,7 @@
 Tài liệu này là **Quy chuẩn Thiết kế Giao diện (SSOT)** áp dụng cho toàn bộ các màn hình, components và views trong hệ thống **Tuquet Admin**.
 
 Mục tiêu cốt lõi: Đảm bảo mọi màn hình khi lập trình viên hoặc AI Agent xây dựng đều **tự động tương thích 100%** với:
+
 1. Cả 2 chế độ **Light Mode** & **Dark Mode**.
 2. Toàn bộ **14 Chế độ Màu sắc Built-in** (Blue, Violet, Pink, Green, Zinc, Rose, Orange, Deep-blue...) và màu Custom tùy biến.
 3. Độ tương phản hoàn hảo (không bao giờ xảy ra lỗi chữ đen trên nền đen hoặc chữ trắng trên nền trắng).
@@ -93,7 +94,9 @@ Khi tạo một trang mới hoặc component mới, hãy áp dụng cấu trúc 
 <template>
   <div class="space-y-6 p-4 md:p-6">
     <!-- Header của trang -->
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div
+      class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+    >
       <div>
         <h1 class="text-2xl font-bold tracking-tight text-foreground">
           Tên Màn Hình
@@ -121,7 +124,9 @@ Khi tạo một trang mới hoặc component mới, hãy áp dụng cấu trúc 
     </div>
 
     <!-- Khối nội dung chính (Card) -->
-    <div class="rounded-xl border border-border/60 bg-card text-card-foreground shadow-xs">
+    <div
+      class="rounded-xl border border-border/60 bg-card text-card-foreground shadow-xs"
+    >
       <div class="border-b border-border/60 p-6">
         <h3 class="text-lg font-semibold text-foreground">
           Thông tin tổng hợp

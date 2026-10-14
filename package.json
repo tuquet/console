@@ -23,6 +23,7 @@
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 turbo build",
     "build:analyze": "turbo build:analyze",
     "build:admin": "pnpm run build --filter=@tuquet/admin-web",
+    "build:local": "bash ./scripts/build-local.sh",
     "build:antd": "pnpm run build --filter=@tuquet/admin-web",
     "build:docker": "./scripts/deploy/build-local-docker-image.sh",
     "changeset": "pnpm exec changeset",
@@ -30,6 +31,7 @@
     "check:circular": "vsh check-circular",
     "check:cspell": "cspell lint \"**/*.ts\" \"**/README.md\" \".changeset/*.md\" --no-progress",
     "check:dep": "vsh check-dep",
+    "check:i18n": "vue-i18n-extract report --vueFiles './apps/web-admin/src/**/*.?(vue|ts)' --languageFiles './apps/web-admin/src/locales/langs/**/*.json'",
     "check:type": "turbo run typecheck",
     "clean": "node ./scripts/clean.mjs",
     "commit": "czg",
@@ -88,6 +90,7 @@
     "vite": "catalog:",
     "vitest": "catalog:",
     "vue": "catalog:",
+    "vue-i18n-extract": "^2.0.7",
     "vue-tsc": "catalog:"
   },
   "engines": {

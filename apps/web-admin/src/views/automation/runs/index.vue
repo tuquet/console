@@ -1,22 +1,13 @@
 <script lang="ts" setup>
 import type { AutomaCampaignRunItem } from '#/api';
 
-import { computed, onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Eye, Laptop, PlayCircle, RefreshCw } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  toast,
-} from '@tuquet/vue-ui';
+import { Badge, Button } from '@tuquet/vue-ui';
 
+import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { calculateProgressPercentage, getCampaignRunsApi } from '#/api';
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
@@ -27,71 +18,153 @@ const route = useRoute();
 const router = useRouter();
 const { formatDate } = useDateFormat();
 
-const loading = ref(true);
-const runs = ref<AutomaCampaignRunItem[]>([]);
-
-const VALID_STATUSES = new Set([
-  'all',
-  'cancelled',
-  'completed',
-  'failed',
-  'pending',
-  'queued',
-  'running',
-]);
-
-const filterStatus = computed({
-  get() {
-    const s = route.query.status as string;
-    return VALID_STATUSES.has(s) ? s : 'all';
-  },
-  set(val: string) {
-    router.replace({
-      query: {
-        ...route.query,
-        status: val === 'all' ? undefined : val,
-      },
-    });
-  },
-});
-
-const filteredRuns = computed(() => {
-  if (filterStatus.value === 'all') return runs.value;
-  if (filterStatus.value === 'pending') {
-    return runs.value.filter(
-      (r) => r.status === 'pending' || r.status === 'queued',
-    );
-  }
-  return runs.value.filter((r) => r.status === filterStatus.value);
-});
-
-async function loadRuns() {
-  loading.value = true;
-  try {
-    const tenantId = (route.query.tenant as string) || undefined;
-    const workflowId = (route.query.workflow as string) || undefined;
-    runs.value = await getCampaignRunsApi({ tenantId, workflowId });
-  } catch (error: any) {
-    toast.error(error.message || 'Không thể tải danh sách phiên chạy');
-  } finally {
-    loading.value = false;
-  }
-}
+const allRuns = ref<AutomaCampaignRunItem[]>([]);
 
 function handleViewDetail(id: string) {
   router.push(`/automation/runs/${id}`);
 }
 
+const [Grid, gridApi] = useVbenVxeGrid<AutomaCampaignRunItem>({
+  formOptions: {
+    schema: [
+      {
+        component: 'Select',
+        fieldName: 'status',
+        label: 'Trạng thái',
+        defaultValue: (route.query.status as string) || 'all',
+        componentProps: {
+          placeholder: 'Tất cả trạng thái',
+          options: [
+            { label: 'Tất cả trạng thái', value: 'all' },
+            { label: 'Đang chạy', value: 'running' },
+            { label: 'Hoàn thành', value: 'completed' },
+            { label: 'Thất bại', value: 'failed' },
+            { label: 'Đang chờ', value: 'pending' },
+            { label: 'Đã hủy', value: 'cancelled' },
+          ],
+        },
+      },
+      {
+        component: 'Input',
+        fieldName: 'search',
+        label: 'Tìm kiếm',
+        componentProps: {
+          placeholder: 'Tên phiên chạy hoặc kịch bản...',
+          clearable: true,
+        },
+      },
+    ],
+    layout: 'vertical',
+    showCollapseButton: false,
+    submitButtonOptions: {
+      content: $t('common.filter'),
+    },
+    resetButtonOptions: {
+      content: $t('common.reset'),
+    },
+    actionWrapperClass: 'flex items-center justify-end gap-2 pt-2 sm:pt-6',
+    wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3',
+  },
+  gridOptions: {
+    border: false,
+    round: true,
+    showOverflow: true,
+    pagerConfig: {
+      pageSize: 15,
+      pageSizes: [10, 15, 30, 50],
+    },
+    proxyConfig: {
+      autoLoad: true,
+      ajax: {
+        query: async (
+          { page }: { page?: { currentPage?: number; pageSize?: number } },
+          formValues: Record<string, any>,
+        ) => {
+          const tenantId = (route.query.tenant as string) || undefined;
+          const workflowId = (route.query.workflow as string) || undefined;
+          const data = await getCampaignRunsApi({ tenantId, workflowId });
+          allRuns.value = data;
+
+          let filtered = data;
+          if (formValues?.status && formValues.status !== 'all') {
+            if (formValues.status === 'pending') {
+              filtered = filtered.filter(
+                (r) => r.status === 'pending' || r.status === 'queued',
+              );
+            } else {
+              filtered = filtered.filter((r) => r.status === formValues.status);
+            }
+          }
+
+          if (formValues?.search) {
+            const kw = String(formValues.search).toLowerCase().trim();
+            filtered = filtered.filter(
+              (r) =>
+                r.name.toLowerCase().includes(kw) ||
+                (r.workflow && r.workflow.name.toLowerCase().includes(kw)),
+            );
+          }
+
+          const currentPage = page?.currentPage || 1;
+          const pageSize = page?.pageSize || 15;
+          const start = (currentPage - 1) * pageSize;
+          const end = start + pageSize;
+
+          return {
+            items: filtered.slice(start, end),
+            total: filtered.length,
+          };
+        },
+      },
+    },
+    columns: [
+      {
+        field: 'name',
+        title: 'Phiên chạy & kịch bản',
+        minWidth: 260,
+        slots: { default: 'name-cell' },
+      },
+      {
+        field: 'runner',
+        title: 'Thiết bị thực thi',
+        width: 170,
+        slots: { default: 'runner-cell' },
+      },
+      {
+        field: 'progress',
+        title: 'Tiến độ thực thi',
+        width: 190,
+        slots: { default: 'progress-cell' },
+      },
+      {
+        field: 'status',
+        title: 'Trạng thái',
+        width: 140,
+        slots: { default: 'status-cell' },
+      },
+      {
+        field: 'created_at',
+        title: 'Thời gian tạo',
+        width: 160,
+        slots: { default: 'created-cell' },
+      },
+      {
+        field: 'actions',
+        title: 'Thao tác',
+        width: 110,
+        align: 'right',
+        slots: { default: 'actions-cell' },
+      },
+    ],
+  },
+});
+
 watch(
   () => [route.query.tenant, route.query.workflow],
   () => {
-    loadRuns();
+    gridApi.reload();
   },
 );
-
-onMounted(() => {
-  loadRuns();
-});
 </script>
 
 <template>
@@ -100,330 +173,91 @@ onMounted(() => {
     <div
       class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div class="flex items-center gap-2.5">
+      <div class="flex flex-col gap-1">
         <h1
           class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
-          Phiên Chạy Chiến Dịch
+          Lịch sử chạy
         </h1>
-        <Badge variant="secondary" class="text-xs uppercase font-medium">
-          Campaign Runs
-        </Badge>
+        <p class="text-xs text-muted-foreground">
+          Theo dõi tiến độ và nhật ký thực thi workflow trên các runner nodes
+        </p>
       </div>
 
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
-          size="icon"
-          :disabled="loading"
-          class="size-8 shrink-0"
-          title="Làm mới"
-          @click="loadRuns"
+          size="sm"
+          class="gap-1.5"
+          :title="$t('common.refresh')"
+          @click="() => gridApi.reload()"
         >
-          <RefreshCw
-            class="size-3.5 shrink-0"
-            :class="{ 'animate-spin': loading }"
-          />
+          <RefreshCw class="size-3.5" />
+          {{ $t('common.refresh') }}
         </Button>
       </div>
     </div>
 
     <!-- Main Container -->
     <div
-      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-4"
+      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-sm space-y-4"
     >
-      <!-- Filter Bar -->
       <div
-        class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/40 pb-4"
+        class="flex items-center gap-2 border-b border-border/40 pb-3 px-3 sm:px-0 pt-2 sm:pt-0"
       >
-        <div class="flex items-center gap-2">
-          <PlayCircle class="size-4 shrink-0 text-muted-foreground" />
-          <span class="text-sm font-semibold text-foreground">
-            Danh Sách Phiên Chạy
-          </span>
-          <span class="text-xs text-muted-foreground">
-            ({{ filteredRuns.length }} / {{ runs.length }})
-          </span>
-        </div>
-
-        <div
-          class="inline-flex flex-wrap rounded-lg border border-border/60 bg-muted/40 p-1"
-        >
-          <button
-            type="button"
-            class="rounded-md px-3 py-1 text-xs font-medium transition-all"
-            :class="
-              filterStatus === 'all'
-                ? 'bg-background text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="filterStatus = 'all'"
-          >
-            Tất Cả ({{ runs.length }})
-          </button>
-          <button
-            type="button"
-            class="rounded-md px-3 py-1 text-xs font-medium transition-all"
-            :class="
-              filterStatus === 'running'
-                ? 'bg-background text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="filterStatus = 'running'"
-          >
-            Đang Chạy ({{ runs.filter((r) => r.status === 'running').length }})
-          </button>
-          <button
-            type="button"
-            class="rounded-md px-3 py-1 text-xs font-medium transition-all"
-            :class="
-              filterStatus === 'completed'
-                ? 'bg-background text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="filterStatus = 'completed'"
-          >
-            Hoàn Thành ({{
-              runs.filter((r) => r.status === 'completed').length
-            }})
-          </button>
-          <button
-            type="button"
-            class="rounded-md px-3 py-1 text-xs font-medium transition-all"
-            :class="
-              filterStatus === 'failed'
-                ? 'bg-background text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="filterStatus = 'failed'"
-          >
-            Thất Bại ({{ runs.filter((r) => r.status === 'failed').length }})
-          </button>
-          <button
-            type="button"
-            class="rounded-md px-3 py-1 text-xs font-medium transition-all"
-            :class="
-              filterStatus === 'cancelled'
-                ? 'bg-background text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="filterStatus = 'cancelled'"
-          >
-            Đã Hủy ({{ runs.filter((r) => r.status === 'cancelled').length }})
-          </button>
-          <button
-            type="button"
-            class="rounded-md px-3 py-1 text-xs font-medium transition-all"
-            :class="
-              filterStatus === 'pending'
-                ? 'bg-background text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            "
-            @click="filterStatus = 'pending'"
-          >
-            Đang Chờ ({{
-              runs.filter(
-                (r) => r.status === 'pending' || r.status === 'queued',
-              ).length
-            }})
-          </button>
-        </div>
+        <PlayCircle class="size-4 shrink-0 text-muted-foreground" />
+        <span class="text-sm font-semibold text-foreground">
+          Danh sách phiên chạy
+        </span>
+        <span class="text-xs text-muted-foreground">
+          · {{ allRuns.length }} tổng số
+        </span>
       </div>
 
-      <!-- Desktop Table -->
-      <div
-        v-if="filteredRuns.length > 0"
-        class="hidden md:block overflow-x-auto rounded-lg border border-border/60"
-      >
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Phiên Chạy & Quy Trình</TableHead>
-              <TableHead>Máy Trạm Đảm Nhiệm</TableHead>
-              <TableHead>Tiến Độ Thực Thi</TableHead>
-              <TableHead>Trạng Thái</TableHead>
-              <TableHead>Thời Gian Tạo</TableHead>
-              <TableHead class="text-right">Thao Tác</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-for="r in filteredRuns" :key="r.id">
-              <TableCell>
-                <div class="flex items-center gap-2.5">
-                  <div
-                    class="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground"
-                  >
-                    <PlayCircle class="size-4" />
-                  </div>
-                  <div>
-                    <div class="font-medium text-foreground">
-                      {{ r.name }}
-                    </div>
-                    <div class="text-xs text-muted-foreground">
-                      {{ r.workflow ? r.workflow.name : 'Chưa gắn quy trình' }}
-                    </div>
-                  </div>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <div
-                  v-if="r.runner"
-                  class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
-                >
-                  <Laptop class="size-3.5 text-muted-foreground shrink-0" />
-                  <span>{{ r.runner.name }}</span>
-                </div>
-                <span v-else class="text-xs text-muted-foreground">
-                  Điều phối tự động
-                </span>
-              </TableCell>
-
-              <TableCell>
-                <div class="w-44 space-y-1">
-                  <div
-                    class="flex items-center justify-between text-xs font-mono"
-                  >
-                    <span class="text-foreground">
-                      {{ r.completed_tasks }} / {{ r.total_tasks }} tasks
-                    </span>
-                    <span class="text-muted-foreground font-semibold">
-                      {{
-                        calculateProgressPercentage(
-                          r.completed_tasks,
-                          r.total_tasks,
-                        )
-                      }}%
-                    </span>
-                  </div>
-                  <div
-                    class="h-1.5 w-full rounded-full bg-muted overflow-hidden"
-                  >
-                    <div
-                      class="h-full rounded-full transition-all"
-                      :class="{
-                        'bg-primary': r.status === 'running',
-                        'bg-success': r.status === 'completed',
-                        'bg-destructive': r.status === 'failed',
-                        'bg-muted-foreground':
-                          r.status === 'cancelled' ||
-                          r.status === 'pending' ||
-                          r.status === 'queued',
-                      }"
-                      :style="{
-                        width: `${calculateProgressPercentage(r.completed_tasks, r.total_tasks)}%`,
-                      }"
-                    ></div>
-                  </div>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <Badge variant="outline" class="text-xs font-normal">
-                  <span
-                    class="mr-1.5 size-1.5 rounded-full"
-                    :class="{
-                      'bg-primary animate-pulse': r.status === 'running',
-                      'bg-success': r.status === 'completed',
-                      'bg-destructive': r.status === 'failed',
-                      'bg-muted-foreground': r.status === 'cancelled',
-                      'bg-warning animate-pulse':
-                        r.status === 'pending' || r.status === 'queued',
-                    }"
-                  ></span>
-                  {{
-                    r.status === 'running'
-                      ? 'Đang Chạy'
-                      : r.status === 'completed'
-                        ? 'Hoàn Thành'
-                        : r.status === 'failed'
-                          ? 'Thất Bại'
-                          : r.status === 'cancelled'
-                            ? 'Đã Hủy'
-                            : 'Đang Chờ'
-                  }}
-                </Badge>
-              </TableCell>
-
-              <TableCell class="text-xs text-muted-foreground">
-                {{ formatDate(r.created_at) }}
-              </TableCell>
-
-              <TableCell class="text-right">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  class="h-7 text-xs flex items-center gap-1 inline-flex"
-                  @click="handleViewDetail(r.id)"
-                >
-                  <Eye class="size-3 shrink-0" />
-                  <span>Chi Tiết</span>
-                </Button>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-
-      <!-- Mobile Touch Cards -->
-      <div v-if="filteredRuns.length > 0" class="block space-y-3 md:hidden">
-        <div
-          v-for="r in filteredRuns"
-          :key="r.id"
-          class="rounded-xl border border-border/60 bg-muted/10 p-4 space-y-3"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2.5">
-              <div
-                class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
-              >
-                <PlayCircle class="size-4.5" />
+      <Grid class="runs-vxe-grid">
+        <template #name-cell="{ row }">
+          <div class="flex items-center gap-2.5">
+            <div
+              class="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground shrink-0"
+            >
+              <PlayCircle class="size-4" />
+            </div>
+            <div class="min-w-0">
+              <div class="font-medium text-foreground truncate">
+                {{ row.name }}
               </div>
-              <div>
-                <div class="font-semibold text-foreground text-sm">
-                  {{ r.name }}
-                </div>
-                <div class="text-xs text-muted-foreground">
-                  {{ r.workflow ? r.workflow.name : 'Chưa gắn quy trình' }}
-                </div>
+              <div class="text-xs text-muted-foreground truncate">
+                {{ row.workflow ? row.workflow.name : 'Chưa gắn quy trình' }}
               </div>
             </div>
-
-            <Badge variant="outline" class="text-xs font-normal">
-              <span
-                class="mr-1.5 size-1.5 rounded-full"
-                :class="{
-                  'bg-primary animate-pulse': r.status === 'running',
-                  'bg-success': r.status === 'completed',
-                  'bg-destructive': r.status === 'failed',
-                  'bg-muted-foreground': r.status === 'cancelled',
-                  'bg-warning animate-pulse':
-                    r.status === 'pending' || r.status === 'queued',
-                }"
-              ></span>
-              {{
-                r.status === 'running'
-                  ? 'Đang Chạy'
-                  : r.status === 'completed'
-                    ? 'Hoàn Thành'
-                    : r.status === 'failed'
-                      ? 'Thất Bại'
-                      : r.status === 'cancelled'
-                        ? 'Đã Hủy'
-                        : 'Đang Chờ'
-              }}
-            </Badge>
           </div>
+        </template>
 
-          <!-- Progress Bar -->
-          <div class="space-y-1">
+        <template #runner-cell="{ row }">
+          <div
+            v-if="row.runner"
+            class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
+          >
+            <Laptop class="size-3.5 text-muted-foreground shrink-0" />
+            <span>{{ row.runner.name }}</span>
+          </div>
+          <span v-else class="text-xs text-muted-foreground">
+            Điều phối tự động
+          </span>
+        </template>
+
+        <template #progress-cell="{ row }">
+          <div class="w-full max-w-[170px] space-y-1">
             <div class="flex items-center justify-between text-xs font-mono">
-              <span class="text-muted-foreground">
-                {{ r.completed_tasks }} / {{ r.total_tasks }} tasks
+              <span class="text-foreground">
+                {{ row.completed_tasks }} / {{ row.total_tasks }} tasks
               </span>
-              <span class="text-foreground font-semibold">
+              <span class="text-muted-foreground font-semibold">
                 {{
-                  calculateProgressPercentage(r.completed_tasks, r.total_tasks)
+                  calculateProgressPercentage(
+                    row.completed_tasks,
+                    row.total_tasks,
+                  )
                 }}%
               </span>
             </div>
@@ -431,62 +265,84 @@ onMounted(() => {
               <div
                 class="h-full rounded-full transition-all"
                 :class="{
-                  'bg-primary': r.status === 'running',
-                  'bg-success': r.status === 'completed',
-                  'bg-destructive': r.status === 'failed',
+                  'bg-primary': row.status === 'running',
+                  'bg-success': row.status === 'completed',
+                  'bg-destructive': row.status === 'failed',
                   'bg-muted-foreground':
-                    r.status === 'cancelled' ||
-                    r.status === 'pending' ||
-                    r.status === 'queued',
+                    row.status === 'cancelled' ||
+                    row.status === 'pending' ||
+                    row.status === 'queued',
                 }"
                 :style="{
-                  width: `${calculateProgressPercentage(r.completed_tasks, r.total_tasks)}%`,
+                  width: `${calculateProgressPercentage(row.completed_tasks, row.total_tasks)}%`,
                 }"
               ></div>
             </div>
           </div>
+        </template>
 
-          <div
-            class="flex items-center justify-between border-t border-border/40 pt-2 text-xs text-muted-foreground"
+        <template #status-cell="{ row }">
+          <Badge variant="outline" class="text-xs font-normal">
+            <span
+              class="mr-1.5 size-1.5 rounded-full"
+              :class="{
+                'bg-primary animate-pulse': row.status === 'running',
+                'bg-success': row.status === 'completed',
+                'bg-destructive': row.status === 'failed',
+                'bg-muted-foreground': row.status === 'cancelled',
+                'bg-warning animate-pulse':
+                  row.status === 'pending' || row.status === 'queued',
+              }"
+            ></span>
+            {{
+              row.status === 'running'
+                ? 'Đang chạy'
+                : row.status === 'completed'
+                  ? 'Hoàn thành'
+                  : row.status === 'failed'
+                    ? 'Thất bại'
+                    : row.status === 'cancelled'
+                      ? 'Đã hủy'
+                      : 'Đang chờ'
+            }}
+          </Badge>
+        </template>
+
+        <template #created-cell="{ row }">
+          <span class="text-xs text-muted-foreground">
+            {{ formatDate(row.created_at) }}
+          </span>
+        </template>
+
+        <template #actions-cell="{ row }">
+          <Button
+            variant="outline"
+            size="sm"
+            class="h-7 text-xs flex items-center gap-1 inline-flex"
+            @click="handleViewDetail(row.id)"
           >
-            <span>{{ r.runner ? r.runner.name : 'Tự động' }}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              class="h-7 text-xs"
-              @click="handleViewDetail(r.id)"
-            >
-              Chi Tiết
-            </Button>
-          </div>
-        </div>
-      </div>
+            <Eye class="size-3 shrink-0" />
+            <span>Chi tiết</span>
+          </Button>
+        </template>
 
-      <!-- Empty State -->
-      <div
-        v-if="filteredRuns.length === 0 && !loading"
-        class="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/60 py-12 text-center"
-      >
-        <div
-          class="flex size-12 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground"
-        >
-          <PlayCircle class="size-6" />
-        </div>
-        <h3 class="mt-3 text-sm font-semibold text-foreground">
-          {{
-            filterStatus === 'all'
-              ? $t('page.runs_view.empty_title')
-              : 'Không có phiên chạy phù hợp bộ lọc'
-          }}
-        </h3>
-        <p class="mt-1 max-w-sm text-xs text-muted-foreground">
-          {{
-            filterStatus === 'all'
-              ? $t('page.runs_view.empty_desc')
-              : 'Thử chuyển sang bộ lọc khác để kiểm tra trạng thái các phiên chạy.'
-          }}
-        </p>
-      </div>
+        <template #empty>
+          <div
+            class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground"
+          >
+            <PlayCircle
+              class="size-10 stroke-[1.5] text-muted-foreground/60 mb-3"
+            />
+            <p class="text-sm font-medium text-foreground">
+              Chưa có phiên chạy nào
+            </p>
+            <p class="text-xs text-muted-foreground max-w-sm mt-1">
+              Các phiên chạy workflow được phân phối và thực thi tự động qua
+              runner nodes.
+            </p>
+          </div>
+        </template>
+      </Grid>
     </div>
   </div>
 </template>

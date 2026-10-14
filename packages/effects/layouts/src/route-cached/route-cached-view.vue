@@ -79,6 +79,7 @@ const computedCurrentRouteKey = computed(() => {
         appear
         mode="out-in"
         :name="getTransitionName(item.route)"
+        :css="Boolean(getTransitionName(item.route))"
       >
         <component
           v-show="item.key === computedCurrentRouteKey"

@@ -52,7 +52,7 @@ function handleOk() {
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Xác Nhận Xóa / Lưu Trữ Workspace</DialogTitle>
+        <DialogTitle>Xác nhận xóa hoặc lưu trữ workspace</DialogTitle>
       </DialogHeader>
 
       <div class="space-y-5 py-2">
@@ -85,7 +85,7 @@ function handleOk() {
           :disabled="props.loading || confirmSlugInput.trim() !== props.slug"
           @click="handleOk"
         >
-          Xác Nhận Xóa
+          Xác nhận xóa
         </Button>
       </DialogFooter>
     </DialogContent>

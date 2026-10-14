@@ -26,7 +26,6 @@ import {
 } from 'vue';
 
 import { usePriorityValues } from '@vben/hooks';
-import { EmptyIcon } from '@vben/icons';
 import { $t } from '@vben/locales';
 import { usePreferences } from '@vben/preferences';
 import {
@@ -509,8 +508,43 @@ onUnmounted(() => {
       <!-- Unified empty state -->
       <template v-if="showDefaultEmpty" #empty>
         <slot name="empty">
-          <EmptyIcon class="mx-auto" />
-          <div class="mt-2">{{ $t('common.noData') }}</div>
+          <div
+            class="flex flex-col items-center justify-center py-8 text-center"
+          >
+            <div
+              class="flex size-11 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground ring-1 ring-border/50 shadow-2xs"
+            >
+              <svg
+                class="size-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H14.76a2 2 0 0 1 1.79 1.1L18 14"
+                />
+                <path d="M6 14v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-5" />
+                <path d="M4 14h16" />
+                <path d="M12 4v4" />
+                <path d="M10 6l2-2 2 2" />
+              </svg>
+            </div>
+            <div
+              class="mt-2.5 text-xs font-medium text-foreground tracking-tight"
+            >
+              {{
+                $t('common.noData') === 'No Data'
+                  ? 'Không có dữ liệu'
+                  : $t('common.noData')
+              }}
+            </div>
+            <p class="mt-0.5 text-2xs text-muted-foreground">
+              Không tìm thấy bản ghi nào phù hợp với bộ lọc
+            </p>
+          </div>
         </slot>
       </template>
     </VxeGrid>

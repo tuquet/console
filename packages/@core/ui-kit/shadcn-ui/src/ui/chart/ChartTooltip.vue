@@ -30,7 +30,7 @@ defineProps<{
           <span
             class="size-2 shrink-0 rounded-full"
             :style="{ backgroundColor: item.color }"
-          />
+          ></span>
           <span class="text-muted-foreground">{{ item.name }}</span>
         </div>
         <span class="font-semibold text-foreground">{{ item.value }}</span>

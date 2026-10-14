@@ -1,9 +1,10 @@
 # Bản Đồ Năng Lực Hệ Thống (Admin Capability Map)
 
-> Trạng thái: **ĐÃ HOÀN THÀNH** (100% 7/7 Modules) | Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
+> Trạng thái: **ĐÃ HOÀN THÀNH** (100% 8/8 Modules) | Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
 
 | Module id | Trách nhiệm | Phụ thuộc |
 | :-- | :-- | :-- |
+| `platform-foundation` | Kiến trúc monorepo 39 packages, hạ tầng build cục bộ `build:local`, vòng đời PWA auto-update, và cổng kiểm định chất lượng | — |
 | `data-access` | `supabaseRequest({ schema })` (Accept/Content-Profile); quyền hiệu lực từ DB (superadmin + user thường) thay cho hardcode; danh sách plugin `installed` | — |
 | `route-foundation` | Tách `dashboard.ts` → `dashboard.ts` / `tenants.ts` / `fleet.ts` / `automation.ts` / `system.ts`; `meta.authority` + gate theo plugin; redirect alias; cập nhật home path và `router.push` | `data-access` |
 | `tenants-truth` | `/tenants/:id` tabs `overview / members / usage / audit` với dữ liệu thật; sửa invite (`role_id`, `token_hash`, `invited_by`) và gán role qua `member_roles`; plan từ `billing.subscriptions`; ẩn tab API Keys (D4) | `route-foundation` |
@@ -11,9 +12,10 @@
 | `automation-engine` | `/automation/workflows`, `/automation/runs`, `/automation/runs/:id` (polling log 3s) | `route-foundation` |
 | `system-catalog` | `/system/plugins`, `/system/plans` | `route-foundation` |
 | `superadmin-routes` | `/system/users`, `/system/audit-logs`, `/system/subscriptions`, `/system/roles` — đặc quyền riêng cho Platform Superadmin | `route-foundation`, `system-catalog` |
+| `concise-common-i18n` | Tối giản nhãn nút (Brevity & Anti-Verbosity: "nói ít hiểu nhiều"), tái sử dụng từ vựng chung `$t('common.*')`, chuẩn hóa Sentence case tiếng Việt | `platform-foundation` |
 
 **Phụ thuộc ngoài (repo `cloud`):** `cloud:platform-superadmin` — `public.is_platform_admin()` + policy SELECT bổ sung (RFC §7.1). Đã hoàn tất tích hợp tại local migration `tuquet/cloud`.
 
-Build order: `data-access` → `route-foundation` → (`tenants-truth`, `fleet-inventory`, `automation-engine`, `system-catalog` — song song được) → `superadmin-routes`
+Build order: `platform-foundation` → `data-access` → `route-foundation` → (`tenants-truth`, `fleet-inventory`, `automation-engine`, `system-catalog` — song song được) → `superadmin-routes` → `concise-common-i18n`
 
-Spec module: [`SPEC-data-access.md`](SPEC-data-access.md) (đã hoàn thành), [`SPEC-route-foundation.md`](SPEC-route-foundation.md) (đã hoàn thành), [`SPEC-tenants-truth.md`](SPEC-tenants-truth.md) (đã hoàn thành), [`SPEC-fleet-inventory.md`](SPEC-fleet-inventory.md) (đã hoàn thành), [`SPEC-automation-engine.md`](SPEC-automation-engine.md) (đã hoàn thành), [`SPEC-system-catalog.md`](SPEC-system-catalog.md) (đã hoàn thành), [`SPEC-superadmin-routes.md`](SPEC-superadmin-routes.md) (đã hoàn thành).
+Spec module: [`SPEC-platform-foundation.md`](SPEC-platform-foundation.md) (đã hoàn thành), [`SPEC-data-access.md`](SPEC-data-access.md) (đã hoàn thành), [`SPEC-route-foundation.md`](SPEC-route-foundation.md) (đã hoàn thành), [`SPEC-tenants-truth.md`](SPEC-tenants-truth.md) (đã hoàn thành), [`SPEC-fleet-inventory.md`](SPEC-fleet-inventory.md) (đã hoàn thành), [`SPEC-automation-engine.md`](SPEC-automation-engine.md) (đã hoàn thành), [`SPEC-system-catalog.md`](SPEC-system-catalog.md) (đã hoàn thành), [`SPEC-superadmin-routes.md`](SPEC-superadmin-routes.md) (đã hoàn thành), [`SPEC-concise-common-i18n.md`](SPEC-concise-common-i18n.md).
