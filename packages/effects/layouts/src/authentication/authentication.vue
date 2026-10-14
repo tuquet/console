@@ -107,9 +107,7 @@ const logoSrc = computed(() => {
       v-if="!authPanelCenter"
       class="relative hidden w-0 flex-1 border-x border-border/50 lg:block dark:border-white/[0.05]"
     >
-      <div
-        class="absolute inset-0 size-full bg-[#fafafa] dark:bg-[#0a0a0a]"
-      >
+      <div class="absolute inset-0 size-full bg-[#fafafa] dark:bg-[#0a0a0a]">
         <div class="login-background absolute top-0 left-0 size-full"></div>
         <div
           :key="authPanelLeft ? 'left' : authPanelRight ? 'right' : 'center'"
@@ -177,10 +175,7 @@ const logoSrc = computed(() => {
 
 <style scoped>
 .login-background {
-  background-image: radial-gradient(
-    rgb(20 20 19 / 7%) 1px,
-    transparent 1px
-  );
+  background-image: radial-gradient(rgb(20 20 19 / 7%) 1px, transparent 1px);
   background-size: 24px 24px;
   mask-image: radial-gradient(
     circle at 50% 50%,

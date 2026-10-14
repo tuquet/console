@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
@@ -73,7 +74,10 @@ function cleanStaleViteTempDirs() {
   try {
     for (const entry of fs.readdirSync(viteCacheDir)) {
       if (entry.startsWith('deps_temp_')) {
-        fs.rmSync(path.join(viteCacheDir, entry), { force: true, recursive: true });
+        fs.rmSync(path.join(viteCacheDir, entry), {
+          force: true,
+          recursive: true,
+        });
       }
     }
   } catch {
@@ -138,13 +142,19 @@ function isIgnoredBenignMessage(entry) {
   if (
     text.includes('Cloudflare Turnstile') ||
     url.includes('challenges.cloudflare.com') ||
-    text.includes("The target origin provided ('https://challenges.cloudflare.com')")
+    text.includes(
+      "The target origin provided ('https://challenges.cloudflare.com')",
+    )
   ) {
     return true;
   }
 
   // 3. Built-in upstream @vben/vite-config serve-time migration notice banner
-  if (text.includes('Named field slot control bindings moved to `slotProps.componentProps`')) {
+  if (
+    text.includes(
+      'Named field slot control bindings moved to `slotProps.componentProps`',
+    )
+  ) {
     return true;
   }
 
@@ -161,7 +171,9 @@ async function runConsoleGate() {
     console.log(`ℹ️  Reusing active Vite dev server at ${TARGET_URL}`);
   } else {
     cleanStaleViteTempDirs();
-    console.log(`🚀 Starting headless Vite dev server for @tuquet/admin-web on port ${PORT}...`);
+    console.log(
+      `🚀 Starting headless Vite dev server for @tuquet/admin-web on port ${PORT}...`,
+    );
     process.chdir(webAdminDir);
     viteServer = await createServer({
       configFile: path.join(webAdminDir, 'vite.config.ts'),
@@ -306,10 +318,34 @@ async function runConsoleGate() {
       if (pathname.startsWith('/rest/v1/system_plugins')) {
         return route.fulfill({
           body: JSON.stringify([
-            { id: 'core-iam', is_core: true, name: 'Core IAM', status: 'installed', version: '1.0.0' },
-            { id: 'runners', is_core: false, name: 'Fleet Runners', status: 'installed', version: '1.0.0' },
-            { id: 'automa', is_core: false, name: 'Automa Engine', status: 'installed', version: '1.0.0' },
-            { id: 'subscriptions', is_core: false, name: 'Billing & Plans', status: 'installed', version: '1.0.0' },
+            {
+              id: 'core-iam',
+              is_core: true,
+              name: 'Core IAM',
+              status: 'installed',
+              version: '1.0.0',
+            },
+            {
+              id: 'runners',
+              is_core: false,
+              name: 'Fleet Runners',
+              status: 'installed',
+              version: '1.0.0',
+            },
+            {
+              id: 'automa',
+              is_core: false,
+              name: 'Automa Engine',
+              status: 'installed',
+              version: '1.0.0',
+            },
+            {
+              id: 'subscriptions',
+              is_core: false,
+              name: 'Billing & Plans',
+              status: 'installed',
+              version: '1.0.0',
+            },
           ]),
           contentType: 'application/json',
           status: 200,
@@ -319,15 +355,51 @@ async function runConsoleGate() {
       if (pathname.startsWith('/rest/v1/permissions')) {
         return route.fulfill({
           body: JSON.stringify([
-            { description: 'Read tenants', id: 'tenants:read', module: 'tenants' },
-            { description: 'Read devices', id: 'runners:devices:read', module: 'runners' },
-            { description: 'Read browsers', id: 'runners:browsers:read', module: 'runners' },
-            { description: 'Read proxies', id: 'runners:proxies:read', module: 'runners' },
-            { description: 'Read workflows', id: 'automa:workflows:read', module: 'automa' },
-            { description: 'Read campaigns', id: 'automa:campaigns:read', module: 'automa' },
-            { description: 'Read logs', id: 'automa:logs:read', module: 'automa' },
-            { description: 'Read plugins', id: 'plugins:read', module: 'system' },
-            { description: 'Read subscriptions', id: 'subscriptions:read', module: 'billing' },
+            {
+              description: 'Read tenants',
+              id: 'tenants:read',
+              module: 'tenants',
+            },
+            {
+              description: 'Read devices',
+              id: 'runners:devices:read',
+              module: 'runners',
+            },
+            {
+              description: 'Read browsers',
+              id: 'runners:browsers:read',
+              module: 'runners',
+            },
+            {
+              description: 'Read proxies',
+              id: 'runners:proxies:read',
+              module: 'runners',
+            },
+            {
+              description: 'Read workflows',
+              id: 'automa:workflows:read',
+              module: 'automa',
+            },
+            {
+              description: 'Read campaigns',
+              id: 'automa:campaigns:read',
+              module: 'automa',
+            },
+            {
+              description: 'Read logs',
+              id: 'automa:logs:read',
+              module: 'automa',
+            },
+            {
+              description: 'Read plugins',
+              id: 'plugins:read',
+              module: 'system',
+            },
+            {
+              description: 'Read subscriptions',
+              id: 'subscriptions:read',
+              module: 'billing',
+            },
           ]),
           contentType: 'application/json',
           status: 200,

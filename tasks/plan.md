@@ -41,13 +41,16 @@ flowchart TD
 ## Task List
 
 ### Phase 1: 3D Specter Ghost Component
+
 - [x] **Task 28:** Xây dựng [`apps/web-admin/src/components/common/specter-ghost-banner.vue`](../apps/web-admin/src/components/common/specter-ghost-banner.vue) với mô hình Three.js 3D Specter Ghost (thân sứ mờ, tà áo lượn sóng, mắt ngôi sao 4 cánh liếc theo chuột, tay vẫy chào khi hover/click, Spotlight SVG và dọn dẹp GPU đầy đủ).
 
 ### Phase 2: Auth Layout Integration & Unit Tests
+
 - [x] **Task 29:** Cập nhật [`apps/web-admin/src/layouts/auth.vue`](../apps/web-admin/src/layouts/auth.vue) để bổ sung tuỳ chọn `ghost 3d` vào thanh chuyển đổi (`phone` · `robot 3d` · `ghost 3d` · `random`) và lưu trữ `localStorage`.
 - [x] **Task 30:** Viết unit test [`apps/web-admin/src/components/common/__tests__/specter-ghost-banner.test.ts`](../apps/web-admin/src/components/common/__tests__/specter-ghost-banner.test.ts) kiểm tra toán học giảm chấn chuột, biến dạng sóng tà áo, vòng đời component và chuyển đổi 4 chế độ.
 
 ### Checkpoint: Complete Quality Gate
+
 - [x] Tất cả unit tests (`vitest`), kiểm tra kiểu (`typecheck`) và bản dựng production (`build:admin`) kết thúc với 0 lỗi.
 
 ---

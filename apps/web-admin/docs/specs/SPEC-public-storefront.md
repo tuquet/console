@@ -27,6 +27,7 @@
 Xây dựng hoàn chỉnh phân hệ **Public Storefront (`/store`)** cho khách vãng lai trong `@tuquet/admin-web`:
 
 ### 2.1. Mở rộng API Hỗ trợ `skipAuth` & Lưu trữ Đơn hàng Khách (`billing.ts` & `commerce.ts`)
+
 - **`src/api/core/billing.ts`**:
   - Cập nhật `getActivePaymentGatewaysApi(options?: { skipAuth?: boolean })` để truyền `skipAuth: options?.skipAuth` xuống `supabaseRequest`.
 - **`src/api/core/commerce.ts`**:
@@ -35,11 +36,13 @@ Xây dựng hoàn chỉnh phân hệ **Public Storefront (`/store`)** cho khách
     - `saveGuestOrderLocal(item: SavedGuestOrderItem): SavedGuestOrderItem[]`
 
 ### 2.2. Định tuyến `/store` & Từ điển Đa ngôn ngữ (`core.ts` & `page.json`)
+
 - Đăng ký route `/store` (`name: 'PublicStorefront'`, `component: () => import('#/views/commerce/public-store/index.vue')`) trong `src/router/routes/core.ts`.
 - Bổ sung nút liên kết mở nhanh `/store` trên thanh công cụ của `/commerce/store` để người dùng hoặc quản trị viên dễ dàng kiểm tra giao diện công khai.
 - Bổ sung khóa đa ngôn ngữ `page.commerce.publicStore` và `page.commerce.publicStore_desc` vào `en-US/page.json` và `vi-VN/page.json`.
 
 ### 2.3. Giao Diện Cửa Hàng Công Khai (`/store` — `src/views/commerce/public-store/index.vue`)
+
 1. **Header Thương Hiệu & Chuyển Đổi Chế Độ:**
    - Thanh điều hướng độc lập hiển thị thương hiệu **Tuquet Digital Store**, nút chuyển đổi giữa 2 chế độ: **Danh mục sản phẩm (`catalog`)** và **Tra cứu & Nhận hàng (`lookup`)**, kèm nút **Đăng nhập Workspace (`/auth/login` hoặc `/commerce/store`)**.
 2. **Chế Độ 1 — Danh Mục Sản Phẩm Số Công Khai (`catalog`):**

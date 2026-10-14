@@ -189,9 +189,7 @@ function mountPhone(
     const badge = flatDot(grp, C, 0.85, activeDotClass);
     const dots: any[] = [];
     for (let k = 0; k < N; k++) {
-      dots.push(
-        flatDot(grp, C, 0.55, k === i ? activeDotClass : 'dot off'),
-      );
+      dots.push(flatDot(grp, C, 0.55, k === i ? activeDotClass : 'dot off'));
     }
     cards.push({
       i,

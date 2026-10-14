@@ -66,12 +66,7 @@ export const HL: Record<string, any> = (() => {
     };
   }
 
-  function unproj(
-    C: HairlineCam,
-    sx: number,
-    sy: number,
-    z: number,
-  ): Point2D {
+  function unproj(C: HairlineCam, sx: number, sy: number, z: number): Point2D {
     const c = Math.cos(C.az);
     const s = Math.sin(C.az);
     const zf = Math.sqrt(1 - C.k * C.k);
@@ -170,11 +165,8 @@ export const HL: Record<string, any> = (() => {
     return [...lo, ...up];
   }
 
-  const ringAt = (
-    P: ProjFn,
-    ring: HairlineRingPoint[],
-    z: number,
-  ): Point2D[] => ring.map((q) => P(q.u, q.v, z));
+  const ringAt = (P: ProjFn, ring: HairlineRingPoint[], z: number): Point2D[] =>
+    ring.map((q) => P(q.u, q.v, z));
 
   const facing = (C: HairlineCam): FacingFn => {
     const s = Math.sin(C.az);
@@ -182,10 +174,7 @@ export const HL: Record<string, any> = (() => {
     return (q: HairlineRingPoint) => q.nu * s + q.nv * c >= -1e-6;
   };
 
-  function run(
-    ring: HairlineRingPoint[],
-    keep: FacingFn,
-  ): HairlineRingPoint[] {
+  function run(ring: HairlineRingPoint[], keep: FacingFn): HairlineRingPoint[] {
     const n = ring.length;
     if (n === 0) return [];
     let s = -1;
@@ -290,15 +279,13 @@ export const HL: Record<string, any> = (() => {
   ) {
     const f = run(ring, front);
     const lowP = ringAt(P, f, z0 - depth);
-    const ends = [f[0], f[f.length - 1]].filter(
-      (q): q is HairlineRingPoint => Boolean(q),
+    const ends = [f[0], f[f.length - 1]].filter((q): q is HairlineRingPoint =>
+      Boolean(q),
     );
     return {
       d:
         open(lowP) +
-        ends
-          .map((q) => seg(P(q.u, q.v, z0), P(q.u, q.v, z0 - depth)))
-          .join(''),
+        ends.map((q) => seg(P(q.u, q.v, z0), P(q.u, q.v, z0 - depth))).join(''),
       y0: Math.min(...ringAt(P, f, z0).map((p) => p[1])),
       y1: Math.max(...lowP.map((p) => p[1])) + 2,
     };
@@ -445,12 +432,7 @@ export const HL: Record<string, any> = (() => {
     el.cr.setAttribute('d', s.crease);
   };
 
-  const flatDot = (
-    parent: Element,
-    C: HairlineCam,
-    r: number,
-    cls: string,
-  ) =>
+  const flatDot = (parent: Element, C: HairlineCam, r: number, cls: string) =>
     mk(
       'ellipse',
       { rx: r2(r * C.S), ry: r2(r * C.S * C.k), class: cls },

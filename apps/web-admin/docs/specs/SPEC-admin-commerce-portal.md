@@ -30,12 +30,14 @@
 Xây dựng hoàn chỉnh phân hệ giao diện Web **`admin-commerce-portal`** trong `@tuquet/admin-web` kết nối trực tiếp với tầng API `src/api/core/billing.ts` và `src/api/core/commerce.ts`:
 
 ### 2.1. Mở rộng API Quản trị Cổng Thanh Toán (`src/api/core/billing.ts`)
+
 - Bổ sung hàm `upsertPaymentGatewayAdminApi(payload)` cho phép Platform Admin cập nhật cấu hình cổng thanh toán (`is_active`, `rate_per_credit`, `public_config`, `sort_order`, `name`) qua PostgREST `POST /rest/v1/payment_gateways?on_conflict=id` (`schema: 'billing'`).
 - Bổ sung hàm lọc thuần khiết (pure filter helpers) phục vụ `useVbenVxeGrid` và kiểm thử đơn vị:
   - `filterWalletTransactions(items, filters)` trong `billing.ts`.
   - `filterCommerceProducts(items, filters)` và `filterCommerceOrders(items, filters)` trong `commerce.ts`.
 
 ### 2.2. Cửa Hàng Tài Nguyên Số (`/commerce/store` — `src/views/commerce/store/index.vue`)
+
 - **Thanh chọn Workspace & Số dư Ví Xu:** Cho phép chọn Workspace đang thao tác (`getTenantsApi`, đồng bộ `getActiveTenantId` / `setActiveTenantId`), hiển thị số dư `Xu` thời gian thực (`getTenantWalletApi`) và nút chuyển nhanh sang nạp Xu.
 - **Bộ lọc Danh mục & Loại sản phẩm:** Lọc theo danh mục (`getCommerceCategoriesApi`), phân loại (`serial_stock`, `specter_resource`, `digital_file`, `wallet_credit`) và từ khóa tìm kiếm.
 - **Thẻ Sản Phẩm & Chọn Biến Thể (SKU):** Hiển thị tên sản phẩm, mô tả ngắn, nhãn loại sản phẩm, danh sách biến thể SKU (`variants`), tồn kho khả dụng (`available_stock` hoặc `Unlimited`), đơn giá `Xu` (`price_credits` + `compare_at_credits`).
@@ -45,6 +47,7 @@ Xây dựng hoàn chỉnh phân hệ giao diện Web **`admin-commerce-portal`**
   - Nếu chọn cổng ngoại vi (`bank_transfer`, `e_wallet`, `card_intl`, `crypto`): Hiển thị mã QR VietQR, thông tin ngân hàng/ví, mã `transfer_code` (`TQ...`) kèm nút sao chép 1 chạm và tự động kiểm tra trạng thái mỗi 3 giây (`getPaymentIntentStatusApi`).
 
 ### 2.3. Lịch Sử Đơn Hàng & Nhận Tài Nguyên (`/commerce/orders` — `src/views/commerce/orders/index.vue`)
+
 - **Thanh thống kê KPI:** Tổng đơn hàng, Đơn hoàn tất (`completed`), Tổng Xu đã thanh toán.
 - **Bảng `useVbenVxeGrid<CommerceOrderRecord>`:** Lọc theo trạng thái đơn hàng (`all`, `completed`, `pending_payment`, `manual_review`, `failed`) và tìm kiếm theo mã đơn (`order_code`), phương thức thanh toán.
 - **Hộp Thoại Bàn Giao Tài Nguyên (`OrderDeliveriesDialog`):**
@@ -56,6 +59,7 @@ Xây dựng hoàn chỉnh phân hệ giao diện Web **`admin-commerce-portal`**
     - `wallet_credit`: Hiển thị số Xu và Bonus Xu đã cộng vào Ví Tenant.
 
 ### 2.4. Ví Xu & Sổ Cái Giao Dịch (`/commerce/wallet` — `src/views/commerce/wallet/index.vue`)
+
 - **3 Thẻ KPI Ví Xu:** Số dư khả dụng (`balance_credits` Xu), Tổng Xu đã nạp (`total_topped_up_credits` Xu), Tổng Xu đã chi tiêu (`total_spent_credits` Xu).
 - **Hộp Thoại Nạp Xu Đa Kênh (`TopupWalletDialog`):**
   - Cho phép chọn mốc Xu nạp nhanh (`50,000 Xu`, `100,000 Xu`, `500,000 Xu`, `1,000,000 Xu` hoặc nhập số Xu tùy chỉnh) và chọn cổng thanh toán đang hoạt động (`getActivePaymentGatewaysApi`).
@@ -65,7 +69,9 @@ Xây dựng hoàn chỉnh phân hệ giao diện Web **`admin-commerce-portal`**
   - Truy vấn `getWalletTransactionsApi(tenantId)`, lọc theo loại giao dịch (`topup`, `purchase`, `bonus`, `refund`, `admin_adjustment`) và tìm kiếm mô tả/mã tham chiếu.
 
 ### 2.5. Quản Trị Cửa Hàng & Cổng Thanh Toán (`/commerce/admin` — `src/views/commerce/admin/index.vue`)
+
 Dành riêng cho `superadmin` / `commerce:manage`, gồm 4 chế độ (Mode Tabs) dùng `useVbenVxeGrid`:
+
 1. **Tab 1 — Sản phẩm & Kho hàng (`products`):**
    - Bảng `useVbenVxeGrid<CommerceProductItem>` hiển thị sản phẩm, loại sản phẩm, chế độ hiển thị (`public`, `tenant_only`, `hidden`), số lượng SKU và tổng tồn kho.
    - Hộp thoại **Thêm/Sửa Sản phẩm & Biến thể SKU** (`upsertCommerceProductAdminApi`, `upsertProductVariantAdminApi`).

@@ -60,6 +60,7 @@ sequenceDiagram
 ### 2.2. Mô Hình Dữ Liệu (`schema: commerce` tại `cloud/supabase/plugins/commerce/install.sql`)
 
 #### A. Kiểu liệt kê (`ENUM` trong `schema: commerce`)
+
 - `commerce.product_type`: `'serial_stock'`, `'specter_resource'`, `'digital_file'`, `'wallet_credit'`
 - `commerce.stock_status`: `'available'`, `'reserved'`, `'sold'`, `'defective'`
 - `commerce.order_status`: `'pending_payment'`, `'paid'`, `'fulfilling'`, `'completed'`, `'manual_review'`, `'failed'`, `'cancelled'`, `'refunded'`
