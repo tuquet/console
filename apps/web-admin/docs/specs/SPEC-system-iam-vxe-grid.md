@@ -31,43 +31,45 @@ Xây dựng lại giao diện hai trang quản trị định danh và phân quy�
    - Chuẩn hóa hàm lọc thuần khiết `filterPlatformUsers(users, filters)` hỗ trợ tìm kiếm tức thì không phân biệt hoa thường trên cả 4 trường: **Họ tên (`full_name`)**, **Email (`email`)**, **Định danh UUID (`id`)**, và **Tên/Slug tổ chức (`workspaces`)**.
 2. **Nâng cấp Bộ Lọc `formOptions` & Thanh Thống Kê (`Stats Bar`):**
    - Bổ sung thanh thống kê tổng quan phía trên bảng: **Tổng người dùng**, **Đã tham gia workspace**, và **Chưa có tổ chức**.
-   - Bộ lọc `formOptions` gồm 3 tiêu chí:
+   - Bộ lọc `formOptions` (`submitOnChange: true`, `submitOnEnter: true`, `wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3'`) gồm 3 tiêu chí nằm gọn trên 1 hàng ngang cùng cụm nút thao tác:
      - `tenant_filter` (`Select`): `Tất cả người dùng` (`all`), `Đã tham gia tổ chức` (`has_tenants`), `Chưa có tổ chức` (`no_tenants`).
      - `role_filter` (`Select`): `Tất cả vai trò` (`all`), `Owner` (`owner`), `Admin` (`admin`), `Member` (`member`), `Viewer` (`viewer`).
-     - `search` (`Input`, `clearable: true`): Tìm theo họ tên, email, UUID hoặc tên workspace.
-   - Nút hành động chuẩn hóa dùng `$t('common.filter')` và `$t('common.reset')`.
-3. **Chuẩn hóa Cột Bảng `vxe-table` & Hộp Thoại Chi Tiết Người Dùng:**
-   - **Cột `Người dùng` (`full_name`):** Avatar + Họ tên + Email (căn trái, chống tràn text).
-   - **Cột `Định danh UUID` (`id`):** Mã UUID rút gọn kèm nút sao chép nhanh (`Copy` icon + phản hồi `toast.success`).
-   - **Cột `Workspaces & vai trò` (`tenant_count`):** Badge số lượng tổ chức + hiển thị nhanh các badge vai trò (`RoleBadge`) hoặc tên workspace tiêu biểu.
-   - **Cột `Ngày tham gia` (`created_at`, `sortable: true`):** Định dạng ngày tháng chuẩn kèm cập nhật cuối.
-   - **Cột `Thao tác` (`actions`):** Nút `Chi tiết` mở `Dialog` hiển thị hồ sơ đầy đủ của người dùng và danh sách các Workspace đang tham gia (kèm nút chuyển hướng nhanh tới `/tenants/:id`).
+     - `search` (`Input`): Tìm theo tên, email, UUID hoặc tên workspace (cập nhật giá trị tức thì qua `modelValue` / `onUpdate:modelValue` trong `src/adapter/form.ts` và `src/adapter/component/index.ts`).
+   - Nút hành động chuẩn hóa dùng `$t('common.filter')` và `$t('common.reset')` kích thước `size="sm"` (`h-9 text-xs`) đồng bộ chiều cao với `Select` và `Input`.
+3. **Chuẩn hóa Cột Bảng `vxe-table` (`cellConfig: { height: 58 }`) & Hộp Thoại Chi Tiết Người Dùng:**
+   - **Cột `Người dùng` (`full_name`, `minWidth: 250`):** Avatar (`size-9`) + Họ tên + Email (căn trái, chống tràn text).
+   - **Cột `Vai trò chính` (`primary_role`, `width: 140`):** Tách riêng cột hiển thị `RoleBadge` (`OWNER`, `ADMIN`, `MEMBER`, `VIEWER`) để tránh dồn chung nhiều badge trong một ô.
+   - **Cột `Tổ chức tham gia` (`tenant_count`, `minWidth: 210`):** Badge số lượng tổ chức + tên workspace tiêu biểu trên 1 dòng thoáng đãng.
+   - **Cột `Mã định danh` (`id`, `width: 175`):** Mã UUID rút gọn kèm nút sao chép nhanh (`Copy` icon + phản hồi `toast.success`).
+   - **Cột `Ngày tham gia` (`created_at`, `width: 150`):** Định dạng ngày tháng chuẩn căn trái.
+   - **Cột `Thao tác` (`actions`, `width: 110`, `align: 'right'`):** Nút `Chi tiết` mở `Dialog` hiển thị hồ sơ đầy đủ của người dùng và danh sách các Workspace đang tham gia (kèm nút chuyển hướng nhanh tới `/tenants/:id`).
 
 ### 2.2. Trang Vai Trò & Quyền Hạn (`/system/roles` — [`src/views/system/roles/index.vue`](../../src/views/system/roles/index.vue))
 
 1. **Chuyển đổi từ Card Grid tĩnh sang `useVbenVxeGrid` (`vxe-table`) có Tìm Kiếm & Phân Trang:**
    - Giữ thanh chuyển chế độ (Mode Selector Tabs) gồm 2 chế độ: **Vai trò hệ thống (`roles`)** và **Danh mục quyền hạn (`permissions`)**, kèm số lượng tổng ở mỗi tab và thanh thống kê (`Stats Bar`).
 2. **Tab 1 — Bảng Vai Trò Hệ Thống (`RolesGrid` — `useVbenVxeGrid<SystemRoleItem>`):**
-   - **Bộ lọc `formOptions`:**
+   - **Bộ lọc `formOptions` (`submitOnChange: true`, `submitOnEnter: true`, `wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3'`):**
      - `role_type` (`Select`): `Tất cả phân loại` (`all`), `System Role` (`system`), `Custom Role` (`custom`).
-     - `module` (`Select`): Lọc các vai trò có chứa quyền thuộc phân hệ (`all`, `core-iam`, `runners`, `automa`, `storage`, `subscriptions`, `webhooks`...).
-     - `search` (`Input`, `clearable: true`): Tìm theo tên vai trò, mô tả hoặc mã quyền hạn (`owner`, `runners:devices:manage`...).
-   - **Cột bảng `vxe-table`:**
-     - `name` (`Vai trò`, `minWidth: 220`): Icon + `RoleBadge` + mô tả vai trò.
-     - `is_system` (`Phân loại`, `width: 140`): Badge `System Role` / `Custom`.
-     - `permissions` (`Quyền được gán`, `minWidth: 300`): Hiển thị số lượng quyền (`N quyền`) + preview 3 mã quyền đầu tiên + badge `+X quyền khác`.
-     - `created_at` (`Ngày tạo`, `width: 150`).
-     - `actions` (`Thao tác`, `width: 110`, `align: 'right'`): Nút `Chi tiết` mở `Dialog` hiển thị toàn bộ danh sách quyền hạn của vai trò đó được gom nhóm trực quan theo từng Module.
+     - `module` (`Select`): Lọc các vai trò có chứa quyền thuộc phân hệ (`all`, `core-iam`, `runners`, `automa`, `storage`, `subscriptions`, `webhooks`).
+     - `search` (`Input`): Tìm theo tên vai trò, mô tả hoặc mã quyền hạn (`owner`, `runners:devices:manage`...).
+   - **Cột bảng `vxe-table` (`cellConfig: { height: 56 }`):**
+     - `name` (`Vai trò`, `width: 175`): `RoleBadge` + mã định danh vai trò.
+     - `description` (`Mô tả chính sách`, `minWidth: 250`): Tách riêng cột mô tả chính sách vai trò để hiển thị rõ ràng, không bị ép dưới badge.
+     - `is_system` (`Phân loại`, `width: 140`, `align: 'left'`): Badge `System Role` / `Custom` kèm biểu tượng `Lock`.
+     - `permissions` (`Quyền hạn được gán`, `minWidth: 290`): Hiển thị trên 1 dòng gọn gàng gồm số lượng quyền (`N quyền`) + tối đa 2 mã quyền tiêu biểu (`max-w-36 truncate`) + badge `+X khác` mở nhanh Policy Inspector.
+     - `created_at` (`Ngày tạo`, `width: 145`, `align: 'left'`).
+     - `actions` (`Thao tác`, `width: 105`, `align: 'right'`): Nút `Chi tiết` mở `Dialog` hiển thị toàn bộ danh sách quyền hạn của vai trò đó được gom nhóm trực quan theo từng Module.
 3. **Tab 2 — Bảng Danh Mục Quyền Hạn (`PermissionsGrid` — `useVbenVxeGrid<SystemPermissionItem>`):**
-   - **Bộ lọc `formOptions`:**
-     - `module` (`Select`): Lọc theo module (`Tất cả module` + danh sách module động từ dữ liệu).
+   - **Bộ lọc `formOptions` (`submitOnChange: true`, `submitOnEnter: true`, `wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3'`):**
+     - `module` (`Select`): Lọc theo module (`Tất cả module` + 6 core modules).
      - `role` (`Select`): Lọc các quyền được gán cho một vai trò cụ thể (`Tất cả vai trò`, `owner`, `admin`, `member`, `viewer`).
-     - `search` (`Input`, `clearable: true`): Tìm theo mã định danh quyền (`id`) hoặc mô tả (`description`).
-   - **Cột bảng `vxe-table`:**
-     - `id` (`Mã quyền hạn`, `minWidth: 240`): Mã `code` font-mono kèm nút sao chép nhanh.
-     - `module` (`Module`, `width: 150`): Badge định danh phân hệ (`core-iam`, `runners`, `automa`...).
-     - `description` (`Mô tả quyền hạn`, `minWidth: 260`): Mô tả chi tiết tác vụ được cấp phép.
-     - `assigned_roles` (`Vai trò sở hữu`, `minWidth: 220`): Hiển thị trực tiếp các `RoleBadge` (`OWNER`, `ADMIN`, `MEMBER`, `VIEWER`) đang sở hữu quyền hạn này.
+     - `search` (`Input`): Tìm theo mã định danh quyền (`id`) hoặc mô tả (`description`).
+   - **Cột bảng `vxe-table` (`cellConfig: { height: 52 }`):**
+     - `id` (`Mã quyền hạn`, `minWidth: 230`): Mã `code` font-mono kèm nút sao chép nhanh.
+     - `module` (`Module`, `width: 155`, `align: 'left'`): Badge định danh phân hệ (`core-iam`, `runners`, `automa`...).
+     - `description` (`Mô tả tác vụ`, `minWidth: 260`): Mô tả chi tiết tác vụ được cấp phép.
+     - `roles` (`Vai trò sở hữu`, `minWidth: 260`): Hiển thị trực tiếp các `RoleBadge` (`Owner`, `Admin`, `Member`, `Viewer`) trên 1 dòng thoáng đãng.
 
 ---
 

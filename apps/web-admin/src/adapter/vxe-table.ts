@@ -45,7 +45,7 @@ setupVbenVxeTable({
           showActiveMsg: true,
           showResponseMsg: false,
         },
-         round: true,
+        round: true,
         rowConfig: {
           isHover: true,
         },
