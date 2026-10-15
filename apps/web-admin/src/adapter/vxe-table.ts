@@ -26,6 +26,7 @@ import { Button } from '@tuquet/vue-ui';
 
 import {
   isInteractiveCellClick,
+  stripRedundantDetailTriggerVNodes,
   VxeRowDetailSheet,
 } from '#/components/vxe-detail-sheet';
 
@@ -89,6 +90,7 @@ setupVbenVxeTable({
   configVxeTable: (vxeUI) => {
     vxeUI.setConfig({
       translate: resolveVxeTranslate,
+      zIndex: 2050,
       grid: {
         align: 'left',
         border: false,
@@ -226,8 +228,15 @@ export const useVbenVxeGrid = <
   };
 
   const originalCellClick = options.gridEvents?.cellClick;
+  const isSheetEnabled = options.detailSheetOptions?.enabled !== false;
+  const baseGridClass = options.gridClass ?? '';
+  const mergedGridClass = isSheetEnabled
+    ? [baseGridClass, 'tuquet-vxe-clickable-rows'].filter(Boolean).join(' ')
+    : baseGridClass;
+
   const enhancedOptions: AdminVxeGridProps<T, TFormValues, TSubmitValues> = {
     ...options,
+    gridClass: mergedGridClass,
     gridEvents: {
       ...options.gridEvents,
       cellClick(params: any) {
@@ -336,7 +345,9 @@ export const useVbenVxeGrid = <
             actionSlotFn
               ? {
                   'row-actions': ({ row }: { row: Record<string, any> }) =>
-                    actionSlotFn({ row } as any),
+                    stripRedundantDetailTriggerVNodes(
+                      actionSlotFn({ row } as any),
+                    ),
                 }
               : {},
           ),

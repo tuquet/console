@@ -8,22 +8,38 @@ import type {
 } from '#/api/core/supabase-schema-registry';
 
 import { computed, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { VxeForm, VxeFormItem } from '@vben/plugins/vxe-table';
 import { usePreferences } from '@vben/preferences';
 
 import {
+  ArrowUpRight,
+  Building2,
   Check,
+  ChevronDown,
   Copy,
-  Database,
+  Cpu,
+  CreditCard,
   Edit3,
   FileJson,
+  Folder,
+  Globe,
+  KeyRound,
+  Layers,
   Loader2,
-  Lock,
+  Puzzle,
   Save,
   ShieldCheck,
+  ShoppingBag,
+  Users,
+  Wallet,
+  Workflow,
 } from '@lucide/vue';
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
   Badge,
   Button,
   Input,
@@ -45,6 +61,7 @@ import {
   executeDynamicSupabasePatch,
   inferResourceFromRouteAndRow,
 } from '#/api/core/supabase-schema-registry';
+import RoleBadge from '#/components/iam/role-badge.vue';
 import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
@@ -67,12 +84,14 @@ const emit = defineEmits<{
   'update:open': [value: boolean];
 }>();
 
+const router = useRouter();
 const { isMobile } = usePreferences();
 const { copyToClipboard, isCopied } = useClipboard();
 const { formatDate } = useDateFormat();
 
 const effectiveAccess = ref<EffectiveAccess | null>(null);
 const saving = ref(false);
+const isEditing = ref(false);
 const formData = reactive<Record<string, any>>({});
 
 async function ensureEffectiveAccess() {
@@ -82,7 +101,6 @@ async function ensureEffectiveAccess() {
   try {
     effectiveAccess.value = await getEffectiveAccessApi();
   } catch {
-    // Fallback to null (optimistic UI; backend RLS enforces policy)
     effectiveAccess.value = null;
   }
 }
@@ -109,16 +127,208 @@ const dynamicSchema = computed(() => {
 });
 
 const editableFields = computed<DynamicVxeFormField[]>(() =>
-  dynamicSchema.value.fields.filter((f) => f.group === 'editable'),
+  dynamicSchema.value.fields.filter((f) => f.editable),
 );
 
-const readonlyFields = computed<DynamicVxeFormField[]>(() =>
-  dynamicSchema.value.fields.filter((f) => f.group === 'readonly'),
+const canEditRow = computed<boolean>(
+  () =>
+    dynamicSchema.value.rls.canUpdate.allowed &&
+    editableFields.value.length > 0,
 );
 
-const jsonFields = computed<DynamicVxeFormField[]>(() =>
-  dynamicSchema.value.fields.filter((f) => f.group === 'json'),
+function resolveFieldRawValue(field: DynamicVxeFormField): unknown {
+  const row = props.row;
+  if (!row) return undefined;
+  if (field.field in row && row[field.field] !== undefined) {
+    return row[field.field];
+  }
+  return field.value;
+}
+
+const viewScalarFields = computed<DynamicVxeFormField[]>(() => {
+  const row = props.row;
+  if (!row) return [];
+  return dynamicSchema.value.fields.filter((f) => {
+    if (f.group === 'json') return false;
+    // Avatar is already rendered in the Identity Header
+    if (f.field === 'avatar_url') return false;
+    const val = resolveFieldRawValue(f);
+    return val !== undefined && val !== null && val !== '';
+  });
+});
+
+function hasNonEmptyJson(raw: unknown): boolean {
+  if (!raw) return false;
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    return Boolean(trimmed && trimmed !== '{}' && trimmed !== 'null');
+  }
+  if (typeof raw === 'object') {
+    return Object.keys(raw as Record<string, any>).length > 0;
+  }
+  return false;
+}
+
+const visibleJsonFields = computed<DynamicVxeFormField[]>(() =>
+  dynamicSchema.value.fields.filter(
+    (f) => f.group === 'json' && hasNonEmptyJson(props.row?.[f.field]),
+  ),
 );
+
+const isUserProfile = computed(
+  () =>
+    resolvedResource.value === 'public.profiles' ||
+    Boolean(
+      props.row && ('avatar_url' in props.row || 'full_name' in props.row),
+    ),
+);
+
+const resourceIcon = computed(() => {
+  switch (resolvedResource.value) {
+    case 'automa.campaign_runs':
+    case 'runners.devices': {
+      return Cpu;
+    }
+    case 'automa.workflows': {
+      return Workflow;
+    }
+    case 'billing.payment_gateways':
+    case 'billing.payment_intents':
+    case 'billing.subscriptions': {
+      return CreditCard;
+    }
+    case 'billing.plans': {
+      return Layers;
+    }
+    case 'billing.wallet_transactions': {
+      return Wallet;
+    }
+    case 'commerce.orders':
+    case 'commerce.products': {
+      return ShoppingBag;
+    }
+    case 'public.audit_logs': {
+      return ShieldCheck;
+    }
+    case 'public.permissions':
+    case 'public.roles': {
+      return KeyRound;
+    }
+    case 'public.profiles': {
+      return Users;
+    }
+    case 'public.system_plugins': {
+      return Puzzle;
+    }
+    case 'runners.browsers':
+    case 'runners.proxies': {
+      return Globe;
+    }
+    default: {
+      return Building2;
+    }
+  }
+});
+
+const headerStatusField = computed<DynamicVxeFormField | undefined>(() => {
+  return dynamicSchema.value.fields.find(
+    (f) =>
+      f.statusMeta &&
+      (f.field === 'status' ||
+        f.field === 'primary_role' ||
+        f.field === 'tx_type'),
+  );
+});
+
+const headerSubtitle = computed<string>(() => {
+  const row = props.row;
+  if (!row) return '';
+  switch (resolvedResource.value) {
+    case 'billing.plans': {
+      const price =
+        row.price_monthly_usd === 0
+          ? $t('page.system_view.plans_free')
+          : `$${Number(row.price_monthly_usd ?? 0).toLocaleString()}${$t('page.system_view.per_month_suffix')}`;
+      return row.description ? `${price} · ${row.description}` : price;
+    }
+    case 'billing.subscriptions': {
+      const planLabel = row.plan_name || row.plan_id || '';
+      const price = `$${Number(row.price_monthly_usd ?? 0).toLocaleString()}${$t('page.system_view.per_month_suffix')}`;
+      return planLabel ? `${planLabel} · ${price}` : price;
+    }
+    case 'public.audit_logs': {
+      const parts = [
+        row.entity_type,
+        row.created_at ? formatDate(String(row.created_at)) : '',
+      ].filter(Boolean);
+      return parts.join(' · ');
+    }
+    case 'public.permissions': {
+      return row.description || `${$t('common.module')}: ${row.module || '—'}`;
+    }
+    case 'public.profiles': {
+      return String(row.email || '');
+    }
+    case 'public.roles': {
+      return String(
+        row.description ||
+          (row.is_system
+            ? $t('common.rlsSystemRoleImmutable')
+            : $t('page.system_view.roles_type_custom')),
+      );
+    }
+    case 'public.system_plugins': {
+      const kind = row.is_core
+        ? $t('page.system_view.plugins_type_core')
+        : $t('page.system_view.plugins_type_extension');
+      return `v${row.version || '1.0.0'} · ${kind}`;
+    }
+    default: {
+      if (
+        props.options?.subtitleField &&
+        row[String(props.options.subtitleField)]
+      ) {
+        return String(row[String(props.options.subtitleField)]);
+      }
+      return String(
+        row.description ||
+          row.short_description ||
+          row.email ||
+          row.buyer_email ||
+          (row.slug ? `/${row.slug}` : '') ||
+          '',
+      );
+    }
+  }
+});
+
+const groupedRolePermissions = computed<Record<string, string[]>>(() => {
+  const perms = props.row?.permissions;
+  if (!Array.isArray(perms) || perms.length === 0) {
+    return {};
+  }
+  const groups: Record<string, string[]> = {};
+  for (const rawPerm of perms) {
+    const perm = String(rawPerm);
+    const prefix = perm.split(/[:.]/)[0] || 'core-iam';
+    if (!groups[prefix]) {
+      groups[prefix] = [];
+    }
+    groups[prefix].push(perm);
+  }
+  return groups;
+});
+
+function getInitials(name: null | string | undefined): string {
+  if (!name) return 'U';
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}
 
 function syncFormDataFromRow(row: null | Record<string, any>) {
   for (const key of Object.keys(formData)) {
@@ -134,23 +344,134 @@ function syncFormDataFromRow(row: null | Record<string, any>) {
         ? JSON.stringify(val, null, 2)
         : val;
   }
+  for (const field of dynamicSchema.value.fields) {
+    if (!(field.field in formData) && field.value !== undefined) {
+      formData[field.field] = field.value;
+    }
+  }
 }
 
 watch(
   () => [props.open, props.row] as const,
   ([isOpen, currentRow]) => {
     if (isOpen && currentRow) {
+      isEditing.value = false;
       syncFormDataFromRow(currentRow);
       void ensureEffectiveAccess();
+    } else if (!isOpen) {
+      isEditing.value = false;
     }
   },
   { immediate: true },
 );
 
-function formatReadonlyValue(field: DynamicVxeFormField): string {
-  const raw = props.row?.[field.field];
+watch(
+  () => router.currentRoute.value.fullPath,
+  () => {
+    if (props.open) {
+      emit('update:open', false);
+    }
+  },
+);
+
+function startEditing() {
+  syncFormDataFromRow(props.row);
+  isEditing.value = true;
+}
+
+function cancelEditing() {
+  syncFormDataFromRow(props.row);
+  isEditing.value = false;
+}
+
+function formatBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return '0 MB';
+  const mb = bytes / (1024 * 1024);
+  if (mb >= 1024) {
+    return `${Number((mb / 1024).toFixed(1))} GB`;
+  }
+  if (mb >= 1) {
+    return `${Math.round(mb)} MB`;
+  }
+  return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+function formatDisplayValue(field: DynamicVxeFormField): string {
+  const raw = resolveFieldRawValue(field);
   if (raw === undefined || raw === null || raw === '') {
     return '—';
+  }
+  if (field.field === 'price_monthly_usd') {
+    const num = Number(raw);
+    if (num === 0) return $t('page.system_view.plans_free');
+    return `$${num.toLocaleString()}${$t('page.system_view.per_month_suffix')}`;
+  }
+  if (field.field === 'max_storage_mb') {
+    const mb = Number(raw);
+    if (mb >= 1024) {
+      return `${Number((mb / 1024).toFixed(1))} GB`;
+    }
+    return `${mb} MB`;
+  }
+  if (field.field === 'storage_size_bytes') {
+    return formatBytes(Number(raw));
+  }
+  if (field.field === 'ram_gb') {
+    return `${raw} GB`;
+  }
+  if (field.field === 'cpu_cores') {
+    return `${raw} vCPU`;
+  }
+  if (field.field === 'max_members') {
+    return $t('page.system_view.plans_members_unit', [raw]);
+  }
+  if (field.field === 'max_monthly_runs') {
+    return $t('page.system_view.plans_runs_unit', [
+      Number(raw).toLocaleString(),
+    ]);
+  }
+  if (field.field === 'latency_ms') {
+    return `${raw} ms`;
+  }
+  if (
+    field.field === 'amount_credits' ||
+    field.field === 'total_credits' ||
+    field.field === 'balance_after' ||
+    field.field === 'balance_after_credits' ||
+    field.field === 'credits_amount'
+  ) {
+    return `${Number(raw).toLocaleString()} Xu`;
+  }
+  if (field.field === 'pay_amount' || field.field === 'amount_original') {
+    const currency =
+      props.row?.pay_currency || props.row?.currency_original || '';
+    const formatted = Number(raw).toLocaleString();
+    return currency ? `${formatted} ${currency}` : formatted;
+  }
+  if (field.field === 'rate_per_credit') {
+    const currency = props.row?.currency || '';
+    const formatted = Number(raw).toLocaleString();
+    return currency ? `${formatted} ${currency}` : formatted;
+  }
+  if (field.field === 'cancel_at_period_end') {
+    return raw
+      ? $t('page.system_view.subs_cancel_period_end')
+      : $t('page.system_view.subs_auto_renew');
+  }
+  if (field.field === 'is_active') {
+    return raw
+      ? $t('page.system_view.plans_badge_active')
+      : $t('page.system_view.status_paused');
+  }
+  if (field.field === 'is_core') {
+    return raw
+      ? $t('page.system_view.plugins_type_core')
+      : $t('page.system_view.plugins_type_extension');
+  }
+  if (field.field === 'is_system') {
+    return raw
+      ? $t('page.system_view.roles_type_system')
+      : $t('page.system_view.roles_type_custom');
   }
   if (field.type === 'datetime') {
     return formatDate(String(raw));
@@ -185,10 +506,23 @@ function isCopyableIdentifier(field: DynamicVxeFormField): boolean {
     field.field === 'id' ||
     field.field.endsWith('_id') ||
     field.field.endsWith('_code') ||
+    field.field === 'machine_fingerprint' ||
     field.field === 'slug' ||
     field.field === 'host' ||
     field.field === 'ip_address'
   );
+}
+
+function handleNavigateWorkspace(tenantId: string) {
+  if (!tenantId) return;
+  emit('update:open', false);
+  router.push(`/tenants/${tenantId}`);
+}
+
+function handleNavigateCampaignRun(runId: string) {
+  if (!runId) return;
+  emit('update:open', false);
+  router.push(`/automation/runs/${runId}`);
 }
 
 async function handleSave() {
@@ -203,7 +537,7 @@ async function handleSave() {
   );
 
   if (Object.keys(dirtyPayload).length === 0 && !props.options?.onSave) {
-    toast.info($t('common.noChangesToSave'));
+    isEditing.value = false;
     return;
   }
 
@@ -230,6 +564,7 @@ async function handleSave() {
       emit('saved', result.updatedRow);
     }
     toast.success($t('common.savedSuccessfully'));
+    isEditing.value = false;
     emit('update:open', false);
   } catch (error: any) {
     toast.error(error?.message || $t('common.error'));
@@ -245,196 +580,119 @@ async function handleSave() {
       :side="isMobile ? 'bottom' : 'right'"
       :class="
         isMobile
-          ? 'flex max-h-[88vh] w-full flex-col rounded-t-2xl border-t border-border/80 p-0'
-          : 'flex h-full w-full flex-col border-l border-border/80 p-0 sm:max-w-lg'
+          ? 'tuquet-detail-sheet-content z-[2001] flex max-h-[88vh] w-full flex-col rounded-t-2xl border-t border-border/80 p-0'
+          : 'tuquet-detail-sheet-content z-[2001] flex h-full w-full flex-col border-l border-border/80 p-0 sm:max-w-lg'
       "
     >
-      <!-- Sheet Header with Dynamic Title, Schema Badge & RLS Policy Badge -->
+      <!-- Product Identity Header -->
       <SheetHeader
-        class="shrink-0 space-y-2 border-b border-border/60 bg-muted/20 px-4 py-3.5 text-left sm:px-5"
+        class="shrink-0 border-b border-border/60 bg-muted/20 px-4 py-4 text-left sm:px-5"
       >
-        <div class="flex flex-wrap items-center gap-1.5 pr-6">
-          <span
-            class="inline-flex items-center gap-1 rounded-md border border-border/70 bg-background px-2 py-0.5 font-mono text-2xs text-muted-foreground"
+        <div class="flex items-start gap-3 pr-6">
+          <Avatar
+            v-if="isUserProfile"
+            class="size-10 shrink-0 rounded-xl border border-border/60"
           >
-            <Database class="size-3 shrink-0 text-primary" />
-            {{ dynamicSchema.rls.resource }}
-          </span>
+            <AvatarImage
+              v-if="props.row?.avatar_url"
+              :src="props.row.avatar_url"
+              :alt="dynamicSchema.title"
+            />
+            <AvatarFallback
+              class="rounded-xl bg-muted text-xs font-semibold text-foreground"
+            >
+              {{ getInitials(dynamicSchema.title) }}
+            </AvatarFallback>
+          </Avatar>
 
-          <span
-            v-if="
-              dynamicSchema.rls.canUpdate.allowed && editableFields.length > 0
-            "
-            class="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-2xs font-medium text-emerald-600 dark:text-emerald-400"
-          >
-            <ShieldCheck class="size-3 shrink-0" />
-            {{ $t('common.rlsWritable') }} ·
-            <span class="font-mono">{{
-              dynamicSchema.rls.canUpdate.policyName
-            }}</span>
-          </span>
-          <span
+          <div
             v-else
-            class="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 text-2xs font-medium text-amber-600 dark:text-amber-400"
+            class="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-background text-foreground shadow-2xs"
           >
-            <Lock class="size-3 shrink-0" />
-            {{ $t('common.rlsReadOnly') }} ·
-            <span class="font-mono">{{
-              dynamicSchema.rls.canUpdate.policyName
-            }}</span>
-          </span>
+            <component :is="resourceIcon" class="size-4.5 text-primary" />
+          </div>
+
+          <div class="min-w-0 flex-1 space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <SheetTitle
+                class="truncate text-base font-semibold tracking-tight text-foreground"
+              >
+                {{ dynamicSchema.title }}
+              </SheetTitle>
+
+              <span
+                v-if="headerStatusField?.statusMeta"
+                class="inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-2xs font-medium"
+                :class="headerStatusField.statusMeta.badgeClass"
+              >
+                <span
+                  class="size-1.5 rounded-full"
+                  :class="headerStatusField.statusMeta.dotClass"
+                ></span>
+                <span>
+                  {{
+                    headerStatusField.statusMeta.labelKey
+                      ? $t(headerStatusField.statusMeta.labelKey)
+                      : headerStatusField.statusMeta.fallbackLabel
+                  }}
+                </span>
+              </span>
+
+              <Badge
+                v-else-if="props.row && 'is_active' in props.row"
+                variant="outline"
+                class="text-2xs font-normal"
+              >
+                <span
+                  class="mr-1.5 size-1.5 rounded-full"
+                  :class="
+                    props.row.is_active ? 'bg-success' : 'bg-muted-foreground'
+                  "
+                ></span>
+                {{
+                  props.row.is_active
+                    ? $t('page.system_view.plans_badge_active')
+                    : $t('page.system_view.status_paused')
+                }}
+              </Badge>
+            </div>
+
+            <SheetDescription
+              v-if="headerSubtitle"
+              class="line-clamp-2 text-xs text-muted-foreground"
+            >
+              {{ headerSubtitle }}
+            </SheetDescription>
+          </div>
         </div>
-
-        <SheetTitle class="truncate text-base font-semibold tracking-tight">
-          {{ dynamicSchema.title }}
-        </SheetTitle>
-
-        <SheetDescription class="text-xs text-muted-foreground">
-          {{
-            dynamicSchema.rls.canUpdate.reasonKey
-              ? $t(dynamicSchema.rls.canUpdate.reasonKey)
-              : $t('common.detailSheetTitle')
-          }}
-        </SheetDescription>
       </SheetHeader>
 
-      <!-- Scrollable Sheet Body powered by VxeForm -->
+      <!-- Scrollable Drawer Body -->
       <div
         v-if="props.row"
-        class="flex-1 space-y-4 overflow-y-auto px-4 py-3.5 sm:px-5"
+        class="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-5"
       >
-        <!-- Section 1: Editable Fields via VxeForm -->
-        <div
-          v-if="editableFields.length > 0"
-          class="rounded-xl border border-border/60 bg-card p-3.5 shadow-2xs"
-        >
+        <!-- MODE A: Clean Product Inspector (Default View Mode) -->
+        <template v-if="!isEditing">
+          <!-- 1. Unified Business Properties List -->
           <div
-            class="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-foreground"
+            v-if="viewScalarFields.length > 0"
+            class="divide-y divide-border/50 rounded-xl border border-border/60 bg-card px-4 py-1 shadow-2xs"
           >
-            <Edit3 class="size-3.5 text-primary" />
-            <span>{{ $t('common.detailSheetEditableSection') }}</span>
-          </div>
-
-          <VxeForm
-            :data="formData"
-            custom-layout
-            size="small"
-            class="w-full space-y-2.5"
-          >
-            <VxeFormItem
-              v-for="field in editableFields"
+            <div
+              v-for="field in viewScalarFields"
               :key="field.field"
-              :field="field.field"
-              :title="field.title"
-              span="24"
+              class="flex items-start justify-between gap-4 py-2.5 text-xs"
             >
-              <template #default>
-                <!-- Enum Select -->
-                <select
-                  v-if="field.type === 'enum' && field.options?.length"
-                  v-model="formData[field.field]"
-                  :data-testid="`vxe-field-${field.field}`"
-                  class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <option
-                    v-for="opt in field.options"
-                    :key="String(opt.value)"
-                    :value="opt.value"
-                  >
-                    {{ opt.label }}
-                  </option>
-                </select>
+              <span class="shrink-0 text-muted-foreground">
+                {{ field.title }}
+              </span>
 
-                <!-- Boolean Switch -->
-                <div
-                  v-else-if="field.type === 'boolean'"
-                  class="flex h-9 items-center justify-between rounded-md border border-border/60 bg-muted/20 px-3"
-                >
-                  <span class="text-xs text-foreground">
-                    {{
-                      formData[field.field]
-                        ? $t('common.enabled')
-                        : $t('common.disabled')
-                    }}
-                  </span>
-                  <Switch
-                    :checked="Boolean(formData[field.field])"
-                    :data-testid="`vxe-field-${field.field}`"
-                    @update:checked="
-                      (val: boolean) => (formData[field.field] = val)
-                    "
-                  />
-                </div>
-
-                <!-- Multiline Textarea -->
-                <Textarea
-                  v-else-if="field.type === 'textarea'"
-                  v-model="formData[field.field]"
-                  :data-testid="`vxe-field-${field.field}`"
-                  rows="3"
-                  class="text-xs"
-                />
-
-                <!-- Number Input -->
-                <Input
-                  v-else-if="field.type === 'number'"
-                  v-model.number="formData[field.field]"
-                  :data-testid="`vxe-field-${field.field}`"
-                  :max="field.max"
-                  :min="field.min"
-                  type="number"
-                  class="h-9 text-xs"
-                />
-
-                <!-- Default Text Input -->
-                <Input
-                  v-else
-                  v-model="formData[field.field]"
-                  :data-testid="`vxe-field-${field.field}`"
-                  class="h-9 text-xs"
-                />
-              </template>
-            </VxeFormItem>
-          </VxeForm>
-        </div>
-
-        <!-- Section 2: System & Identity Read-Only Metadata via VxeForm -->
-        <div
-          v-if="readonlyFields.length > 0"
-          class="rounded-xl border border-border/60 bg-muted/20 p-3.5"
-        >
-          <div
-            class="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-foreground"
-          >
-            <Database class="size-3.5 text-muted-foreground" />
-            <span>{{ $t('common.detailSheetMetadataSection') }}</span>
-          </div>
-
-          <VxeForm
-            :data="props.row"
-            custom-layout
-            readonly
-            size="small"
-            class="w-full"
-          >
-            <VxeFormItem
-              v-for="field in readonlyFields"
-              :key="field.field"
-              :field="field.field"
-              :title="field.title"
-              :span="
-                field.type === 'uuid' ||
-                field.type === 'textarea' ||
-                field.field === 'id'
-                  ? 24
-                  : 12
-              "
-            >
-              <template #default>
-                <!-- Semantic Enum Status Badge -->
-                <div
+              <div class="min-w-0 flex-1 text-right">
+                <!-- Semantic Enum Badge -->
+                <span
                   v-if="field.statusMeta"
-                  class="inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium"
+                  class="inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-2xs font-medium"
                   :class="field.statusMeta.badgeClass"
                 >
                   <span
@@ -448,101 +706,173 @@ async function handleSave() {
                         : field.statusMeta.fallbackLabel
                     }}
                   </span>
-                </div>
+                </span>
 
-                <!-- Copyable Identifier / UUID / Code -->
-                <div
+                <!-- Copyable Identifier / Code / IP / UUID -->
+                <button
                   v-else-if="
-                    isCopyableIdentifier(field) && props.row[field.field]
+                    isCopyableIdentifier(field) && resolveFieldRawValue(field)
                   "
-                  class="flex items-center justify-between gap-2 rounded-md border border-border/60 bg-background/80 px-2.5 py-1 font-mono text-xs text-foreground"
+                  type="button"
+                  class="inline-flex max-w-full items-center gap-1.5 rounded-md border border-border/60 bg-muted/30 px-2 py-0.5 font-mono text-2xs text-foreground transition-colors hover:bg-muted"
+                  :title="$t('common.copy')"
+                  @click="
+                    copyToClipboard(
+                      String(resolveFieldRawValue(field)),
+                      field.title,
+                    )
+                  "
                 >
-                  <span class="truncate">{{ props.row[field.field] }}</span>
-                  <button
-                    type="button"
-                    class="inline-flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                    :title="$t('common.copy')"
-                    @click="
-                      copyToClipboard(
-                        String(props.row[field.field]),
-                        field.title,
-                      )
-                    "
-                  >
-                    <Check
-                      v-if="isCopied(field.title)"
-                      class="size-3.5 text-emerald-500"
-                    />
-                    <Copy v-else class="size-3.5" />
-                  </button>
-                </div>
+                  <span class="truncate">{{
+                    resolveFieldRawValue(field)
+                  }}</span>
+                  <Check
+                    v-if="isCopied(field.title)"
+                    class="size-3 shrink-0 text-emerald-500"
+                  />
+                  <Copy v-else class="size-3 shrink-0 text-muted-foreground" />
+                </button>
 
-                <!-- Default Read-Only Scalar -->
-                <div
+                <!-- Formatted Business Value -->
+                <span
                   v-else
-                  class="truncate text-xs font-medium text-foreground"
+                  class="wrap-break-word font-medium text-foreground"
                 >
-                  {{ formatReadonlyValue(field) }}
-                </div>
-              </template>
-            </VxeFormItem>
-          </VxeForm>
-
-          <!-- Relational Array Summaries (Permissions, Roles, Dependencies, Workspaces) -->
-          <div
-            v-if="
-              Array.isArray(props.row.permissions) &&
-              props.row.permissions.length > 0
-            "
-            class="mt-3 border-t border-border/50 pt-3"
-          >
-            <div class="mb-1.5 text-2xs font-medium text-muted-foreground">
-              {{ $t('term.permissions') }} ({{ props.row.permissions.length }})
-            </div>
-            <div class="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto pr-1">
-              <button
-                v-for="perm in props.row.permissions"
-                :key="perm"
-                type="button"
-                class="inline-flex items-center gap-1 rounded border border-border/60 bg-background px-2 py-0.5 font-mono text-2xs text-foreground transition-colors hover:bg-muted"
-                :title="$t('common.copy')"
-                @click="copyToClipboard(String(perm), String(perm))"
-              >
-                <span>{{ perm }}</span>
-                <Copy class="size-2.5 text-muted-foreground" />
-              </button>
+                  {{ formatDisplayValue(field) }}
+                </span>
+              </div>
             </div>
           </div>
 
+          <!-- 2. Relational: User Workspaces (Interactive Navigation Cards) -->
+          <div
+            v-if="
+              Array.isArray(props.row.workspaces) &&
+              props.row.workspaces.length > 0
+            "
+            class="space-y-2 rounded-xl border border-border/60 bg-card p-3.5 shadow-2xs"
+          >
+            <div class="text-xs font-semibold text-foreground">
+              {{
+                $t('page.system_view.users_orgs_header', [
+                  props.row.workspaces.length,
+                ])
+              }}
+            </div>
+            <div class="space-y-1.5">
+              <div
+                v-for="ws in props.row.workspaces"
+                :key="ws.tenant_id"
+                class="group flex cursor-pointer items-center justify-between gap-2.5 rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-xs transition-colors hover:border-primary/40 hover:bg-muted/40"
+                @click="handleNavigateWorkspace(ws.tenant_id)"
+              >
+                <div class="flex min-w-0 items-center gap-2.5">
+                  <div
+                    class="flex size-7 shrink-0 items-center justify-center rounded-md border border-border/60 bg-background text-muted-foreground"
+                  >
+                    <Building2 class="size-3.5" />
+                  </div>
+                  <div class="min-w-0">
+                    <div class="truncate font-medium text-foreground">
+                      {{ ws.tenant_name }}
+                    </div>
+                    <div
+                      class="truncate font-mono text-2xs text-muted-foreground"
+                    >
+                      /{{ ws.tenant_slug || String(ws.tenant_id).slice(0, 8) }}
+                    </div>
+                  </div>
+                </div>
+                <div class="flex shrink-0 items-center gap-1.5">
+                  <RoleBadge :role="ws.role_name" />
+                  <ArrowUpRight
+                    class="size-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Relational: Role Permissions Grouped by Module -->
+          <div
+            v-if="Object.keys(groupedRolePermissions).length > 0"
+            class="space-y-2.5 rounded-xl border border-border/60 bg-card p-3.5 shadow-2xs"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-foreground">
+                {{ $t('term.permissions') }}
+              </span>
+              <Badge variant="secondary" class="font-mono text-2xs font-normal">
+                {{ props.row.permissions?.length || 0 }}
+              </Badge>
+            </div>
+
+            <div class="space-y-2">
+              <div
+                v-for="(perms, modName) in groupedRolePermissions"
+                :key="modName"
+                class="rounded-lg border border-border/60 bg-muted/15 p-2.5"
+              >
+                <div class="mb-2 flex items-center justify-between">
+                  <div
+                    class="flex items-center gap-1.5 text-xs font-medium text-foreground"
+                  >
+                    <Folder class="size-3.5 text-primary" />
+                    <span class="capitalize">{{ modName }}</span>
+                  </div>
+                  <span class="font-mono text-2xs text-muted-foreground">
+                    {{ perms.length }}
+                  </span>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <button
+                    v-for="perm in perms"
+                    :key="perm"
+                    type="button"
+                    class="inline-flex items-center gap-1 rounded-md border border-border/60 bg-background px-2 py-0.5 font-mono text-2xs text-foreground transition-colors hover:bg-muted"
+                    :title="$t('common.copy')"
+                    @click="copyToClipboard(perm, perm)"
+                  >
+                    <span>{{ perm }}</span>
+                    <Check
+                      v-if="isCopied(perm)"
+                      class="size-2.5 text-emerald-500"
+                    />
+                    <Copy v-else class="size-2.5 text-muted-foreground" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Relational: Assigned Roles on Permission -->
           <div
             v-if="Array.isArray(props.row.roles) && props.row.roles.length > 0"
-            class="mt-3 border-t border-border/50 pt-3"
+            class="space-y-2 rounded-xl border border-border/60 bg-card p-3.5 shadow-2xs"
           >
-            <div class="mb-1.5 text-2xs font-medium text-muted-foreground">
+            <div class="text-xs font-semibold text-foreground">
               {{ $t('page.system_view.roles_col_assigned_roles') }} ({{
                 props.row.roles.length
               }})
             </div>
             <div class="flex flex-wrap gap-1.5">
-              <Badge
+              <RoleBadge
                 v-for="roleName in props.row.roles"
                 :key="roleName"
-                variant="outline"
-                class="font-mono text-2xs font-medium"
-              >
-                {{ roleName }}
-              </Badge>
+                :role="roleName"
+              />
             </div>
           </div>
 
+          <!-- 5. Relational: Plugin Dependencies -->
           <div
             v-if="
               Array.isArray(props.row.dependencies) &&
               props.row.dependencies.length > 0
             "
-            class="mt-3 border-t border-border/50 pt-3"
+            class="space-y-2 rounded-xl border border-border/60 bg-card p-3.5 shadow-2xs"
           >
-            <div class="mb-1.5 text-2xs font-medium text-muted-foreground">
+            <div class="text-xs font-semibold text-foreground">
               {{ $t('common.module') }} ({{ props.row.dependencies.length }})
             </div>
             <div class="flex flex-wrap gap-1.5">
@@ -557,115 +887,358 @@ async function handleSave() {
             </div>
           </div>
 
+          <!-- 6. Relational: Campaign Run Progress, Workflow & Runner -->
           <div
             v-if="
-              Array.isArray(props.row.workspaces) &&
-              props.row.workspaces.length > 0
+              resolvedResource === 'automa.campaign_runs' &&
+              (props.row.workflow ||
+                props.row.runner ||
+                typeof props.row.total_tasks === 'number')
             "
-            class="mt-3 border-t border-border/50 pt-3"
+            class="space-y-2.5 rounded-xl border border-border/60 bg-card p-3.5 shadow-2xs"
           >
-            <div class="mb-1.5 text-2xs font-medium text-muted-foreground">
-              {{
-                $t('page.system_view.users_orgs_header', [
-                  props.row.workspaces.length,
-                ])
-              }}
-            </div>
-            <div class="max-h-40 space-y-1.5 overflow-y-auto pr-1">
-              <div
-                v-for="ws in props.row.workspaces"
-                :key="ws.tenant_id"
-                class="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs"
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-foreground">
+                {{ $t('page.runs_view.col_progress') }}
+              </span>
+              <span
+                v-if="typeof props.row.total_tasks === 'number'"
+                class="font-mono text-2xs text-muted-foreground"
               >
+                {{ props.row.completed_tasks || 0 }} /
+                {{ props.row.total_tasks || 0 }}
+              </span>
+            </div>
+
+            <div
+              v-if="
+                typeof props.row.total_tasks === 'number' &&
+                props.row.total_tasks > 0
+              "
+              class="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+            >
+              <div
+                class="h-full rounded-full bg-primary transition-all"
+                :style="{
+                  width: `${Math.min(
+                    100,
+                    Math.round(
+                      ((props.row.completed_tasks || 0) /
+                        props.row.total_tasks) *
+                        100,
+                    ),
+                  )}%`,
+                }"
+              ></div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div
+                v-if="props.row.workflow?.name"
+                class="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/20 px-2.5 py-2 text-xs"
+              >
+                <Workflow class="size-3.5 shrink-0 text-primary" />
                 <div class="min-w-0">
-                  <div class="truncate font-medium text-foreground">
-                    {{ ws.tenant_name }}
+                  <div class="text-2xs text-muted-foreground">
+                    {{ $t('term.workflow') }}
                   </div>
-                  <div
-                    class="truncate font-mono text-2xs text-muted-foreground"
-                  >
-                    /{{ ws.tenant_slug || String(ws.tenant_id).slice(0, 8) }}
+                  <div class="truncate font-medium text-foreground">
+                    {{ props.row.workflow.name }}
                   </div>
                 </div>
-                <Badge variant="outline" class="shrink-0 font-mono text-2xs">
-                  {{ ws.role_name }}
-                </Badge>
+              </div>
+
+              <div
+                v-if="props.row.runner?.name"
+                class="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/20 px-2.5 py-2 text-xs"
+              >
+                <Cpu class="size-3.5 shrink-0 text-primary" />
+                <div class="min-w-0">
+                  <div class="text-2xs text-muted-foreground">
+                    {{ $t('term.device') }}
+                  </div>
+                  <div class="truncate font-medium text-foreground">
+                    {{ props.row.runner.name }}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Section 3: Structured JSON Payload Inspector / Editor -->
-        <div
-          v-if="jsonFields.length > 0"
-          class="rounded-xl border border-border/60 bg-muted/20 p-3.5"
-        >
+          <!-- 7. Relational: Browser Active Lock & Proxy Binding -->
           <div
-            class="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-foreground"
+            v-if="
+              resolvedResource === 'runners.browsers' &&
+              (props.row.locked_by_device || props.row.proxy)
+            "
+            class="grid grid-cols-1 gap-2 sm:grid-cols-2"
           >
-            <FileJson class="size-3.5 text-muted-foreground" />
-            <span>{{ $t('common.detailSheetJsonSection') }}</span>
+            <div
+              v-if="props.row.locked_by_device?.name"
+              class="flex items-center gap-2.5 rounded-xl border border-border/60 bg-card p-3 text-xs shadow-2xs"
+            >
+              <Cpu class="size-4 shrink-0 text-primary" />
+              <div class="min-w-0">
+                <div class="text-2xs text-muted-foreground">
+                  {{ $t('common.lockedBy') }}
+                </div>
+                <div class="truncate font-medium text-foreground">
+                  {{ props.row.locked_by_device.name }}
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-if="props.row.proxy?.host"
+              class="flex items-center gap-2.5 rounded-xl border border-border/60 bg-card p-3 text-xs shadow-2xs"
+            >
+              <Globe class="size-4 shrink-0 text-primary" />
+              <div class="min-w-0">
+                <div class="text-2xs text-muted-foreground">
+                  {{ $t('term.proxy') }}
+                </div>
+                <div class="truncate font-mono text-2xs text-foreground">
+                  {{ props.row.proxy.protocol || 'socks5' }}://{{
+                    props.row.proxy.host
+                  }}:{{ props.row.proxy.port }}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <VxeForm
-            :data="formData"
-            custom-layout
-            size="small"
-            class="w-full space-y-2.5"
+          <!-- 8. Relational: Commerce Product Variants -->
+          <div
+            v-if="
+              Array.isArray(props.row.variants) && props.row.variants.length > 0
+            "
+            class="space-y-2 rounded-xl border border-border/60 bg-card p-3.5 shadow-2xs"
           >
-            <VxeFormItem
-              v-for="field in jsonFields"
-              :key="field.field"
-              :field="field.field"
-              :title="field.title"
-              span="24"
-            >
-              <template #default>
-                <Textarea
-                  v-if="field.editable"
-                  v-model="formData[field.field]"
-                  :data-testid="`vxe-field-${field.field}`"
-                  rows="4"
-                  class="font-mono text-xs"
-                />
-                <div v-else class="relative">
-                  <pre
-                    class="max-h-44 overflow-auto rounded-lg border border-border/60 bg-background p-2.5 font-mono text-2xs text-foreground"
-                    >{{ formatJsonPreview(field.field) }}</pre>
-                  <button
-                    type="button"
-                    class="absolute top-2 right-2 inline-flex size-6 items-center justify-center rounded border border-border/60 bg-muted/80 text-muted-foreground hover:text-foreground"
-                    :title="$t('common.copy')"
-                    @click="
-                      copyToClipboard(
-                        formatJsonPreview(field.field),
-                        field.title,
-                      )
-                    "
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-foreground">
+                {{ $t('common.variants') }}
+              </span>
+              <Badge variant="secondary" class="font-mono text-2xs font-normal">
+                {{ props.row.variants.length }}
+              </Badge>
+            </div>
+            <div class="space-y-1.5">
+              <div
+                v-for="variant in props.row.variants"
+                :key="variant.id || variant.sku"
+                class="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2 text-xs"
+              >
+                <div class="min-w-0">
+                  <div class="truncate font-medium text-foreground">
+                    {{ variant.name || variant.sku }}
+                  </div>
+                  <div
+                    v-if="variant.sku"
+                    class="truncate font-mono text-2xs text-muted-foreground"
                   >
-                    <Copy class="size-3" />
-                  </button>
+                    {{ variant.sku }}
+                  </div>
                 </div>
-              </template>
-            </VxeFormItem>
-          </VxeForm>
-        </div>
+                <div class="shrink-0 text-right font-mono text-xs font-medium">
+                  {{ Number(variant.price_credits || 0).toLocaleString() }} Xu
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 9. Non-Empty Structured JSON Payload -->
+          <div
+            v-if="visibleJsonFields.length > 0"
+            class="space-y-2.5 rounded-xl border border-border/60 bg-card p-3.5 shadow-2xs"
+          >
+            <div
+              v-for="field in visibleJsonFields"
+              :key="field.field"
+              class="space-y-1.5"
+            >
+              <div class="flex items-center justify-between">
+                <div
+                  class="flex items-center gap-1.5 text-xs font-semibold text-foreground"
+                >
+                  <FileJson class="size-3.5 text-muted-foreground" />
+                  <span>{{ field.title }}</span>
+                </div>
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1 rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-2xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  @click="
+                    copyToClipboard(formatJsonPreview(field.field), field.title)
+                  "
+                >
+                  <Copy class="size-3" />
+                  <span>{{ $t('common.copy') }}</span>
+                </button>
+              </div>
+              <pre
+                class="max-h-44 overflow-auto rounded-lg border border-border/60 bg-muted/20 p-2.5 font-mono text-2xs text-foreground"
+                >{{ formatJsonPreview(field.field) }}</pre>
+            </div>
+          </div>
+        </template>
+
+        <!-- MODE B: Vertical Aligned VxeForm Editor (When Editing) -->
+        <template v-else>
+          <div
+            class="rounded-xl border border-border/60 bg-card p-4 shadow-2xs"
+          >
+            <VxeForm
+              :data="formData"
+              custom-layout
+              vertical
+              size="small"
+              class="tuquet-vxe-vertical-form w-full space-y-3"
+            >
+              <VxeFormItem
+                v-for="field in editableFields"
+                :key="field.field"
+                :field="field.field"
+                :title="field.title"
+                span="24"
+              >
+                <template #default>
+                  <!-- Styled Enum Select -->
+                  <div
+                    v-if="field.type === 'enum' && field.options?.length"
+                    class="relative w-full"
+                  >
+                    <select
+                      v-model="formData[field.field]"
+                      :data-testid="`vxe-field-${field.field}`"
+                      class="flex h-9 w-full appearance-none rounded-md border border-input bg-background pr-8 pl-3 text-xs text-foreground shadow-2xs transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                    >
+                      <option
+                        v-for="opt in field.options"
+                        :key="String(opt.value)"
+                        :value="opt.value"
+                      >
+                        {{ opt.label }}
+                      </option>
+                    </select>
+                    <ChevronDown
+                      class="pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+                    />
+                  </div>
+
+                  <!-- Boolean Switch -->
+                  <div
+                    v-else-if="field.type === 'boolean'"
+                    class="flex h-9 items-center justify-between rounded-md border border-border/60 bg-muted/20 px-3"
+                  >
+                    <span class="text-xs text-foreground">
+                      {{
+                        formData[field.field]
+                          ? $t('common.enabled')
+                          : $t('common.disabled')
+                      }}
+                    </span>
+                    <Switch
+                      :checked="Boolean(formData[field.field])"
+                      :data-testid="`vxe-field-${field.field}`"
+                      @update:checked="
+                        (val: boolean) => (formData[field.field] = val)
+                      "
+                    />
+                  </div>
+
+                  <!-- JSON Editor -->
+                  <Textarea
+                    v-else-if="field.type === 'json'"
+                    v-model="formData[field.field]"
+                    :data-testid="`vxe-field-${field.field}`"
+                    rows="5"
+                    class="font-mono text-xs"
+                  />
+
+                  <!-- Multiline Textarea -->
+                  <Textarea
+                    v-else-if="field.type === 'textarea'"
+                    v-model="formData[field.field]"
+                    :data-testid="`vxe-field-${field.field}`"
+                    rows="3"
+                    class="text-xs"
+                  />
+
+                  <!-- Number Input -->
+                  <Input
+                    v-else-if="field.type === 'number'"
+                    v-model.number="formData[field.field]"
+                    :data-testid="`vxe-field-${field.field}`"
+                    :max="field.max"
+                    :min="field.min"
+                    type="number"
+                    class="h-9 text-xs"
+                  />
+
+                  <!-- Default Text Input -->
+                  <Input
+                    v-else
+                    v-model="formData[field.field]"
+                    :data-testid="`vxe-field-${field.field}`"
+                    class="h-9 text-xs"
+                  />
+                </template>
+              </VxeFormItem>
+            </VxeForm>
+          </div>
+        </template>
       </div>
 
-      <!-- Sheet Footer with Auto-Forwarded Row Actions + Save/Close -->
+      <!-- Clean Single-Bar Footer -->
       <SheetFooter
         v-if="props.row"
-        class="shrink-0 flex-col gap-2.5 border-t border-border/60 bg-muted/20 px-4 py-3 sm:flex-col sm:space-x-0 sm:px-5"
+        class="shrink-0 border-t border-border/60 bg-muted/20 px-4 py-3 sm:px-5"
       >
-        <!-- Row Actions Bar (Auto-forwarded from Grid Action Slot + Declarative Actions) -->
         <div
-          class="flex w-full flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2.5"
+          v-if="!isEditing"
+          class="flex w-full flex-wrap items-center justify-between gap-2"
         >
-          <span class="text-2xs font-medium text-muted-foreground">
-            {{ $t('common.detailSheetActionsSection') }}
-          </span>
           <div class="flex flex-wrap items-center gap-1.5">
             <slot name="row-actions" :row="props.row"></slot>
+
+            <!-- Contextual Quick-Navigation for Workspace / Subscription -->
+            <Button
+              v-if="
+                (resolvedResource === 'public.tenants' && props.row.id) ||
+                (resolvedResource === 'billing.subscriptions' &&
+                  props.row.tenant_id)
+              "
+              variant="outline"
+              size="sm"
+              class="h-8 gap-1.5 px-2.5 text-xs"
+              @click="
+                handleNavigateWorkspace(
+                  String(
+                    resolvedResource === 'public.tenants'
+                      ? props.row.id
+                      : props.row.tenant_id,
+                  ),
+                )
+              "
+            >
+              <Building2 class="size-3.5" />
+              <span>{{ $t('term.workspace') }}</span>
+              <ArrowUpRight class="size-3 text-muted-foreground" />
+            </Button>
+
+            <!-- Contextual Quick-Navigation for Campaign Run Logs -->
+            <Button
+              v-if="
+                resolvedResource === 'automa.campaign_runs' &&
+                props.row.id &&
+                !$slots['row-actions']
+              "
+              variant="outline"
+              size="sm"
+              class="h-8 gap-1.5 px-2.5 text-xs"
+              @click="handleNavigateCampaignRun(String(props.row.id))"
+            >
+              <span>{{ $t('common.viewLogs') }}</span>
+              <ArrowUpRight class="size-3 text-muted-foreground" />
+            </Button>
 
             <Button
               v-for="(act, idx) in props.options?.actions || []"
@@ -673,42 +1246,49 @@ async function handleSave() {
               :variant="act.variant || 'outline'"
               :disabled="act.disabled?.(props.row)"
               size="sm"
-              class="h-7 gap-1 px-2.5 text-xs"
+              class="h-8 gap-1.5 px-2.5 text-xs"
               @click="(act.handler ?? act.onClick)?.(props.row)"
             >
               <component :is="act.icon" v-if="act.icon" class="size-3.5" />
               <span>{{ act.label }}</span>
             </Button>
+          </div>
 
+          <div class="ml-auto flex items-center gap-2">
             <Button
-              v-if="props.row.id"
-              variant="ghost"
+              variant="outline"
               size="sm"
-              class="h-7 gap-1 px-2 text-xs text-muted-foreground"
-              @click="copyToClipboard(String(props.row.id), 'ID')"
+              class="h-8 px-3 text-xs"
+              @click="emit('update:open', false)"
             >
-              <Copy class="size-3" />
-              <span>ID</span>
+              {{ $t('common.close') }}
+            </Button>
+            <Button
+              v-if="canEditRow"
+              size="sm"
+              class="h-8 gap-1.5 px-3.5 text-xs font-medium"
+              data-testid="vxe-detail-sheet-edit"
+              @click="startEditing"
+            >
+              <Edit3 class="size-3.5" />
+              <span>{{ $t('common.edit') }}</span>
             </Button>
           </div>
         </div>
 
-        <!-- Primary Form Submit / Close Buttons -->
-        <div class="flex w-full items-center justify-end gap-2">
+        <div v-else class="flex w-full items-center justify-end gap-2">
           <Button
             variant="outline"
             size="sm"
-            class="h-9 px-3.5 text-xs"
-            @click="emit('update:open', false)"
+            class="h-8 px-3 text-xs"
+            :disabled="saving"
+            @click="cancelEditing"
           >
-            {{ $t('common.close') }}
+            {{ $t('common.cancel') }}
           </Button>
           <Button
-            v-if="
-              editableFields.length > 0 && dynamicSchema.rls.canUpdate.allowed
-            "
             size="sm"
-            class="h-9 gap-1.5 px-4 text-xs font-medium"
+            class="h-8 gap-1.5 px-4 text-xs font-medium"
             :disabled="saving"
             data-testid="vxe-detail-sheet-save"
             @click="handleSave"

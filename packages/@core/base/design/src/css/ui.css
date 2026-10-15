@@ -83,7 +83,55 @@
 }
 
 .z-popup {
-  z-index: var(--popup-z-index);
+  z-index: var(--popup-z-index, 2000);
+}
+
+/* ==========================================================================
+   Canonical 5-Tier Portal Z-Index Hierarchy
+   Guarantees all teleported overlays, sheets, modals, confirm dialogs,
+   floating poppers, and toasts always stack above Layout Header (200)
+   and Sidebar (201), and nest deterministically when opened from each other.
+   ========================================================================== */
+
+/* Tier 2: Detail Sheet / Drawer Overlay (2000) & Content (2001) */
+body > .fixed.inset-0.z-50:has(+ .tuquet-detail-sheet-content),
+.tuquet-detail-sheet-overlay {
+  z-index: var(--popup-z-index, 2000) !important;
+}
+
+.tuquet-detail-sheet-content {
+  z-index: calc(var(--popup-z-index, 2000) + 1) !important;
+}
+
+/* Tier 3: Standard Dialog / Modal Overlay (2010) & Content (2011) */
+body > .fixed.inset-0.z-50:not(:has(+ .tuquet-detail-sheet-content)):not(:has(+ [role='alertdialog'])) {
+  z-index: calc(var(--popup-z-index, 2000) + 10) !important;
+}
+
+body > [role='dialog'].fixed.z-50:not(.tuquet-detail-sheet-content),
+body > .fixed.inset-0.z-50 > [role='dialog'].z-50 {
+  z-index: calc(var(--popup-z-index, 2000) + 11) !important;
+}
+
+/* Tier 4: AlertDialog Confirmation Overlay (2020) & Content (2021) */
+body > .fixed.inset-0.z-50:has(+ [role='alertdialog']) {
+  z-index: calc(var(--popup-z-index, 2000) + 20) !important;
+}
+
+body > [role='alertdialog'].fixed.z-50 {
+  z-index: calc(var(--popup-z-index, 2000) + 21) !important;
+}
+
+/* Tier 5: Floating Poppers (Select, DropdownMenu, Popover, Tooltip, VxeUI) (2050) & Toasts (2100) */
+[data-reka-popper-content-wrapper],
+body > [data-reka-popper-content-wrapper],
+.vxe-select--panel,
+.vxe-table--tooltip-wrapper {
+  z-index: calc(var(--popup-z-index, 2000) + 50) !important;
+}
+
+[data-sonner-toaster] {
+  z-index: calc(var(--popup-z-index, 2000) + 100) !important;
 }
 
 @keyframes shrink {

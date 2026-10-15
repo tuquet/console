@@ -59,6 +59,12 @@ export type DynamicFieldType =
   | 'uuid';
 
 export interface SupabaseColumnSchema {
+  /** Optional custom patch writer for virtual/nested columns (e.g. metadata.plan) */
+  applyPatchValue?: (
+    payload: Record<string, any>,
+    nextVal: any,
+    originalRow: Record<string, any>,
+  ) => void;
   editable?: boolean;
   enumMeta?: Record<string, EnumItemMeta>;
   field: string;
@@ -67,8 +73,12 @@ export interface SupabaseColumnSchema {
   labelKey?: string;
   max?: number;
   min?: number;
+  /** When true, only surface this column if the key is present on the runtime row */
+  onlyWhenPresent?: boolean;
   options?: Array<{ label: string; value: number | string }>;
   required?: boolean;
+  /** Optional value resolver for nested/computed row properties */
+  resolveValue?: (row: Record<string, any>) => unknown;
   type: DynamicFieldType;
 }
 
@@ -115,6 +125,7 @@ export interface DynamicVxeFormField {
   statusMeta?: ResolvedStatusMeta;
   title: string;
   type: DynamicFieldType;
+  value?: unknown;
 }
 
 const PROXY_PROTOCOL_OPTIONS: Array<{ label: string; value: string }> = [
@@ -220,7 +231,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       name: {
         editable: true,
         field: 'name',
@@ -236,10 +246,25 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'text',
       },
       plan: {
+        applyPatchValue: (payload, nextVal, originalRow) => {
+          if ('metadata' in originalRow && !('plan' in originalRow)) {
+            const currentMeta =
+              originalRow.metadata && typeof originalRow.metadata === 'object'
+                ? originalRow.metadata
+                : {};
+            payload.metadata = {
+              ...currentMeta,
+              plan: nextVal,
+            };
+          } else {
+            payload.plan = nextVal;
+          }
+        },
         editable: true,
         enumMeta: TENANT_PLAN_META,
         field: 'plan',
         labelKey: 'term.plan',
+        resolveValue: (row) => row?.plan ?? row?.metadata?.plan,
         type: 'enum',
       },
       status: {
@@ -265,6 +290,12 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.createdAt',
         type: 'datetime',
       },
+      updated_at: {
+        field: 'updated_at',
+        labelKey: 'common.updatedAt',
+        type: 'datetime',
+      },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: (row, access) => {
       const isOwnerOrAdmin =
@@ -299,7 +330,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       name: {
         editable: true,
         field: 'name',
@@ -313,18 +343,18 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.description',
         type: 'textarea',
       },
-      version: {
-        editable: true,
-        field: 'version',
-        labelKey: 'common.version',
-        type: 'text',
-      },
       status: {
         editable: true,
         enumMeta: WORKFLOW_STATUS_META,
         field: 'status',
         labelKey: 'common.status',
         type: 'enum',
+      },
+      version: {
+        editable: true,
+        field: 'version',
+        labelKey: 'common.version',
+        type: 'text',
       },
       triggerSummary: {
         field: 'triggerSummary',
@@ -336,7 +366,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.nodes',
         type: 'number',
       },
-      tenant_id: { field: 'tenant_id', labelKey: 'term.tenant', type: 'uuid' },
       created_at: {
         field: 'created_at',
         labelKey: 'common.createdAt',
@@ -347,6 +376,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.updatedAt',
         type: 'datetime',
       },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
@@ -377,7 +407,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       name: {
         editable: true,
         field: 'name',
@@ -392,12 +421,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.status',
         type: 'enum',
       },
-      workflow_id: {
-        field: 'workflow_id',
-        labelKey: 'term.workflow',
-        type: 'uuid',
-      },
-      device_id: { field: 'device_id', labelKey: 'term.device', type: 'uuid' },
       total_tasks: {
         field: 'total_tasks',
         labelKey: 'page.runs_view.col_progress',
@@ -413,9 +436,25 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.failed',
         type: 'number',
       },
+      error_message: {
+        field: 'error_message',
+        labelKey: 'common.error',
+        type: 'textarea',
+      },
+      workflow_id: {
+        field: 'workflow_id',
+        labelKey: 'term.workflow',
+        type: 'uuid',
+      },
+      device_id: { field: 'device_id', labelKey: 'term.device', type: 'uuid' },
       started_at: {
         field: 'started_at',
-        labelKey: 'common.createdAt',
+        labelKey: 'common.startedAt',
+        type: 'datetime',
+      },
+      ended_at: {
+        field: 'ended_at',
+        labelKey: 'common.endedAt',
         type: 'datetime',
       },
       completed_at: {
@@ -423,6 +462,12 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.updatedAt',
         type: 'datetime',
       },
+      created_at: {
+        field: 'created_at',
+        labelKey: 'common.createdAt',
+        type: 'datetime',
+      },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
@@ -453,12 +498,18 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       name: {
         editable: true,
         field: 'name',
         labelKey: 'common.name',
         required: true,
+        type: 'text',
+      },
+      hostname: {
+        editable: true,
+        field: 'hostname',
+        labelKey: 'common.hostname',
+        onlyWhenPresent: true,
         type: 'text',
       },
       status: {
@@ -467,6 +518,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         field: 'status',
         labelKey: 'common.status',
         type: 'enum',
+      },
+      driver_type: {
+        field: 'driver_type',
+        labelKey: 'common.driver',
+        type: 'text',
       },
       os_info: {
         editable: true,
@@ -480,9 +536,24 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.ipAddress',
         type: 'text',
       },
-      machine_id: {
-        field: 'machine_id',
-        labelKey: 'common.id',
+      cpu_cores: {
+        field: 'cpu_cores',
+        labelKey: 'common.cpuCores',
+        type: 'number',
+      },
+      ram_gb: {
+        field: 'ram_gb',
+        labelKey: 'common.ramGb',
+        type: 'number',
+      },
+      active_jobs: {
+        field: 'active_jobs',
+        labelKey: 'common.activeJobs',
+        type: 'number',
+      },
+      version: {
+        field: 'version',
+        labelKey: 'common.version',
         type: 'text',
       },
       runner_version: {
@@ -490,11 +561,32 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.version',
         type: 'text',
       },
+      machine_fingerprint: {
+        field: 'machine_fingerprint',
+        labelKey: 'common.fingerprint',
+        type: 'text',
+      },
+      machine_id: {
+        field: 'machine_id',
+        labelKey: 'common.id',
+        type: 'text',
+      },
+      last_heartbeat_at: {
+        field: 'last_heartbeat_at',
+        labelKey: 'common.lastHeartbeat',
+        type: 'datetime',
+      },
       last_seen_at: {
         field: 'last_seen_at',
         labelKey: 'common.updatedAt',
         type: 'datetime',
       },
+      registered_at: {
+        field: 'registered_at',
+        labelKey: 'common.createdAt',
+        type: 'datetime',
+      },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
@@ -525,7 +617,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       name: {
         editable: true,
         field: 'name',
@@ -540,29 +631,72 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.status',
         type: 'enum',
       },
-      os_platform: {
-        editable: true,
-        field: 'os_platform',
-        labelKey: 'page.automation_view.col_os',
+      browser_type: {
+        field: 'browser_type',
+        labelKey: 'common.browserType',
+        type: 'text',
+      },
+      engine_version: {
+        field: 'engine_version',
+        labelKey: 'common.version',
         type: 'text',
       },
       browser_version: {
         editable: true,
         field: 'browser_version',
         labelKey: 'common.version',
+        onlyWhenPresent: true,
         type: 'text',
+      },
+      os_platform: {
+        editable: true,
+        field: 'os_platform',
+        labelKey: 'page.automation_view.col_os',
+        type: 'text',
+      },
+      os_version: {
+        field: 'os_version',
+        labelKey: 'common.version',
+        type: 'text',
+      },
+      cpu_cores: {
+        field: 'cpu_cores',
+        labelKey: 'common.cpuCores',
+        type: 'number',
+      },
+      ram_gb: {
+        field: 'ram_gb',
+        labelKey: 'common.ramGb',
+        type: 'number',
+      },
+      storage_size_bytes: {
+        field: 'storage_size_bytes',
+        labelKey: 'common.storageSize',
+        type: 'number',
+      },
+      cookies_count: {
+        field: 'cookies_count',
+        labelKey: 'common.cookiesCount',
+        type: 'number',
       },
       proxy_id: {
         editable: true,
         field: 'proxy_id',
         labelKey: 'term.proxy',
+        onlyWhenPresent: true,
         type: 'text',
+      },
+      last_synced_at: {
+        field: 'last_synced_at',
+        labelKey: 'common.lastSyncedAt',
+        type: 'datetime',
       },
       created_at: {
         field: 'created_at',
         labelKey: 'common.createdAt',
         type: 'datetime',
       },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
@@ -593,7 +727,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'host',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       host: {
         editable: true,
         field: 'host',
@@ -630,6 +763,13 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.country',
         type: 'text',
       },
+      city: {
+        editable: true,
+        field: 'city',
+        labelKey: 'common.city',
+        onlyWhenPresent: true,
+        type: 'text',
+      },
       is_residential: {
         editable: true,
         field: 'is_residential',
@@ -641,11 +781,22 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.latency',
         type: 'number',
       },
+      error_count: {
+        field: 'error_count',
+        labelKey: 'common.errorCount',
+        type: 'number',
+      },
       last_checked_at: {
         field: 'last_checked_at',
         labelKey: 'common.updatedAt',
         type: 'datetime',
       },
+      created_at: {
+        field: 'created_at',
+        labelKey: 'common.createdAt',
+        type: 'datetime',
+      },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
@@ -676,7 +827,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'order_code',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       order_code: {
         field: 'order_code',
         labelKey: 'page.commerce_view.col_order_code',
@@ -721,6 +871,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.updatedAt',
         type: 'datetime',
       },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: (row, access) => {
       const isSuperadmin = !access || access.isSuperadmin;
@@ -753,7 +904,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       name: {
         editable: true,
         field: 'name',
@@ -815,6 +965,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.createdAt',
         type: 'datetime',
       },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
@@ -841,7 +992,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'reference_id',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       tx_type: {
         enumMeta: WALLET_TX_TYPE_META,
         field: 'tx_type',
@@ -851,6 +1001,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
       amount_credits: {
         field: 'amount_credits',
         labelKey: 'common.amount',
+        type: 'number',
+      },
+      balance_after_credits: {
+        field: 'balance_after_credits',
+        labelKey: 'page.commerce_view.col_balance_after',
         type: 'number',
       },
       balance_after: {
@@ -878,6 +1033,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.createdAt',
         type: 'datetime',
       },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: () => ({
       canSelect: { allowed: true, policyName: 'wallet_tx_select_tenant' },
@@ -899,9 +1055,13 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     schema: SUPABASE_SCHEMA.BILLING,
     table: 'payment_intents',
     primaryKey: 'id',
-    titleField: 'reference_code',
+    titleField: 'transfer_code',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
+      transfer_code: {
+        field: 'transfer_code',
+        labelKey: 'common.transferCode',
+        type: 'text',
+      },
       reference_code: {
         field: 'reference_code',
         labelKey: 'common.reference',
@@ -920,12 +1080,31 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.status',
         type: 'enum',
       },
+      amount_credits: {
+        editable: true,
+        field: 'amount_credits',
+        labelKey: 'common.amount',
+        min: 0,
+        onlyWhenPresent: true,
+        type: 'number',
+      },
       credits_amount: {
         editable: true,
         field: 'credits_amount',
         labelKey: 'common.amount',
         min: 0,
+        onlyWhenPresent: true,
         type: 'number',
+      },
+      pay_amount: {
+        field: 'pay_amount',
+        labelKey: 'common.price',
+        type: 'number',
+      },
+      pay_currency: {
+        field: 'pay_currency',
+        labelKey: 'common.currency',
+        type: 'text',
       },
       amount_original: {
         field: 'amount_original',
@@ -937,11 +1116,32 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.currency',
         type: 'text',
       },
+      buyer_email: {
+        field: 'buyer_email',
+        labelKey: 'common.email',
+        type: 'text',
+      },
+      target_type: {
+        field: 'target_type',
+        labelKey: 'common.targetType',
+        type: 'text',
+      },
+      paid_at: {
+        field: 'paid_at',
+        labelKey: 'common.paidAt',
+        type: 'datetime',
+      },
+      expires_at: {
+        field: 'expires_at',
+        labelKey: 'common.expiresAt',
+        type: 'datetime',
+      },
       created_at: {
         field: 'created_at',
         labelKey: 'common.createdAt',
         type: 'datetime',
       },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
@@ -966,20 +1166,44 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     schema: SUPABASE_SCHEMA.BILLING,
     table: 'payment_gateways',
     primaryKey: 'id',
-    titleField: 'display_name',
+    titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
+      name: {
+        editable: true,
+        field: 'name',
+        labelKey: 'common.name',
+        onlyWhenPresent: true,
+        required: true,
+        type: 'text',
+      },
+      display_name: {
+        editable: true,
+        field: 'display_name',
+        labelKey: 'common.name',
+        onlyWhenPresent: true,
+        required: true,
+        type: 'text',
+      },
+      channel: {
+        enumMeta: PAYMENT_CHANNEL_META,
+        field: 'channel',
+        labelKey: 'common.channel',
+        type: 'enum',
+      },
       provider_code: {
         enumMeta: PAYMENT_CHANNEL_META,
         field: 'provider_code',
         labelKey: 'common.type',
         type: 'enum',
       },
-      display_name: {
-        editable: true,
-        field: 'display_name',
-        labelKey: 'common.name',
-        required: true,
+      driver: {
+        field: 'driver',
+        labelKey: 'common.driver',
+        type: 'text',
+      },
+      currency: {
+        field: 'currency',
+        labelKey: 'common.currency',
         type: 'text',
       },
       rate_per_credit: {
@@ -1001,16 +1225,22 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.sortOrder',
         type: 'number',
       },
+      updated_at: {
+        field: 'updated_at',
+        labelKey: 'common.updatedAt',
+        type: 'datetime',
+      },
+      created_at: {
+        field: 'created_at',
+        labelKey: 'common.createdAt',
+        type: 'datetime',
+      },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       public_config: {
         editable: true,
         field: 'public_config',
         labelKey: 'common.publicConfig',
         type: 'json',
-      },
-      updated_at: {
-        field: 'updated_at',
-        labelKey: 'common.updatedAt',
-        type: 'datetime',
       },
     },
     evaluateRls: (_row, access) => {
@@ -1038,7 +1268,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'text' },
       name: {
         editable: true,
         field: 'name',
@@ -1052,6 +1281,14 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.description',
         type: 'textarea',
       },
+      status: {
+        editable: true,
+        enumMeta: SYSTEM_PLUGIN_STATUS_META,
+        field: 'status',
+        isFieldLocked: (row) => Boolean(row?.is_core || row?.is_system),
+        labelKey: 'common.status',
+        type: 'enum',
+      },
       version: {
         editable: true,
         field: 'version',
@@ -1063,14 +1300,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.module',
         type: 'text',
       },
-      status: {
-        editable: true,
-        enumMeta: SYSTEM_PLUGIN_STATUS_META,
-        field: 'status',
-        isFieldLocked: (row) => Boolean(row?.is_core || row?.is_system),
-        labelKey: 'common.status',
-        type: 'enum',
-      },
       is_core: {
         field: 'is_core',
         labelKey: 'common.coreKernel',
@@ -1081,6 +1310,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'page.system_view.plugins_col_installed_at',
         type: 'datetime',
       },
+      id: { field: 'id', labelKey: 'common.id', type: 'text' },
       metadata: {
         editable: true,
         field: 'metadata',
@@ -1113,7 +1343,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'text' },
       name: {
         editable: true,
         field: 'name',
@@ -1133,6 +1362,12 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.price',
         min: 0,
         type: 'number',
+      },
+      is_active: {
+        editable: true,
+        field: 'is_active',
+        labelKey: 'common.status',
+        type: 'boolean',
       },
       max_members: {
         editable: true,
@@ -1155,22 +1390,17 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         min: 0,
         type: 'number',
       },
-      is_active: {
-        editable: true,
-        field: 'is_active',
-        labelKey: 'common.status',
-        type: 'boolean',
+      created_at: {
+        field: 'created_at',
+        labelKey: 'common.createdAt',
+        type: 'datetime',
       },
+      id: { field: 'id', labelKey: 'common.id', type: 'text' },
       metadata: {
         editable: true,
         field: 'metadata',
         labelKey: 'common.publicConfig',
         type: 'json',
-      },
-      created_at: {
-        field: 'created_at',
-        labelKey: 'common.createdAt',
-        type: 'datetime',
       },
     },
     evaluateRls: (_row, access) => {
@@ -1198,7 +1428,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'full_name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       full_name: {
         editable: true,
         field: 'full_name',
@@ -1209,12 +1438,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
       email: {
         field: 'email',
         labelKey: 'common.email',
-        type: 'text',
-      },
-      avatar_url: {
-        editable: true,
-        field: 'avatar_url',
-        labelKey: 'common.avatarUrl',
         type: 'text',
       },
       primary_role: {
@@ -1228,6 +1451,12 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'term.tenants',
         type: 'number',
       },
+      avatar_url: {
+        editable: true,
+        field: 'avatar_url',
+        labelKey: 'common.avatarUrl',
+        type: 'text',
+      },
       created_at: {
         field: 'created_at',
         labelKey: 'common.createdAt',
@@ -1238,6 +1467,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.updatedAt',
         type: 'datetime',
       },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
@@ -1264,7 +1494,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       name: {
         editable: true,
         field: 'name',
@@ -1300,6 +1529,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.createdAt',
         type: 'datetime',
       },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: (row, access) => {
       if (row?.is_system) {
@@ -1345,7 +1575,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'id',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'text' },
       module: {
         editable: true,
         field: 'module',
@@ -1363,6 +1592,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.createdAt',
         type: 'datetime',
       },
+      id: { field: 'id', labelKey: 'common.id', type: 'text' },
     },
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
@@ -1389,16 +1619,9 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'tenant_name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
-      tenant_id: { field: 'tenant_id', labelKey: 'term.tenant', type: 'uuid' },
       tenant_name: {
         field: 'tenant_name',
         labelKey: 'term.workspace',
-        type: 'text',
-      },
-      tenant_slug: {
-        field: 'tenant_slug',
-        labelKey: 'page.workspace.col_slug',
         type: 'text',
       },
       plan_id: {
@@ -1408,16 +1631,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'term.plan',
         type: 'enum',
       },
-      plan_name: {
-        field: 'plan_name',
-        labelKey: 'term.plan',
-        type: 'text',
-      },
-      price_monthly_usd: {
-        field: 'price_monthly_usd',
-        labelKey: 'page.system_view.subs_col_unit_price',
-        type: 'number',
-      },
       status: {
         editable: true,
         enumMeta: SUBSCRIPTION_STATUS_META,
@@ -1425,16 +1638,16 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.status',
         type: 'enum',
       },
+      price_monthly_usd: {
+        field: 'price_monthly_usd',
+        labelKey: 'page.system_view.subs_col_unit_price',
+        type: 'number',
+      },
       cancel_at_period_end: {
         editable: true,
         field: 'cancel_at_period_end',
         labelKey: 'common.cancelAtPeriodEnd',
         type: 'boolean',
-      },
-      current_period_start: {
-        field: 'current_period_start',
-        labelKey: 'common.createdAt',
-        type: 'datetime',
       },
       current_period_end: {
         field: 'current_period_end',
@@ -1446,6 +1659,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.createdAt',
         type: 'datetime',
       },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
     },
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
@@ -1472,7 +1686,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'action',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       action: { field: 'action', labelKey: 'common.action', type: 'text' },
       entity_type: {
         field: 'entity_type',
@@ -1484,16 +1697,14 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.entityId',
         type: 'text',
       },
-      tenant_id: { field: 'tenant_id', labelKey: 'term.tenant', type: 'uuid' },
-      tenant_name: {
-        field: 'tenant_name',
-        labelKey: 'term.tenant',
-        type: 'text',
-      },
-      actor_id: { field: 'actor_id', labelKey: 'common.actor', type: 'uuid' },
       actor_name: {
         field: 'actor_name',
         labelKey: 'common.actor',
+        type: 'text',
+      },
+      tenant_name: {
+        field: 'tenant_name',
+        labelKey: 'term.tenant',
         type: 'text',
       },
       ip_address: {
@@ -1506,6 +1717,12 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.userAgent',
         type: 'textarea',
       },
+      created_at: {
+        field: 'created_at',
+        labelKey: 'common.createdAt',
+        type: 'datetime',
+      },
+      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
       old_values: {
         field: 'old_values',
         labelKey: 'common.oldValues',
@@ -1515,11 +1732,6 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         field: 'new_values',
         labelKey: 'common.newValues',
         type: 'json',
-      },
-      created_at: {
-        field: 'created_at',
-        labelKey: 'common.createdAt',
-        type: 'datetime',
       },
     },
     evaluateRls: () => ({
@@ -1578,13 +1790,22 @@ export function inferResourceFromRouteAndRow(
     if ('order_code' in row && 'total_credits' in row) {
       return 'commerce.orders';
     }
-    if ('reference_code' in row && 'credits_amount' in row) {
+    if (
+      ('reference_code' in row && 'credits_amount' in row) ||
+      ('transfer_code' in row && 'pay_amount' in row)
+    ) {
       return 'billing.payment_intents';
     }
-    if ('rate_per_credit' in row && 'provider_code' in row) {
+    if (
+      'rate_per_credit' in row &&
+      ('provider_code' in row || 'channel' in row || 'driver' in row)
+    ) {
       return 'billing.payment_gateways';
     }
-    if ('tx_type' in row && 'balance_after' in row) {
+    if (
+      'tx_type' in row &&
+      ('balance_after' in row || 'balance_after_credits' in row)
+    ) {
       return 'billing.wallet_transactions';
     }
     if (
@@ -1608,10 +1829,20 @@ export function inferResourceFromRouteAndRow(
     if ('is_core' in row && 'version' in row) {
       return 'public.system_plugins';
     }
-    if ('machine_id' in row || 'runner_version' in row) {
+    if (
+      'machine_id' in row ||
+      'runner_version' in row ||
+      'machine_fingerprint' in row ||
+      'driver_type' in row
+    ) {
       return 'runners.devices';
     }
-    if ('browser_version' in row || 'os_platform' in row) {
+    if (
+      'browser_version' in row ||
+      'os_platform' in row ||
+      'browser_type' in row ||
+      'engine_version' in row
+    ) {
       return 'runners.browsers';
     }
     if ('host' in row && 'port' in row && 'protocol' in row) {
@@ -1661,20 +1892,31 @@ export function evaluateRowRlsPolicy(
 const IGNORED_INTERNAL_ROW_KEYS = new Set([
   '_X_ROW_CHILD',
   '_X_ROW_KEY',
+  'actor_email',
+  'actor_id',
+  'current_period_start',
   'definition',
   'deliveries',
   'dependencies',
   'device_token_hash',
   'guest_claim_token_hash',
   'items',
+  'locked_by_device',
   'manifest',
   'member_roles',
   'password_hash',
   'permissions',
+  'plan_name',
+  'product',
+  'proxy',
   'roles',
+  'runner',
+  'tenant_id',
   'tenant_members',
+  'tenant_slug',
   'variants',
   'webhook_secret',
+  'workflow',
   'workspaces',
 ]);
 
@@ -1730,9 +1972,8 @@ export interface BuildDynamicVxeFormSchemaInput {
 
 /**
  * Dynamically builds the complete `VxeForm` field schema by merging:
- * 1. `gridOptions.columns` (for localized titles and column priority)
- * 2. `SUPABASE_TABLE_REGISTRY[resource].columns` (for DB types, Enum options, and mutability)
- * 3. Runtime `row` keys (surfacing any remaining fields hidden on mobile `< 640px`)
+ * 1. `SUPABASE_TABLE_REGISTRY[resource].columns` (curated business order, DB types, Enum options, and mutability)
+ * 2. `gridOptions.columns` (for localized titles and custom grid columns)
  */
 export function buildDynamicVxeFormSchema(
   input: BuildDynamicVxeFormSchemaInput,
@@ -1758,16 +1999,16 @@ export function buildDynamicVxeFormSchema(
     }
   }
 
-  // Ordered union of fields: schema columns first, then grid columns, then remaining row keys
+  // Curated union of fields: schema columns first, then explicit grid columns (never raw uncurated row keys)
   const orderedFieldNames: string[] = [];
   const seen = new Set<string>();
 
-  const pushField = (field?: string) => {
+  const pushField = (field?: string, fromSchema = false) => {
     if (
       !field ||
       field === 'actions' ||
       field === 'action' ||
-      IGNORED_INTERNAL_ROW_KEYS.has(field) ||
+      (!fromSchema && IGNORED_INTERNAL_ROW_KEYS.has(field)) ||
       seen.has(field)
     ) {
       return;
@@ -1775,13 +2016,15 @@ export function buildDynamicVxeFormSchema(
     if (field === 'is_system' && 'is_core' in row) {
       return;
     }
-    // Skip undefined values that are neither in row nor editable in schema
     const colMeta = tableSchema.columns[field];
-    if (!(field in row) && !colMeta?.editable) {
+    const resolvedVal = colMeta?.resolveValue
+      ? colMeta.resolveValue(row)
+      : row[field];
+    const hasField = field in row || resolvedVal !== undefined;
+    if (!hasField && (!colMeta?.editable || colMeta?.onlyWhenPresent)) {
       return;
     }
-    // Skip array properties on row (e.g. workspaces[], roles[]) to keep VxeForm scalar/JSON-clean
-    if (Array.isArray(row[field])) {
+    if (Array.isArray(resolvedVal)) {
       return;
     }
     seen.add(field);
@@ -1789,20 +2032,19 @@ export function buildDynamicVxeFormSchema(
   };
 
   for (const key of Object.keys(tableSchema.columns)) {
-    pushField(key);
+    pushField(key, true);
   }
   if (Array.isArray(input.gridColumns)) {
     for (const col of input.gridColumns) {
-      pushField(col?.field);
+      pushField(col?.field, false);
     }
-  }
-  for (const key of Object.keys(row)) {
-    pushField(key);
   }
 
   const fields: DynamicVxeFormField[] = orderedFieldNames.map((field) => {
     const colMeta = tableSchema.columns[field];
-    const rawValue = row[field];
+    const rawValue = colMeta?.resolveValue
+      ? colMeta.resolveValue(row)
+      : row[field];
     const type: DynamicFieldType =
       colMeta?.type ?? inferRuntimeFieldType(field, rawValue);
 
@@ -1812,8 +2054,8 @@ export function buildDynamicVxeFormSchema(
     );
 
     const rawTitle =
-      gridTitleMap.get(field) ||
       (colMeta?.labelKey ? translate(colMeta.labelKey) : '') ||
+      gridTitleMap.get(field) ||
       humanizeFieldKey(field);
 
     const options = colMeta?.enumMeta
@@ -1844,16 +2086,16 @@ export function buildDynamicVxeFormSchema(
       statusMeta,
       title: rawTitle,
       type,
+      value: rawValue,
     };
   });
 
-  // Sort so editable fields appear first, followed by readonly metadata, then JSON payloads
-  const groupPriority: Record<DynamicVxeFormField['group'], number> = {
-    editable: 0,
-    readonly: 1,
-    json: 2,
-  };
-  fields.sort((a, b) => groupPriority[a.group] - groupPriority[b.group]);
+  // Keep scalar fields in curated business order, with JSON fields at the end
+  fields.sort((a, b) => {
+    const aJson = a.group === 'json' ? 1 : 0;
+    const bJson = b.group === 'json' ? 1 : 0;
+    return aJson - bJson;
+  });
 
   const titleField = tableSchema.titleField || 'name';
   const rowTitle = String(
@@ -1862,6 +2104,7 @@ export function buildDynamicVxeFormSchema(
       row.display_name ||
       row.full_name ||
       row.order_code ||
+      row.transfer_code ||
       row.reference_code ||
       row.host ||
       row.id ||
@@ -1900,7 +2143,9 @@ export function computeDirtyMutablePayload(
     }
 
     let nextVal = formData[field];
-    const prevVal = originalRow[field];
+    const prevVal = colMeta.resolveValue
+      ? colMeta.resolveValue(originalRow)
+      : originalRow[field];
 
     if (colMeta.type === 'number' && nextVal !== '' && nextVal !== null) {
       const parsed = Number(nextVal);
@@ -1921,7 +2166,11 @@ export function computeDirtyMutablePayload(
         : prevVal === nextVal;
 
     if (!isSame) {
-      payload[field] = nextVal;
+      if (colMeta.applyPatchValue) {
+        colMeta.applyPatchValue(payload, nextVal, originalRow);
+      } else {
+        payload[field] = nextVal;
+      }
     }
   }
 

@@ -273,11 +273,7 @@ watch(
     >
       <Grid class="runs-vxe-grid">
         <template #name-cell="{ row }">
-          <div
-            class="flex items-start gap-2.5 py-1 sm:items-center"
-            :class="{ 'cursor-pointer': isMobile }"
-            @click="isMobile && handleViewDetail(row.id)"
-          >
+          <div class="flex items-start gap-2.5 py-1 sm:items-center">
             <div
               class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground sm:mt-0"
             >

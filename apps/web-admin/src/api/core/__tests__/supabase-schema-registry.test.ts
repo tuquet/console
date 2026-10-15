@@ -335,4 +335,56 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     expect(planFieldMap.get('metadata')?.group).toBe('json');
     expect(planFieldMap.get('metadata')?.editable).toBe(true);
   });
+
+  it('resolves nested metadata.plan on public.tenants and aligns with real runtime API models', () => {
+    const tenantRow = {
+      created_at: '2026-10-15T00:00:00Z',
+      id: 'tenant_1',
+      metadata: { plan: 'pro', region: 'ap-southeast-1' },
+      name: 'Tuquet HQ',
+      slug: 'tuquet-hq',
+      status: 'active',
+      updated_at: '2026-10-15T01:00:00Z',
+    };
+
+    const tenantSchema = buildDynamicVxeFormSchema({
+      resource: 'public.tenants',
+      row: tenantRow,
+    });
+    const planField = tenantSchema.fields.find((f) => f.field === 'plan');
+    expect(planField?.value).toBe('pro');
+    expect(planField?.statusMeta?.fallbackLabel).toBeDefined();
+
+    // Editing plan on a TenantItem writes back into metadata.plan
+    const dirtyTenant = computeDirtyMutablePayload(
+      tenantRow,
+      { name: 'Tuquet HQ', plan: 'enterprise', slug: 'tuquet-hq' },
+      'public.tenants',
+    );
+    expect(dirtyTenant).toEqual({
+      metadata: {
+        plan: 'enterprise',
+        region: 'ap-southeast-1',
+      },
+    });
+
+    // Real PaymentIntentItem & PaymentGatewayItem row disambiguation
+    expect(
+      inferResourceFromRouteAndRow('/commerce/admin', {
+        amount_credits: 1000,
+        pay_amount: 500_000,
+        pay_currency: 'VND',
+        transfer_code: 'TQ9988',
+      }),
+    ).toBe('billing.payment_intents');
+
+    expect(
+      inferResourceFromRouteAndRow('/commerce/admin', {
+        channel: 'bank_transfer',
+        driver: 'sepay',
+        name: 'VietQR SePay',
+        rate_per_credit: 1000,
+      }),
+    ).toBe('billing.payment_gateways');
+  });
 });

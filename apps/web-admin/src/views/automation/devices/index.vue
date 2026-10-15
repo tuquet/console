@@ -70,8 +70,7 @@ async function checkDaemonHealth() {
 }
 
 function handleOpenDetail(node: FleetDeviceItem) {
-  selectedNode.value = node;
-  isDetailModalVisible.value = true;
+  gridApi.openDetailSheet(node);
 }
 
 async function handleRevokeNode(node: FleetDeviceItem) {
