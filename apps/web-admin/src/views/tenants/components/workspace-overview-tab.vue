@@ -7,7 +7,7 @@ import { Check, Copy, ExternalLink, Layers } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
 
 import DangerZoneCard from '#/components/common/danger-zone-card.vue';
-import { useClipboard, useDateFormat } from '#/composables';
+import { useClipboard } from '#/composables';
 import { $t } from '#/locales';
 
 interface Props {
@@ -29,7 +29,6 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
-const { formatDateOnly } = useDateFormat();
 const { copyToClipboard, isCopied } = useClipboard();
 
 function copyTenantId() {
@@ -43,7 +42,7 @@ function navigateToFleet() {
 
 <template>
   <div class="space-y-4">
-    <!-- Workspace Detail Specifications Grid (Mobile-First 1 -> 2 -> 3 Columns) -->
+    <!-- Operational Workspace Specifications Grid (3 Non-Redundant Cards) -->
     <div
       class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-4"
     >
@@ -58,33 +57,10 @@ function navigateToFleet() {
         </div>
       </div>
 
-      <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
-        <!-- 1. Workspace Name -->
+      <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
+        <!-- 1. Tenant ID (Full UUID + Copy Action) -->
         <div
-          class="rounded-lg border border-border/50 bg-muted/20 p-3.5 space-y-1.5"
-        >
-          <div class="text-xs text-muted-foreground">
-            {{ $t('page.workspace.col_name') }}
-          </div>
-          <div class="text-sm font-semibold text-foreground break-words">
-            {{ tenant.name }}
-          </div>
-        </div>
-
-        <!-- 2. Slug Identifier -->
-        <div
-          class="rounded-lg border border-border/50 bg-muted/20 p-3.5 space-y-1.5"
-        >
-          <div class="text-xs text-muted-foreground">
-            {{ $t('page.workspace.col_slug') }}
-          </div>
-          <div class="font-mono text-xs font-medium text-foreground break-all">
-            {{ tenant.slug }}
-          </div>
-        </div>
-
-        <!-- 3. Tenant ID -->
-        <div
+          data-testid="overview-card-tenant-id"
           class="rounded-lg border border-border/50 bg-muted/20 p-3.5 space-y-1.5"
         >
           <div class="text-xs text-muted-foreground">
@@ -109,20 +85,9 @@ function navigateToFleet() {
           </div>
         </div>
 
-        <!-- 4. Created At -->
+        <!-- 2. Service Plan & Monthly Rate -->
         <div
-          class="rounded-lg border border-border/50 bg-muted/20 p-3.5 space-y-1.5"
-        >
-          <div class="text-xs text-muted-foreground">
-            {{ $t('page.workspace.col_created_at') }}
-          </div>
-          <div class="text-xs font-medium text-foreground">
-            {{ formatDateOnly(tenant.created_at) }}
-          </div>
-        </div>
-
-        <!-- 5. Service Plan -->
-        <div
+          data-testid="overview-card-service-plan"
           class="rounded-lg border border-border/50 bg-muted/20 p-3.5 space-y-1.5"
         >
           <div class="text-xs text-muted-foreground">
@@ -142,8 +107,9 @@ function navigateToFleet() {
           </div>
         </div>
 
-        <!-- 6. Device Infrastructure -->
+        <!-- 3. Device Infrastructure -->
         <div
+          data-testid="overview-card-device-infra"
           class="rounded-lg border border-border/50 bg-muted/20 p-3.5 space-y-1.5"
         >
           <div class="text-xs text-muted-foreground">
@@ -176,7 +142,7 @@ function navigateToFleet() {
     <!-- Workspace Lifecycle / Danger Zone Card -->
     <DangerZoneCard
       :button-text="$t('page.tenants_view.archive_or_delete')"
-      :description="$t('page.tenants_view.archive_or_delete')"
+      :description="$t('page.tenants_view.delete_modal_warning')"
       :title="$t('page.tenants_view.admin_actions')"
       @trigger="emit('deleteWorkspace')"
     />

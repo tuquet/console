@@ -52,8 +52,7 @@ const { formatDate } = useDateFormat();
     <!-- Action bar inside tab -->
     <div class="flex items-center justify-between gap-2">
       <h3 class="text-sm font-semibold text-foreground sm:text-base">
-        {{ $t('page.tenants_view.members_list_title') }} ·
-        {{ props.members.length }}
+        {{ $t('page.tenants_view.members_list_title') }}
       </h3>
       <Button size="sm" class="h-8 gap-1.5 font-medium" @click="emit('invite')">
         <UserPlus class="size-3.5" />

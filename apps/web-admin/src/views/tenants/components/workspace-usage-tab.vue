@@ -3,15 +3,7 @@ import type { WorkspaceSubscription, WorkspaceUsageQuota } from '#/api';
 
 import { computed } from 'vue';
 
-import {
-  Calendar,
-  Cpu,
-  CreditCard,
-  HardDrive,
-  PlayCircle,
-  Users,
-} from '@lucide/vue';
-import { Badge } from '@tuquet/vue-ui';
+import { Calendar, Cpu, HardDrive, PlayCircle, Users } from '@lucide/vue';
 
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
@@ -48,52 +40,21 @@ const runsPercent = computed(() =>
 
 <template>
   <div class="space-y-4">
-    <!-- Plan Summary Card -->
+    <!-- Billing Cycle Context Strip -->
     <div
-      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
+      v-if="subscription?.current_period_end"
+      class="flex items-center justify-between gap-2 rounded-lg border border-border/50 bg-muted/20 px-3.5 py-2 text-xs text-muted-foreground"
     >
-      <div
-        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-      >
-        <div class="flex items-center gap-3">
-          <div
-            class="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary"
-          >
-            <CreditCard class="size-5" />
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-base font-semibold text-foreground">
-                {{ quota.plan_name }}
-              </span>
-              <Badge variant="secondary" class="text-xs font-medium">
-                ${{ subscription?.plan?.price_monthly_usd || 0 }}/{{
-                  $t('page.tenants_view.per_month')
-                }}
-              </Badge>
-            </div>
-            <p class="text-xs text-muted-foreground mt-0.5">
-              {{
-                subscription?.plan?.description ||
-                $t('page.tenants_view.default_plan_desc')
-              }}
-            </p>
-          </div>
-        </div>
-
-        <div
-          v-if="subscription?.current_period_end"
-          class="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-lg self-start sm:self-auto"
+      <span>{{ $t('page.tenants_view.default_plan_desc') }}</span>
+      <span class="inline-flex shrink-0 items-center gap-1.5">
+        <Calendar class="size-3.5" />
+        <span
+          >{{ $t('page.tenants_view.period_end') }}:
+          <strong class="font-mono text-foreground">{{
+            formatDateOnly(subscription.current_period_end)
+          }}</strong></span
         >
-          <Calendar class="size-3.5" />
-          <span
-            >{{ $t('page.tenants_view.period_end') }}:
-            <strong class="text-foreground">{{
-              formatDateOnly(subscription.current_period_end)
-            }}</strong></span
-          >
-        </div>
-      </div>
+      </span>
     </div>
 
     <!-- Resource Quotas Progress Grid -->

@@ -472,18 +472,11 @@ function handleOpenCreate() {
     <!-- Top Header -->
     <div class="flex items-center justify-between gap-2">
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
-          <h1
-            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-          >
-            {{ $t('page.system.roles') }}
-          </h1>
-          <Badge variant="secondary" class="font-mono text-xs font-normal">
-            {{
-              activeTab === 'roles' ? allRoles.length : allPermissions.length
-            }}
-          </Badge>
-        </div>
+        <h1
+          class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+        >
+          {{ $t('page.system.roles') }}
+        </h1>
         <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.system.roles_desc') }}
         </p>

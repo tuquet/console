@@ -15,13 +15,13 @@ import {
   PlayCircle,
   Plus,
   RefreshCw,
+  Terminal,
 } from '@lucide/vue';
 import { Badge, Button, toast } from '@tuquet/vue-ui';
 
 import { calculateProgressPercentage, getAutomationOverviewApi } from '#/api';
 import { $t } from '#/locales';
 
-import FleetMetrics from '../devices/components/fleet-metrics.vue';
 import ConnectFleetModal from '../devices/components/modals/connect-fleet-modal.vue';
 
 defineOptions({ name: 'AutomationOverview' });
@@ -193,6 +193,26 @@ onMounted(() => {
       </div>
 
       <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <Badge
+          variant="outline"
+          class="hidden h-8 items-center gap-1.5 px-2.5 font-mono text-xs font-normal sm:inline-flex"
+        >
+          <Terminal class="size-3.5 text-muted-foreground" />
+          <span>:{{ overview.fleet.loopback_port }}</span>
+          <span
+            class="size-1.5 rounded-full"
+            :class="
+              overview.fleet.loopback_online
+                ? 'animate-pulse bg-success'
+                : 'bg-muted-foreground'
+            "
+          ></span>
+          <span class="font-sans text-muted-foreground">{{
+            overview.fleet.loopback_online
+              ? $t('page.fleet_view.online')
+              : $t('page.fleet_view.standby')
+          }}</span>
+        </Badge>
         <Button
           variant="outline"
           size="sm"
@@ -215,14 +235,8 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 1. Fleet & Loopback Daemon Telemetry (2x2 on Mobile, 4 cols on Desktop) -->
-    <FleetMetrics :metrics="overview.fleet" :loading="loading" />
-
-    <!-- 2. Quick-Jump Automation Sub-Modules (2 cols on Mobile, 5 cols on Desktop) -->
-    <div class="space-y-2">
-      <h2 class="text-sm font-semibold tracking-tight text-foreground">
-        {{ $t('page.automation_view.overview_modules_title') }}
-      </h2>
+    <!-- 1. Unified Actionable Automation & Fleet KPI Grid (2 cols on Mobile, 5 cols on Desktop) -->
+    <div>
       <div
         class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5"
       >

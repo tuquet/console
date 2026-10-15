@@ -808,16 +808,11 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
     <!-- Top Header -->
     <div class="flex items-center justify-between gap-2">
       <div class="flex min-w-0 flex-col gap-0.5">
-        <div class="flex items-center gap-2">
-          <h1
-            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-          >
-            {{ $t('page.commerce.admin') }}
-          </h1>
-          <Badge variant="secondary" class="font-mono text-xs">
-            {{ allProducts.length }}
-          </Badge>
-        </div>
+        <h1
+          class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+        >
+          {{ $t('page.commerce.admin') }}
+        </h1>
         <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.commerce.admin_desc') }}
         </p>

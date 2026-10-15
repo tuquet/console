@@ -1,22 +1,22 @@
-# Task List: Standardized VXE Cell Renderers
+# Task List: Enterprise UI Information Deduplication (`SPEC-ui-information-deduplication`)
 
-- [x] Task 1: Register Core Shared Cell Renderers in `apps/web-admin/src/adapter/vxe-table.ts` <!-- id: 0 -->
-  - Acceptance: `CellDate`, `CellIdCopy`, and `CellStatus` are registered via `vxeUI.renderer.add`.
-  - Verify: `pnpm check:type`
-  - Files: `apps/web-admin/src/adapter/vxe-table.ts`
-- [x] Task 2: Refactor `system/plugins/index.vue` to use `CellDate` <!-- id: 1 -->
-  - Acceptance: Remove `date-cell` template slot, configure column with `cellRender: { name: 'CellDate' }`.
-  - Verify: `pnpm check:type`
-  - Files: `apps/web-admin/src/views/system/plugins/index.vue`
-- [x] Task 3: Refactor `system/users/index.vue` to use `CellDate` & `CellIdCopy` <!-- id: 2 -->
-  - Acceptance: Remove `date-cell` and `id-cell` template slots, configure columns with `CellDate` and `CellIdCopy`.
-  - Verify: `pnpm check:type`
-  - Files: `apps/web-admin/src/views/system/users/index.vue`
-- [x] Task 4: Add Unit Tests for VXE Renderers <!-- id: 3 -->
-  - Acceptance: Unit test ensures renderers return valid VNodes and handle edge cases (empty date, copy click).
-  - Verify: `pnpm --filter @tuquet/admin-web run test`
-  - Files: `apps/web-admin/src/adapter/__tests__/vxe-renderers.test.ts`
-- [x] Task 5: Final Quality Verification (Typecheck, Lint & Build) <!-- id: 4 -->
-  - Acceptance: `pnpm check:type`, `oxlint`, and `pnpm run build:admin` all pass with 0 errors.
-  - Verify: Local pre-push quality gate passes.
-  - Files: N/A
+- [x] Task 1: Refactor `views/dashboard/analytics/index.vue` to 2-row Executive KPI Cards and deduplicated Infrastructure list <!-- id: 0 -->
+  - Acceptance: No KPI card renders duplicate adjacent numbers (`3 3`), synonymous status labels (`Ready Online`), or 3rd-line chart echoes; `PluginsChart` subtitle uses `page.analytics.actual`; `Infrastructure Services` removes the duplicate `Desktop Bridge (:8765)` item.
+  - Verify: `pnpm --filter @tuquet/admin-web typecheck`
+  - Files: `apps/web-admin/src/views/dashboard/analytics/index.vue`
+- [x] Task 2: Consolidate `views/system/overview/index.vue` and `views/automation/overview/index.vue` into single unified Actionable KPI Grids <!-- id: 1 -->
+  - Acceptance: `SystemOverview` renders a single 6-card clickable KPI grid (including MRR under Subscriptions) without a duplicate top 4-card KPI strip; `AutomationOverview` renders a single 5-card clickable KPI grid with a Loopback Daemon status pill in the header.
+  - Verify: `pnpm --filter @tuquet/admin-web typecheck`
+  - Files: `apps/web-admin/src/views/system/overview/index.vue`, `apps/web-admin/src/views/automation/overview/index.vue`
+- [x] Task 3: Deduplicate `WorkspaceHero`, `WorkspaceOverviewTab`, `WorkspaceUsageTab`, and `WorkspaceMembersTab` <!-- id: 2 -->
+  - Acceptance: `WorkspaceHero` renders `page.workspace.current_workspace` when `isCurrentActive` is true; `WorkspaceOverviewTab` renders 3 non-redundant operational cards (`Tenant ID`, `Service Plan`, `Device Infrastructure`) and distinct `DangerZoneCard` description vs. button text; `WorkspaceUsageTab` removes the duplicate Plan Summary card; `WorkspaceMembersTab` removes the duplicate `· {count}` heading suffix.
+  - Verify: `pnpm --filter @tuquet/admin-web typecheck`
+  - Files: `apps/web-admin/src/views/tenants/components/workspace-hero.vue`, `apps/web-admin/src/views/tenants/components/workspace-overview-tab.vue`, `apps/web-admin/src/views/tenants/components/workspace-usage-tab.vue`, `apps/web-admin/src/views/tenants/components/workspace-members-tab.vue`
+- [x] Task 4: Remove redundant `<h1>` count badges on multi-tab views (`commerce/admin/index.vue`, `system/roles/index.vue`) <!-- id: 3 -->
+  - Acceptance: `commerce/admin/index.vue` and `system/roles/index.vue` no longer render a duplicate `<Badge>` next to `<h1>` above their mode tabs.
+  - Verify: `pnpm --filter @tuquet/admin-web typecheck`
+  - Files: `apps/web-admin/src/views/commerce/admin/index.vue`, `apps/web-admin/src/views/system/roles/index.vue`
+- [x] Task 5: Add unit tests and pass all quality gates (`vitest`, `check:i18n`, `oxlint`, `typecheck`) <!-- id: 4 -->
+  - Acceptance: `analytics-dedup.test.ts` passes along with all existing unit tests, `pnpm check:i18n`, `pnpm oxlint`, and `pnpm --filter @tuquet/admin-web typecheck`.
+  - Verify: `pnpm --filter @tuquet/admin-web test:unit && pnpm check:i18n && pnpm oxlint`
+  - Files: `apps/web-admin/src/views/dashboard/analytics/__tests__/analytics-dedup.test.ts`

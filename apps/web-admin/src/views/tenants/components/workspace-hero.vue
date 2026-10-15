@@ -121,10 +121,11 @@ const planName = computed(() => {
         <Badge
           v-else
           variant="secondary"
+          data-testid="hero-current-workspace-badge"
           class="flex items-center gap-1.5 px-2.5 py-1 font-medium text-xs"
         >
-          <span class="size-1.5 rounded-full bg-success"></span>
-          <span>{{ $t('common.active') }}</span>
+          <CheckCircle2 class="size-3.5 text-primary" />
+          <span>{{ $t('page.workspace.current_workspace') }}</span>
         </Badge>
 
         <Button
