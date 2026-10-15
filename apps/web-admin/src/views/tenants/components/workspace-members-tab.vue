@@ -50,11 +50,10 @@ const { formatDate } = useDateFormat();
 <template>
   <div class="space-y-4 pt-1">
     <!-- Action bar inside tab -->
-    <div
-      class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"
-    >
-      <h3 class="text-base font-semibold text-foreground">
-        Danh sách thành viên · {{ props.members.length }}
+    <div class="flex items-center justify-between gap-2">
+      <h3 class="text-sm font-semibold text-foreground sm:text-base">
+        {{ $t('page.tenants_view.members_list_title') }} ·
+        {{ props.members.length }}
       </h3>
       <Button size="sm" class="h-8 gap-1.5 font-medium" @click="emit('invite')">
         <UserPlus class="size-3.5" />
@@ -69,12 +68,12 @@ const { formatDate } = useDateFormat();
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Thành viên</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Vai trò</TableHead>
-            <TableHead>Trạng thái</TableHead>
-            <TableHead>Ngày tham gia</TableHead>
-            <TableHead class="text-right">Thao tác</TableHead>
+            <TableHead>{{ $t('term.member') }}</TableHead>
+            <TableHead>{{ $t('common.email') }}</TableHead>
+            <TableHead>{{ $t('term.role') }}</TableHead>
+            <TableHead>{{ $t('common.status') }}</TableHead>
+            <TableHead>{{ $t('page.tenants_view.col_joined_at') }}</TableHead>
+            <TableHead class="text-right">{{ $t('common.actions') }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -88,20 +87,23 @@ const { formatDate } = useDateFormat();
                     :src="record.avatar_url"
                   />
                   <AvatarFallback
-                    class="bg-muted text-muted-foreground text-xs font-semibold uppercase"
+                    class="bg-primary/10 text-primary text-xs font-semibold uppercase"
                   >
                     {{ (record.full_name || record.email || 'U').slice(0, 2) }}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <div class="font-medium text-foreground">
-                    {{ record.full_name || 'Kỹ sư Tuquet' }}
+                    {{
+                      record.full_name ||
+                      $t('page.tenants_view.default_member_name')
+                    }}
                   </div>
                   <div
                     v-if="record.role?.name === 'owner'"
                     class="text-xs text-primary font-medium"
                   >
-                    Chủ sở hữu
+                    {{ $t('page.tenants_view.role_owner') }}
                   </div>
                 </div>
               </div>
@@ -134,10 +136,10 @@ const { formatDate } = useDateFormat();
                 ></span>
                 {{
                   record.status === 'active'
-                    ? 'Hoạt động'
+                    ? $t('common.active')
                     : record.status === 'invited'
-                      ? 'Chờ chấp thuận'
-                      : 'Tạm khóa'
+                      ? $t('page.tenants_view.status_invited')
+                      : $t('common.suspended')
                 }}
               </Badge>
             </TableCell>
@@ -175,16 +177,25 @@ const { formatDate } = useDateFormat();
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Xóa thành viên này?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          {{
+                            $t('page.tenants_view.remove_member_confirm_title')
+                          }}
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          Thành viên "{{ record.full_name || record.email }}" sẽ
-                          mất quyền truy cập vào Workspace này.
+                          {{
+                            $t('page.tenants_view.remove_member_confirm_desc', {
+                              name: record.full_name || record.email,
+                            })
+                          }}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Hủy</AlertDialogCancel>
+                        <AlertDialogCancel>
+                          {{ $t('common.cancel') }}
+                        </AlertDialogCancel>
                         <AlertDialogAction @click="emit('remove', record)">
-                          Xóa
+                          {{ $t('common.delete') }}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -199,7 +210,7 @@ const { formatDate } = useDateFormat();
               colspan="6"
               class="h-24 text-center text-sm text-muted-foreground"
             >
-              Không có thành viên nào trong Workspace.
+              {{ $t('page.tenants_view.members_empty') }}
             </TableCell>
           </TableRow>
         </TableBody>
@@ -218,14 +229,17 @@ const { formatDate } = useDateFormat();
             <Avatar class="size-8">
               <AvatarImage v-if="member.avatar_url" :src="member.avatar_url" />
               <AvatarFallback
-                class="bg-muted text-muted-foreground text-xs font-semibold uppercase"
+                class="bg-primary/10 text-primary text-xs font-semibold uppercase"
               >
                 {{ (member.full_name || member.email || 'U').slice(0, 2) }}
               </AvatarFallback>
             </Avatar>
             <div>
               <div class="font-medium text-foreground text-sm">
-                {{ member.full_name || 'Kỹ sư Tuquet' }}
+                {{
+                  member.full_name ||
+                  $t('page.tenants_view.default_member_name')
+                }}
               </div>
               <div class="text-xs text-muted-foreground">
                 {{ member.email }}
@@ -251,10 +265,10 @@ const { formatDate } = useDateFormat();
             ></span>
             {{
               member.status === 'active'
-                ? 'Hoạt động'
+                ? $t('common.active')
                 : member.status === 'invited'
-                  ? 'Chờ chấp thuận'
-                  : 'Tạm khóa'
+                  ? $t('page.tenants_view.status_invited')
+                  : $t('common.suspended')
             }}
           </Badge>
 
@@ -266,7 +280,7 @@ const { formatDate } = useDateFormat();
               @click="emit('edit', member)"
             >
               <Edit3 class="size-3.5" />
-              <span>Sửa</span>
+              <span>{{ $t('common.edit') }}</span>
             </Button>
             <template v-if="member.role?.name !== 'owner'">
               <span class="text-muted-foreground/40">•</span>
@@ -277,21 +291,28 @@ const { formatDate } = useDateFormat();
                     size="sm"
                     class="p-0 h-auto text-destructive hover:text-destructive text-xs"
                   >
-                    Xóa
+                    {{ $t('common.delete') }}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Xóa thành viên này?</AlertDialogTitle>
+                    <AlertDialogTitle>
+                      {{ $t('page.tenants_view.remove_member_confirm_title') }}
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
-                      Thành viên "{{ member.full_name || member.email }}" sẽ mất
-                      quyền truy cập vào Workspace này.
+                      {{
+                        $t('page.tenants_view.remove_member_confirm_desc', {
+                          name: member.full_name || member.email,
+                        })
+                      }}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Hủy</AlertDialogCancel>
+                    <AlertDialogCancel>
+                      {{ $t('common.cancel') }}
+                    </AlertDialogCancel>
                     <AlertDialogAction @click="emit('remove', member)">
-                      Xóa
+                      {{ $t('common.delete') }}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

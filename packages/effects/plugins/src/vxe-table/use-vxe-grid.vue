@@ -103,11 +103,12 @@ const isSeparator = computed(() => {
   if (
     !formOptions.value ||
     showSearchForm.value === false ||
-    separator.value === false
+    separator.value === false ||
+    separator.value === undefined
   ) {
     return false;
   }
-  if (separator.value === true || separator.value === undefined) {
+  if (separator.value === true) {
     return true;
   }
   return separator.value.show !== false;
@@ -243,6 +244,7 @@ const options = computed(() => {
       {},
       mergedOptions.pagerConfig,
       {
+        autoHidden: true,
         pageSize: 20,
         background: true,
         pageSizes: [10, 20, 30, 50, 100, 200],
@@ -538,14 +540,10 @@ onUnmounted(() => {
             <div
               class="mt-2.5 text-xs font-medium text-foreground tracking-tight"
             >
-              {{
-                $t('common.noData') === 'No Data'
-                  ? 'Không có dữ liệu'
-                  : $t('common.noData')
-              }}
+              {{ $t('common.noData') }}
             </div>
             <p class="mt-0.5 text-2xs text-muted-foreground">
-              Không tìm thấy bản ghi nào phù hợp với bộ lọc
+              {{ $t('common.noMatchingRecords') }}
             </p>
           </div>
         </slot>

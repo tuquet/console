@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import type { SystemPermissionItem, SystemRoleItem } from '#/api';
 
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+
+import { usePreferences } from '@vben/preferences';
 
 import {
   Check,
@@ -34,12 +36,14 @@ import {
   sortRoleNamesByPriority,
 } from '#/api';
 import RoleBadge from '#/components/iam/role-badge.vue';
-import { useDateFormat } from '#/composables';
+import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
 defineOptions({ name: 'SystemRoles' });
 
 const { formatDate } = useDateFormat();
+const { copyToClipboard, isCopied } = useClipboard();
+const { isMobile } = usePreferences();
 
 const activeTab = ref<'permissions' | 'roles'>('roles');
 const allRoles = ref<SystemRoleItem[]>([]);
@@ -49,7 +53,6 @@ const loadingCatalog = ref(false);
 
 const selectedRole = ref<null | SystemRoleItem>(null);
 const roleDetailOpen = ref(false);
-const copiedKey = ref<null | string>(null);
 
 let loadPromise: null | Promise<void> = null;
 
@@ -72,9 +75,7 @@ async function ensureCatalogLoaded(force = false): Promise<void> {
       allPermissions.value = permsData;
       catalogLoaded.value = true;
     } catch (error: any) {
-      toast.error(
-        error.message || 'Không thể tải danh mục vai trò và phân quyền',
-      );
+      toast.error(error.message || $t('page.system_view.roles_load_error'));
     } finally {
       loadingCatalog.value = false;
       loadPromise = null;
@@ -83,15 +84,6 @@ async function ensureCatalogLoaded(force = false): Promise<void> {
 
   return loadPromise;
 }
-
-const systemRolesCount = computed(
-  () => allRoles.value.filter((r) => r.is_system).length,
-);
-
-const modulesCount = computed(() => {
-  const mods = new Set(allPermissions.value.map((p) => p.module));
-  return mods.size;
-});
 
 const permissionMap = computed(() => {
   const map = new Map<string, SystemPermissionItem>();
@@ -133,71 +125,190 @@ const rolesByPermissionMap = computed<Record<string, string[]>>(() => {
   return map;
 });
 
-async function handleCopyKey(text: string) {
-  try {
-    await navigator.clipboard.writeText(text);
-    copiedKey.value = text;
-    toast.success(`Đã sao chép: ${text}`);
-    setTimeout(() => {
-      if (copiedKey.value === text) {
-        copiedKey.value = null;
-      }
-    }, 1800);
-  } catch {
-    toast.error('Không thể sao chép vào bộ nhớ tạm');
-  }
+function handleCopyKey(text: string) {
+  copyToClipboard(text, text);
 }
 
-function openRoleDetail(role: SystemRoleItem) {
+function openRoleMatrixDialog(role: SystemRoleItem) {
   selectedRole.value = role;
   roleDetailOpen.value = true;
 }
 
-const MODULE_OPTIONS = [
-  { label: 'Tất cả module', value: 'all' },
-  { label: 'Core IAM (core-iam)', value: 'core-iam' },
-  { label: 'Runners (runners)', value: 'runners' },
-  { label: 'Automa (automa)', value: 'automa' },
-  { label: 'Subscriptions (subscriptions)', value: 'subscriptions' },
-  { label: 'Storage (storage)', value: 'storage' },
-  { label: 'Webhooks (webhooks)', value: 'webhooks' },
-];
+function openRoleDetail(role: SystemRoleItem) {
+  rolesGridApi.openDetailSheet(role);
+}
+
+function getModuleOptions() {
+  return [
+    { label: $t('page.system_view.roles_module_all'), value: 'all' },
+    { label: $t('page.system_view.roles_module_core_iam'), value: 'core-iam' },
+    { label: $t('page.system_view.roles_module_runners'), value: 'runners' },
+    { label: $t('page.system_view.roles_module_automa'), value: 'automa' },
+    {
+      label: $t('page.system_view.roles_module_subscriptions'),
+      value: 'subscriptions',
+    },
+    { label: $t('page.system_view.roles_module_storage'), value: 'storage' },
+    { label: $t('page.system_view.roles_module_webhooks'), value: 'webhooks' },
+  ];
+}
+
+function getRoleColumns() {
+  return [
+    {
+      field: 'name',
+      title: $t('term.role'),
+      minWidth: isMobile.value ? 130 : 175,
+      align: 'left' as const,
+      slots: { default: 'role-name-cell' },
+    },
+    {
+      field: 'description',
+      title: $t('page.system_view.roles_col_policy_desc'),
+      minWidth: 250,
+      align: 'left' as const,
+      visible: !isMobile.value,
+      slots: { default: 'role-desc-cell' },
+    },
+    {
+      field: 'is_system',
+      title: $t('page.system_view.plugins_col_type'),
+      width: 140,
+      align: 'left' as const,
+      visible: !isMobile.value,
+      slots: { default: 'role-type-cell' },
+    },
+    {
+      field: 'permissions',
+      title: $t('page.system_view.roles_col_assigned_perms'),
+      minWidth: isMobile.value ? 120 : 290,
+      align: 'left' as const,
+      slots: { default: 'role-perms-cell' },
+    },
+    {
+      field: 'created_at',
+      title: $t('common.createdAt'),
+      width: 145,
+      align: 'left' as const,
+      visible: !isMobile.value,
+      slots: { default: 'role-date-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('common.actions'),
+      width: isMobile.value ? 56 : 105,
+      align: 'right' as const,
+      slots: { default: 'role-actions-cell' },
+    },
+  ];
+}
+
+function getPermColumns() {
+  return [
+    {
+      field: 'id',
+      title: $t('page.system_view.perms_col_id'),
+      minWidth: isMobile.value ? 180 : 230,
+      align: 'left' as const,
+      slots: { default: 'perm-id-cell' },
+    },
+    {
+      field: 'module',
+      title: $t('page.system_view.roles_col_module'),
+      width: isMobile.value ? 115 : 155,
+      align: 'left' as const,
+      slots: { default: 'perm-module-cell' },
+    },
+    {
+      field: 'description',
+      title: $t('page.system_view.perms_col_desc'),
+      minWidth: 260,
+      align: 'left' as const,
+      visible: !isMobile.value,
+      slots: { default: 'perm-desc-cell' },
+    },
+    {
+      field: 'roles',
+      title: $t('page.system_view.roles_col_assigned_roles'),
+      minWidth: 260,
+      align: 'left' as const,
+      visible: !isMobile.value,
+      slots: { default: 'perm-roles-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('common.actions'),
+      width: isMobile.value ? 56 : 105,
+      align: 'right' as const,
+      slots: { default: 'perm-actions-cell' },
+    },
+  ];
+}
 
 const [RolesGrid, rolesGridApi] = useVbenVxeGrid<SystemRoleItem>({
   separator: false,
+  detailSheetOptions: {
+    actions: [
+      {
+        icon: ShieldCheck,
+        label: $t('page.system_view.roles_dialog_title'),
+        onClick: (row) => openRoleMatrixDialog(row),
+        variant: 'outline',
+      },
+    ],
+    forwardActionSlot: false,
+    resource: 'public.roles',
+    subtitleField: 'id',
+    titleField: 'name',
+    onSaved: async () => {
+      await ensureCatalogLoaded(true);
+    },
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Select',
         fieldName: 'role_type',
-        label: 'Phân loại',
+        label: () => $t('page.system_view.plugins_filter_type'),
         defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả phân loại',
+        componentProps: () => ({
+          placeholder: $t('page.system_view.plugins_type_all'),
           options: [
-            { label: 'Tất cả phân loại', value: 'all' },
-            { label: 'System Role', value: 'system' },
-            { label: 'Custom Role', value: 'custom' },
+            { label: $t('page.system_view.plugins_type_all'), value: 'all' },
+            {
+              label: $t('page.system_view.roles_type_system'),
+              value: 'system',
+            },
+            {
+              label: $t('page.system_view.roles_type_custom'),
+              value: 'custom',
+            },
           ],
-        },
+        }),
       },
       {
         component: 'Select',
         fieldName: 'module',
-        label: 'Module quyền hạn',
+        label: () => $t('page.system_view.roles_filter_module'),
         defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả module',
-          options: MODULE_OPTIONS,
-        },
+        componentProps: () => ({
+          placeholder: $t('page.system_view.roles_module_all'),
+          options: getModuleOptions(),
+        }),
       },
       {
         component: 'Input',
         fieldName: 'search',
-        label: 'Tìm kiếm',
-        componentProps: {
-          placeholder: 'Tìm theo tên vai trò, mô tả hoặc mã quyền...',
-        },
+        label: () => $t('common.search'),
+        componentProps: () => ({
+          placeholder: $t('page.system_view.roles_search_placeholder'),
+        }),
       },
     ],
     layout: 'vertical',
@@ -205,13 +316,14 @@ const [RolesGrid, rolesGridApi] = useVbenVxeGrid<SystemRoleItem>({
     submitOnChange: true,
     submitOnEnter: true,
     submitButtonOptions: {
-      content: $t('common.filter'),
+      content: computed(() => $t('common.filter')),
     },
     resetButtonOptions: {
-      content: $t('common.reset'),
+      content: computed(() => $t('common.reset')),
     },
-    actionWrapperClass: 'flex items-center justify-end gap-2',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3',
+    actionWrapperClass:
+      'col-span-2 sm:col-span-1 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
@@ -257,90 +369,69 @@ const [RolesGrid, rolesGridApi] = useVbenVxeGrid<SystemRoleItem>({
         },
       },
     },
-    columns: [
-      {
-        field: 'name',
-        title: 'Vai trò',
-        width: 175,
-        align: 'left',
-        slots: { default: 'role-name-cell' },
-      },
-      {
-        field: 'description',
-        title: 'Mô tả chính sách',
-        minWidth: 250,
-        align: 'left',
-        slots: { default: 'role-desc-cell' },
-      },
-      {
-        field: 'is_system',
-        title: 'Phân loại',
-        width: 140,
-        align: 'left',
-        slots: { default: 'role-type-cell' },
-      },
-      {
-        field: 'permissions',
-        title: 'Quyền hạn được gán',
-        minWidth: 290,
-        align: 'left',
-        slots: { default: 'role-perms-cell' },
-      },
-      {
-        field: 'created_at',
-        title: 'Ngày tạo',
-        width: 145,
-        align: 'left',
-        slots: { default: 'role-date-cell' },
-      },
-      {
-        field: 'actions',
-        title: 'Thao tác',
-        width: 105,
-        align: 'right',
-        slots: { default: 'role-actions-cell' },
-      },
-    ],
+    columns: getRoleColumns(),
   },
 });
 
 const [PermissionsGrid, permsGridApi] = useVbenVxeGrid<SystemPermissionItem>({
   separator: false,
+  detailSheetOptions: {
+    forwardActionSlot: false,
+    resource: 'public.permissions',
+    subtitleField: 'module',
+    titleField: 'id',
+    actions: [
+      {
+        label: $t('common.copy'),
+        onClick: (row) => handleCopyKey(row.id),
+        variant: 'outline',
+      },
+    ],
+    onSaved: async () => {
+      await ensureCatalogLoaded(true);
+    },
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Select',
         fieldName: 'module',
-        label: 'Module',
+        label: () => $t('page.system_view.roles_col_module'),
         defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả module',
-          options: MODULE_OPTIONS,
-        },
+        componentProps: () => ({
+          placeholder: $t('page.system_view.roles_module_all'),
+          options: getModuleOptions(),
+        }),
       },
       {
         component: 'Select',
         fieldName: 'role',
-        label: 'Vai trò sở hữu',
+        label: () => $t('page.system_view.roles_col_assigned_roles'),
         defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả vai trò',
+        componentProps: () => ({
+          placeholder: $t('page.system_view.roles_all'),
           options: [
-            { label: 'Tất cả vai trò', value: 'all' },
-            { label: 'Owner', value: 'owner' },
-            { label: 'Admin', value: 'admin' },
-            { label: 'Member', value: 'member' },
-            { label: 'Viewer', value: 'viewer' },
+            { label: $t('page.system_view.roles_all'), value: 'all' },
+            { label: $t('page.system_view.role_owner'), value: 'owner' },
+            { label: $t('page.system_view.role_admin'), value: 'admin' },
+            { label: $t('page.system_view.role_member'), value: 'member' },
+            { label: $t('page.system_view.role_viewer'), value: 'viewer' },
           ],
-        },
+        }),
       },
       {
         component: 'Input',
         fieldName: 'search',
-        label: 'Tìm kiếm',
-        componentProps: {
-          placeholder: 'Tìm theo mã quyền (id) hoặc mô tả tác vụ...',
-        },
+        label: () => $t('common.search'),
+        componentProps: () => ({
+          placeholder: $t('page.system_view.perms_search_placeholder'),
+        }),
       },
     ],
     layout: 'vertical',
@@ -348,13 +439,14 @@ const [PermissionsGrid, permsGridApi] = useVbenVxeGrid<SystemPermissionItem>({
     submitOnChange: true,
     submitOnEnter: true,
     submitButtonOptions: {
-      content: $t('common.filter'),
+      content: computed(() => $t('common.filter')),
     },
     resetButtonOptions: {
-      content: $t('common.reset'),
+      content: computed(() => $t('common.reset')),
     },
-    actionWrapperClass: 'flex items-center justify-end gap-2',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3',
+    actionWrapperClass:
+      'col-span-2 sm:col-span-1 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
@@ -387,7 +479,10 @@ const [PermissionsGrid, permsGridApi] = useVbenVxeGrid<SystemPermissionItem>({
               search: formValues?.search,
             },
             allRoles.value,
-          );
+          ).map((perm) => ({
+            ...perm,
+            roles: rolesByPermissionMap.value[perm.id] ?? [],
+          }));
 
           const currentPage = page?.currentPage || 1;
           const pageSize = page?.pageSize || 15;
@@ -400,37 +495,29 @@ const [PermissionsGrid, permsGridApi] = useVbenVxeGrid<SystemPermissionItem>({
         },
       },
     },
-    columns: [
-      {
-        field: 'id',
-        title: 'Mã quyền hạn',
-        minWidth: 230,
-        align: 'left',
-        slots: { default: 'perm-id-cell' },
-      },
-      {
-        field: 'module',
-        title: 'Module',
-        width: 155,
-        align: 'left',
-        slots: { default: 'perm-module-cell' },
-      },
-      {
-        field: 'description',
-        title: 'Mô tả tác vụ',
-        minWidth: 260,
-        align: 'left',
-        slots: { default: 'perm-desc-cell' },
-      },
-      {
-        field: 'roles',
-        title: 'Vai trò sở hữu',
-        minWidth: 260,
-        align: 'left',
-        slots: { default: 'perm-roles-cell' },
-      },
-    ],
+    columns: getPermColumns(),
   },
+});
+
+watch([() => $t('page.system_view.roles_col_policy_desc'), isMobile], () => {
+  rolesGridApi.setGridOptions({ columns: getRoleColumns() });
+  permsGridApi.setGridOptions({ columns: getPermColumns() });
+  rolesGridApi.formApi?.setState({
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
+  });
+  permsGridApi.formApi?.setState({
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
+  });
 });
 
 async function handleRefresh() {
@@ -444,88 +531,80 @@ async function handleRefresh() {
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Top Header -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="flex flex-col gap-1">
-        <h1
-          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.system.roles') }}
-        </h1>
-        <p class="text-xs text-muted-foreground">
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1
+            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          >
+            {{ $t('page.system.roles') }}
+          </h1>
+          <Badge variant="secondary" class="font-mono text-xs font-normal">
+            {{
+              activeTab === 'roles' ? allRoles.length : allPermissions.length
+            }}
+          </Badge>
+        </div>
+        <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.system.roles_desc') }}
         </p>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex shrink-0 items-center gap-2">
         <Button
           variant="outline"
-          size="sm"
+          size="icon"
+          class="size-8 shrink-0"
           :disabled="loadingCatalog"
           :title="$t('common.refresh')"
           @click="handleRefresh"
-          class="gap-1.5"
         >
           <RefreshCw
-            class="size-3.5 text-muted-foreground"
+            class="size-3.5 shrink-0"
             :class="{ 'animate-spin': loadingCatalog }"
           />
-          {{ $t('common.refresh') }}
         </Button>
       </div>
     </div>
 
-    <!-- Main Container: Mode Tabs + Stats Bar + VXE Grid -->
+    <!-- Main Container: Mode Tabs + VXE Grid -->
     <div
-      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-xs space-y-3"
+      class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs space-y-3"
     >
-      <!-- Mode Selector & Stats Bar -->
-      <div
-        class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/40 pb-3 px-3 sm:px-0 pt-2 sm:pt-0"
-      >
-        <div class="flex items-center gap-1.5">
-          <Button
-            variant="ghost"
-            size="sm"
-            :class="{
-              'bg-muted font-medium text-foreground': activeTab === 'roles',
-            }"
-            @click="activeTab = 'roles'"
-            class="h-8 gap-1.5 text-xs"
-          >
-            <ShieldCheck class="size-3.5 text-primary" />
-            <span>Vai trò hệ thống ({{ allRoles.length }})</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            :class="{
-              'bg-muted font-medium text-foreground':
-                activeTab === 'permissions',
-            }"
-            @click="activeTab = 'permissions'"
-            class="h-8 gap-1.5 text-xs"
-          >
-            <KeyRound class="size-3.5 text-muted-foreground" />
-            <span>Danh mục quyền hạn ({{ allPermissions.length }})</span>
-          </Button>
-        </div>
-
-        <div class="flex items-center gap-3 text-xs text-muted-foreground">
-          <template v-if="activeTab === 'roles'">
-            <span>{{ systemRolesCount }} System Roles</span>
-            <span>&bull;</span>
-            <span>{{ allPermissions.length }} quyền hạt nhân</span>
-          </template>
-          <template v-else>
-            <span>{{ modulesCount }} modules</span>
-            <span>&bull;</span>
-            <span>{{ allPermissions.length }} quyền hạt nhân</span>
-          </template>
-        </div>
+      <!-- Mode Selector -->
+      <div class="flex items-center gap-1.5 border-b border-border/40 pb-2.5">
+        <Button
+          variant="ghost"
+          size="sm"
+          :class="{
+            'bg-muted font-medium text-foreground': activeTab === 'roles',
+          }"
+          @click="activeTab = 'roles'"
+          class="h-8 gap-1.5 text-xs"
+        >
+          <ShieldCheck class="size-3.5 text-primary" />
+          <span>{{
+            $t('page.system_view.roles_tab_roles', [allRoles.length])
+          }}</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          :class="{
+            'bg-muted font-medium text-foreground': activeTab === 'permissions',
+          }"
+          @click="activeTab = 'permissions'"
+          class="h-8 gap-1.5 text-xs"
+        >
+          <KeyRound class="size-3.5 text-muted-foreground" />
+          <span>{{
+            $t('page.system_view.roles_tab_permissions', [
+              allPermissions.length,
+            ])
+          }}</span>
+        </Button>
       </div>
 
       <!-- Tab 1: System Roles VXE Grid -->
@@ -534,7 +613,9 @@ async function handleRefresh() {
           <template #role-name-cell="{ row }">
             <div class="flex items-center gap-2">
               <RoleBadge :role="row.name" :uppercase="true" />
-              <code class="font-mono text-[11px] text-muted-foreground">
+              <code
+                class="hidden font-mono text-2xs text-muted-foreground sm:inline"
+              >
                 {{ row.name }}
               </code>
             </div>
@@ -542,10 +623,7 @@ async function handleRefresh() {
 
           <template #role-desc-cell="{ row }">
             <span class="text-xs text-muted-foreground">
-              {{
-                row.description ||
-                'Vai trò phân quyền chuẩn mực cho thành viên workspace'
-              }}
+              {{ row.description || $t('page.system_view.roles_default_desc') }}
             </span>
           </template>
 
@@ -555,7 +633,11 @@ async function handleRefresh() {
               class="gap-1 text-xs font-normal"
             >
               <Lock v-if="row.is_system" class="size-3 shrink-0" />
-              <span>{{ row.is_system ? 'System Role' : 'Custom' }}</span>
+              <span>{{
+                row.is_system
+                  ? $t('page.system_view.roles_type_system')
+                  : $t('page.system_view.roles_badge_custom')
+              }}</span>
             </Badge>
           </template>
 
@@ -565,12 +647,16 @@ async function handleRefresh() {
                 variant="outline"
                 class="shrink-0 font-mono text-xs font-semibold"
               >
-                {{ row.permissions.length }} quyền
+                {{
+                  $t('page.system_view.roles_perms_count', [
+                    row.permissions.length,
+                  ])
+                }}
               </Badge>
               <code
                 v-for="perm in row.permissions.slice(0, 2)"
                 :key="perm"
-                class="max-w-36 truncate rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground"
+                class="hidden max-w-36 truncate rounded bg-muted px-1.5 py-0.5 font-mono text-2xs text-muted-foreground sm:inline-block"
                 :title="perm"
               >
                 {{ perm }}
@@ -578,10 +664,14 @@ async function handleRefresh() {
               <Badge
                 v-if="row.permissions.length > 2"
                 variant="secondary"
-                class="shrink-0 cursor-pointer text-[11px] font-normal hover:bg-accent"
+                class="hidden shrink-0 cursor-pointer text-2xs font-normal hover:bg-accent sm:inline-flex"
                 @click.stop="openRoleDetail(row as SystemRoleItem)"
               >
-                +{{ row.permissions.length - 2 }} khác
+                {{
+                  $t('page.system_view.roles_more_perms', [
+                    row.permissions.length - 2,
+                  ])
+                }}
               </Badge>
             </div>
           </template>
@@ -597,11 +687,12 @@ async function handleRefresh() {
               <Button
                 variant="outline"
                 size="sm"
-                class="h-7 text-xs inline-flex items-center gap-1"
+                class="h-7 px-2 text-xs inline-flex items-center gap-1"
+                :title="$t('common.detail')"
                 @click="openRoleDetail(row as SystemRoleItem)"
               >
                 <Eye class="size-3 shrink-0" />
-                <span>{{ $t('common.detail') }}</span>
+                <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
               </Button>
             </div>
           </template>
@@ -614,10 +705,10 @@ async function handleRefresh() {
                 class="size-10 stroke-[1.5] text-muted-foreground/60 mb-3"
               />
               <p class="text-sm font-medium text-foreground">
-                Không tìm thấy vai trò phù hợp
+                {{ $t('page.system_view.roles_empty_title') }}
               </p>
               <p class="text-xs text-muted-foreground max-w-sm mt-1">
-                Thử thay đổi bộ lọc phân loại, module hoặc từ khóa tìm kiếm.
+                {{ $t('page.system_view.roles_empty_desc') }}
               </p>
             </div>
           </template>
@@ -638,13 +729,10 @@ async function handleRefresh() {
                 variant="ghost"
                 size="icon"
                 class="size-6 shrink-0 text-muted-foreground hover:text-foreground"
-                title="Sao chép mã quyền"
+                :title="$t('page.system_view.perms_copy_key')"
                 @click.stop="handleCopyKey(row.id)"
               >
-                <Check
-                  v-if="copiedKey === row.id"
-                  class="size-3.5 text-success"
-                />
+                <Check v-if="isCopied(row.id)" class="size-3.5 text-success" />
                 <Copy v-else class="size-3.5" />
               </Button>
             </div>
@@ -664,7 +752,7 @@ async function handleRefresh() {
             <span class="text-xs text-muted-foreground">
               {{
                 row.description ||
-                `Quyền hạn thực thi tác vụ trên module ${row.module}`
+                $t('page.system_view.perms_default_desc', [row.module])
               }}
             </span>
           </template>
@@ -685,6 +773,23 @@ async function handleRefresh() {
             </div>
           </template>
 
+          <template #perm-actions-cell="{ row }">
+            <div class="flex items-center justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                class="inline-flex h-7 items-center gap-1 px-2 text-xs"
+                :title="$t('common.detail')"
+                @click="
+                  permsGridApi.openDetailSheet(row as SystemPermissionItem)
+                "
+              >
+                <Eye class="size-3 shrink-0" />
+                <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
+              </Button>
+            </div>
+          </template>
+
           <template #empty>
             <div
               class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground"
@@ -693,11 +798,10 @@ async function handleRefresh() {
                 class="size-10 stroke-[1.5] text-muted-foreground/60 mb-3"
               />
               <p class="text-sm font-medium text-foreground">
-                Không tìm thấy quyền hạn phù hợp
+                {{ $t('page.system_view.perms_empty_title') }}
               </p>
               <p class="text-xs text-muted-foreground max-w-sm mt-1">
-                Thử thay đổi bộ lọc module, vai trò sở hữu hoặc từ khóa tìm
-                kiếm.
+                {{ $t('page.system_view.perms_empty_desc') }}
               </p>
             </div>
           </template>
@@ -711,13 +815,13 @@ async function handleRefresh() {
         <DialogHeader>
           <DialogTitle class="flex items-center gap-2 text-base">
             <ShieldCheck class="size-4 text-primary" />
-            <span>Chi tiết chính sách vai trò</span>
+            <span>{{ $t('page.system_view.roles_dialog_title') }}</span>
             <RoleBadge v-if="selectedRole" :role="selectedRole.name" />
           </DialogTitle>
           <DialogDescription class="text-xs">
             {{
               selectedRole?.description ||
-              'Danh sách các quyền hạn hạt nhân được cấp phát cho vai trò này theo từng phân hệ'
+              $t('page.system_view.roles_dialog_desc')
             }}
           </DialogDescription>
         </DialogHeader>
@@ -732,19 +836,26 @@ async function handleRefresh() {
           >
             <div class="flex items-center gap-2">
               <Badge :variant="selectedRole.is_system ? 'default' : 'outline'">
-                {{ selectedRole.is_system ? 'System Role' : 'Custom Role' }}
+                {{
+                  selectedRole.is_system
+                    ? $t('page.system_view.roles_type_system')
+                    : $t('page.system_view.roles_type_custom')
+                }}
               </Badge>
               <span class="text-muted-foreground">
-                ID:
+                {{ $t('page.system_view.roles_id_prefix') }}
                 <code class="font-mono text-foreground">{{
                   selectedRole.id
                 }}</code>
               </span>
             </div>
             <div class="font-medium text-foreground">
-              Đã cấp {{ selectedRole.permissions.length }} /
-              {{ allPermissions.length || selectedRole.permissions.length }}
-              quyền hạn
+              {{
+                $t('page.system_view.roles_granted_summary', [
+                  selectedRole.permissions.length,
+                  allPermissions.length || selectedRole.permissions.length,
+                ])
+              }}
             </div>
           </div>
 
@@ -760,11 +871,11 @@ async function handleRefresh() {
               <div class="flex items-center gap-2">
                 <Folder class="size-4 text-primary" />
                 <span class="font-semibold text-foreground">
-                  Module: {{ moduleName }}
+                  {{ $t('page.system_view.roles_module_header', [moduleName]) }}
                 </span>
               </div>
-              <Badge variant="outline" class="font-mono text-[11px]">
-                {{ perms.length }} quyền
+              <Badge variant="outline" class="font-mono text-2xs">
+                {{ $t('page.system_view.roles_perms_count', [perms.length]) }}
               </Badge>
             </div>
 
@@ -783,10 +894,12 @@ async function handleRefresh() {
                       {{ perm.id }}
                     </code>
                   </div>
-                  <p class="text-[11px] text-muted-foreground pl-4.5">
+                  <p class="text-2xs text-muted-foreground pl-4.5">
                     {{
                       perm.description ||
-                      `Thực thi tác vụ trên module ${moduleName}`
+                      $t('page.system_view.perms_module_action_desc', [
+                        moduleName,
+                      ])
                     }}
                   </p>
                 </div>
@@ -794,13 +907,10 @@ async function handleRefresh() {
                   variant="ghost"
                   size="icon"
                   class="size-6 shrink-0 text-muted-foreground hover:text-foreground"
-                  title="Sao chép mã quyền"
+                  :title="$t('page.system_view.perms_copy_key')"
                   @click="handleCopyKey(perm.id)"
                 >
-                  <Check
-                    v-if="copiedKey === perm.id"
-                    class="size-3 text-success"
-                  />
+                  <Check v-if="isCopied(perm.id)" class="size-3 text-success" />
                   <Copy v-else class="size-3" />
                 </Button>
               </div>

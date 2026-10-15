@@ -1,198 +1,255 @@
-# Spec: Tiêu Chuẩn Đa Ngôn Ngữ i18n (en-US / vi-VN) Mặc Định en-US
+# Spec: Kiến Trúc Đa Ngôn Ngữ 3 Tầng & Áp Dụng 100% Toàn Hệ Thống (`i18n-en-vi`)
 
-> **Module id:** `i18n-en-vi` (xem [`capability-map.md`](capability-map.md)) — **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**
-
-## 1. Objective (Mục Tiêu)
-
-Thiết lập tiêu chuẩn quốc tế hóa (i18n) nhất quán, chuẩn hóa và toàn diện cho Tuquet Admin (`@tuquet/admin-web`, `@vben/locales`, `@vben/constants`, `@vben/preferences`):
-
-1. **Chuẩn hóa cặp ngôn ngữ chính**: Hỗ trợ 2 ngôn ngữ chuẩn: **Tiếng Anh (`en-US`)** và **Tiếng Việt (`vi-VN`)**, với ngôn ngữ mặc định toàn hệ thống là **`en-US`**.
-2. **Khắc phục tình trạng hardcode text tự do**: Chấm dứt việc gõ trực tiếp chuỗi văn bản cứng vào component Vue; quy định 100% văn bản giao diện người dùng (headers, table columns, action buttons, modals, badges, empty states, toast messages) phải thông qua hàm dịch `$t(...)`.
-3. **Phân tầng 2 lớp độc lập (Two-Tier SSOT Architecture)**:
-   - **Framework Core Tier (`@vben/locales`)**: Chứa các từ vựng dùng chung của nền tảng (`common`, `term`, `authentication`, `preferences`, `profile`, `ui`).
-   - **Business App Tier (`web-admin`)**: Chứa từ vựng nghiệp vụ chuyên biệt của từng màn hình (`page.json` cho dashboard, tenants, automation, system).
-4. **Trải nghiệm chuyển ngữ tức thì (Zero-Flicker Instant Toggle)**: Đồng bộ mượt mà giữa nút chuyển ngôn ngữ (`LanguageToggle`), `localStorage` (`preferences-locale`), HTML `lang` attribute, và thư viện định dạng thời gian `dayjs`.
+> **Mã đặc tả:** `SPEC-i18n-en-vi`  
+> **Module id:** `i18n-en-vi` (xem [`capability-map.md`](capability-map.md))  
+> **Kiến trúc nguồn:** [`docs/architecture/overview.md`](../architecture/overview.md), [`ADR-004`](../decisions/0004-vxe-grid-form-and-i18n-terminology.md)  
+> **Trạng thái:** **ĐÃ NGHIỆM THU & TRIỂN KHAI 100% (ACCEPTED & IMPLEMENTED)**
 
 ---
 
-## 2. Tech Stack & Dependencies
+## 1. Objective (Mục Tiêu & Phạm Vi)
 
-- **Framework i18n**: `vue-i18n` (v9/v10 Composition API mode, `legacy: false`, `globalInjection: true`).
-- **Core Packages**:
-  - `@vben-core/typings`: Khai báo kiểu `SupportedLanguages` (`en-US`, `vi-VN`).
-  - `@vben/constants`: Định nghĩa danh sách runtime `SUPPORT_LANGUAGES` (`en-US` & `vi-VN`).
-  - `@vben/locales`: Quản lý nạp từ điển, `useSimpleLocale`, `$t`, dynamic load regex.
-  - `@vben/preferences`: Lưu trữ và đồng bộ hóa cài đặt `locale` trong `localStorage`.
-- **Date/Time i18n**: `dayjs` (`dayjs/locale/en`, `dayjs/locale/vi`).
+Đạt độ phủ quốc tế hóa **100% (`0` chuỗi văn bản tĩnh hardcode)** cho toàn bộ Tuquet Admin (`@tuquet/admin-web`, `@vben/locales`, `@vben/plugins`) trên cả 2 ngôn ngữ **`en-US`** và **`vi-VN`**, bao gồm toàn bộ tiêu đề trang, cột bảng `VxeGrid`, bộ lọc `VbenForm`, hộp thoại Modal, tab chi tiết, biểu đồ Analytics, trang xác thực/hồ sơ, trạng thái rỗng (Empty state) và thông báo `toast`:
+
+1. **Loại Bỏ Triệt Để 100% Chuỗi Hardcode (46 Tệp / 992 Dòng Hiện Còn Tồn Đọng):**
+   - Chuyển đổi toàn bộ văn bản tĩnh tiếng Việt/tiếng Anh còn nằm trong 46 tệp `.vue` và `.ts` tại `apps/web-admin/src/` sang sử dụng hệ thống từ điển 3 tầng (`$t('common.*')`, `$t('term.*')`, `$t('page.*')`).
+2. **Cơ Chế Dịch Động Phản Ứng Tức Thì (`Reactive VxeGrid & VbenForm i18n`):**
+   - **Cột bảng `VxeGrid`:** Cấu hình `VxeUI.setConfig({ translate })` kết hợp truyền khóa dịch/hàm dịch để khi người dùng bấm `LanguageToggle` (`en-US` $\leftrightarrow$ `vi-VN`), toàn bộ tiêu đề cột (`columns[].title`), phân trang (`VxePager`) và trạng thái rỗng đổi ngôn ngữ tức thì mà không cần tải lại trang (F5).
+   - **Bộ lọc `VbenForm` (`formOptions.schema`):** Chuẩn hóa `label: () => $t('...')` và `componentProps: () => ({ placeholder: $t('...'), options: [...] })` để nhãn trường lọc, placeholder và danh sách tùy chọn Select tự động cập nhật theo `preferences.app.locale`.
+3. **Kiến Trúc Từ Điển 3 Tầng (Three-Tier Dictionary SSOT):**
+   - **Tầng 1 — Hành động & Trạng thái phổ quát (`packages/locales/src/langs/*/common.json`):** Động từ thao tác (`create`, `add`, `edit`, `delete`, `save`, `cancel`, `confirm`, `close`, `back`, `copy`, `copied`, `search`, `filter`, `reset`, `refresh`, `export`, `import`, `connect`, `detail`), trạng thái (`status`, `all`, `active`, `inactive`, `online`, `offline`, `pending`, `completed`, `failed`, `suspended`) và nhãn cột phổ biến (`name`, `description`, `createdAt`, `updatedAt`, `action`).
+   - **Tầng 2 — Thuật ngữ miền chuẩn (`packages/locales/src/langs/*/term.json`):** Danh mục 50+ thuật ngữ cốt lõi của hệ sinh thái (`workspace`, `workflow`, `run`, `device`, `runner`, `browser`, `browserProfile`, `proxy`, `proxyPool`, `plugin`, `plan`, `subscription`, `role`, `permission`, `auditLog`, `user`, `member`, `job`, `task`, `order`, `wallet`, `product`).
+   - **Tầng 3 — Nhãn ngữ cảnh màn hình (`apps/web-admin/src/locales/langs/*/page.json`):** Chỉ chứa tiêu đề, mô tả phụ, thông báo `toast` và câu hướng dẫn đặc thù của 6 phân hệ (`dashboard`, `workspace`, `automation`, `commerce`, `system`, `auth`, `profile`).
+4. **Chuẩn Ngữ Pháp `Sentence case` & Nhãn Tối Giản (`Brevity Standard`):**
+   - Văn bản tiếng Việt tuân thủ nghiêm ngặt **Sentence case** (chỉ viết hoa chữ cái đầu câu và danh từ riêng/viết tắt kỹ thuật $\le 4$ ký tự như `API`, `CLI`, `SSO`, `UUID`, `IP`, `RBAC`, `IAM`).
+   - Nút hành động trong ngữ cảnh đã rõ chỉ dùng động từ ngắn gọn (`Tạo` / `Create`, `Mời` / `Invite`, `Lưu` / `Save`).
 
 ---
 
-## 3. Commands (Lệnh Thực Thi)
+## 2. Tech Stack
+
+- **Framework i18n:** `vue-i18n@^11.4.10` (`legacy: false`, `globalInjection: true`).
+- **Workspace Packages:** `@vben/locales`, `@vben/preferences`, `@vben/plugins` (`vxe-table`), `@vben-core/form-ui`.
+- **Static Analysis & Verification:** `vue-i18n-extract` + trình quét AST/Regex kiểm tra `0` chuỗi tiếng Việt hardcode trong `apps/web-admin/src/`.
+
+---
+
+## 3. Commands (Lệnh Thực Thi & Kiểm Định)
 
 ```bash
-# Typecheck toàn bộ dự án
-pnpm --filter @tuquet/admin-web run typecheck
+# 1. Kiểm tra đối xứng khóa dịch giữa en-US và vi-VN
+pnpm run check:i18n
 
-# Chạy unit tests cho preferences và locales
-pnpm --filter @vben/preferences test
-pnpm --filter @vben/locales test
+# 2. Quét phát hiện chuỗi tiếng Việt hardcode còn sót trong apps/web-admin/src (ngoài thư mục locales/)
+node -e '
+const fs = require("node:fs"), path = require("node:path");
+const vn = /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]/;
+function walk(d) {
+  return fs.readdirSync(d, { withFileTypes: true }).flatMap((f) => {
+    const p = path.join(d, f.name);
+    return f.isDirectory() ? (f.name === "locales" || f.name === "__tests__" ? [] : walk(p)) : /\.(vue|ts)$/.test(f.name) ? [p] : [];
+  });
+}
+let leaks = 0;
+for (const file of walk("apps/web-admin/src")) {
+  fs.readFileSync(file, "utf8").split("\n").forEach((line, idx) => {
+    const t = line.trim();
+    if (!t.startsWith("//") && !t.startsWith("/*") && !t.startsWith("*") && !t.startsWith("<!--") && vn.test(t)) {
+      console.error(`${file}:${idx + 1}: ${t}`);
+      leaks++;
+    }
+  });
+}
+if (leaks > 0) process.exit(1);
+console.log("PASS: 0 hardcoded Vietnamese lines found.");
+'
 
-# Build production web-admin
-pnpm --filter @tuquet/admin-web run build
+# 3. Kiểm tra kiểu dữ liệu TypeScript & Linter
+pnpm run check:type
+pnpm run lint
 
-# Chạy môi trường development
-pnpm --filter @tuquet/admin-web run dev
+# 4. Build cục bộ và cập nhật Nginx preview (Zero Git Push)
+pnpm run build:local
 ```
 
 ---
 
-## 4. Project Structure (Cấu Trúc Thư Mục & Phân Tầng)
+## 4. Project Structure & Phạm Vi 46 Tệp Cần Chuẩn Hóa 100%
 
-```
+```text
 admin/
 ├── packages/
-│   ├── @core/base/typings/src/
-│   │   └── languages.ts                 # Khai báo interface SupportedLanguages (en-US, vi-VN)
-│   ├── constants/src/
-│   │   └── core.ts                      # SUPPORT_LANGUAGES danh sách [ { label: 'English', value: 'en-US' }, { label: 'Tiếng Việt', value: 'vi-VN' } ]
-│   ├── locales/src/
-│   │   ├── i18n.ts                      # Nạp và gộp messages từ packages/locales và apps
-│   │   ├── typing.ts                    # Type definitions
-│   │   └── langs/
-│   │       ├── en-US/                   # Framework Core English
-│   │       │   ├── common.json
-│   │       │   ├── term.json
-│   │       │   ├── authentication.json
-│   │       │   ├── preferences.json
-│   │       │   ├── profile.json
-│   │       │   └── ui.json
-│   │       └── vi-VN/                   # Framework Core Tiếng Việt (Tạo mới, đối xứng 100%)
-│   │           ├── common.json
-│   │           ├── term.json
-│   │           ├── authentication.json
-│   │           ├── preferences.json
-│   │           ├── profile.json
-│   │           └── ui.json
-│   └── @core/preferences/src/
-│       └── config.ts                    # default: locale: 'en-US'
-│
+│   ├── locales/src/langs/{en-US,vi-VN}/
+│   │   ├── common.json                         # Tầng 1: Mở rộng các khóa trạng thái, cột chung & thao tác
+│   │   ├── term.json                           # Tầng 2: Từ điển thuật ngữ chuẩn (bổ sung commerce/wallet/order)
+│   │   ├── authentication.json                 # Chuỗi xác thực dùng chung
+│   │   └── profile.json                        # Chuỗi hồ sơ cá nhân
+│   └── effects/plugins/src/vxe-table/
+│       └── init.ts                             # Tích hợp VxeUI.setConfig({ translate }) & đồng bộ locale
 └── apps/web-admin/src/
-    ├── locales/
-    │   ├── index.ts                     # Setup i18n của app, nạp dayjs locale ('en' / 'vi')
-    │   └── langs/
-    │       ├── en-US/                   # Business App English
-    │       │   └── page.json            # dashboard, tenants, automation, system
-    │       └── vi-VN/                   # Business App Tiếng Việt (Tạo mới, đối xứng 100%)
-    │           └── page.json
-    └── views/                           # Toàn bộ template Vue gọi $t('...') thay vì hardcode
+    ├── adapter/vxe-table.ts                    # Cấu hình translate i18n tự động cho VxeTable
+    ├── locales/langs/{en-US,vi-VN}/page.json   # Tầng 3: Từ điển nghiệp vụ 100% đối xứng
+    ├── api/core/                               # [4 files] access.ts, supabase-client.ts, system.ts, workspace-detail.ts
+    ├── composables/use-clipboard.ts            # [1 file] Thông báo sao chép clipboard đa ngôn ngữ
+    ├── components/
+    │   ├── common/                             # [2 files] cli-snippet-card.vue, danger-zone-card.vue
+    │   └── iam/role-badge.vue                  # [1 file] Nhãn vai trò theo i18n
+    └── views/
+        ├── _core/
+        │   ├── authentication/                 # [5 files] login, forget-password, reset-password, callback, desktop-bridge
+        │   └── profile/index.vue               # [1 file] Hồ sơ cá nhân & bảo mật tài khoản
+        ├── dashboard/analytics/                # [4 files] index, growth-chart, plans-chart, plugins-chart
+        ├── tenants/                            # [12 files] index, detail + 5 tabs + 5 modals
+        ├── automation/                         # [8 files] workflows, runs (index/detail), devices (+2 modals), browsers, proxies
+        ├── system/                             # [6 files] plugins, plans, subscriptions, users, roles, audit-logs
+        └── commerce/                           # [5 files] store, orders, wallet, admin, public-store
 ```
 
 ---
 
-## 5. Code Style & Naming Conventions
+## 5. Code Style & Mẫu Thiết Kế Reactive i18n
 
-### 5.1. Cấu Trúc Key Dịch (Key Taxonomy)
+### 5.1. Dịch Động Cho `VxeGrid` & `VbenForm` (Không Cần Reload Trang)
 
-Áp dụng quy tắc phân cấp bằng dấu chấm (`dot.notation`) theo `snake_case` cho từng phân đoạn:
-
-```
-[scope].[domain].[component_or_entity].[element_type]
-```
-
-- **Scope chung (Core)**:
-  - `common.create` (`Create` / `Tạo`)
-  - `common.confirm` (`Confirm` / `Xác nhận`)
-  - `common.cancel` (`Cancel` / `Hủy`)
-  - `term.workspace` (`Workspace` / `Workspace`)
-  - `term.workflow` (`Workflow` / `Quy trình`)
-  - `ui.table.empty` (`No data available` / `Không có dữ liệu`)
-
-- **Scope màn hình nghiệp vụ (Business Pages - `page.json`)**:
-  - `page.workspace.title` (`Workspace Management` / `Quản trị workspace`)
-  - `page.workspace.total_tenants` (`Total Workspaces` / `Tổng workspace`)
-  - `page.workspace.current_active` (`Selected Workspace` / `Workspace đang chọn`)
-  - `page.workspace.plan_tier` (`Service Plan` / `Gói dịch vụ`)
-  - `page.fleet.title` (`Device Fleet` / `Quản trị máy trạm`)
-  - `page.fleet.connect_workstation` (`Connect Workstation` / `Ghép nối máy trạm`)
-  - `page.automation.runs_title` (`Automation Runs` / `Phiên chạy tự động`)
-
-### 5.2. Mẫu Sử Dụng Trong Component Vue
-
-**Chuẩn cú pháp trong `<template>`:**
-
-```html
-<template>
-  <div class="flex items-center justify-between">
-    <h1 class="text-lg font-semibold">{{ $t('page.workspace.title') }}</h1>
-    <button @click="openCreateModal">
-      <Plus class="size-4" />
-      <span>{{ $t('common.create') }}</span>
-    </button>
-  </div>
-</template>
-```
-
-**Chuẩn cú pháp trong `<script setup lang="ts">`:**
-
-```typescript
+```ts
 import { $t } from '#/locales';
+import { useVbenVxeGrid } from '#/adapter/vxe-table';
 
-function handleNotify() {
-  toast.success($t('page.workspace.create_success', { name: payload.name }));
-}
+const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
+  formOptions: {
+    schema: [
+      {
+        component: 'Select',
+        fieldName: 'plan',
+        label: () => $t('term.plan'),
+        defaultValue: 'all',
+        componentProps: () => ({
+          placeholder: $t('common.all'),
+          options: [
+            { label: $t('common.all'), value: 'all' },
+            { label: $t('page.workspace.plan_free'), value: 'free' },
+            { label: $t('page.workspace.plan_pro'), value: 'pro' },
+            {
+              label: $t('page.workspace.plan_enterprise'),
+              value: 'enterprise',
+            },
+          ],
+        }),
+      },
+      {
+        component: 'Select',
+        fieldName: 'status',
+        label: () => $t('common.status'),
+        defaultValue: 'all',
+        componentProps: () => ({
+          placeholder: $t('common.all'),
+          options: [
+            { label: $t('common.all'), value: 'all' },
+            { label: $t('common.active'), value: 'active' },
+            { label: $t('common.suspended'), value: 'suspended' },
+          ],
+        }),
+      },
+    ],
+  },
+  gridOptions: {
+    columns: [
+      {
+        field: 'name',
+        title: 'term.workspace',
+        minWidth: 220,
+        slots: { default: 'name-cell' },
+      },
+      {
+        field: 'plan',
+        title: 'term.plan',
+        width: 130,
+        slots: { default: 'plan-cell' },
+      },
+      {
+        field: 'status',
+        title: 'common.status',
+        width: 140,
+        slots: { default: 'status-cell' },
+      },
+      {
+        field: 'created_at',
+        title: 'common.createdAt',
+        width: 150,
+        slots: { default: 'date-cell' },
+      },
+      {
+        field: 'actions',
+        title: 'common.action',
+        width: 220,
+        align: 'right',
+        slots: { default: 'actions-cell' },
+      },
+    ],
+  },
+});
+```
+
+### 5.2. Cấu Hình `translate` Trong `src/adapter/vxe-table.ts`
+
+```ts
+import { $t, i18n } from '#/locales';
+
+setupVbenVxeTable({
+  configVxeTable: (vxeUI) => {
+    vxeUI.setConfig({
+      translate(key, args) {
+        if (key && typeof key === 'string' && i18n.global.te(key)) {
+          return $t(key, args);
+        }
+        return key;
+      },
+      grid: {
+        // ...
+      },
+    });
+  },
+  useVbenForm,
+});
 ```
 
 ---
 
-## 6. Testing Strategy
+## 6. Testing Strategy (Chiến Lược Kiểm Thử)
 
-1. **Unit Test Phân Giải Khóa (Key Integrity Tests)**:
-   - Viết test tự động quét và đối chiếu toàn bộ key giữa thư mục `en-US` và `vi-VN`.
-   - Bắt buộc: Số lượng key và đường dẫn phân cấp trong `vi-VN` phải khớp 100% với `en-US` (không được thiếu key nào ở cả 2 tier).
-2. **Preference & Persistence Test**:
-   - Kiểm tra `preferences.app.locale`: Khởi tạo mặc định là `'en-US'`.
-   - Kiểm tra việc gọi `updatePreferences({ app: { locale: 'vi-VN' } })` ghi đúng vào cache/localStorage và cập nhật thẻ `<html lang="vi-VN">`.
-3. **Dayjs Locale Switch Test**:
-   - Kiểm tra khi switch sang `vi-VN`, `dayjs` tự động nạp `dayjs/locale/vi` và định dạng ngày tháng sang tiếng Việt; khi switch sang `en-US`, nạp `dayjs/locale/en`.
+1. **Static Hardcode Scanner Gate:** Chạy trình quét toàn bộ `apps/web-admin/src/**/*.{vue,ts}` (loại trừ `src/locales/**` và comment) đảm bảo **`0` dòng** chứa ký tự tiếng Việt có dấu hardcode.
+2. **Key Parity Gate (`pnpm run check:i18n`):** Đối chiếu 100% khóa dịch giữa `en-US` và `vi-VN` trên cả `packages/locales` và `apps/web-admin/src/locales`.
+3. **Reactive Locale Switch Verification:** Kiểm tra chuyển đổi `en-US` $\leftrightarrow$ `vi-VN` trực tiếp trên trình duyệt đảm bảo tiêu đề trang, cột bảng `VxeGrid`, nhãn lọc `VbenForm`, biểu đồ và modal đổi ngôn ngữ tức thì.
+4. **Typecheck, Lint & Local Build:** Đạt `0 errors` khi chạy `pnpm run check:type`, `pnpm run lint`, và `pnpm run build:local`.
 
 ---
 
-## 7. Boundaries (Ranh Giới Thực Hiện)
+## 7. Boundaries (Ranh Giới Kỹ Thuật)
 
-- **Luôn Luôn Làm (Always)**:
-  - Giữ `en-US` làm chuẩn gốc (SSOT). Mỗi khi thêm mới một nhãn vào `en-US`, lập tức bổ sung khóa tương ứng vào `vi-VN`.
-  - Luôn fallback về `en-US` nếu một ngôn ngữ bất kỳ bị thiếu message ở runtime.
-  - Sử dụng tham số biến nội suy chuẩn `{name}`, `{count}` thay vì nối chuỗi thủ công trong mã nguồn.
-- **Hỏi Trước (Ask First)**:
-  - Thay đổi cấu trúc file locale lớn (ví dụ tách `page.json` thành 5 file nhỏ cho từng route module).
-  - Bổ sung thêm ngôn ngữ thứ 3 ngoài `en-US` và `vi-VN`.
-- **Tuyệt Đối Không Làm (Never)**:
-  - Không hardcode chuỗi text trực tiếp trong code Vue template hoặc logic thông báo toast.
-  - Không xóa bỏ hoặc sửa lệch cấu trúc key giữa `en-US` và `vi-VN`.
-  - Không tải file font CDN bên ngoài để phục vụ ký tự tiếng Việt (đã có `@fontsource` tự host Inter, Roboto).
-
----
-
-## 8. Success Criteria (Tiêu Chí Hoàn Thành Nghiệm Thu)
-
-1. [x] **Registry Song Ngữ**: `@vben-core/typings` và `@vben/constants` khai báo đầy đủ 2 ngôn ngữ: `en-US` (English) và `vi-VN` (Tiếng Việt).
-2. [x] **Bộ Từ Điển Đối Xứng 100%**:
-   - `packages/locales/src/langs/vi-VN/` đầy đủ 6 file (`common`, `term`, `authentication`, `preferences`, `profile`, `ui`) dịch chuẩn xác, đối xứng với `en-US`.
-   - `apps/web-admin/src/locales/langs/vi-VN/` đầy đủ `page.json`, dịch trọn vẹn toàn bộ các trang Admin.
-3. [x] **Mặc Định Chuẩn `en-US`**:
-   - Trình duyệt truy cập lần đầu tiên khi chưa có `localStorage` sẽ hiển thị toàn bộ giao diện bằng Tiếng Anh (`en-US`).
-4. [x] **Nút Đổi Ngôn Ngữ Hoạt Động Mượt Mà**:
-   - Dropdown tại Header hiển thị 2 lựa chọn: `English` và `Tiếng Việt`.
-   - Click chọn chuyển tức thì toàn bộ text trên menu, breadcrumb, header, bảng, nút bấm mà không cần reload trang (F5).
-   - Định dạng ngày tháng `formatDate` chuyển đổi tương ứng theo locale được chọn.
-5. [x] **Typecheck & Test Pass**: `pnpm --filter @vben/preferences test` và `pnpm --filter @vben/locales test` chạy thành công.
+- **Always:**
+  - Tra cứu và tái sử dụng `$t('common.*')` và `$t('term.*')` trước khi tạo khóa mới trong `page.json`.
+  - Dùng hàm getter `() => $t('...')` cho `formOptions.schema` (`label`, `componentProps`) và khóa i18n cho `columns[].title` để đảm bảo tính reactive khi chuyển đổi ngôn ngữ.
+  - Tuân thủ tuyệt đối `Sentence case` cho tiếng Việt và giữ nguyên các thuật ngữ chuẩn trong `term.json` (`Workspace`, `Runner`, `Proxy`, `Plugin`, `Webhook`).
+- **Ask first:**
+  - Thêm ngôn ngữ mới ngoài `en-US` và `vi-VN`.
+  - Thay đổi tên định danh kỹ thuật trong `term.json`.
+- **Never:**
+  - Không để sót bất kỳ chuỗi tiếng Việt hoặc tiếng Anh hiển thị người dùng nào dạng hardcode trong `.vue` / `.ts`.
+  - Không dùng Title Case trong tiếng Việt (ví dụ: cấm viết `"Thêm Thành Viên Mới"`, phải viết `"Thêm thành viên"`).
+  - Không chạy `git push` khi chưa có yêu cầu rõ ràng từ người dùng.
 
 ---
 
-## 9. Open Questions (Câu Hỏi Mở Chờ Xác Nhận)
+## 8. Success Criteria (Tiêu Chí Nghiệm Thu)
 
-1. **Cấu trúc lưu trữ của `page.json` trong `web-admin`**:
-   - _Phương án A (Khuyến nghị - KISS)_: Dùng 1 file `page.json` duy nhất cho `web-admin` (gồm các block `page.workspace`, `page.fleet`, `page.automation`, `page.analytics`, `page.system`), gọn nhẹ và dễ bảo trì.
-   - _Phương án B_: Tách nhỏ thành từng file theo route module (`workspace.json`, `fleet.json`, `automation.json`, `system.json`).
-2. **Quy tắc hiển thị tên thương hiệu & thuật ngữ kỹ thuật**:
-   - Các thuật ngữ như `Multi-Tenant`, `SSO`, `Loopback Daemon`, `Runner`, `Bridge`, `Proxy` có giữ nguyên tiếng Anh trong bản `vi-VN` không (ví dụ: `Cổng SSO Loopback`, `Máy trạm Runner`), hay chuyển ngữ hoàn toàn sang thuần Việt? _(Khuyến nghị: Giữ nguyên thuật ngữ kỹ thuật chuẩn quốc tế để người vận hành hệ thống dễ hiểu)_.
+- [x] **SC1 (Zero Hardcoded Strings):** Trình quét toàn bộ 46 tệp trong `apps/web-admin/src/**/*.{vue,ts}` trả về **`0` dòng** chứa chuỗi tiếng Việt hardcode; các biểu đồ Analytics và badge cũng dùng `$t(...)` 100%.
+- [x] **SC2 (100% Key Parity):** Tất cả các tệp JSON trong `packages/locales/src/langs/{en-US,vi-VN}/` và `apps/web-admin/src/locales/langs/{en-US,vi-VN}/page.json` khớp 100% số lượng khóa và cấu trúc (1,418 khóa phẳng đối xứng 100%, `pnpm run check:i18n` pass).
+- [x] **SC3 (Reactive Grid & Form Localization):** Chuyển đổi ngôn ngữ qua `LanguageToggle` cập nhật tức thì cả tiêu đề cột `VxeGrid`, nhãn/placeholder/options của `VbenForm`, biểu đồ và Modal mà không cần tải lại trang.
+- [x] **SC4 (Sentence Case & Terminology Compliance):** 100% giá trị dịch trong `vi-VN/*.json` tuân thủ Sentence case và đồng nhất thuật ngữ với `term.json`.
+- [x] **SC5 (Quality & Local Build Gate):** Vượt qua `pnpm run check:type`, `pnpm run lint` (`0 errors`), 109/109 unit tests (`vitest`) và `pnpm run build:local` phục vụ kiểm thử trực tiếp trên `http://100.68.217.61/`.
+
+---
+
+## 9. Open Questions (Câu Hỏi Mở)
+
+Đã hoàn tất triển khai và nghiệm thu toàn bộ 5 tiêu chí SC1–SC5.

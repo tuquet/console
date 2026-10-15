@@ -15,6 +15,7 @@ import {
 } from '@tuquet/vue-ui';
 
 import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
+import { $t } from '#/locales';
 
 interface Props {
   loading?: boolean;
@@ -26,17 +27,17 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   roles: () => [
     {
-      display_name: 'Quản trị viên',
+      display_name: $t('page.workspace.administrator'),
       id: '00000000-0000-0000-0000-000000000002',
       name: 'admin',
     },
     {
-      display_name: 'Thành viên',
+      display_name: $t('term.member'),
       id: '00000000-0000-0000-0000-000000000003',
       name: 'member',
     },
     {
-      display_name: 'Người xem',
+      display_name: $t('page.tenants_view.role_viewer'),
       id: '00000000-0000-0000-0000-000000000004',
       name: 'viewer',
     },
@@ -67,7 +68,7 @@ watch(
 
 function handleOk() {
   if (!email.value || !email.value.includes('@')) {
-    toast.warning('Vui lòng nhập địa chỉ email hợp lệ');
+    toast.warning($t('page.tenants_view.invalid_email_warning'));
     return;
   }
   emit('submit', { email: email.value.trim(), roleId: selectedRoleId.value });
@@ -78,7 +79,9 @@ function handleOk() {
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Mời thành viên vào workspace</DialogTitle>
+        <DialogTitle>
+          {{ $t('page.tenants_view.invite_modal_title') }}
+        </DialogTitle>
       </DialogHeader>
 
       <div class="py-2">
@@ -88,7 +91,10 @@ function handleOk() {
           size="small"
           class="w-full space-y-3"
         >
-          <VxeFormItem title="Email thành viên" span="24">
+          <VxeFormItem
+            :title="$t('page.tenants_view.member_email_label')"
+            span="24"
+          >
             <template #default>
               <Input
                 v-model="email"
@@ -99,7 +105,10 @@ function handleOk() {
             </template>
           </VxeFormItem>
 
-          <VxeFormItem title="Vai trò IAM" span="24">
+          <VxeFormItem
+            :title="$t('page.tenants_view.iam_role_label')"
+            span="24"
+          >
             <template #default>
               <select
                 v-model="selectedRoleId"
@@ -124,10 +133,10 @@ function handleOk() {
           :disabled="props.loading"
           @click="emit('update:open', false)"
         >
-          Hủy
+          {{ $t('common.cancel') }}
         </Button>
         <Button :disabled="props.loading" @click="handleOk">
-          Gửi lời mời
+          {{ $t('page.tenants_view.send_invite_btn') }}
         </Button>
       </DialogFooter>
     </DialogContent>

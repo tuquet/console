@@ -89,7 +89,7 @@ function menuIcon(menu: MenuRecordRaw) {
 .vben-normal-menu.is-dark
   .vben-normal-menu__item.is-active
   .vben-normal-menu__icon {
-  @apply text-foreground;
+  @apply text-primary;
 }
 
 .vben-normal-menu.is-collapse .vben-normal-menu__name {
@@ -126,7 +126,7 @@ function menuIcon(menu: MenuRecordRaw) {
 }
 
 .vben-normal-menu__item.is-active {
-  @apply bg-primary text-primary dark:bg-accent;
+  @apply bg-primary text-primary dark:bg-primary/15;
 }
 
 .vben-normal-menu__item.is-active .vben-normal-menu__name,

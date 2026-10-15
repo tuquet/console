@@ -13,6 +13,7 @@ import {
 } from '@tuquet/vue-ui';
 
 import CliSnippetCard from '#/components/common/cli-snippet-card.vue';
+import { $t } from '#/locales';
 
 interface Props {
   loopbackOnline: boolean;
@@ -42,7 +43,7 @@ function handleOpenAuthBridge() {
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogContent class="sm:max-w-lg">
       <DialogHeader>
-        <DialogTitle>Kết nối thiết bị</DialogTitle>
+        <DialogTitle>{{ $t('page.fleet_view.connect_btn') }}</DialogTitle>
       </DialogHeader>
 
       <div class="space-y-5 py-2">
@@ -53,7 +54,7 @@ function handleOpenAuthBridge() {
           <div class="flex items-center gap-2">
             <Terminal class="size-4 text-primary shrink-0" />
             <span class="text-sm font-medium text-foreground">
-              Cổng daemon local
+              {{ $t('page.fleet_view.metric_loopback_port') }}
             </span>
             <Badge variant="outline" class="font-mono text-xs">
               :{{ props.loopbackPort }}
@@ -68,7 +69,11 @@ function handleOpenAuthBridge() {
                   : 'bg-muted text-muted-foreground'
               "
             >
-              {{ props.loopbackOnline ? 'Online' : 'Chưa phát hiện' }}
+              {{
+                props.loopbackOnline
+                  ? $t('common.online')
+                  : $t('page.automation_view.daemon_not_detected')
+              }}
             </Badge>
             <Button
               variant="outline"
@@ -81,7 +86,7 @@ function handleOpenAuthBridge() {
                 class="size-3 shrink-0"
                 :class="{ 'animate-spin': props.probing }"
               />
-              <span>Kiểm tra</span>
+              <span>{{ $t('page.automation_view.probe_btn') }}</span>
             </Button>
           </div>
         </div>
@@ -95,17 +100,17 @@ function handleOpenAuthBridge() {
               1
             </span>
             <span class="text-sm font-semibold text-foreground">
-              Đăng nhập qua CLI trên thiết bị
+              {{ $t('page.automation_view.connect_step1_title') }}
             </span>
           </div>
           <p class="text-xs text-muted-foreground ml-7">
-            Mở terminal trên thiết bị của bạn và chạy lệnh kết nối:
+            {{ $t('page.automation_view.connect_step1_desc') }}
           </p>
           <div class="ml-7">
             <CliSnippetCard
               command="tuquet login"
-              label="Lệnh đăng nhập CLI"
-              copied-label="Lệnh đăng nhập"
+              :label="$t('page.automation_view.cli_login_cmd_label')"
+              :copied-label="$t('page.automation_view.cli_login_copied_label')"
             />
           </div>
         </div>
@@ -119,12 +124,11 @@ function handleOpenAuthBridge() {
               2
             </span>
             <span class="text-sm font-semibold text-foreground">
-              Xác thực phiên trên trình duyệt
+              {{ $t('page.automation_view.connect_step2_title') }}
             </span>
           </div>
           <p class="text-xs text-muted-foreground ml-7">
-            Trình duyệt sẽ tự động chuyển tiếp tới màn hình cấp quyền xác thực
-            desktop. Bạn cũng có thể mở thủ công:
+            {{ $t('page.automation_view.connect_step2_desc') }}
           </p>
           <div class="ml-7">
             <Button
@@ -132,7 +136,7 @@ function handleOpenAuthBridge() {
               @click="handleOpenAuthBridge"
             >
               <ExternalLink class="size-3.5 shrink-0" />
-              <span>Mở trang ủy quyền desktop SSO</span>
+              <span>{{ $t('page.automation_view.open_desktop_sso_btn') }}</span>
             </Button>
           </div>
         </div>
@@ -141,15 +145,16 @@ function handleOpenAuthBridge() {
         <div
           class="rounded-lg bg-muted/50 p-3 border border-border text-xs text-muted-foreground"
         >
-          <strong class="text-foreground">Mẹo:</strong> Sau khi hoàn tất đăng
-          nhập, thiết bị của bạn sẽ tự động xuất hiện trong danh sách với trạng
-          thái trực tuyến.
+          <strong class="text-foreground"
+            >{{ $t('page.automation_view.tip_label') }}:</strong
+          >
+          {{ $t('page.automation_view.connect_tip_desc') }}
         </div>
       </div>
 
       <DialogFooter class="pt-2">
         <Button variant="outline" @click="emit('update:open', false)">
-          Đóng
+          {{ $t('common.close') }}
         </Button>
       </DialogFooter>
     </DialogContent>

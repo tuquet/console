@@ -1,33 +1,42 @@
-import type { PaymentChannelType, PaymentIntentItem } from './billing';
+import type {
+  CommerceOrderStatus,
+  CommerceProductType,
+  CommerceProductVisibility,
+  CommerceStockMode,
+  CommerceStockStatus,
+  PaymentChannelType,
+} from '@vben/constants';
+
+import type { PaymentIntentItem } from './billing';
+
+import {
+  COMMERCE_ORDER_STATUS,
+  COMMERCE_PRODUCT_TYPE,
+  COMMERCE_PRODUCT_VISIBILITY,
+  COMMERCE_STOCK_MODE,
+  COMMERCE_STOCK_STATUS,
+  FILTER_ALL,
+  PAYMENT_CHANNEL,
+  STORAGE_KEYS,
+} from '@vben/constants';
 
 import { mapRawPaymentIntent } from './billing';
 import { supabaseRequest } from './supabase-client';
 
-export type CommerceProductType =
-  | 'digital_file'
-  | 'serial_stock'
-  | 'specter_resource'
-  | 'wallet_credit';
-
-export type CommerceProductVisibility = 'hidden' | 'public' | 'tenant_only';
-
-export type CommerceStockMode = 'finite_counter' | 'serialized' | 'unlimited';
-
-export type CommerceStockStatus =
-  | 'available'
-  | 'defective'
-  | 'reserved'
-  | 'sold';
-
-export type CommerceOrderStatus =
-  | 'cancelled'
-  | 'completed'
-  | 'failed'
-  | 'fulfilling'
-  | 'manual_review'
-  | 'paid'
-  | 'pending_payment'
-  | 'refunded';
+export {
+  COMMERCE_ORDER_STATUS,
+  COMMERCE_PRODUCT_TYPE,
+  COMMERCE_PRODUCT_VISIBILITY,
+  COMMERCE_STOCK_MODE,
+  COMMERCE_STOCK_STATUS,
+};
+export type {
+  CommerceOrderStatus,
+  CommerceProductType,
+  CommerceProductVisibility,
+  CommerceStockMode,
+  CommerceStockStatus,
+};
 
 export interface CommerceCategoryItem {
   created_at: string;
@@ -222,7 +231,8 @@ export function mapRawProductVariant(raw: any): CommerceProductVariantItem {
     sku: String(raw?.sku || ''),
     sold_count: Math.trunc(Number(raw?.sold_count ?? 0)),
     sort_order: Number(raw?.sort_order ?? 0),
-    stock_mode: (raw?.stock_mode || 'unlimited') as CommerceStockMode,
+    stock_mode: (raw?.stock_mode ||
+      COMMERCE_STOCK_MODE.UNLIMITED) as CommerceStockMode,
     updated_at: String(raw?.updated_at || ''),
   };
 }
@@ -239,7 +249,8 @@ export function mapRawCommerceProduct(raw: any): CommerceProductItem {
     id: String(raw?.id || ''),
     is_active: raw?.is_active !== false,
     name: String(raw?.name || ''),
-    product_type: (raw?.product_type || 'serial_stock') as CommerceProductType,
+    product_type: (raw?.product_type ||
+      COMMERCE_PRODUCT_TYPE.SERIAL_STOCK) as CommerceProductType,
     short_description: raw?.short_description
       ? String(raw.short_description)
       : null,
@@ -253,7 +264,8 @@ export function mapRawCommerceProduct(raw: any): CommerceProductItem {
           mapRawProductVariant(v),
         )
       : undefined,
-    visibility: (raw?.visibility || 'public') as CommerceProductVisibility,
+    visibility: (raw?.visibility ||
+      COMMERCE_PRODUCT_VISIBILITY.PUBLIC) as CommerceProductVisibility,
   };
 }
 
@@ -276,8 +288,9 @@ export function mapRawCommerceOrder(raw: any): CommerceOrderRecord {
       ? String(raw.payment_intent_id)
       : null,
     payment_method: (raw?.payment_method ||
-      'internal_wallet') as PaymentChannelType,
-    status: (raw?.status || 'pending_payment') as CommerceOrderStatus,
+      PAYMENT_CHANNEL.INTERNAL_WALLET) as PaymentChannelType,
+    status: (raw?.status ||
+      COMMERCE_ORDER_STATUS.PENDING_PAYMENT) as CommerceOrderStatus,
     subtotal_credits: Math.trunc(Number(raw?.subtotal_credits ?? 0)),
     total_credits: Math.trunc(Number(raw?.total_credits ?? 0)),
     updated_at: String(raw?.updated_at || ''),
@@ -293,7 +306,7 @@ export function mapRawOrderDelivery(raw: any): CommerceOrderDeliveryItem {
         ? raw.delivered_payload
         : {},
     delivery_type: (raw?.delivery_type ||
-      'serial_stock') as CommerceProductType,
+      COMMERCE_PRODUCT_TYPE.SERIAL_STOCK) as CommerceProductType,
     download_count: Math.trunc(Number(raw?.download_count ?? 0)),
     expires_at: raw?.expires_at ? String(raw.expires_at) : null,
     id: String(raw?.id || ''),
@@ -646,13 +659,13 @@ export function filterCommerceProducts(
   }
 
   let result = items;
-  if (filters?.category_id && filters.category_id !== 'all') {
+  if (filters?.category_id && filters.category_id !== FILTER_ALL) {
     result = result.filter((p) => p.category_id === filters.category_id);
   }
-  if (filters?.product_type && filters.product_type !== 'all') {
+  if (filters?.product_type && filters.product_type !== FILTER_ALL) {
     result = result.filter((p) => p.product_type === filters.product_type);
   }
-  if (filters?.visibility && filters.visibility !== 'all') {
+  if (filters?.visibility && filters.visibility !== FILTER_ALL) {
     result = result.filter((p) => p.visibility === filters.visibility);
   }
   if (filters?.search) {
@@ -692,10 +705,10 @@ export function filterCommerceOrders(
   }
 
   let result = items;
-  if (filters?.status && filters.status !== 'all') {
+  if (filters?.status && filters.status !== FILTER_ALL) {
     result = result.filter((o) => o.status === filters.status);
   }
-  if (filters?.payment_method && filters.payment_method !== 'all') {
+  if (filters?.payment_method && filters.payment_method !== FILTER_ALL) {
     result = result.filter((o) => o.payment_method === filters.payment_method);
   }
   if (filters?.search) {
@@ -721,7 +734,7 @@ export interface SavedGuestOrderItem {
   total_credits: number;
 }
 
-const GUEST_ORDERS_STORAGE_KEY = 'TUQUET_GUEST_ORDERS';
+const GUEST_ORDERS_STORAGE_KEY = STORAGE_KEYS.GUEST_ORDERS;
 
 /**
  * Retrieve saved guest orders from localStorage for Public Storefront lookup convenience.
@@ -762,4 +775,49 @@ export function saveGuestOrderLocal(
     // Ignore storage quota errors
   }
   return updated;
+}
+
+/**
+ * Pure helper: Check whether a commerce product variant is currently in stock and active.
+ */
+export function isVariantInStock(
+  variant: CommerceProductVariantItem | null | undefined,
+): boolean {
+  if (!variant || !variant.is_active) return false;
+  if (variant.stock_mode === 'unlimited') return true;
+  return variant.available_stock > 0;
+}
+
+/**
+ * Pure helper: Extract newline-delimited serial / secret lines from order delivery items.
+ */
+export function formatSerialDeliveriesText(
+  deliveries: CommerceOrderDeliveryItem[],
+): string {
+  if (!Array.isArray(deliveries) || deliveries.length === 0) return '';
+  return deliveries
+    .filter((d) => d.delivery_type === 'serial_stock')
+    .map(
+      (d) =>
+        d.delivered_payload?.serial ||
+        d.delivered_payload?.secret_line ||
+        JSON.stringify(d.delivered_payload),
+    )
+    .join('\n');
+}
+
+/**
+ * Shared browser helper: Trigger a UTF-8 text file download for serial deliveries.
+ */
+export function downloadTextFile(filename: string, content: string): void {
+  if (!content) return;
+  const blob = new Blob([content], {
+    type: 'text/plain;charset=utf-8',
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
 }

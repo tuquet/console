@@ -12,6 +12,7 @@
     "scripts/*/src/**/*.json"
   ],
   "globalEnv": ["NODE_ENV"],
+  "concurrency": "1",
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

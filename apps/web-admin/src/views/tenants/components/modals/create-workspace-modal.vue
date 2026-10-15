@@ -13,6 +13,7 @@ import {
 } from '@tuquet/vue-ui';
 
 import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
+import { $t } from '#/locales';
 
 interface Props {
   loading?: boolean;
@@ -54,7 +55,7 @@ function handleNameChange() {
 
 function handleOk() {
   if (!name.value.trim() || !slug.value.trim()) {
-    toast.warning('Vui lòng nhập tên và mã slug của Workspace');
+    toast.warning($t('page.tenants_view.workspace_name_slug_required'));
     return;
   }
   emit('submit', {
@@ -69,7 +70,9 @@ function handleOk() {
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogContent class="sm:max-w-lg">
       <DialogHeader>
-        <DialogTitle>Tạo workspace mới</DialogTitle>
+        <DialogTitle>
+          {{ $t('page.tenants_view.create_modal_title') }}
+        </DialogTitle>
       </DialogHeader>
 
       <div class="py-2">
@@ -79,42 +82,47 @@ function handleOk() {
           size="small"
           class="w-full space-y-3"
         >
-          <VxeFormItem title="Tên workspace" span="24">
+          <VxeFormItem :title="$t('page.workspace.col_name')" span="24">
             <template #default>
               <Input
                 v-model="name"
-                placeholder="Ví dụ: Core Engineering"
+                :placeholder="$t('page.tenants_view.name_placeholder')"
                 class="h-10"
                 @input="handleNameChange"
               />
             </template>
           </VxeFormItem>
 
-          <VxeFormItem title="Mã slug định danh" span="24">
+          <VxeFormItem :title="$t('page.workspace.col_slug')" span="24">
             <template #default>
               <div class="space-y-1.5 w-full">
                 <Input
                   v-model="slug"
-                  placeholder="Ví dụ: core-eng"
+                  :placeholder="$t('page.tenants_view.slug_placeholder')"
                   class="h-10"
                 />
                 <p class="text-xs text-muted-foreground">
-                  Dùng trong định danh URL. Chỉ gồm chữ thường, số và dấu gạch
-                  ngang.
+                  {{ $t('page.tenants_view.slug_hint') }}
                 </p>
               </div>
             </template>
           </VxeFormItem>
 
-          <VxeFormItem title="Gói dịch vụ" span="24">
+          <VxeFormItem :title="$t('page.workspace.service_plan')" span="24">
             <template #default>
               <select
                 v-model="plan"
                 class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <option value="pro">Pro - Khuyên dùng</option>
-                <option value="free">Free Tier</option>
-                <option value="enterprise">Enterprise Custom</option>
+                <option value="pro">
+                  {{ $t('page.tenants_view.plan_pro_recommended') }}
+                </option>
+                <option value="free">
+                  {{ $t('page.tenants_view.plan_free_tier') }}
+                </option>
+                <option value="enterprise">
+                  {{ $t('page.tenants_view.plan_enterprise_custom') }}
+                </option>
               </select>
             </template>
           </VxeFormItem>
@@ -127,10 +135,10 @@ function handleOk() {
           :disabled="props.loading"
           @click="emit('update:open', false)"
         >
-          Hủy
+          {{ $t('common.cancel') }}
         </Button>
         <Button :disabled="props.loading" @click="handleOk">
-          Tạo workspace
+          {{ $t('page.tenants_view.create_submit_btn') }}
         </Button>
       </DialogFooter>
     </DialogContent>

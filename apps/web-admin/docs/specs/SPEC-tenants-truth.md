@@ -1,43 +1,81 @@
-# Spec: `tenants-truth`
+# Spec: Quản Trị Workspace & Chi Tiết 4 Tabs Dữ Liệu Thực (`tenants-truth`)
 
-> Module id: `tenants-truth` (xem [capability-map.md](capability-map.md)) — **ĐÃ HOÀN THÀNH** | Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
-
----
-
-## 1. Objective & Scope
-
-Module này loại bỏ toàn bộ dữ liệu mẫu (mock data), các lời gọi bảng không tồn tại (`/rest/v1/machines`), và hệ thống API Keys giả khỏi màn hình chi tiết Workspace (`/tenants/:id`). Thay thế bằng **100% dữ liệu đo đếm thực tế (telemetry)** từ các schema `public`, `billing`, và `runners` của Tuquet Cloud, đồng thời cấu hình chuyển đổi 4 tab thông qua URL query parameter `?tab=`.
-
-### Trong phạm vi:
-
-1. **4 Tab Chi Tiết Workspace (`/tenants/:id?tab=`):**
-   - **Tab `overview`:** Hiển thị thông tin định danh Workspace (Name, Slug, Tenant ID, Ngày tạo), số lượng Runner Devices trực tuyến / tổng số, gói cước hiện hành, trạng thái (`active` / `archived`), và các thao tác (kích hoạt chọn workspace làm ngữ cảnh CLI, đổi tên/slug, xóa/lưu trữ).
-   - **Tab `members`:** Danh sách thành viên thật từ `public.tenant_members` kèm thông tin `profiles` và vai trò thật qua `member_roles(role_id,roles(id,name,display_name))`.
-     - Hỗ trợ 4 vai trò hệ thống: `owner` (Chủ sở hữu), `admin` (Quản trị viên), `member` (Thành viên), `viewer` (Người xem). Loại bỏ hoàn toàn role ảo `developer`.
-     - Sửa chức năng mời thành viên: Ghi vào `public.tenant_invitations` với các trường bắt buộc thật (`role_id UUID`, `token_hash`, `invited_by UUID`, `expires_at`, `status = 'pending'`).
-     - Sửa chức năng cập nhật vai trò: Cập nhật bản ghi trong bảng nối `public.member_roles`.
-   - **Tab `usage`:** Hiển thị hạn mức và tài nguyên thực tế:
-     - Gói cước và hạn mức tối đa đọc từ `billing.subscriptions` liên kết `billing.plans` (schema `billing`). Trường hợp tenant chưa có bản ghi subscription, tự động áp dụng gói `free` từ `billing.plans`.
-     - Số lượng Runner devices đọc từ `runners.devices` (schema `runners`).
-     - Số lượng thành viên đọc từ `public.tenant_members`.
-     - Chỉ số đo lường bổ sung từ `billing.usage_meters`.
-   - **Tab `audit`:** Hiển thị nhật ký kiểm toán an ninh của tenant từ `public.audit_logs` (lọc theo `tenant_id = eq.<tenantId>`).
-2. **Loại Bỏ Tab API Keys (Quyết định D4):**
-   - Ẩn hoàn toàn tab "Cấu hình & API Keys" và các modal liên quan đến API key (do backend Cloud chưa có bảng API Key chuyên biệt; credential headless thật là `runners.devices.device_token_hash`).
-3. **Đồng Bộ URL Tab Navigation:**
-   - Giá trị tab được đồng bộ 2 chiều với query parameter trên URL: `/tenants/:id?tab=overview|members|usage|audit` (mặc định: `overview`).
-
-### Ngoài phạm vi:
-
-- Không can thiệp các màn hình độc lập `/fleet/*` (thuộc module `fleet-inventory`).
-- Không triển khai polling 3s cho Automa (thuộc module `automation-engine`).
-- Không sửa backend schema/RLS của `tuquet/cloud` (đã hoàn thiện ở Module `data-access`).
+> **Mã đặc tả:** `SPEC-tenants-truth`  
+> **Module id:** `tenants-truth` (xem [`capability-map.md`](capability-map.md))  
+> **Kiến trúc nguồn:** [`docs/architecture/overview.md`](../architecture/overview.md), [`docs/routes/tenants.md`](../routes/tenants.md), [`ADR-004`](../decisions/0004-vxe-grid-form-and-i18n-terminology.md)  
+> **Trạng thái:** **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**
 
 ---
 
-## 2. Public Interfaces & Data Structures
+## 1. Objective (Mục Tiêu & Phạm Vi)
 
-### 2.1. Data Models (`workspace-detail.ts`)
+Xây dựng phân hệ Quản trị Workspace (`/tenants` và `/tenants/:id`) kết nối **100% dữ liệu đo đếm thực tế (Real Telemetry)** từ 3 schema `public`, `billing`, và `runners` của Tuquet Cloud, sử dụng chuẩn bảng dữ liệu `useVbenVxeGrid` (`VxeTable`) và biểu mẫu `VxeForm`:
+
+1. **Danh Sách Workspace (`/tenants`):**
+   - Hiển thị danh mục toàn bộ Workspace mà người dùng có quyền truy cập (hoặc toàn bộ nền tảng đối với Superadmin) qua bảng `useVbenVxeGrid`.
+   - Hỗ trợ tìm kiếm theo tên/slug/UUID, lọc theo trạng thái (`active`, `suspended`, `archived`), tạo Workspace mới qua `VxeForm` modal, và chọn Workspace làm ngữ cảnh hoạt động hiện tại (`activeTenantId`).
+2. **Chi Tiết Workspace 4 Tabs Đồng Bộ URL (`/tenants/:id?tab=overview|members|usage|audit`):**
+   - **Tab `overview`:** Hiển thị hồ sơ định danh Workspace (`VxeForm`), số lượng máy trạm Runner trực tuyến / tổng số từ `runners.devices`, gói thuê bao hiện hành từ `billing.subscriptions`, và các thao tác quản trị (chọn làm Workspace đang hoạt động, đổi tên/slug, lưu trữ/xóa).
+   - **Tab `members`:** Bảng `useVbenVxeGrid` hiển thị danh sách thành viên thật từ `public.tenant_members` liên kết `profiles` và vai trò qua `member_roles(role_id,roles(id,name,display_name))` (`owner`, `admin`, `member`, `viewer`). Hỗ trợ mời thành viên mới vào `public.tenant_invitations` (`role_id`, `token_hash`, `invited_by`, `expires_at`), đổi vai trò trong `public.member_roles`, và thu hồi quyền thành viên.
+   - **Tab `usage`:** Hiển thị hạn mức và mức tiêu thụ tài nguyên thực tế từ `billing.subscriptions`, `billing.plans` (mặc định rơi về gói `free` nếu chưa có hợp đồng riêng), `billing.usage_meters`, `runners.devices` và `public.tenant_members`.
+   - **Tab `audit`:** Bảng `useVbenVxeGrid` tra cứu nhật ký kiểm toán an ninh của Workspace từ `public.audit_logs` (`tenant_id = eq.<tenantId>`).
+
+---
+
+## 2. Tech Stack
+
+- **Framework:** Vue 3.5 (`<script setup lang="ts">`), Vue Router 4, TypeScript 5.
+- **Data Grid & Form Engine:** `useVbenVxeGrid` (`VxeTable`) và `VxeForm` từ [`src/adapter/vxe-table.ts`](../../src/adapter/vxe-table.ts).
+- **UI & Icons:** `@tuquet/vue-ui` (`Badge`, `Button`, `Card`, `Dialog`, `Tabs`, `toast`), `@lucide/vue`.
+- **Data Access Layer:** [`src/api/core/tenant.ts`](../../src/api/core/tenant.ts) và [`src/api/core/workspace-detail.ts`](../../src/api/core/workspace-detail.ts).
+
+---
+
+## 3. Commands (Lệnh Thực Thi & Kiểm Định)
+
+```bash
+# 1. Chạy unit tests cho API Workspace & Tenant
+pnpm exec vitest run apps/web-admin/src/api/core/__tests__/workspace-detail.test.ts
+
+# 2. Kiểm tra kiểu dữ liệu TypeScript
+pnpm --filter @tuquet/admin-web run typecheck
+
+# 3. Kiểm tra linter và định dạng
+npx oxlint apps/web-admin/src/
+pnpm run lint
+
+# 4. Đóng gói bản dựng production
+pnpm run build:admin
+```
+
+---
+
+## 4. Project Structure (Cấu Trúc Tệp Tác Động)
+
+```text
+apps/web-admin/src/
+├── api/core/
+│   ├── tenant.ts                                     # CRUD danh sách Workspace & quản lý activeTenantId
+│   ├── workspace-detail.ts                           # Hợp nhất dữ liệu 4 tabs (public, runners, billing)
+│   └── __tests__/
+│       └── workspace-detail.test.ts                  # Unit tests cho chuẩn hóa dữ liệu thành viên, quota, token_hash
+├── router/routes/modules/
+│   └── tenants.ts                                    # Định tuyến /tenants và /tenants/:id
+└── views/tenants/
+    ├── index.vue                                     # Danh sách Workspace (useVbenVxeGrid + Create Modal VxeForm)
+    ├── detail.vue                                    # Khung 4 tabs đồng bộ URL query ?tab=
+    └── components/
+        ├── workspace-overview-tab.vue                # Tab Overview (VxeForm cập nhật tên/slug & thống kê thiết bị)
+        ├── workspace-members-tab.vue                 # Tab Members (useVbenVxeGrid + Invite/Change Role VxeForm Modals)
+        ├── workspace-usage-tab.vue                   # Tab Usage & Quotas (billing.subscriptions + usage_meters)
+        └── workspace-audit-tab.vue                   # Tab Audit Logs (useVbenVxeGrid tra cứu sự kiện an ninh)
+```
+
+---
+
+## 5. Code Style & Kiến Trúc Chi Tiết
+
+### 5.1. Mô Hình Dữ Liệu & Chữ Ký Hàm API (`workspace-detail.ts`)
 
 ```ts
 export type TenantDetailTab = 'audit' | 'members' | 'overview' | 'usage';
@@ -52,32 +90,11 @@ export interface WorkspaceMember {
   avatar_url?: null | string;
   email: string;
   full_name?: null | string;
-  id: string; // tenant_member id
+  id: string;
   joined_at: string;
   role: WorkspaceMemberRole;
   status: 'active' | 'invited' | 'suspended';
   user_id: string;
-}
-
-export interface WorkspaceSubscriptionPlan {
-  description?: null | string;
-  id: string;
-  max_members: number;
-  max_monthly_runs: number;
-  max_storage_mb: number;
-  name: string;
-  price_monthly_usd: number;
-}
-
-export interface WorkspaceSubscription {
-  cancel_at_period_end: boolean;
-  current_period_end: string;
-  current_period_start: string;
-  id: string;
-  plan: WorkspaceSubscriptionPlan;
-  plan_id: string;
-  status: string;
-  tenant_id: string;
 }
 
 export interface WorkspaceUsageQuota {
@@ -92,162 +109,108 @@ export interface WorkspaceUsageQuota {
   used_storage_mb: number;
 }
 
-export interface TenantAuditLog {
-  action: string;
-  actor_email?: null | string;
-  actor_id?: null | string;
-  actor_name?: null | string;
-  created_at: string;
-  entity_id: string;
-  entity_type: string;
-  id: number | string;
-}
-
-export interface WorkspaceDetailData {
-  active_devices_count: number;
-  members: WorkspaceMember[];
-  quota: WorkspaceUsageQuota;
-  subscription: null | WorkspaceSubscription;
-  tenant: TenantItem;
-  total_devices_count: number;
-}
-```
-
-### 2.2. API Functions Exported (`workspace-detail.ts`)
-
-```ts
-/**
- * Lấy chi tiết Workspace từ tenants, tenant_members, runners.devices, và billing.subscriptions
- */
 export async function getWorkspaceDetailApi(
   tenantId: string,
 ): Promise<WorkspaceDetailData>;
-
-/**
- * Lấy danh sách nhật ký an ninh của Tenant
- */
 export async function getTenantAuditLogsApi(
   tenantId: string,
   limit?: number,
 ): Promise<TenantAuditLog[]>;
-
-/**
- * Lấy danh sách các vai trò hệ thống có thể gán (owner, admin, member, viewer)
- */
 export async function getAvailableRolesApi(): Promise<WorkspaceMemberRole[]>;
-
-/**
- * Mời thành viên mới vào Tenant qua public.tenant_invitations thật
- */
 export async function inviteWorkspaceMemberApi(params: {
   email: string;
   invitedBy: string;
   roleId: string;
   tenantId: string;
 }): Promise<void>;
-
-/**
- * Cập nhật vai trò của thành viên trong public.member_roles
- */
 export async function updateWorkspaceMemberRoleApi(params: {
   memberId: string;
   roleId: string;
   tenantId: string;
 }): Promise<void>;
-
-/**
- * Xóa thành viên khỏi Tenant (public.tenant_members)
- */
 export async function removeWorkspaceMemberApi(memberId: string): Promise<void>;
-
-/**
- * Cập nhật thông tin Workspace (Tên, Slug)
- */
-export async function updateWorkspaceInfoApi(
-  tenantId: string,
-  data: { name?: string; slug?: string },
-): Promise<TenantItem>;
-
-/**
- * Xóa hoặc lưu trữ Workspace
- */
-export async function deleteWorkspaceApi(tenantId: string): Promise<void>;
 ```
 
----
+### 5.2. Hợp Đồng Giao Tiếp Đa Schema PostgREST
 
-## 3. PostgREST Protocol Contracts
-
-| Mục đích | Schema | PostgREST Endpoint & Params |
+| Mục Đích | Schema | Endpoint PostgREST |
 | :-- | :-- | :-- |
-| Tenant Info | `public` | `GET /rest/v1/tenants?id=eq.<tenantId>&select=*` |
-| Thành viên & Roles | `public` | `GET /rest/v1/tenant_members?tenant_id=eq.<tenantId>&select=id,status,joined_at,user_id,profiles(id,full_name,email,avatar_url),member_roles(role_id,roles(id,name,display_name))` |
-| Danh sách Runner Devices | `runners` | `GET /rest/v1/devices?tenant_id=eq.<tenantId>&select=id,status` |
-| Gói cước & Subscription | `billing` | `GET /rest/v1/subscriptions?tenant_id=eq.<tenantId>&select=id,tenant_id,plan_id,status,current_period_start,current_period_end,cancel_at_period_end,plans:plan_id(*)` |
-| Hạn ngạch mặc định (Free) | `billing` | `GET /rest/v1/plans?id=eq.free&select=*` |
-| Bộ đếm tài nguyên | `billing` | `GET /rest/v1/usage_meters?tenant_id=eq.<tenantId>&select=metric_name,current_value` |
-| Nhật ký kiểm toán | `public` | `GET /rest/v1/audit_logs?tenant_id=eq.<tenantId>&select=id,action,entity_type,entity_id,created_at,actor_id,profiles(id,full_name,email)&order=created_at.desc&limit=50` |
-| Gán vai trò thành viên | `public` | `POST /rest/v1/member_roles` (hoặc `PATCH` / `DELETE` + `POST` để đổi role) |
-| Lời mời gia nhập | `public` | `POST /rest/v1/tenant_invitations` (`role_id`, `token_hash`, `invited_by`, `expires_at`) |
+| **Thông tin Workspace** | `public` | `GET /rest/v1/tenants?id=eq.<tenantId>&select=*` |
+| **Thành viên & Vai trò** | `public` | `GET /rest/v1/tenant_members?tenant_id=eq.<tenantId>&select=id,status,joined_at,user_id,profiles(id,full_name,email,avatar_url),member_roles(role_id,roles(id,name,display_name))` |
+| **Thiết bị Runner kết nối** | `runners` | `GET /rest/v1/devices?tenant_id=eq.<tenantId>&select=id,status` |
+| **Hợp đồng thuê bao & Gói** | `billing` | `GET /rest/v1/subscriptions?tenant_id=eq.<tenantId>&select=id,tenant_id,plan_id,status,current_period_start,current_period_end,cancel_at_period_end,plans:plan_id(*)` |
+| **Hạn mức mặc định (`free`)** | `billing` | `GET /rest/v1/plans?id=eq.free&select=*` |
+| **Bộ đếm tiêu thụ** | `billing` | `GET /rest/v1/usage_meters?tenant_id=eq.<tenantId>&select=metric_name,current_value` |
+| **Nhật ký kiểm toán** | `public` | `GET /rest/v1/audit_logs?tenant_id=eq.<tenantId>&select=id,action,entity_type,entity_id,created_at,actor_id,profiles(id,full_name,email)&order=created_at.desc&limit=50` |
+| **Gửi lời mời gia nhập** | `public` | `POST /rest/v1/tenant_invitations` (`role_id`, `token_hash`, `invited_by`, `expires_at`) |
+| **Cập nhật vai trò** | `public` | `DELETE /rest/v1/member_roles?member_id=eq.<id>` + `POST /rest/v1/member_roles` |
+
+### 5.3. Kiến Trúc Giao Diện Chi Tiết Workspace Chuẩn Responsive & Built-in Theme (`/tenants/:id`)
+
+1. **Khắc phục lỗi tràn dọc 1 ký tự/dòng trên Mobile trong `workspace-overview-tab.vue`:**
+   - **Nguyên nhân gốc rễ:** `VxeForm` với `<VxeFormItem span="12">` chia 2 cột `50%` cố định ngay cả trên màn hình điện thoại 375px và đặt nhãn (`title`) nằm ngang bên trái giá trị, khiến cột giá trị chỉ còn rộng ~20px và làm tên Workspace (`Nguyen Dinh Tu`), Slug (`personal-dev`), UUID (`b0000000-...`) bị bẻ gãy từng chữ cái theo chiều dọc.
+   - **Giải pháp chuẩn:** Thay thế `VxeForm` chỉ đọc (read-only) trong `workspace-overview-tab.vue` bằng lưới thông tin **Responsive Description Grid** (`grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3`):
+     - Mỗi ô thông tin xếp nhãn (`text-xs text-muted-foreground`) nằm **phía trên** giá trị (`text-sm font-semibold text-foreground` hoặc `font-mono text-xs break-all`), đảm bảo hiển thị 1 cột rộng rãi trên Mobile, 2 cột trên Tablet và 3 cột trên Desktop.
+2. **Thanh chuyển đổi 4 Tabs cuộn ngang mượt trên Mobile (`detail.vue`):**
+   - Trên màn hình nhỏ, `<TabsList>` sử dụng `flex w-full justify-start overflow-x-auto no-scrollbar sm:w-auto sm:inline-flex` và mỗi `<TabsTrigger>` có `shrink-0 whitespace-nowrap gap-1.5` để 4 tab (`Overview`, `Members`, `Quotas & resources`, `Audit logs`) luôn nằm trên 1 hàng ngang, không bị tràn khỏi khung Card hoặc rớt dòng icon/chữ.
+3. **Đồng bộ Built-in Theme & Loại bỏ trùng lặp nút thao tác (`workspace-hero.vue` & `workspace-overview-tab.vue`):**
+   - Avatar đại diện Workspace trong `workspace-hero.vue` sử dụng `bg-primary/10 text-primary border border-primary/20` (thay cho gradient xanh dương cố định `from-sky-600 to-indigo-600`).
+   - Loại bỏ sự trùng lặp của 3 nút thao tác (`Set Primary`, `Pair CLI`, `Edit Settings`) vốn đang xuất hiện lặp lại ở cả `WorkspaceHero` phía trên và thẻ `Admin actions` phía dưới trong `workspace-overview-tab.vue`.
+4. **Tuân thủ thang chữ 7-Tier Modular Scale (`workspace-usage-tab.vue`, `workspace-audit-tab.vue`, `workspace-members-tab.vue`):**
+   - Thay toàn bộ class kích thước chữ tùy tiện `text-[11px]` bằng token chuẩn `text-xs` hoặc `text-2xs`.
+   - Đồng bộ `AvatarFallback` của thành viên trong `workspace-members-tab.vue` sang `bg-primary/10 text-primary`.
 
 ---
 
-## 4. UI Components & Layout Specs
+## 6. Testing Strategy (Chiến Lược Kiểm Thử)
 
-### 4.1. Cấu Trúc Tab Container (`views/tenants/detail.vue`)
-
-- Header: Nút "Back" về `/tenants`, Hero Card thông tin workspace (Tên, Slug, Trạng thái, Badge Active).
-- Tab Navigation: 4 tab phẳng chuẩn Shadcn Slate:
-  1. `<TabsTrigger value="overview">` (Icon: `LayoutDashboard` hoặc `Layers`)
-  2. `<TabsTrigger value="members">` (Icon: `Users`)
-  3. `<TabsTrigger value="usage">` (Icon: `Gauge`)
-  4. `<TabsTrigger value="audit">` (Icon: `ShieldCheck` hoặc `History`)
-- Tự động sync query: `router.replace({ query: { ...route.query, tab: newTab } })`.
-
-### 4.2. Tab Chi Tiết
-
-- **`WorkspaceOverviewTab.vue`:**
-  - Card 1: Thông tin cơ bản (Tenant ID sao chép 1 chạm, Slug, Ngày thành lập, Trạng thái hoạt động).
-  - Card 2: Trạng thái Fleet Runner liên kết (Số máy online, tổng số thiết bị đã đăng ký, nút tắt "Quản lý Fleet").
-  - Card 3: Thao tác nâng cao (Kích hoạt cho Specter CLI, Đổi tên/slug, Xóa workspace).
-- **`WorkspaceMembersTab.vue`:**
-  - Bảng thành viên Dual View (Table trên desktop, Card trên mobile).
-  - Badge vai trò chuẩn: `Owner` (tím), `Admin` (xanh dương), `Member` (xanh lá), `Viewer` (xám).
-  - Modal mời thành viên: Cho phép chọn vai trò từ `getAvailableRolesApi()`.
-- **`WorkspaceUsageTab.vue` (thay thế Quotas):**
-  - Thanh tiến trình đo lường: Thành viên đã dùng / Hạn mức gói; Thiết bị Runners đang kết nối / Hạn mức; Dung lượng lưu trữ / Hạn mức gói.
-  - Thông tin gói cước từ `billing.plans` (Tên gói, giá tháng, kỳ hạn gia hạn tiếp theo).
-- **`WorkspaceAuditTab.vue`:**
-  - Dòng thời gian / Bảng sự kiện an ninh: Thời gian, Người thực hiện (Tên + Email), Hành động (`action`), Đối tượng (`entity_type` + `entity_id`).
+1. **Unit Tests ([`workspace-detail.test.ts`](../../src/api/core/__tests__/workspace-detail.test.ts)):**
+   - Kiểm tra ánh xạ dữ liệu thành viên từ cấu trúc lồng nhau `tenant_members -> profiles & member_roles -> roles`.
+   - Kiểm tra tính toán hạn mức `WorkspaceUsageQuota` khi có hợp đồng `billing.subscriptions` và khi fallback về gói `free`.
+   - Kiểm tra sinh `token_hash` và payload gửi lời mời trong `inviteWorkspaceMemberApi`.
+2. **Component & Layout Verification:**
+   - Kiểm tra `workspace-overview-tab.vue` không còn sử dụng `<VxeFormItem span="12">` gây vỡ chữ dọc trên màn hình hẹp.
+   - Kiểm tra `0` kết quả `text-[11px]` trong toàn bộ `apps/web-admin/src/views/tenants/`.
+3. **Typecheck & Lint Gate:** `pnpm --filter @tuquet/admin-web run typecheck` và `pnpm run lint` đạt `0 errors`.
 
 ---
 
-## 5. Acceptance Criteria (Tiêu Chí Nghiệm Thu)
+## 7. Boundaries (Ranh Giới Kỹ Thuật)
 
-- [ ] **AC1:** Truy cập `/tenants/:id` hiển thị đầy đủ thông tin Workspace thật mà không gọi bảng giả `/rest/v1/machines`.
-- [ ] **AC2:** URL query param phản ánh đúng tab đang chọn (ví dụ `/tenants/:id?tab=usage`). Refresh trang giữ nguyên tab hiện tại.
-- [ ] **AC3:** Tab `overview` hiển thị đúng số Runner Devices trực tuyến từ schema `runners.devices`.
-- [ ] **AC4:** Tab `members` hiển thị chính xác danh sách thành viên kèm role thật từ `member_roles`. Không còn xuất hiện role giả `developer`.
-- [ ] **AC5:** Gửi lời mời thành viên tạo thành công bản ghi trong `public.tenant_invitations` với `role_id` UUID hợp lệ và `token_hash`.
-- [ ] **AC6:** Đổi vai trò thành viên cập nhật thành công bảng nối `public.member_roles`.
-- [ ] **AC7:** Tab `usage` đọc đúng thông tin từ `billing.subscriptions` và `billing.plans`. Nếu chưa có subscription, tự động hiển thị hạn mức gói `free` từ database.
-- [ ] **AC8:** Tab `audit` đọc và hiển thị danh sách sự kiện từ `public.audit_logs` của tenant tương ứng.
-- [ ] **AC9:** Tab API Keys và mọi modal/code liên quan đến API Keys giả bị loại bỏ hoàn toàn khỏi giao diện theo quyết định D4.
-- [ ] **AC10:** Toàn bộ test suite Vitest mới cho `workspace-detail` và các helper logic đạt 100% pass.
-- [ ] **AC11:** Toàn bộ các bước kiểm tra chất lượng:
-  ```bash
-  pnpm exec vitest run apps/web-admin/src/api/core
-  pnpm --filter @tuquet/admin-web run typecheck
-  npx oxlint apps/web-admin/src/
-  pnpm run lint
-  pnpm run build:admin
-  ```
-  đều đạt **0 errors, 0 warnings**.
+- **Always:**
+  - Sử dụng `useVbenVxeGrid` cho bảng danh sách Workspace, và `VxeForm` cho các Modal nhập liệu (Create/Edit Workspace, Invite/Edit Member).
+  - Sử dụng lưới CSS Grid chuẩn (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`) cho thẻ thông tin định danh chỉ đọc (Read-only Metadata) trên `workspace-overview-tab.vue` để đảm bảo tương thích Mobile 100%.
+  - Đồng bộ 2 chiều tab đang mở với query parameter `?tab=overview|members|usage|audit` qua `router.replace`.
+  - Truyền đúng `{ schema: 'runners' }` và `{ schema: 'billing' }` khi truy vấn thiết bị và gói cước.
+- **Ask first:**
+  - Thay đổi cấu trúc bảng `public.tenant_invitations` hoặc `public.member_roles`.
+- **Never:**
+  - Không dùng `VxeFormItem span="12"` với nhãn nằm ngang cho dữ liệu chỉ đọc khiến chữ bị ép dọc 1 ký tự/dòng trên điện thoại.
+  - Không dùng class kích thước pixel tùy tiện (`text-[11px]`) hoặc màu gradient cố định (`from-sky-600 to-indigo-600`) lệch khỏi Built-in Theme.
 
 ---
 
-## 6. Status & Sign-off Request
+## 8. Success Criteria (Tiêu Chí Nghiệm Thu)
 
-Spec này được xây dựng bám sát kiến trúc hệ thống và Capability Map đã duyệt.
+- [x] **SC1:** Danh sách `/tenants` và chi tiết `/tenants/:id` vận hành 100% trên dữ liệu thật từ `public`, `runners`, `billing`.
+- [x] **SC2:** Chuyển đổi giữa 4 tabs (`overview`, `members`, `usage`, `audit`) đồng bộ tức thì với `?tab=` trên URL, giữ nguyên tab khi F5 và không gây nháy trang hay nhảy cuộn.
+- [x] **SC3:** Mời thành viên mới tạo bản ghi hợp lệ trong `public.tenant_invitations` và đổi vai trò cập nhật chính xác bảng nối `public.member_roles`.
+- [x] **SC4:** Tab `usage` tính toán đúng tỷ lệ sử dụng Thành viên, Thiết bị, Lượt chạy và Dung lượng lưu trữ so với hạn mức của gói cước hiện hành.
+- [x] **SC5:** Toàn bộ unit tests trong `workspace-detail.test.ts` pass 100% và `typecheck` đạt 0 lỗi.
+- [x] **SC6 — Mobile-First Workspace Overview & Tabs Bar:** Trên màn hình Mobile (375px), thanh 4 Tabs cuộn ngang gọn trong khung Card (`whitespace-nowrap`), và toàn bộ thông tin `Workspace details` (Name, Slug, Tenant ID, Created At, Service Plan, Device Infra) hiển thị rõ ràng theo bố cục 1 cột (Mobile) $\rightarrow$ 2 cột (Tablet) $\rightarrow$ 3 cột (Desktop), tuyệt đối không bị gãy chữ theo chiều dọc.
+- [x] **SC7 — Action Deduplication & Built-in Theme Coherence:** Avatar của Workspace trong `WorkspaceHero` và `WorkspaceMembersTab` đồng bộ theo màu `--primary`; khu vực thao tác quản trị không bị lặp lại trùng lặp giữa `WorkspaceHero` và `WorkspaceOverviewTab`.
+- [x] **SC8 — Typography Compliance & Zero Regression:** Loại bỏ hoàn toàn `text-[11px]` trong `views/tenants/**`, vượt qua `typecheck`, `oxlint`, và `pnpm run build:local`.
 
-> [!IMPORTANT] **Theo quy trình Spec-Driven Development, Agent dừng turn tại đây để User xem xét và phê duyệt `SPEC-tenants-truth.md` trước khi tiến hành lập kế hoạch chi tiết (Phase 2: Plan & Tasks) và triển khai mã nguồn.**
+---
+
+## 9. Resolved Decisions (Các Quyết Định Đã Chốt)
+
+1. **Tập trung 4 Tabs chuẩn mực (`overview`, `members`, `usage`, `audit`):** Không sử dụng tab API Keys tĩnh tại cấp Workspace vì toàn bộ kết nối từ máy trạm Specter Desk và Headless Runner được xác thực định danh theo từng thiết bị qua `runners.devices.device_token_hash` và cổng Desktop Loopback SSO (`/auth/desktop`).
+2. **Fallback hạn mức tự động về gói `free`:** Khi một Workspace mới khởi tạo chưa có bản ghi trong `billing.subscriptions`, tầng API tự động đối chiếu định nghĩa gói `free` trong `billing.plans` để luôn hiển thị đầy đủ thanh đo lường hạn mức.
+3. **Tinh gọn nút thao tác & Chuyên biệt hóa Danger Zone (Phương án A):** Giữ các nút thao tác nhanh (`Set Primary`, `Pair CLI`, `Settings`, `Refresh`) trên thanh `WorkspaceHero` ở đầu trang; thẻ phía dưới trong Tab `Overview` chỉ đóng vai trò khu vực **Quản lý vòng đời / Danger zone** (`Archive or delete`) để loại bỏ sự trùng lặp 3 nút giống hệt nhau trên cùng màn hình.
+
+---
+
+## 10. Open Questions (Câu Hỏi Mở)
+
+_(Không còn câu hỏi mở — Tất cả quyết định thiết kế đã được phê duyệt)._

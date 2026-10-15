@@ -1,3 +1,4 @@
+import { $t } from '@vben/locales';
 import { initPreferences, updatePreferences } from '@vben/preferences';
 import { unmountGlobalLoading } from '@vben/utils';
 
@@ -48,10 +49,10 @@ async function initApplication() {
     if (appEl && !appEl.innerHTML.trim()) {
       appEl.innerHTML = `
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;font-family:sans-serif;color:#333;text-align:center;">
-          <h2 style="font-size:22px;margin-bottom:12px;">Không thể tải ứng dụng</h2>
-          <p style="color:#666;max-width:480px;margin-bottom:20px;font-size:14px;">Trình duyệt có thể đang chứa bản lưu cũ hoặc kết nối mạng bị gián đoạn.</p>
+          <h2 style="font-size:22px;margin-bottom:12px;">${$t('authentication.appLoadErrorTitle')}</h2>
+          <p style="color:#666;max-width:480px;margin-bottom:20px;font-size:14px;">${$t('authentication.appLoadErrorDesc')}</p>
           <button onclick="window.location.reload(true)" style="padding:10px 20px;background:#09090b;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;">
-            Tải lại trang (Reload)
+            ${$t('authentication.appReloadBtn')}
           </button>
         </div>
       `;

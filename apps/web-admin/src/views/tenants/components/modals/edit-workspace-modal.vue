@@ -15,6 +15,7 @@ import {
 } from '@tuquet/vue-ui';
 
 import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
+import { $t } from '#/locales';
 
 interface Props {
   loading?: boolean;
@@ -47,7 +48,7 @@ watch(
 
 function handleOk() {
   if (!name.value.trim() || !slug.value.trim()) {
-    toast.warning('Vui lòng điền đầy đủ tên và slug Workspace');
+    toast.warning($t('page.tenants_view.workspace_name_slug_required'));
     return;
   }
   emit('submit', {
@@ -61,7 +62,9 @@ function handleOk() {
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Cài đặt và cập nhật workspace</DialogTitle>
+        <DialogTitle>
+          {{ $t('page.tenants_view.edit_modal_title') }}
+        </DialogTitle>
       </DialogHeader>
 
       <div class="py-2">
@@ -71,19 +74,23 @@ function handleOk() {
           size="small"
           class="w-full space-y-3"
         >
-          <VxeFormItem title="Tên workspace" span="24">
+          <VxeFormItem :title="$t('page.workspace.col_name')" span="24">
             <template #default>
               <Input
                 v-model="name"
-                placeholder="Ví dụ: Core Engineering"
+                :placeholder="$t('page.tenants_view.name_placeholder')"
                 class="h-10"
               />
             </template>
           </VxeFormItem>
 
-          <VxeFormItem title="Mã slug định danh URL" span="24">
+          <VxeFormItem :title="$t('page.workspace.col_slug')" span="24">
             <template #default>
-              <Input v-model="slug" placeholder="core-eng" class="h-10" />
+              <Input
+                v-model="slug"
+                :placeholder="$t('page.tenants_view.slug_placeholder')"
+                class="h-10"
+              />
             </template>
           </VxeFormItem>
         </VxeForm>
@@ -95,9 +102,11 @@ function handleOk() {
           :disabled="props.loading"
           @click="emit('update:open', false)"
         >
-          Hủy
+          {{ $t('common.cancel') }}
         </Button>
-        <Button :disabled="props.loading" @click="handleOk"> Cập nhật </Button>
+        <Button :disabled="props.loading" @click="handleOk">
+          {{ $t('common.update') }}
+        </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

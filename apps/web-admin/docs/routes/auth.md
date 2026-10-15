@@ -1,12 +1,12 @@
-# Đặc Tả Route: Xác Thực & Tuyến Lõi (Authentication & Core Routes)
+# Đặc Tả Route: Xác Thực, Cửa Hàng Công Khai & Tuyến Lõi (Authentication & Core Routes)
 
 > **Module File:** [`src/router/routes/core.ts`](../../src/router/routes/core.ts)  
-> **Layouts:** `AuthPageLayout` (cho các trang xác thực) và `BasicLayout` (cho khung quản trị)  
+> **Layouts:** `AuthPageLayout` (cho các trang xác thực), `BasicLayout` (cho khung quản trị) và Standalone View (cho `/store`)  
 > **Tài liệu kiến trúc:** [`docs/architecture/overview.md`](../architecture/overview.md)
 
 ---
 
-## 1. Định Nghĩa Tuyến Đường Lõi (Core Route Definitions)
+## 1. Định Nghĩa Tuyến Đường Lõi (`core.ts`)
 
 ### 1.1. Tuyến Gốc & Hồ Sơ Cá Nhân (`Root` & `Profile`)
 
@@ -18,7 +18,7 @@
   redirect: preferences.app.defaultHomePath, // '/dashboard/analytics'
   children: [
     {
-      path: 'profile',
+      path: '/profile',
       name: 'Profile',
       component: () => import('#/views/_core/profile/index.vue'),
       meta: {
@@ -37,7 +37,28 @@
 
 ---
 
-### 1.2. Cụm Tuyến Xác Thực (`/auth/*`)
+### 1.2. Cửa Hàng Sản Phẩm Số Công Khai (`/store` — `PublicStorefront`)
+
+```typescript
+{
+  path: '/store',
+  name: 'PublicStorefront',
+  component: () => import('#/views/commerce/public-store/index.vue'),
+  meta: {
+    hideInBreadcrumb: true,
+    hideInMenu: true,
+    hideInTab: true,
+    ignoreAccess: true,
+    title: $t('page.commerce.publicStore'),
+  },
+}
+```
+
+- **Chức Năng:** Cửa hàng sản phẩm số công khai dành cho khách vãng lai (`Guest Checkout`), không yêu cầu đăng nhập (`ignoreAccess: true`), sử dụng `{ skipAuth: true }` trên tầng API và bàn giao tài nguyên tự động qua `claim_token` (xem chi tiết tại [`docs/routes/commerce.md`](commerce.md)).
+
+---
+
+### 1.3. Cụm Tuyến Xác Thực (`/auth/*`)
 
 Sử dụng container giao diện chuyên dụng `AuthPageLayout` ([`src/layouts/auth.vue`](../../src/layouts/auth.vue)):
 
@@ -52,7 +73,7 @@ Sử dụng container giao diện chuyên dụng `AuthPageLayout` ([`src/layouts
 
 ---
 
-### 1.3. Tuyến Bắt Lỗi Toàn Cục (`FallbackNotFound`)
+### 1.4. Tuyến Bắt Lỗi Toàn Cục (`FallbackNotFound`)
 
 ```typescript
 {
@@ -88,4 +109,4 @@ sequenceDiagram
     Browser->>Browser: Hiển thị thông báo "Ủy quyền thành công, bạn có thể đóng tab này"
 ```
 
-- **Quy tắc an toàn PNA:** Trình duyệt sẽ gửi lệnh xác thực cục bộ không làm rò rỉ credential ra ngoài domain máy trạm.
+- **Quy tắc an toàn PNA:** Trình duyệt gửi lệnh xác thực cục bộ không làm rò rỉ credential ra ngoài domain máy trạm.

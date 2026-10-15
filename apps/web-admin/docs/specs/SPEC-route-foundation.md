@@ -1,152 +1,122 @@
-# Spec: `route-foundation`
+# Spec: Kiến Trúc Định Tuyến Đa Phân Hệ, Plugin Gate & Bảo Toàn Cuộn Nội Trang (`route-foundation`)
 
-> Module id: `route-foundation` (xem [capability-map.md](capability-map.md)) — **ĐÃ HOÀN THÀNH** | Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
-
----
-
-## 1. Objective & Scope
-
-Module này tái cấu trúc toàn bộ hệ thống định tuyến (router) của `apps/web-admin` từ cấu trúc nguyên khối `dashboard.ts` ban đầu thành 5 module độc lập theo ranh giới Plugin và Tenant của Tuquet Cloud, đồng thời thiết lập cơ chế bảo vệ quyền (`meta.authority`) và lọc động theo trạng thái cài đặt plugin (`meta.plugin`).
-
-### Trong phạm vi:
-
-1. **Tách module định tuyến:**
-   - Phân rã `modules/dashboard.ts` thành 5 file module trong `src/router/routes/modules/`:
-     - `dashboard.ts`: Chỉ chứa `/dashboard/analytics`, cấu hình redirect mặc định và các tuyến chuyển hướng tiện ích (`/dashboard/workspace` → `/tenants`, `/dashboard/fleet` → `/fleet/devices`).
-     - `tenants.ts`: Khai báo `/tenants` (danh sách Workspace) và `/tenants/:id` (chi tiết Workspace).
-     - `fleet.ts`: Khai báo `/fleet/devices`, `/fleet/browsers`, `/fleet/proxies`.
-     - `automation.ts`: Khai báo `/automation/workflows`, `/automation/runs`, `/automation/runs/:id`.
-     - `system.ts`: Khai báo `/system/plugins`, `/system/plans`.
-2. **Di chuyển và cấu trúc lại views:**
-   - Chuyển `views/dashboard/workspace/` → `views/tenants/`.
-   - Chuyển `views/dashboard/fleet/` → `views/fleet/devices/`.
-   - Tạo placeholder views không mock data cho các route mới:
-     - `views/fleet/browsers/index.vue`
-     - `views/fleet/proxies/index.vue`
-     - `views/automation/workflows/index.vue`
-     - `views/automation/runs/index.vue`
-     - `views/automation/runs/detail.vue`
-     - `views/system/plugins/index.vue`
-     - `views/system/plans/index.vue`
-3. **Cơ chế lọc động theo Plugin (`Plugin Gating`):**
-   - Bổ sung trường `meta.plugin` vào định nghĩa route.
-   - Thêm hàm thuần `filterRoutesByPlugins(routes, installedPlugins)` lọc bỏ các route thuộc plugin chưa `installed`.
-   - Tích hợp vào `generateAccess` trong `src/router/access.ts` sử dụng `getInstalledPluginsApi()` từ `data-access`.
-4. **Cơ chế phân quyền giao diện (`Authority Gating`):**
-   - Thiết lập `meta.authority` trên từng route con theo ma trận RFC §4 (ví dụ: `['superadmin', 'runners:devices:read']`).
-   - Tương thích 100% với hàm `hasAuthority()` của `@vben/access`.
-5. **Đồng bộ hóa điều hướng và i18n:**
-   - Đổi `defaultHomePath` trong `preferences.ts` và `homePath` trong `user.ts` từ `/dashboard/workspace` → `/dashboard/analytics`.
-   - Cập nhật các lời gọi `router.push('/dashboard/workspace...')` trong `views/tenants/` và `views/_core/profile/index.vue` sang `/tenants`.
-   - Bổ sung nhãn i18n cho các trang mới trong `locales/langs/en-US/page.json`.
-
-### Ngoài phạm vi:
-
-- Không viết logic truy vấn Supabase thật cho các tab Workspace Detail (để lại cho Module `tenants-truth`).
-- Không viết logic telemetry thật cho Fleet (để lại cho Module `fleet-inventory`).
-- Không kết nối Polling 3s cho Automa (để lại cho Module `automation-engine`).
-- Không sửa schema/RLS của Tuquet Cloud (đã hoàn thiện ở Module `data-access`).
+> **Mã đặc tả:** `SPEC-route-foundation`  
+> **Module id:** `route-foundation` (xem [`capability-map.md`](capability-map.md))  
+> **Kiến trúc nguồn:** [`docs/architecture/overview.md`](../architecture/overview.md), [`docs/routes/README.md`](../routes/README.md), [`ADR-001`](../decisions/0001-routing-architecture.md), [`ADR-004`](../decisions/0004-vxe-grid-form-and-i18n-terminology.md)  
+> **Trạng thái:** **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**
 
 ---
 
-## 2. Tech Stack & Dependencies
+## 1. Objective (Mục Tiêu & Phạm Vi)
 
-- **Framework:** Vue 3, Vue Router 4, `@vben/access` (chế độ `'frontend'`), `@vben/preferences`.
-- **UI & Icons:** Lucide Icons (`@lucide/vue` / `@iconify/vue`), `@tuquet/vue-ui`.
-- **Phụ thuộc nội bộ:**
-  - `apps/web-admin/src/api/core/access.ts` (`getInstalledPluginsApi`).
-  - `apps/web-admin/src/api/core/user.ts` (cung cấp roles bao gồm `'superadmin'` và các permission IDs).
+Thiết lập kiến trúc định tuyến phân rã theo module và ranh giới Plugin cho `@tuquet/admin-web`, bao gồm **27 tuyến đường** phân bổ trên **5 nhóm điều hướng Sidebar** (`/dashboard`, `/tenants`, `/automation`, `/commerce`, `/system`) và cụm định tuyến lõi [`core.ts`](../../src/router/routes/core.ts):
+
+1. **Cấu Trúc 5 Nhóm Điều Hướng Sidebar & Cụm Tuyến Lõi (27 Routes):**
+   - **`dashboard.ts` (`order: 1`):** Trang chủ mặc định `/dashboard/analytics` (hiển thị Telemetry thực tế từ Cloud & Loopback Daemon).
+   - **`tenants.ts` (`order: 10`):** Quản trị Workspace đa thuê bao (`/tenants` danh sách và `/tenants/:id` chi tiết 4 tabs `overview | members | usage | audit`).
+   - **`automation.ts` (`order: 20`):** Hợp nhất toàn bộ kịch bản tự động hóa (plugin `automa`: `workflows`, `runs`, `runs/:id`) và hạ tầng thực thi (plugin `runners`: `devices`, `browsers`, `proxies`) dưới một nhánh `/automation/*` duy nhất, khớp 1-1 với cây thư mục `src/views/automation/*`.
+   - **`commerce.ts` (`order: 25`):** Cổng thương mại sản phẩm số & Ví trả trước (`/commerce/store`, `/commerce/orders`, `/commerce/wallet`, `/commerce/admin`).
+   - **`system.ts` (`order: 30`):** Danh mục hệ thống (`/system/plugins`, `/system/plans`) và 4 tuyến giám sát toàn nền tảng dành riêng cho Platform Superadmin (`/system/users`, `/system/audit-logs`, `/system/subscriptions`, `/system/roles`).
+   - **`core.ts`:** Cụm xác thực (`/auth/login`, `register`, `forget-password`, `reset-password`, `callback`, `desktop`), trang hồ sơ `/profile`, và cửa hàng công khai `/store` (`PublicStorefront`).
+2. **Bộ Lọc Động Theo Plugin (`filterRoutesByPlugins`):**
+   - Cắt tỉa tự động các route mà `meta.plugin` chưa có trạng thái `installed` trong `public.system_plugins`.
+   - Hỗ trợ menu cha hỗn hợp đa plugin (như `/automation` kết hợp `automa` + `runners`, `/commerce` kết hợp `commerce` + `subscriptions`, `/system` kết hợp `core-iam` + `subscriptions`), chỉ ẩn menu cha khi toàn bộ route con bị lọc bỏ.
+3. **Bảo Toàn Vị Trí Cuộn & Triệt Tiêu Nháy Trang Nội Tuyến (`Intra-Page Scroll Preservation`):**
+   - Dùng `route.path` làm khóa định danh mặc định (`getTabKey`) cho `router-view`, tắt hiệu ứng transition và giữ nguyên vị trí cuộn khi người dùng chỉ thay đổi query parameters trên cùng một đường dẫn (`?tab=`, `?status=`, `?tenant=`).
 
 ---
 
-## 3. Project Structure Changes
+## 2. Tech Stack
 
+- **Router & Access Control:** Vue Router 4, `@vben/access` (`accessMode: 'frontend'`), `@vben/preferences`.
+- **Layout & Scroll Hooks:** `@vben/layouts` (`useLayoutHook`, `useLayoutScroll`), `@vben/stores` (`getTabKey`).
+- **Icons:** `@lucide/vue` (`lucide:layout-dashboard`, `lucide:building-2`, `lucide:workflow`, `lucide:shopping-bag`, `lucide:shield-check`).
+
+---
+
+## 3. Commands (Lệnh Thực Thi & Kiểm Định)
+
+```bash
+# 1. Chạy unit tests cho Router và Plugin Gate
+pnpm exec vitest run apps/web-admin/src/router
+
+# 2. Kiểm tra kiểu dữ liệu TypeScript toàn bộ workspace
+pnpm --filter @tuquet/admin-web run typecheck
+
+# 3. Kiểm tra linter và định dạng
+npx oxlint apps/web-admin/src/
+pnpm run lint
+
+# 4. Đóng gói bản dựng production
+pnpm run build:admin
 ```
+
+---
+
+## 4. Project Structure (Cấu Trúc Tệp Tác Động)
+
+```text
 apps/web-admin/src/
-├── locales/langs/en-US/
-│   └── page.json                         # Bổ sung i18n keys cho tenants, fleet, automation, system
-├── preferences.ts                        # defaultHomePath: '/dashboard/analytics'
-├── api/core/
-│   └── user.ts                           # homePath: '/dashboard/analytics'
+├── preferences.ts                            # defaultHomePath: '/dashboard/analytics'
 ├── router/
-│   ├── access.ts                         # Tích hợp filterRoutesByPlugins() với getInstalledPluginsApi()
-│   ├── plugin-gate.ts                    # MỚI: hàm thuần filterRoutesByPlugins()
+│   ├── index.ts                              # Khởi tạo Vue Router & scrollBehavior bảo toàn cuộn nội trang
+│   ├── access.ts                             # Kết nối getInstalledPluginsApi() với filterRoutesByPlugins()
+│   ├── plugin-gate.ts                        # Hàm thuần khiết filterRoutesByPlugins(routes, installedPlugins)
 │   ├── __tests__/
-│   │   └── plugin-gate.test.ts           # MỚI: Vitest kiểm thử logic filterRoutesByPlugins
+│   │   └── plugin-gate.test.ts               # Unit tests kiểm thử lọc plugin đơn & hỗn hợp (automa/runners/commerce)
 │   └── routes/
+│       ├── index.ts                          # Tự động nạp modules/*.ts qua import.meta.glob
+│       ├── core.ts                           # Root, /profile, /auth/* (6 routes), và /store (PublicStorefront)
 │       └── modules/
-│           ├── dashboard.ts              # Chỉ giữ /dashboard/analytics + alias redirects
-│           ├── tenants.ts                # MỚI: /tenants, /tenants/:id
-│           ├── fleet.ts                  # MỚI: /fleet/devices, /fleet/browsers, /fleet/proxies
-│           ├── automation.ts             # MỚI: /automation/workflows, /automation/runs, /automation/runs/:id
-│           └── system.ts                 # MỚI: /system/plugins, /system/plans
+│           ├── dashboard.ts                  # /dashboard/analytics (order: 1)
+│           ├── tenants.ts                    # /tenants, /tenants/:id (order: 10)
+│           ├── automation.ts                 # /automation/{workflows,runs,runs/:id,devices,browsers,proxies} (order: 20)
+│           ├── commerce.ts                   # /commerce/{store,orders,wallet,admin} (order: 25)
+│           └── system.ts                     # /system/{plugins,plans,users,audit-logs,subscriptions,roles} (order: 30)
 └── views/
-    ├── tenants/                          # DI CHUYỂN từ views/dashboard/workspace/
-    │   ├── index.vue
-    │   ├── detail.vue
-    │   └── components/
-    ├── fleet/
-    │   ├── devices/                      # DI CHUYỂN từ views/dashboard/fleet/
-    │   │   ├── index.vue
-    │   │   └── components/
-    │   ├── browsers/
-    │   │   └── index.vue                 # MỚI (clean placeholder)
-    │   └── proxies/
-    │       └── index.vue                 # MỚI (clean placeholder)
-    ├── automation/
-    │   ├── workflows/
-    │   │   └── index.vue                 # MỚI (clean placeholder)
-    │   └── runs/
-    │       ├── index.vue                 # MỚI (clean placeholder)
-    │       └── detail.vue                # MỚI (clean placeholder)
-    └── system/
-        ├── plugins/
-        │   └── index.vue                 # MỚI (clean placeholder)
-        └── plans/
-            └── index.vue                 # MỚI (clean placeholder)
+    ├── dashboard/analytics/                  # Trang chủ Telemetry
+    ├── tenants/                              # Danh sách & Chi tiết Workspace 4 tabs
+    ├── automation/                           # Đồng bộ 100% với /automation/{workflows,runs,devices,browsers,proxies}
+    ├── commerce/                             # Đồng bộ 100% với /commerce/{store,orders,wallet,admin} & public-store
+    └── system/                               # Đồng bộ 100% với /system/{plugins,plans,users,audit-logs,subscriptions,roles}
 ```
 
 ---
 
-## 4. Chi Tiết Thiết Kế
+## 5. Code Style & Kiến Trúc Chi Tiết
 
-### 4.1. Ma Trận Module, Tuyến Đường và Quyền Hạn
+### 5.1. Ma Trận 27 Tuyến Đường & Ranh Giới Plugin / Authority
 
-| Module | Route Path | Route Name | Plugin Gate | Authority (`meta.authority`) | Icon |
-| :-- | :-- | :-- | :-- | :-- | :-- |
-| `dashboard.ts` | `/dashboard/analytics` | `Analytics` | `core-iam` | _(authenticated)_ | `lucide:area-chart` |
-| `tenants.ts` | `/tenants` | `Tenants` | `core-iam` | `['superadmin', 'tenants:read']` | `lucide:building-2` |
-| `tenants.ts` | `/tenants/:id` | `TenantDetail` | `core-iam` | `['superadmin', 'tenants:read']` | `lucide:building-2` |
-| `fleet.ts` | `/fleet/devices` | `FleetDevices` | `runners` | `['superadmin', 'runners:devices:read']` | `lucide:laptop` |
-| `fleet.ts` | `/fleet/browsers` | `FleetBrowsers` | `runners` | `['superadmin', 'runners:browsers:read']` | `lucide:globe` |
-| `fleet.ts` | `/fleet/proxies` | `FleetProxies` | `runners` | `['superadmin', 'runners:proxies:read']` | `lucide:network` |
-| `automation.ts` | `/automation/workflows` | `AutomationWorkflows` | `automa` | `['superadmin', 'automa:workflows:read']` | `lucide:git-branch` |
-| `automation.ts` | `/automation/runs` | `AutomationRuns` | `automa` | `['superadmin', 'automa:campaigns:read']` | `lucide:play-circle` |
-| `automation.ts` | `/automation/runs/:id` | `AutomationRunDetail` | `automa` | `['superadmin', 'automa:logs:read']` | `lucide:file-text` |
-| `system.ts` | `/system/plugins` | `SystemPlugins` | `core-iam` | `['superadmin', 'plugins:read']` | `lucide:puzzle` |
-| `system.ts` | `/system/plans` | `SystemPlans` | `subscriptions` | `['superadmin', 'subscriptions:read']` | `lucide:credit-card` |
+| Nhóm Module | Đường Dẫn (Path) | Tên Tuyến (Name) | Plugin (`meta.plugin`) | Quyền Truy Cập (`meta.authority`) |
+| :-- | :-- | :-- | :-- | :-- |
+| **Dashboard** | `/dashboard/analytics` | `Analytics` | `core-iam` | Authenticated |
+| **Tenants** | `/tenants` | `Tenants` | `core-iam` | `['superadmin', 'tenants:read']` |
+| **Tenants** | `/tenants/:id` | `TenantDetail` | `core-iam` | `['superadmin', 'tenants:read']` |
+| **Automation** | `/automation/workflows` | `AutomationWorkflows` | `automa` | `['superadmin', 'automa:workflows:read']` |
+| **Automation** | `/automation/runs` | `AutomationRuns` | `automa` | `['superadmin', 'automa:campaigns:read']` |
+| **Automation** | `/automation/runs/:id` | `AutomationRunDetail` | `automa` | `['superadmin', 'automa:logs:read']` |
+| **Automation** | `/automation/devices` | `AutomationDevices` | `runners` | `['superadmin', 'runners:devices:read']` |
+| **Automation** | `/automation/browsers` | `AutomationBrowsers` | `runners` | `['superadmin', 'runners:browsers:read']` |
+| **Automation** | `/automation/proxies` | `AutomationProxies` | `runners` | `['superadmin', 'runners:proxies:read']` |
+| **Commerce** | `/commerce/store` | `CommerceStore` | `commerce` | `['superadmin', 'commerce:read']` |
+| **Commerce** | `/commerce/orders` | `CommerceOrders` | `commerce` | `['superadmin', 'commerce:read']` |
+| **Commerce** | `/commerce/wallet` | `CommerceWallet` | `subscriptions` | `['superadmin', 'subscriptions:read', 'commerce:read']` |
+| **Commerce** | `/commerce/admin` | `CommerceAdmin` | `commerce` | `['superadmin', 'commerce:manage']` |
+| **System** | `/system/plugins` | `SystemPlugins` | `core-iam` | `['superadmin', 'plugins:read']` |
+| **System** | `/system/plans` | `SystemPlans` | `subscriptions` | `['superadmin', 'subscriptions:read']` |
+| **System** | `/system/users` | `SystemUsers` | `core-iam` | `['superadmin']` |
+| **System** | `/system/audit-logs` | `SystemAuditLogs` | `core-iam` | `['superadmin']` |
+| **System** | `/system/subscriptions` | `SystemSubscriptions` | `subscriptions` | `['superadmin']` |
+| **System** | `/system/roles` | `SystemRoles` | `core-iam` | `['superadmin']` |
+| **Core & Auth** | `/auth/{login,register,forget-password,reset-password,callback}` | `Login`..`AuthCallback` | Core | Public |
+| **Core & Auth** | `/auth/desktop` | `DesktopBridge` | Core | Authenticated |
+| **Core & Auth** | `/profile` | `Profile` | Core | Authenticated |
+| **Core & Auth** | `/store` | `PublicStorefront` | Core | Public (`ignoreAccess: true`) |
 
-### 4.2. Tuyến Chuyển Hướng Tiện Ích (Navigation Shortcuts & Redirects)
-
-Trong `modules/dashboard.ts`, các đường dẫn phụ trợ được khai báo dưới dạng redirect với cờ `meta.hideInMenu: true`:
-
-- `/dashboard` → redirect `/dashboard/analytics`
-- `/dashboard/workspace` → redirect `/tenants`
-- `/dashboard/workspace/:id` → redirect `/tenants/:id`
-- `/dashboard/fleet` → redirect `/fleet/devices`
-
-### 4.3. Plugin Gating (`filterRoutesByPlugins`)
-
-Khai báo tại `src/router/plugin-gate.ts`:
+### 5.2. Thuật Toán Cắt Tỉa Nhánh Động `filterRoutesByPlugins`
 
 ```ts
-import type { RouteRecordRaw } from 'vue-router';
-
-/**
- * Filter route tree by checking meta.plugin against installed system plugins.
- * If a route requires a plugin that is not installed, it is omitted.
- * If all children of a parent route are omitted, the parent route is omitted.
- */
+// apps/web-admin/src/router/plugin-gate.ts
 export function filterRoutesByPlugins(
   routes: RouteRecordRaw[],
   installedPlugins: string[],
@@ -167,8 +137,7 @@ export function filterRoutesByPlugins(
         installedPlugins,
       );
       if (cloned.children.length === 0 && !cloned.component) {
-        // Layout parent with all children filtered out -> prune
-        continue;
+        continue; // Tự động ẩn menu cha nếu toàn bộ route con bị lọc bỏ
       }
     }
     result.push(cloned);
@@ -178,89 +147,60 @@ export function filterRoutesByPlugins(
 }
 ```
 
-Tích hợp tại `src/router/access.ts`:
+### 5.3. Bảo Toàn Cuộn Nội Trang (`Intra-Page Navigation Invariant`)
 
 ```ts
-async function generateAccess(options: GenerateMenuAndRoutesOptions) {
-  let installedPlugins: string[] = ['core-iam'];
-  try {
-    installedPlugins = await getInstalledPluginsApi();
-  } catch (error) {
-    console.warn(
-      'Failed to load installed plugins, defaulting to core-iam:',
-      error,
-    );
+// apps/web-admin/src/router/index.ts
+scrollBehavior(to, _from, savedPosition) {
+  if (savedPosition) {
+    return savedPosition;
   }
-
-  const filteredRoutes = filterRoutesByPlugins(
-    options.routes,
-    installedPlugins,
-  );
-
-  return await generateAccessible(preferences.app.accessMode, {
-    ...options,
-    routes: filteredRoutes,
-    // ...
-  });
+  // Giữ nguyên vị trí cuộn khi chỉ thay đổi query params trên cùng route path
+  if (_from?.matched?.length && to.path === _from.path) {
+    return false;
+  }
+  return to.hash ? { behavior: 'smooth', el: to.hash } : { left: 0, top: 0 };
 }
 ```
 
-### 4.4. Quy Chuẩn Placeholder Views (No Mock Data)
+---
 
-Các placeholder view mới (`browsers`, `proxies`, `workflows`, `runs`, `plugins`, `plans`) tuân thủ nghiêm ngặt:
+## 6. Testing Strategy (Chiến Lược Kiểm Thử)
 
-- Sử dụng Design Token Semantic Shadcn: `bg-card`, `border-border/60`, `rounded-xl`.
-- Icon Lucide trung tâm: kích thước `size-8 text-muted-foreground`.
-- Tiêu đề màn hình và badge trạng thái rõ ràng (ví dụ: "Ready for telemetry integration").
-- **Tuyệt đối 0 mock data**, 0 bảng số ảo, 0 văn bản tiếng Trung (AGENTS.md §5).
+1. **Unit Tests ([`plugin-gate.test.ts`](../../src/router/__tests__/plugin-gate.test.ts)):**
+   - Kiểm tra lọc độc lập từng nhánh con trong các menu hỗn hợp (`/automation` với `automa` + `runners`; `/commerce` với `commerce` + `subscriptions`; `/system` với `core-iam` + `subscriptions`).
+   - Kiểm tra tự động cắt tỉa (prune) menu cha khi 0 route con còn lại.
+   - Kiểm tra bảo toàn tính bất biến (immutability) của mảng `routes` đầu vào.
+2. **Typecheck & Lint Gate:** `pnpm --filter @tuquet/admin-web run typecheck` và `pnpm run lint` đạt `0 errors`.
 
 ---
 
-## 5. Acceptance Criteria (Tiêu Chí Nghiệm Thu)
+## 7. Boundaries (Ranh Giới Kỹ Thuật)
 
-- [ ] **AC1:** Truy cập `/dashboard` hoặc `/dashboard/analytics` chuyển thẳng vào trang Analytics thật.
-- [ ] **AC2:** Truy cập `/dashboard/workspace` tự động chuyển hướng đến `/tenants`.
-- [ ] **AC3:** Truy cập `/dashboard/workspace/:id` tự động chuyển hướng đến `/tenants/:id`.
-- [ ] **AC4:** Truy cập `/dashboard/fleet` tự động chuyển hướng đến `/fleet/devices`.
-- [ ] **AC5:** Sidebar menu hiển thị tối đa 5 nhóm chính:
-  1. **Dashboard** (`/dashboard/analytics`)
-  2. **Workspaces** (`/tenants`)
-  3. **Fleet** (`/fleet/devices`, `/fleet/browsers`, `/fleet/proxies`)
-  4. **Automation** (`/automation/workflows`, `/automation/runs`)
-  5. **System** (`/system/plugins`, `/system/plans`)
-- [ ] **AC6:** Toàn bộ biểu tượng trên thanh menu và màn hình đều là Lucide Icons (`building-2`, `cpu`, `workflow`, `shield-check`, v.v.), không có Emoji.
-- [ ] **AC7:** Khi mock `getInstalledPluginsApi()` không trả về `'automa'`, nhóm menu `/automation` và toàn bộ route con bị ẩn hoàn toàn khỏi menu và không thể truy cập.
-- [ ] **AC8:** Khi mock `getInstalledPluginsApi()` không trả về `'subscriptions'`, route con `/system/plans` bị loại bỏ trong khi `/system/plugins` vẫn hoạt động bình thường.
-- [ ] **AC9:** User thường không có quyền `runners:devices:read` sẽ không thấy `/fleet/devices` trên menu và bị chặn 403 nếu truy cập trực tiếp.
-- [ ] **AC10:** Superadmin (`roles` có `'superadmin'`) truy cập được toàn bộ các module đã cài đặt plugin.
-- [ ] **AC11:** Unit tests cho `filterRoutesByPlugins` đạt 100% pass với đầy đủ các ca biên.
-- [ ] **AC12:** Tất cả lệnh kiểm định chất lượng:
-  ```bash
-  pnpm exec vitest run apps/web-admin/src/router
-  pnpm --filter @tuquet/admin-web run typecheck
-  npx oxlint apps/web-admin/src/
-  pnpm run lint
-  pnpm run build:admin
-  ```
-  đều kết thúc thành công với **0 errors, 0 warnings**.
+- **Always:**
+  - Khai báo đầy đủ `meta.plugin` và `meta.authority` trên mọi route nghiệp vụ.
+  - Giữ cấu trúc thư mục trong `src/views/<module>/` khớp 1-1 với đường dẫn URL `/<module>/*`.
+  - Bảo toàn vị trí cuộn và khóa `:key="route.path"` khi điều hướng query nội trang (`?tab=`, `?status=`).
+- **Ask first:**
+  - Thêm nhóm menu cấp 1 mới lên thanh Sidebar (hiện chuẩn hóa ở 5 nhóm cốt lõi).
+  - Thêm route công khai mới vào `coreRoutes` (`ignoreAccess: true`).
+- **Never:**
+  - Không tạo các route redirect dư thừa hoặc giữ lại thư mục view không còn khớp với đường dẫn URL.
+  - Không dùng `route.fullPath` làm khóa mặc định của `router-view` gây hủy/tạo lại component khi lọc bảng.
 
 ---
 
-## 6. Edge Cases & Error Handling
+## 8. Success Criteria (Tiêu Chí Nghiệm Thu)
 
-1. **Lỗi mạng khi tải danh sách plugin (`getInstalledPluginsApi` fail):**
-   - Không làm sập ứng dụng hay chặn đăng nhập; rơi về `['core-iam']` để người dùng vẫn truy cập được các tính năng cốt lõi (Workspaces, Analytics).
-2. **Parent route không có component và mọi children bị lọc:**
-   - Hàm `filterRoutesByPlugins` tự động cắt tỉa (prune) nhánh cha rỗng, tránh tạo ra menu cha vô hình hoặc bị kẹt khi click.
-3. **Người dùng gõ URL cũ có query string hoặc hash:**
-   - Các redirect route bảo toàn query parameters và params khi chuyển hướng sang URL mới.
-4. **Mobile Viewport (<640px):**
-   - Menu hiển thị trong Drawer của Vben; các link mới bấm chạm tối thiểu 40px không tràn layout.
+- [x] **SC1:** Thanh Sidebar hiển thị đúng 5 nhóm điều hướng cấp 1 theo thứ tự: `Dashboard` (`1`), `Workspaces` (`10`), `Automation` (`20`), `Commerce` (`25`), và `System` (`30`).
+- [x] **SC2:** Nhóm `/automation` hợp nhất trọn vẹn 6 tuyến con (`workflows`, `runs`, `runs/:id`, `devices`, `browsers`, `proxies`) với thư mục view đồng bộ tại `src/views/automation/*` và ranh giới plugin độc lập (`automa` vs `runners`).
+- [x] **SC3:** Nhóm `/commerce` và tuyến công khai `/store` hoạt động chính xác với bộ lọc plugin (`commerce`, `subscriptions`) và cờ `ignoreAccess: true` cho khách vãng lai.
+- [x] **SC4:** Thay đổi query parameter (`?tab=members`, `?status=running`) không gây nháy hiệu ứng chuyển trang hoặc nhảy thanh cuộn lên đầu trang.
+- [x] **SC5:** 100% unit tests trong `plugin-gate.test.ts` pass và `typecheck` đạt 0 lỗi.
 
 ---
 
-## 7. Status & Sign-off Request
+## 9. Resolved Decisions (Các Quyết Định Đã Chốt)
 
-Spec này được xây dựng dựa trên kiến trúc hệ thống và Capability Map đã duyệt.
-
-> [!IMPORTANT] **Theo quy trình Spec-Driven Development, Agent dừng turn tại đây để User xem xét và phê duyệt `SPEC-route-foundation.md` trước khi tiến hành lập kế hoạch chi tiết (Phase 2: Plan & Tasks) và triển khai mã nguồn.**
+1. **Hợp nhất `Fleet` và `Automation` dưới `/automation`:** Gom 3 màn hình hạ tầng (`devices`, `browsers`, `proxies`) và 3 màn hình kịch bản (`workflows`, `runs`, `runs/:id`) vào cùng một menu `/automation` và thư mục `src/views/automation/`, trong khi vẫn giữ nguyên 2 mã plugin độc lập (`runners` và `automa`) để đánh giá quyền và trạng thái cài đặt chính xác.
+2. **Fallback an toàn khi tải danh sách Plugin:** Nếu lời gọi `getInstalledPluginsApi()` gặp sự cố mạng tạm thời lúc khởi động, router mặc định rơi về `['core-iam']` để người vận hành vẫn truy cập được Dashboard và Workspaces mà không bị kẹt màn hình trắng.

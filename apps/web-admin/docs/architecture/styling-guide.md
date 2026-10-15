@@ -92,6 +92,21 @@ Toàn bộ bảng dữ liệu và biểu mẫu sử dụng adapter [`src/adapter
 - Đường kẻ kéo giãn cột: `--vxe-ui-table-resizable-line-color: hsl(var(--border) / 50%)`
 - Nền header & dòng dữ liệu: tự động nhận `--card`, `--muted`, `--foreground` theo Light/Dark Mode và 14 Built-in Themes.
 
+### 2.7. Biểu Đồ Dữ Liệu (`AreaChart`, `DonutChart`, `BarChart` & `--chart-1..5`)
+
+Toàn bộ biểu đồ trong `@vben-core/shadcn-ui` (`AreaChart`, `DonutChart`, `BarChart`) sử dụng hàm `defaultColors()` trả về 5 biến CSS ngữ nghĩa `['hsl(var(--chart-1))', ..., 'hsl(var(--chart-5))']` thay cho mã màu Hex cố định:
+
+- Khi người dùng đổi bất kỳ chủ đề nào trong **14 Built-in Themes** hoặc **Custom**, `updateCSSVariables` (`packages/@core/preferences/src/update-css-variables.ts`) tự động sinh 5 sắc độ `--chart-1` .. `--chart-5` đồng điệu với màu chủ đề (sắc độ `--primary-500/400/600/300/700` cho nhóm chủ đề có màu, và thang 5 bậc độ sáng tương phản cao cho nhóm chủ đề đơn sắc `zinc`, `neutral`, `slate`, `gray`).
+- **Quy tắc bắt buộc:** Không truyền mảng `:colors="['#38bdf8', ...]"` gán cứng mã Hex vào các biểu đồ Dashboard để biểu đồ luôn tự động chuyển màu theo Built-in Theme.
+
+### 2.8. Logo SVG Động & Hệ Thống Icon Lucide Đồng Bộ Built-in Theme (SSOT)
+
+1. **Specter SVG Logo (`VbenLogo` & `AuthPageLayout`):**
+   - Khi `src` là `/logo.svg`, `/logo-app.svg`, hoặc rỗng, `VbenLogo` (`packages/@core/ui-kit/shadcn-ui/src/components/logo/logo.vue`) dựng trực tiếp thẻ `<svg>` inline: ở **Dark Mode** (`theme === 'dark'`) hiển thị dải màu **Trắng sứ (Porcelain White)** (`#FAFAFA` $\rightarrow$ `#E4E4E7` $\rightarrow$ `#A1A1AA`) nổi bật sắc nét trên nền tối; ở **Light Mode** sử dụng `<linearGradient>` 3 điểm (`hsl(var(--chart-4))` $\rightarrow$ `hsl(var(--chart-1))` $\rightarrow$ `hsl(var(--chart-3))`) và hào quang `hsl(var(--primary) / 0.22)` theo Built-in Theme.
+2. **Hệ thống Icon Lucide (`internal/tailwind-config/src/theme.css`, `menu-ui`, `tabs-ui`):**
+   - Toàn bộ hộp chứa icon không phải nút bấm (`:is(.bg-muted, .bg-muted\/50, .bg-muted\/40):not(button, [role='button'], a):has(> svg.lucide:only-child)`) và các icon `svg.lucide` độc lập được đồng bộ tập trung về `hsl(var(--primary))` và `hsl(var(--primary) / 10%)` ngay tại `internal/tailwind-config/src/theme.css` mà không cần sửa thủ công từng file View.
+   - Menu và Tabbar đang active ở cả Light và Dark mode đều sử dụng `hsl(var(--primary))` và nền `hsl(var(--primary) / 15%)`.
+
 ---
 
 ## 3. Khuôn Mẫu Thực Hành Chuẩn (Component Boilerplate)

@@ -11,8 +11,26 @@ const routes: RouteRecordRaw[] = [
     },
     name: 'Automation',
     path: '/automation',
-    redirect: '/automation/workflows',
+    redirect: '/automation/overview',
     children: [
+      {
+        name: 'AutomationOverview',
+        path: 'overview',
+        component: () => import('#/views/automation/overview/index.vue'),
+        meta: {
+          authority: [
+            'superadmin',
+            'automa:workflows:read',
+            'automa:campaigns:read',
+            'runners:devices:read',
+            'runners:browsers:read',
+            'runners:proxies:read',
+          ],
+          icon: 'lucide:activity',
+          plugin: ['automa', 'runners'],
+          title: $t('page.automation.overview'),
+        },
+      },
       {
         name: 'AutomationWorkflows',
         path: 'workflows',

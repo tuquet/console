@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import type { GlobalAuditLogItem } from '#/api';
 
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+
+import { usePreferences } from '@vben/preferences';
 
 import { Eye, RefreshCw, ShieldCheck, User } from '@lucide/vue';
 import {
@@ -22,40 +24,107 @@ import { $t } from '#/locales';
 defineOptions({ name: 'SystemAuditLogs' });
 
 const { formatDate } = useDateFormat();
+const { isMobile } = usePreferences();
 
 const selectedLog = ref<GlobalAuditLogItem | null>(null);
 const detailOpen = ref(false);
+const totalLogs = ref(0);
+
+function getColumns() {
+  return [
+    {
+      field: 'created_at',
+      title: $t('page.system_view.audit_col_time'),
+      width: isMobile.value ? 125 : 170,
+      slots: { default: 'time-cell' },
+    },
+    {
+      field: 'action',
+      title: $t('page.system_view.audit_col_action'),
+      minWidth: isMobile.value ? 150 : 160,
+      slots: { default: 'action-cell' },
+    },
+    {
+      field: 'entity_type',
+      title: $t('page.system_view.audit_col_entity'),
+      minWidth: 160,
+      visible: !isMobile.value,
+      slots: { default: 'entity-cell' },
+    },
+    {
+      field: 'tenant_id',
+      title: $t('page.system_view.audit_col_tenant_id'),
+      width: 150,
+      visible: !isMobile.value,
+      slots: { default: 'tenant-cell' },
+    },
+    {
+      field: 'actor_id',
+      title: $t('page.system_view.audit_col_actor'),
+      width: 140,
+      visible: !isMobile.value,
+      slots: { default: 'actor-cell' },
+    },
+    {
+      field: 'ip_address',
+      title: $t('page.system_view.audit_col_ip'),
+      width: 140,
+      visible: !isMobile.value,
+      slots: { default: 'ip-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('common.detail'),
+      width: isMobile.value ? 56 : 100,
+      align: 'right' as const,
+      slots: { default: 'detail-cell' },
+    },
+  ];
+}
 
 const [Grid, gridApi] = useVbenVxeGrid<GlobalAuditLogItem>({
+  detailSheetOptions: {
+    forwardActionSlot: false,
+    resource: 'public.audit_logs',
+    subtitleField: 'entity_type',
+    titleField: 'action',
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Input',
         fieldName: 'action',
-        label: 'Hành động',
-        componentProps: {
-          placeholder: 'auth:login, member:invite...',
-        },
+        label: () => $t('page.system_view.audit_col_action'),
+        componentProps: () => ({
+          placeholder: $t('page.system_view.audit_action_placeholder'),
+        }),
       },
       {
         component: 'Input',
         fieldName: 'tenantId',
-        label: 'Mã định danh tổ chức',
-        componentProps: {
-          placeholder: 'Tenant UUID...',
-        },
+        label: () => $t('page.system_view.audit_filter_tenant_id'),
+        componentProps: () => ({
+          placeholder: $t('page.system_view.audit_tenant_placeholder'),
+        }),
       },
     ],
     layout: 'vertical',
     showCollapseButton: false,
     submitButtonOptions: {
-      content: $t('common.filter'),
+      content: computed(() => $t('common.filter')),
     },
     resetButtonOptions: {
-      content: $t('common.reset'),
+      content: computed(() => $t('common.reset')),
     },
-    actionWrapperClass: 'flex items-center justify-end gap-2 pt-2 sm:pt-6',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3',
+    actionWrapperClass:
+      'col-span-2 sm:col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
@@ -84,6 +153,7 @@ const [Grid, gridApi] = useVbenVxeGrid<GlobalAuditLogItem>({
             tenantId: tenantId || undefined,
             limit: 100,
           });
+          totalLogs.value = data.length;
 
           const currentPage = page?.currentPage || 1;
           const pageSize = page?.pageSize || 15;
@@ -97,57 +167,24 @@ const [Grid, gridApi] = useVbenVxeGrid<GlobalAuditLogItem>({
         },
       },
     },
-    columns: [
-      {
-        field: 'created_at',
-        title: 'Thời gian',
-        width: 170,
-        slots: { default: 'time-cell' },
-      },
-      {
-        field: 'action',
-        title: 'Hành động',
-        width: 160,
-        slots: { default: 'action-cell' },
-      },
-      {
-        field: 'entity_type',
-        title: 'Thực thể',
-        minWidth: 160,
-        slots: { default: 'entity-cell' },
-      },
-      {
-        field: 'tenant_id',
-        title: 'Tenant ID',
-        width: 150,
-        slots: { default: 'tenant-cell' },
-      },
-      {
-        field: 'actor_id',
-        title: 'Tác nhân',
-        width: 140,
-        slots: { default: 'actor-cell' },
-      },
-      {
-        field: 'ip_address',
-        title: 'IP',
-        width: 140,
-        slots: { default: 'ip-cell' },
-      },
-      {
-        field: 'actions',
-        title: 'Chi tiết',
-        width: 100,
-        align: 'right',
-        slots: { default: 'detail-cell' },
-      },
-    ],
+    columns: getColumns(),
   },
 });
 
+watch([() => $t('page.system_view.audit_col_time'), isMobile], () => {
+  gridApi.setGridOptions({ columns: getColumns() });
+  gridApi.formApi?.setState({
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
+  });
+});
+
 function openDetail(log: GlobalAuditLogItem) {
-  selectedLog.value = log;
-  detailOpen.value = true;
+  gridApi.openDetailSheet(log);
 }
 
 function getActionBadgeVariant(
@@ -179,23 +216,26 @@ function refresh() {
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Header -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="flex flex-col gap-1">
-        <h1
-          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.system.auditLogs') }}
-        </h1>
-        <p class="text-xs text-muted-foreground">
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1
+            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          >
+            {{ $t('page.system.auditLogs') }}
+          </h1>
+          <Badge variant="secondary" class="font-mono text-xs font-normal">
+            {{ totalLogs }}
+          </Badge>
+        </div>
+        <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.system.auditLogs_desc') }}
         </p>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex shrink-0 items-center gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -208,9 +248,9 @@ function refresh() {
       </div>
     </div>
 
-    <!-- Table View (Desktop) -->
+    <!-- Table View -->
     <div
-      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-xs space-y-4"
+      class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs"
     >
       <Grid class="audit-logs-vxe-grid">
         <template #time-cell="{ row }">
@@ -220,12 +260,19 @@ function refresh() {
         </template>
 
         <template #action-cell="{ row }">
-          <Badge
-            :variant="getActionBadgeVariant(row.action)"
-            class="font-mono text-xs"
-          >
-            {{ row.action }}
-          </Badge>
+          <div class="flex min-w-0 flex-col items-start gap-0.5 py-0.5">
+            <Badge
+              :variant="getActionBadgeVariant(row.action)"
+              class="font-mono text-xs"
+            >
+              {{ row.action }}
+            </Badge>
+            <span
+              class="truncate font-mono text-2xs text-muted-foreground sm:hidden"
+            >
+              {{ row.entity_type }} #{{ row.entity_id.slice(0, 6) }}
+            </span>
+          </div>
         </template>
 
         <template #entity-cell="{ row }">
@@ -239,7 +286,7 @@ function refresh() {
 
         <template #tenant-cell="{ row }">
           <code
-            class="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground"
+            class="rounded bg-muted px-1.5 py-0.5 font-mono text-2xs text-muted-foreground"
           >
             {{ row.tenant_id.slice(0, 8) }}...
           </code>
@@ -249,7 +296,11 @@ function refresh() {
           <div class="flex items-center gap-1 text-xs text-muted-foreground">
             <User class="size-3 text-muted-foreground/70" />
             <span class="font-mono">
-              {{ row.actor_id ? row.actor_id.slice(0, 8) : 'Hệ thống' }}
+              {{
+                row.actor_id
+                  ? row.actor_id.slice(0, 8)
+                  : $t('page.system_view.audit_actor_system')
+              }}
             </span>
           </div>
         </template>
@@ -279,11 +330,15 @@ function refresh() {
         <DialogHeader>
           <DialogTitle class="flex items-center gap-2 text-base">
             <ShieldCheck class="size-4 text-primary" />
-            Chi tiết sự kiện kiểm toán #{{ selectedLog?.id }}
+            {{ $t('page.system_view.audit_dialog_title', [selectedLog?.id]) }}
           </DialogTitle>
           <DialogDescription class="font-mono text-xs">
-            Hành động: {{ selectedLog?.action }} | Tenant:
-            {{ selectedLog?.tenant_id }}
+            {{
+              $t('page.system_view.audit_dialog_desc', [
+                selectedLog?.action,
+                selectedLog?.tenant_id,
+              ])
+            }}
           </DialogDescription>
         </DialogHeader>
 
@@ -292,35 +347,44 @@ function refresh() {
           class="space-y-3 max-h-[60vh] overflow-y-auto text-xs"
         >
           <div>
-            <h4 class="font-semibold text-foreground mb-1">Dữ liệu mới</h4>
+            <h4 class="font-semibold text-foreground mb-1">
+              {{ $t('page.system_view.audit_new_values') }}
+            </h4>
             <pre
-              class="rounded-lg bg-muted p-3 font-mono overflow-x-auto text-[11px]"
+              class="rounded-lg bg-muted p-3 font-mono overflow-x-auto text-2xs"
               >{{
                 JSON.stringify(selectedLog.new_values, null, 2) || 'null'
               }}</pre>
           </div>
 
           <div>
-            <h4 class="font-semibold text-foreground mb-1">Dữ liệu cũ</h4>
+            <h4 class="font-semibold text-foreground mb-1">
+              {{ $t('page.system_view.audit_old_values') }}
+            </h4>
             <pre
-              class="rounded-lg bg-muted p-3 font-mono overflow-x-auto text-[11px]"
+              class="rounded-lg bg-muted p-3 font-mono overflow-x-auto text-2xs"
               >{{
                 JSON.stringify(selectedLog.old_values, null, 2) || 'null'
               }}</pre>
           </div>
 
           <div
-            class="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground pt-2 border-t border-border/40"
+            class="grid grid-cols-2 gap-2 text-2xs text-muted-foreground pt-2 border-t border-border/40"
           >
             <div>
-              <strong>Actor ID:</strong>
-              {{ selectedLog.actor_id || 'Hệ thống' }}
+              <strong>{{ $t('page.system_view.audit_actor_id_label') }}</strong>
+              {{
+                selectedLog.actor_id ||
+                $t('page.system_view.audit_actor_system')
+              }}
             </div>
             <div>
-              <strong>IP address:</strong> {{ selectedLog.ip_address || '—' }}
+              <strong>{{ $t('page.system_view.audit_ip_label') }}</strong>
+              {{ selectedLog.ip_address || '—' }}
             </div>
             <div class="col-span-2 truncate">
-              <strong>User agent:</strong> {{ selectedLog.user_agent || '—' }}
+              <strong>{{ $t('page.system_view.audit_ua_label') }}</strong>
+              {{ selectedLog.user_agent || '—' }}
             </div>
           </div>
         </div>

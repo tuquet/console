@@ -3,7 +3,9 @@ import type { ActiveBannerScene } from '#/components/common/specter-ghost-banner
 
 import { computed, ref } from 'vue';
 
+import { STORAGE_KEYS } from '@vben/constants';
 import { AuthPageLayout } from '@vben/layouts';
+import { $t } from '@vben/locales';
 import { preferences } from '@vben/preferences';
 
 import HairlinePhoneBanner from '#/components/common/hairline-phone-banner.vue';
@@ -14,7 +16,7 @@ import SplineRobotBanner from '#/components/common/spline-robot-banner.vue';
 
 type BannerMode = 'ghost' | 'phone' | 'random' | 'robot';
 
-const STORAGE_KEY = 'specter:auth-banner-mode';
+const STORAGE_KEY = STORAGE_KEYS.AUTH_BANNER_MODE;
 const SCENES: ActiveBannerScene[] = ['phone', 'robot', 'ghost'];
 
 function getInitialMode(): BannerMode {
@@ -56,6 +58,10 @@ function selectMode(mode: BannerMode) {
 const appName = computed(() => preferences.app.name);
 const logo = computed(() => preferences.logo.source);
 const logoDark = computed(() => preferences.logo.sourceDark);
+
+function labelOrFallback(translated: string, key: string, fallback: string) {
+  return translated === key ? fallback : translated;
+}
 </script>
 
 <template>
@@ -73,7 +79,7 @@ const logoDark = computed(() => preferences.logo.sourceDark);
 
         <!-- Minimal monochrome scene switcher pill -->
         <div
-          class="absolute bottom-5 left-5 z-30 inline-flex items-center gap-0.5 rounded-full border border-border/70 bg-background/80 p-1 font-mono text-[11px] backdrop-blur-md dark:border-white/10 dark:bg-zinc-900/80"
+          class="absolute bottom-5 left-5 z-30 inline-flex items-center gap-0.5 rounded-full border border-border/70 bg-background/80 p-1 font-mono text-2xs backdrop-blur-md dark:border-white/10 dark:bg-zinc-900/80"
         >
           <button
             type="button"
@@ -85,7 +91,13 @@ const logoDark = computed(() => preferences.logo.sourceDark);
             "
             @click="selectMode('phone')"
           >
-            phone
+            {{
+              labelOrFallback(
+                $t('authentication.bannerPhone'),
+                'authentication.bannerPhone',
+                'phone',
+              )
+            }}
           </button>
           <button
             type="button"
@@ -97,7 +109,13 @@ const logoDark = computed(() => preferences.logo.sourceDark);
             "
             @click="selectMode('robot')"
           >
-            robot 3d
+            {{
+              labelOrFallback(
+                $t('authentication.bannerRobot'),
+                'authentication.bannerRobot',
+                'robot 3d',
+              )
+            }}
           </button>
           <button
             type="button"
@@ -109,11 +127,17 @@ const logoDark = computed(() => preferences.logo.sourceDark);
             "
             @click="selectMode('ghost')"
           >
-            ghost 3d
+            {{
+              labelOrFallback(
+                $t('authentication.bannerGhost'),
+                'authentication.bannerGhost',
+                'ghost 3d',
+              )
+            }}
           </button>
           <button
             type="button"
-            title="Tự động đổi ngẫu nhiên mỗi lần tải trang (nhấn để đổi ngay)"
+            :title="$t('authentication.bannerRandomTooltip')"
             class="rounded-full px-2.5 py-0.5 transition-colors"
             :class="
               bannerMode === 'random'
@@ -122,7 +146,13 @@ const logoDark = computed(() => preferences.logo.sourceDark);
             "
             @click="selectMode('random')"
           >
-            random
+            {{
+              labelOrFallback(
+                $t('authentication.bannerRandom'),
+                'authentication.bannerRandom',
+                'random',
+              )
+            }}
           </button>
         </div>
       </div>

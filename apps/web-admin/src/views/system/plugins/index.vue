@@ -1,13 +1,20 @@
 <script lang="ts" setup>
 import type { SystemPluginItem } from '#/api';
 
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+
+import {
+  FILTER_ALL,
+  SYSTEM_PLUGIN_CATEGORY,
+  SYSTEM_PLUGIN_STATUS,
+} from '@vben/constants';
+import { usePreferences } from '@vben/preferences';
 
 import {
   CreditCard,
   Database,
+  Eye,
   HardDrive,
-  Layers,
   RefreshCw,
   ShieldCheck,
   Webhook,
@@ -24,45 +31,114 @@ import { $t } from '#/locales';
 defineOptions({ name: 'SystemPlugins' });
 
 const { formatDate } = useDateFormat();
+const { isMobile } = usePreferences();
 
 const allPlugins = ref<SystemPluginItem[]>([]);
 
+function getColumns() {
+  return [
+    {
+      field: 'name',
+      title: $t('term.plugin'),
+      minWidth: isMobile.value ? 180 : 220,
+      slots: { default: 'plugin-cell' },
+    },
+    {
+      field: 'is_core',
+      title: $t('page.system_view.plugins_col_type'),
+      width: 150,
+      visible: !isMobile.value,
+      slots: { default: 'type-cell' },
+    },
+    {
+      field: 'version',
+      title: $t('page.system_view.plugins_col_version_schema'),
+      minWidth: 200,
+      visible: !isMobile.value,
+      slots: { default: 'version-cell' },
+    },
+    {
+      field: 'status',
+      title: $t('common.status'),
+      width: isMobile.value ? 110 : 140,
+      slots: { default: 'status-cell' },
+    },
+    {
+      field: 'installed_at',
+      title: $t('page.system_view.plugins_col_installed_at'),
+      minWidth: 150,
+      align: 'right' as const,
+      visible: !isMobile.value,
+      slots: { default: 'date-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('common.actions'),
+      width: isMobile.value ? 56 : 105,
+      align: 'right' as const,
+      slots: { default: 'actions-cell' },
+    },
+  ];
+}
+
 const [Grid, gridApi] = useVbenVxeGrid<SystemPluginItem>({
+  detailSheetOptions: {
+    forwardActionSlot: false,
+    resource: 'public.system_plugins',
+    subtitleField: 'version',
+    titleField: 'name',
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Select',
         fieldName: 'is_core',
-        label: 'Phân loại',
-        defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả phân loại',
+        label: () => $t('page.system_view.plugins_filter_type'),
+        defaultValue: FILTER_ALL,
+        componentProps: () => ({
+          placeholder: $t('page.system_view.plugins_type_all'),
           options: [
-            { label: 'Tất cả phân loại', value: 'all' },
-            { label: 'Core Kernel', value: 'core' },
-            { label: 'Extension', value: 'extension' },
+            {
+              label: $t('page.system_view.plugins_type_all'),
+              value: FILTER_ALL,
+            },
+            {
+              label: $t('page.system_view.plugins_type_core'),
+              value: SYSTEM_PLUGIN_CATEGORY.CORE,
+            },
+            {
+              label: $t('page.system_view.plugins_type_extension'),
+              value: SYSTEM_PLUGIN_CATEGORY.EXTENSION,
+            },
           ],
-        },
+        }),
       },
       {
         component: 'Input',
         fieldName: 'keyword',
-        label: 'Tìm kiếm',
-        componentProps: {
-          placeholder: 'Tên plugin hoặc định danh...',
-        },
+        label: () => $t('common.search'),
+        componentProps: () => ({
+          placeholder: $t('page.system_view.plugins_search_placeholder'),
+        }),
       },
     ],
     layout: 'vertical',
     showCollapseButton: false,
     submitButtonOptions: {
-      content: $t('common.filter'),
+      content: computed(() => $t('common.filter')),
     },
     resetButtonOptions: {
-      content: $t('common.reset'),
+      content: computed(() => $t('common.reset')),
     },
-    actionWrapperClass: 'flex items-center justify-end gap-2 pt-2 sm:pt-6',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3',
+    actionWrapperClass:
+      'col-span-2 sm:col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
@@ -83,9 +159,9 @@ const [Grid, gridApi] = useVbenVxeGrid<SystemPluginItem>({
           allPlugins.value = data;
 
           let filtered = data;
-          if (formValues?.is_core === 'core') {
+          if (formValues?.is_core === SYSTEM_PLUGIN_CATEGORY.CORE) {
             filtered = filtered.filter((p) => p.is_core);
-          } else if (formValues?.is_core === 'extension') {
+          } else if (formValues?.is_core === SYSTEM_PLUGIN_CATEGORY.EXTENSION) {
             filtered = filtered.filter((p) => !p.is_core);
           }
 
@@ -110,40 +186,20 @@ const [Grid, gridApi] = useVbenVxeGrid<SystemPluginItem>({
         },
       },
     },
-    columns: [
-      {
-        field: 'name',
-        title: 'Plugin',
-        minWidth: 220,
-        slots: { default: 'plugin-cell' },
-      },
-      {
-        field: 'is_core',
-        title: 'Phân loại',
-        width: 150,
-        slots: { default: 'type-cell' },
-      },
-      {
-        field: 'version',
-        title: 'Phiên bản & schema',
-        minWidth: 200,
-        slots: { default: 'version-cell' },
-      },
-      {
-        field: 'status',
-        title: 'Trạng thái',
-        width: 140,
-        slots: { default: 'status-cell' },
-      },
-      {
-        field: 'installed_at',
-        title: 'Ngày cài đặt',
-        minWidth: 150,
-        align: 'right',
-        slots: { default: 'date-cell' },
-      },
-    ],
+    columns: getColumns(),
   },
+});
+
+watch([() => $t('page.system_view.plugins_col_type'), isMobile], () => {
+  gridApi.setGridOptions({ columns: getColumns() });
+  gridApi.formApi?.setState({
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
+  });
 });
 
 function getPluginIcon(pluginId: string) {
@@ -178,23 +234,26 @@ function refresh() {
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Top Header -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="flex flex-col gap-1">
-        <h1
-          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.system.plugins') }}
-        </h1>
-        <p class="text-xs text-muted-foreground">
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1
+            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          >
+            {{ $t('page.system.plugins') }}
+          </h1>
+          <Badge variant="secondary" class="font-mono text-xs font-normal">
+            {{ allPlugins.length }}
+          </Badge>
+        </div>
+        <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.system.plugins_desc') }}
         </p>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex shrink-0 items-center gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -209,48 +268,35 @@ function refresh() {
 
     <!-- Main Container -->
     <div
-      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-sm space-y-4"
+      class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs"
     >
-      <!-- Stats Bar -->
-      <div
-        class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-border/40 pb-4 text-xs"
-      >
-        <div class="flex items-center gap-2">
-          <Layers class="size-4 text-muted-foreground" />
-          <span class="text-sm font-semibold text-foreground">
-            Danh sách plugins
-          </span>
-          <span class="text-muted-foreground"
-            >· {{ allPlugins.length }} tổng số</span
-          >
-        </div>
-
-        <div class="flex items-center gap-3 text-muted-foreground">
-          <span
-            >{{ allPlugins.filter((p) => p.is_core).length }} Core Kernel</span
-          >
-          <span>&bull;</span>
-          <span
-            >{{ allPlugins.filter((p) => !p.is_core).length }} Extensions</span
-          >
-        </div>
-      </div>
-
       <!-- Table Grid -->
       <Grid class="plugins-vxe-grid">
         <template #plugin-cell="{ row }">
           <div class="flex items-center gap-2.5 py-1">
             <div
-              class="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground shrink-0"
+              class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
             >
               <component :is="getPluginIcon(row.id)" class="size-4" />
             </div>
-            <div class="text-left">
-              <div class="font-medium text-foreground">
+            <div class="min-w-0 text-left">
+              <div class="truncate font-medium text-foreground">
                 {{ row.name }}
               </div>
-              <div class="font-mono text-xs text-muted-foreground">
-                {{ row.id }}
+              <div
+                class="flex items-center gap-1.5 font-mono text-2xs text-muted-foreground sm:text-xs"
+              >
+                <span class="truncate">{{ row.id }}</span>
+                <span class="sm:hidden">&bull;</span>
+                <span class="sm:hidden">v{{ row.version }}</span>
+                <span class="sm:hidden">&bull;</span>
+                <span class="truncate font-sans sm:hidden">
+                  {{
+                    row.is_core
+                      ? $t('page.system_view.plugins_type_core')
+                      : $t('page.system_view.plugins_type_extension')
+                  }}
+                </span>
               </div>
             </div>
           </div>
@@ -261,7 +307,11 @@ function refresh() {
             :variant="row.is_core ? 'default' : 'secondary'"
             class="text-xs font-normal"
           >
-            {{ row.is_core ? 'Core Kernel' : 'Extension' }}
+            {{
+              row.is_core
+                ? $t('page.system_view.plugins_type_core')
+                : $t('page.system_view.plugins_type_extension')
+            }}
           </Badge>
         </template>
 
@@ -271,7 +321,9 @@ function refresh() {
               v{{ row.version }}
             </Badge>
             <span v-if="row.schema_name" class="text-muted-foreground">
-              schema: {{ row.schema_name }}
+              {{
+                $t('page.system_view.plugins_schema_prefix', [row.schema_name])
+              }}
             </span>
           </div>
         </template>
@@ -281,17 +333,18 @@ function refresh() {
             <span
               class="mr-1.5 size-1.5 rounded-full"
               :class="{
-                'bg-success': row.status === 'installed',
-                'bg-muted-foreground': row.status === 'disabled',
-                'bg-warning': row.status === 'pending',
+                'bg-success': row.status === SYSTEM_PLUGIN_STATUS.INSTALLED,
+                'bg-muted-foreground':
+                  row.status === SYSTEM_PLUGIN_STATUS.DISABLED,
+                'bg-warning': row.status === SYSTEM_PLUGIN_STATUS.PENDING,
               }"
             ></span>
             {{
-              row.status === 'installed'
-                ? 'Đã cài đặt'
-                : row.status === 'disabled'
-                  ? 'Tạm dừng'
-                  : 'Đang chờ'
+              row.status === SYSTEM_PLUGIN_STATUS.INSTALLED
+                ? $t('page.system_view.plugins_status_installed')
+                : row.status === SYSTEM_PLUGIN_STATUS.DISABLED
+                  ? $t('page.system_view.status_paused')
+                  : $t('common.pending')
             }}
           </Badge>
         </template>
@@ -300,6 +353,21 @@ function refresh() {
           <span class="text-xs text-muted-foreground">
             {{ formatDate(row.installed_at) }}
           </span>
+        </template>
+
+        <template #actions-cell="{ row }">
+          <div class="flex items-center justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              class="inline-flex h-7 items-center gap-1 px-2 text-xs"
+              :title="$t('common.detail')"
+              @click="gridApi.openDetailSheet(row as SystemPluginItem)"
+            >
+              <Eye class="size-3 shrink-0" />
+              <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
+            </Button>
+          </div>
         </template>
       </Grid>
     </div>

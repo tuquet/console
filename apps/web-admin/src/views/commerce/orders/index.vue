@@ -6,13 +6,13 @@ import type {
   TenantItem,
 } from '#/api';
 
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+
+import { usePreferences } from '@vben/preferences';
 
 import {
   Building2,
-  CheckCircle2,
-  Coins,
   Copy,
   Download,
   ExternalLink,
@@ -35,20 +35,32 @@ import {
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
+  downloadTextFile,
   filterCommerceOrders,
+  formatSerialDeliveriesText,
   getActiveTenantId,
   getOrderDeliveriesApi,
   getTenantOrdersApi,
   getTenantsApi,
   setActiveTenantId,
 } from '#/api';
-import { useDateFormat } from '#/composables';
+import { useClipboard, useDateFormat } from '#/composables';
+import {
+  buildEnumFilterOptions,
+  COMMERCE_ORDER_STATUS,
+  COMMERCE_ORDER_STATUS_META,
+  FILTER_ALL,
+  PAYMENT_CHANNEL,
+  PAYMENT_CHANNEL_META,
+} from '#/constants';
 import { $t } from '#/locales';
 
 defineOptions({ name: 'CommerceOrders' });
 
 const router = useRouter();
 const { formatDate } = useDateFormat();
+const { copyToClipboard } = useClipboard();
+const { isMobile } = usePreferences();
 
 const tenants = ref<TenantItem[]>([]);
 const selectedTenantId = ref<string>(getActiveTenantId());
@@ -60,97 +72,181 @@ const loadingDeliveries = ref(false);
 const selectedOrder = ref<CommerceOrderRecord | null>(null);
 const orderDeliveries = ref<CommerceOrderDeliveryItem[]>([]);
 
-const ORDER_STATUS_MAP: Record<
-  CommerceOrderStatus,
-  {
-    label: string;
-    variant: 'default' | 'destructive' | 'outline' | 'secondary';
-  }
-> = {
-  cancelled: { label: 'Đã hủy', variant: 'outline' },
-  completed: { label: 'Đã giao hàng', variant: 'default' },
-  failed: { label: 'Thất bại', variant: 'destructive' },
-  fulfilling: { label: 'Đang xuất kho', variant: 'secondary' },
-  manual_review: { label: 'Chờ duyệt tay', variant: 'secondary' },
-  paid: { label: 'Đã thanh toán', variant: 'default' },
-  pending_payment: { label: 'Chờ thanh toán', variant: 'outline' },
-  refunded: { label: 'Đã hoàn tiền', variant: 'outline' },
-};
+const orderStatusMap = computed<
+  Record<
+    CommerceOrderStatus,
+    {
+      label: string;
+      variant: 'default' | 'destructive' | 'outline' | 'secondary';
+    }
+  >
+>(() => ({
+  [COMMERCE_ORDER_STATUS.CANCELLED]: {
+    label: $t('common.cancelled'),
+    variant: 'outline',
+  },
+  [COMMERCE_ORDER_STATUS.COMPLETED]: {
+    label: $t('page.commerce_view.order_status_completed'),
+    variant: 'default',
+  },
+  [COMMERCE_ORDER_STATUS.FAILED]: {
+    label: $t('common.failed'),
+    variant: 'destructive',
+  },
+  [COMMERCE_ORDER_STATUS.FULFILLING]: {
+    label: $t('page.commerce_view.order_status_fulfilling'),
+    variant: 'secondary',
+  },
+  [COMMERCE_ORDER_STATUS.MANUAL_REVIEW]: {
+    label: $t('page.commerce_view.order_status_manual_review'),
+    variant: 'secondary',
+  },
+  [COMMERCE_ORDER_STATUS.PAID]: {
+    label: $t('page.commerce_view.order_status_paid'),
+    variant: 'default',
+  },
+  [COMMERCE_ORDER_STATUS.PENDING_PAYMENT]: {
+    label: $t('page.commerce_view.order_status_pending_payment'),
+    variant: 'outline',
+  },
+  [COMMERCE_ORDER_STATUS.REFUNDED]: {
+    label: $t('page.commerce_view.order_status_refunded'),
+    variant: 'outline',
+  },
+}));
 
-const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  bank_transfer: 'Chuyển khoản VietQR',
-  card_intl: 'Thẻ quốc tế (Stripe)',
-  crypto: 'Crypto (USDT)',
-  e_wallet: 'Ví điện tử (MoMo)',
-  internal_wallet: 'Ví Xu trả trước',
-};
+const paymentMethodLabels = computed<Record<string, string>>(() => ({
+  [PAYMENT_CHANNEL.BANK_TRANSFER]: $t(
+    'page.commerce_view.method_bank_transfer',
+  ),
+  [PAYMENT_CHANNEL.CARD_INTL]: $t('page.commerce_view.method_card_intl'),
+  [PAYMENT_CHANNEL.CRYPTO]: $t('page.commerce_view.method_crypto'),
+  [PAYMENT_CHANNEL.E_WALLET]: $t('page.commerce_view.method_e_wallet'),
+  [PAYMENT_CHANNEL.INTERNAL_WALLET]: $t(
+    'page.commerce_view.method_internal_wallet',
+  ),
+}));
 
 function getOrderStatusBadge(status: CommerceOrderStatus) {
   return (
-    ORDER_STATUS_MAP[status] || { label: status, variant: 'outline' as const }
+    orderStatusMap.value[status] || {
+      label: status,
+      variant: 'outline' as const,
+    }
   );
 }
 
 function getPaymentMethodLabel(method: null | string) {
-  if (!method) return 'Chưa chọn';
-  return PAYMENT_METHOD_LABELS[method] || method;
+  if (!method) return $t('page.commerce_view.method_not_selected');
+  return paymentMethodLabels.value[method] || method;
 }
 
-const completedCount = computed(
-  () => allOrders.value.filter((o) => o.status === 'completed').length,
-);
-
-const totalSpentCredits = computed(() =>
-  allOrders.value
-    .filter((o) => o.status === 'completed' || o.status === 'paid')
-    .reduce((sum, o) => sum + (o.total_credits || 0), 0),
-);
+function getColumns() {
+  const mobile = isMobile.value;
+  return [
+    {
+      field: 'order_code',
+      title: $t('page.commerce_view.col_order_code'),
+      minWidth: mobile ? 145 : 190,
+      slots: { default: 'code-cell' },
+    },
+    {
+      field: 'payment_method',
+      title: $t('page.commerce_view.col_payment_method'),
+      minWidth: 170,
+      visible: !mobile,
+      slots: { default: 'method-cell' },
+    },
+    {
+      field: 'total_credits',
+      title: $t('page.commerce_view.total_payment'),
+      width: mobile ? 105 : 150,
+      slots: { default: 'total-cell' },
+    },
+    {
+      field: 'status',
+      title: $t('common.status'),
+      width: mobile ? 110 : 155,
+      visible: !mobile,
+      slots: { default: 'status-cell' },
+    },
+    {
+      field: 'created_at',
+      title: $t('page.commerce_view.col_created_time'),
+      width: 165,
+      visible: !mobile,
+      slots: { default: 'date-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('page.commerce_view.col_delivery'),
+      width: mobile ? 95 : 150,
+      align: 'right' as const,
+      slots: { default: 'action-cell' },
+    },
+  ];
+}
 
 const [Grid, gridApi] = useVbenVxeGrid<CommerceOrderRecord>({
   separator: false,
+  detailSheetOptions: {
+    resource: 'commerce.orders',
+    subtitleField: 'payment_method',
+    titleField: 'order_code',
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Select',
         fieldName: 'status',
-        label: 'Trạng thái đơn',
-        defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả trạng thái',
-          options: [
-            { label: 'Tất cả trạng thái', value: 'all' },
-            { label: 'Đã giao hàng', value: 'completed' },
-            { label: 'Chờ thanh toán', value: 'pending_payment' },
-            { label: 'Chờ duyệt tay', value: 'manual_review' },
-            { label: 'Thất bại', value: 'failed' },
-          ],
-        },
+        label: () => $t('page.commerce_view.order_status_label'),
+        defaultValue: FILTER_ALL,
+        componentProps: () => ({
+          placeholder: $t('page.runs_view.status_all'),
+          options: buildEnumFilterOptions(COMMERCE_ORDER_STATUS_META, $t, {
+            allLabelText: $t('page.runs_view.status_all'),
+            order: [
+              COMMERCE_ORDER_STATUS.COMPLETED,
+              COMMERCE_ORDER_STATUS.PENDING_PAYMENT,
+              COMMERCE_ORDER_STATUS.MANUAL_REVIEW,
+              COMMERCE_ORDER_STATUS.FAILED,
+            ],
+          }),
+        }),
       },
       {
         component: 'Select',
         fieldName: 'payment_method',
-        label: 'Kênh thanh toán',
-        defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả kênh',
-          options: [
-            { label: 'Tất cả kênh', value: 'all' },
-            { label: 'Ví Xu trả trước', value: 'internal_wallet' },
-            { label: 'Chuyển khoản VietQR', value: 'bank_transfer' },
-            { label: 'Ví điện tử MoMo', value: 'e_wallet' },
-            { label: 'Thẻ quốc tế Stripe', value: 'card_intl' },
-            { label: 'Crypto USDT', value: 'crypto' },
-          ],
-        },
+        label: () => $t('page.commerce_view.payment_channel_label'),
+        defaultValue: FILTER_ALL,
+        componentProps: () => ({
+          placeholder: $t('page.commerce_view.all_channels'),
+          options: buildEnumFilterOptions(PAYMENT_CHANNEL_META, $t, {
+            allLabelText: $t('page.commerce_view.all_channels'),
+            order: [
+              PAYMENT_CHANNEL.INTERNAL_WALLET,
+              PAYMENT_CHANNEL.BANK_TRANSFER,
+              PAYMENT_CHANNEL.E_WALLET,
+              PAYMENT_CHANNEL.CARD_INTL,
+              PAYMENT_CHANNEL.CRYPTO,
+            ],
+          }),
+        }),
       },
       {
         component: 'Input',
         fieldName: 'search',
-        label: 'Tìm kiếm',
-        componentProps: {
-          placeholder: 'Tìm theo mã đơn ORD-... hoặc UUID...',
+        label: () => $t('common.search'),
+        componentProps: () => ({
+          placeholder: $t('page.commerce_view.search_order_placeholder'),
           clearable: true,
-        },
+        }),
       },
     ],
     layout: 'vertical',
@@ -158,13 +254,14 @@ const [Grid, gridApi] = useVbenVxeGrid<CommerceOrderRecord>({
     submitOnChange: true,
     submitOnEnter: true,
     submitButtonOptions: {
-      content: $t('common.filter'),
+      content: computed(() => $t('common.filter')),
     },
     resetButtonOptions: {
-      content: $t('common.reset'),
+      content: computed(() => $t('common.reset')),
     },
-    actionWrapperClass: 'flex items-center justify-end gap-2',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3',
+    actionWrapperClass:
+      'col-span-2 sm:col-span-1 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
@@ -211,46 +308,18 @@ const [Grid, gridApi] = useVbenVxeGrid<CommerceOrderRecord>({
         },
       },
     },
-    columns: [
-      {
-        field: 'order_code',
-        title: 'Mã đơn hàng',
-        minWidth: 190,
-        slots: { default: 'code-cell' },
-      },
-      {
-        field: 'payment_method',
-        title: 'Phương thức',
-        minWidth: 170,
-        slots: { default: 'method-cell' },
-      },
-      {
-        field: 'total_credits',
-        title: 'Tổng thanh toán',
-        width: 150,
-        slots: { default: 'total-cell' },
-      },
-      {
-        field: 'status',
-        title: 'Trạng thái',
-        width: 155,
-        slots: { default: 'status-cell' },
-      },
-      {
-        field: 'created_at',
-        title: 'Thời gian tạo',
-        width: 165,
-        slots: { default: 'date-cell' },
-      },
-      {
-        field: 'actions',
-        title: 'Bàn giao',
-        width: 150,
-        align: 'right',
-        slots: { default: 'action-cell' },
-      },
-    ],
+    columns: getColumns(),
   },
+});
+
+watch([() => $t('page.commerce_view.col_order_code'), isMobile], () => {
+  gridApi.setGridOptions({ columns: getColumns() });
+  gridApi.formApi?.setState({
+    commonConfig: {
+      componentProps: { class: 'w-full' },
+      hideLabel: isMobile.value,
+    },
+  });
 });
 
 async function initTenantsAndLoad() {
@@ -283,44 +352,31 @@ async function openDeliveriesModal(order: CommerceOrderRecord) {
   try {
     orderDeliveries.value = await getOrderDeliveriesApi(order.id);
   } catch (error: any) {
-    toast.error(error?.message || 'Không thể tải dữ liệu bàn giao');
+    toast.error(
+      error?.message || $t('page.commerce_view.load_deliveries_failed'),
+    );
   } finally {
     loadingDeliveries.value = false;
   }
 }
 
 const serialLinesText = computed(() =>
-  orderDeliveries.value
-    .filter((d) => d.delivery_type === 'serial_stock')
-    .map(
-      (d) =>
-        d.delivered_payload?.serial ||
-        d.delivered_payload?.secret_line ||
-        JSON.stringify(d.delivered_payload),
-    )
-    .join('\n'),
+  formatSerialDeliveriesText(orderDeliveries.value),
 );
 
-async function copyText(text: string, label = 'dữ liệu') {
-  try {
-    await navigator.clipboard.writeText(text);
-    toast.success(`Đã sao chép ${label}`);
-  } catch {
-    toast.error('Không thể sao chép');
-  }
+async function copyText(
+  text: string,
+  label = $t('page.commerce_view.copy_default_label'),
+) {
+  await copyToClipboard(text, $t('page.commerce_view.copied_label', { label }));
 }
 
 function downloadSerialTxt() {
   if (!serialLinesText.value) return;
-  const blob = new Blob([serialLinesText.value], {
-    type: 'text/plain;charset=utf-8',
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `${selectedOrder.value?.order_code || 'order'}.txt`;
-  link.click();
-  URL.revokeObjectURL(url);
+  downloadTextFile(
+    `${selectedOrder.value?.order_code || 'order'}.txt`,
+    serialLinesText.value,
+  );
 }
 
 onMounted(() => {
@@ -329,30 +385,33 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Header -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="flex flex-col gap-1">
-        <h1
-          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.commerce.orders') }}
-        </h1>
-        <p class="text-xs text-muted-foreground">
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1
+            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          >
+            {{ $t('page.commerce.orders') }}
+          </h1>
+          <Badge variant="secondary" class="font-mono text-xs font-normal">
+            {{ allOrders.length }}
+          </Badge>
+        </div>
+        <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.commerce.orders_desc') }}
         </p>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <div
-          class="flex items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-1.5"
+          class="flex items-center gap-1.5 rounded-lg border border-border/60 bg-card px-2.5 py-1.5"
         >
-          <Building2 class="size-3.5 text-muted-foreground" />
+          <Building2 class="size-3.5 shrink-0 text-muted-foreground" />
           <select
             :value="selectedTenantId"
-            class="bg-transparent text-xs font-medium text-foreground focus:outline-none"
+            class="max-w-[110px] sm:max-w-[160px] truncate bg-transparent text-xs font-medium text-foreground focus:outline-none"
             @change="handleTenantChange"
           >
             <option
@@ -368,73 +427,30 @@ onMounted(() => {
         <Button
           variant="default"
           size="sm"
-          class="gap-1.5"
+          class="h-8 gap-1.5 px-2.5 text-xs sm:px-3"
           @click="router.push('/commerce/store')"
         >
           <ShoppingBag class="size-3.5" />
-          Mua thêm tài nguyên
+          <span class="hidden sm:inline">{{
+            $t('page.commerce_view.buy_more_resources')
+          }}</span>
         </Button>
 
         <Button
           variant="outline"
-          size="sm"
-          class="gap-1.5"
+          size="icon"
+          class="size-8 shrink-0"
+          :title="$t('common.refresh')"
           @click="() => gridApi.reload()"
         >
-          <RefreshCw class="size-3.5 text-muted-foreground" />
-          {{ $t('common.refresh') }}
+          <RefreshCw class="size-3.5 shrink-0" />
         </Button>
-      </div>
-    </div>
-
-    <!-- Metric Cards -->
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-      <div class="rounded-xl border border-border/60 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground">
-            Tổng đơn hàng
-          </span>
-          <PackageCheck class="size-4 text-primary" />
-        </div>
-        <p
-          class="mt-2 font-mono text-2xl font-bold tracking-tight text-foreground"
-        >
-          {{ allOrders.length }}
-        </p>
-      </div>
-
-      <div class="rounded-xl border border-border/60 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground">
-            Đã giao hàng hoàn tất
-          </span>
-          <CheckCircle2 class="size-4 text-success" />
-        </div>
-        <p
-          class="mt-2 font-mono text-2xl font-bold tracking-tight text-foreground"
-        >
-          {{ completedCount }}
-        </p>
-      </div>
-
-      <div class="rounded-xl border border-border/60 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground">
-            Tổng giá trị đơn đã mua
-          </span>
-          <Coins class="size-4 text-primary" />
-        </div>
-        <p
-          class="mt-2 font-mono text-2xl font-bold tracking-tight text-foreground"
-        >
-          {{ totalSpentCredits.toLocaleString('en-US') }} Xu
-        </p>
       </div>
     </div>
 
     <!-- VXE Grid Container -->
     <div
-      class="overflow-hidden rounded-none border-0 border-border/60 bg-card p-0 shadow-none sm:rounded-xl sm:border sm:p-5 sm:shadow-xs"
+      class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs"
     >
       <Grid>
         <template #code-cell="{ row }">
@@ -445,7 +461,12 @@ onMounted(() => {
             <button
               type="button"
               class="text-muted-foreground hover:text-foreground"
-              @click="copyText(row.order_code, 'mã đơn hàng')"
+              @click="
+                copyText(
+                  row.order_code,
+                  $t('page.commerce_view.order_code_label'),
+                )
+              "
             >
               <Copy class="size-3" />
             </button>
@@ -484,7 +505,7 @@ onMounted(() => {
             @click="openDeliveriesModal(row)"
           >
             <Eye class="size-3.5" />
-            Nhận hàng
+            {{ $t('page.commerce_view.claim_delivery_btn') }}
           </Button>
         </template>
       </Grid>
@@ -496,11 +517,14 @@ onMounted(() => {
         <DialogHeader>
           <DialogTitle class="flex items-center gap-2 text-base font-semibold">
             <PackageCheck class="size-4 text-primary" />
-            Chi tiết bàn giao — {{ selectedOrder?.order_code }}
+            {{
+              $t('page.commerce_view.delivery_detail_title', {
+                code: selectedOrder?.order_code || '',
+              })
+            }}
           </DialogTitle>
           <DialogDescription class="text-xs text-muted-foreground">
-            Danh sách tài khoản, license key, proxy hoặc tệp số đã xuất kho cho
-            đơn hàng này.
+            {{ $t('page.commerce_view.delivery_detail_desc') }}
           </DialogDescription>
         </DialogHeader>
 
@@ -508,14 +532,16 @@ onMounted(() => {
           v-if="loadingDeliveries"
           class="py-8 text-center text-xs text-muted-foreground"
         >
-          Đang tải dữ liệu bàn giao...
+          {{ $t('page.commerce_view.loading_deliveries') }}
         </div>
 
         <div
           v-else-if="orderDeliveries.length === 0"
           class="rounded-lg border border-dashed border-border/60 py-8 text-center text-xs text-muted-foreground"
         >
-          Đơn hàng này chưa có bản ghi bàn giao (Trạng thái hiện tại:
+          {{ $t('page.commerce_view.no_deliveries_yet') }} ({{
+            $t('page.commerce_view.current_status_label')
+          }}:
           <span class="font-semibold text-foreground">{{
             selectedOrder?.status
           }}</span
@@ -529,22 +555,28 @@ onMounted(() => {
                 class="flex items-center gap-1.5 text-xs font-semibold text-foreground"
               >
                 <KeyRound class="size-3.5 text-primary" />
-                Tài khoản / License key đã xuất ({{
-                  orderDeliveries.filter(
-                    (d) => d.delivery_type === 'serial_stock',
-                  ).length
+                {{
+                  $t('page.commerce_view.serial_data_lines', {
+                    count: orderDeliveries.filter(
+                      (d) => d.delivery_type === 'serial_stock',
+                    ).length,
+                  })
                 }}
-                dòng)
               </span>
               <div class="flex items-center gap-1.5">
                 <Button
                   size="sm"
                   variant="outline"
                   class="h-7 gap-1 text-xs"
-                  @click="copyText(serialLinesText, 'danh sách tài khoản')"
+                  @click="
+                    copyText(
+                      serialLinesText,
+                      $t('page.commerce_view.account_list_label'),
+                    )
+                  "
                 >
                   <Copy class="size-3" />
-                  Sao chép tất cả
+                  {{ $t('page.commerce_view.copy_all') }}
                 </Button>
                 <Button
                   size="sm"
@@ -553,7 +585,7 @@ onMounted(() => {
                   @click="downloadSerialTxt"
                 >
                   <Download class="size-3" />
-                  Tải .txt
+                  {{ $t('page.commerce_view.download_txt') }}
                 </Button>
               </div>
             </div>
@@ -574,9 +606,15 @@ onMounted(() => {
           >
             <div class="flex items-center justify-between">
               <span class="font-semibold text-foreground">
-                Loại bàn giao: {{ item.delivery_type }}
+                {{
+                  $t('page.commerce_view.delivery_type_prefix', {
+                    type: item.delivery_type,
+                  })
+                }}
               </span>
-              <Badge variant="default" class="text-2xs">Đã cấp phát</Badge>
+              <Badge variant="default" class="text-2xs">
+                {{ $t('page.commerce_view.provisioned_badge') }}
+              </Badge>
             </div>
             <pre
               class="mt-2 overflow-x-auto rounded bg-background p-2 font-mono text-2xs text-muted-foreground"
@@ -592,7 +630,7 @@ onMounted(() => {
                 class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
               >
                 <ExternalLink class="size-3" />
-                Tải tệp xuống
+                {{ $t('page.commerce_view.download_file') }}
               </a>
             </div>
           </div>

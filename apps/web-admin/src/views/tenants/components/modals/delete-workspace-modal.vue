@@ -12,6 +12,8 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
+import { $t } from '#/locales';
+
 interface Props {
   loading?: boolean;
   open: boolean;
@@ -41,7 +43,7 @@ watch(
 
 function handleOk() {
   if (confirmSlugInput.value.trim() !== props.slug) {
-    toast.error('Mã Slug xác nhận không chính xác!');
+    toast.error($t('page.tenants_view.confirm_slug_mismatch'));
     return;
   }
   emit('submit');
@@ -52,20 +54,21 @@ function handleOk() {
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Xác nhận xóa hoặc lưu trữ workspace</DialogTitle>
+        <DialogTitle>
+          {{ $t('page.tenants_view.delete_modal_title') }}
+        </DialogTitle>
       </DialogHeader>
 
       <div class="space-y-5 py-2">
         <div
           class="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive"
         >
-          Hành động này sẽ vô hiệu hóa toàn bộ API keys, ngắt kết nối thiết bị
-          và loại bỏ workspace khỏi hệ thống.
+          {{ $t('page.tenants_view.delete_modal_warning') }}
         </div>
 
         <div>
           <label class="block text-sm font-medium text-foreground mb-2">
-            Để xác nhận, hãy nhập chính xác slug:
+            {{ $t('page.tenants_view.delete_confirm_prompt') }}
             <strong class="font-mono text-destructive">{{ props.slug }}</strong>
           </label>
           <Input v-model="confirmSlugInput" :placeholder="props.slug" />
@@ -78,14 +81,14 @@ function handleOk() {
           :disabled="props.loading"
           @click="emit('update:open', false)"
         >
-          Hủy
+          {{ $t('common.cancel') }}
         </Button>
         <Button
           variant="destructive"
           :disabled="props.loading || confirmSlugInput.trim() !== props.slug"
           @click="handleOk"
         >
-          Xác nhận xóa
+          {{ $t('page.tenants_view.confirm_delete_btn') }}
         </Button>
       </DialogFooter>
     </DialogContent>

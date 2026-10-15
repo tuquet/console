@@ -21,11 +21,14 @@ import {
   VxePager,
   VxeRadioGroup,
   VxeSelect,
+  VxeSwitch,
+  VxeTextarea,
   VxeTooltip,
   VxeUI,
   VxeUpload,
 } from 'vxe-pc-ui';
 import enUS from 'vxe-pc-ui/lib/language/en-US'; // Import default language
+import viVN from 'vxe-pc-ui/lib/language/vi-VN';
 import zhCN from 'vxe-pc-ui/lib/language/zh-CN';
 import {
   VxeColgroup,
@@ -51,6 +54,72 @@ function normalizeVxeLocale<T extends Record<string, any>>(localeModule: T) {
       ? localeModule.default
       : localeModule
   ) as T;
+}
+
+function buildViVxeLocale() {
+  const base = normalizeVxeLocale(viVN) as Record<string, any>;
+  return {
+    ...base,
+    vxe: {
+      ...base?.vxe,
+      button: {
+        ...base?.vxe?.button,
+        cancel: 'Hủy',
+        clear: 'Xóa',
+        confirm: 'Xác nhận',
+      },
+      loading: {
+        ...base?.vxe?.loading,
+        text: 'Đang tải...',
+      },
+      pager: {
+        ...base?.vxe?.pager,
+        endPage: 'Trang cuối',
+        endPageTitle: 'Trang cuối',
+        goto: 'Đến',
+        gotoTitle: 'Trang',
+        homePage: 'Trang đầu',
+        homePageTitle: 'Trang đầu',
+        nextJump: 'Tiến nhanh',
+        nextJumpTitle: 'Tiến nhanh',
+        nextPage: 'Trang sau',
+        nextPageTitle: 'Trang sau',
+        pageClassifier: '',
+        pagesize: '{0} / trang',
+        prevJump: 'Lùi nhanh',
+        prevJumpTitle: 'Lùi nhanh',
+        prevPage: 'Trang trước',
+        prevPageTitle: 'Trang trước',
+        total: 'Tổng {0} bản ghi',
+      },
+      select: {
+        ...base?.vxe?.select,
+        allChecked: 'Tất cả',
+        clear: 'Xóa',
+        close: 'Đóng',
+        emptyText: 'Không có dữ liệu',
+        loadingText: 'Đang tải...',
+        search: 'Tìm kiếm',
+        searchEmpty: 'Không tìm thấy dữ liệu phù hợp',
+      },
+      table: {
+        ...base?.vxe?.table,
+        actionTitle: 'Thao tác',
+        allFilter: 'Tất cả',
+        allTitle: 'Chọn tất cả / Bỏ chọn',
+        confirmFilter: 'Lọc',
+        customAll: 'Tất cả',
+        customCancel: 'Hủy',
+        customClose: 'Đóng',
+        customConfirm: 'Xác nhận',
+        customRestore: 'Khôi phục mặc định',
+        customTitle: 'Tùy chỉnh cột',
+        emptyText: 'Không có dữ liệu',
+        resetFilter: 'Đặt lại',
+        seqTitle: '#',
+      },
+    },
+  };
 }
 
 export function useTableForm(...args: any[]) {
@@ -100,8 +169,8 @@ export function initVxeTable() {
   // VxeUI.component(VxeRadioButton);
   VxeUI.component(VxeRadioGroup);
   VxeUI.component(VxeSelect);
-  // VxeUI.component(VxeSwitch);
-  // VxeUI.component(VxeTextarea);
+  VxeUI.component(VxeSwitch);
+  VxeUI.component(VxeTextarea);
   VxeUI.component(VxeTooltip);
   VxeUI.component(VxeUpload);
 
@@ -120,8 +189,9 @@ export function setupVbenVxeTable(setupOptions: SetupVxeTable) {
   const { isDark, locale } = usePreferences();
 
   const localMap: Partial<Record<SupportedLanguagesType, any>> = {
-    'zh-CN': normalizeVxeLocale(zhCN),
     'en-US': normalizeVxeLocale(enUS),
+    'vi-VN': buildViVxeLocale(),
+    'zh-CN': normalizeVxeLocale(zhCN),
   };
 
   watch(

@@ -48,5 +48,20 @@
   "database": "Cơ sở dữ liệu",
   "storage": "Lưu trữ",
   "webhook": "Webhook",
-  "webhooks": "Webhook"
+  "webhooks": "Webhook",
+  "order": "Đơn hàng",
+  "orders": "Đơn hàng",
+  "wallet": "Ví tiền",
+  "product": "Sản phẩm",
+  "products": "Sản phẩm",
+  "transaction": "Giao dịch",
+  "transactions": "Giao dịch",
+  "category": "Danh mục",
+  "categories": "Danh mục",
+  "stock": "Kho hàng",
+  "serial": "Mã thẻ",
+  "serials": "Mã thẻ",
+  "invoice": "Hóa đơn",
+  "invoices": "Hóa đơn",
+  "balance": "Số dư"
 }

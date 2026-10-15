@@ -1,21 +1,49 @@
+import type {
+  BrowserStatus,
+  CampaignStatus,
+  DeviceStatus,
+  LogLevel,
+  ProxyProtocol,
+  ProxyStatus,
+  WorkflowStatus,
+} from '@vben/constants';
+
+import {
+  BROWSER_STATUS,
+  CAMPAIGN_STATUS,
+  DEVICE_STATUS,
+  FILTER_ALL,
+  LOG_LEVEL,
+  PROXY_PROTOCOL,
+  PROXY_STATUS,
+  SUPABASE_SCHEMA,
+  WORKFLOW_STATUS,
+} from '@vben/constants';
+
 import { supabaseRequest } from './supabase-client';
 
 // ============================================================================
 // PART 1: WORKFLOW ORCHESTRATION & CAMPAIGN RUNS (PostgreSQL schema: 'automa')
 // ============================================================================
 
-export type WorkflowStatus = 'archived' | 'draft' | 'published';
-
-export type CampaignStatus =
-  | 'cancelled'
-  | 'completed'
-  | 'failed'
-  | 'paused'
-  | 'pending'
-  | 'queued'
-  | 'running';
-
-export type LogLevel = 'debug' | 'error' | 'fatal' | 'info' | 'trace' | 'warn';
+export {
+  BROWSER_STATUS,
+  CAMPAIGN_STATUS,
+  DEVICE_STATUS,
+  LOG_LEVEL,
+  PROXY_PROTOCOL,
+  PROXY_STATUS,
+  WORKFLOW_STATUS,
+};
+export type {
+  BrowserStatus,
+  CampaignStatus,
+  DeviceStatus,
+  LogLevel,
+  ProxyProtocol,
+  ProxyStatus,
+  WorkflowStatus,
+};
 
 export interface AutomaWorkflowItem {
   created_at: string;
@@ -70,7 +98,11 @@ export interface AutomaExecutionLogItem {
  * Pure function: Kiểm tra xem phiên chạy có đang trong trạng thái cần live polling hay không
  */
 export function isRunActive(status: CampaignStatus): boolean {
-  return status === 'pending' || status === 'queued' || status === 'running';
+  return (
+    status === CAMPAIGN_STATUS.PENDING ||
+    status === CAMPAIGN_STATUS.QUEUED ||
+    status === CAMPAIGN_STATUS.RUNNING
+  );
 }
 
 /**
@@ -97,11 +129,11 @@ export function buildAutomationFilterQuery(
     queryParts.push(`tenant_id=eq.${encodeURIComponent(params.tenantId)}`);
   }
 
-  if (params?.status && params.status !== 'all') {
+  if (params?.status && params.status !== FILTER_ALL) {
     queryParts.push(`status=eq.${encodeURIComponent(params.status)}`);
   }
 
-  if (params?.workflowId && params.workflowId !== 'all') {
+  if (params?.workflowId && params.workflowId !== FILTER_ALL) {
     queryParts.push(`workflow_id=eq.${encodeURIComponent(params.workflowId)}`);
   }
 
@@ -126,7 +158,7 @@ export async function getWorkflowsApi(params?: {
       params,
     );
     const data = await supabaseRequest<AutomaWorkflowItem[]>(query, {
-      schema: 'automa',
+      schema: SUPABASE_SCHEMA.AUTOMA,
     });
     return Array.isArray(data) ? data : [];
   } catch (error: any) {
@@ -151,7 +183,7 @@ export async function getCampaignRunsApi(params?: {
       params,
     );
     const data = await supabaseRequest<AutomaCampaignRunItem[]>(query, {
-      schema: 'automa',
+      schema: SUPABASE_SCHEMA.AUTOMA,
     });
     return Array.isArray(data) ? data : [];
   } catch (error: any) {
@@ -171,7 +203,7 @@ export async function getCampaignRunDetailApi(
   try {
     const query = `/rest/v1/campaign_runs?id=eq.${encodeURIComponent(runId)}&select=id,tenant_id,workflow_id,runner_id,name,status,total_tasks,completed_tasks,failed_tasks,started_at,ended_at,created_at,error_message,result_summary,parameters,workflow:workflow_id(name),runner:runner_id(name)`;
     const data = await supabaseRequest<AutomaCampaignRunItem[]>(query, {
-      schema: 'automa',
+      schema: SUPABASE_SCHEMA.AUTOMA,
     });
     return Array.isArray(data) && data.length > 0 ? (data[0] ?? null) : null;
   } catch (error: any) {
@@ -198,7 +230,7 @@ export async function getExecutionLogsApi(
     query += `&order=id.asc&limit=${limit}`;
 
     const data = await supabaseRequest<AutomaExecutionLogItem[]>(query, {
-      schema: 'automa',
+      schema: SUPABASE_SCHEMA.AUTOMA,
     });
     return Array.isArray(data) ? data : [];
   } catch (error: any) {
@@ -218,13 +250,13 @@ export async function cancelCampaignRunApi(runId: string): Promise<void> {
     {
       body: JSON.stringify({
         ended_at: new Date().toISOString(),
-        status: 'cancelled',
+        status: CAMPAIGN_STATUS.CANCELLED,
       }),
       headers: {
         'Content-Type': 'application/json',
       },
       method: 'PATCH',
-      schema: 'automa',
+      schema: SUPABASE_SCHEMA.AUTOMA,
     },
   );
 }
@@ -232,17 +264,6 @@ export async function cancelCampaignRunApi(runId: string): Promise<void> {
 // ============================================================================
 // PART 2: COMPUTE DEVICES, BROWSERS & PROXIES (PostgreSQL schema: 'runners')
 // ============================================================================
-
-export type DeviceStatus =
-  | 'busy'
-  | 'disabled'
-  | 'idle'
-  | 'maintenance'
-  | 'offline';
-
-export type BrowserStatus = 'error' | 'idle' | 'running' | 'syncing';
-
-export type ProxyStatus = 'active' | 'disabled' | 'failing' | 'testing';
 
 export interface FleetDeviceItem {
   active_jobs: number;
@@ -265,11 +286,6 @@ export interface FleetDeviceItem {
   updated_at: string;
   version: string;
 }
-
-/**
- * Backward compatibility alias for existing components
- */
-export type FleetNodeItem = FleetDeviceItem;
 
 export interface FleetBrowserItem {
   browser_type: string;
@@ -309,7 +325,7 @@ export interface FleetProxyItem {
   last_checked_at: null | string;
   latency_ms: null | number;
   port: number;
-  protocol: 'http' | 'https' | 'socks4' | 'socks5' | string;
+  protocol: ProxyProtocol | string;
   status: ProxyStatus;
   tags: string[];
   tenant_id: string;
@@ -358,7 +374,7 @@ export function mapRawDeviceToFleetNode(raw: any): FleetDeviceItem {
     ram_gb: ramGb,
     ram_mb: ramMb,
     registered_at: raw.registered_at || new Date().toISOString(),
-    status: raw.status || 'offline',
+    status: raw.status || DEVICE_STATUS.OFFLINE,
     tenant_id: raw.tenant_id ?? '',
     updated_at: raw.updated_at || new Date().toISOString(),
     version: raw.version || 'v0.1.0',
@@ -374,7 +390,7 @@ export function calculateFleetMetrics(
 ): FleetMetricsData {
   const total_nodes = nodes.length;
   const online_nodes = nodes.filter(
-    (n) => n.status === 'idle' || n.status === 'busy',
+    (n) => n.status === DEVICE_STATUS.IDLE || n.status === DEVICE_STATUS.BUSY,
   ).length;
   const active_jobs = nodes.reduce((sum, n) => sum + (n.active_jobs || 0), 0);
 
@@ -400,7 +416,7 @@ export function buildFleetFilterQuery(
     queryParts.push(`tenant_id=eq.${encodeURIComponent(params.tenantId)}`);
   }
 
-  if (params?.status && params.status !== 'all') {
+  if (params?.status && params.status !== FILTER_ALL) {
     queryParts.push(`status=eq.${encodeURIComponent(params.status)}`);
   }
 
@@ -459,7 +475,9 @@ export async function getFleetDevicesApi(params?: {
       '/rest/v1/devices?select=*&order=last_heartbeat_at.desc.nullslast',
       params,
     );
-    const data = await supabaseRequest<any[]>(query, { schema: 'runners' });
+    const data = await supabaseRequest<any[]>(query, {
+      schema: SUPABASE_SCHEMA.RUNNERS,
+    });
     if (!Array.isArray(data)) return [];
     return data.map((row) => mapRawDeviceToFleetNode(row));
   } catch (error) {
@@ -469,11 +487,6 @@ export async function getFleetDevicesApi(params?: {
 }
 
 /**
- * Backward compatibility alias
- */
-export const getFleetNodesApi = getFleetDevicesApi;
-
-/**
  * Thu hồi quyền truy cập của một máy trạm trong schema runners.devices
  */
 export async function revokeFleetDeviceApi(deviceId: string): Promise<void> {
@@ -481,15 +494,10 @@ export async function revokeFleetDeviceApi(deviceId: string): Promise<void> {
     `/rest/v1/devices?id=eq.${encodeURIComponent(deviceId)}`,
     {
       method: 'DELETE',
-      schema: 'runners',
+      schema: SUPABASE_SCHEMA.RUNNERS,
     },
   );
 }
-
-/**
- * Backward compatibility alias
- */
-export const revokeFleetNodeApi = revokeFleetDeviceApi;
 
 /**
  * Lấy danh sách browser profiles từ schema runners.browsers
@@ -504,7 +512,7 @@ export async function getFleetBrowsersApi(params?: {
       params,
     );
     const data = await supabaseRequest<FleetBrowserItem[]>(query, {
-      schema: 'runners',
+      schema: SUPABASE_SCHEMA.RUNNERS,
     });
     return Array.isArray(data) ? data : [];
   } catch (error) {
@@ -526,11 +534,144 @@ export async function getFleetProxiesApi(params?: {
       params,
     );
     const data = await supabaseRequest<FleetProxyItem[]>(query, {
-      schema: 'runners',
+      schema: SUPABASE_SCHEMA.RUNNERS,
     });
     return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error('[Automation] Failed to load proxies:', error);
     return [];
   }
+}
+
+// ============================================================================
+// PART 3: UNIFIED AUTOMATION OVERVIEW TELEMETRY (/automation/overview)
+// ============================================================================
+
+export interface AutomationOverviewSummary {
+  browsers: {
+    error: number;
+    idle: number;
+    running: number;
+    total: number;
+  };
+  fleet: FleetMetricsData;
+  proxies: {
+    active: number;
+    avgLatencyMs: number;
+    failing: number;
+    total: number;
+  };
+  recentDevices: FleetDeviceItem[];
+  recentRuns: AutomaCampaignRunItem[];
+  runs: {
+    completed: number;
+    failed: number;
+    running: number;
+    total: number;
+  };
+  workflows: {
+    archived: number;
+    draft: number;
+    published: number;
+    total: number;
+  };
+}
+
+/**
+ * Pure function: Aggregate unified telemetry across workflows, runs, devices, browsers, and proxies
+ */
+export function calculateAutomationOverviewSummary(input: {
+  browsers: FleetBrowserItem[];
+  devices: FleetDeviceItem[];
+  loopbackOnline: boolean;
+  proxies: FleetProxyItem[];
+  runs: AutomaCampaignRunItem[];
+  workflows: AutomaWorkflowItem[];
+}): AutomationOverviewSummary {
+  const { browsers, devices, loopbackOnline, proxies, runs, workflows } = input;
+
+  const fleet = calculateFleetMetrics(devices, loopbackOnline);
+
+  const workflowsSummary = {
+    archived: workflows.filter((w) => w.status === WORKFLOW_STATUS.ARCHIVED)
+      .length,
+    draft: workflows.filter((w) => w.status === WORKFLOW_STATUS.DRAFT).length,
+    published: workflows.filter((w) => w.status === WORKFLOW_STATUS.PUBLISHED)
+      .length,
+    total: workflows.length,
+  };
+
+  const runsSummary = {
+    completed: runs.filter((r) => r.status === CAMPAIGN_STATUS.COMPLETED)
+      .length,
+    failed: runs.filter((r) => r.status === CAMPAIGN_STATUS.FAILED).length,
+    running: runs.filter((r) => isRunActive(r.status)).length,
+    total: runs.length,
+  };
+
+  const browsersSummary = {
+    error: browsers.filter((b) => b.status === BROWSER_STATUS.ERROR).length,
+    idle: browsers.filter((b) => b.status === BROWSER_STATUS.IDLE).length,
+    running: browsers.filter(
+      (b) =>
+        b.status === BROWSER_STATUS.RUNNING ||
+        b.status === BROWSER_STATUS.SYNCING,
+    ).length,
+    total: browsers.length,
+  };
+
+  const measuredProxies = proxies.filter(
+    (p) => typeof p.latency_ms === 'number' && p.latency_ms > 0,
+  );
+  const avgLatencyMs =
+    measuredProxies.length > 0
+      ? Math.round(
+          measuredProxies.reduce((sum, p) => sum + (p.latency_ms || 0), 0) /
+            measuredProxies.length,
+        )
+      : 0;
+
+  const proxiesSummary = {
+    active: proxies.filter((p) => p.status === PROXY_STATUS.ACTIVE).length,
+    avgLatencyMs,
+    failing: proxies.filter((p) => p.status === PROXY_STATUS.FAILING).length,
+    total: proxies.length,
+  };
+
+  return {
+    browsers: browsersSummary,
+    fleet,
+    proxies: proxiesSummary,
+    recentDevices: devices.slice(0, 5),
+    recentRuns: runs.slice(0, 5),
+    runs: runsSummary,
+    workflows: workflowsSummary,
+  };
+}
+
+/**
+ * Fetch and aggregate all Automation & Fleet metrics for /automation/overview
+ */
+export async function getAutomationOverviewApi(params?: {
+  tenantId?: string;
+}): Promise<AutomationOverviewSummary> {
+  const tenantId = params?.tenantId;
+  const [workflows, runs, devices, browsers, proxies, daemonProbe] =
+    await Promise.all([
+      getWorkflowsApi({ tenantId }),
+      getCampaignRunsApi({ tenantId }),
+      getFleetDevicesApi({ tenantId }),
+      getFleetBrowsersApi({ tenantId }),
+      getFleetProxiesApi({ tenantId }),
+      probeLocalDaemonApi(),
+    ]);
+
+  return calculateAutomationOverviewSummary({
+    browsers,
+    devices,
+    loopbackOnline: daemonProbe.online,
+    proxies,
+    runs,
+    workflows,
+  });
 }

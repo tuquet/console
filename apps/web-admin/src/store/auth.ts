@@ -164,8 +164,8 @@ export const useAuthStore = defineStore('auth', () => {
       return 'modal';
     }
 
-    toast.warning('Phiên đăng nhập đã hết hạn', {
-      description: 'Vui lòng đăng nhập lại để tiếp tục làm việc.',
+    toast.warning($t('authentication.loginAgainTitle'), {
+      description: $t('authentication.loginAgainSubTitle'),
       duration: 4000,
     });
 

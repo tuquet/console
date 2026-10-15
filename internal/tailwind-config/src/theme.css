@@ -677,4 +677,30 @@ html.grayscale-mode {
     --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 1px
       var(--tw-ring-color, hsl(var(--ring) / 65%)) !important;
   }
+
+  /* SSOT Built-in Theme Synchronization for Lucide Icon Badges & Standalone Icons */
+  :is(.bg-muted, [class*='bg-muted/50'], [class*='bg-muted/40']):not(
+      button,
+      [role='button'],
+      a
+    ):has(> svg.lucide:only-child) {
+    color: hsl(var(--primary));
+    background-color: hsl(var(--primary) / 10%);
+  }
+
+  :is(.bg-muted, [class*='bg-muted/50'], [class*='bg-muted/40']):not(
+      button,
+      [role='button'],
+      a
+    ):has(> svg.lucide:only-child)
+    > svg.lucide {
+    color: hsl(var(--primary));
+  }
+
+  :not(button, [role='button'], a, label)
+    > svg.lucide:is(.text-muted-foreground, .text-foreground):not(
+      :has(~ input)
+    ) {
+    color: hsl(var(--primary));
+  }
 }

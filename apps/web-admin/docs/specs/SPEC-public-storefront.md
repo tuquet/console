@@ -1,69 +1,24 @@
-# Spec: Cửa Hàng Sản Phẩm Số Công Khai & Thanh Toán Khách Vãng Lai (Module `public-storefront`)
+# Spec: Cửa Hàng Sản Phẩm Số Công Khai & Thanh Toán Khách Vãng Lai (`public-storefront`)
 
 > **Mã đặc tả:** `SPEC-public-storefront`  
 > **Module id:** `public-storefront` (xem [`capability-map.md`](capability-map.md))  
-> **Kiến trúc nguồn:** [`SPEC-payment-gateway.md`](SPEC-payment-gateway.md), [`SPEC-digital-commerce.md`](SPEC-digital-commerce.md), [`SPEC-admin-commerce-portal.md`](SPEC-admin-commerce-portal.md), [`skills/rules/TYPOGRAPHY.md`](../../../../skills/rules/TYPOGRAPHY.md)  
-> **Trạng thái:** **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**
+> **Kiến trúc nguồn:** [`SPEC-payment-gateway.md`](SPEC-payment-gateway.md), [`SPEC-digital-commerce.md`](SPEC-digital-commerce.md), [`SPEC-admin-commerce-portal.md`](SPEC-admin-commerce-portal.md), [`ADR-002`](../decisions/0002-typography-and-font-system.md)  
+> **Trạng thái:** **ĐÃ HOÀN THÀNH (IMPLEMENTED)**
 
 ---
 
-## 1. Giả Định & Quyết Định Thiết Kế (Resolved Decisions)
+## 1. Objective (Mục Tiêu Nghiệp Vụ & Kỹ Thuật)
 
-1. **Định tuyến Công khai không yêu cầu đăng nhập (`/store` trong `src/router/routes/core.ts`):**
-   - Route `/store` (`name: 'PublicStorefront'`) được đăng ký trực tiếp trong `coreRoutes` (`src/router/routes/core.ts`), tự động nằm trong `coreRouteNames` để đi qua `setupAccessGuard` mà không yêu cầu JWT `accessToken`.
-   - Mọi truy vấn dữ liệu từ `/store` (`getCommerceCategoriesApi`, `getCommerceProductsApi`, `getActivePaymentGatewaysApi`, `createCheckoutOrderApi`, `getGuestOrderDeliveriesApi`) đều truyền `{ skipAuth: true }`, sử dụng `anon` key hợp lệ với các chính sách RLS công khai (`visibility = 'public'`) và hàm RPC `SECURITY DEFINER`.
-2. **Bảo mật Bàn giao Khách vãng lai bằng `claim_token` (`CLM_...`) & Lưu trữ Cục bộ (`localStorage`):**
-   - Khi khách vãng lai (Guest) tạo đơn hàng (`_buyer_tenant_id = NULL`), RPC `commerce.create_checkout_order` sinh mã bảo mật `claim_token` (`CLM_` + 32 ký tự hex ngẫu nhiên) và trả về duy nhất 1 lần cho phiên khởi tạo.
-   - Giao diện `/store` tự động lưu cặp `(order_code, claim_token, buyer_email, total_credits, created_at)` vào `localStorage` (`TUQUET_GUEST_ORDERS`) của trình duyệt, đồng thời hỗ trợ đường dẫn truy cập nhanh `/store?order=ORD-...&token=CLM_...` để khách hàng không bị mất quyền nhận tài nguyên khi tải lại trang.
-   - Khách vãng lai chỉ được phép chọn các sản phẩm có `visibility = 'public'` và `product_type IN ('serial_stock', 'digital_file')` (các gói tài nguyên nội bộ `specter_resource` và `wallet_credit` yêu cầu đăng nhập Tenant Workspace và có nút điều hướng sang `/commerce/store`).
-3. **Thanh toán Đa kênh & Tự động Nhận hàng (Realtime Polling 3s):**
-   - Hỗ trợ đầy đủ các cổng thanh toán ngoại vi đang hoạt động (`bank_transfer` VietQR 24/7, `e_wallet` MoMo/ZaloPay, `card_intl` Stripe, `crypto` USDT).
-   - Sau khi tạo đơn, hộp thoại hiển thị mã QR động (`qr_image_url`), số tiền quy đổi theo tỷ giá cổng (`total_credits * rate_per_credit`), mã nội dung chuyển khoản `TQ...` và tự động gọi `getGuestOrderDeliveriesApi(order_code, claim_token)` mỗi 3 giây. Ngay khi `order.status === 'completed'`, giao diện chuyển thẳng sang màn hình nhận tài khoản/key (`uid|pass|2fa` sao chép 1 chạm & tải tệp `.txt`) hoặc tải tệp số.
+Xây dựng phân hệ **Public Storefront (`/store`)** trong `@tuquet/admin-web` cho phép khách hàng vãng lai (Guest Checkout — không cần tài khoản đăng nhập) duyệt danh mục sản phẩm số công khai, thanh toán tự động qua đa kênh và nhận bàn giao sản phẩm tức thì thông qua mã bảo mật `claim_token`:
+
+1. **Truy cập Công khai Không Cần Đăng Nhập (`/store`):** Đăng ký trong `coreRoutes` (`src/router/routes/core.ts`, `ignoreAccess: true`), sử dụng cờ `{ skipAuth: true }` trên mọi lời gọi API để truy vấn qua `anon` key hợp lệ với chính sách RLS công khai (`visibility = 'public'`).
+2. **Danh Mục Sản Phẩm Số Công Khai (`catalog` mode):** Lọc theo danh mục, loại sản phẩm (`serial_stock`, `digital_file`) và tìm kiếm từ khóa; hiển thị tồn kho khả dụng, giá niêm yết theo `Xu` kèm quy đổi tham khảo sang tiền tệ cổng thanh toán.
+3. **Thanh Toán Khách Vãng Lai Đa Kênh (`GuestCheckoutDialog`):** Hỗ trợ đặt mua SKU công khai qua VietQR 24/7 (`bank_transfer`), Ví điện tử MoMo (`e_wallet`), Thẻ quốc tế Stripe (`card_intl`), và Crypto USDT (`crypto`); tự động lưu cặp `(order_code, claim_token)` vào `localStorage` (`TUQUET_GUEST_ORDERS`) và kiểm tra trạng thái đơn hàng mỗi 3 giây.
+4. **Tra Cứu Đơn Hàng & Nhận Tài Nguyên (`lookup` mode):** Cho phép khách hàng tra cứu lại đơn hàng bất kỳ lúc nào bằng cặp `order_code` (`ORD-...`) + `claim_token` (`CLM_...`) hoặc chọn nhanh từ danh sách đơn hàng đã lưu trên trình duyệt để sao chép tài khoản/key (`uid|pass|2fa`), tải tệp `.txt` hoặc tải tệp số.
 
 ---
 
-## 2. Objective (Mục Tiêu & Phạm Vi)
-
-Xây dựng hoàn chỉnh phân hệ **Public Storefront (`/store`)** cho khách vãng lai trong `@tuquet/admin-web`:
-
-### 2.1. Mở rộng API Hỗ trợ `skipAuth` & Lưu trữ Đơn hàng Khách (`billing.ts` & `commerce.ts`)
-
-- **`src/api/core/billing.ts`**:
-  - Cập nhật `getActivePaymentGatewaysApi(options?: { skipAuth?: boolean })` để truyền `skipAuth: options?.skipAuth` xuống `supabaseRequest`.
-- **`src/api/core/commerce.ts`**:
-  - Bổ sung kiểu `SavedGuestOrderItem` và các hàm tiện ích quản lý lịch sử đơn hàng khách vãng lai trên trình duyệt:
-    - `getSavedGuestOrders(): SavedGuestOrderItem[]`
-    - `saveGuestOrderLocal(item: SavedGuestOrderItem): SavedGuestOrderItem[]`
-
-### 2.2. Định tuyến `/store` & Từ điển Đa ngôn ngữ (`core.ts` & `page.json`)
-
-- Đăng ký route `/store` (`name: 'PublicStorefront'`, `component: () => import('#/views/commerce/public-store/index.vue')`) trong `src/router/routes/core.ts`.
-- Bổ sung nút liên kết mở nhanh `/store` trên thanh công cụ của `/commerce/store` để người dùng hoặc quản trị viên dễ dàng kiểm tra giao diện công khai.
-- Bổ sung khóa đa ngôn ngữ `page.commerce.publicStore` và `page.commerce.publicStore_desc` vào `en-US/page.json` và `vi-VN/page.json`.
-
-### 2.3. Giao Diện Cửa Hàng Công Khai (`/store` — `src/views/commerce/public-store/index.vue`)
-
-1. **Header Thương Hiệu & Chuyển Đổi Chế Độ:**
-   - Thanh điều hướng độc lập hiển thị thương hiệu **Tuquet Digital Store**, nút chuyển đổi giữa 2 chế độ: **Danh mục sản phẩm (`catalog`)** và **Tra cứu & Nhận hàng (`lookup`)**, kèm nút **Đăng nhập Workspace (`/auth/login` hoặc `/commerce/store`)**.
-2. **Chế Độ 1 — Danh Mục Sản Phẩm Số Công Khai (`catalog`):**
-   - Bộ lọc Danh mục (`getCommerceCategoriesApi({ skipAuth: true })`), lọc loại sản phẩm (`all`, `serial_stock`, `digital_file`) và ô tìm kiếm tức thì.
-   - Lưới thẻ sản phẩm hiển thị các sản phẩm `visibility === 'public'`, chọn biến thể SKU, tồn kho khả dụng, giá niêm yết (`Xu` + quy đổi tham khảo sang `VND`/`USD` theo cổng mặc định).
-   - Nếu sản phẩm thuộc loại `specter_resource` hoặc `wallet_credit`, hiển thị nhãn **Yêu cầu Workspace** và nút chuyển sang `/commerce/store`.
-3. **Hộp Thoại Guest Checkout Đa Kênh (`GuestCheckoutDialog`):**
-   - Nhập số lượng cần mua, địa chỉ Email nhận thông báo (`buyer_email`), và chọn cổng thanh toán (`bank_transfer` VietQR, `e_wallet` MoMo, `card_intl` Stripe, `crypto` USDT).
-   - Khi nhấn **Tạo đơn & Lấy mã QR**:
-     - Gọi `createCheckoutOrderApi({ buyer_email, items, payment_method, gateway_code }, { skipAuth: true })`.
-     - Lưu ngay `(order_code, claim_token)` vào `localStorage` (`saveGuestOrderLocal`) và hiển thị cảnh báo nhắc khách hàng lưu lại `claim_token` (kèm nút sao chép 1 chạm).
-     - Hiển thị mã QR VietQR, số tiền cần chuyển, nội dung `transfer_code` (`TQ...`) và tự động kiểm tra trạng thái đơn qua `getGuestOrderDeliveriesApi(order_code, claim_token)` mỗi 3 giây.
-4. **Chế Độ 2 — Tra Cứu Đơn Hàng & Nhận Tài Nguyên (`lookup`):**
-   - Cho phép nhập `Mã đơn hàng (ORD-...)` và `Mã nhận hàng bảo mật (CLM_...)` (tự động điền từ URL query `?order=...&token=...` hoặc chọn 1 chạm từ danh sách **Đơn hàng gần đây trên trình duyệt này**).
-   - Hiển thị trạng thái đơn hàng (`completed`, `pending_payment`, `manual_review`, `failed`) và toàn bộ dữ liệu bàn giao:
-     - `serial_stock`: Khung văn bản `font-mono` chứa các dòng `uid|pass|2fa` hoặc license key + nút **Sao chép tất cả** + nút **Tải tệp `.txt`**.
-     - `digital_file`: Thông tin phiên bản và liên kết tải tệp.
-
----
-
-## 3. Tech Stack
+## 2. Tech Stack
 
 - **Frontend Application:** `@tuquet/admin-web` (Vue 3 `<script setup lang="ts">`, TypeScript, Vue Router 4, `vue-i18n`).
 - **UI Components & Icons:** `@tuquet/vue-ui` (`Badge`, `Button`, `Dialog`, `DialogContent`, `DialogDescription`, `DialogHeader`, `DialogTitle`, `toast`), `@lucide/vue`.
@@ -71,60 +26,123 @@ Xây dựng hoàn chỉnh phân hệ **Public Storefront (`/store`)** cho khách
 
 ---
 
-## 4. Commands (Lệnh Thực Thi & Kiểm Định)
+## 3. Commands (Lệnh Thực Thi & Kiểm Định)
 
 ```bash
 # 1. Chạy unit tests cho API Core và Router
-pnpm exec vitest run apps/web-admin/src/api/core apps/web-admin/src/router
+pnpm --filter @tuquet/admin-web run test:unit -- src/api/core src/router
 
 # 2. Kiểm tra kiểu dữ liệu TypeScript (Zero errors)
 pnpm --filter @tuquet/admin-web run typecheck
 
 # 3. Quét tĩnh mã nguồn oxlint
-npx oxlint apps/web-admin/src/
+pnpm run lint
 ```
 
 ---
 
-## 5. Project Structure (Cấu Trúc Tệp Tác Động)
+## 4. Project Structure (Cấu Trúc Tệp Nguồn)
 
 ```text
 admin/apps/web-admin/
 ├── docs/
+│   ├── routes/
+│   │   └── commerce.md                              # Tài liệu chi tiết định tuyến /commerce & /store
 │   └── specs/
-│       ├── capability-map.md                        # Cập nhật trạng thái hoàn thành 18/18 modules
 │       └── SPEC-public-storefront.md                # Bản đặc tả hiện tại
 └── src/
     ├── api/core/
-    │   ├── billing.ts                               # Bổ sung options?: { skipAuth?: boolean } cho getActivePaymentGatewaysApi
-    │   ├── commerce.ts                              # Bổ sung getSavedGuestOrders & saveGuestOrderLocal
+    │   ├── billing.ts                               # Hỗ trợ options?: { skipAuth?: boolean } cho getActivePaymentGatewaysApi
+    │   ├── commerce.ts                              # getSavedGuestOrders, saveGuestOrderLocal & skipAuth cho Guest Checkout
     │   └── __tests__/
     │       ├── billing.test.ts                      # Unit test cho getActivePaymentGatewaysApi({ skipAuth: true })
     │       └── commerce.test.ts                     # Unit test cho getSavedGuestOrders & saveGuestOrderLocal
     ├── locales/langs/
-    │   ├── en-US/page.json                          # Bổ sung page.commerce.publicStore
-    │   └── vi-VN/page.json                          # Bổ sung page.commerce.publicStore
+    │   ├── en-US/page.json                          # Khóa đa ngôn ngữ page.commerce.publicStore*
+    │   └── vi-VN/page.json                          # Khóa đa ngôn ngữ page.commerce.publicStore*
     ├── router/routes/
-    │   └── core.ts                                  # Đăng ký route công khai /store (PublicStorefront)
+    │   └── core.ts                                  # Đăng ký route công khai /store (PublicStorefront, ignoreAccess: true)
     └── views/commerce/
         ├── store/
-        │   └── index.vue                            # Bổ sung nút mở nhanh Storefront công khai (/store)
+        │   └── index.vue                            # Nút mở nhanh Storefront công khai (/store)
         └── public-store/
             └── index.vue                            # Giao diện Storefront công khai, Guest Checkout & Tra cứu claim_token
 ```
 
 ---
 
-## 6. Acceptance Criteria (Tiêu Chí Nghiệm Thu)
+## 5. Code Style & Kiến Trúc Chi Tiết
 
-- [x] **AC1 — Truy cập Công khai Không Cần Đăng Nhập (`/store`):**
-  - Route `/store` nằm trong `coreRoutes` (`coreRouteNames`), truy cập trực tiếp mà không bị chuyển hướng về `/auth/login`.
-  - Toàn bộ lời gọi API trên `/store` truyền `skipAuth: true`.
-- [x] **AC2 — Guest Checkout Đa Kênh & Bảo Toàn `claim_token`:**
-  - Khách vãng lai có thể chọn SKU `public`, nhập email, chọn cổng thanh toán (VietQR / MoMo / Stripe / USDT), nhận mã QR + `transfer_code` (`TQ...`) và mã `claim_token` (`CLM_...`).
-  - Mã `(order_code, claim_token)` được tự động lưu vào `localStorage` để tra cứu lại dễ dàng.
-- [x] **AC3 — Tự Động Bàn Giao & Tra Cứu Đơn Hàng (`getGuestOrderDeliveriesApi`):**
-  - Hệ thống tự động kiểm tra trạng thái đơn mỗi 3 giây và mở ngay dữ liệu bàn giao (`uid|pass|2fa` sao chép / tải `.txt`, hoặc link tải tệp) khi thanh toán hoàn tất.
-  - Tab **Tra cứu & Nhận hàng** cho phép nhập `order_code` + `claim_token` hoặc chọn từ danh sách đơn đã lưu trên trình duyệt.
-- [x] **AC4 — Chất Lượng Mã Nguồn:**
-  - Vượt qua 100% `vitest`, `vue-tsc` (`0 errors`) và `oxlint` (`0 warnings/errors`).
+### 5.1. Cơ Chế Truy Xuất Không Cần JWT (`skipAuth: true`) & Bảo Toàn `claim_token`
+
+Tất cả các hàm API phục vụ `/store` truyền `{ skipAuth: true }` xuống `supabaseRequest` để chỉ đính kèm `apikey: anonKey` mà không yêu cầu phiên đăng nhập của người dùng:
+
+```typescript
+export interface SavedGuestOrderItem {
+  buyer_email: string;
+  claim_token: string;
+  created_at: string;
+  order_code: string;
+  total_credits: number;
+}
+
+const GUEST_ORDERS_STORAGE_KEY = 'TUQUET_GUEST_ORDERS';
+
+export function saveGuestOrderLocal(
+  item: SavedGuestOrderItem,
+): SavedGuestOrderItem[] {
+  const existing = getSavedGuestOrders().filter(
+    (entry) => entry.order_code !== item.order_code,
+  );
+  const updated = [item, ...existing].slice(0, 20);
+  localStorage.setItem(GUEST_ORDERS_STORAGE_KEY, JSON.stringify(updated));
+  return updated;
+}
+```
+
+### 5.2. Luồng Nhận Hàng Tự Động Qua URL Query & Polling 3 Giây
+
+- Khi khách vãng lai khởi tạo đơn hàng qua `createCheckoutOrderApi(..., { skipAuth: true })`, RPC trả về `claim_token` (`CLM_` + 32 hex) duy nhất một lần.
+- Giao diện lưu ngay vào `localStorage` và đồng bộ lên URL query (`?order=ORD-...&token=CLM_...`) để khách hàng có thể đánh dấu trang (bookmark) hoặc tải lại trang (F5) mà không mất quyền truy cập đơn hàng.
+- Bộ hẹn giờ kiểm tra `getGuestOrderDeliveriesApi(order_code, claim_token)` mỗi 3 giây sẽ tự động dừng và hiển thị dữ liệu bàn giao ngay khi `order.status === 'completed'`.
+
+---
+
+## 6. Testing Strategy
+
+1. **Kiểm thử Đơn vị (`billing.test.ts` & `commerce.test.ts`):**
+   - Xác minh `getActivePaymentGatewaysApi({ skipAuth: true })`, `getCommerceCategoriesApi({ skipAuth: true })`, `getCommerceProductsApi({ skipAuth: true })`, `createCheckoutOrderApi(..., { skipAuth: true })`, và `getGuestOrderDeliveriesApi` truyền đúng `skipAuth: true`.
+   - Xác minh `saveGuestOrderLocal` và `getSavedGuestOrders` chống trùng lặp theo `order_code`, giới hạn tối đa 20 đơn gần nhất và xử lý an toàn khi `localStorage` chứa dữ liệu lỗi.
+2. **Kiểm thử Định tuyến (`core.ts`):**
+   - Xác minh route `/store` (`name: 'PublicStorefront'`) nằm trong `coreRouteNames` để `setupAccessGuard` cho phép khách chưa đăng nhập truy cập thẳng.
+
+---
+
+## 7. Boundaries
+
+- **Always do (Luôn thực hiện):**
+  - Truyền `{ skipAuth: true }` trên mọi lời gọi API trong `src/views/commerce/public-store/index.vue`.
+  - Lưu trữ `claim_token` vào `localStorage` ngay tại thời điểm tạo đơn thành công trước khi hiển thị mã QR thanh toán.
+  - Chỉ cho phép Guest Checkout đặt mua các sản phẩm có `visibility === 'public'` và `product_type IN ('serial_stock', 'digital_file')`.
+- **Ask first (Hỏi trước khi thực hiện):**
+  - Cho phép khách vãng lai mua các loại tài nguyên gắn chặt với định danh Tenant (`specter_resource` hoặc `wallet_credit`).
+- **Never do (Tuyệt đối cấm):**
+  - Không bao giờ cho phép khách vãng lai sử dụng phương thức `internal_wallet` (Ví Xu nội bộ chỉ dành cho Tenant đã xác thực).
+  - Không bao giờ lưu trữ thông tin thẻ tín dụng hoặc khóa bí mật thanh toán trong `localStorage`.
+
+---
+
+## 8. Success Criteria
+
+- [x] Route `/store` truy cập công khai không cần đăng nhập, không bị đẩy về `/auth/login`.
+- [x] Khách vãng lai có thể chọn SKU `public`, nhập email, chọn cổng thanh toán (VietQR / MoMo / Stripe / USDT), nhận mã QR + `transfer_code` (`TQ...`) và mã bảo mật `claim_token` (`CLM_...`).
+- [x] Hệ thống tự động lưu `(order_code, claim_token)` vào `localStorage` và tự động bàn giao sản phẩm (`uid|pass|2fa` sao chép / tải `.txt`, hoặc link tải tệp) ngay khi thanh toán hoàn tất.
+- [x] Chế độ **Tra cứu & Nhận hàng (`lookup`)** hoạt động chính xác với cả nhập tay, chọn từ lịch sử trình duyệt và tham số URL `?order=...&token=...`.
+- [x] Vượt qua 100% `vitest`, `vue-tsc` (`0 errors`) và `oxlint` (`0 warnings/errors`).
+
+---
+
+## 9. Resolved Decisions
+
+1. **Định tuyến Công khai trong `coreRoutes` (`/store`):** Đăng ký `/store` trực tiếp trong `src/router/routes/core.ts` với `meta: { ignoreAccess: true, hideInMenu: true }` để tách biệt hoàn toàn khỏi khung Sidebar quản trị (`BasicLayout`) và mở quyền truy cập cho khách vãng lai.
+2. **Bảo mật Bàn giao Không Tài Khoản qua `claim_token` (`CLM_...`):** Thay vì bắt buộc khách vãng lai tạo tài khoản hoặc chờ email, hệ thống cấp phát `claim_token` ngẫu nhiên 128-bit (lưu băm SHA-256 `guest_claim_token_hash` trong DB) kết hợp lưu cục bộ `localStorage` để nhận bàn giao tức thì trên trình duyệt.

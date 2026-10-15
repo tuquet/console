@@ -14,6 +14,7 @@ import {
 } from '@tuquet/vue-ui';
 
 import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
+import { $t } from '#/locales';
 
 interface Props {
   loading?: boolean;
@@ -26,17 +27,17 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   roles: () => [
     {
-      display_name: 'Quản trị viên',
+      display_name: $t('page.workspace.administrator'),
       id: '00000000-0000-0000-0000-000000000002',
       name: 'admin',
     },
     {
-      display_name: 'Thành viên',
+      display_name: $t('term.member'),
       id: '00000000-0000-0000-0000-000000000003',
       name: 'member',
     },
     {
-      display_name: 'Người xem',
+      display_name: $t('page.tenants_view.role_viewer'),
       id: '00000000-0000-0000-0000-000000000004',
       name: 'viewer',
     },
@@ -80,7 +81,9 @@ function handleOk() {
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Chỉnh sửa phân quyền thành viên</DialogTitle>
+        <DialogTitle>
+          {{ $t('page.tenants_view.edit_member_modal_title') }}
+        </DialogTitle>
       </DialogHeader>
 
       <div class="py-2">
@@ -90,7 +93,10 @@ function handleOk() {
           size="small"
           class="w-full space-y-3"
         >
-          <VxeFormItem title="Email định danh" span="24">
+          <VxeFormItem
+            :title="$t('page.tenants_view.member_email_label')"
+            span="24"
+          >
             <template #default>
               <Input
                 :model-value="props.member?.email"
@@ -100,7 +106,10 @@ function handleOk() {
             </template>
           </VxeFormItem>
 
-          <VxeFormItem title="Họ và tên hiển thị" span="24">
+          <VxeFormItem
+            :title="$t('page.tenants_view.display_name_label')"
+            span="24"
+          >
             <template #default>
               <Input
                 :model-value="props.member?.full_name || props.member?.email"
@@ -110,7 +119,10 @@ function handleOk() {
             </template>
           </VxeFormItem>
 
-          <VxeFormItem title="Vai trò IAM" span="24">
+          <VxeFormItem
+            :title="$t('page.tenants_view.iam_role_label')"
+            span="24"
+          >
             <template #default>
               <select
                 v-model="selectedRoleId"
@@ -121,7 +133,7 @@ function handleOk() {
                   v-if="props.member?.role?.name === 'owner'"
                   :value="props.member.role.id"
                 >
-                  Chủ sở hữu owner - Bất biến
+                  {{ $t('page.tenants_view.role_owner_immutable') }}
                 </option>
                 <option
                   v-for="role in props.roles"
@@ -134,16 +146,18 @@ function handleOk() {
             </template>
           </VxeFormItem>
 
-          <VxeFormItem title="Trạng thái hoạt động" span="24">
+          <VxeFormItem :title="$t('common.status')" span="24">
             <template #default>
               <select
                 v-model="status"
                 :disabled="props.member?.role?.name === 'owner'"
                 class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <option value="active">Hoạt động</option>
-                <option value="suspended">Tạm khóa</option>
-                <option value="invited">Chờ chấp thuận</option>
+                <option value="active">{{ $t('common.active') }}</option>
+                <option value="suspended">{{ $t('common.suspended') }}</option>
+                <option value="invited">
+                  {{ $t('page.tenants_view.status_invited') }}
+                </option>
               </select>
             </template>
           </VxeFormItem>
@@ -156,10 +170,10 @@ function handleOk() {
           :disabled="props.loading"
           @click="emit('update:open', false)"
         >
-          Hủy
+          {{ $t('common.cancel') }}
         </Button>
         <Button :disabled="props.loading" @click="handleOk">
-          Lưu thay đổi
+          {{ $t('common.save') }}
         </Button>
       </DialogFooter>
     </DialogContent>

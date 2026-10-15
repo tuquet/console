@@ -1,5 +1,7 @@
 import { Buffer } from 'node:buffer';
 
+import { $t } from '@vben/locales';
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -34,7 +36,7 @@ describe('getEffectiveAccessApi & session caching', () => {
 
   it('should throw an error if no accessToken is found in accessStore', async () => {
     await expect(getEffectiveAccessApi()).rejects.toThrow(
-      'Chưa đăng nhập: không tìm thấy accessToken',
+      $t('authentication.missingAccessToken'),
     );
   });
 

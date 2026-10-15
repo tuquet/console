@@ -1,13 +1,10 @@
+import type { SupabaseSchema } from '@vben/constants';
+
+import { $t } from '@vben/locales';
 import { useAccessStore } from '@vben/stores';
 
-export type SupabaseSchema =
-  | 'automa'
-  | 'billing'
-  | 'commerce'
-  | 'events'
-  | 'media'
-  | 'public'
-  | 'runners';
+export { SUPABASE_SCHEMA } from '@vben/constants';
+export type { SupabaseSchema };
 
 export interface SupabaseRequestOptions extends RequestInit {
   _isRetry?: boolean;
@@ -343,7 +340,7 @@ export async function supabaseRequest<T = any>(
       errorJson.message ||
         errorJson.msg ||
         errorJson.error_description ||
-        `Yêu cầu Supabase thất bại (${response.status})`,
+        $t('authentication.supabaseRequestFailed', { status: response.status }),
     );
   }
 

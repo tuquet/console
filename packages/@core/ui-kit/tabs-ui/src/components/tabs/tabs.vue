@@ -91,7 +91,7 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
         :key="tab.key"
         :class="[
           {
-            'is-active bg-primary/15 dark:bg-accent': tab.key === active,
+            'is-active bg-primary/15 dark:bg-primary/15': tab.key === active,
             draggable: !tab.affixTab,
             'affix-tab': tab.affixTab,
           },
@@ -117,19 +117,19 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
               <!-- close-icon -->
               <X
                 v-show="!tab.affixTab && tabsView.length > 1 && tab.closable"
-                class="size-3 cursor-pointer rounded-full stroke-accent-foreground/80 transition-all group-[.is-active]:text-primary hover:bg-accent hover:stroke-accent-foreground group-[.is-active]:dark:text-accent-foreground"
+                class="size-3 cursor-pointer rounded-full stroke-accent-foreground/80 transition-all group-[.is-active]:text-primary hover:bg-accent hover:stroke-accent-foreground group-[.is-active]:dark:text-primary"
                 @click.stop="() => emit('close', tab.key)"
               />
               <Pin
                 v-show="tab.affixTab && tabsView.length > 1 && tab.closable"
-                class="size-3.5 cursor-pointer rounded-full transition-all group-[.is-active]:text-primary hover:bg-accent hover:stroke-accent-foreground group-[.is-active]:dark:text-accent-foreground"
+                class="size-3.5 cursor-pointer rounded-full transition-all group-[.is-active]:text-primary hover:bg-accent hover:stroke-accent-foreground group-[.is-active]:dark:text-primary"
                 @click.stop="() => emit('unpin', tab)"
               />
             </div>
 
             <!-- tab-item-main -->
             <div
-              class="mx-3 mr-4 flex h-full items-center overflow-hidden rounded-tl-[5px] rounded-tr-[5px] pr-3 text-accent-foreground transition-all duration-300 group-[.is-active]:text-primary group-[.is-active]:dark:text-accent-foreground"
+              class="mx-3 mr-4 flex h-full items-center overflow-hidden rounded-tl-[5px] rounded-tr-[5px] pr-3 text-accent-foreground transition-all duration-300 group-[.is-active]:text-primary group-[.is-active]:dark:text-primary"
             >
               <VbenIcon
                 v-if="showIcon"

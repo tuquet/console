@@ -5,12 +5,11 @@ export { default as ChartTooltip } from './ChartTooltip.vue';
 
 export function defaultColors(count: number = 3) {
   const chartPalette = [
-    '#38bdf8',
-    '#10b981',
-    '#a855f7',
-    '#f59e0b',
-    '#ec4899',
-    '#06b6d4',
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-2))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-5))',
   ];
 
   if (count <= chartPalette.length) {

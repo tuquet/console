@@ -1,8 +1,10 @@
 <script lang="ts" setup>
-import type { FleetDeviceItem, FleetMetricsData } from '#/api';
+import type { FleetDeviceItem } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
+
+import { usePreferences } from '@vben/preferences';
 
 import { Cpu, Eye, HardDrive, Laptop, Plus, RefreshCw } from '@lucide/vue';
 import {
@@ -22,7 +24,6 @@ import {
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  calculateFleetMetrics,
   getFleetDevicesApi,
   probeLocalDaemonApi,
   revokeFleetDeviceApi,
@@ -30,7 +31,6 @@ import {
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
-import FleetMetrics from './components/fleet-metrics.vue';
 import ConnectFleetModal from './components/modals/connect-fleet-modal.vue';
 import NodeDetailModal from './components/modals/node-detail-modal.vue';
 
@@ -38,6 +38,7 @@ defineOptions({ name: 'AutomationDevices' });
 
 const route = useRoute();
 const { formatDate } = useDateFormat();
+const { isMobile } = usePreferences();
 
 const probingDaemon = ref(false);
 const nodes = ref<FleetDeviceItem[]>([]);
@@ -47,10 +48,6 @@ const loopbackOnline = ref(false);
 const isConnectModalVisible = ref(false);
 const isDetailModalVisible = ref(false);
 const selectedNode = ref<FleetDeviceItem | null>(null);
-
-const metrics = computed<FleetMetricsData>(() => {
-  return calculateFleetMetrics(nodes.value, loopbackOnline.value);
-});
 
 function getOsBadgeVariant(os?: string): 'default' | 'outline' | 'secondary' {
   if (!os) return 'outline';
@@ -80,60 +77,149 @@ function handleOpenDetail(node: FleetDeviceItem) {
 async function handleRevokeNode(node: FleetDeviceItem) {
   try {
     await revokeFleetDeviceApi(node.id);
-    toast.success(`Đã thu hồi quyền thiết bị ${node.name}`);
+    toast.success(
+      $t('page.automation_view.device_revoke_success', { name: node.name }),
+    );
     isDetailModalVisible.value = false;
     gridApi.reload();
   } catch (error: any) {
-    toast.error(error.message || 'Không thể thu hồi thiết bị');
+    toast.error(
+      error.message || $t('page.automation_view.device_revoke_failed'),
+    );
   }
 }
 
+function getColumns() {
+  const mobile = isMobile.value;
+  return [
+    {
+      field: 'name',
+      title: $t('page.automation_view.col_workstation'),
+      minWidth: mobile ? 175 : 240,
+      slots: { default: 'name-cell' },
+    },
+    {
+      field: 'os_info',
+      title: $t('page.automation_view.col_os'),
+      width: 140,
+      visible: !mobile,
+      slots: { default: 'os-cell' },
+    },
+    {
+      field: 'hardware',
+      title: $t('page.automation_view.col_hardware'),
+      width: 190,
+      visible: !mobile,
+      slots: { default: 'hardware-cell' },
+    },
+    {
+      field: 'driver_type',
+      title: $t('page.automation_view.col_driver'),
+      width: 130,
+      visible: !mobile,
+      slots: { default: 'driver-cell' },
+    },
+    {
+      field: 'status',
+      title: $t('common.status'),
+      width: mobile ? 95 : 140,
+      slots: { default: 'status-cell' },
+    },
+    {
+      field: 'active_jobs',
+      title: $t('term.jobs'),
+      width: 110,
+      visible: !mobile,
+      slots: { default: 'jobs-cell' },
+    },
+    {
+      field: 'last_heartbeat_at',
+      title: $t('page.fleet_view.col_last_seen'),
+      width: 150,
+      visible: !mobile,
+      slots: { default: 'heartbeat-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('common.actions'),
+      minWidth: mobile ? 115 : 185,
+      align: 'right' as const,
+      showOverflow: false,
+      slots: { default: 'actions-cell' },
+    },
+  ];
+}
+
 const [Grid, gridApi] = useVbenVxeGrid<FleetDeviceItem>({
+  separator: false,
+  gridClass: 'p-0',
+  detailSheetOptions: {
+    resource: 'runners.devices',
+    subtitleField: 'hostname',
+    titleField: 'name',
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Select',
         fieldName: 'status',
-        label: 'Trạng thái',
+        label: () => $t('common.status'),
         defaultValue: (route.query.status as string) || 'all',
-        componentProps: {
-          placeholder: 'Tất cả trạng thái',
+        componentProps: () => ({
+          placeholder: $t('page.runs_view.status_all'),
           options: [
-            { label: 'Tất cả trạng thái', value: 'all' },
-            { label: 'Sẵn sàng', value: 'idle' },
-            { label: 'Đang bận', value: 'busy' },
-            { label: 'Ngoại tuyến', value: 'offline' },
-            { label: 'Bảo trì', value: 'maintenance' },
-            { label: 'Vô hiệu', value: 'disabled' },
+            { label: $t('page.runs_view.status_all'), value: 'all' },
+            {
+              label: $t('page.automation_view.device_status_idle'),
+              value: 'idle',
+            },
+            {
+              label: $t('page.automation_view.device_status_busy'),
+              value: 'busy',
+            },
+            { label: $t('common.offline'), value: 'offline' },
+            {
+              label: $t('page.automation_view.device_status_maintenance'),
+              value: 'maintenance',
+            },
+            { label: $t('common.disabled'), value: 'disabled' },
           ],
-        },
+        }),
       },
       {
         component: 'Input',
         fieldName: 'search',
-        label: 'Tìm kiếm',
-        componentProps: {
-          placeholder: 'Tìm theo tên, hostname hoặc IP...',
+        label: () => $t('common.search'),
+        componentProps: () => ({
+          placeholder: $t('page.automation_view.device_search_placeholder'),
           clearable: true,
-        },
+        }),
       },
     ],
     layout: 'vertical',
     showCollapseButton: false,
     submitButtonOptions: {
-      content: $t('common.filter'),
+      content: computed(() => $t('common.filter')),
     },
     resetButtonOptions: {
-      content: $t('common.reset'),
+      content: computed(() => $t('common.reset')),
     },
-    actionWrapperClass: 'flex items-center justify-end gap-2 pt-2 sm:pt-6',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3',
+    actionWrapperClass:
+      'col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
     round: true,
     showOverflow: true,
     pagerConfig: {
+      autoHidden: true,
       pageSize: 15,
       pageSizes: [10, 15, 30, 50],
     },
@@ -176,59 +262,18 @@ const [Grid, gridApi] = useVbenVxeGrid<FleetDeviceItem>({
         },
       },
     },
-    columns: [
-      {
-        field: 'name',
-        title: 'Máy trạm',
-        minWidth: 240,
-        slots: { default: 'name-cell' },
-      },
-      {
-        field: 'os_info',
-        title: 'Hệ điều hành',
-        width: 140,
-        slots: { default: 'os-cell' },
-      },
-      {
-        field: 'hardware',
-        title: 'Phần cứng',
-        width: 190,
-        slots: { default: 'hardware-cell' },
-      },
-      {
-        field: 'driver_type',
-        title: 'Driver',
-        width: 130,
-        slots: { default: 'driver-cell' },
-      },
-      {
-        field: 'status',
-        title: 'Trạng thái',
-        width: 140,
-        slots: { default: 'status-cell' },
-      },
-      {
-        field: 'active_jobs',
-        title: 'Tác vụ',
-        width: 110,
-        slots: { default: 'jobs-cell' },
-      },
-      {
-        field: 'last_heartbeat_at',
-        title: 'Ping cuối',
-        width: 150,
-        slots: { default: 'heartbeat-cell' },
-      },
-      {
-        field: 'actions',
-        title: 'Thao tác',
-        minWidth: 185,
-        align: 'right',
-        showOverflow: false,
-        slots: { default: 'actions-cell' },
-      },
-    ],
+    columns: getColumns(),
   },
+});
+
+watch([() => $t('page.automation_view.col_workstation'), isMobile], () => {
+  gridApi.setGridOptions({ columns: getColumns() });
+  gridApi.formApi?.setState({
+    commonConfig: {
+      componentProps: { class: 'w-full' },
+      hideLabel: isMobile.value,
+    },
+  });
 });
 
 watch(
@@ -240,36 +285,39 @@ watch(
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
-    <!-- Top Header -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="flex flex-col gap-1">
-        <h1
-          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.automation.devices') }}
-        </h1>
-        <p class="text-xs text-muted-foreground">
+  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
+    <!-- Compact Single-Row Header -->
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1
+            class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
+          >
+            {{ $t('page.automation.devices') }}
+          </h1>
+          <Badge variant="secondary" class="shrink-0 font-mono text-2xs">
+            {{ nodes.length }}
+          </Badge>
+        </div>
+        <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.automation.devices_desc') }}
         </p>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="sm"
-          class="gap-1.5"
+          class="h-8 gap-1.5 px-2.5 text-xs"
           :title="$t('common.refresh')"
           @click="() => gridApi.reload()"
         >
           <RefreshCw class="size-3.5" />
-          {{ $t('common.refresh') }}
+          <span class="hidden sm:inline">{{ $t('common.refresh') }}</span>
         </Button>
         <Button
           size="sm"
-          class="gap-1.5 text-xs font-medium"
+          class="h-8 gap-1.5 px-2.5 text-xs font-medium"
           @click="isConnectModalVisible = true"
         >
           <Plus class="size-3.5" />
@@ -278,25 +326,10 @@ watch(
       </div>
     </div>
 
-    <!-- Fleet Real-time Overview Cards -->
-    <FleetMetrics :metrics="metrics" />
-
     <!-- Main Container -->
     <div
-      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-sm space-y-4"
+      class="overflow-hidden rounded-xl border border-border/60 bg-card p-2.5 shadow-xs sm:p-4"
     >
-      <div
-        class="flex items-center gap-2 border-b border-border/40 pb-3 px-3 sm:px-0 pt-2 sm:pt-0"
-      >
-        <Laptop class="size-4 shrink-0 text-muted-foreground" />
-        <span class="text-sm font-semibold text-foreground">
-          Danh sách thiết bị
-        </span>
-        <span class="text-xs text-muted-foreground">
-          · {{ nodes.length }} tổng số
-        </span>
-      </div>
-
       <Grid class="devices-vxe-grid">
         <template #name-cell="{ row }">
           <div class="flex items-center gap-2.5">
@@ -329,7 +362,9 @@ watch(
           <div class="flex items-center gap-2.5 text-xs text-foreground">
             <span class="inline-flex items-center gap-1 font-mono">
               <Cpu class="size-3.5 shrink-0 text-muted-foreground" />
-              <span class="leading-none">{{ row.cpu_cores }} Cores</span>
+              <span class="leading-none">
+                {{ $t('page.automation_view.cpu_cores_unit', [row.cpu_cores]) }}
+              </span>
             </span>
             <span class="inline-flex items-center gap-1 font-mono">
               <HardDrive class="size-3.5 shrink-0 text-muted-foreground" />
@@ -358,14 +393,14 @@ watch(
             ></span>
             {{
               row.status === 'idle'
-                ? 'Sẵn sàng'
+                ? $t('page.automation_view.device_status_idle')
                 : row.status === 'busy'
-                  ? 'Đang bận'
+                  ? $t('page.automation_view.device_status_busy')
                   : row.status === 'maintenance'
-                    ? 'Bảo trì'
+                    ? $t('page.automation_view.device_status_maintenance')
                     : row.status === 'disabled'
-                      ? 'Vô hiệu'
-                      : 'Ngoại tuyến'
+                      ? $t('common.disabled')
+                      : $t('common.offline')
             }}
           </Badge>
         </template>
@@ -377,7 +412,7 @@ watch(
               row.active_jobs > 0 ? 'text-primary' : 'text-muted-foreground'
             "
           >
-            {{ row.active_jobs }} jobs
+            {{ $t('page.automation_view.active_jobs_unit', [row.active_jobs]) }}
           </span>
         </template>
 
@@ -396,26 +431,33 @@ watch(
               @click="handleOpenDetail(row)"
             >
               <Eye class="size-3 shrink-0" />
-              <span>Chi tiết</span>
+              <span>{{ $t('common.detail') }}</span>
             </Button>
             <AlertDialog>
               <AlertDialogTrigger as-child>
                 <Button variant="destructive" size="sm" class="h-7 text-xs">
-                  Thu hồi
+                  {{ $t('page.automation_view.revoke_btn') }}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Thu hồi thiết bị?</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    {{ $t('page.automation_view.revoke_device_confirm_title') }}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    Thiết bị "{{ row.name }}" sẽ không thể kết nối tới hệ thống
-                    cho tới khi được kết nối lại.
+                    {{
+                      $t('page.automation_view.revoke_device_confirm_desc', {
+                        name: row.name,
+                      })
+                    }}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Hủy</AlertDialogCancel>
+                  <AlertDialogCancel>
+                    {{ $t('common.cancel') }}
+                  </AlertDialogCancel>
                   <AlertDialogAction @click="handleRevokeNode(row)">
-                    Thu hồi
+                    {{ $t('page.automation_view.revoke_btn') }}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -431,10 +473,10 @@ watch(
               class="size-10 stroke-[1.5] text-muted-foreground/60 mb-3"
             />
             <p class="text-sm font-medium text-foreground">
-              Chưa có thiết bị nào
+              {{ $t('page.fleet_view.empty_all') }}
             </p>
             <p class="text-xs text-muted-foreground max-w-sm mt-1">
-              Kết nối thiết bị chạy daemon để thực thi các tác vụ tự động hóa.
+              {{ $t('page.fleet_view.empty_desc') }}
             </p>
           </div>
         </template>

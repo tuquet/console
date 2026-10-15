@@ -1,3 +1,4 @@
+import { $t } from '@vben/locales';
 import { useAccessStore } from '@vben/stores';
 
 import { decodeJwtPayload, supabaseRequest } from './supabase-client';
@@ -102,7 +103,7 @@ export async function getEffectiveAccessApi(): Promise<EffectiveAccess> {
   const token = accessStore.accessToken;
 
   if (!token) {
-    throw new Error('Chưa đăng nhập: không tìm thấy accessToken');
+    throw new Error($t('authentication.missingAccessToken'));
   }
 
   // Reuse in-flight or cached promise if token hasn't changed
@@ -136,7 +137,7 @@ export async function getEffectiveAccessApi(): Promise<EffectiveAccess> {
     // Standard User: derive permissions from active tenant memberships
     const userId = readUserIdFromToken(token);
     if (!userId) {
-      throw new Error('Token không hợp lệ: thiếu claim sub');
+      throw new Error($t('authentication.invalidTokenSub'));
     }
 
     const membershipRows = await supabaseRequest<TenantMembershipQueryResult[]>(

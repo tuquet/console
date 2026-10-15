@@ -1,32 +1,33 @@
+import type {
+  PaymentChannelType,
+  PaymentIntentStatusType,
+  PaymentTargetType,
+  WalletTxType,
+} from '@vben/constants';
+
+import {
+  FILTER_ALL,
+  PAYMENT_CHANNEL,
+  PAYMENT_INTENT_STATUS,
+  PAYMENT_TARGET_TYPE,
+  SUPABASE_SCHEMA,
+  WALLET_TX_TYPE,
+} from '@vben/constants';
+
 import { supabaseRequest } from './supabase-client';
 
-export type PaymentChannelType =
-  | 'bank_transfer'
-  | 'card_intl'
-  | 'crypto'
-  | 'e_wallet'
-  | 'internal_wallet';
-
-export type PaymentIntentStatusType =
-  | 'expired'
-  | 'failed'
-  | 'manual_review'
-  | 'pending'
-  | 'processing'
-  | 'refunded'
-  | 'succeeded';
-
-export type PaymentTargetType =
-  | 'commerce_order'
-  | 'subscription_upgrade'
-  | 'wallet_topup';
-
-export type WalletTxType =
-  | 'admin_adjustment'
-  | 'bonus'
-  | 'purchase'
-  | 'refund'
-  | 'topup';
+export {
+  PAYMENT_CHANNEL,
+  PAYMENT_INTENT_STATUS,
+  PAYMENT_TARGET_TYPE,
+  WALLET_TX_TYPE,
+};
+export type {
+  PaymentChannelType,
+  PaymentIntentStatusType,
+  PaymentTargetType,
+  WalletTxType,
+};
 
 export interface PaymentGatewayItem {
   channel: PaymentChannelType;
@@ -103,7 +104,8 @@ export interface SettlePaymentIntentResult {
 
 export function mapRawPaymentGateway(raw: any): PaymentGatewayItem {
   return {
-    channel: (raw?.channel || 'bank_transfer') as PaymentChannelType,
+    channel: (raw?.channel ||
+      PAYMENT_CHANNEL.BANK_TRANSFER) as PaymentChannelType,
     currency: String(raw?.currency || 'VND'),
     driver: String(raw?.driver || 'manual'),
     id: String(raw?.id || ''),
@@ -142,7 +144,7 @@ export function mapRawWalletTransaction(raw: any): WalletTransactionItem {
     reference_id: raw?.reference_id ?? null,
     reference_type: raw?.reference_type ?? null,
     tenant_id: String(raw?.tenant_id || ''),
-    tx_type: (raw?.tx_type || 'topup') as WalletTxType,
+    tx_type: (raw?.tx_type || WALLET_TX_TYPE.TOPUP) as WalletTxType,
     wallet_id: String(raw?.wallet_id || ''),
   };
 }
@@ -163,9 +165,11 @@ export function mapRawPaymentIntent(raw: any): PaymentIntentItem {
     pay_amount: Number(raw?.pay_amount ?? 0),
     pay_currency: String(raw?.pay_currency || 'VND'),
     provider_tx_id: raw?.provider_tx_id ?? null,
-    status: (raw?.status || 'pending') as PaymentIntentStatusType,
+    status: (raw?.status ||
+      PAYMENT_INTENT_STATUS.PENDING) as PaymentIntentStatusType,
     target_id: String(raw?.target_id || ''),
-    target_type: (raw?.target_type || 'wallet_topup') as PaymentTargetType,
+    target_type: (raw?.target_type ||
+      PAYMENT_TARGET_TYPE.WALLET_TOPUP) as PaymentTargetType,
     tenant_id: raw?.tenant_id ?? null,
     transfer_code: String(raw?.transfer_code || ''),
   };
@@ -182,7 +186,7 @@ export async function getActivePaymentGatewaysApi(options?: {
     {
       body: JSON.stringify({}),
       method: 'POST',
-      schema: 'billing',
+      schema: SUPABASE_SCHEMA.BILLING,
       skipAuth: options?.skipAuth,
     },
   );
@@ -199,7 +203,7 @@ export async function getAllPaymentGatewaysAdminApi(): Promise<
 > {
   const rows = await supabaseRequest<any[]>(
     '/rest/v1/payment_gateways?select=*&order=sort_order.asc,id.asc',
-    { schema: 'billing' },
+    { schema: SUPABASE_SCHEMA.BILLING },
   );
   return Array.isArray(rows)
     ? rows.map((row) => mapRawPaymentGateway(row))
@@ -214,7 +218,7 @@ export async function getTenantWalletApi(
 ): Promise<TenantWalletItem> {
   const rows = await supabaseRequest<any[]>(
     `/rest/v1/wallets?tenant_id=eq.${encodeURIComponent(tenantId)}&select=*&limit=1`,
-    { schema: 'billing' },
+    { schema: SUPABASE_SCHEMA.BILLING },
   );
   if (Array.isArray(rows) && rows.length > 0) {
     return mapRawTenantWallet(rows[0]);
@@ -238,7 +242,7 @@ export async function getWalletTransactionsApi(
 ): Promise<WalletTransactionItem[]> {
   const rows = await supabaseRequest<any[]>(
     `/rest/v1/wallet_transactions?tenant_id=eq.${encodeURIComponent(tenantId)}&select=*&order=created_at.desc&limit=${limit}`,
-    { schema: 'billing' },
+    { schema: SUPABASE_SCHEMA.BILLING },
   );
   return Array.isArray(rows)
     ? rows.map((row) => mapRawWalletTransaction(row))
@@ -261,7 +265,7 @@ export async function createPaymentIntentApi(
       _tenant_id: params.tenant_id ?? null,
     }),
     method: 'POST',
-    schema: 'billing',
+    schema: SUPABASE_SCHEMA.BILLING,
   });
   return mapRawPaymentIntent(raw);
 }
@@ -274,7 +278,7 @@ export async function getPaymentIntentStatusApi(
 ): Promise<null | PaymentIntentItem> {
   const rows = await supabaseRequest<any[]>(
     `/rest/v1/payment_intents?id=eq.${encodeURIComponent(intentId)}&select=*&limit=1`,
-    { schema: 'billing' },
+    { schema: SUPABASE_SCHEMA.BILLING },
   );
   if (Array.isArray(rows) && rows.length > 0) {
     return mapRawPaymentIntent(rows[0]);
@@ -289,8 +293,8 @@ export async function getManualReviewIntentsAdminApi(): Promise<
   PaymentIntentItem[]
 > {
   const rows = await supabaseRequest<any[]>(
-    '/rest/v1/payment_intents?status=eq.manual_review&select=*&order=updated_at.desc',
-    { schema: 'billing' },
+    `/rest/v1/payment_intents?status=eq.${PAYMENT_INTENT_STATUS.MANUAL_REVIEW}&select=*&order=updated_at.desc`,
+    { schema: SUPABASE_SCHEMA.BILLING },
   );
   return Array.isArray(rows) ? rows.map((row) => mapRawPaymentIntent(row)) : [];
 }
@@ -314,7 +318,7 @@ export async function approveManualPaymentIntentAdminApi(
         _transfer_code: null,
       }),
       method: 'POST',
-      schema: 'billing',
+      schema: SUPABASE_SCHEMA.BILLING,
     },
   );
 }
@@ -334,7 +338,7 @@ export async function upsertPaymentGatewayAdminApi(
       },
       method: 'POST',
       preferRepresentation: true,
-      schema: 'billing',
+      schema: SUPABASE_SCHEMA.BILLING,
     },
   );
   return mapRawPaymentGateway(Array.isArray(rows) ? rows[0] : rows);
@@ -352,7 +356,7 @@ export function filterWalletTransactions(
   }
 
   let result = items;
-  if (filters?.tx_type && filters.tx_type !== 'all') {
+  if (filters?.tx_type && filters.tx_type !== FILTER_ALL) {
     result = result.filter((tx) => tx.tx_type === filters.tx_type);
   }
 

@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   buildAutomationFilterQuery,
   buildFleetFilterQuery,
+  calculateAutomationOverviewSummary,
   calculateFleetMetrics,
   calculateProgressPercentage,
   cancelCampaignRunApi,
@@ -452,6 +453,189 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
         { schema: 'runners' },
       );
       expect(proxies).toHaveLength(1);
+    });
+  });
+
+  describe('calculateAutomationOverviewSummary', () => {
+    it('aggregates workflows, runs, devices, browsers, and proxy latency accurately', () => {
+      const summary = calculateAutomationOverviewSummary({
+        browsers: [
+          {
+            browser_type: 'chromium',
+            cookies_count: 10,
+            cpu_cores: 4,
+            created_at: 'now',
+            engine_version: '130',
+            id: 'b1',
+            last_synced_at: null,
+            name: 'B1',
+            os_platform: 'windows',
+            os_version: '11',
+            ram_gb: 8,
+            status: 'running',
+            storage_size_bytes: 1024,
+            tenant_id: 't1',
+          },
+          {
+            browser_type: 'chromium',
+            cookies_count: 0,
+            cpu_cores: 2,
+            created_at: 'now',
+            engine_version: '130',
+            id: 'b2',
+            last_synced_at: null,
+            name: 'B2',
+            os_platform: 'linux',
+            os_version: '22',
+            ram_gb: 4,
+            status: 'idle',
+            storage_size_bytes: 0,
+            tenant_id: 't1',
+          },
+        ],
+        devices: [
+          {
+            active_jobs: 2,
+            capabilities: [],
+            cpu_cores: 8,
+            id: 'd1',
+            last_heartbeat_at: null,
+            machine_fingerprint: 'fp1',
+            name: 'Node 1',
+            os_info: 'linux',
+            ram_gb: 16,
+            ram_mb: 16_384,
+            registered_at: 'now',
+            status: 'busy',
+            tenant_id: 't1',
+            updated_at: 'now',
+            version: '1.0',
+          },
+        ],
+        loopbackOnline: true,
+        proxies: [
+          {
+            city: 'Hanoi',
+            country_code: 'VN',
+            created_at: 'now',
+            error_count: 0,
+            host: '1.1.1.1',
+            id: 'p1',
+            is_residential: true,
+            last_checked_at: 'now',
+            latency_ms: 100,
+            port: 1080,
+            protocol: 'socks5',
+            status: 'active',
+            tags: [],
+            tenant_id: 't1',
+          },
+          {
+            city: 'SG',
+            country_code: 'SG',
+            created_at: 'now',
+            error_count: 2,
+            host: '2.2.2.2',
+            id: 'p2',
+            is_residential: false,
+            last_checked_at: 'now',
+            latency_ms: 200,
+            port: 8080,
+            protocol: 'http',
+            status: 'failing',
+            tags: [],
+            tenant_id: 't1',
+          },
+        ],
+        runs: [
+          {
+            completed_tasks: 5,
+            created_at: 'now',
+            ended_at: null,
+            error_message: null,
+            failed_tasks: 0,
+            id: 'r1',
+            name: 'Run 1',
+            runner_id: 'd1',
+            started_at: 'now',
+            status: 'running',
+            tenant_id: 't1',
+            total_tasks: 10,
+            workflow_id: 'w1',
+          },
+          {
+            completed_tasks: 10,
+            created_at: 'now',
+            ended_at: 'now',
+            error_message: null,
+            failed_tasks: 0,
+            id: 'r2',
+            name: 'Run 2',
+            runner_id: 'd1',
+            started_at: 'now',
+            status: 'completed',
+            tenant_id: 't1',
+            total_tasks: 10,
+            workflow_id: 'w1',
+          },
+        ],
+        workflows: [
+          {
+            created_at: 'now',
+            description: null,
+            id: 'w1',
+            name: 'WF 1',
+            status: 'published',
+            tenant_id: 't1',
+            updated_at: 'now',
+            version: '1.0',
+          },
+          {
+            created_at: 'now',
+            description: null,
+            id: 'w2',
+            name: 'WF 2',
+            status: 'draft',
+            tenant_id: 't1',
+            updated_at: 'now',
+            version: '1.0',
+          },
+        ],
+      });
+
+      expect(summary.workflows).toEqual({
+        archived: 0,
+        draft: 1,
+        published: 1,
+        total: 2,
+      });
+      expect(summary.runs).toEqual({
+        completed: 1,
+        failed: 0,
+        running: 1,
+        total: 2,
+      });
+      expect(summary.fleet).toEqual({
+        active_jobs: 2,
+        loopback_online: true,
+        loopback_port: 8765,
+        online_nodes: 1,
+        total_nodes: 1,
+      });
+      expect(summary.browsers).toEqual({
+        error: 0,
+        idle: 1,
+        running: 1,
+        total: 2,
+      });
+      expect(summary.proxies).toEqual({
+        active: 1,
+        avgLatencyMs: 150,
+        failing: 1,
+        total: 2,
+      });
+      expect(summary.recentRuns).toHaveLength(2);
+      expect(summary.recentDevices).toHaveLength(1);
     });
   });
 });

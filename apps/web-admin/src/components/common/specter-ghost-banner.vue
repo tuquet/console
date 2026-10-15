@@ -64,6 +64,7 @@ export function nextBannerScene(current: ActiveBannerScene): ActiveBannerScene {
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
+import { $t } from '@vben/locales';
 import { usePreferences } from '@vben/preferences';
 
 defineOptions({ name: 'SpecterGhostBanner' });
@@ -536,7 +537,7 @@ onBeforeUnmount(() => {
         <div
           class="size-7 animate-spin rounded-full border border-foreground/20 border-t-foreground/80"
         ></div>
-        <span>loading specter 3d...</span>
+        <span>{{ $t('authentication.bannerLoadingGhost') }}</span>
       </div>
     </Transition>
 
@@ -545,7 +546,7 @@ onBeforeUnmount(() => {
       v-if="hasError"
       class="z-20 flex flex-col items-center gap-2 px-6 text-center font-mono text-xs text-muted-foreground"
     >
-      <span>3d ghost unavailable offline</span>
+      <span>{{ $t('authentication.bannerOfflineGhost') }}</span>
     </div>
 
     <!-- Interactive Three.js WebGL Canvas -->

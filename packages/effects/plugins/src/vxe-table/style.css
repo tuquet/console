@@ -61,6 +61,22 @@
   font-size: 0.75rem;
   font-weight: 600;
   color: hsl(var(--muted-foreground));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vxe-table.is--empty .vxe-table--body-wrapper {
+  overflow-x: hidden !important;
+}
+
+.vxe-table.is--empty .vxe-table--empty-placeholder {
+  width: 100% !important;
+}
+
+.vxe-pager.is--hidden,
+.vxe-grid:has(.vxe-table.is--empty) .vxe-grid--pager-wrapper,
+.vxe-grid:has(.vxe-table.is--empty) .vxe-pager {
+  display: none !important;
 }
 
 .vxe-header--column .vxe-cell,

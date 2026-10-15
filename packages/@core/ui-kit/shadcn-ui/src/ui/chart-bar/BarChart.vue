@@ -5,7 +5,7 @@ import type { Component } from 'vue';
 
 import type { BaseChartProps } from '../chart';
 
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import { cn } from '@vben-core/shared/utils';
 
@@ -68,6 +68,20 @@ const legendItems = ref<BulletLegendItemInterface[]>(
     inactive: false,
     name: category,
   })),
+);
+
+watch(
+  [colors, () => props.categories],
+  () => {
+    legendItems.value = props.categories.map((category, i) => ({
+      color: colors.value[i],
+      inactive:
+        legendItems.value.find((item) => item.name === category)?.inactive ??
+        false,
+      name: category,
+    }));
+  },
+  { deep: true },
 );
 
 const isMounted = useMounted();

@@ -18,6 +18,7 @@ import {
 
 import { getTenantAuditLogsApi } from '#/api';
 import { useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 interface Props {
   tenantId: string;
@@ -35,7 +36,7 @@ async function loadAuditLogs() {
   try {
     logs.value = await getTenantAuditLogsApi(props.tenantId);
   } catch (error: any) {
-    toast.error(error.message || 'Không thể tải nhật ký an ninh');
+    toast.error(error.message || $t('page.tenants_view.audit_load_failed'));
   } finally {
     loading.value = false;
   }
@@ -67,11 +68,10 @@ onMounted(() => {
         </div>
         <div>
           <h3 class="text-sm font-semibold text-foreground">
-            Nhật Ký Kiểm Toán An Ninh
+            {{ $t('page.tenants_view.audit_title') }}
           </h3>
           <p class="text-xs text-muted-foreground">
-            Lịch sử các thao tác thay đổi cấu hình, thành viên và phân quyền
-            trong Workspace
+            {{ $t('page.tenants_view.audit_desc') }}
           </p>
         </div>
       </div>
@@ -84,7 +84,7 @@ onMounted(() => {
         @click="loadAuditLogs"
       >
         <RefreshCw class="size-3.5" :class="{ 'animate-spin': loading }" />
-        <span>Làm Mới</span>
+        <span>{{ $t('common.refresh') }}</span>
       </Button>
     </div>
 
@@ -95,10 +95,16 @@ onMounted(() => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead class="w-[180px]">Thời Gian</TableHead>
-            <TableHead class="w-[220px]">Người Thực Hiện</TableHead>
-            <TableHead class="w-[180px]">Hành Động</TableHead>
-            <TableHead>Đối Tượng / Chi Tiết</TableHead>
+            <TableHead class="w-[180px]">
+              {{ $t('page.tenants_view.audit_col_time') }}
+            </TableHead>
+            <TableHead class="w-[220px]">
+              {{ $t('page.tenants_view.audit_col_actor') }}
+            </TableHead>
+            <TableHead class="w-[180px]">{{ $t('common.action') }}</TableHead>
+            <TableHead>
+              {{ $t('page.tenants_view.audit_col_target') }}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -117,11 +123,15 @@ onMounted(() => {
                 </div>
                 <div class="truncate max-w-[180px]">
                   <div class="text-xs font-medium text-foreground truncate">
-                    {{ log.actor_name || log.actor_email || 'Hệ thống' }}
+                    {{
+                      log.actor_name ||
+                      log.actor_email ||
+                      $t('page.system.title')
+                    }}
                   </div>
                   <div
                     v-if="log.actor_name && log.actor_email"
-                    class="text-[11px] text-muted-foreground truncate"
+                    class="text-2xs text-muted-foreground truncate"
                   >
                     {{ log.actor_email }}
                   </div>
@@ -152,7 +162,7 @@ onMounted(() => {
             >
               <div class="flex flex-col items-center justify-center gap-2">
                 <History class="size-8 text-muted-foreground/60" />
-                <p>Chưa có sự kiện kiểm toán an ninh nào được ghi nhận</p>
+                <p>{{ $t('page.tenants_view.audit_empty') }}</p>
               </div>
             </TableCell>
           </TableRow>
@@ -178,11 +188,13 @@ onMounted(() => {
 
         <div class="flex items-center gap-2 pt-1 text-muted-foreground">
           <User class="size-3.5" />
-          <span>{{ log.actor_name || log.actor_email || 'Hệ thống' }}</span>
+          <span>{{
+            log.actor_name || log.actor_email || $t('page.system.title')
+          }}</span>
         </div>
 
         <div
-          class="pt-2 border-t border-border/40 font-mono text-[11px] text-muted-foreground"
+          class="pt-2 border-t border-border/40 font-mono text-xs text-muted-foreground"
         >
           <span>{{ log.entity_type }}: </span>
           <span class="text-foreground">{{ log.entity_id }}</span>
@@ -194,7 +206,7 @@ onMounted(() => {
         class="rounded-xl border border-border/60 bg-card p-8 text-center text-sm text-muted-foreground shadow-sm"
       >
         <History class="size-8 text-muted-foreground/60 mx-auto mb-2" />
-        <p>Chưa có sự kiện kiểm toán an ninh nào được ghi nhận</p>
+        <p>{{ $t('page.tenants_view.audit_empty') }}</p>
       </div>
     </div>
   </div>

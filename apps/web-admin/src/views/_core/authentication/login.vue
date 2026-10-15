@@ -134,7 +134,7 @@ function handleGitHubLogin() {
           <div class="relative my-3 flex items-center justify-between">
             <span class="w-[28%] border-b border-input"></span>
             <span class="text-center text-xs text-muted-foreground">
-              hoặc đăng nhập với
+              {{ $t('authentication.orLoginWith') }}
             </span>
             <span class="w-[28%] border-b border-input"></span>
           </div>
@@ -144,7 +144,7 @@ function handleGitHubLogin() {
             @click="handleGitHubLogin"
           >
             <SvgGithubIcon class="size-5" />
-            <span>Continue with GitHub</span>
+            <span>{{ $t('authentication.continueWithGithub') }}</span>
           </Button>
         </div>
       </template>

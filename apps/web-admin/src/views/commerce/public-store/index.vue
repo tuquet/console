@@ -12,7 +12,7 @@ import type {
   SavedGuestOrderItem,
 } from '#/api';
 
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import {
@@ -47,21 +47,26 @@ import {
 
 import {
   createCheckoutOrderApi,
+  downloadTextFile,
   filterCommerceProducts,
+  formatSerialDeliveriesText,
   getActivePaymentGatewaysApi,
   getCommerceCategoriesApi,
   getCommerceProductsApi,
   getGuestOrderDeliveriesApi,
   getSavedGuestOrders,
+  isVariantInStock,
   saveGuestOrderLocal,
 } from '#/api';
-import { useDateFormat } from '#/composables';
+import { useClipboard, useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 defineOptions({ name: 'PublicStorefront' });
 
 const route = useRoute();
 const router = useRouter();
 const { formatDate } = useDateFormat();
+const { copyToClipboard } = useClipboard();
 
 type StorefrontMode = 'catalog' | 'lookup';
 const activeMode = ref<StorefrontMode>('catalog');
@@ -131,10 +136,16 @@ const estimatedFiatAmount = computed(() => {
 });
 
 function getProductTypeLabel(type: CommerceProductType): string {
-  if (type === 'serial_stock') return 'Tài khoản / License key';
-  if (type === 'digital_file') return 'Tệp số / Source';
-  if (type === 'specter_resource') return 'Tài nguyên Specter (Workspace)';
-  return 'Gói nạp Xu (Workspace)';
+  if (type === 'serial_stock') {
+    return $t('page.commerce_view.type_serial_stock');
+  }
+  if (type === 'digital_file') {
+    return $t('page.commerce_view.type_digital_file');
+  }
+  if (type === 'specter_resource') {
+    return $t('page.commerce_view.type_specter_resource_workspace');
+  }
+  return $t('page.commerce_view.type_wallet_credit_workspace');
 }
 
 function isGuestPurchasableProduct(product: CommerceProductItem): boolean {
@@ -158,12 +169,6 @@ function selectVariant(productId: string, variantId: string) {
     ...selectedVariantByProduct.value,
     [productId]: variantId,
   };
-}
-
-function isVariantInStock(variant: CommerceProductVariantItem | null): boolean {
-  if (!variant || !variant.is_active) return false;
-  if (variant.stock_mode === 'unlimited') return true;
-  return variant.available_stock > 0;
 }
 
 async function loadPublicCatalog() {
@@ -211,7 +216,7 @@ function openGuestCheckout(product: CommerceProductItem) {
   }
   const variant = getSelectedVariant(product);
   if (!variant) {
-    toast.error('Sản phẩm này chưa có biến thể SKU khả dụng');
+    toast.error($t('page.commerce_view.no_sku_available'));
     return;
   }
   stopPolling();
@@ -255,7 +260,7 @@ async function checkGuestOrderStatus(
     if (res.order.status === 'completed') {
       stopPolling();
       toast.success(
-        `Đơn hàng ${orderCode} đã thanh toán thành công! Đang mở tài nguyên...`,
+        $t('page.commerce_view.guest_order_paid_opening', { code: orderCode }),
       );
       lookedUpOrder.value = res.order;
       lookedUpDeliveries.value = res.deliveries;
@@ -265,17 +270,15 @@ async function checkGuestOrderStatus(
       activeMode.value = 'lookup';
       await loadPublicCatalog();
     } else if (res.order.status === 'manual_review' && !silent) {
-      toast.info(
-        'Đơn hàng đang ở trạng thái chờ Quản trị viên đối soát thủ công (manual_review)',
-      );
+      toast.info($t('page.commerce_view.guest_order_manual_review'));
     } else if (!silent) {
-      toast.info(
-        'Hệ thống đang chờ nhận xác nhận thanh toán từ ngân hàng/ví...',
-      );
+      toast.info($t('page.commerce_view.guest_order_waiting_bank'));
     }
   } catch (error: any) {
     if (!silent) {
-      toast.error(error?.message || 'Không thể kiểm tra trạng thái đơn hàng');
+      toast.error(
+        error?.message || $t('page.commerce_view.check_order_status_failed'),
+      );
     }
   } finally {
     checkingPayment.value = false;
@@ -286,7 +289,7 @@ async function handleCreateGuestOrder() {
   if (!activeProduct.value || !activeVariant.value) return;
   const gw = currentGateway.value;
   if (!gw) {
-    toast.error('Hiện chưa có cổng thanh toán ngoại vi nào khả dụng');
+    toast.error($t('page.commerce_view.no_external_gateway_available'));
     return;
   }
 
@@ -323,9 +326,13 @@ async function handleCreateGuestOrder() {
       startPollingGuestOrder(res.order.order_code, res.claim_token);
     }
 
-    toast.success(`Đã tạo đơn hàng ${res.order.order_code}`);
+    toast.success(
+      $t('page.commerce_view.guest_order_created_toast', {
+        code: res.order.order_code,
+      }),
+    );
   } catch (error: any) {
-    toast.error(error?.message || 'Không thể khởi tạo đơn hàng');
+    toast.error(error?.message || $t('page.commerce_view.order_create_failed'));
   } finally {
     submittingOrder.value = false;
   }
@@ -339,9 +346,7 @@ async function handleLookupGuestOrder(
   const token = (customToken ?? lookupClaimToken.value).trim();
 
   if (!code || !token) {
-    toast.error(
-      'Vui lòng nhập đầy đủ Mã đơn hàng (ORD-...) và Mã nhận hàng (CLM_...)',
-    );
+    toast.error($t('page.commerce_view.enter_order_code_and_claim_token'));
     return;
   }
 
@@ -352,11 +357,15 @@ async function handleLookupGuestOrder(
     const res = await getGuestOrderDeliveriesApi(code, token);
     lookedUpOrder.value = res.order;
     lookedUpDeliveries.value = res.deliveries;
-    toast.success(`Đã tải thông tin đơn hàng ${res.order.order_code}`);
+    toast.success(
+      $t('page.commerce_view.loaded_order_info_toast', {
+        code: res.order.order_code,
+      }),
+    );
   } catch (error: any) {
     toast.error(
       error?.message ||
-        'Không tìm thấy đơn hàng hoặc mã nhận hàng không hợp lệ',
+        $t('page.commerce_view.order_not_found_or_invalid_token'),
     );
   } finally {
     lookingUp.value = false;
@@ -364,38 +373,29 @@ async function handleLookupGuestOrder(
 }
 
 const serialLinesText = computed(() =>
-  lookedUpDeliveries.value
-    .filter((d) => d.delivery_type === 'serial_stock')
-    .map(
-      (d) =>
-        d.delivered_payload?.serial ||
-        d.delivered_payload?.secret_line ||
-        JSON.stringify(d.delivered_payload),
-    )
-    .join('\n'),
+  formatSerialDeliveriesText(lookedUpDeliveries.value),
 );
 
-async function copyText(text: string, label = 'dữ liệu') {
-  try {
-    await navigator.clipboard.writeText(text);
-    toast.success(`Đã sao chép ${label}`);
-  } catch {
-    toast.error('Không thể sao chép');
-  }
+async function copyText(
+  text: string,
+  label = $t('page.commerce_view.copy_default_label'),
+) {
+  await copyToClipboard(text, $t('page.commerce_view.copied_label', { label }));
 }
 
 function downloadSerialTxt() {
   if (!serialLinesText.value) return;
-  const blob = new Blob([serialLinesText.value], {
-    type: 'text/plain;charset=utf-8',
-  });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `${lookedUpOrder.value?.order_code || 'guest-order'}.txt`;
-  link.click();
-  URL.revokeObjectURL(url);
+  downloadTextFile(
+    `${lookedUpOrder.value?.order_code || 'guest-order'}.txt`,
+    serialLinesText.value,
+  );
 }
+
+watch(checkoutOpen, (open) => {
+  if (!open) {
+    stopPolling();
+  }
+});
 
 onMounted(async () => {
   savedOrders.value = getSavedGuestOrders();
@@ -431,10 +431,10 @@ onBeforeUnmount(() => {
           </div>
           <div>
             <span class="text-base font-bold tracking-tight text-foreground">
-              Tuquet Digital Store
+              {{ $t('page.commerce_view.public_store_brand') }}
             </span>
             <p class="text-2xs text-muted-foreground">
-              Giao tài nguyên tự động 24/7 • Chống bán trùng
+              {{ $t('page.commerce_view.public_store_tagline') }}
             </p>
           </div>
         </div>
@@ -447,7 +447,7 @@ onBeforeUnmount(() => {
             @click="activeMode = 'catalog'"
           >
             <ShoppingBag class="size-3.5" />
-            Danh mục sản phẩm
+            {{ $t('page.commerce_view.product_catalog_tab') }}
           </Button>
 
           <Button
@@ -457,7 +457,7 @@ onBeforeUnmount(() => {
             @click="activeMode = 'lookup'"
           >
             <PackageSearch class="size-3.5" />
-            Tra cứu & Nhận hàng
+            {{ $t('page.commerce_view.order_lookup_tab') }}
             <Badge
               v-if="savedOrders.length > 0"
               variant="secondary"
@@ -473,7 +473,7 @@ onBeforeUnmount(() => {
             class="gap-1.5 text-xs"
             @click="router.push('/commerce/store')"
           >
-            Workspace Portal
+            {{ $t('page.commerce_view.workspace_portal_btn') }}
             <ArrowRight class="size-3.5" />
           </Button>
         </div>
@@ -488,21 +488,19 @@ onBeforeUnmount(() => {
         <div class="space-y-1.5">
           <div class="flex items-center gap-2">
             <Badge variant="default" class="text-2xs">
-              Instant Auto-Fulfillment
+              {{ $t('page.commerce_view.instant_auto_fulfillment_badge') }}
             </Badge>
             <span class="text-xs text-muted-foreground">
-              Không cần tạo tài khoản — Thanh toán & nhận ngay
+              {{ $t('page.commerce_view.no_account_needed_hint') }}
             </span>
           </div>
           <h1
             class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
           >
-            Cửa hàng Tài khoản, License Key & Tài nguyên số
+            {{ $t('page.commerce_view.public_store_hero_title') }}
           </h1>
           <p class="max-w-2xl text-xs text-muted-foreground">
-            Hệ thống khóa tồn kho nguyên tử (`FOR UPDATE SKIP LOCKED`) đảm bảo
-            tuyệt đối không bán trùng. Hỗ trợ thanh toán tự động 24/7 qua
-            VietQR, MoMo, Stripe và Crypto USDT.
+            {{ $t('page.commerce_view.public_store_hero_desc') }}
           </p>
         </div>
 
@@ -511,13 +509,17 @@ onBeforeUnmount(() => {
             class="flex items-center gap-1.5 rounded-lg border border-border/60 bg-background px-3 py-2"
           >
             <Zap class="size-4 text-primary" />
-            <span class="font-medium">Giao tự động 3 giây</span>
+            <span class="font-medium">
+              {{ $t('page.commerce_view.auto_delivery_3s') }}
+            </span>
           </div>
           <div
             class="flex items-center gap-1.5 rounded-lg border border-border/60 bg-background px-3 py-2"
           >
             <ShieldCheck class="size-4 text-success" />
-            <span class="font-medium">Bảo mật `claim_token`</span>
+            <span class="font-medium">
+              {{ $t('page.commerce_view.claim_token_security') }}
+            </span>
           </div>
         </div>
       </div>
@@ -535,7 +537,7 @@ onBeforeUnmount(() => {
               class="h-8 text-xs"
               @click="selectedCategoryId = 'all'"
             >
-              Tất cả
+              {{ $t('page.commerce_view.all_categories') }}
             </Button>
             <Button
               v-for="cat in categories"
@@ -554,9 +556,15 @@ onBeforeUnmount(() => {
               v-model="selectedProductType"
               class="h-8 rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
             >
-              <option value="all">Mọi loại sản phẩm</option>
-              <option value="serial_stock">Tài khoản / License key</option>
-              <option value="digital_file">Tệp số / Source</option>
+              <option value="all">
+                {{ $t('page.commerce_view.all_product_types') }}
+              </option>
+              <option value="serial_stock">
+                {{ $t('page.commerce_view.type_serial_stock') }}
+              </option>
+              <option value="digital_file">
+                {{ $t('page.commerce_view.type_digital_file') }}
+              </option>
             </select>
 
             <div class="relative w-full sm:w-64">
@@ -566,7 +574,9 @@ onBeforeUnmount(() => {
               <input
                 v-model="searchKeyword"
                 type="text"
-                placeholder="Tìm tên sản phẩm, mã SKU..."
+                :placeholder="
+                  $t('page.commerce_view.search_product_sku_placeholder')
+                "
                 class="h-8 w-full rounded-md border border-border bg-background pr-3 pl-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
               />
             </div>
@@ -581,7 +591,7 @@ onBeforeUnmount(() => {
                 class="size-3.5"
                 :class="{ 'animate-spin': loadingCatalog }"
               />
-              Làm mới
+              {{ $t('common.refresh') }}
             </Button>
           </div>
         </div>
@@ -593,10 +603,10 @@ onBeforeUnmount(() => {
         >
           <ShoppingBag class="mx-auto size-10 text-muted-foreground/50" />
           <p class="mt-3 text-base font-semibold text-foreground">
-            Chưa có sản phẩm công khai phù hợp
+            {{ $t('page.commerce_view.empty_public_products_title') }}
           </p>
           <p class="mt-1 text-xs text-muted-foreground">
-            Vui lòng thử lại với từ khóa hoặc danh mục khác.
+            {{ $t('page.commerce_view.empty_public_products_desc') }}
           </p>
         </div>
 
@@ -627,7 +637,7 @@ onBeforeUnmount(() => {
                   {{
                     product.short_description ||
                     product.description ||
-                    'Bàn giao tự động ngay sau khi thanh toán thành công.'
+                    $t('page.commerce_view.default_public_product_desc')
                   }}
                 </p>
               </div>
@@ -640,7 +650,7 @@ onBeforeUnmount(() => {
                 <span
                   class="text-2xs font-semibold tracking-wider text-muted-foreground uppercase"
                 >
-                  Phân loại (SKU)
+                  {{ $t('page.commerce_view.sku_category_label') }}
                 </span>
                 <div class="flex flex-wrap gap-1.5">
                   <button
@@ -680,7 +690,7 @@ onBeforeUnmount(() => {
                     "
                     class="font-medium text-success"
                   >
-                    ● Luôn sẵn hàng
+                    ● {{ $t('page.commerce_view.in_stock_unlimited') }}
                   </span>
                   <span
                     v-else-if="
@@ -688,11 +698,15 @@ onBeforeUnmount(() => {
                     "
                     class="font-medium text-success"
                   >
-                    ● Còn {{ getSelectedVariant(product)?.available_stock }} sản
-                    phẩm
+                    ●
+                    {{
+                      $t('page.commerce_view.stock_count', {
+                        count: getSelectedVariant(product)?.available_stock,
+                      })
+                    }}
                   </span>
                   <span v-else class="font-medium text-destructive">
-                    ● Tạm hết hàng
+                    ● {{ $t('page.commerce_view.out_of_stock') }}
                   </span>
                 </p>
               </div>
@@ -705,7 +719,7 @@ onBeforeUnmount(() => {
                 @click="openGuestCheckout(product)"
               >
                 <ShoppingBag class="size-3.5" />
-                Mua ngay
+                {{ $t('page.commerce_view.buy_now') }}
               </Button>
               <Button
                 v-else
@@ -714,7 +728,7 @@ onBeforeUnmount(() => {
                 class="gap-1.5"
                 @click="router.push('/commerce/store')"
               >
-                Mở trong Workspace
+                {{ $t('page.commerce_view.open_in_workspace') }}
               </Button>
             </div>
           </div>
@@ -728,18 +742,17 @@ onBeforeUnmount(() => {
           <div class="rounded-xl border border-border/60 bg-card p-5 space-y-4">
             <div>
               <h2 class="text-base font-semibold text-foreground">
-                Tra cứu đơn hàng khách vãng lai
+                {{ $t('page.commerce_view.guest_lookup_title') }}
               </h2>
               <p class="mt-0.5 text-xs text-muted-foreground">
-                Nhập Mã đơn hàng (`ORD-...`) và Mã bảo mật nhận hàng (`CLM_...`)
-                được cấp khi tạo đơn.
+                {{ $t('page.commerce_view.guest_lookup_desc') }}
               </p>
             </div>
 
             <div class="space-y-3">
               <div class="space-y-1">
                 <label class="text-xs font-medium text-foreground">
-                  Mã đơn hàng (`order_code`)
+                  {{ $t('page.commerce_view.order_code_field_label') }}
                 </label>
                 <input
                   v-model="lookupOrderCode"
@@ -751,7 +764,7 @@ onBeforeUnmount(() => {
 
               <div class="space-y-1">
                 <label class="text-xs font-medium text-foreground">
-                  Mã bảo mật nhận hàng (`claim_token`)
+                  {{ $t('page.commerce_view.claim_token_field_label') }}
                 </label>
                 <input
                   v-model="lookupClaimToken"
@@ -768,7 +781,7 @@ onBeforeUnmount(() => {
                 @click="() => handleLookupGuestOrder()"
               >
                 <PackageSearch class="size-4" />
-                Tra cứu & Nhận tài nguyên
+                {{ $t('page.commerce_view.lookup_and_claim_btn') }}
               </Button>
             </div>
           </div>
@@ -781,7 +794,7 @@ onBeforeUnmount(() => {
             <div class="flex items-center gap-2">
               <History class="size-4 text-primary" />
               <h3 class="text-sm font-semibold text-foreground">
-                Đơn gần đây trên trình duyệt này
+                {{ $t('page.commerce_view.recent_browser_orders') }}
               </h3>
             </div>
 
@@ -819,11 +832,10 @@ onBeforeUnmount(() => {
           >
             <Lock class="size-9 text-muted-foreground/50" />
             <p class="mt-3 text-sm font-semibold text-foreground">
-              Chưa chọn đơn hàng cần tra cứu
+              {{ $t('page.commerce_view.no_order_selected_title') }}
             </p>
             <p class="mt-1 max-w-md text-xs text-muted-foreground">
-              Nhập mã đơn hàng cùng `claim_token` ở cột bên trái (hoặc nhấn vào
-              đơn hàng đã lưu trên trình duyệt) để xem và tải xuống tài nguyên.
+              {{ $t('page.commerce_view.no_order_selected_desc') }}
             </p>
           </div>
 
@@ -850,11 +862,12 @@ onBeforeUnmount(() => {
                   </Badge>
                 </div>
                 <p class="mt-1 text-xs text-muted-foreground">
-                  Tổng giá trị:
+                  {{ $t('page.commerce_view.total_value_label') }}
                   <span class="font-mono font-semibold text-foreground">
                     {{ lookedUpOrder.total_credits.toLocaleString('en-US') }} Xu
                   </span>
-                  • Ngày tạo: {{ formatDate(lookedUpOrder.created_at) }}
+                  • {{ $t('common.createdAt') }}:
+                  {{ formatDate(lookedUpOrder.created_at) }}
                 </p>
               </div>
 
@@ -871,7 +884,7 @@ onBeforeUnmount(() => {
                 "
               >
                 <RefreshCw class="size-3.5" />
-                Làm mới trạng thái
+                {{ $t('page.commerce_view.refresh_status_btn') }}
               </Button>
             </div>
 
@@ -879,11 +892,11 @@ onBeforeUnmount(() => {
               v-if="lookedUpDeliveries.length === 0"
               class="rounded-lg border border-dashed border-border/60 py-10 text-center text-xs text-muted-foreground"
             >
-              Đơn hàng này đang ở trạng thái
+              {{ $t('page.commerce_view.order_status_no_deliveries_prefix') }}
               <span class="font-semibold text-foreground">{{
                 lookedUpOrder.status
               }}</span>
-              và chưa phát sinh bản ghi bàn giao tài nguyên.
+              {{ $t('page.commerce_view.order_status_no_deliveries_suffix') }}
             </div>
 
             <div v-else class="space-y-4">
@@ -893,22 +906,28 @@ onBeforeUnmount(() => {
                     class="flex items-center gap-1.5 text-xs font-semibold text-foreground"
                   >
                     <KeyRound class="size-3.5 text-primary" />
-                    Dữ liệu Tài khoản / License Key ({{
-                      lookedUpDeliveries.filter(
-                        (d) => d.delivery_type === 'serial_stock',
-                      ).length
+                    {{
+                      $t('page.commerce_view.serial_data_lines', {
+                        count: lookedUpDeliveries.filter(
+                          (d) => d.delivery_type === 'serial_stock',
+                        ).length,
+                      })
                     }}
-                    dòng)
                   </span>
                   <div class="flex items-center gap-1.5">
                     <Button
                       size="sm"
                       variant="outline"
                       class="h-7 gap-1 text-xs"
-                      @click="copyText(serialLinesText, 'danh sách tài khoản')"
+                      @click="
+                        copyText(
+                          serialLinesText,
+                          $t('page.commerce_view.account_list_label'),
+                        )
+                      "
                     >
                       <Copy class="size-3" />
-                      Sao chép tất cả
+                      {{ $t('page.commerce_view.copy_all') }}
                     </Button>
                     <Button
                       size="sm"
@@ -917,7 +936,7 @@ onBeforeUnmount(() => {
                       @click="downloadSerialTxt"
                     >
                       <Download class="size-3" />
-                      Tải tệp .txt
+                      {{ $t('page.commerce_view.download_txt') }}
                     </Button>
                   </div>
                 </div>
@@ -938,9 +957,15 @@ onBeforeUnmount(() => {
               >
                 <div class="flex items-center justify-between">
                   <span class="font-semibold text-foreground">
-                    Tài nguyên bàn giao ({{ item.delivery_type }})
+                    {{
+                      $t('page.commerce_view.delivered_resource_type', {
+                        type: item.delivery_type,
+                      })
+                    }}
                   </span>
-                  <Badge variant="default" class="text-2xs">Đã hoàn tất</Badge>
+                  <Badge variant="default" class="text-2xs">
+                    {{ $t('page.commerce_view.order_status_completed') }}
+                  </Badge>
                 </div>
                 <pre
                   class="mt-2 overflow-x-auto rounded bg-background p-2 font-mono text-2xs text-muted-foreground"
@@ -956,7 +981,7 @@ onBeforeUnmount(() => {
                     class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                   >
                     <ExternalLink class="size-3" />
-                    Tải tệp xuống
+                    {{ $t('page.commerce_view.download_file') }}
                   </a>
                 </div>
               </div>
@@ -974,15 +999,19 @@ onBeforeUnmount(() => {
             <ShoppingBag class="size-4 text-primary" />
             {{
               createdIntent
-                ? `Thanh toán đơn hàng ${createdOrder?.order_code}`
-                : `Mua nhanh: ${activeProduct?.name || ''}`
+                ? $t('page.commerce_view.pay_order_title', {
+                    code: createdOrder?.order_code || '',
+                  })
+                : $t('page.commerce_view.quick_buy_title', {
+                    name: activeProduct?.name || '',
+                  })
             }}
           </DialogTitle>
           <DialogDescription class="text-xs text-muted-foreground">
             {{
               createdIntent
-                ? 'Lưu lại mã nhận hàng (claim_token) và quét mã QR bên dưới để nhận sản phẩm tự động.'
-                : 'Chọn số lượng, nhập email (tùy chọn) và chọn kênh thanh toán.'
+                ? $t('page.commerce_view.guest_pay_order_desc')
+                : $t('page.commerce_view.guest_configure_order_desc')
             }}
           </DialogDescription>
         </DialogHeader>
@@ -1008,7 +1037,7 @@ onBeforeUnmount(() => {
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="space-y-1">
               <label class="text-xs font-medium text-foreground">
-                Số lượng
+                {{ $t('page.commerce_view.quantity_label') }}
               </label>
               <input
                 v-model.number="checkoutQty"
@@ -1021,7 +1050,7 @@ onBeforeUnmount(() => {
 
             <div class="space-y-1">
               <label class="text-xs font-medium text-foreground">
-                Email nhận biên lai (Tùy chọn)
+                {{ $t('page.commerce_view.buyer_email_optional_label') }}
               </label>
               <input
                 v-model="buyerEmail"
@@ -1036,7 +1065,7 @@ onBeforeUnmount(() => {
             <label
               class="text-2xs font-semibold tracking-wider text-muted-foreground uppercase"
             >
-              Chọn kênh thanh toán
+              {{ $t('page.commerce_view.select_payment_channel_label') }}
             </label>
             <button
               v-for="gw in publicGateways"
@@ -1072,7 +1101,7 @@ onBeforeUnmount(() => {
             class="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 p-3"
           >
             <span class="text-xs font-medium text-muted-foreground">
-              Tổng thanh toán
+              {{ $t('page.commerce_view.total_payment') }}
             </span>
             <div class="text-right">
               <p class="font-mono text-lg font-bold text-foreground">
@@ -1087,7 +1116,7 @@ onBeforeUnmount(() => {
 
           <div class="flex justify-end gap-2 pt-2">
             <Button variant="outline" size="sm" @click="checkoutOpen = false">
-              Hủy
+              {{ $t('common.cancel') }}
             </Button>
             <Button
               size="sm"
@@ -1096,7 +1125,7 @@ onBeforeUnmount(() => {
               @click="handleCreateGuestOrder"
             >
               <Sparkles class="size-3.5" />
-              Tạo đơn & Lấy mã QR
+              {{ $t('page.commerce_view.create_order_get_qr_btn') }}
             </Button>
           </div>
         </div>
@@ -1109,16 +1138,21 @@ onBeforeUnmount(() => {
           >
             <div class="flex items-center justify-between">
               <span class="font-semibold text-foreground">
-                Mã bảo mật nhận hàng (`claim_token` — Đã tự động lưu):
+                {{ $t('page.commerce_view.claim_token_auto_saved_label') }}
               </span>
               <Button
                 size="sm"
                 variant="outline"
                 class="h-6 gap-1 px-2 text-2xs"
-                @click="copyText(createdClaimToken, 'mã bảo mật claim_token')"
+                @click="
+                  copyText(
+                    createdClaimToken,
+                    $t('page.commerce_view.claim_token_copy_label'),
+                  )
+                "
               >
                 <Copy class="size-3" />
-                Sao chép
+                {{ $t('common.copy') }}
               </Button>
             </div>
             <code
@@ -1134,11 +1168,11 @@ onBeforeUnmount(() => {
           >
             <img
               :src="createdIntent.checkout_payload.qr_image_url"
-              alt="Guest Checkout QR"
+              :alt="$t('page.commerce_view.payment_qr_alt')"
               class="h-52 w-52 object-contain"
             />
             <span class="mt-2 text-2xs font-medium text-slate-600">
-              Quét mã QR để thanh toán chính xác số tiền và nội dung
+              {{ $t('page.commerce_view.scan_qr_exact_amount_hint') }}
             </span>
           </div>
 
@@ -1146,7 +1180,9 @@ onBeforeUnmount(() => {
             class="space-y-2 rounded-lg border border-border/60 bg-muted/30 p-3.5 text-xs"
           >
             <div class="flex items-center justify-between">
-              <span class="text-muted-foreground">Số tiền cần chuyển:</span>
+              <span class="text-muted-foreground">
+                {{ $t('page.commerce_view.transfer_amount_label') }}
+              </span>
               <span class="font-mono text-sm font-bold text-foreground">
                 {{ createdIntent.pay_amount.toLocaleString('en-US') }}
                 {{ createdIntent.pay_currency }}
@@ -1154,7 +1190,9 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="flex items-center justify-between">
-              <span class="text-muted-foreground">Nội dung chuyển khoản:</span>
+              <span class="text-muted-foreground">
+                {{ $t('page.commerce_view.transfer_memo_label') }}
+              </span>
               <div class="flex items-center gap-1.5">
                 <code
                   class="rounded bg-primary/15 px-2 py-0.5 font-mono text-sm font-bold text-primary"
@@ -1166,7 +1204,10 @@ onBeforeUnmount(() => {
                   variant="outline"
                   class="h-6 px-2 text-2xs"
                   @click="
-                    copyText(createdIntent.transfer_code, 'mã chuyển khoản')
+                    copyText(
+                      createdIntent.transfer_code,
+                      $t('page.commerce_view.transfer_code_label'),
+                    )
                   "
                 >
                   <Copy class="size-3" />
@@ -1175,9 +1216,13 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="flex items-center justify-between">
-              <span class="text-muted-foreground">Trạng thái đơn:</span>
+              <span class="text-muted-foreground">
+                {{ $t('page.commerce_view.order_status_short_label') }}
+              </span>
               <Badge variant="secondary" class="text-2xs">
-                {{ createdOrder.status }} (Tự động kiểm tra 3s/lần)
+                {{ createdOrder.status }} ({{
+                  $t('page.commerce_view.auto_check_3s')
+                }})
               </Badge>
             </div>
           </div>
@@ -1193,7 +1238,7 @@ onBeforeUnmount(() => {
                 }
               "
             >
-              Đóng
+              {{ $t('common.close') }}
             </Button>
             <Button
               size="sm"
@@ -1210,7 +1255,7 @@ onBeforeUnmount(() => {
               "
             >
               <CheckCircle2 class="size-3.5" />
-              Kiểm tra & Nhận hàng ngay
+              {{ $t('page.commerce_view.check_and_claim_now_btn') }}
             </Button>
           </div>
         </div>

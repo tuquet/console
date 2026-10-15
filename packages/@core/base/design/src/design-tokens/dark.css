@@ -80,12 +80,7 @@
   /* Base border radius */
   --radius: 0.5rem;
 
-  /* Chart colors (shadcn standard) */
-  --chart-1: 199 89% 48%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 271 81% 56%;
-  --chart-4: 38 92% 50%;
-  --chart-5: 340 75% 55%;
+  /* Chart colors are dynamically injected onto :root by updateCSSVariables */
 
   /* Unovis CSS tokens */
   --vis-primary-color: var(--primary);

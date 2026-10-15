@@ -51,10 +51,10 @@ const planName = computed(() => {
       <!-- Left: Avatar & Basic Information -->
       <div class="flex items-start gap-3.5 sm:items-center">
         <Avatar
-          class="size-12 sm:size-14 shrink-0 rounded-full bg-gradient-to-tr from-sky-600 to-indigo-600 font-semibold text-base sm:text-lg text-white"
+          class="size-12 sm:size-14 shrink-0 rounded-full border border-primary/20 bg-primary/10 font-semibold text-base sm:text-lg text-primary"
         >
           <AvatarFallback
-            class="bg-transparent text-white font-semibold text-base sm:text-lg"
+            class="bg-transparent text-primary font-semibold text-base sm:text-lg"
           >
             {{ tenantInitials }}
           </AvatarFallback>
@@ -78,7 +78,9 @@ const planName = computed(() => {
                 "
               ></span>
               {{
-                props.tenant.status === 'active' ? 'Đang hoạt động' : 'Tạm dừng'
+                props.tenant.status === 'active'
+                  ? $t('common.active')
+                  : $t('common.suspended')
               }}
             </Badge>
           </div>
@@ -94,7 +96,10 @@ const planName = computed(() => {
             <span class="hidden sm:inline">•</span>
             <span class="flex items-center gap-1">
               <Calendar class="size-3.5" />
-              <span>Tạo: {{ formatDateOnly(props.tenant.created_at) }}</span>
+              <span
+                >{{ $t('common.createdAt') }}:
+                {{ formatDateOnly(props.tenant.created_at) }}</span
+              >
             </span>
           </div>
         </div>
@@ -110,7 +115,7 @@ const planName = computed(() => {
           @click="emit('setActive')"
         >
           <CheckCircle2 class="size-3.5" />
-          <span>Đặt làm chính</span>
+          <span>{{ $t('page.tenants_view.set_primary') }}</span>
         </Button>
 
         <Badge
@@ -119,7 +124,7 @@ const planName = computed(() => {
           class="flex items-center gap-1.5 px-2.5 py-1 font-medium text-xs"
         >
           <span class="size-1.5 rounded-full bg-success"></span>
-          <span>Active</span>
+          <span>{{ $t('common.active') }}</span>
         </Badge>
 
         <Button
@@ -129,7 +134,7 @@ const planName = computed(() => {
           @click="emit('connectCli')"
         >
           <Terminal class="size-3.5" />
-          <span>Ghép nối CLI</span>
+          <span>{{ $t('page.tenants_view.pair_cli') }}</span>
         </Button>
 
         <Button
@@ -139,7 +144,7 @@ const planName = computed(() => {
           @click="emit('openSettings')"
         >
           <Settings class="size-3.5" />
-          <span>Cài đặt</span>
+          <span>{{ $t('page.tenants_view.settings') }}</span>
         </Button>
 
         <Button

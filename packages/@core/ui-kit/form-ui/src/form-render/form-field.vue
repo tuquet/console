@@ -535,10 +535,10 @@ onUnmounted(() => {
           ref="labelRef"
           :class="
             cn(
-              'flex leading-6',
+              'flex text-sm font-medium leading-5 text-foreground',
               {
                 'flex-shrink-0 justify-end pr-3': !isVertical,
-                'mb-2 flex-row': isVertical,
+                'mb-1.5 flex-row': isVertical,
                 'self-start': shouldCollapsible && !isVertical,
               },
               labelClass,

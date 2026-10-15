@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import type { PlatformSubscriptionItem } from '#/api';
 
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
-import { Building2, CreditCard, DollarSign, RefreshCw } from '@lucide/vue';
+import { FILTER_ALL, SUBSCRIPTION_STATUS } from '@vben/constants';
+import { usePreferences } from '@vben/preferences';
+
+import { Eye, RefreshCw } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
@@ -14,77 +17,152 @@ import { $t } from '#/locales';
 defineOptions({ name: 'SystemSubscriptions' });
 
 const { formatDate } = useDateFormat();
+const { isMobile } = usePreferences();
 
 const allSubscriptions = ref<PlatformSubscriptionItem[]>([]);
-
-const STATUS_MAP: Record<
-  string,
-  {
-    label: string;
-    variant: 'default' | 'destructive' | 'outline' | 'secondary';
-  }
-> = {
-  active: { label: 'Đang hoạt động', variant: 'default' },
-  canceled: { label: 'Đã hủy', variant: 'outline' },
-  past_due: { label: 'Quá hạn', variant: 'destructive' },
-  trialing: { label: 'Dùng thử', variant: 'secondary' },
-};
 
 function getStatusBadge(status: string): {
   label: string;
   variant: 'default' | 'destructive' | 'outline' | 'secondary';
 } {
-  return STATUS_MAP[status] || { label: status, variant: 'outline' };
+  switch (status) {
+    case SUBSCRIPTION_STATUS.ACTIVE: {
+      return { label: $t('common.active'), variant: 'default' };
+    }
+    case SUBSCRIPTION_STATUS.CANCELED: {
+      return { label: $t('common.cancelled'), variant: 'outline' };
+    }
+    case SUBSCRIPTION_STATUS.PAST_DUE: {
+      return {
+        label: $t('page.system_view.subs_status_past_due'),
+        variant: 'destructive',
+      };
+    }
+    case SUBSCRIPTION_STATUS.TRIALING: {
+      return {
+        label: $t('page.system_view.subs_status_trialing'),
+        variant: 'secondary',
+      };
+    }
+    default: {
+      return { label: status, variant: 'outline' };
+    }
+  }
 }
 
-const totalMRR = computed(() => {
-  return allSubscriptions.value
-    .filter((s) => s.status === 'active')
-    .reduce((sum, s) => sum + (s.price_monthly_usd || 0), 0);
-});
-
-const activeCount = computed(() => {
-  return allSubscriptions.value.filter((s) => s.status === 'active').length;
-});
+function getColumns() {
+  return [
+    {
+      field: 'tenant_name',
+      title: $t('term.workspace'),
+      minWidth: isMobile.value ? 180 : 220,
+      slots: { default: 'workspace-cell' },
+    },
+    {
+      field: 'plan_name',
+      title: $t('term.plan'),
+      width: 150,
+      visible: !isMobile.value,
+      slots: { default: 'plan-cell' },
+    },
+    {
+      field: 'price_monthly_usd',
+      title: $t('page.system_view.subs_col_unit_price'),
+      width: 150,
+      visible: !isMobile.value,
+      slots: { default: 'price-cell' },
+    },
+    {
+      field: 'status',
+      title: $t('common.status'),
+      width: isMobile.value ? 115 : 160,
+      slots: { default: 'status-cell' },
+    },
+    {
+      field: 'current_period_end',
+      title: $t('page.system_view.subs_col_next_billing'),
+      minWidth: 170,
+      visible: !isMobile.value,
+      slots: { default: 'period-cell' },
+    },
+    {
+      field: 'cancel_at_period_end',
+      title: $t('page.system_view.subs_col_auto_renew'),
+      width: 150,
+      align: 'right' as const,
+      visible: !isMobile.value,
+      slots: { default: 'renewal-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('common.actions'),
+      width: isMobile.value ? 56 : 105,
+      align: 'right' as const,
+      slots: { default: 'actions-cell' },
+    },
+  ];
+}
 
 const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscriptionItem>({
+  detailSheetOptions: {
+    forwardActionSlot: false,
+    resource: 'billing.subscriptions',
+    subtitleField: 'plan_name',
+    titleField: 'tenant_name',
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Select',
         fieldName: 'status',
-        label: 'Trạng thái',
-        defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả trạng thái',
+        label: () => $t('common.status'),
+        defaultValue: FILTER_ALL,
+        componentProps: () => ({
+          placeholder: $t('page.system_view.status_all'),
           options: [
-            { label: 'Tất cả trạng thái', value: 'all' },
-            { label: 'Đang hoạt động', value: 'active' },
-            { label: 'Đã hủy', value: 'canceled' },
-            { label: 'Dùng thử', value: 'trialing' },
+            { label: $t('page.system_view.status_all'), value: FILTER_ALL },
+            {
+              label: $t('common.active'),
+              value: SUBSCRIPTION_STATUS.ACTIVE,
+            },
+            {
+              label: $t('common.cancelled'),
+              value: SUBSCRIPTION_STATUS.CANCELED,
+            },
+            {
+              label: $t('page.system_view.subs_status_trialing'),
+              value: SUBSCRIPTION_STATUS.TRIALING,
+            },
           ],
-        },
+        }),
       },
       {
         component: 'Input',
         fieldName: 'search',
-        label: 'Tìm kiếm',
-        componentProps: {
-          placeholder: 'Tìm theo tên tổ chức hoặc định danh...',
+        label: () => $t('common.search'),
+        componentProps: () => ({
+          placeholder: $t('page.system_view.subs_search_placeholder'),
           clearable: true,
-        },
+        }),
       },
     ],
     layout: 'vertical',
     showCollapseButton: false,
     submitButtonOptions: {
-      content: $t('common.filter'),
+      content: computed(() => $t('common.filter')),
     },
     resetButtonOptions: {
-      content: $t('common.reset'),
+      content: computed(() => $t('common.reset')),
     },
-    actionWrapperClass: 'flex items-center justify-end gap-2 pt-2 sm:pt-6',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3',
+    actionWrapperClass:
+      'col-span-2 sm:col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
@@ -106,7 +184,7 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscriptionItem>({
 
           const filterStatus = formValues?.status;
           let filtered =
-            filterStatus && filterStatus !== 'all'
+            filterStatus && filterStatus !== FILTER_ALL
               ? data.filter((s) => s.status === filterStatus)
               : data;
 
@@ -132,132 +210,84 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscriptionItem>({
         },
       },
     },
-    columns: [
-      {
-        field: 'tenant_name',
-        title: 'Workspace',
-        minWidth: 220,
-        slots: { default: 'workspace-cell' },
-      },
-      {
-        field: 'plan_name',
-        title: 'Gói cước',
-        width: 150,
-        slots: { default: 'plan-cell' },
-      },
-      {
-        field: 'price_monthly_usd',
-        title: 'Đơn giá',
-        width: 150,
-        slots: { default: 'price-cell' },
-      },
-      {
-        field: 'status',
-        title: 'Trạng thái',
-        width: 160,
-        slots: { default: 'status-cell' },
-      },
-      {
-        field: 'current_period_end',
-        title: 'Kỳ gia hạn tiếp theo',
-        minWidth: 170,
-        slots: { default: 'period-cell' },
-      },
-      {
-        field: 'cancel_at_period_end',
-        title: 'Tự động gia hạn',
-        width: 150,
-        align: 'right',
-        slots: { default: 'renewal-cell' },
-      },
-    ],
+    columns: getColumns(),
   },
+});
+
+watch([() => $t('page.system_view.subs_col_unit_price'), isMobile], () => {
+  gridApi.setGridOptions({ columns: getColumns() });
+  gridApi.formApi?.setState({
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
+  });
 });
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Header -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="flex flex-col gap-1">
-        <h1
-          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.system.subscriptions') }}
-        </h1>
-        <p class="text-xs text-muted-foreground">
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1
+            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          >
+            {{ $t('page.system.subscriptions') }}
+          </h1>
+          <Badge variant="secondary" class="font-mono text-xs font-normal">
+            {{ allSubscriptions.length }}
+          </Badge>
+        </div>
+        <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.system.subscriptions_desc') }}
         </p>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex shrink-0 items-center gap-2">
         <Button
           variant="outline"
-          size="sm"
+          size="icon"
+          class="size-8 shrink-0"
           :title="$t('common.refresh')"
           @click="() => gridApi.reload()"
-          class="gap-1.5"
         >
-          <RefreshCw class="size-3.5 text-muted-foreground" />
-          {{ $t('common.refresh') }}
+          <RefreshCw class="size-3.5 shrink-0" />
         </Button>
-      </div>
-    </div>
-
-    <!-- Metric Cards -->
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-      <div class="rounded-xl border border-border/60 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground"
-            >Doanh thu định kỳ MRR</span
-          >
-          <DollarSign class="size-4 text-primary" />
-        </div>
-        <p class="mt-2 text-2xl font-bold tracking-tight text-foreground">
-          ${{ totalMRR.toLocaleString('en-US') }}
-        </p>
-      </div>
-
-      <div class="rounded-xl border border-border/60 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground"
-            >Thuê bao kích hoạt</span
-          >
-          <CreditCard class="size-4 text-success" />
-        </div>
-        <p class="mt-2 text-2xl font-bold tracking-tight text-foreground">
-          {{ activeCount }}
-        </p>
-      </div>
-
-      <div class="rounded-xl border border-border/60 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground"
-            >Tổng workspace ký kết</span
-          >
-          <Building2 class="size-4 text-primary" />
-        </div>
-        <p class="mt-2 text-2xl font-bold tracking-tight text-foreground">
-          {{ allSubscriptions.length }}
-        </p>
       </div>
     </div>
 
     <!-- Table Container with Integrated Form & Pager -->
     <div
-      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-xs space-y-4"
+      class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs"
     >
       <Grid class="subscriptions-vxe-grid">
         <template #workspace-cell="{ row }">
-          <div class="flex flex-col text-left py-1">
-            <span class="font-medium text-foreground">
+          <div class="flex min-w-0 flex-col py-1 text-left">
+            <span class="truncate font-medium text-foreground">
               {{ row.tenant_name }}
             </span>
-            <span class="font-mono text-xs text-muted-foreground">
-              /{{ row.tenant_slug || row.tenant_id.slice(0, 8) }}
-            </span>
+            <div
+              class="flex items-center gap-1.5 font-mono text-2xs text-muted-foreground sm:text-xs"
+            >
+              <span class="truncate">
+                /{{ row.tenant_slug || row.tenant_id.slice(0, 8) }}
+              </span>
+              <span class="sm:hidden">&bull;</span>
+              <span
+                class="truncate font-sans font-medium text-foreground sm:hidden"
+              >
+                {{ row.plan_name }}
+              </span>
+              <span class="sm:hidden">&bull;</span>
+              <span class="sm:hidden">
+                ${{ row.price_monthly_usd
+                }}{{ $t('page.system_view.per_month_suffix') }}
+              </span>
+            </div>
           </div>
         </template>
 
@@ -269,7 +299,8 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscriptionItem>({
 
         <template #price-cell="{ row }">
           <span class="font-medium text-foreground">
-            ${{ row.price_monthly_usd }}/tháng
+            ${{ row.price_monthly_usd
+            }}{{ $t('page.system_view.per_month_suffix') }}
           </span>
         </template>
 
@@ -290,8 +321,27 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscriptionItem>({
             :variant="row.cancel_at_period_end ? 'outline' : 'secondary'"
             class="text-xs"
           >
-            {{ row.cancel_at_period_end ? 'Hủy cuối kỳ' : 'Tự động' }}
+            {{
+              row.cancel_at_period_end
+                ? $t('page.system_view.subs_cancel_period_end')
+                : $t('page.system_view.subs_auto_renew')
+            }}
           </Badge>
+        </template>
+
+        <template #actions-cell="{ row }">
+          <div class="flex items-center justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              class="inline-flex h-7 items-center gap-1 px-2 text-xs"
+              :title="$t('common.detail')"
+              @click="gridApi.openDetailSheet(row as PlatformSubscriptionItem)"
+            >
+              <Eye class="size-3 shrink-0" />
+              <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
+            </Button>
+          </div>
         </template>
       </Grid>
     </div>

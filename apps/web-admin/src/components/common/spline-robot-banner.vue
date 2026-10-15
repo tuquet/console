@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
+import { $t } from '@vben/locales';
 import { usePreferences } from '@vben/preferences';
 
 defineOptions({ name: 'SplineRobotBanner' });
@@ -139,7 +140,7 @@ onBeforeUnmount(() => {
         <div
           class="size-7 animate-spin rounded-full border border-foreground/20 border-t-foreground/80"
         ></div>
-        <span>loading 3d scene...</span>
+        <span>{{ $t('authentication.bannerLoadingScene') }}</span>
       </div>
     </Transition>
 
@@ -148,7 +149,7 @@ onBeforeUnmount(() => {
       v-if="hasError"
       class="z-20 flex flex-col items-center gap-2 px-6 text-center font-mono text-xs text-muted-foreground"
     >
-      <span>3d scene unavailable offline</span>
+      <span>{{ $t('authentication.bannerOfflineScene') }}</span>
     </div>
 
     <!-- Interactive WebGL Canvas -->

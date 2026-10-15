@@ -20,10 +20,16 @@ export function filterRoutesByPlugins(
   const result: RouteRecordRaw[] = [];
 
   for (const route of routes) {
-    const requiredPlugin = (route.meta as undefined | { plugin?: string })
-      ?.plugin;
-    if (requiredPlugin && !installedPlugins.includes(requiredPlugin)) {
-      continue;
+    const requiredPlugin = (
+      route.meta as undefined | { plugin?: string | string[] }
+    )?.plugin;
+    if (requiredPlugin) {
+      const isInstalled = Array.isArray(requiredPlugin)
+        ? requiredPlugin.some((p) => installedPlugins.includes(p))
+        : installedPlugins.includes(requiredPlugin);
+      if (!isInstalled) {
+        continue;
+      }
     }
 
     const cloned = { ...route };

@@ -30,7 +30,6 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
-import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
 import {
   calculateProgressPercentage,
   cancelCampaignRunApi,
@@ -39,6 +38,8 @@ import {
   isRunActive,
 } from '#/api';
 import { useDateFormat } from '#/composables';
+import { CAMPAIGN_STATUS_META, getStatusToneMeta } from '#/constants';
+import { $t } from '#/locales';
 
 defineOptions({ name: 'AutomationRunDetail' });
 
@@ -66,6 +67,16 @@ const progressPct = computed(() => {
     run.value.total_tasks,
   );
 });
+
+function getRunStatusDotClass(status: string): string {
+  const meta = getStatusToneMeta(status, CAMPAIGN_STATUS_META);
+  return `${meta.dotClass}${meta.pulse ? ' animate-pulse' : ''}`;
+}
+
+function getRunStatusLabel(status: string): string {
+  const meta = getStatusToneMeta(status, CAMPAIGN_STATUS_META);
+  return meta.labelKey ? $t(meta.labelKey) : (meta.fallbackLabel ?? status);
+}
 
 function formatDuration(
   start: null | string | undefined,
@@ -139,10 +150,10 @@ async function handleCancelRun() {
   canceling.value = true;
   try {
     await cancelCampaignRunApi(runId.value);
-    toast.success('Đã gửi yêu cầu hủy phiên chạy');
+    toast.success($t('page.automation_view.cancel_run_success'));
     await fetchRunAndLogs();
   } catch (error: any) {
-    toast.error(error.message || 'Hủy phiên chạy thất bại');
+    toast.error(error.message || $t('page.automation_view.cancel_run_failed'));
   } finally {
     canceling.value = false;
   }
@@ -158,7 +169,7 @@ onMounted(async () => {
     await fetchRunAndLogs();
     startPolling();
   } catch (error: any) {
-    toast.error(error.message || 'Không thể tải chi tiết phiên chạy');
+    toast.error(error.message || $t('page.automation_view.load_run_failed'));
   } finally {
     loading.value = false;
   }
@@ -170,67 +181,54 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
-    <!-- Navigation & Action Header -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="flex items-center gap-3">
+  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
+    <!-- Mobile-First Navigation & Action Header -->
+    <div class="flex items-start justify-between gap-2 sm:items-center">
+      <div class="flex min-w-0 items-start gap-2.5 sm:items-center">
         <Button
           variant="outline"
           size="icon"
           class="size-8 shrink-0"
-          title="Quay lại"
+          :title="$t('common.back')"
           @click="handleGoBack"
         >
           <ArrowLeft class="size-4" />
         </Button>
-        <div>
-          <div class="flex items-center gap-2">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
             <h1
-              class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+              class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
             >
-              {{ run?.name || 'Chi tiết phiên chạy' }}
+              {{ run?.name || $t('page.automation.runDetail') }}
             </h1>
-            <Badge v-if="run" variant="outline" class="text-xs font-normal">
+            <Badge
+              v-if="run"
+              variant="outline"
+              class="shrink-0 text-xs font-normal"
+            >
               <span
                 class="mr-1.5 size-1.5 rounded-full"
-                :class="{
-                  'bg-primary animate-pulse': run.status === 'running',
-                  'bg-success': run.status === 'completed',
-                  'bg-destructive': run.status === 'failed',
-                  'bg-muted-foreground': run.status === 'cancelled',
-                  'bg-warning animate-pulse':
-                    run.status === 'pending' || run.status === 'queued',
-                }"
+                :class="getRunStatusDotClass(run.status)"
               ></span>
-              {{
-                run.status === 'running'
-                  ? 'Đang chạy'
-                  : run.status === 'completed'
-                    ? 'Hoàn thành'
-                    : run.status === 'failed'
-                      ? 'Thất bại'
-                      : run.status === 'cancelled'
-                        ? 'Đã hủy'
-                        : 'Đang chờ'
-              }}
+              {{ getRunStatusLabel(run.status) }}
             </Badge>
           </div>
-          <div class="font-mono text-xs text-muted-foreground">
-            Run ID: {{ runId }}
+          <div
+            class="truncate font-mono text-2xs text-muted-foreground sm:text-xs"
+          >
+            {{ $t('page.automation_view.run_id_label') }}: {{ runId }}
           </div>
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <!-- Live Polling Indicator -->
         <div
           v-if="isActive"
-          class="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-3 py-1 text-xs text-muted-foreground"
+          class="hidden items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-2.5 py-1 text-xs text-muted-foreground sm:inline-flex"
         >
-          <span class="size-2 rounded-full bg-success animate-pulse"></span>
-          <span>Live polling 3s</span>
+          <span class="size-2 animate-pulse rounded-full bg-success"></span>
+          <span>{{ $t('page.automation_view.live_polling_3s') }}</span>
         </div>
 
         <AlertDialog v-if="isActive">
@@ -239,24 +237,27 @@ onUnmounted(() => {
               variant="destructive"
               size="sm"
               :disabled="canceling"
-              class="gap-1.5 h-8 text-xs font-medium"
+              class="h-8 gap-1.5 px-2.5 text-xs font-medium"
             >
-              <XCircle class="size-3.5" />
-              <span>Hủy phiên chạy</span>
+              <XCircle class="size-3.5 shrink-0" />
+              <span class="hidden sm:inline">
+                {{ $t('page.automation_view.cancel_run_btn') }}
+              </span>
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Hủy phiên chạy workflow?</AlertDialogTitle>
+              <AlertDialogTitle>
+                {{ $t('page.automation_view.cancel_run_confirm_title') }}
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                Tiến trình tự động hóa đang thực thi trên runner node sẽ bị dừng
-                lại ngay lập tức.
+                {{ $t('page.automation_view.cancel_run_confirm_desc') }}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Đóng</AlertDialogCancel>
+              <AlertDialogCancel>{{ $t('common.close') }}</AlertDialogCancel>
               <AlertDialogAction @click="handleCancelRun">
-                Xác nhận hủy
+                {{ $t('page.automation_view.confirm_cancel_btn') }}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -267,7 +268,7 @@ onUnmounted(() => {
           size="icon"
           :disabled="loading"
           class="size-8 shrink-0"
-          title="Làm mới"
+          :title="$t('common.refresh')"
           @click="fetchRunAndLogs"
         >
           <RefreshCw
@@ -278,137 +279,170 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Overview Form via VXE UI Form -->
+    <!-- Mobile-First Run Specifications Grid (2 -> 2 -> 4 Columns) -->
     <div
       v-if="run"
-      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
+      class="space-y-2.5 rounded-xl border border-border/60 bg-card p-3 shadow-xs sm:space-y-3 sm:p-4"
     >
-      <VxeForm :data="run" custom-layout readonly size="small" class="w-full">
-        <VxeFormItem title="Quy trình" span="12" class="sm:col-span-6">
-          <template #default>
-            <div class="flex items-center gap-2 text-sm">
-              <GitBranch class="size-4 text-muted-foreground shrink-0" />
-              <span class="font-medium text-foreground truncate">
-                {{ run.workflow ? run.workflow.name : 'Chưa gắn quy trình' }}
-              </span>
-            </div>
-          </template>
-        </VxeFormItem>
+      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+        <!-- 1. Workflow -->
+        <div
+          class="space-y-1.5 rounded-lg border border-border/50 bg-muted/20 p-3"
+        >
+          <div class="text-xs text-muted-foreground">
+            {{ $t('term.workflow') }}
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <GitBranch class="size-4 shrink-0 text-muted-foreground" />
+            <span class="truncate font-medium text-foreground">
+              {{
+                run.workflow
+                  ? run.workflow.name
+                  : $t('page.runs_view.unassigned_workflow')
+              }}
+            </span>
+          </div>
+        </div>
 
-        <VxeFormItem title="Thiết bị thực thi" span="12" class="sm:col-span-6">
-          <template #default>
-            <div class="flex items-center gap-2 text-sm">
-              <Laptop class="size-4 text-muted-foreground shrink-0" />
-              <span class="font-medium text-foreground truncate">
-                {{ run.runner ? run.runner.name : 'Điều phối tự động' }}
-              </span>
-            </div>
-          </template>
-        </VxeFormItem>
+        <!-- 2. Runner Device -->
+        <div
+          class="space-y-1.5 rounded-lg border border-border/50 bg-muted/20 p-3"
+        >
+          <div class="text-xs text-muted-foreground">
+            {{ $t('page.runs_view.col_runner') }}
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <Laptop class="size-4 shrink-0 text-muted-foreground" />
+            <span class="truncate font-medium text-foreground">
+              {{
+                run.runner
+                  ? run.runner.name
+                  : $t('page.runs_view.auto_dispatch')
+              }}
+            </span>
+          </div>
+        </div>
 
-        <VxeFormItem title="Thời lượng" span="12" class="sm:col-span-6">
-          <template #default>
-            <div class="flex items-center gap-2 text-sm font-mono">
-              <Clock class="size-4 text-muted-foreground shrink-0" />
-              <span class="font-semibold text-foreground">
-                {{ formatDuration(run.started_at, run.ended_at) }}
-              </span>
-              <span class="text-xs text-muted-foreground font-sans">
-                · Bắt đầu: {{ formatDate(run.started_at) }}
-              </span>
-            </div>
-          </template>
-        </VxeFormItem>
+        <!-- 3. Duration & Started At -->
+        <div
+          class="space-y-1.5 rounded-lg border border-border/50 bg-muted/20 p-3"
+        >
+          <div class="text-xs text-muted-foreground">
+            {{ $t('page.runs_view.duration') }}
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 font-mono text-sm">
+            <Clock class="size-4 shrink-0 text-muted-foreground" />
+            <span class="font-semibold text-foreground">
+              {{ formatDuration(run.started_at, run.ended_at) }}
+            </span>
+            <span class="font-sans text-2xs text-muted-foreground">
+              &bull; {{ formatDate(run.started_at) }}
+            </span>
+          </div>
+        </div>
 
-        <VxeFormItem title="Tiến độ tác vụ" span="12" class="sm:col-span-6">
-          <template #default>
-            <div class="flex items-center gap-3 w-full max-w-sm">
-              <div class="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-                <div
-                  class="h-full rounded-full bg-primary transition-all"
-                  :style="{ width: `${progressPct}%` }"
-                ></div>
-              </div>
-              <span
-                class="text-xs font-mono font-medium text-foreground shrink-0"
-              >
-                {{ run.completed_tasks }} / {{ run.total_tasks }} tasks ·
-                {{ progressPct }}%
-              </span>
-            </div>
-          </template>
-        </VxeFormItem>
-
-        <VxeFormItem v-if="run.error_message" title="Lỗi thực thi" span="24">
-          <template #default>
+        <!-- 4. Task Progress -->
+        <div
+          class="space-y-1.5 rounded-lg border border-border/50 bg-muted/20 p-3"
+        >
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-muted-foreground">
+              {{ $t('page.automation_view.task_progress') }}
+            </span>
+            <span class="font-mono font-medium text-foreground">
+              {{
+                $t('page.automation_view.tasks_progress_count', [
+                  run.completed_tasks,
+                  run.total_tasks,
+                ])
+              }}
+              ({{ progressPct }}%)
+            </span>
+          </div>
+          <div class="h-2 w-full overflow-hidden rounded-full bg-muted">
             <div
-              class="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive w-full"
-            >
-              <AlertCircle class="size-4 shrink-0 mt-0.5" />
-              <div class="font-mono break-all leading-relaxed">
-                {{ run.error_message }}
-              </div>
-            </div>
-          </template>
-        </VxeFormItem>
-      </VxeForm>
+              class="h-full rounded-full bg-primary transition-all"
+              :style="{ width: `${progressPct}%` }"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Message Banner -->
+      <div
+        v-if="run.error_message"
+        class="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive"
+      >
+        <AlertCircle class="mt-0.5 size-4 shrink-0" />
+        <div class="font-mono leading-relaxed break-all">
+          {{ run.error_message }}
+        </div>
+      </div>
     </div>
 
     <!-- Execution Logs Console Section -->
     <div
-      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-3"
+      class="space-y-3 rounded-xl border border-border/60 bg-card p-3 shadow-xs sm:p-4"
     >
       <div
-        class="flex items-center justify-between border-b border-border/40 pb-3"
+        class="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-2.5"
       >
         <div class="flex items-center gap-2">
           <Terminal class="size-4 text-muted-foreground" />
           <span class="text-sm font-semibold text-foreground">
-            Nhật ký thực thi
+            {{ $t('page.automation_view.execution_logs') }}
           </span>
-          <Badge variant="outline" class="text-xs font-normal">
-            {{ logs.length }} dòng
+          <Badge variant="outline" class="text-2xs font-normal sm:text-xs">
+            {{ $t('page.automation_view.logs_line_count', [logs.length]) }}
           </Badge>
         </div>
 
-        <div class="text-xs text-muted-foreground">
-          {{ isActive ? 'Đang cập nhật thời gian thực...' : 'Đã hoàn tất' }}
+        <div class="text-2xs text-muted-foreground sm:text-xs">
+          {{
+            isActive
+              ? $t('page.automation_view.logs_live_updating')
+              : $t('page.automation_view.logs_finished')
+          }}
         </div>
       </div>
 
       <!-- Terminal Output Window -->
       <div
         ref="consoleRef"
-        class="max-h-[500px] min-h-[300px] overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-950 p-4 font-mono text-xs text-neutral-300 space-y-1.5"
+        class="max-h-[460px] min-h-[260px] space-y-1.5 overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-950 p-3 font-mono text-xs text-neutral-300 sm:p-4"
       >
         <div
           v-for="log in logs"
           :key="log.id"
-          class="flex items-start gap-2 hover:bg-neutral-900/50 py-0.5 px-1 rounded transition-colors"
+          class="flex flex-col gap-1 rounded px-1 py-1 transition-colors hover:bg-neutral-900/50 sm:flex-row sm:items-start sm:gap-2 sm:py-0.5"
         >
-          <span class="text-neutral-500 shrink-0 select-none">
-            {{ formatDate(log.logged_at) }}
-          </span>
-          <span
-            class="font-semibold uppercase shrink-0 text-2xs px-1 py-0.5 rounded"
-            :class="{
-              'text-success bg-success/20': log.level === 'info',
-              'text-warning bg-warning/20': log.level === 'warn',
-              'text-destructive bg-destructive/20':
-                log.level === 'error' || log.level === 'fatal',
-              'text-primary bg-primary/20':
-                log.level === 'debug' || log.level === 'trace',
-            }"
-          >
-            {{ log.level }}
-          </span>
-          <span
-            v-if="log.step_name"
-            class="text-neutral-400 font-semibold shrink-0"
-          >
-            [{{ log.step_name }}]
-          </span>
-          <span class="text-neutral-200 break-all flex-1">
+          <div class="flex flex-wrap items-center gap-1.5 sm:shrink-0">
+            <span
+              class="shrink-0 text-2xs text-neutral-500 select-none sm:text-xs"
+            >
+              {{ formatDate(log.logged_at) }}
+            </span>
+            <span
+              class="shrink-0 rounded px-1 py-0.5 text-2xs font-semibold uppercase"
+              :class="{
+                'bg-success/20 text-success': log.level === 'info',
+                'bg-warning/20 text-warning': log.level === 'warn',
+                'bg-destructive/20 text-destructive':
+                  log.level === 'error' || log.level === 'fatal',
+                'bg-primary/20 text-primary':
+                  log.level === 'debug' || log.level === 'trace',
+              }"
+            >
+              {{ log.level }}
+            </span>
+            <span
+              v-if="log.step_name"
+              class="shrink-0 font-semibold text-neutral-400"
+            >
+              [{{ log.step_name }}]
+            </span>
+          </div>
+          <span class="flex-1 leading-relaxed text-neutral-200 break-all">
             {{ log.message }}
           </span>
         </div>
@@ -418,8 +452,8 @@ onUnmounted(() => {
           v-if="logs.length === 0 && !loading"
           class="flex h-48 flex-col items-center justify-center text-center text-neutral-500"
         >
-          <PlayCircle class="size-6 text-neutral-600 mb-2" />
-          <span>Chưa có nhật ký thực thi nào được ghi lại.</span>
+          <PlayCircle class="mb-2 size-6 text-neutral-600" />
+          <span>{{ $t('page.automation_view.logs_empty') }}</span>
         </div>
       </div>
     </div>

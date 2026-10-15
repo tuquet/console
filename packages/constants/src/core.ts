@@ -6,6 +6,13 @@ import type { SupportedLanguagesType } from '@vben-core/typings';
 export const LOGIN_PATH = '/auth/login';
 
 /**
+ * Universal sentinel value for "All" filter options across VbenForm / VxeGrid selects
+ */
+export const FILTER_ALL = 'all' as const;
+export type FilterAll = typeof FILTER_ALL;
+export type WithFilterAll<T extends string> = FilterAll | T;
+
+/**
  * Language option; value defaults to string to support registering custom languages at runtime (see setSupportLanguages)
  */
 export interface LanguageOption<TValue extends string = string> {

@@ -3,16 +3,21 @@ import type { GrowthPoint } from '#/api';
 
 import { computed } from 'vue';
 
+import { $t } from '@vben/locales';
+
 import { AreaChart } from '@vben-core/shadcn-ui';
 
 const props = defineProps<{
   data: GrowthPoint[];
 }>();
 
+const categoryLabel = computed(() => $t('term.workspace'));
+
 const chartData = computed(() => {
   if (!props.data || props.data.length === 0) return [];
+  const label = categoryLabel.value;
   return props.data.map((d) => ({
-    Workspace: d.count,
+    [label]: d.count,
     date: d.date,
   }));
 });
@@ -23,8 +28,7 @@ const chartData = computed(() => {
     <AreaChart
       :data="chartData"
       index="date"
-      :categories="['Workspace']"
-      :colors="['#38bdf8']"
+      :categories="[categoryLabel]"
       :show-gradient="true"
       class="h-full w-full"
     />

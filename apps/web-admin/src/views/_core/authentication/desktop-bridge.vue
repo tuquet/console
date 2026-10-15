@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import { $t } from '@vben/locales';
 import { useAccessStore, useUserStore } from '@vben/stores';
 
 import { CheckCircle2, Laptop } from '@lucide/vue';
@@ -27,7 +28,9 @@ const { copyToClipboard, isCopied } = useClipboard();
 
 // Query parameters from Desk app
 const machineName = computed(
-  () => (route.query.machine_name as string) || 'Local Workstation',
+  () =>
+    (route.query.machine_name as string) ||
+    $t('authentication.desktopLocalWorkstation'),
 );
 const state = computed(() => (route.query.state as string) || '');
 const port = computed(() => (route.query.port as string) || '8765');
@@ -63,7 +66,10 @@ async function loadTenants() {
 
   if (tenantOptions.value.length === 0) {
     tenantOptions.value = [
-      { label: 'Workspace Mặc định', value: 'default-workspace' },
+      {
+        label: $t('authentication.desktopDefaultWorkspace'),
+        value: 'default-workspace',
+      },
     ];
     selectedTenant.value = 'default-workspace';
   }
@@ -102,7 +108,6 @@ async function handleAuthorize() {
       machineName: machineName.value,
     };
 
-    // 1. Gửi qua local HTTP loopback bằng POST (JSON Body - Không lộ token trên URL)
     try {
       await fetch(`http://127.0.0.1:${port.value}/api/v1/auth/callback`, {
         method: 'POST',
@@ -110,16 +115,14 @@ async function handleAuthorize() {
         body: JSON.stringify(payload),
       });
     } catch {
-      // Loopback có thể cần fallback
+      // Loopback may fallback to custom URI protocol
     }
 
-    // 2. Chuyển hướng tới custom URI protocol để đưa cửa sổ Desk lên đầu
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
     iframe.src = deepLinkUrl.value;
     document.body.append(iframe);
 
-    // Đánh dấu ủy quyền thành công
     setTimeout(() => {
       isAuthorized.value = true;
       loading.value = false;
@@ -127,13 +130,17 @@ async function handleAuthorize() {
   } catch (error: any) {
     loading.value = false;
     errorMessage.value =
-      error?.message || 'Không thể gửi phản hồi xác thực tới Specter Desk';
+      error?.message || $t('authentication.desktopSendAuthFailed');
   }
 }
 
 function handleReopenDesk() {
   window.location.href = deepLinkUrl.value;
 }
+
+const tokenBundleLabel = computed(() =>
+  $t('authentication.desktopTokenBundleLabel'),
+);
 
 function handleCopyTokenBundle() {
   const bundle = btoa(
@@ -145,7 +152,7 @@ function handleCopyTokenBundle() {
       machineName: machineName.value,
     }),
   );
-  copyToClipboard(bundle, 'Mã ghép nối Specter Desk');
+  copyToClipboard(bundle, tokenBundleLabel.value);
 }
 
 function handleCancel() {
@@ -162,7 +169,6 @@ onMounted(() => {
 <template>
   <div class="flex min-h-screen items-center justify-center bg-background p-4">
     <Card class="w-full max-w-lg shadow-lg border-border/60 p-6">
-      <!-- Trạng thái đã ủy quyền thành công -->
       <template v-if="isAuthorized">
         <div class="text-center py-6 space-y-4">
           <div
@@ -170,49 +176,52 @@ onMounted(() => {
           >
             <CheckCircle2 class="size-7" />
           </div>
-          <h3 class="text-xl font-bold">Ủy quyền thành công</h3>
+          <h3 class="text-xl font-bold">
+            {{ $t('authentication.desktopAuthorizedTitle') }}
+          </h3>
           <p class="text-xs text-muted-foreground max-w-sm mx-auto">
-            Máy trạm đã được kết nối an toàn với tài khoản Tuquet. Bạn có thể
-            đóng tab này và tiếp tục trên Specter Desk.
+            {{ $t('authentication.desktopAuthorizedDesc') }}
           </p>
           <div class="space-y-3 pt-2">
             <div class="flex gap-2 justify-center">
-              <Button @click="handleReopenDesk"> Mở lại Specter Desk </Button>
+              <Button @click="handleReopenDesk">
+                {{ $t('authentication.desktopReopenBtn') }}
+              </Button>
               <Button variant="outline" @click="handleCopyTokenBundle">
                 {{
-                  isCopied('Mã ghép nối Specter Desk')
-                    ? 'Đã sao chép'
-                    : 'Sao chép token ghép nối'
+                  isCopied(tokenBundleLabel)
+                    ? $t('common.copied')
+                    : $t('authentication.desktopCopyTokenBtn')
                 }}
               </Button>
             </div>
             <div>
               <Button class="w-full h-10" @click="handleCancel">
-                Đóng tab này
+                {{ $t('authentication.desktopCloseTab') }}
               </Button>
             </div>
           </div>
         </div>
       </template>
 
-      <!-- Trạng thái yêu cầu đăng nhập trước -->
       <template v-else-if="!isLoggedIn">
         <div class="text-center py-6 space-y-4">
           <Avatar class="size-16 mx-auto mb-2">
             <AvatarImage src="https://tuquet.com/icons/cli.svg" />
             <AvatarFallback>CLI</AvatarFallback>
           </Avatar>
-          <h3 class="text-xl font-bold">Kết nối thiết bị</h3>
+          <h3 class="text-xl font-bold">
+            {{ $t('authentication.desktopConnectTitle') }}
+          </h3>
           <p class="text-xs text-muted-foreground">
-            Đăng nhập tài khoản <strong>Tuquet</strong> để cấp quyền truy cập
-            cho thiết bị.
+            {{ $t('authentication.desktopConnectDesc') }}
           </p>
 
           <div class="rounded-lg bg-muted p-4 text-left">
             <span
               class="text-xs font-semibold text-muted-foreground block mb-1"
             >
-              Thiết bị yêu cầu:
+              {{ $t('authentication.desktopRequestingDevice') }}
             </span>
             <div class="flex items-center justify-between">
               <span class="text-sm font-medium text-foreground">{{
@@ -222,16 +231,17 @@ onMounted(() => {
                 variant="outline"
                 class="bg-primary/10 text-primary border-primary/30"
               >
-                Local Workstation
+                {{ $t('authentication.desktopLocalWorkstation') }}
               </Badge>
             </div>
           </div>
 
-          <Button class="w-full h-10" @click="goToLogin"> Đăng nhập </Button>
+          <Button class="w-full h-10" @click="goToLogin">
+            {{ $t('common.login') }}
+          </Button>
         </div>
       </template>
 
-      <!-- Màn hình Xác nhận cấp quyền (Consent Screen) -->
       <template v-else>
         <div class="text-center pb-4">
           <div
@@ -239,9 +249,11 @@ onMounted(() => {
           >
             <Laptop class="size-8" />
           </div>
-          <h3 class="text-xl font-bold">Ủy quyền thiết bị</h3>
+          <h3 class="text-xl font-bold">
+            {{ $t('authentication.desktopConsentTitle') }}
+          </h3>
           <p class="text-xs text-muted-foreground mt-1">
-            Cấp quyền kết nối và đồng bộ tài nguyên với Tuquet Cloud.
+            {{ $t('authentication.desktopConsentDesc') }}
           </p>
         </div>
 
@@ -249,7 +261,9 @@ onMounted(() => {
           class="space-y-4 rounded-xl border border-border/60 bg-muted/40 p-4"
         >
           <div class="flex items-center justify-between">
-            <span class="text-xs text-muted-foreground">Tài khoản</span>
+            <span class="text-xs text-muted-foreground">{{
+              $t('authentication.desktopAccountLabel')
+            }}</span>
             <div class="flex items-center space-x-2">
               <Avatar class="size-6">
                 <AvatarImage :src="userAvatar" />
@@ -262,7 +276,9 @@ onMounted(() => {
           </div>
 
           <div class="flex items-center justify-between">
-            <span class="text-xs text-muted-foreground">Thiết bị</span>
+            <span class="text-xs text-muted-foreground">{{
+              $t('term.device')
+            }}</span>
             <Badge
               variant="outline"
               class="bg-accent text-accent-foreground border-border"
@@ -272,9 +288,9 @@ onMounted(() => {
           </div>
 
           <div>
-            <span class="text-xs text-muted-foreground block mb-2"
-              >Workspace</span
-            >
+            <span class="text-xs text-muted-foreground block mb-2">{{
+              $t('term.workspace')
+            }}</span>
             <select
               v-model="selectedTenant"
               class="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
@@ -293,8 +309,8 @@ onMounted(() => {
         <div
           class="mt-4 p-3 bg-warning/10 rounded-lg border border-warning/20 text-xs text-warning"
         >
-          <strong>Lưu ý:</strong> Thiết bị này sẽ được cấp quyền thực thi tác vụ
-          runner và quản lý profile trình duyệt trong Workspace đã chọn.
+          <strong>{{ $t('authentication.desktopSecurityNoteTitle') }}</strong>
+          {{ $t('authentication.desktopSecurityNoteDesc') }}
         </div>
 
         <div
@@ -306,14 +322,18 @@ onMounted(() => {
 
         <div class="mt-6 flex gap-3">
           <Button variant="outline" class="flex-1 h-10" @click="handleCancel">
-            Hủy
+            {{ $t('common.cancel') }}
           </Button>
           <Button
             class="flex-1 h-10"
             :disabled="loading"
             @click="handleAuthorize"
           >
-            {{ loading ? 'Đang xử lý...' : 'Cấp quyền' }}
+            {{
+              loading
+                ? $t('authentication.desktopProcessing')
+                : $t('authentication.desktopGrantBtn')
+            }}
           </Button>
         </div>
       </template>

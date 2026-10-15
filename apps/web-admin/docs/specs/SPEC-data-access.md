@@ -1,71 +1,97 @@
-# Spec: `data-access`
+# Spec: Tầng Truy Cập Dữ Liệu Đa Schema & Phân Quyền Động (`data-access`)
 
-> Module id: `data-access` (xem [capability-map.md](capability-map.md)) — **ĐÃ HOÀN THÀNH** | Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
+> **Mã đặc tả:** `SPEC-data-access`  
+> **Module id:** `data-access` (xem [`capability-map.md`](capability-map.md))  
+> **Kiến trúc nguồn:** [`docs/architecture/overview.md`](../architecture/overview.md), [`ADR-001`](../decisions/0001-routing-architecture.md)  
+> **Trạng thái:** **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**
 
-## Objective
+---
 
-Admin hiện không đọc được bảng ngoài schema `public`, và đang hardcode quyền (`roles: ['super','admin']`, access codes `['super','admin','user']`). Module này sửa tầng truy cập dữ liệu để các module sau dựa vào được:
+## 1. Objective (Mục Tiêu & Phạm Vi)
 
-1. `supabaseRequest()` đọc/ghi được mọi schema đã expose (`runners`, `automa`, `billing`, `media`, `events`).
-2. Quyền giao diện tính từ DB thật, theo hai chế độ (D1):
-   - **Superadmin** (`app_metadata.platform_role = 'superadmin'` trong JWT): có toàn bộ `public.permissions`.
-   - **User thường**: hợp các `permission_id` từ các role của user trong mọi tenant đang `active`.
-3. Danh sách plugin `installed` từ `public.system_plugins`.
+Thiết lập tầng truy cập dữ liệu trung tâm (Single Source of Truth — SSOT) cho `@tuquet/admin-web` kết nối trực tiếp tới Tuquet Cloud PostgREST & GoTrue mà không phụ thuộc vào SDK `@supabase/supabase-js`:
 
-**Người dùng:** người vận hành đăng nhập admin. **Thành công:** sau đăng nhập, `userInfo.roles` và `accessCodes` chứa permission id thật; không còn chuỗi `'super'`, `'admin'`, `'user'` hardcode.
+1. **Giao Tiếp Đa Schema PostgREST (`supabaseRequest`):**
+   - Hỗ trợ đọc/ghi trên toàn bộ **7 schema chuyên biệt** của Tuquet Cloud: `public`, `runners`, `automa`, `billing`, `commerce`, `media`, và `events`.
+   - Tự động đính kèm header `Accept-Profile: <schema>` cho các truy vấn đọc (`GET`, `HEAD`) và `Content-Profile: <schema>` cho các truy vấn ghi/RPC (`POST`, `PUT`, `PATCH`, `DELETE`).
+   - Hỗ trợ cờ `skipAuth: true` cho các truy vấn công khai (như `/store` Guest Checkout) chỉ gửi `apikey` (`anon` key) mà không đính kèm JWT phiên đăng nhập, cùng cơ chế tự động làm mới token (`refreshSession`) khi gặp `401 Unauthorized`.
+2. **Động Hóa Quyền Hạn Từ Cơ Sở Dữ Liệu (`getEffectiveAccessApi`):**
+   - **Platform Superadmin** (`app_metadata.platform_role = 'superadmin'` trong JWT): Sở hữu toàn bộ danh mục quyền trong `public.permissions` kèm mã quyền `'superadmin'`.
+   - **Multi-Tenant Member (User thường):** Hợp nhất tập quyền thực tế từ cơ sở dữ liệu qua chuỗi quan hệ `public.tenant_members` $\rightarrow$ `member_roles` $\rightarrow$ `roles` $\rightarrow$ `role_permissions` của tất cả các Workspace đang `active`.
+   - Lưu bộ nhớ đệm đơn luồng (single-flight promise cache) cho mỗi phiên đăng nhập và xóa sạch khi đăng xuất (`clearAccessCache()`).
+3. **Truy Vấn Trạng Thái Cài Đặt Plugin (`getInstalledPluginsApi`):**
+   - Truy vấn danh sách các plugin có `status = 'installed'` từ `public.system_plugins` để cung cấp đầu vào cho bộ lọc định tuyến [`filterRoutesByPlugins()`](../../src/router/plugin-gate.ts).
 
-**Ngoài phạm vi:** đổi route/menu (`route-foundation`), sửa `fleet.ts` / `workspace-detail.ts` (các module sau), migration ở `cloud`.
+---
 
-## Tech Stack
+## 2. Tech Stack
 
-Vue 3 + Vben (`@vben/stores`, `@vben/access` chế độ `frontend`), fetch API, Supabase PostgREST + GoTrue. Không thêm dependency.
+- **Framework & Stores:** Vue 3.5, Pinia (`@vben/stores`), `@vben/access` (chế độ `'frontend'`).
+- **HTTP & Auth Protocol:** Native `fetch` API chuẩn hóa qua [`supabase-client.ts`](../../src/api/core/supabase-client.ts), Supabase PostgREST v12 + GoTrue REST API.
+- **Testing:** Vitest (`happy-dom`).
 
-## Commands
+---
+
+## 3. Commands (Lệnh Thực Thi & Kiểm Định)
 
 ```bash
-pnpm --filter @tuquet/admin-web run typecheck
+# 1. Chạy unit tests cho toàn bộ tầng API Core
 pnpm exec vitest run apps/web-admin/src/api/core
+
+# 2. Kiểm tra kiểu dữ liệu TypeScript cho web-admin
+pnpm --filter @tuquet/admin-web run typecheck
+
+# 3. Kiểm tra linter và định dạng
 npx oxlint apps/web-admin/src/
 pnpm run lint
+
+# 4. Đóng gói bản dựng production
 pnpm run build:admin
 ```
 
-## Project Structure
+---
 
-```
+## 4. Project Structure (Cấu Trúc Tệp Tác Động)
+
+```text
 apps/web-admin/src/api/core/
-  supabase-client.ts      # + option `schema`
-  access.ts               # MỚI: getEffectiveAccessApi(), getInstalledPluginsApi(), helpers thuần
-  auth.ts                 # getAccessCodesApi() -> dùng access.ts
-  user.ts                 # getUserInfoApi().roles -> dùng access.ts
-  __tests__/access.test.ts
+├── supabase-client.ts                        # SSOT HTTP client (7 schemas, auto-refresh JWT, skipAuth)
+├── access.ts                                 # getEffectiveAccessApi(), getInstalledPluginsApi(), pure helpers
+├── auth.ts                                   # GoTrue Auth & getAccessCodesApi() -> gọi access.ts
+├── user.ts                                   # getUserInfoApi() -> trả về roles & permissions thật từ access.ts
+└── __tests__/
+    └── access.test.ts                        # Unit tests cho readPlatformRole, flattenMemberships, schema headers
 ```
 
-## Thiết kế
+---
 
-### 1. `supabaseRequest` + schema
+## 5. Code Style & Kiến Trúc Chi Tiết
+
+### 5.1. Hợp Đồng `supabaseRequest` & Đa Schema PostgREST
 
 ```ts
-export interface SupabaseRequestOptions extends RequestInit {
-  preferRepresentation?: boolean;
-  schema?: SupabaseSchema; // default 'public' -> không gửi header
-}
 export type SupabaseSchema =
-  'automa' | 'billing' | 'events' | 'media' | 'public' | 'runners';
+  'automa' | 'billing' | 'commerce' | 'events' | 'media' | 'public' | 'runners';
 
-// method GET/HEAD -> 'Accept-Profile'; còn lại -> 'Content-Profile'
+export interface SupabaseRequestOptions extends RequestInit {
+  _isRetry?: boolean;
+  _retryToken?: string;
+  preferRepresentation?: boolean;
+  schema?: SupabaseSchema; // Mặc định 'public' -> không gửi Profile header
+  skipAuth?: boolean; // true -> chỉ gửi apikey (dùng cho Public Storefront /store)
+}
 ```
 
-### 2. `access.ts`
+### 5.2. Ma Trận Truy Vấn Quyền Hạn & Plugin (`access.ts`)
 
 ```ts
 export interface EffectiveAccess {
   isSuperadmin: boolean;
-  permissions: string[]; // đã unique + sort
-  tenantPermissions: Record<string, string[]>; // tenant_id -> permissions (rỗng với superadmin)
+  permissions: string[]; // Danh sách permission_id đã loại trùng & sắp xếp
+  tenantPermissions: Record<string, string[]>; // tenant_id -> permissions[]
 }
 
-export function readPlatformRole(accessToken: string): null | string; // decode payload JWT (base64url), không verify
+export function readPlatformRole(accessToken: string): null | string;
 export function flattenMemberships(
   rows: MembershipRow[],
 ): Pick<EffectiveAccess, 'permissions' | 'tenantPermissions'>;
@@ -73,60 +99,51 @@ export async function getEffectiveAccessApi(): Promise<EffectiveAccess>;
 export async function getInstalledPluginsApi(): Promise<string[]>;
 ```
 
-Request dùng:
+| Mục Đích | Schema | Truy Vấn PostgREST |
+| :-- | :-- | :-- |
+| **Quyền của Superadmin** | `public` | `GET /rest/v1/permissions?select=id` |
+| **Quyền của User thường** | `public` | `GET /rest/v1/tenant_members?user_id=eq.<uid>&status=eq.active&select=tenant_id,member_roles(roles(role_permissions(permission_id)))` |
+| **Danh sách Plugin đã cài** | `public` | `GET /rest/v1/system_plugins?status=eq.installed&select=id` |
 
-| Mục đích | Request |
-| :-- | :-- |
-| Superadmin | `GET /rest/v1/permissions?select=id` |
-| User thường | `GET /rest/v1/tenant_members?user_id=eq.<uid>&status=eq.active&select=tenant_id,member_roles(roles(role_permissions(permission_id)))` |
-| Plugin | `GET /rest/v1/system_plugins?status=eq.installed&select=id` |
+---
 
-`uid` lấy từ claim `sub` của access token (tránh gọi thêm `/auth/v1/user`).
+## 6. Testing Strategy (Chiến Lược Kiểm Thử)
 
-### 3. Nối vào luồng hiện có
+1. **Unit Tests ([`access.test.ts`](../../src/api/core/__tests__/access.test.ts)):**
+   - Kiểm tra `readPlatformRole`: giải mã base64url JWT hợp lệ, token không có `platform_role`, và token sai định dạng.
+   - Kiểm tra `flattenMemberships`: gộp quyền từ nhiều Workspace, khử trùng lặp `permission_id`, xử lý mảng `member_roles` rỗng.
+   - Kiểm tra `supabaseRequest`: tự động gắn `Accept-Profile` cho `GET`/`HEAD` và `Content-Profile` cho `POST`/`PATCH`/`DELETE` trên cả 7 schemas.
+2. **Typecheck & Lint Gate:** `pnpm --filter @tuquet/admin-web run typecheck` và `pnpm run lint` đạt `0 errors`.
 
-- `getAccessCodesApi()` → `(await getEffectiveAccessApi()).permissions`.
-- `getUserInfoApi().roles` → cùng danh sách, cộng thêm `'superadmin'` nếu là superadmin (để `meta.authority` ở module sau dùng được).
-- Gọi `getEffectiveAccessApi()` **một lần** cho mỗi lần đăng nhập. Hiện `store/auth.ts` gọi `fetchUserInfo()` và `getAccessCodesApi()` song song → cache promise trong `access.ts`, xóa cache khi logout.
-- Lỗi mạng/RLS → ném lỗi (guard hiện có sẽ logout). **Cấm** fallback về danh sách hardcode.
+---
 
-## Code Style
+## 7. Boundaries (Ranh Giới Kỹ Thuật)
 
-Theo code hiện có: hàm `xxxApi` async, export interface, dùng chung `supabaseRequest`, comment tiếng Anh, `encodeURIComponent` cho tham số URL.
+- **Always:**
+  - Mọi truy vấn HTTP tới Tuquet Cloud trong `apps/web-admin` bắt buộc đi qua `supabaseRequest<T>()`.
+  - Xóa bộ nhớ đệm quyền hạn (`clearAccessCache()`) ngay khi người dùng đăng xuất hoặc làm mới phiên thất bại.
+  - Sử dụng `encodeURIComponent` khi truyền tham số động vào chuỗi truy vấn PostgREST.
+- **Ask first:**
+  - Thêm schema PostgreSQL mới vào kiểu `SupabaseSchema`.
+  - Thay đổi cơ chế `accessMode` của `@vben/access`.
+- **Never:**
+  - Không bao giờ đọc quyền `superadmin` từ `user_metadata` (do người dùng cuối có thể tự chỉnh sửa `user_metadata`; chỉ tin cậy `app_metadata.platform_role`).
+  - Không đọc danh sách quyền từ JWT claim (do giới hạn cắt 25 quyền của JWT hook).
+  - Không fallback về danh sách quyền giả lập khi truy vấn mạng thất bại.
 
-```ts
-export async function getInstalledPluginsApi(): Promise<string[]> {
-  const rows = await supabaseRequest<{ id: string }[]>(
-    '/rest/v1/system_plugins?status=eq.installed&select=id',
-  );
-  return rows.map((r) => r.id);
-}
-```
+---
 
-## Testing Strategy
+## 8. Success Criteria (Tiêu Chí Nghiệm Thu)
 
-- **Unit (Vitest)** cho hàm thuần: `readPlatformRole` (token hợp lệ / thiếu claim / sai định dạng), `flattenMemberships` (nhiều tenant, role trùng quyền, `member_roles` rỗng), chọn header theo method/schema.
-- **Local integration** với Supabase local (`cloud`): đăng nhập `admin@tuquet.com` → `accessCodes` chứa `tenants:read`, `runners:devices:read`, …, không chứa `'super'`. Kiểm `GET /rest/v1/devices` với `schema: 'runners'` trả 200.
-- Typecheck, oxlint, lint, build đều 0 lỗi (AGENTS §6–7).
+- [x] **SC1:** `supabaseRequest` hỗ trợ đầy đủ 7 schemas (`public`, `runners`, `automa`, `billing`, `commerce`, `media`, `events`), tự động gắn đúng `Accept-Profile` / `Content-Profile` theo HTTP method.
+- [x] **SC2:** Hoàn toàn loại bỏ các mã vai trò tĩnh (`'super'`, `'user'`) khỏi `auth.ts` và `user.ts`.
+- [x] **SC3:** Tài khoản thường nhận đúng tập hợp `permission_id` thực tế từ các Workspace đang hoạt động; tài khoản có `app_metadata.platform_role = 'superadmin'` nhận toàn bộ quyền và role `'superadmin'`.
+- [x] **SC4:** Single-flight promise cache đảm bảo `fetchUserInfo()` và `getAccessCodesApi()` chỉ kích hoạt duy nhất 1 lượt truy vấn DB cho mỗi lần đăng nhập.
+- [x] **SC5:** Toàn bộ unit tests trong `src/api/core/__tests__/` và `typecheck` pass 100%.
 
-## Boundaries
+---
 
-- **Always:** đi qua `supabaseRequest`; duy trì thiết kế chuẩn (`schema` là tùy chọn, mặc định `public`); chạy đủ quality gate trước commit.
-- **Ask first:** sửa repo `cloud`; đổi `accessMode` của Vben; thêm store Pinia mới.
-- **Never:** tin `user_metadata` để xác định superadmin (user tự sửa được); dùng `permissions` trong JWT (bị cắt ở 25); fallback dữ liệu/quyền giả; push khi chưa qua gate.
+## 9. Resolved Decisions (Các Quyết Định Đã Chốt)
 
-## Success Criteria
-
-1. `supabaseRequest('/rest/v1/devices?select=id', { schema: 'runners' })` gửi `Accept-Profile: runners`; POST/PATCH/DELETE gửi `Content-Profile`.
-2. Không còn chuỗi `'super'`, `'user'` hardcode trong `auth.ts` / `user.ts`.
-3. User thường: `accessCodes` = đúng hợp quyền từ DB (đối chiếu bằng SQL trên DB local).
-4. JWT có `platform_role = 'superadmin'`: `accessCodes` = toàn bộ `public.permissions`, `roles` có `'superadmin'`.
-5. Mỗi lần đăng nhập chỉ có 1 request tính quyền.
-6. Unit test pass; typecheck / oxlint / lint / build 0 lỗi.
-7. Các trang hiện có (Analytics, Workspace, Fleet) vẫn mở được như trước — module này không đổi route.
-
-## Resolved Decisions (2026-10-13)
-
-1. **Cloud Migration:** Đã được cập nhật trực tiếp tại `tuquet/cloud/supabase/migrations/20261011000001_core_iam.sql`, `seed_admin_tuquet.sql`, `seed.sql`, và `plugins/subscriptions/install.sql`.
-2. **Superadmin Scope:** Superadmin có đầy đủ quyền **xem và sửa** trên toàn bộ hệ thống (`is_platform_admin()` short-circuit tất cả RLS và guards).
-3. **Status:** **APPROVED** — sẵn sàng chuyển sang Phase 2 (Plan) và Phase 3 (Tasks).
+1. **Xác thực Superadmin qua `app_metadata.platform_role`:** Đồng bộ với hàm bảo mật `public.is_platform_admin()` tại tầng cơ sở dữ liệu `tuquet/cloud`, đảm bảo tính nhất quán giữa quyền giao diện và chính sách Row-Level Security (RLS).
+2. **Single-Flight Access Cache:** Lưu promise đang chạy trong `access.ts` để hai lời gọi song song `fetchUserInfo()` và `getAccessCodesApi()` lúc khởi động ứng dụng dùng chung kết quả mà không nhân đôi truy vấn mạng.

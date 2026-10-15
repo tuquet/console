@@ -1,4 +1,23 @@
+import type {
+  SubscriptionStatus,
+  SystemPluginCategory,
+  SystemPluginStatus,
+} from '@vben/constants';
+
+import {
+  FILTER_ALL,
+  SUBSCRIPTION_STATUS,
+  SUPABASE_SCHEMA,
+  SYSTEM_PLUGIN_CATEGORY,
+  SYSTEM_PLUGIN_STATUS,
+  TENANT_STATUS,
+} from '@vben/constants';
+import { $t } from '@vben/locales';
+
 import { supabaseRequest } from './supabase-client';
+
+export { SUBSCRIPTION_STATUS, SYSTEM_PLUGIN_CATEGORY, SYSTEM_PLUGIN_STATUS };
+export type { SubscriptionStatus, SystemPluginCategory, SystemPluginStatus };
 
 export interface SystemPluginItem {
   dependencies?: string[];
@@ -11,7 +30,7 @@ export interface SystemPluginItem {
   metadata?: Record<string, any>;
   name: string;
   schema_name: null | string;
-  status: 'disabled' | 'installed' | 'pending' | string;
+  status: string | SystemPluginStatus;
   version: string;
 }
 
@@ -71,23 +90,18 @@ export interface PlatformSubscriptionItem {
   plan_id: string;
   plan_name: string;
   price_monthly_usd: number;
-  status:
-    | 'active'
-    | 'canceled'
-    | 'free_tier'
-    | 'past_due'
-    | 'trialing'
-    | 'unpaid'
-    | string;
+  status: string | SubscriptionStatus;
   tenant_id: string;
   tenant_name: string;
   tenant_slug: string;
 }
 
 export interface SystemPermissionItem {
+  created_at?: string;
   description: null | string;
   id: string;
   module: string;
+  roles?: string[];
 }
 
 export interface SystemRoleItem {
@@ -96,7 +110,9 @@ export interface SystemRoleItem {
   id: string;
   is_system: boolean;
   name: string;
+  permission_count?: number;
   permissions: string[];
+  tenant_id?: null | string;
 }
 
 const CORE_PLUGIN_IDS = new Set([
@@ -135,7 +151,7 @@ export function mapRawPlugin(raw: any): SystemPluginItem {
       raw.metadata && typeof raw.metadata === 'object' ? raw.metadata : {},
     name: raw.name || pluginId || 'Unnamed Plugin',
     schema_name: raw.schema_name ?? null,
-    status: raw.status || 'installed',
+    status: raw.status || SYSTEM_PLUGIN_STATUS.INSTALLED,
     version: raw.version || '1.0.0',
   };
 }
@@ -191,7 +207,7 @@ export async function getBillingPlansApi(): Promise<BillingPlanItem[]> {
   try {
     const data = await supabaseRequest<any[]>(
       '/rest/v1/plans?select=*&order=price_monthly_usd.asc',
-      { schema: 'billing' },
+      { schema: SUPABASE_SCHEMA.BILLING },
     );
     if (!Array.isArray(data)) return [];
     return data.map((row) => mapRawBillingPlan(row));
@@ -248,7 +264,7 @@ export function mapRawPlatformUser(raw: any): PlatformUserItem {
         const tenantObj = tm.tenants || {};
         workspaces.push({
           role_name: topRole,
-          status: tm.status || 'active',
+          status: tm.status || TENANT_STATUS.ACTIVE,
           tenant_id: String(tm.tenant_id || tenantObj.id || ''),
           tenant_name: tenantObj.name || 'Workspace',
           tenant_slug: tenantObj.slug || '',
@@ -267,7 +283,7 @@ export function mapRawPlatformUser(raw: any): PlatformUserItem {
     avatar_url: raw.avatar_url ?? null,
     created_at: raw.created_at || new Date().toISOString(),
     email: raw.email ?? null,
-    full_name: raw.full_name || 'Người dùng ẩn danh',
+    full_name: raw.full_name || $t('common.anonymousUser'),
     id: String(raw.id ?? ''),
     primary_role: sortedRoles[0],
     tenant_count: Number(tenantCount) || 0,
@@ -296,7 +312,7 @@ export function filterPlatformUsers(
     result = result.filter((u) => u.tenant_count === 0);
   }
 
-  if (filters?.role_filter && filters.role_filter !== 'all') {
+  if (filters?.role_filter && filters.role_filter !== FILTER_ALL) {
     const roleTarget = filters.role_filter.toLowerCase().trim();
     result = result.filter(
       (u) =>
@@ -344,7 +360,7 @@ export function filterSystemRoles(
     result = result.filter((r) => !r.is_system);
   }
 
-  if (filters?.module && filters.module !== 'all') {
+  if (filters?.module && filters.module !== FILTER_ALL) {
     const modTarget = filters.module.toLowerCase().trim();
     const modulePermIds = new Set(
       (permissionsCatalog || [])
@@ -389,12 +405,12 @@ export function filterSystemPermissions(
   if (!Array.isArray(permissions)) return [];
   let result = permissions;
 
-  if (filters?.module && filters.module !== 'all') {
+  if (filters?.module && filters.module !== FILTER_ALL) {
     const modTarget = filters.module.toLowerCase().trim();
     result = result.filter((p) => p.module.toLowerCase() === modTarget);
   }
 
-  if (filters?.role && filters.role !== 'all' && Array.isArray(roles)) {
+  if (filters?.role && filters.role !== FILTER_ALL && Array.isArray(roles)) {
     const roleTarget = filters.role.toLowerCase().trim();
     const matchedRole = roles.find(
       (r) =>
@@ -463,9 +479,9 @@ export function mapRawPlatformSubscription(raw: any): PlatformSubscriptionItem {
     plan_id: String(raw.plan_id ?? ''),
     plan_name: plan.name || raw.plan_id || 'Free Tier',
     price_monthly_usd: Number(plan.price_monthly_usd) || 0,
-    status: raw.status || 'free_tier',
+    status: raw.status || SUBSCRIPTION_STATUS.FREE_TIER,
     tenant_id: String(raw.tenant_id ?? ''),
-    tenant_name: tenant.name || 'Không rõ Workspace',
+    tenant_name: tenant.name || $t('common.unknownWorkspace'),
     tenant_slug: tenant.slug || '',
   };
 }
@@ -484,7 +500,9 @@ export function mapRawSystemRole(raw: any): SystemRoleItem {
     id: String(raw.id ?? ''),
     is_system: typeof raw.is_system === 'boolean' ? raw.is_system : true,
     name: raw.name || 'unnamed_role',
+    permission_count: permissions.length,
     permissions,
+    tenant_id: raw.tenant_id ?? null,
   };
 }
 
@@ -574,7 +592,7 @@ export async function getPlatformSubscriptionsApi(): Promise<
   try {
     const data = await supabaseRequest<any[]>(
       '/rest/v1/subscriptions?select=*,tenants(name,slug),plans(name,price_monthly_usd)&order=created_at.desc',
-      { schema: 'billing' },
+      { schema: SUPABASE_SCHEMA.BILLING },
     );
     if (!Array.isArray(data)) return [];
     return data.map((row) => mapRawPlatformSubscription(row));
@@ -616,6 +634,7 @@ export async function getSystemPermissionsApi(): Promise<
     );
     if (!Array.isArray(data)) return [];
     return data.map((row) => ({
+      created_at: row.created_at || undefined,
       description: row.description ?? null,
       id: String(row.id ?? ''),
       module: row.module || 'other',
@@ -626,4 +645,162 @@ export async function getSystemPermissionsApi(): Promise<
     }
     return [];
   }
+}
+
+export interface SystemOverviewSummary {
+  auditLogs: {
+    total: number;
+  };
+  plans: {
+    active: number;
+    paused: number;
+    total: number;
+  };
+  plugins: {
+    core: number;
+    extension: number;
+    installed: number;
+    total: number;
+  };
+  recentAuditLogs: GlobalAuditLogItem[];
+  recentSubscriptions: PlatformSubscriptionItem[];
+  recentUsers: PlatformUserItem[];
+  roles: {
+    custom: number;
+    permissionsTotal: number;
+    system: number;
+    total: number;
+  };
+  subscriptions: {
+    active: number;
+    canceled: number;
+    mrrUsd: number;
+    pastDue: number;
+    total: number;
+  };
+  users: {
+    total: number;
+    unassigned: number;
+    withWorkspaces: number;
+  };
+}
+
+/**
+ * Pure function: Tổng hợp toàn bộ chỉ số KPI cho trang /system/overview
+ */
+export function calculateSystemOverviewSummary(input: {
+  auditLogs?: GlobalAuditLogItem[];
+  permissions?: SystemPermissionItem[];
+  plans?: BillingPlanItem[];
+  plugins?: SystemPluginItem[];
+  roles?: SystemRoleItem[];
+  subscriptions?: PlatformSubscriptionItem[];
+  users?: PlatformUserItem[];
+}): SystemOverviewSummary {
+  const plugins = input.plugins ?? [];
+  const plans = input.plans ?? [];
+  const users = input.users ?? [];
+  const roles = input.roles ?? [];
+  const permissions = input.permissions ?? [];
+  const subscriptions = input.subscriptions ?? [];
+  const auditLogs = input.auditLogs ?? [];
+
+  const corePlugins = plugins.filter((p) => p.is_core).length;
+  const extensionPlugins = plugins.length - corePlugins;
+  const installedPlugins = plugins.filter(
+    (p) => p.status === SYSTEM_PLUGIN_STATUS.INSTALLED,
+  ).length;
+
+  const activePlans = plans.filter((p) => p.is_active).length;
+  const pausedPlans = plans.length - activePlans;
+
+  const usersWithWorkspaces = users.filter(
+    (u) => (u.tenant_count ?? 0) > 0,
+  ).length;
+  const unassignedUsers = users.length - usersWithWorkspaces;
+
+  const systemRoles = roles.filter((r) => r.is_system).length;
+  const customRoles = roles.length - systemRoles;
+
+  const activeSubs = subscriptions.filter(
+    (s) =>
+      s.status === SUBSCRIPTION_STATUS.ACTIVE ||
+      s.status === SUBSCRIPTION_STATUS.TRIALING,
+  );
+  const pastDueSubs = subscriptions.filter(
+    (s) => s.status === SUBSCRIPTION_STATUS.PAST_DUE,
+  ).length;
+  const canceledSubs = subscriptions.filter(
+    (s) =>
+      s.status === SUBSCRIPTION_STATUS.CANCELED ||
+      s.status === SUBSCRIPTION_STATUS.UNPAID,
+  ).length;
+  const mrrUsd = activeSubs.reduce(
+    (sum, s) => sum + (Number(s.price_monthly_usd) || 0),
+    0,
+  );
+
+  return {
+    auditLogs: {
+      total: auditLogs.length,
+    },
+    plans: {
+      active: activePlans,
+      paused: pausedPlans,
+      total: plans.length,
+    },
+    plugins: {
+      core: corePlugins,
+      extension: extensionPlugins,
+      installed: installedPlugins,
+      total: plugins.length,
+    },
+    recentAuditLogs: auditLogs.slice(0, 5),
+    recentSubscriptions: subscriptions.slice(0, 5),
+    recentUsers: users.slice(0, 5),
+    roles: {
+      custom: customRoles,
+      permissionsTotal: permissions.length,
+      system: systemRoles,
+      total: roles.length,
+    },
+    subscriptions: {
+      active: activeSubs.length,
+      canceled: canceledSubs,
+      mrrUsd,
+      pastDue: pastDueSubs,
+      total: subscriptions.length,
+    },
+    users: {
+      total: users.length,
+      unassigned: unassignedUsers,
+      withWorkspaces: usersWithWorkspaces,
+    },
+  };
+}
+
+/**
+ * Nạp song song toàn bộ dữ liệu thống kê cho trang Tổng quan hệ thống (/system/overview)
+ */
+export async function getSystemOverviewApi(): Promise<SystemOverviewSummary> {
+  const [plugins, plans, users, roles, permissions, subscriptions, auditLogs] =
+    await Promise.all([
+      getSystemPluginsApi(),
+      getBillingPlansApi(),
+      getPlatformUsersApi(),
+      getSystemRolesApi(),
+      getSystemPermissionsApi(),
+      getPlatformSubscriptionsApi(),
+      getGlobalAuditLogsApi({ limit: 50 }),
+    ]);
+
+  return calculateSystemOverviewSummary({
+    auditLogs,
+    permissions,
+    plans,
+    plugins,
+    roles,
+    subscriptions,
+    users,
+  });
 }

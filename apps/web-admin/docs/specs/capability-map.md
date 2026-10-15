@@ -1,56 +1,84 @@
 # Bản Đồ Năng Lực Hệ Thống (Admin Capability Map)
 
-> Trạng thái: **ĐÃ HOÀN THÀNH** (100% 18/18 Modules) | Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
+> **Trạng thái:** **ĐÃ HOÀN THÀNH (100% — 20/20 Canonical Modules)**  
+> **Kiến trúc nguồn:** [`docs/architecture/overview.md`](../architecture/overview.md) | **Danh mục ADR:** [`docs/decisions/`](../decisions/)
 
-| Module id | Trách nhiệm | Phụ thuộc |
-| :-- | :-- | :-- |
-| `platform-foundation` | Kiến trúc monorepo, hạ tầng build cục bộ `build:local`, vòng đời PWA auto-update, và cổng kiểm định chất lượng | — |
-| `data-access` | `supabaseRequest({ schema })` (`Accept-Profile` / `Content-Profile`); quyền hiệu lực từ DB (superadmin + user thường); danh sách plugin `installed` | `platform-foundation` |
-| `route-foundation` | Phân rã module định tuyến theo ranh giới Plugin; `meta.authority` + bộ lọc `filterRoutesByPlugins()`; chuẩn hóa trang chủ `/dashboard/analytics` | `data-access` |
-| `tenants-truth` | `/tenants/:id` gồm 4 tabs `overview / members / usage / audit` với dữ liệu thật; mời thành viên (`role_id`, `token_hash`, `invited_by`) và gán role qua `member_roles`; gói cước từ `billing.subscriptions` | `route-foundation` |
-| `fleet-inventory` | Quản trị máy trạm `runners.devices`, hồ sơ trình duyệt `runners.browsers`, và bể proxy `runners.proxies` — 100% dữ liệu thật từ schema `runners` | `route-foundation` |
-| `automation-engine` | Quản trị quy trình `automa.workflows`, phiên chạy `automa.campaign_runs`, và chi tiết nhật ký thực thi `automa.execution_logs` (polling 3s) | `route-foundation` |
-| `system-catalog` | Quản trị `/system/plugins` (`public.system_plugins`) và `/system/plans` (`billing.plans`) | `route-foundation` |
-| `superadmin-routes` | `/system/users`, `/system/audit-logs`, `/system/subscriptions`, `/system/roles` — đặc quyền giám sát xuyên tenant cho Platform Superadmin | `route-foundation`, `system-catalog` |
-| `layout-preferences-coherence` | Kiểm toán chống khóa giao diện (Anti-Lockout), bảo vệ điều hướng Sidebar, đồng bộ hóa 100% Preferences Drawer và Layout | `platform-foundation` |
-| `i18n-en-vi` | Kiến trúc đa ngôn ngữ `en-US` / `vi-VN` mặc định `en-US`, đồng bộ `dayjs` và chuyển ngữ tức thì | `platform-foundation` |
-| `concise-common-i18n` | Tối giản nhãn nút (Brevity & Anti-Verbosity), từ điển thuật ngữ chuẩn `term.json`, tái sử dụng `$t('common.*')`, chuẩn hóa Sentence case tiếng Việt | `i18n-en-vi` |
-| `route-consolidation-automation-fleet` | Hợp nhất phân hệ Fleet và Automation vào một menu cấp 1 duy nhất `/automation` (gồm `workflows`, `runs`, `devices`, `browsers`, `proxies`) | `fleet-inventory`, `automation-engine` |
-| `docs-and-admin-coherence` | Dời `src/views/fleet/*` sang `src/views/automation/*`, xóa legacy redirects, khôi phục `meta.plugin` trong `automation.ts`, ban hành `ADR-004` + `docs/README.md`, và làm sạch dữ liệu hạ tầng | `route-consolidation-automation-fleet`, `concise-common-i18n` |
-| `automation-api-and-i18n-unification` | Hợp nhất `src/api/core/fleet.ts` vào `src/api/core/automation.ts`, `fleet.test.ts` vào `automation.test.ts`, và `page.fleet.*` vào `page.automation.*` trên nền kiến trúc 2 schema DB (`automa` + `runners`) | `docs-and-admin-coherence` |
-| `system-iam-vxe-grid` | Chuẩn hóa giao diện bảng `useVbenVxeGrid` (`vxe-table`) cho `/system/users` và `/system/roles`: tìm kiếm đa trường (tên, email, UUID, workspace, mã quyền), lọc theo vai trò/module, thanh thống kê và hộp thoại chi tiết | `superadmin-routes`, `concise-common-i18n` |
-| `payment-gateway` | Cổng thanh toán đa nền tảng mở rộng theo chuẩn Provider Adapter (`bank_transfer` VietQR/IBFT, `e_wallet` MoMo/ZaloPay, `card_intl` Stripe, `crypto` USDT, `internal_wallet` trừ Xu tức thì), Ví trả trước của Tenant (`billing.wallets` đơn vị `Xu` `BIGINT`), sổ cái `billing.wallet_transactions`, `billing.payment_intents` (có trạng thái `manual_review` khi quá hạn/thiếu tiền) và Edge Function `payment-webhook` | `data-access`, `system-catalog` |
-| `digital-commerce` | Plugin cửa hàng sản phẩm số (`commerce`): Danh mục & biến thể sản phẩm số (Tài khoản/Key `serial_stock`, Tài nguyên Specter `specter_resource`, File tải về `digital_file`, Nạp Xu `wallet_credit`), Kho hàng chống bán trùng (`FOR UPDATE SKIP LOCKED`), máy trạng thái đơn hàng (`commerce.orders`) và bộ điều phối giao hàng tự động (Auto-Fulfillment) | `payment-gateway` |
-| `admin-commerce-portal` | Giao diện Web kép trong `apps/web-admin`: (1) Platform Admin quản trị sản phẩm, nạp kho hàng loạt (bulk stock), cấu hình cổng thanh toán & duyệt lệnh `manual_review`; (2) Tenant Portal nạp Ví Xu, mua sản phẩm số và nhận tài nguyên ngay trong dashboard | `payment-gateway`, `digital-commerce`, `system-iam-vxe-grid` |
-| `public-storefront` | Giao diện Web Storefront công khai (`/store`) cho khách vãng lai (Guest Checkout): xem danh mục công khai, thanh toán tức thì qua Chuyển khoản NH / MoMo / Stripe / Crypto (Realtime Polling) và nhận sản phẩm ngay qua `claim_token` bảo mật | `payment-gateway`, `digital-commerce` |
-| `specter-3d-ghost-banner` | Bộ sưu tập 3 banner tương tác trên trang xác thực (`AuthPageLayout`): `HairlinePhoneBanner` (`phone`), `SplineRobotBanner` (`robot 3d`), và `SpecterGhostBanner` (`ghost 3d` — Three.js WebGL 60fps với tà áo lượn sóng, mắt ngôi sao 4 cánh liếc theo chuột, tay vẫy chào) kèm thanh chọn 4 chế độ lưu `localStorage` | `platform-foundation` |
+---
 
-**Phụ thuộc ngoài (repo `cloud`):**
+## 1. Ma Trận 20 Module Năng Lực Chuẩn Hóa (Canonical Capability Matrix)
 
-- `cloud:platform-superadmin` — `public.is_platform_admin()` + policy SELECT bổ sung. Đã hoàn tất tích hợp tại local migration `tuquet/cloud`.
-- `cloud:payment-gateway` (`schema: billing` mở rộng + `supabase/functions/payment-webhook`) & `cloud:digital-commerce` (`supabase/plugins/commerce`, `schema: commerce`).
+| STT | Module ID | Tệp Đặc Tả (`SPEC-*.md`) | Trách Nhiệm Cốt Lõi | Phụ Thuộc |
+| :-: | :-- | :-- | :-- | :-- |
+| 1 | `platform-foundation` | [`SPEC-platform-foundation.md`](SPEC-platform-foundation.md) | Kiến trúc monorepo (`pnpm` + `turbo`), hạ tầng build cục bộ `build:local`, vòng đời PWA auto-update, và cổng kiểm định chất lượng (`vue-tsc`, `oxlint`, `vitest`) | — |
+| 2 | `layout-preferences-coherence` | [`SPEC-layout-preferences-coherence.md`](SPEC-layout-preferences-coherence.md) | Kiểm toán chống khóa giao diện (Anti-Lockout), bảo vệ điều hướng Sidebar, cô lập `initialPreferences` và đồng bộ 100% Preferences Drawer với Layout | `platform-foundation` |
+| 3 | `i18n-en-vi` | [`SPEC-i18n-en-vi.md`](SPEC-i18n-en-vi.md) | Kiến trúc đa ngôn ngữ `en-US` / `vi-VN` đối xứng 100%, từ điển thuật ngữ `term.json`, tái sử dụng `$t('common.*')`, và quy chuẩn Sentence case tiếng Việt | `platform-foundation` |
+| 4 | `specter-3d-ghost-banner` | [`SPEC-specter-3d-ghost-banner.md`](SPEC-specter-3d-ghost-banner.md) | Bộ sưu tập 3 banner tương tác trên trang xác thực (`AuthPageLayout`): `HairlinePhoneBanner` (`phone`), `SplineRobotBanner` (`robot 3d`), và `SpecterGhostBanner` (`ghost 3d` — Three.js WebGL 60fps) kèm thanh chọn 4 chế độ lưu `localStorage` | `platform-foundation` |
+| 5 | `data-access` | [`SPEC-data-access.md`](SPEC-data-access.md) | Tầng truy xuất `supabaseRequest({ schema, skipAuth })` đa schema (`public`, `runners`, `automa`, `billing`, `commerce`, `media`, `events`), nạp quyền hiệu lực từ DB và danh sách plugin `installed` | `platform-foundation` |
+| 6 | `route-foundation` | [`SPEC-route-foundation.md`](SPEC-route-foundation.md) | Kiến trúc 27 routes (5 phân hệ Sidebar `/dashboard`, `/tenants`, `/automation`, `/commerce`, `/system` + 8 routes `core.ts`), bộ lọc `filterRoutesByPlugins()`, và bảo toàn cuộn nội trang | `data-access`, `i18n-en-vi` |
+| 7 | `tenants-truth` | [`SPEC-tenants-truth.md`](SPEC-tenants-truth.md) | Quản trị `/tenants` (`useVbenVxeGrid`) và `/tenants/:id` (4 chế độ `overview / members / usage / audit` với `useVbenVxeGrid`), mời thành viên (`tenant_invitations`) và gán vai trò (`member_roles`) | `route-foundation` |
+| 8 | `automation-engine` | [`SPEC-automation-engine.md`](SPEC-automation-engine.md) | Quản trị kịch bản `/automation/workflows` (`automa.workflows`), lịch sử chạy `/automation/runs` (`automa.campaign_runs`), và chi tiết nhật ký `/automation/runs/:id` (`automa.execution_logs` polling 3s) qua client hợp nhất `src/api/core/automation.ts` | `route-foundation` |
+| 9 | `fleet-inventory` | [`SPEC-fleet-inventory.md`](SPEC-fleet-inventory.md) | Quản trị hạ tầng thực thi dưới `/automation`: thiết bị `/automation/devices` (`runners.devices`), hồ sơ trình duyệt `/automation/browsers` (`runners.browsers`), và bể proxy `/automation/proxies` (`runners.proxies`) dùng `useVbenVxeGrid` | `route-foundation`, `automation-engine` |
+| 10 | `system-catalog` | [`SPEC-system-catalog.md`](SPEC-system-catalog.md) | Quản trị kho plugin hệ thống `/system/plugins` (`public.system_plugins` — phân tách 6 Core Kernel Plugins & Extension Plugins) và bảng giá gói cước `/system/plans` (`billing.plans`) bằng `useVbenVxeGrid` | `route-foundation` |
+| 11 | `superadmin-routes` | [`SPEC-superadmin-routes.md`](SPEC-superadmin-routes.md) | Bộ 4 trang đặc quyền giám sát xuyên tenant cho Platform Superadmin: `/system/users`, `/system/roles`, `/system/subscriptions`, và `/system/audit-logs` chuẩn hóa 100% trên `useVbenVxeGrid` | `route-foundation`, `system-catalog` |
+| 12 | `payment-gateway` | [`SPEC-payment-gateway.md`](SPEC-payment-gateway.md) | Cổng thanh toán đa kênh theo chuẩn Provider Adapter (`bank_transfer` VietQR, `e_wallet` MoMo, `card_intl` Stripe, `crypto` USDT, `internal_wallet` trừ Xu tức thì), Ví Xu Tenant (`billing.wallets` `BIGINT`), sổ cái `billing.wallet_transactions`, `billing.payment_intents` (`manual_review`) và Edge Function `payment-webhook` | `data-access`, `system-catalog` |
+| 13 | `digital-commerce` | [`SPEC-digital-commerce.md`](SPEC-digital-commerce.md) | Phân hệ sản phẩm số (`schema: commerce`): 4 loại sản phẩm (`serial_stock`, `specter_resource`, `digital_file`, `wallet_credit`), kho hàng chống bán trùng (`FOR UPDATE SKIP LOCKED`), máy trạng thái đơn hàng (`commerce.orders`) và giao hàng tự động xuyên schema (Auto-Fulfillment) | `payment-gateway`, `fleet-inventory`, `automation-engine` |
+| 14 | `admin-commerce-portal` | [`SPEC-admin-commerce-portal.md`](SPEC-admin-commerce-portal.md) | Cổng thương mại điện tử nội bộ dưới `/commerce`: Cửa hàng `/commerce/store`, Lịch sử đơn & nhận hàng `/commerce/orders`, Ví Xu `/commerce/wallet`, và Trung tâm quản trị `/commerce/admin` (sản phẩm, nạp kho hàng loạt, duyệt `manual_review`, cấu hình cổng thanh toán) | `payment-gateway`, `digital-commerce`, `superadmin-routes` |
+| 15 | `public-storefront` | [`SPEC-public-storefront.md`](SPEC-public-storefront.md) | Cửa hàng sản phẩm số công khai `/store` (`ignoreAccess: true`, `skipAuth: true`) cho khách vãng lai (Guest Checkout): thanh toán đa kênh (Realtime Polling 3s) và nhận bàn giao tức thì qua `claim_token` (`CLM_...`) | `payment-gateway`, `digital-commerce`, `admin-commerce-portal` |
+| 16 | `enum-constants-ssot` | [`SPEC-enum-constants-ssot.md`](SPEC-enum-constants-ssot.md) | Hệ thống Enum & Hằng số Đơn Nguồn Sự Thật (`as const` + Derived Union Types) tại `@vben/constants` và `#/constants`, đồng bộ tầng API (`src/api/core/*`), siêu dữ liệu huy hiệu (`StatusTone`) và bộ lọc đa ngôn ngữ (`buildEnumFilterOptions`) | `platform-foundation`, `i18n-en-vi`, `data-access` |
+| 17 | `automation-dashboard` | [`SPEC-automation-dashboard.md`](SPEC-automation-dashboard.md) | Trang tổng quan `/automation/overview` tập trung toàn bộ KPI Kịch bản, Phiên chạy, Thiết bị, Trình duyệt & Proxy; lược bỏ khối thống kê rườm rà và tối ưu bộ lọc 2 cột trên Mobile cho 5 màn hình danh sách `/automation/*` | `automation-engine`, `fleet-inventory`, `i18n-en-vi` |
+| 18 | `workflow-mobile-first` | [`SPEC-workflow-mobile-first.md`](SPEC-workflow-mobile-first.md) | Giao diện Mobile-First cho `/automation/workflows`, `/automation/runs`, `/automation/runs/:id`: thu gọn cột `VxeGrid` theo `isMobile` (không cuộn ngang trên `375px`), thanh lọc gọn nhẹ và hộp thoại xem chi tiết quy trình `WorkflowDetailModal` chuẩn baseline | `automation-engine`, `enum-constants-ssot`, `i18n-en-vi` |
+| 19 | `system-dashboard` | [`SPEC-system-dashboard.md`](SPEC-system-dashboard.md) | Trang tổng quan `/system/overview` tập trung KPI của 6 phân hệ quản trị hệ thống (`plugins`, `plans`, `users`, `roles`, `subscriptions`, `audit-logs`), kèm tinh gọn bảng `VxeGrid` Mobile-First cho toàn bộ nhánh `/system/*` | `system-catalog`, `superadmin-routes`, `enum-constants-ssot`, `i18n-en-vi` |
+| 20 | `mobile-vxe-detail-sheet` | [`SPEC-mobile-vxe-detail-sheet.md`](SPEC-mobile-vxe-detail-sheet.md) | Chuẩn hóa Sheet chi tiết & sửa nhanh bằng `VxeForm` (`VxeRowDetailSheet`) kèm đầy đủ các trường và nút hành động khi chạm/click vào dòng trên toàn bộ 19 bảng `useVbenVxeGrid` (15 trang) | `tenants-truth`, `workflow-mobile-first`, `admin-commerce-portal`, `system-dashboard` |
 
-Build order: `platform-foundation` → (`data-access`, `layout-preferences-coherence`, `i18n-en-vi`, `specter-3d-ghost-banner`) → `route-foundation` → (`tenants-truth`, `fleet-inventory`, `automation-engine`, `system-catalog`) → (`superadmin-routes`, `concise-common-i18n`, `route-consolidation-automation-fleet`) → `docs-and-admin-coherence` → (`automation-api-and-i18n-unification`, `system-iam-vxe-grid`) → `payment-gateway` → `digital-commerce` → (`admin-commerce-portal`, `public-storefront`)
+---
 
-Danh sách Spec module:
+## 2. Thứ Tự Triển Khai & Phụ Thuộc Kiến Trúc (Canonical Build Order)
 
-- [`SPEC-platform-foundation.md`](SPEC-platform-foundation.md)
-- [`SPEC-data-access.md`](SPEC-data-access.md)
-- [`SPEC-route-foundation.md`](SPEC-route-foundation.md)
-- [`SPEC-tenants-truth.md`](SPEC-tenants-truth.md)
-- [`SPEC-fleet-inventory.md`](SPEC-fleet-inventory.md)
-- [`SPEC-automation-engine.md`](SPEC-automation-engine.md)
-- [`SPEC-system-catalog.md`](SPEC-system-catalog.md)
-- [`SPEC-superadmin-routes.md`](SPEC-superadmin-routes.md)
-- [`SPEC-layout-preferences-coherence.md`](SPEC-layout-preferences-coherence.md)
-- [`SPEC-i18n-en-vi.md`](SPEC-i18n-en-vi.md)
-- [`SPEC-concise-common-i18n.md`](SPEC-concise-common-i18n.md)
-- [`SPEC-route-consolidation-automation-fleet.md`](SPEC-route-consolidation-automation-fleet.md)
-- [`SPEC-docs-and-admin-coherence.md`](SPEC-docs-and-admin-coherence.md)
-- [`SPEC-automation-api-and-i18n-unification.md`](SPEC-automation-api-and-i18n-unification.md)
-- [`SPEC-system-iam-vxe-grid.md`](SPEC-system-iam-vxe-grid.md)
-- [`SPEC-payment-gateway.md`](SPEC-payment-gateway.md)
-- [`SPEC-digital-commerce.md`](SPEC-digital-commerce.md)
-- [`SPEC-admin-commerce-portal.md`](SPEC-admin-commerce-portal.md)
-- [`SPEC-specter-3d-ghost-banner.md`](SPEC-specter-3d-ghost-banner.md)
-- [`SPEC-public-storefront.md`](SPEC-public-storefront.md)
+```mermaid
+flowchart TD
+    PF["1. platform-foundation"] --> LPC["2. layout-preferences-coherence"]
+    PF --> I18N["3. i18n-en-vi"]
+    PF --> GHOST["4. specter-3d-ghost-banner"]
+    PF --> DA["5. data-access"]
+    PF --> ECS["16. enum-constants-ssot"]
+    I18N --> ECS
+    DA --> ECS
+    DA --> RF["6. route-foundation"]
+    I18N --> RF
+    RF --> TT["7. tenants-truth"]
+    RF --> AE["8. automation-engine"]
+    AE --> FI["9. fleet-inventory"]
+    AE --> AD["17. automation-dashboard"]
+    FI --> AD
+    I18N --> AD
+    AE --> WMF["18. workflow-mobile-first"]
+    ECS --> WMF
+    I18N --> WMF
+    RF --> SC["10. system-catalog"]
+    SC --> SA["11. superadmin-routes"]
+    SC --> SD["19. system-dashboard"]
+    SA --> SD
+    ECS --> SD
+    I18N --> SD
+    DA --> PG["12. payment-gateway"]
+    SC --> PG
+    PG --> DC["13. digital-commerce"]
+    FI --> DC
+    AE --> DC
+    PG --> ACP["14. admin-commerce-portal"]
+    DC --> ACP
+    SA --> ACP
+    ACP --> PSF["15. public-storefront"]
+    TT --> MVDS["20. mobile-vxe-detail-sheet"]
+    WMF --> MVDS
+    ACP --> MVDS
+    SD --> MVDS
+```
+
+---
+
+## 3. Phụ Thuộc Liên Kho Lưu Trữ (`tuquet/cloud`)
+
+- **`cloud:platform-superadmin`:** Hàm `public.is_platform_admin()` và các chính sách RLS `SELECT / UPDATE` xuyên tenant cho Platform Superadmin.
+- **`cloud:payment-gateway`:** Mở rộng `schema: billing` (`cloud/supabase/plugins/subscriptions/install.sql`) + Edge Function `cloud/supabase/functions/payment-webhook/`.
+- **`cloud:digital-commerce`:** Plugin thương mại số `schema: commerce` (`cloud/supabase/plugins/commerce/install.sql`).

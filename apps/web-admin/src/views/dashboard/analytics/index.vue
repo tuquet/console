@@ -47,7 +47,7 @@ async function loadAnalytics() {
     const data = await getRealAnalyticsDataApi();
     analyticsData.value = data;
   } catch (error: any) {
-    toast.error(error.message || 'Error loading telemetry data');
+    toast.error(error.message || $t('common.error'));
   } finally {
     loading.value = false;
   }
@@ -59,18 +59,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+  <div class="space-y-3 p-3 sm:space-y-5 sm:p-5">
     <!-- Top Header: Streamlined, Flat & Compact -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div>
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0">
         <h1
-          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
         >
           {{ $t('page.analytics.title') }}
         </h1>
-        <p class="text-xs text-muted-foreground">
+        <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.analytics.badge') }}
         </p>
       </div>
@@ -89,97 +87,123 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 4 Platform Metric Cards: Mobile-First Grid -->
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <!-- 4 Platform Metric Cards: Mobile-First 2x2 Grid -->
+    <div class="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
       <!-- Metric 1: Workspaces -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:border-border"
+        class="rounded-xl border border-border/60 bg-card p-3 sm:p-4 shadow-sm transition-all hover:border-border"
       >
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-muted-foreground">
+        <div class="flex items-center justify-between gap-1">
+          <span
+            class="truncate text-xs sm:text-sm font-medium text-muted-foreground"
+          >
             {{ $t('page.analytics.total_workspaces') }}
           </span>
           <span
-            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
+            class="flex size-7 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
           >
-            <Building2 class="size-4.5" />
+            <Building2 class="size-4 sm:size-4.5" />
           </span>
         </div>
-        <div class="mt-3 flex items-baseline gap-2">
-          <span class="text-2xl font-bold tracking-tight text-foreground">
+        <div class="mt-2 flex items-baseline gap-1.5 sm:gap-2">
+          <span
+            class="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+          >
             {{ analyticsData.tenants.total }}
           </span>
           <span
-            class="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground"
+            class="inline-flex items-center gap-1 truncate text-2xs sm:text-xs font-medium text-muted-foreground"
           >
-            <span class="size-1.5 rounded-full bg-success"></span>
+            <span class="size-1.5 shrink-0 rounded-full bg-success"></span>
             {{ analyticsData.tenants.activeCount }}
-            {{ $t('page.analytics.active_workspaces') }}
+            <span class="hidden sm:inline">{{
+              $t('page.analytics.active_workspaces')
+            }}</span>
           </span>
         </div>
-        <div class="mt-2 text-xs text-muted-foreground">
-          {{ analyticsData.tenants.planBreakdown.pro }} Pro •
-          {{ analyticsData.tenants.planBreakdown.free }} Free
+        <div class="mt-1.5 truncate text-2xs sm:text-xs text-muted-foreground">
+          {{ analyticsData.tenants.planBreakdown.pro }}
+          {{ $t('page.analytics.plan_pro') }} &bull;
+          {{ analyticsData.tenants.planBreakdown.free }}
+          {{ $t('page.analytics.plan_free') }}
         </div>
       </div>
 
       <!-- Metric 2: System Plugins -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:border-border"
+        class="rounded-xl border border-border/60 bg-card p-3 sm:p-4 shadow-sm transition-all hover:border-border"
       >
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-muted-foreground">
+        <div class="flex items-center justify-between gap-1">
+          <span
+            class="truncate text-xs sm:text-sm font-medium text-muted-foreground"
+          >
             {{ $t('page.analytics.system_plugins') }}
           </span>
           <span
-            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
+            class="flex size-7 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
           >
-            <Layers class="size-4.5" />
+            <Layers class="size-4 sm:size-4.5" />
           </span>
         </div>
-        <div class="mt-3 flex items-baseline gap-2">
-          <span class="text-2xl font-bold tracking-tight text-foreground">
+        <div class="mt-2 flex items-baseline gap-1.5 sm:gap-2">
+          <span
+            class="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+          >
             {{ analyticsData.plugins.total }}
           </span>
-          <span class="text-xs font-medium text-muted-foreground">
+          <span
+            class="truncate text-2xs sm:text-xs font-medium text-muted-foreground"
+          >
             {{ $t('page.analytics.ready') }}
           </span>
         </div>
-        <div class="mt-2 text-xs text-muted-foreground">
+        <div class="mt-1.5 truncate text-2xs sm:text-xs text-muted-foreground">
           <span class="font-medium text-foreground">
             {{ analyticsData.plugins.coreCount }}
             {{ $t('page.analytics.core_kernel') }}
           </span>
-          {{ $t('page.analytics.modules_extension') }}
+          <span class="hidden sm:inline">{{
+            $t('page.analytics.modules_extension')
+          }}</span>
         </div>
       </div>
 
       <!-- Metric 3: Fleet CLI Daemon -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:border-border"
+        class="rounded-xl border border-border/60 bg-card p-3 sm:p-4 shadow-sm transition-all hover:border-border"
       >
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-muted-foreground">
+        <div class="flex items-center justify-between gap-1">
+          <span
+            class="truncate text-xs sm:text-sm font-medium text-muted-foreground"
+          >
             {{ $t('page.analytics.fleet_bridge') }}
           </span>
           <span
-            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
+            class="flex size-7 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
           >
-            <Terminal class="size-4.5" />
+            <Terminal class="size-4 sm:size-4.5" />
           </span>
         </div>
-        <div class="mt-3 flex items-baseline gap-2">
-          <span class="text-2xl font-bold tracking-tight text-foreground">
+        <div class="mt-2 flex items-baseline gap-1.5 sm:gap-2">
+          <span
+            class="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+          >
             {{ $t('page.analytics.ready') }}
           </span>
           <span
-            class="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
+            class="inline-flex items-center gap-1 truncate text-2xs sm:text-xs text-muted-foreground"
           >
-            <span class="size-2 rounded-full bg-success animate-pulse"></span>
-            {{ $t('page.analytics.online') }}
+            <span
+              class="size-2 shrink-0 rounded-full bg-success animate-pulse"
+            ></span>
+            <span class="hidden sm:inline">{{
+              $t('page.analytics.online')
+            }}</span>
           </span>
         </div>
-        <div class="mt-2 font-mono text-xs text-muted-foreground">
+        <div
+          class="mt-1.5 truncate font-mono text-2xs sm:text-xs text-muted-foreground"
+        >
           {{ $t('page.analytics.sso_port') }}:
           <span class="font-semibold text-foreground">
             :{{ analyticsData.fleet.loopbackPort }}
@@ -189,29 +213,35 @@ onMounted(() => {
 
       <!-- Metric 4: API Edge Latency -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:border-border"
+        class="rounded-xl border border-border/60 bg-card p-3 sm:p-4 shadow-sm transition-all hover:border-border"
       >
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-muted-foreground">
+        <div class="flex items-center justify-between gap-1">
+          <span
+            class="truncate text-xs sm:text-sm font-medium text-muted-foreground"
+          >
             {{ $t('page.analytics.api_latency') }}
           </span>
           <span
-            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
+            class="flex size-7 sm:size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
           >
-            <Activity class="size-4.5" />
+            <Activity class="size-4 sm:size-4.5" />
           </span>
         </div>
-        <div class="mt-3 flex items-baseline gap-2">
-          <span class="text-2xl font-bold tracking-tight text-foreground">
+        <div class="mt-2 flex items-baseline gap-1.5 sm:gap-2">
+          <span
+            class="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+          >
             {{ analyticsData.system.latencyMs }}
           </span>
-          <span class="text-sm font-medium text-muted-foreground">ms</span>
+          <span class="text-xs sm:text-sm font-medium text-muted-foreground"
+            >ms</span
+          >
         </div>
         <div
-          class="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"
+          class="mt-1.5 flex items-center gap-1 truncate text-2xs sm:text-xs text-muted-foreground"
         >
-          <CheckCircle2 class="size-3.5 text-success" />
-          <span>{{ $t('page.analytics.healthy_infra') }}</span>
+          <CheckCircle2 class="size-3.5 shrink-0 text-success" />
+          <span class="truncate">{{ $t('page.analytics.healthy_infra') }}</span>
         </div>
       </div>
     </div>
@@ -236,7 +266,7 @@ onMounted(() => {
         >
           <div class="flex items-center gap-2">
             <Loader2 class="size-5 animate-spin text-primary" />
-            <span>Loading...</span>
+            <span>{{ $t('common.loading') }}</span>
           </div>
         </div>
         <GrowthChart v-else :data="analyticsData.tenants.growth" />
@@ -260,7 +290,7 @@ onMounted(() => {
         >
           <div class="flex items-center gap-2">
             <Loader2 class="size-5 animate-spin text-primary" />
-            <span>Loading...</span>
+            <span>{{ $t('common.loading') }}</span>
           </div>
         </div>
         <PlansChart v-else :data="analyticsData.tenants.planBreakdown" />
@@ -287,7 +317,7 @@ onMounted(() => {
         >
           <div class="flex items-center gap-2">
             <Loader2 class="size-5 animate-spin text-primary" />
-            <span>Loading...</span>
+            <span>{{ $t('common.loading') }}</span>
           </div>
         </div>
         <PluginsChart

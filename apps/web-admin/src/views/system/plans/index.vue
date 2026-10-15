@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import type { BillingPlanItem } from '#/api';
 
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
-import { Cpu, CreditCard, HardDrive, RefreshCw, Users } from '@lucide/vue';
+import { usePreferences } from '@vben/preferences';
+
+import { Cpu, CreditCard, Eye, HardDrive, RefreshCw, Users } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
@@ -14,9 +16,9 @@ import { $t } from '#/locales';
 defineOptions({ name: 'SystemPlans' });
 
 const { formatDate } = useDateFormat();
+const { isMobile } = usePreferences();
 
 const plansCount = ref(0);
-const activePlansCount = ref(0);
 
 function formatStorage(mb: number): string {
   if (mb >= 1024) {
@@ -25,43 +27,118 @@ function formatStorage(mb: number): string {
   return `${mb} MB`;
 }
 
+function getColumns() {
+  return [
+    {
+      field: 'name',
+      title: $t('page.system_view.plans_col_name'),
+      minWidth: isMobile.value ? 170 : 200,
+      slots: { default: 'name-cell' },
+    },
+    {
+      field: 'price_monthly_usd',
+      title: $t('page.system_view.plans_col_price'),
+      width: isMobile.value ? 100 : 140,
+      slots: { default: 'price-cell' },
+    },
+    {
+      field: 'max_members',
+      title: $t('page.system_view.plans_col_max_members'),
+      width: 170,
+      visible: !isMobile.value,
+      slots: { default: 'members-cell' },
+    },
+    {
+      field: 'max_storage_mb',
+      title: $t('page.system_view.plans_col_storage'),
+      width: 140,
+      visible: !isMobile.value,
+      slots: { default: 'storage-cell' },
+    },
+    {
+      field: 'max_monthly_runs',
+      title: $t('page.system_view.plans_col_monthly_runs'),
+      width: 160,
+      visible: !isMobile.value,
+      slots: { default: 'runs-cell' },
+    },
+    {
+      field: 'is_active',
+      title: $t('common.status'),
+      width: isMobile.value ? 105 : 130,
+      slots: { default: 'status-cell' },
+    },
+    {
+      field: 'created_at',
+      title: $t('common.createdAt'),
+      minWidth: 150,
+      align: 'right' as const,
+      visible: !isMobile.value,
+      slots: { default: 'date-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('common.actions'),
+      width: isMobile.value ? 56 : 105,
+      align: 'right' as const,
+      slots: { default: 'actions-cell' },
+    },
+  ];
+}
+
 const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
+  detailSheetOptions: {
+    forwardActionSlot: false,
+    resource: 'billing.plans',
+    subtitleField: 'id',
+    titleField: 'name',
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Select',
         fieldName: 'status',
-        label: 'Trạng thái',
+        label: () => $t('common.status'),
         defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả trạng thái',
+        componentProps: () => ({
+          placeholder: $t('page.system_view.status_all'),
           options: [
-            { label: 'Tất cả trạng thái', value: 'all' },
-            { label: 'Đang kích hoạt', value: 'active' },
-            { label: 'Tạm dừng', value: 'paused' },
+            { label: $t('page.system_view.status_all'), value: 'all' },
+            {
+              label: $t('page.system_view.plans_status_active'),
+              value: 'active',
+            },
+            { label: $t('page.system_view.status_paused'), value: 'paused' },
           ],
-        },
+        }),
       },
       {
         component: 'Input',
         fieldName: 'search',
-        label: 'Tìm kiếm',
-        componentProps: {
-          placeholder: 'Tìm theo tên gói cước hoặc mã ID...',
+        label: () => $t('common.search'),
+        componentProps: () => ({
+          placeholder: $t('page.system_view.plans_search_placeholder'),
           clearable: true,
-        },
+        }),
       },
     ],
     layout: 'vertical',
     showCollapseButton: false,
     submitButtonOptions: {
-      content: $t('common.filter'),
+      content: computed(() => $t('common.filter')),
     },
     resetButtonOptions: {
-      content: $t('common.reset'),
+      content: computed(() => $t('common.reset')),
     },
-    actionWrapperClass: 'flex items-center justify-end gap-2 pt-2 sm:pt-6',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3',
+    actionWrapperClass:
+      'col-span-2 sm:col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
@@ -80,7 +157,6 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
         ) => {
           const data = await getBillingPlansApi();
           plansCount.value = data.length;
-          activePlansCount.value = data.filter((p) => p.is_active).length;
 
           let filtered = data;
           if (formValues?.status === 'active') {
@@ -110,73 +186,44 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
         },
       },
     },
-    columns: [
-      {
-        field: 'name',
-        title: 'Tên gói',
-        minWidth: 200,
-        slots: { default: 'name-cell' },
-      },
-      {
-        field: 'price_monthly_usd',
-        title: 'Giá cước',
-        width: 140,
-        slots: { default: 'price-cell' },
-      },
-      {
-        field: 'max_members',
-        title: 'Hạn mức thành viên',
-        width: 170,
-        slots: { default: 'members-cell' },
-      },
-      {
-        field: 'max_storage_mb',
-        title: 'Dung lượng',
-        width: 140,
-        slots: { default: 'storage-cell' },
-      },
-      {
-        field: 'max_monthly_runs',
-        title: 'Lượt chạy / tháng',
-        width: 160,
-        slots: { default: 'runs-cell' },
-      },
-      {
-        field: 'is_active',
-        title: 'Trạng thái',
-        width: 130,
-        slots: { default: 'status-cell' },
-      },
-      {
-        field: 'created_at',
-        title: 'Ngày tạo',
-        minWidth: 150,
-        align: 'right',
-        slots: { default: 'date-cell' },
-      },
-    ],
+    columns: getColumns(),
   },
+});
+
+watch([() => $t('page.system_view.plans_col_name'), isMobile], () => {
+  gridApi.setGridOptions({ columns: getColumns() });
+  gridApi.formApi?.setState({
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
+  });
 });
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Top Header -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="flex flex-col gap-1">
-        <h1
-          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.system.plans') }}
-        </h1>
-        <p class="text-xs text-muted-foreground">
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1
+            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          >
+            {{ $t('page.system.plans') }}
+          </h1>
+          <Badge variant="secondary" class="font-mono text-xs font-normal">
+            {{ plansCount }}
+          </Badge>
+        </div>
+        <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.system.plans_desc') }}
         </p>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex shrink-0 items-center gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -191,40 +238,35 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
 
     <!-- Main Container -->
     <div
-      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-sm space-y-4"
+      class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs"
     >
-      <!-- Stats Bar -->
-      <div
-        class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-border/40 pb-4 text-xs"
-      >
-        <div class="flex items-center gap-2">
-          <CreditCard class="size-4 text-muted-foreground" />
-          <span class="text-sm font-semibold text-foreground">
-            Danh sách gói dịch vụ
-          </span>
-          <span class="text-muted-foreground">· {{ plansCount }} gói</span>
-        </div>
-
-        <div class="flex items-center gap-3 text-muted-foreground">
-          <span>{{ activePlansCount }} đang kích hoạt</span>
-        </div>
-      </div>
-
       <!-- Table Grid -->
       <Grid class="plans-vxe-grid">
         <template #name-cell="{ row }">
           <div class="flex items-center gap-2.5 py-1">
             <div
-              class="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground"
+              class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
             >
               <CreditCard class="size-4" />
             </div>
-            <div class="text-left">
-              <div class="font-medium text-foreground">
+            <div class="min-w-0 text-left">
+              <div class="truncate font-medium text-foreground">
                 {{ row.name }}
               </div>
-              <div class="font-mono text-xs text-muted-foreground">
-                {{ row.id }}
+              <div
+                class="flex items-center gap-1.5 font-mono text-2xs text-muted-foreground sm:text-xs"
+              >
+                <span class="truncate">{{ row.id }}</span>
+                <span class="sm:hidden">&bull;</span>
+                <span class="truncate font-sans sm:hidden">
+                  {{
+                    $t('page.system_view.plans_members_unit', [row.max_members])
+                  }}
+                </span>
+                <span class="sm:hidden">&bull;</span>
+                <span class="sm:hidden">{{
+                  formatStorage(row.max_storage_mb)
+                }}</span>
               </div>
             </div>
           </div>
@@ -233,14 +275,14 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
         <template #price-cell="{ row }">
           <div v-if="row.price_monthly_usd === 0">
             <Badge variant="secondary" class="text-xs font-normal">
-              Miễn phí
+              {{ $t('page.system_view.plans_free') }}
             </Badge>
           </div>
           <div v-else class="font-semibold text-foreground text-sm">
             ${{ row.price_monthly_usd }}
-            <span class="text-xs font-normal text-muted-foreground"
-              >/tháng</span
-            >
+            <span class="text-xs font-normal text-muted-foreground">{{
+              $t('page.system_view.per_month_suffix')
+            }}</span>
           </div>
         </template>
 
@@ -249,7 +291,9 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
             class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
           >
             <Users class="size-3.5 text-muted-foreground shrink-0" />
-            <span>{{ row.max_members }} users</span>
+            <span>{{
+              $t('page.system_view.plans_members_unit', [row.max_members])
+            }}</span>
           </div>
         </template>
 
@@ -267,7 +311,11 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
             class="inline-flex items-center gap-1.5 text-xs text-foreground font-medium"
           >
             <Cpu class="size-3.5 text-muted-foreground shrink-0" />
-            <span>{{ row.max_monthly_runs.toLocaleString() }} runs</span>
+            <span>{{
+              $t('page.system_view.plans_runs_unit', [
+                row.max_monthly_runs.toLocaleString(),
+              ])
+            }}</span>
           </div>
         </template>
 
@@ -277,7 +325,11 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
               class="mr-1.5 size-1.5 rounded-full"
               :class="row.is_active ? 'bg-success' : 'bg-muted-foreground'"
             ></span>
-            {{ row.is_active ? 'Kích hoạt' : 'Tạm dừng' }}
+            {{
+              row.is_active
+                ? $t('page.system_view.plans_badge_active')
+                : $t('page.system_view.status_paused')
+            }}
           </Badge>
         </template>
 
@@ -285,6 +337,21 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
           <span class="text-xs text-muted-foreground">
             {{ formatDate(row.created_at) }}
           </span>
+        </template>
+
+        <template #actions-cell="{ row }">
+          <div class="flex items-center justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              class="inline-flex h-7 items-center gap-1 px-2 text-xs"
+              :title="$t('common.detail')"
+              @click="gridApi.openDetailSheet(row as BillingPlanItem)"
+            >
+              <Eye class="size-3 shrink-0" />
+              <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
+            </Button>
+          </div>
         </template>
       </Grid>
     </div>

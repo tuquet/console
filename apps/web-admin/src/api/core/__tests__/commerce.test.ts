@@ -408,5 +408,63 @@ describe('commerce core api (digital-commerce)', () => {
       expect(saved[0]?.claim_token).toBe('CLM_1234567890ABCDEF');
       expect(getSavedGuestOrders()[0]?.total_credits).toBe(150);
     });
+
+    it('evaluates variant stock availability and formats serial deliveries cleanly', async () => {
+      const { formatSerialDeliveriesText, isVariantInStock } =
+        await import('../commerce');
+
+      expect(isVariantInStock(null)).toBe(false);
+      expect(
+        isVariantInStock(
+          mapRawProductVariant({
+            available_stock: 0,
+            id: 'v-unlimited',
+            is_active: true,
+            stock_mode: 'unlimited',
+          }),
+        ),
+      ).toBe(true);
+      expect(
+        isVariantInStock(
+          mapRawProductVariant({
+            available_stock: 0,
+            id: 'v-empty',
+            is_active: true,
+            stock_mode: 'serialized',
+          }),
+        ),
+      ).toBe(false);
+
+      const text = formatSerialDeliveriesText([
+        {
+          buyer_tenant_id: 't-1',
+          created_at: '2026-10-14T12:00:00Z',
+          delivered_payload: { serial: 'UID1|PASS1|2FA1' },
+          delivery_type: 'serial_stock',
+          download_count: 0,
+          expires_at: null,
+          id: 'd-1',
+          max_downloads: null,
+          order_id: 'o-1',
+          order_item_id: 'oi-1',
+          stock_item_id: 's-1',
+        },
+        {
+          buyer_tenant_id: 't-1',
+          created_at: '2026-10-14T12:00:00Z',
+          delivered_payload: { download_url: 'https://example.com/file.zip' },
+          delivery_type: 'digital_file',
+          download_count: 0,
+          expires_at: null,
+          id: 'd-2',
+          max_downloads: null,
+          order_id: 'o-1',
+          order_item_id: 'oi-2',
+          stock_item_id: null,
+        },
+      ]);
+
+      expect(text).toBe('UID1|PASS1|2FA1');
+    });
   });
 });

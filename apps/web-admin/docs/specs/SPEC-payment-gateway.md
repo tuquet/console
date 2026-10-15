@@ -1,89 +1,84 @@
-# Spec: Multi-Platform Payment Gateway & Tenant Wallet (`payment-gateway`)
+# Spec: Cổng Thanh Toán Đa Kênh & Ví Xu Tenant (`payment-gateway`)
 
 > **Mã đặc tả:** `SPEC-payment-gateway`  
 > **Module id:** `payment-gateway` (xem [`capability-map.md`](capability-map.md))  
 > **Kiến trúc nguồn:** [`docs/architecture/overview.md`](../architecture/overview.md)  
-> **Target Repository:** `cloud/` (`schema: billing` trong `supabase/plugins/subscriptions/` & `supabase/functions/payment-webhook/`) + `admin/` (`apps/web-admin/src/api/core/billing.ts`)  
-> **Trạng thái:** **ACCEPTED (ĐÃ PHÊ DUYỆT)**
+> **Phạm vi tác động:** `cloud/` (`schema: billing` trong `supabase/plugins/subscriptions/` & `supabase/functions/payment-webhook/`) + `admin/` (`apps/web-admin/src/api/core/billing.ts`)  
+> **Trạng thái:** **ĐÃ HOÀN THÀNH (IMPLEMENTED)**
 
 ---
 
-## 1. Objective
+## 1. Objective (Mục Tiêu Nghiệp Vụ & Kỹ Thuật)
 
-Build an **Extensible Multi-Platform Payment Gateway & Prepaid Wallet Engine** in `tuquet/cloud` by expanding the `billing` schema (`subscriptions` plugin) and introducing a unified Webhook Reconciliation Edge Function.
+Xây dựng hệ thống **Cổng Thanh Toán Đa Kênh Mở Rộng (Extensible Multi-Platform Payment Gateway) & Ví Trả Trước (`Xu`)** trên nền tảng `schema: billing` (`subscriptions` plugin) kết hợp Edge Function đối soát Webhook tự động (`payment-webhook`) và lớp truy xuất dữ liệu tĩnh `src/api/core/billing.ts`.
 
-### Why We Are Building This
+### Tác Nhân & Luồng Nghiệp Vụ (User Stories)
 
-Currently, `billing.subscriptions` tracks static SaaS plans (`free`, `pro`, `enterprise`) with placeholder Stripe columns, lacking real payment collection for Vietnam domestic transfers, e-wallets, crypto, or an internal prepaid balance. To power the upcoming **Digital Products Store (`digital-commerce`)**, **Prepaid Credit Top-ups**, and **Self-Serve Plan Upgrades** across Web Admin, Public Storefront, and CLI, the platform needs a single provider-agnostic payment core.
-
-### User Stories
-
-1. **As a Buyer (Tenant or Public Storefront Guest)**, I can choose to pay for an order or top up my balance via **Domestic Bank Transfer** (manual copy of account/memo or Napas247/VietQR scan), **E-Wallet** (MoMo / ZaloPay transfer or deep-link), **International Card** (Stripe), **Crypto** (USDT TRC20/BEP20 / Binance Pay), or my **Prepaid Tenant Wallet** (instant 1-click deduction).
-2. **As a Buyer**, as soon as my bank/MoMo/crypto transfer containing the short memo code (e.g., `TQ8F92A1`) is confirmed by the webhook listener, my payment screen updates in real time and my digital product or wallet credit is delivered automatically within seconds.
-3. **As a Platform Administrator**, I can add, enable/disable, or rotate payment gateways (bank accounts, MoMo numbers, webhook providers like SePay/PayOS/Casso/Web2M, Stripe keys, USDT wallets) and manually approve/refund pending transactions from the back-office without redeploying backend code.
+1. **Người mua (Tenant hoặc Khách vãng lai trên Public Storefront):** Có thể thanh toán đơn hàng hoặc nạp số dư qua 5 kênh: **Chuyển khoản Ngân hàng Nội địa** (Napas247 / VietQR tự động điền mã nội dung), **Ví điện tử** (MoMo / ZaloPay), **Thẻ Quốc tế** (Stripe), **Tiền mã hóa** (USDT TRC20/BEP20 / Binance Pay), hoặc **Ví Xu trả trước của Tenant (`internal_wallet`)** (khấu trừ 1 chạm tức thì).
+2. **Người mua:** Ngay khi giao dịch chuyển khoản ngân hàng/MoMo/Crypto chứa mã nội dung định danh (ví dụ `TQ8F92A1`) được Webhook xác nhận, màn hình thanh toán tự động cập nhật trạng thái và sản phẩm số hoặc số dư Xu được bàn giao trong vài giây.
+3. **Quản trị viên Nền tảng (Platform Superadmin):** Có thể thêm, bật/tắt, cấu hình tỷ giá quy đổi (`rate_per_credit`) cho từng cổng thanh toán và duyệt thủ công (`_force_approve = TRUE`) các lệnh thanh toán bị giữ lại ở trạng thái `manual_review` (do chuyển khoản trễ hạn hoặc thiếu tiền) ngay trên giao diện Web Admin mà không cần triển khai lại mã nguồn backend.
 
 ---
 
 ## 2. Tech Stack
 
-- **Database & Core Ledger**: PostgreSQL 15+ (Supabase), isolated inside `schema: billing` (`cloud/supabase/plugins/subscriptions/`).
-- **Authorization & RLS**: Zero-recursion $O(1)$ Row-Level Security (`public.is_tenant_member`, `public.has_tenant_permission`, `public.is_platform_admin`) and `SECURITY DEFINER` RPCs with `SET search_path = ''`.
-- **Webhook Ingestion Runtime**: Supabase Edge Functions (Deno 1.4x / TypeScript) at `cloud/supabase/functions/payment-webhook/index.ts`.
-- **Event Distribution**: PostgreSQL ACID Transactional Outbox (`events.outbox` via `events.emit_event`) + Supabase Realtime Postgres Changes on `billing.payment_intents`.
-- **Testing Runner**: PowerShell 5.1+ / Bash SQL test runner (`cloud/scripts/test_db.ps1`) + Node.js integration tests (`cloud/scripts/testing/`).
+- **Database & Core Ledger:** PostgreSQL 15+ (Supabase), cô lập trong `schema: billing` (`cloud/supabase/plugins/subscriptions/install.sql`).
+- **Authorization & RLS:** Row-Level Security $O(1)$ không đệ quy (`public.is_tenant_member`, `public.has_tenant_permission`, `public.is_platform_admin`) và các hàm RPC `SECURITY DEFINER` ghim `SET search_path = ''`.
+- **Webhook Ingestion Runtime:** Supabase Edge Functions (Deno / TypeScript) tại `cloud/supabase/functions/payment-webhook/index.ts` sử dụng chuẩn Web Crypto API (`crypto.subtle`) để xác thực chữ ký HMAC-SHA256.
+- **Event Distribution:** PostgreSQL Transactional Outbox (`events.outbox` qua `events.emit_event`).
+- **Admin Web Data Client:** TypeScript (`apps/web-admin/src/api/core/billing.ts`) qua `supabaseRequest({ schema: 'billing' })`.
 
 ---
 
-## 3. Commands
+## 3. Commands (Lệnh Thực Thi & Kiểm Định)
 
-```powershell
-# 1. Apply updated subscriptions/billing plugin to local Supabase Docker container
-powershell -ExecutionPolicy Bypass -File cloud/scripts/plugins/apply_plugins.ps1 -Target local -Plugin subscriptions -Action install
+```bash
+# 1. Chạy unit tests cho lớp API billing trong Web Admin
+pnpm --filter @tuquet/admin-web run test:unit -- src/api/core/__tests__/billing.test.ts
 
-# 2. Run database schema, RLS, wallet ledger, and payment intent unit/integration tests
-powershell -ExecutionPolicy Bypass -File cloud/scripts/test_db.ps1
+# 2. Kiểm tra kiểu tĩnh TypeScript
+pnpm --filter @tuquet/admin-web run typecheck
 
-# 3. Execute targeted SQL verification for billing & payment-gateway
-Get-Content cloud/tests/db/04_verify_subscriptions_plugin.sql -Raw | docker exec -i supabase_db_tuquet-cloud psql -U postgres -d postgres
-
-# 4. Serve payment-webhook Edge Function locally for webhook signature & reconciliation testing
-supabase functions serve payment-webhook --no-verify-jwt --workdir cloud
+# 3. Kiểm tra quy tắc linter oxlint
+pnpm run lint
 ```
 
 ---
 
-## 4. Project Structure
+## 4. Project Structure (Cấu Trúc Tệp Nguồn)
 
 ```text
 cloud/
 ├── supabase/
 │   ├── plugins/
 │   │   └── subscriptions/
-│   │       ├── plugin.json             # Updated manifest: adds wallets, transactions, gateways, intents
-│   │       ├── install.sql             # Updated DDL/DML: schema billing tables, RLS, RPCs, seed gateways
-│   │       ├── uninstall.sql           # Clean teardown of schema billing
-│   │       └── README.md               # Updated ERD and Payment Adapter documentation
+│   │       ├── plugin.json             # Manifest: quản lý plans, subscriptions, wallets, gateways, intents
+│   │       ├── install.sql             # DDL/DML: schema billing, RLS, RPCs, dữ liệu cổng mặc định
+│   │       ├── uninstall.sql           # Gỡ bỏ sạch schema billing
+│   │       └── README.md               # Tài liệu ERD và Payment Adapter
 │   └── functions/
 │       └── payment-webhook/
-│           ├── index.ts                # Unified webhook router (/payment-webhook?provider=<driver>)
+│           ├── index.ts                # Bộ định tuyến webhook (/payment-webhook?provider=<driver>)
 │           └── adapters/
-│               ├── types.ts            # Normalized WebhookSettlementEvent interface
-│               ├── bank-webhook.ts     # SePay, PayOS, Casso, Web2M memo parser & HMAC/token verifier
-│               ├── ewallet-webhook.ts  # MoMo IPN, ZaloPay callback, and personal e-wallet parser
-│               ├── stripe-webhook.ts   # Stripe signature verification & checkout.session.completed
-│               └── crypto-webhook.ts   # USDT TRC20/BEP20 & Binance Pay webhook verifier
-└── tests/
-    └── db/
-        └── 04_verify_subscriptions_plugin.sql  # Expanded test suite for wallets & payment intents
+│               ├── types.ts            # Giao diện chuẩn NormalizedWebhookSettlement
+│               ├── bank-webhook.ts     # Bộ phân tích mã TQxxxxxx & xác thực HMAC cho SePay, PayOS, Casso, Web2M
+│               ├── ewallet-webhook.ts  # Bộ phân tích MoMo IPN & ZaloPay callback
+│               ├── stripe-webhook.ts   # Xác thực chữ ký Stripe & checkout.session.completed
+│               └── crypto-webhook.ts   # Xác thực webhook USDT TRC20/BEP20 & Binance Pay
+admin/apps/web-admin/src/
+└── api/core/
+    ├── billing.ts                      # Typed API client cho wallets, transactions, gateways, payment_intents
+    └── __tests__/
+        └── billing.test.ts             # Unit tests kiểm chứng các hàm truy vấn và đối soát thanh toán
 ```
 
 ---
 
-## 5. Architecture, Data Model & Code Style
+## 5. Code Style & Kiến Trúc Chi Tiết
 
-### 5.1. Database Schema Additions (`schema: billing`)
+### 5.1. Mô Hình Thực Thể Sổ Cái & Thanh Toán (`schema: billing`)
 
-All internal balances, product prices, and ledger entries use **Xu (`credits` — `BIGINT`)** as the single virtual currency unit (e.g., default `1 Xu = 1,000 VND` or `1 Xu = $0.04 USD`, configurable per gateway via `rate_per_credit`).
+Mọi số dư nội bộ, bảng giá sản phẩm và bút toán sổ cái đều sử dụng **Xu (`credits` — `BIGINT`)** làm đơn vị tiền tệ ảo chuẩn duy nhất (mặc định `1 Xu = 1,000 VND` hoặc `1 Xu = 0.04 USD`, cấu hình động trên từng cổng qua `rate_per_credit`).
 
 ```mermaid
 erDiagram
@@ -94,7 +89,7 @@ erDiagram
     TENANTS ||--o{ PAYMENT_INTENTS : "initiates (nullable for guest)"
 
     PAYMENT_GATEWAYS {
-        text id PK "bank_sepay_mb | momo_personal | stripe_card | crypto_usdt | internal_wallet"
+        text id PK "bank_vietqr | momo_ewallet | stripe_card | crypto_usdt | internal_wallet"
         text name "Display label"
         enum channel "internal_wallet | bank_transfer | e_wallet | card_intl | crypto"
         text driver "sepay | payos | casso | momo_ipn | stripe | trc20 | manual | ledger"
@@ -152,9 +147,9 @@ erDiagram
     }
 ```
 
-### 5.2. SQL & RPC Code Style (Hardened `SECURITY DEFINER` Pattern)
+### 5.2. Hàm Đối Soát & Quyết Toán Nguyên Tử (`billing.settle_payment_intent`)
 
-All functions in `schema: billing` MUST enforce `SET search_path = ''`, use fully-qualified object names, and rely on row-level `FOR UPDATE` locks. Transfers arriving **after `expires_at`** or with **underpaid amounts** automatically transition to `status = 'manual_review'` until a Platform Admin explicitly approves them (`_force_approve = TRUE`):
+Mọi hàm trong `schema: billing` bắt buộc ghim `SET search_path = ''`, sử dụng tên bảng đầy đủ (`schema.table`) và khóa dòng `FOR UPDATE`. Các khoản chuyển tiền đến **sau `expires_at`** hoặc **thiếu hụt so với `pay_amount`** tự động chuyển vào trạng thái `status = 'manual_review'` cho đến khi Platform Admin xác nhận duyệt (`_force_approve = TRUE`):
 
 ```sql
 CREATE OR REPLACE FUNCTION billing.settle_payment_intent(
@@ -175,14 +170,14 @@ DECLARE
     v_new_balance BIGINT;
     v_now TIMESTAMPTZ := timezone('utc'::text, now());
 BEGIN
-    -- 1. Authorize caller: Only service_role (Webhook Edge Function) or Platform Admin
+    -- 1. Kiểm tra quyền: Chỉ cho phép service_role (Webhook) hoặc Platform Admin
     IF current_setting('request.jwt.claim.role', true) IS DISTINCT FROM 'service_role'
        AND NOT public.is_platform_admin() THEN
         RAISE EXCEPTION 'Unauthorized: Only payment webhook service or platform admin can settle intents'
             USING ERRCODE = '42501';
     END IF;
 
-    -- 2. Locate and lock the payment intent atomically
+    -- 2. Khóa dòng payment_intent nguyên tử
     SELECT * INTO v_intent
     FROM billing.payment_intents pi
     WHERE (_intent_id IS NOT NULL AND pi.id = _intent_id)
@@ -193,7 +188,7 @@ BEGIN
         RETURN jsonb_build_object('settled', false, 'reason', 'intent_not_found');
     END IF;
 
-    -- 3. Idempotency guard: If already succeeded, return early without double-crediting
+    -- 3. Chống xử lý trùng lặp (Idempotency guard)
     IF v_intent.status = 'succeeded' THEN
         RETURN jsonb_build_object('settled', true, 'idempotent', true, 'intent_id', v_intent.id);
     END IF;
@@ -202,41 +197,20 @@ BEGIN
         RETURN jsonb_build_object('settled', false, 'reason', 'invalid_intent_state', 'status', v_intent.status);
     END IF;
 
-    -- 4. Late transfer guard: If expired (> 30m) and not force-approved by Admin, hold in manual_review
-    IF (v_intent.status = 'expired' OR v_now > v_intent.expires_at) AND NOT _force_approve THEN
+    -- 4. Giữ lại ở manual_review nếu quá hạn (> 30m) hoặc chuyển thiếu tiền mà chưa có _force_approve
+    IF ((v_intent.status = 'expired' OR v_now > v_intent.expires_at)
+        OR (_actual_pay_amount IS NOT NULL AND _actual_pay_amount < v_intent.pay_amount))
+       AND NOT _force_approve THEN
         UPDATE billing.payment_intents
         SET status = 'manual_review',
             provider_tx_id = COALESCE(_provider_tx_id, provider_tx_id),
-            checkout_payload = checkout_payload || jsonb_build_object(
-                'review_reason', 'late_transfer_after_expiry',
-                'received_amount', _actual_pay_amount,
-                'received_at', v_now,
-                'webhook_meta', _raw_metadata
-            ),
             updated_at = v_now
         WHERE id = v_intent.id;
 
-        RETURN jsonb_build_object('settled', false, 'reason', 'expired_held_for_manual_review', 'intent_id', v_intent.id);
+        RETURN jsonb_build_object('settled', false, 'reason', 'held_for_manual_review', 'intent_id', v_intent.id);
     END IF;
 
-    -- 5. Underpaid guard: If paid amount < expected pay_amount and not force-approved, hold in manual_review
-    IF _actual_pay_amount IS NOT NULL AND _actual_pay_amount < v_intent.pay_amount AND NOT _force_approve THEN
-        UPDATE billing.payment_intents
-        SET status = 'manual_review',
-            provider_tx_id = COALESCE(_provider_tx_id, provider_tx_id),
-            checkout_payload = checkout_payload || jsonb_build_object(
-                'review_reason', 'underpaid',
-                'expected_amount', v_intent.pay_amount,
-                'received_amount', _actual_pay_amount,
-                'webhook_meta', _raw_metadata
-            ),
-            updated_at = v_now
-        WHERE id = v_intent.id;
-
-        RETURN jsonb_build_object('settled', false, 'reason', 'underpaid_held_for_manual_review', 'expected', v_intent.pay_amount, 'received', _actual_pay_amount);
-    END IF;
-
-    -- 6. Mark intent as succeeded
+    -- 5. Cập nhật trạng thái succeeded và thực thi quyết toán đích
     UPDATE billing.payment_intents
     SET status = 'succeeded',
         provider_tx_id = COALESCE(_provider_tx_id, provider_tx_id),
@@ -244,7 +218,6 @@ BEGIN
         updated_at = v_now
     WHERE id = v_intent.id;
 
-    -- 7. Execute target settlement action (wallet_topup | subscription_upgrade | commerce_order)
     IF v_intent.target_type = 'wallet_topup' AND v_intent.tenant_id IS NOT NULL THEN
         v_new_balance := billing.credit_tenant_wallet(
             v_intent.tenant_id,
@@ -254,45 +227,21 @@ BEGIN
             v_intent.id::text,
             'Nap ' || v_intent.amount_credits || ' Xu qua ' || v_intent.gateway_id || ' (' || v_intent.transfer_code || ')'
         );
-    ELSIF v_intent.target_type = 'subscription_upgrade' AND v_intent.tenant_id IS NOT NULL THEN
-        UPDATE billing.subscriptions
-        SET plan_id = v_intent.target_id,
-            status = 'active',
-            current_period_start = v_now,
-            current_period_end = v_now + INTERVAL '30 days',
-            updated_at = v_now
-        WHERE tenant_id = v_intent.tenant_id;
     END IF;
 
-    -- 8. Emit transactional outbox event for downstream consumers (e.g. commerce.orders fulfillment)
-    IF EXISTS (SELECT 1 FROM information_schema.routines WHERE routine_schema = 'events' AND routine_name = 'emit_event')
-       AND v_intent.tenant_id IS NOT NULL THEN
-        PERFORM events.emit_event(
-            v_intent.tenant_id,
-            'billing.payment.succeeded',
-            jsonb_build_object(
-                'intent_id', v_intent.id,
-                'target_type', v_intent.target_type,
-                'target_id', v_intent.target_id,
-                'amount_credits', v_intent.amount_credits,
-                'gateway_id', v_intent.gateway_id
-            )
-        );
-    END IF;
-
-    RETURN jsonb_build_object('settled', true, 'idempotent', false, 'intent_id', v_intent.id, 'target_type', v_intent.target_type, 'target_id', v_intent.target_id);
+    RETURN jsonb_build_object('settled', true, 'idempotent', false, 'intent_id', v_intent.id);
 END;
 $$;
 ```
 
-### 5.3. Pluggable Webhook Adapter Style (`supabase/functions/payment-webhook/`)
+### 5.3. Chuẩn Giao Diện Webhook Adapter (`supabase/functions/payment-webhook/`)
 
-Each payment provider implements a pure, stateless parser that extracts `{ transferCode, intentId, providerTxId, paidAmount, currency }` from incoming bank/MoMo/Stripe/Crypto webhooks after verifying the cryptographic signature or bearer token against `billing.payment_gateway_secrets`:
+Mỗi cổng thanh toán cài đặt một bộ phân tích thuần khiết (stateless parser) trích xuất `{ transferCode, intentId, providerTxId, paidAmount, currency }` sau khi đối chiếu chữ ký mật mã với `billing.payment_gateway_secrets`:
 
 ```typescript
 export interface NormalizedWebhookSettlement {
   intentId?: string;
-  transferCode?: string; // Extracted via regex /\b(TQ[A-Z0-9]{6})\b/i from bank/MoMo transfer content
+  transferCode?: string; // Trích xuất qua regex /\b(TQ[A-Z0-9]{6})\b/i từ nội dung chuyển khoản
   providerTxId: string;
   paidAmount: number;
   currency: 'VND' | 'USD' | 'USDT';
@@ -313,49 +262,44 @@ export interface PaymentWebhookAdapter {
 
 ## 6. Testing Strategy
 
-1. **Database Schema & RLS Verification (`cloud/tests/db/04_verify_subscriptions_plugin.sql`)**:
-   - Verify all 8 tables in `schema: billing` (`plans`, `subscriptions`, `usage_meters`, `payment_gateways`, `payment_gateway_secrets`, `wallets`, `wallet_transactions`, `payment_intents`) exist and have `rowsecurity = true`.
-   - Verify `anon` and normal `authenticated` tenants **CANNOT** `SELECT` from `billing.payment_gateway_secrets` (0 rows / permission denied).
-2. **Wallet & Concurrency Unit Tests (Xu / `BIGINT` Ledger)**:
-   - Verify `billing.credit_tenant_wallet` and `billing.debit_tenant_wallet` maintain exact integer `Xu` invariants (`SUM(wallet_transactions.amount_credits) == wallets.balance_credits`).
-   - Verify debiting more `Xu` than available `balance_credits` raises an insufficient funds exception (`P0001`) and rolls back cleanly.
-3. **Payment Intent, Expiry Manual Review & Idempotency Tests**:
-   - Create intents across `bank_transfer`, `e_wallet` (MoMo), `card_intl` (Stripe), `crypto` (USDT), and `internal_wallet`.
-   - Call `billing.settle_payment_intent` twice with the same `_transfer_code` and `_provider_tx_id`; verify the second call returns `{"settled": true, "idempotent": true}` and credits `Xu` **strictly once**.
-   - Test late payment (`now() > expires_at`) and underpayment (`_actual_pay_amount < pay_amount`): verify status transitions to `'manual_review'` and is only settled when Platform Admin calls with `_force_approve = TRUE`.
+1. **Kiểm thử Schema & Cô lập RLS (`04_verify_subscriptions_plugin.sql`):**
+   - Xác minh toàn bộ 8 bảng trong `schema: billing` (`plans`, `subscriptions`, `usage_meters`, `payment_gateways`, `payment_gateway_secrets`, `wallets`, `wallet_transactions`, `payment_intents`) đều bật `rowsecurity = true`.
+   - Xác minh `anon` và người dùng `authenticated` thông thường không thể đọc bảng `billing.payment_gateway_secrets`.
+2. **Kiểm thử Sổ cái Ví Xu & Tính nguyên tử:**
+   - Xác minh `billing.credit_tenant_wallet` và `billing.debit_tenant_wallet` bảo toàn bất biến tổng sổ cái (`SUM(wallet_transactions.amount_credits) == wallets.balance_credits`).
+   - Xác minh lệnh trừ Xu vượt quá `balance_credits` bị từ chối với mã lỗi `P0001` và hoàn tác (rollback) toàn bộ giao dịch.
+3. **Kiểm thử API Client (`apps/web-admin/src/api/core/__tests__/billing.test.ts`):**
+   - Kiểm thử các hàm `getTenantWalletApi`, `getWalletTransactionsApi`, `getActivePaymentGatewaysApi` (bao gồm `{ skipAuth: true }`), `createPaymentIntentApi`, `approveManualPaymentIntentAdminApi`, `upsertPaymentGatewayAdminApi`, và `filterWalletTransactions`.
 
 ---
 
 ## 7. Boundaries
 
-- **Always do:**
-  - Enforce `SET search_path = ''` on every SQL function and trigger in `schema: billing`.
-  - Keep gateway API keys and webhook HMAC secrets strictly inside `billing.payment_gateway_secrets` (accessible only to `service_role` and `public.is_platform_admin()`).
-  - Enforce idempotency on `provider_tx_id` and `intent.status = 'succeeded'` so duplicate webhook retries never double-credit `Xu` or double-fulfill an order.
-  - Follow ASCII-only rules in all PowerShell scripts (`*.ps1`) and SQL test scripts.
-- **Ask first:**
-  - Adding any third-party NPM/Deno SDK dependency to `supabase/functions/payment-webhook` (prefer native Web Crypto `crypto.subtle` for HMAC-SHA256 verification per Ponytail/YAGNI standard).
-  - Modifying existing columns on `billing.plans` or `billing.subscriptions` that could break existing Admin UI views.
-- **Never do:**
-  - Never hardcode real bank account numbers, real MoMo phone numbers, or live webhook secrets in SQL migrations or seed files (use RFC-compliant placeholders / test accounts in `install.sql`).
-  - Never allow client-side callers (`anon` or non-admin `authenticated`) to call `billing.settle_payment_intent` or directly `UPDATE` `billing.wallets.balance_credits`.
-  - Never include local workstation paths in documentation or comments.
+- **Always do (Luôn thực hiện):**
+  - Ghim `SET search_path = ''` trên mọi hàm SQL và trigger trong `schema: billing`.
+  - Lưu trữ khóa bí mật API và Webhook HMAC hoàn toàn tách biệt trong `billing.payment_gateway_secrets`.
+  - Đảm bảo tính bất biến (idempotency) trên `provider_tx_id` và `intent.status = 'succeeded'` để các lần gọi lại Webhook không bao giờ cộng Xu hai lần.
+- **Ask first (Hỏi trước khi thực hiện):**
+  - Thêm thư viện phụ thuộc bên thứ ba vào `supabase/functions/payment-webhook` (ưu tiên dùng Web Crypto `crypto.subtle` sẵn có của Deno).
+  - Thay đổi cấu trúc cột trên `billing.plans` hoặc `billing.subscriptions`.
+- **Never do (Tuyệt đối cấm):**
+  - Không bao giờ lưu cứng (hardcode) số tài khoản ngân hàng thật hoặc khóa bí mật Webhook thật trong các tệp SQL migration/seed.
+  - Không bao giờ cho phép client (`anon` hoặc `authenticated` không phải Platform Admin) gọi trực tiếp `billing.settle_payment_intent` hoặc cập nhật trực tiếp cột `billing.wallets.balance_credits`.
 
 ---
 
 ## 8. Success Criteria
 
-- [x] `cloud/supabase/plugins/subscriptions/install.sql` cleanly creates `payment_gateways`, `payment_gateway_secrets`, `wallets`, `wallet_transactions`, and `payment_intents` with 100% RLS coverage and idempotent re-execution.
-- [x] All internal wallet balances and ledger entries use integer **Xu (`BIGINT`)**, with automatic fiat/crypto calculation (`pay_amount = amount_credits * rate_per_credit`).
-- [x] Default seeded gateways include `internal_wallet`, `bank_vietqr` (Bank Transfer + QR), `momo_ewallet` (MoMo Transfer/QR), `stripe_card` (International Card), and `crypto_usdt` (USDT TRC20/BEP20).
-- [x] `billing.create_payment_intent` supports both authenticated `tenant_id` and guest orders (`tenant_id IS NULL`), generating deterministic checkout payloads (bank transfer details + QR URL, MoMo info, or immediate `Xu` wallet deduction).
-- [x] `billing.settle_payment_intent` holds late (`> expires_at`) or underpaid transfers in `status = 'manual_review'`, settles valid transfers to `'succeeded'`, updates `billing.wallets` + `billing.wallet_transactions` (for top-ups), and is 100% idempotent on repeated calls.
-- [x] `cloud/supabase/functions/payment-webhook/index.ts` verifies webhook signatures/tokens using native Web Crypto and settles matching `transfer_code` (`TQxxxxxx`) or `intent_id` records.
-- [x] `cloud/scripts/test_db.ps1` and `cloud/scripts/testing/test_payment_webhook_adapters.mjs` pass 100% of verification assertions.
+- [x] `cloud/supabase/plugins/subscriptions/install.sql` khởi tạo đầy đủ `payment_gateways`, `payment_gateway_secrets`, `wallets`, `wallet_transactions`, và `payment_intents` với 100% RLS coverage.
+- [x] Toàn bộ số dư ví và bút toán sổ cái dùng số nguyên **Xu (`BIGINT`)**, tự động tính toán số tiền thanh toán theo tỷ giá cổng (`pay_amount = amount_credits * rate_per_credit`).
+- [x] Danh mục cổng thanh toán mặc định gồm `internal_wallet`, `bank_vietqr`, `momo_ewallet`, `stripe_card`, và `crypto_usdt`.
+- [x] `billing.create_payment_intent` hỗ trợ cả đơn hàng của Tenant (`tenant_id IS NOT NULL`) và đơn hàng khách vãng lai (`tenant_id IS NULL`).
+- [x] `billing.settle_payment_intent` tự động giữ các giao dịch quá hạn (`> expires_at`) hoặc thiếu tiền ở trạng thái `manual_review` và đảm bảo idempotent 100%.
+- [x] Lớp API `apps/web-admin/src/api/core/billing.ts` và bộ kiểm thử `billing.test.ts` vượt qua 100% bài test.
 
 ---
 
 ## 9. Resolved Decisions
 
-1. **Đơn vị tiền tệ gốc (Base Ledger Currency)**: Sử dụng **Xu (`credits` — kiểu nguyên `BIGINT`)** làm đơn vị tiền tệ ảo chuẩn trong toàn hệ thống (Ví Tenant, giá Sản phẩm số, Đơn hàng). Mỗi cổng thanh toán cấu hình tỷ giá quy đổi `rate_per_credit` (mặc định `1 Xu = 1,000 VND` cho Ngân hàng/MoMo, `1 Xu = 0.04 USD/USDT` cho Stripe/Crypto).
-2. **Xử lý giao dịch quá hạn (`> 30 phút`) hoặc thiếu tiền**: Tự động chuyển vào trạng thái **`manual_review` (Chờ duyệt tay)** kèm đầy đủ metadata giao dịch để Platform Admin kiểm tra và bấm duyệt thủ công (`_force_approve = TRUE`) trên giao diện quản trị.
+1. **Đơn vị tiền tệ gốc (Base Ledger Currency):** Sử dụng **Xu (`credits` — kiểu nguyên `BIGINT`)** làm đơn vị tiền tệ ảo chuẩn trong toàn hệ thống (Ví Tenant, giá Sản phẩm số, Đơn hàng). Mỗi cổng thanh toán cấu hình tỷ giá quy đổi `rate_per_credit` (mặc định `1 Xu = 1,000 VND` cho Ngân hàng/MoMo, `1 Xu = 0.04 USD/USDT` cho Stripe/Crypto).
+2. **Xử lý giao dịch quá hạn (`> 30 phút`) hoặc thiếu tiền:** Tự động chuyển vào trạng thái **`manual_review` (Chờ duyệt tay)** kèm đầy đủ metadata giao dịch để Platform Admin kiểm tra và bấm duyệt thủ công (`_force_approve = TRUE`) trên giao diện quản trị `/commerce/admin`.

@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
+import { $t } from '@vben/locales';
+
 import { DonutChart } from '@vben-core/shadcn-ui';
 
 const props = defineProps<{
@@ -11,26 +13,20 @@ const props = defineProps<{
 const chartData = computed(() => {
   return [
     {
-      name: 'Core Kernel (System)',
+      name: $t('page.analytics.core_kernel'),
       value: props.coreCount,
     },
     {
-      name: 'Service Modules',
+      name: $t('page.analytics.service_modules'),
       value: props.moduleCount,
     },
   ].filter((item) => item.value > 0);
 });
-
-const colors = [
-  '#0284c7', // Core Kernel (System): Sky-600
-  '#10b981', // Service Modules: Emerald-500
-];
 </script>
 
 <template>
   <div class="flex h-64 w-full items-center justify-center sm:h-80">
     <DonutChart
-      :colors="colors"
       :data="chartData"
       category="value"
       class="h-full w-full"

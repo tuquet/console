@@ -48,5 +48,20 @@
   "database": "Database",
   "storage": "Storage",
   "webhook": "Webhook",
-  "webhooks": "Webhooks"
+  "webhooks": "Webhooks",
+  "order": "Order",
+  "orders": "Orders",
+  "wallet": "Wallet",
+  "product": "Product",
+  "products": "Products",
+  "transaction": "Transaction",
+  "transactions": "Transactions",
+  "category": "Category",
+  "categories": "Categories",
+  "stock": "Stock",
+  "serial": "Serial",
+  "serials": "Serials",
+  "invoice": "Invoice",
+  "invoices": "Invoices",
+  "balance": "Balance"
 }

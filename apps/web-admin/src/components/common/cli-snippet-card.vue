@@ -1,4 +1,8 @@
 <script lang="ts" setup>
+import { computed } from 'vue';
+
+import { $t } from '@vben/locales';
+
 import { Check, Copy, Terminal } from '@lucide/vue';
 import { Button } from '@tuquet/vue-ui';
 
@@ -10,10 +14,14 @@ interface Props {
   label?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  copiedLabel: 'Lệnh CLI',
-  label: 'Lệnh Kết Nối Specter CLI',
-});
+const props = defineProps<Props>();
+
+const resolvedLabel = computed(
+  () => props.label || $t('common.specterCliCommand'),
+);
+const resolvedCopiedLabel = computed(
+  () => props.copiedLabel || $t('common.cliCommand'),
+);
 
 const { copyToClipboard, isCopied } = useClipboard();
 </script>
@@ -25,7 +33,7 @@ const { copyToClipboard, isCopied } = useClipboard();
       <label
         class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
       >
-        {{ props.label }}
+        {{ resolvedLabel }}
       </label>
     </div>
     <div
@@ -36,10 +44,10 @@ const { copyToClipboard, isCopied } = useClipboard();
         variant="ghost"
         size="icon"
         class="text-muted-foreground hover:text-foreground p-0 size-6 shrink-0"
-        @click="copyToClipboard(props.command, props.copiedLabel)"
+        @click="copyToClipboard(props.command, resolvedCopiedLabel)"
       >
         <Check
-          v-if="isCopied(props.copiedLabel)"
+          v-if="isCopied(resolvedCopiedLabel)"
           class="size-3.5 text-success"
         />
         <Copy v-else class="size-3.5" />

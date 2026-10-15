@@ -32,6 +32,7 @@ import {
   updateWorkspaceInfoApi,
   updateWorkspaceMemberRoleApi,
 } from '#/api';
+import { $t } from '#/locales';
 
 import DeleteWorkspaceModal from './components/modals/delete-workspace-modal.vue';
 import EditMemberModal from './components/modals/edit-member-modal.vue';
@@ -107,7 +108,7 @@ async function loadData() {
     detailData.value = detail;
     availableRoles.value = roles;
   } catch (error: any) {
-    toast.error(error.message || 'Không thể tải chi tiết Workspace');
+    toast.error(error.message || $t('page.tenants_view.load_detail_failed'));
   } finally {
     loading.value = false;
   }
@@ -118,7 +119,9 @@ function handleSetActive() {
   setActiveTenantId(detailData.value.tenant.id);
   currentActiveTenantId.value = detailData.value.tenant.id;
   toast.success(
-    `Đã chọn Workspace "${detailData.value.tenant.name}" làm ngữ cảnh CLI`,
+    $t('page.tenants_view.selected_cli_context', {
+      name: detailData.value.tenant.name,
+    }),
   );
 }
 
@@ -146,11 +149,13 @@ async function handleInviteMemberSubmit(payload: {
       roleId: payload.roleId,
       tenantId: detailData.value.tenant.id,
     });
-    toast.success(`Đã gửi lời mời tới ${payload.email}`);
+    toast.success(
+      $t('page.tenants_view.invite_sent_success', { email: payload.email }),
+    );
     isInviteModalVisible.value = false;
     await loadData();
   } catch (error: any) {
-    toast.error(error.message || 'Gửi lời mời thất bại');
+    toast.error(error.message || $t('page.tenants_view.invite_sent_failed'));
   } finally {
     inviting.value = false;
   }
@@ -168,11 +173,11 @@ async function handleEditMemberSubmit(payload: {
       roleId: payload.roleId,
       tenantId: detailData.value.tenant.id,
     });
-    toast.success('Đã cập nhật vai trò thành viên');
+    toast.success($t('page.tenants_view.member_role_updated'));
     isEditMemberModalVisible.value = false;
     await loadData();
   } catch (error: any) {
-    toast.error(error.message || 'Cập nhật thành viên thất bại');
+    toast.error(error.message || $t('page.tenants_view.member_update_failed'));
   } finally {
     updatingMember.value = false;
   }
@@ -181,10 +186,14 @@ async function handleEditMemberSubmit(payload: {
 async function handleRemoveMember(member: WorkspaceMember) {
   try {
     await removeWorkspaceMemberApi(member.id);
-    toast.success(`Đã xóa thành viên ${member.full_name || member.email}`);
+    toast.success(
+      $t('page.tenants_view.member_removed_success', {
+        name: member.full_name || member.email,
+      }),
+    );
     await loadData();
   } catch (error: any) {
-    toast.error(error.message || 'Xóa thành viên thất bại');
+    toast.error(error.message || $t('page.tenants_view.member_remove_failed'));
   }
 }
 
@@ -199,11 +208,13 @@ async function handleEditWorkspaceSubmit(payload: {
       name: payload.name,
       slug: payload.slug,
     });
-    toast.success('Đã cập nhật thông tin Workspace');
+    toast.success($t('page.tenants_view.workspace_updated_success'));
     isEditWorkspaceModalVisible.value = false;
     await loadData();
   } catch (error: any) {
-    toast.error(error.message || 'Cập nhật Workspace thất bại');
+    toast.error(
+      error.message || $t('page.tenants_view.workspace_update_failed'),
+    );
   } finally {
     updatingWorkspace.value = false;
   }
@@ -213,11 +224,13 @@ async function handleDeleteWorkspaceSubmit() {
   deletingWorkspace.value = true;
   try {
     await deleteWorkspaceApi(tenantId.value);
-    toast.success('Đã xóa hoặc lưu trữ Workspace');
+    toast.success($t('page.tenants_view.workspace_deleted_success'));
     isDeleteWorkspaceModalVisible.value = false;
     router.push('/tenants');
   } catch (error: any) {
-    toast.error(error.message || 'Xóa Workspace thất bại');
+    toast.error(
+      error.message || $t('page.tenants_view.workspace_delete_failed'),
+    );
   } finally {
     deletingWorkspace.value = false;
   }
@@ -239,7 +252,7 @@ onMounted(() => {
         @click="router.push('/tenants')"
       >
         <ArrowLeft class="size-3.5" />
-        <span>Danh Sách Workspace</span>
+        <span>{{ $t('page.workspace.list_title') }}</span>
       </Button>
     </div>
 
@@ -261,26 +274,42 @@ onMounted(() => {
       class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
     >
       <Tabs v-model="currentTab" class="w-full">
-        <TabsList class="mb-4">
-          <TabsTrigger value="overview" class="flex items-center gap-1.5">
+        <TabsList
+          class="mb-4 flex h-auto w-full justify-start gap-1 overflow-x-auto p-1 sm:inline-flex sm:w-auto"
+        >
+          <TabsTrigger
+            value="overview"
+            class="flex shrink-0 items-center gap-1.5 whitespace-nowrap"
+          >
             <LayoutDashboard class="size-4 shrink-0" />
-            <span>Tổng quan</span>
+            <span>{{ $t('page.tenants_view.tab_overview') }}</span>
           </TabsTrigger>
-          <TabsTrigger value="members" class="flex items-center gap-1.5">
+          <TabsTrigger
+            value="members"
+            class="flex shrink-0 items-center gap-1.5 whitespace-nowrap"
+          >
             <Users class="size-4 shrink-0" />
-            <span>Thành viên · {{ detailData.members.length }}</span>
+            <span
+              >{{ $t('term.members') }} · {{ detailData.members.length }}</span
+            >
           </TabsTrigger>
-          <TabsTrigger value="usage" class="flex items-center gap-1.5">
+          <TabsTrigger
+            value="usage"
+            class="flex shrink-0 items-center gap-1.5 whitespace-nowrap"
+          >
             <Gauge class="size-4 shrink-0" />
-            <span>Hạn ngạch & tài nguyên</span>
+            <span>{{ $t('page.tenants_view.tab_usage') }}</span>
           </TabsTrigger>
-          <TabsTrigger value="audit" class="flex items-center gap-1.5">
+          <TabsTrigger
+            value="audit"
+            class="flex shrink-0 items-center gap-1.5 whitespace-nowrap"
+          >
             <History class="size-4 shrink-0" />
-            <span>Nhật ký an ninh</span>
+            <span>{{ $t('page.tenants_view.tab_audit') }}</span>
           </TabsTrigger>
         </TabsList>
 
-        <!-- Tab 1: Tổng Quan (Overview) -->
+        <!-- Tab 1: Overview -->
         <TabsContent value="overview">
           <WorkspaceOverviewTab
             :tenant="detailData.tenant"
@@ -296,7 +325,7 @@ onMounted(() => {
           />
         </TabsContent>
 
-        <!-- Tab 2: Thành Viên (Members) -->
+        <!-- Tab 2: Members -->
         <TabsContent value="members">
           <WorkspaceMembersTab
             :members="detailData.members"
@@ -307,7 +336,7 @@ onMounted(() => {
           />
         </TabsContent>
 
-        <!-- Tab 3: Hạn Ngạch & Tài Nguyên (Usage) -->
+        <!-- Tab 3: Usage -->
         <TabsContent value="usage">
           <WorkspaceUsageTab
             :quota="detailData.quota"
@@ -315,7 +344,7 @@ onMounted(() => {
           />
         </TabsContent>
 
-        <!-- Tab 4: Nhật Ký Kiểm Toán (Audit) -->
+        <!-- Tab 4: Audit -->
         <TabsContent value="audit">
           <WorkspaceAuditTab :tenant-id="detailData.tenant.id" />
         </TabsContent>

@@ -1,5 +1,7 @@
 import type { TenantItem } from './tenant';
 
+import { $t } from '@vben/locales';
+
 import { supabaseRequest } from './supabase-client';
 
 export type TenantDetailTab = 'audit' | 'members' | 'overview' | 'usage';
@@ -74,17 +76,21 @@ export interface WorkspaceDetailData {
   total_devices_count: number;
 }
 
-const DEFAULT_OWNER_ROLE: WorkspaceMemberRole = {
-  display_name: 'Chủ sở hữu',
-  id: '00000000-0000-0000-0000-000000000001',
-  name: 'owner',
-};
+function getDefaultOwnerRole(): WorkspaceMemberRole {
+  return {
+    display_name: $t('common.roleOwner'),
+    id: '00000000-0000-0000-0000-000000000001',
+    name: 'owner',
+  };
+}
 
-const DEFAULT_MEMBER_ROLE: WorkspaceMemberRole = {
-  display_name: 'Thành viên',
-  id: '00000000-0000-0000-0000-000000000003',
-  name: 'member',
-};
+function getDefaultMemberRole(): WorkspaceMemberRole {
+  return {
+    display_name: $t('common.roleMember'),
+    id: '00000000-0000-0000-0000-000000000003',
+    name: 'member',
+  };
+}
 
 /**
  * Compute SHA-256 hash string from raw input token using Web Crypto API.
@@ -109,7 +115,7 @@ export function mapRawMembersToWorkspaceMembers(
   }
 
   return rawRows.map((m: any) => {
-    let resolvedRole: WorkspaceMemberRole = DEFAULT_MEMBER_ROLE;
+    let resolvedRole: WorkspaceMemberRole = getDefaultMemberRole();
 
     const assignedRoles: any[] = Array.isArray(m.member_roles)
       ? m.member_roles.map((mr: any) => mr.roles).filter(Boolean)
@@ -135,7 +141,7 @@ export function mapRawMembersToWorkspaceMembers(
         name: topRole.name as WorkspaceMemberRole['name'],
       };
     } else if (ownerUserId && m.user_id === ownerUserId) {
-      resolvedRole = DEFAULT_OWNER_ROLE;
+      resolvedRole = getDefaultOwnerRole();
     }
 
     const email = m.profiles?.email || 'member@tuquet.com';
@@ -215,7 +221,7 @@ export async function getWorkspaceDetailApi(
   );
   const tenant = tenants[0];
   if (!tenant) {
-    throw new Error('Workspace không tồn tại hoặc bạn không có quyền truy cập');
+    throw new Error($t('common.workspaceNotFoundOrDenied'));
   }
 
   // 2. Fetch Members & Profiles & Member Roles concurrently with Devices and Subscriptions
@@ -461,7 +467,7 @@ export async function updateWorkspaceInfoApi(
 
   const updatedItem = Array.isArray(result) ? result[0] : (result as any);
   if (!updatedItem) {
-    throw new Error('Cập nhật Workspace thất bại');
+    throw new Error($t('common.updateWorkspaceFailed'));
   }
   return updatedItem;
 }

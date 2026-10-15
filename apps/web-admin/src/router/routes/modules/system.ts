@@ -12,8 +12,19 @@ const routes: RouteRecordRaw[] = [
     },
     name: 'System',
     path: '/system',
-    redirect: '/system/plugins',
+    redirect: '/system/overview',
     children: [
+      {
+        name: 'SystemOverview',
+        path: 'overview',
+        component: () => import('#/views/system/overview/index.vue'),
+        meta: {
+          authority: ['superadmin', 'plugins:read', 'subscriptions:read'],
+          icon: 'lucide:activity',
+          plugin: ['core-iam', 'subscriptions'],
+          title: $t('page.system.overview'),
+        },
+      },
       {
         name: 'SystemPlugins',
         path: 'plugins',

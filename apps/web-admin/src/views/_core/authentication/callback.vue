@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { $t } from '@vben/locales';
 import { useAccessStore, useUserStore } from '@vben/stores';
 
 import { Loader2 } from '@lucide/vue';
@@ -35,7 +36,9 @@ onMounted(async () => {
 
     if (error) {
       loading.value = false;
-      errorMessage.value = `Đăng nhập thất bại: ${error}`;
+      errorMessage.value = $t('authentication.githubLoginFailedWithReason', {
+        error,
+      });
       return;
     }
 
@@ -65,8 +68,8 @@ onMounted(async () => {
       }
       accessStore.setAccessCodes(accessCodes);
 
-      toast.success('Chào mừng bạn trở lại', {
-        description: 'Đăng nhập GitHub thành công!',
+      toast.success($t('authentication.loginSuccessDesc'), {
+        description: $t('authentication.githubLoginSuccess'),
         duration: 3000,
       });
 
@@ -75,11 +78,11 @@ onMounted(async () => {
     }
 
     loading.value = false;
-    errorMessage.value =
-      'Không tìm thấy dữ liệu phiên làm việc từ GitHub OAuth.';
+    errorMessage.value = $t('authentication.githubSessionMissing');
   } catch (error: any) {
     loading.value = false;
-    errorMessage.value = error.message || 'Lỗi xử lý xác thực GitHub';
+    errorMessage.value =
+      error.message || $t('authentication.githubCallbackError');
   }
 });
 </script>
@@ -91,19 +94,21 @@ onMounted(async () => {
     <div v-if="loading" class="space-y-4">
       <Loader2 class="size-8 animate-spin mx-auto text-primary" />
       <p class="text-muted-foreground text-sm">
-        Đang xác thực thông tin tài khoản GitHub từ Supabase...
+        {{ $t('authentication.githubVerifying') }}
       </p>
     </div>
 
     <div v-else class="space-y-4 max-w-md">
       <div class="text-3xl text-destructive font-bold">!</div>
-      <h3 class="text-lg font-semibold text-destructive">Xác thực thất bại</h3>
+      <h3 class="text-lg font-semibold text-destructive">
+        {{ $t('authentication.githubAuthFailed') }}
+      </h3>
       <p class="text-muted-foreground text-xs">
         {{ errorMessage }}
       </p>
       <div class="pt-2">
         <Button @click="router.push('/auth/login')">
-          Quay lại trang đăng nhập
+          {{ $t('authentication.backToLogin') }}
         </Button>
       </div>
     </div>

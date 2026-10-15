@@ -16,115 +16,151 @@ const props = withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
     <!-- Metric 1: Total Nodes -->
-    <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-      <div class="flex items-center justify-between">
-        <span class="text-sm font-medium text-muted-foreground">
+    <div
+      class="rounded-xl border border-border/60 bg-card p-3 shadow-xs sm:p-4"
+    >
+      <div class="flex items-center justify-between gap-1.5">
+        <span
+          class="truncate text-xs font-medium text-muted-foreground sm:text-sm"
+        >
           {{ $t('page.fleet_view.metric_total_nodes') }}
         </span>
         <span
-          class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
+          class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground sm:size-9"
         >
-          <Laptop class="size-4.5" />
+          <Laptop class="size-3.5 sm:size-4.5" />
         </span>
       </div>
-      <div class="mt-2 flex items-baseline gap-2">
-        <span class="text-2xl font-bold tracking-tight text-foreground">
+      <div class="mt-1.5 flex items-baseline gap-1.5 sm:mt-2 sm:gap-2">
+        <span
+          class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+        >
           {{ props.metrics.total_nodes }}
         </span>
-        <span class="text-xs font-medium text-muted-foreground">
+        <span
+          class="truncate text-2xs font-medium text-muted-foreground sm:text-xs"
+        >
           {{ $t('page.fleet_view.metric_devices_unit') }}
         </span>
       </div>
-      <div class="mt-2 text-xs text-muted-foreground">
+      <div class="mt-1 hidden text-xs text-muted-foreground sm:mt-2 sm:block">
         {{ $t('page.fleet_view.metric_registered_desc') }}
       </div>
     </div>
 
     <!-- Metric 2: Online Nodes -->
-    <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-      <div class="flex items-center justify-between">
-        <span class="text-sm font-medium text-muted-foreground">
+    <div
+      class="rounded-xl border border-border/60 bg-card p-3 shadow-xs sm:p-4"
+    >
+      <div class="flex items-center justify-between gap-1.5">
+        <span
+          class="truncate text-xs font-medium text-muted-foreground sm:text-sm"
+        >
           {{ $t('page.fleet_view.metric_online_nodes') }}
         </span>
         <span
-          class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
+          class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground sm:size-9"
         >
-          <CheckCircle2 class="size-4.5 text-success" />
+          <CheckCircle2 class="size-3.5 text-success sm:size-4.5" />
         </span>
       </div>
-      <div class="mt-2 flex items-baseline gap-2">
-        <span class="text-2xl font-bold tracking-tight text-foreground">
+      <div class="mt-1.5 flex items-baseline gap-1.5 sm:mt-2 sm:gap-2">
+        <span
+          class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+        >
           {{ props.metrics.online_nodes }}
         </span>
-        <span class="text-xs font-medium text-muted-foreground">
+        <span
+          class="truncate text-2xs font-medium text-muted-foreground sm:text-xs"
+        >
           {{ $t('page.fleet_view.metric_ready_unit') }}
         </span>
       </div>
-      <div class="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+      <div
+        class="mt-1 hidden items-center gap-1.5 text-xs text-muted-foreground sm:mt-2 sm:flex"
+      >
         <span
-          class="size-2 rounded-full bg-success animate-pulse shrink-0"
+          class="size-2 shrink-0 animate-pulse rounded-full bg-success"
         ></span>
-        <span>{{ $t('page.fleet_view.metric_auto_exec_desc') }}</span>
+        <span class="truncate">{{
+          $t('page.fleet_view.metric_auto_exec_desc')
+        }}</span>
       </div>
     </div>
 
     <!-- Metric 3: Active Jobs -->
-    <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-      <div class="flex items-center justify-between">
-        <span class="text-sm font-medium text-muted-foreground">
+    <div
+      class="rounded-xl border border-border/60 bg-card p-3 shadow-xs sm:p-4"
+    >
+      <div class="flex items-center justify-between gap-1.5">
+        <span
+          class="truncate text-xs font-medium text-muted-foreground sm:text-sm"
+        >
           {{ $t('page.fleet_view.metric_active_jobs') }}
         </span>
         <span
-          class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
+          class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground sm:size-9"
         >
-          <Cpu class="size-4.5" />
+          <Cpu class="size-3.5 sm:size-4.5" />
         </span>
       </div>
-      <div class="mt-2 flex items-baseline gap-2">
-        <span class="text-2xl font-bold tracking-tight text-foreground">
+      <div class="mt-1.5 flex items-baseline gap-1.5 sm:mt-2 sm:gap-2">
+        <span
+          class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+        >
           {{ props.metrics.active_jobs }}
         </span>
-        <span class="text-xs font-medium text-muted-foreground">
+        <span
+          class="truncate text-2xs font-medium text-muted-foreground sm:text-xs"
+        >
           {{ $t('page.fleet_view.metric_jobs_unit') }}
         </span>
       </div>
-      <div class="mt-2 text-xs text-muted-foreground">
+      <div class="mt-1 hidden text-xs text-muted-foreground sm:mt-2 sm:block">
         {{ $t('page.fleet_view.metric_active_jobs_desc') }}
       </div>
     </div>
 
     <!-- Metric 4: Loopback Daemon -->
-    <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-      <div class="flex items-center justify-between">
-        <span class="text-sm font-medium text-muted-foreground">
+    <div
+      class="rounded-xl border border-border/60 bg-card p-3 shadow-xs sm:p-4"
+    >
+      <div class="flex items-center justify-between gap-1.5">
+        <span
+          class="truncate text-xs font-medium text-muted-foreground sm:text-sm"
+        >
           {{ $t('page.fleet_view.metric_loopback_port') }}
         </span>
         <span
-          class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
+          class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground sm:size-9"
         >
-          <Terminal class="size-4.5" />
+          <Terminal class="size-3.5 sm:size-4.5" />
         </span>
       </div>
-      <div class="mt-2 flex items-baseline gap-2">
-        <span class="text-2xl font-bold tracking-tight text-foreground">
+      <div class="mt-1.5 flex items-baseline gap-1.5 sm:mt-2 sm:gap-2">
+        <span
+          class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+        >
           :{{ props.metrics.loopback_port }}
         </span>
         <span
           v-if="props.metrics.loopback_online"
-          class="inline-flex items-center gap-1.5 text-xs text-foreground"
+          class="inline-flex items-center gap-1 text-2xs text-foreground sm:text-xs"
         >
           <span
-            class="size-2 rounded-full bg-success animate-pulse shrink-0"
+            class="size-1.5 shrink-0 animate-pulse rounded-full bg-success sm:size-2"
           ></span>
           {{ $t('page.fleet_view.online') }}
         </span>
-        <span v-else class="text-xs text-muted-foreground">
+        <span v-else class="text-2xs text-muted-foreground sm:text-xs">
           {{ $t('page.fleet_view.standby') }}
         </span>
       </div>
-      <div class="mt-2 font-mono text-xs text-muted-foreground">
+      <div
+        class="mt-1 hidden font-mono text-xs text-muted-foreground sm:mt-2 sm:block"
+      >
         {{ $t('page.fleet_view.process_supervisor') }}
       </div>
     </div>

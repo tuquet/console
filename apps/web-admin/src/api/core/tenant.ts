@@ -1,4 +1,11 @@
+import type { TenantPlan, TenantStatus } from '@vben/constants';
+
+import { STORAGE_KEYS, TENANT_PLAN, TENANT_STATUS } from '@vben/constants';
+
 import { supabaseRequest } from './supabase-client';
+
+export { TENANT_PLAN, TENANT_STATUS };
+export type { TenantPlan, TenantStatus };
 
 export interface TenantItem {
   avatar_url: null | string;
@@ -6,17 +13,17 @@ export interface TenantItem {
   created_by: null | string;
   id: string;
   metadata?: {
-    plan?: string;
+    plan?: string | TenantPlan;
     region?: string;
     [key: string]: any;
   };
   name: string;
   slug: string;
-  status: 'active' | 'archived' | 'suspended';
+  status: TenantStatus;
   updated_at: string;
 }
 
-const ACTIVE_TENANT_KEY = 'TUQUET_ACTIVE_TENANT_ID';
+const ACTIVE_TENANT_KEY = STORAGE_KEYS.ACTIVE_TENANT_ID;
 
 export function getActiveTenantId(): string {
   return localStorage.getItem(ACTIVE_TENANT_KEY) || '';
@@ -45,12 +52,12 @@ export async function createTenantApi(data: {
 }): Promise<TenantItem> {
   const payload = {
     metadata: {
-      plan: data.plan || 'pro',
+      plan: data.plan || TENANT_PLAN.PRO,
       region: 'ap-southeast-1',
     },
     name: data.name,
     slug: data.slug,
-    status: 'active',
+    status: TENANT_STATUS.ACTIVE,
   };
 
   const result = await supabaseRequest<TenantItem | TenantItem[]>(

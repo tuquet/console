@@ -35,7 +35,7 @@ function createJwtWithExp(expSeconds: number): string {
       exp: expSeconds,
       role: 'authenticated',
       sub: 'user-123',
-      user_metadata: { full_name: 'Quản trị viên' },
+      user_metadata: { full_name: 'Qu\u1EA3n tr\u1ECB vi\u00EAn' },
     }),
   ).toString('base64url');
   return `${header}.${payload}.sig`;
@@ -72,7 +72,7 @@ describe('supabase-client auth interceptor & JWT lifecycle', () => {
       const validToken = createJwtWithExp(nowSec + 3600);
 
       expect(decodeJwtPayload(validToken)?.user_metadata?.full_name).toBe(
-        'Quản trị viên',
+        'Qu\u1EA3n tr\u1ECB vi\u00EAn',
       );
       expect(isJwtTokenExpired(expiredToken)).toBe(true);
       expect(isJwtTokenExpired(validToken)).toBe(false);

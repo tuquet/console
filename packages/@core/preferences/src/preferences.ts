@@ -256,6 +256,13 @@ class PreferenceManager {
       markRaw(this.state),
     );
     Object.assign(this.state, mergedState);
+    if (
+      updates.theme &&
+      (Reflect.has(updates.theme, 'builtinType') ||
+        Reflect.has(updates.theme, 'mode'))
+    ) {
+      this.syncBuiltinThemeColor(this.state);
+    }
 
     // Execute updates based on incoming values
     this.handleUpdates(updates);

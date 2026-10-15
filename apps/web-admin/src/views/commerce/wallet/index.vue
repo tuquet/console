@@ -8,12 +8,12 @@ import type {
   WalletTxType,
 } from '#/api';
 
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { usePreferences } from '@vben/preferences';
+
 import {
-  ArrowDownLeft,
-  ArrowUpRight,
   Building2,
   Coins,
   Copy,
@@ -46,13 +46,15 @@ import {
   getWalletTransactionsApi,
   setActiveTenantId,
 } from '#/api';
-import { useDateFormat } from '#/composables';
+import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
 defineOptions({ name: 'CommerceWallet' });
 
 const router = useRouter();
 const { formatDate } = useDateFormat();
+const { copyToClipboard } = useClipboard();
+const { isMobile } = usePreferences();
 
 const tenants = ref<TenantItem[]>([]);
 const selectedTenantId = ref<string>(getActiveTenantId());
@@ -71,22 +73,33 @@ let pollTimer: null | ReturnType<typeof setInterval> = null;
 
 const QUICK_TOPUP_PRESETS = [50, 100, 200, 500, 1000, 5000];
 
-const TX_TYPE_MAP: Record<
-  WalletTxType,
-  {
-    label: string;
-    variant: 'default' | 'destructive' | 'outline' | 'secondary';
-  }
-> = {
-  admin_adjustment: { label: 'Điều chỉnh hệ thống', variant: 'secondary' },
-  bonus: { label: 'Thưởng / Khuyến mãi', variant: 'default' },
-  purchase: { label: 'Thanh toán đơn hàng', variant: 'outline' },
-  refund: { label: 'Hoàn Xu đơn hàng', variant: 'secondary' },
-  topup: { label: 'Nạp Xu vào ví', variant: 'default' },
-};
+const txTypeMap = computed<
+  Record<
+    WalletTxType,
+    {
+      label: string;
+      variant: 'default' | 'destructive' | 'outline' | 'secondary';
+    }
+  >
+>(() => ({
+  admin_adjustment: {
+    label: $t('page.commerce_view.tx_admin_adjustment'),
+    variant: 'secondary',
+  },
+  bonus: { label: $t('page.commerce_view.tx_bonus'), variant: 'default' },
+  purchase: {
+    label: $t('page.commerce_view.tx_purchase'),
+    variant: 'outline',
+  },
+  refund: {
+    label: $t('page.commerce_view.tx_refund'),
+    variant: 'secondary',
+  },
+  topup: { label: $t('page.commerce_view.tx_topup'), variant: 'default' },
+}));
 
 function getTxTypeBadge(type: WalletTxType) {
-  return TX_TYPE_MAP[type] || { label: type, variant: 'outline' as const };
+  return txTypeMap.value[type] || { label: type, variant: 'outline' as const };
 }
 
 const topupGateways = computed(() =>
@@ -107,35 +120,102 @@ const estimatedPayAmount = computed(() => {
   );
 });
 
+function getColumns() {
+  const mobile = isMobile.value;
+  return [
+    {
+      field: 'tx_type',
+      title: $t('page.commerce_view.tx_type_label'),
+      width: mobile ? 105 : 175,
+      slots: { default: 'type-cell' },
+    },
+    {
+      field: 'description',
+      title: $t('common.description'),
+      minWidth: mobile ? 155 : 240,
+      slots: { default: 'desc-cell' },
+    },
+    {
+      field: 'amount_credits',
+      title: $t('page.commerce_view.col_amount_change'),
+      width: mobile ? 105 : 155,
+      slots: { default: 'amount-cell' },
+    },
+    {
+      field: 'balance_after_credits',
+      title: $t('page.commerce_view.col_balance_after'),
+      width: 155,
+      visible: !mobile,
+      slots: { default: 'balance-cell' },
+    },
+    {
+      field: 'reference_id',
+      title: $t('page.commerce_view.col_reference_id'),
+      width: 175,
+      visible: !mobile,
+      slots: { default: 'ref-cell' },
+    },
+    {
+      field: 'created_at',
+      title: $t('page.commerce_view.col_created_time'),
+      width: 165,
+      visible: !mobile,
+      slots: { default: 'date-cell' },
+    },
+  ];
+}
+
 const [Grid, gridApi] = useVbenVxeGrid<WalletTransactionItem>({
   separator: false,
+  detailSheetOptions: {
+    resource: 'billing.wallet_transactions',
+    subtitleField: 'tx_type',
+    titleField: 'description',
+    actions: [
+      {
+        label: $t('common.copy'),
+        onClick: (row) =>
+          copyToClipboard(row.reference_id || row.id, 'Reference ID'),
+        variant: 'outline',
+      },
+    ],
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Select',
         fieldName: 'tx_type',
-        label: 'Loại giao dịch',
+        label: () => $t('page.commerce_view.tx_type_label'),
         defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả biến động',
+        componentProps: () => ({
+          placeholder: $t('page.commerce_view.all_transactions'),
           options: [
-            { label: 'Tất cả biến động', value: 'all' },
-            { label: 'Nạp Xu vào ví', value: 'topup' },
-            { label: 'Thanh toán đơn hàng', value: 'purchase' },
-            { label: 'Thưởng / Khuyến mãi', value: 'bonus' },
-            { label: 'Hoàn Xu đơn hàng', value: 'refund' },
-            { label: 'Điều chỉnh hệ thống', value: 'admin_adjustment' },
+            { label: $t('page.commerce_view.all_transactions'), value: 'all' },
+            { label: $t('page.commerce_view.tx_topup'), value: 'topup' },
+            { label: $t('page.commerce_view.tx_purchase'), value: 'purchase' },
+            { label: $t('page.commerce_view.tx_bonus'), value: 'bonus' },
+            { label: $t('page.commerce_view.tx_refund'), value: 'refund' },
+            {
+              label: $t('page.commerce_view.tx_admin_adjustment'),
+              value: 'admin_adjustment',
+            },
           ],
-        },
+        }),
       },
       {
         component: 'Input',
         fieldName: 'search',
-        label: 'Tìm kiếm',
-        componentProps: {
-          placeholder: 'Tìm theo nội dung, mã đơn hoặc mã lệnh...',
+        label: () => $t('common.search'),
+        componentProps: () => ({
+          placeholder: $t('page.commerce_view.search_tx_placeholder'),
           clearable: true,
-        },
+        }),
       },
     ],
     layout: 'vertical',
@@ -143,13 +223,14 @@ const [Grid, gridApi] = useVbenVxeGrid<WalletTransactionItem>({
     submitOnChange: true,
     submitOnEnter: true,
     submitButtonOptions: {
-      content: $t('common.filter'),
+      content: computed(() => $t('common.filter')),
     },
     resetButtonOptions: {
-      content: $t('common.reset'),
+      content: computed(() => $t('common.reset')),
     },
-    actionWrapperClass: 'flex items-center justify-end gap-2',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3',
+    actionWrapperClass:
+      'col-span-2 sm:col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
@@ -199,45 +280,18 @@ const [Grid, gridApi] = useVbenVxeGrid<WalletTransactionItem>({
         },
       },
     },
-    columns: [
-      {
-        field: 'tx_type',
-        title: 'Loại giao dịch',
-        width: 175,
-        slots: { default: 'type-cell' },
-      },
-      {
-        field: 'description',
-        title: 'Diễn giải',
-        minWidth: 240,
-        slots: { default: 'desc-cell' },
-      },
-      {
-        field: 'amount_credits',
-        title: 'Biến động Xu',
-        width: 155,
-        slots: { default: 'amount-cell' },
-      },
-      {
-        field: 'balance_after_credits',
-        title: 'Số dư sau GD',
-        width: 155,
-        slots: { default: 'balance-cell' },
-      },
-      {
-        field: 'reference_id',
-        title: 'Mã tham chiếu',
-        width: 175,
-        slots: { default: 'ref-cell' },
-      },
-      {
-        field: 'created_at',
-        title: 'Thời gian',
-        width: 165,
-        slots: { default: 'date-cell' },
-      },
-    ],
+    columns: getColumns(),
   },
+});
+
+watch([() => $t('page.commerce_view.tx_type_label'), isMobile], () => {
+  gridApi.setGridOptions({ columns: getColumns() });
+  gridApi.formApi?.setState({
+    commonConfig: {
+      componentProps: { class: 'w-full' },
+      hideLabel: isMobile.value,
+    },
+  });
 });
 
 async function initData() {
@@ -308,16 +362,16 @@ async function checkTopupStatus(intentId: string, silent = false) {
     if (updated.status === 'succeeded') {
       stopPolling();
       toast.success(
-        `Đã nạp thành công +${updated.amount_credits.toLocaleString('en-US')} Xu vào Ví!`,
+        $t('page.commerce_view.topup_success_toast', {
+          amount: updated.amount_credits.toLocaleString('en-US'),
+        }),
       );
       topupOpen.value = false;
       await gridApi.reload();
     } else if (updated.status === 'manual_review' && !silent) {
-      toast.info(
-        'Giao dịch đang ở trạng thái chờ Quản trị viên duyệt tay (manual_review)',
-      );
+      toast.info($t('page.commerce_view.payment_manual_review_pending'));
     } else if (!silent) {
-      toast.info('Đang chờ xác nhận chuyển khoản từ cổng thanh toán...');
+      toast.info($t('page.commerce_view.payment_waiting_gateway'));
     }
   } finally {
     checkingIntent.value = false;
@@ -326,16 +380,16 @@ async function checkTopupStatus(intentId: string, silent = false) {
 
 async function handleCreateTopupIntent() {
   if (!selectedTenantId.value) {
-    toast.error('Vui lòng chọn Workspace cần nạp Xu');
+    toast.error($t('page.commerce_view.select_workspace_before_topup'));
     return;
   }
   const gw = selectedGateway.value;
   if (!gw) {
-    toast.error('Vui lòng chọn cổng thanh toán');
+    toast.error($t('page.commerce_view.select_payment_gateway'));
     return;
   }
   if (!topupCredits.value || topupCredits.value <= 0) {
-    toast.error('Số Xu nạp phải lớn hơn 0');
+    toast.error($t('page.commerce_view.topup_amount_must_be_positive'));
     return;
   }
 
@@ -350,22 +404,30 @@ async function handleCreateTopupIntent() {
     });
     activeIntent.value = intent;
     startPolling(intent.id);
-    toast.success(`Đã tạo mã nạp Xu: ${intent.transfer_code}`);
+    toast.success(
+      $t('page.commerce_view.topup_intent_created', {
+        code: intent.transfer_code,
+      }),
+    );
   } catch (error: any) {
-    toast.error(error?.message || 'Không thể khởi tạo lệnh nạp Xu');
+    toast.error(error?.message || $t('page.commerce_view.topup_create_failed'));
   } finally {
     creatingIntent.value = false;
   }
 }
 
-async function copyText(text: string, label = 'dữ liệu') {
-  try {
-    await navigator.clipboard.writeText(text);
-    toast.success(`Đã sao chép ${label}`);
-  } catch {
-    toast.error('Không thể sao chép');
-  }
+async function copyText(
+  text: string,
+  label = $t('page.commerce_view.copy_default_label'),
+) {
+  await copyToClipboard(text, $t('page.commerce_view.copied_label', { label }));
 }
+
+watch(topupOpen, (open) => {
+  if (!open) {
+    stopPolling();
+  }
+});
 
 onMounted(() => {
   initData();
@@ -377,30 +439,33 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Header -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="flex flex-col gap-1">
-        <h1
-          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.commerce.wallet') }}
-        </h1>
-        <p class="text-xs text-muted-foreground">
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1
+            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          >
+            {{ $t('page.commerce.wallet') }}
+          </h1>
+          <Badge variant="secondary" class="font-mono text-xs font-normal">
+            {{ allTransactions.length }}
+          </Badge>
+        </div>
+        <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.commerce.wallet_desc') }}
         </p>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <div
-          class="flex items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-1.5"
+          class="flex items-center gap-1.5 rounded-lg border border-border/60 bg-card px-2.5 py-1.5"
         >
-          <Building2 class="size-3.5 text-muted-foreground" />
+          <Building2 class="size-3.5 shrink-0 text-muted-foreground" />
           <select
             :value="selectedTenantId"
-            class="bg-transparent text-xs font-medium text-foreground focus:outline-none"
+            class="max-w-[100px] sm:max-w-[160px] truncate bg-transparent text-xs font-medium text-foreground focus:outline-none"
             @change="handleTenantChange"
           >
             <option
@@ -413,82 +478,61 @@ onBeforeUnmount(() => {
           </select>
         </div>
 
-        <Button size="sm" class="gap-1.5" @click="openTopupModal">
-          <Plus class="size-3.5" />
-          Nạp thêm Xu
-        </Button>
-
         <Button
-          variant="outline"
           size="sm"
-          class="gap-1.5"
-          @click="router.push('/commerce/store')"
+          class="h-8 gap-1.5 px-2.5 text-xs sm:px-3"
+          @click="openTopupModal"
         >
-          <ShoppingBag class="size-3.5 text-muted-foreground" />
-          Cửa hàng số
+          <Plus class="size-3.5" />
+          <span>{{ $t('page.commerce_view.topup_more_xu') }}</span>
         </Button>
 
         <Button
           variant="outline"
-          size="sm"
-          class="gap-1.5"
+          size="icon"
+          class="size-8 shrink-0"
+          :title="$t('common.refresh')"
           @click="() => gridApi.reload()"
         >
-          <RefreshCw class="size-3.5 text-muted-foreground" />
-          {{ $t('common.refresh') }}
+          <RefreshCw class="size-3.5 shrink-0" />
         </Button>
       </div>
     </div>
 
-    <!-- Wallet KPI Metric Cards -->
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-      <div class="rounded-xl border border-primary/30 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground">
-            Số dư khả dụng
-          </span>
-          <Wallet class="size-4 text-primary" />
-        </div>
-        <p
-          class="mt-2 font-mono text-2xl font-bold tracking-tight text-foreground"
+    <!-- Compact Wallet Balance Strip -->
+    <div
+      class="flex items-center justify-between gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-3.5 py-2.5 sm:px-4 sm:py-3"
+    >
+      <div class="flex items-center gap-2.5">
+        <div
+          class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
         >
-          {{ (wallet?.balance_credits ?? 0).toLocaleString('en-US') }} Xu
-        </p>
+          <Wallet class="size-4" />
+        </div>
+        <div>
+          <span class="text-xs text-muted-foreground">
+            {{ $t('page.commerce_view.available_balance_kpi') }}
+          </span>
+          <p class="font-mono text-base sm:text-lg font-bold text-foreground">
+            {{ (wallet?.balance_credits ?? 0).toLocaleString('en-US') }} Xu
+          </p>
+        </div>
       </div>
 
-      <div class="rounded-xl border border-border/60 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground">
-            Tổng Xu đã nạp
-          </span>
-          <ArrowDownLeft class="size-4 text-success" />
-        </div>
-        <p
-          class="mt-2 font-mono text-2xl font-bold tracking-tight text-foreground"
-        >
-          +{{ (wallet?.total_topped_up_credits ?? 0).toLocaleString('en-US') }}
-          Xu
-        </p>
-      </div>
-
-      <div class="rounded-xl border border-border/60 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground">
-            Tổng Xu đã chi tiêu
-          </span>
-          <ArrowUpRight class="size-4 text-primary" />
-        </div>
-        <p
-          class="mt-2 font-mono text-2xl font-bold tracking-tight text-foreground"
-        >
-          {{ (wallet?.total_spent_credits ?? 0).toLocaleString('en-US') }} Xu
-        </p>
-      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        class="h-7 gap-1.5 px-2.5 text-xs"
+        @click="router.push('/commerce/store')"
+      >
+        <ShoppingBag class="size-3.5 text-muted-foreground" />
+        <span>{{ $t('page.commerce.store') }}</span>
+      </Button>
     </div>
 
     <!-- Ledger VXE Grid -->
     <div
-      class="overflow-hidden rounded-none border-0 border-border/60 bg-card p-0 shadow-none sm:rounded-xl sm:border sm:p-5 sm:shadow-xs"
+      class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs"
     >
       <Grid>
         <template #type-cell="{ row }">
@@ -499,7 +543,9 @@ onBeforeUnmount(() => {
 
         <template #desc-cell="{ row }">
           <span class="text-xs text-foreground">
-            {{ row.description || 'Giao dịch Ví Xu' }}
+            {{
+              row.description || $t('page.commerce_view.default_wallet_tx_desc')
+            }}
           </span>
         </template>
 
@@ -543,15 +589,17 @@ onBeforeUnmount(() => {
             <Coins class="size-4 text-primary" />
             {{
               activeIntent
-                ? `Chuyển khoản nạp Xu (${activeIntent.transfer_code})`
-                : 'Nạp thêm Xu vào Ví Workspace'
+                ? $t('page.commerce_view.topup_transfer_title', {
+                    code: activeIntent.transfer_code,
+                  })
+                : $t('page.commerce_view.wallet_topup_title')
             }}
           </DialogTitle>
           <DialogDescription class="text-xs text-muted-foreground">
             {{
               activeIntent
-                ? 'Hệ thống tự động cộng Xu vào Ví ngay khi nhận được Webhook xác nhận giao dịch.'
-                : 'Chọn số lượng Xu muốn nạp và cổng thanh toán (VietQR 24/7, MoMo, Stripe, hoặc Crypto USDT).'
+                ? $t('page.commerce_view.topup_transfer_desc')
+                : $t('page.commerce_view.wallet_topup_desc')
             }}
           </DialogDescription>
         </DialogHeader>
@@ -562,7 +610,7 @@ onBeforeUnmount(() => {
             <label
               class="text-2xs font-semibold tracking-wider text-muted-foreground uppercase"
             >
-              Chọn nhanh gói Xu
+              {{ $t('page.commerce_view.quick_select_xu_pack') }}
             </label>
             <div class="grid grid-cols-3 gap-2">
               <button
@@ -584,7 +632,7 @@ onBeforeUnmount(() => {
 
           <div class="flex items-center justify-between">
             <label class="text-xs font-medium text-foreground">
-              Hoặc nhập số Xu tùy chỉnh
+              {{ $t('page.commerce_view.custom_xu_amount_label') }}
             </label>
             <input
               v-model.number="topupCredits"
@@ -599,7 +647,7 @@ onBeforeUnmount(() => {
             <label
               class="text-2xs font-semibold tracking-wider text-muted-foreground uppercase"
             >
-              Cổng thanh toán
+              {{ $t('page.commerce_view.payment_gateway_label') }}
             </label>
             <button
               v-for="gw in topupGateways"
@@ -635,7 +683,7 @@ onBeforeUnmount(() => {
             class="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 p-3"
           >
             <span class="text-xs font-medium text-muted-foreground">
-              Số tiền thanh toán dự kiến
+              {{ $t('page.commerce_view.estimated_pay_amount') }}
             </span>
             <div class="text-right">
               <p class="font-mono text-lg font-bold text-foreground">
@@ -643,7 +691,11 @@ onBeforeUnmount(() => {
                 {{ selectedGateway?.currency || 'VND' }}
               </p>
               <p class="font-mono text-xs text-primary">
-                Nhận ngay +{{ topupCredits.toLocaleString('en-US') }} Xu
+                {{
+                  $t('page.commerce_view.receive_immediately_xu', {
+                    amount: topupCredits.toLocaleString('en-US'),
+                  })
+                }}
               </p>
             </div>
           </div>
@@ -659,7 +711,7 @@ onBeforeUnmount(() => {
               @click="handleCreateTopupIntent"
             >
               <Plus class="size-3.5" />
-              Tạo mã nạp Xu
+              {{ $t('page.commerce_view.create_topup_code_btn') }}
             </Button>
           </div>
         </div>
@@ -672,11 +724,11 @@ onBeforeUnmount(() => {
           >
             <img
               :src="activeIntent.checkout_payload.qr_image_url"
-              alt="VietQR Topup"
+              :alt="$t('page.commerce_view.payment_qr_alt')"
               class="h-52 w-52 object-contain"
             />
             <span class="mt-2 text-2xs font-medium text-slate-600">
-              Quét mã QR bằng ứng dụng Ngân hàng / Ví điện tử
+              {{ $t('page.commerce_view.scan_qr_bank_wallet_hint') }}
             </span>
           </div>
 
@@ -684,14 +736,18 @@ onBeforeUnmount(() => {
             class="space-y-2 rounded-lg border border-border/60 bg-muted/30 p-3.5 text-xs"
           >
             <div class="flex items-center justify-between">
-              <span class="text-muted-foreground">Số Xu nhận được:</span>
+              <span class="text-muted-foreground">
+                {{ $t('page.commerce_view.xu_to_receive_label') }}
+              </span>
               <span class="font-mono text-sm font-bold text-primary">
                 +{{ activeIntent.amount_credits.toLocaleString('en-US') }} Xu
               </span>
             </div>
 
             <div class="flex items-center justify-between">
-              <span class="text-muted-foreground">Số tiền cần chuyển:</span>
+              <span class="text-muted-foreground">
+                {{ $t('page.commerce_view.transfer_amount_label') }}
+              </span>
               <span class="font-mono text-sm font-bold text-foreground">
                 {{ activeIntent.pay_amount.toLocaleString('en-US') }}
                 {{ activeIntent.pay_currency }}
@@ -699,7 +755,9 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="flex items-center justify-between">
-              <span class="text-muted-foreground">Nội dung chuyển khoản:</span>
+              <span class="text-muted-foreground">
+                {{ $t('page.commerce_view.transfer_memo_label') }}
+              </span>
               <div class="flex items-center gap-1.5">
                 <code
                   class="rounded bg-primary/15 px-2 py-0.5 font-mono text-sm font-bold text-primary"
@@ -711,7 +769,10 @@ onBeforeUnmount(() => {
                   variant="outline"
                   class="h-6 px-2 text-2xs"
                   @click="
-                    copyText(activeIntent.transfer_code, 'mã chuyển khoản')
+                    copyText(
+                      activeIntent.transfer_code,
+                      $t('page.commerce_view.transfer_code_label'),
+                    )
                   "
                 >
                   <Copy class="size-3" />
@@ -720,7 +781,9 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="flex items-center justify-between">
-              <span class="text-muted-foreground">Trạng thái lệnh:</span>
+              <span class="text-muted-foreground">
+                {{ $t('page.commerce_view.intent_status_label') }}
+              </span>
               <Badge variant="secondary" class="text-2xs">
                 {{ activeIntent.status }}
               </Badge>
@@ -738,7 +801,7 @@ onBeforeUnmount(() => {
                 }
               "
             >
-              Đóng
+              {{ $t('common.close') }}
             </Button>
             <Button
               size="sm"
@@ -750,7 +813,7 @@ onBeforeUnmount(() => {
                 class="size-3.5"
                 :class="{ 'animate-spin': checkingIntent }"
               />
-              Kiểm tra đã nhận Xu
+              {{ $t('page.commerce_view.check_xu_received_btn') }}
             </Button>
           </div>
         </div>

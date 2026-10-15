@@ -11,13 +11,14 @@
 
 ## 1. Tổng Quan Hệ Thống (System Overview)
 
-`admin.tuquet.com` là bảng điều khiển quản trị tập trung (Admin Console) của **Hệ sinh thái Tuquet**, đảm nhiệm 3 nhiệm vụ cốt lõi:
+`admin.tuquet.com` là bảng điều khiển quản trị tập trung (Unified Management Console) của **Hệ sinh thái Tuquet**, đảm nhiệm 4 trụ cột cốt lõi:
 
 1. **Multi-Tenant IAM:** Quản lý danh tính, phân quyền thành viên và tổ chức không gian làm việc (Workspaces / Tenants).
 2. **Runners Fleet Control:** Điều phối và giám sát hạ tầng máy trạm phân tán (Specter Desk, Headless Runners, Chromium automation profiles, Proxy pool).
 3. **Automa Engine Telemetry:** Giám sát kịch bản quy trình tự động hóa (Workflows), tiến độ các đợt chạy (Campaign Runs) và nhật ký thực thi (Execution Logs).
+4. **Digital Commerce & Multi-Channel Payment:** Cửa hàng sản phẩm số nội bộ (`/commerce/*`) và công khai (`/store`), Ví trả trước đơn vị `Xu` (`BIGINT`), cổng thanh toán đa kênh (VietQR, MoMo, Stripe, Crypto USDT) và tự động bàn giao tài nguyên (Auto-Fulfillment).
 
-Hệ thống kết nối trực tiếp đến **Tuquet Cloud** (`tuquet/cloud/supabase`), tương tác với các schema chuyên biệt qua chuẩn PostgREST và tuân thủ nghiêm ngặt bảo mật Row Level Security (RLS).
+Hệ thống kết nối trực tiếp đến **Tuquet Cloud** (`tuquet/cloud/supabase`), tương tác với 7 schema chuyên biệt qua chuẩn PostgREST và tuân thủ nghiêm ngặt bảo mật Row Level Security (RLS).
 
 ---
 
@@ -26,7 +27,7 @@ Hệ thống kết nối trực tiếp đến **Tuquet Cloud** (`tuquet/cloud/su
 1. **KISS & YAGNI (Keep It Simple, Stupid & You Aren't Gonna Need It):**
    - Loại bỏ thanh Tabbar Chrome ảo trong SPA (`preferences.tabbar.enable = false`) để tiết kiệm không gian màn hình.
    - Header tối giản với các thành phần cốt lõi: Logo Tuquet, chuyển đổi Ngôn ngữ/Theme, Avatar & Menu người dùng.
-   - Sidebar tinh gọn trong **4 nhóm chức năng chính**: `Dashboard`, `Workspaces`, `Automation`, `System`.
+   - Sidebar tinh gọn trong **5 nhóm chức năng chính**: `Dashboard`, `Workspaces`, `Automation`, `Commerce`, `System`.
 2. **Dữ Liệu Đo Đếm Thực Tế (100% Real Telemetry — Zero Mock Data):**
    - Tuyệt đối không dùng Mock Data hay số liệu giả lập. Toàn bộ số liệu trên console phản ánh chính xác trạng thái thực tế từ cơ sở dữ liệu và telemetry máy trạm.
    - Khi bảng dữ liệu rỗng, hiển thị Empty State chuẩn mực kèm biểu tượng Lucide và hướng dẫn kết nối.
@@ -43,34 +44,40 @@ Hệ thống kết nối trực tiếp đến **Tuquet Cloud** (`tuquet/cloud/su
 
 ## 3. Kiến Trúc Đa Schema PostgREST (Multi-Schema Protocol)
 
-Tuquet Cloud phân tách dữ liệu thành các schema chuyên biệt nhằm đảm bảo tính toàn vẹn và cô lập dữ liệu:
+Tuquet Cloud phân tách dữ liệu thành **7 schema chuyên biệt** nhằm đảm bảo tính toàn vẹn và cô lập dữ liệu:
 
 | Tên Schema | Phạm Vi Chức Năng | Bảng Dữ Liệu Tiêu Biểu | Header PostgREST Bắt Buộc |
 | :-- | :-- | :-- | :-- |
 | `public` | Quản lý danh tính, Workspace, RBAC, Plugins | `tenants`, `profiles`, `system_plugins`, `roles`, `permissions`, `audit_logs` | _(Mặc định — không cần header)_ |
 | `runners` | Quản lý thiết bị máy trạm, Chromium, Proxies | `devices`, `browsers`, `proxies` | `Accept-Profile: runners` |
 | `automa` | Kịch bản đồ họa, chiến dịch chạy, nhật ký bước | `workflows`, `campaign_runs`, `execution_logs` | `Accept-Profile: automa` |
-| `billing` | Hợp đồng thuê bao SaaS, bảng giá gói cước | `subscriptions`, `plans`, `usage_meters` | `Accept-Profile: billing` |
+| `billing` | Hợp đồng thuê bao SaaS, gói cước, Ví Xu & Thanh toán | `subscriptions`, `plans`, `usage_meters`, `wallets`, `wallet_transactions`, `payment_gateways`, `payment_intents` | `Accept-Profile: billing` |
+| `commerce` | Cửa hàng sản phẩm số, kho serial, đơn hàng & giao hàng | `categories`, `products`, `product_variants`, `stock_items`, `orders`, `order_items`, `order_deliveries` | `Accept-Profile: commerce` |
 | `media` | Tệp tin lưu trữ và tài nguyên đa phương tiện | `assets`, `buckets` | `Accept-Profile: media` |
+| `events` | Hàng đợi sự kiện Transactional Outbox & Webhooks | `outbox`, `webhook_endpoints`, `webhook_deliveries` | `Accept-Profile: events` |
 
 ### Hợp Đồng Giao Tiếp API Client:
 
 Toàn bộ các truy vấn HTTP tới Supabase sử dụng hàm dùng chung `supabaseRequest<T>()` tại [`src/api/core/supabase-client.ts`](../../src/api/core/supabase-client.ts):
 
 ```typescript
+export type AdminSchema =
+  'automa' | 'billing' | 'commerce' | 'events' | 'media' | 'public' | 'runners';
+
 export interface SupabaseRequestOptions extends RequestInit {
   preferRepresentation?: boolean;
-  schema?: 'automa' | 'billing' | 'events' | 'media' | 'public' | 'runners';
+  schema?: AdminSchema;
+  skipAuth?: boolean;
 }
 // GET / HEAD -> headers['Accept-Profile'] = schema
-// POST / PATCH / DELETE -> headers['Content-Profile'] = schema
+// POST / PUT / PATCH / DELETE -> headers['Content-Profile'] = schema
 ```
 
 ---
 
 ## 4. Mô Hình Phân Quyền & Hai Chế Độ Truy Cập (Security & Access Models)
 
-Hệ thống vận hành theo 2 chế độ truy cập rõ rệt:
+Hệ thống vận hành theo 2 chế độ truy cập rõ rệt (kết hợp truy cập công khai `skipAuth` trên `/store`):
 
 ```mermaid
 flowchart TD
@@ -78,7 +85,7 @@ flowchart TD
 
     CheckRole -- Có --> SuperadminMode[Chế Độ Platform Superadmin]
     SuperadminMode --> BypassRLS[Bypass RLS qua public.is_platform_admin]
-    SuperadminMode --> FullAccess[Toàn quyền quản trị nền tảng: /system/* & toàn bộ Workspaces]
+    SuperadminMode --> FullAccess[Toàn quyền quản trị nền tảng: /system/*, /commerce/admin & toàn bộ Workspaces]
 
     CheckRole -- Không --> TenantMode[Chế Độ Multi-Tenant Member]
     TenantMode --> NormalRLS[Áp dụng nghiêm ngặt RLS get_user_tenant_ids]
@@ -90,15 +97,15 @@ flowchart TD
 
 - **Cô lập RLS:** Người dùng chỉ có thể xem và thao tác trên những tenant mà họ là thành viên thông qua hàm `get_user_tenant_ids()`.
 - **Động hóa quyền hạn từ Database:**
-  - Tuyệt đối không suy quyền giao diện từ JWT claim (JWT hook bị giới hạn 25 permissions, trong khi Owner có tới 36 quyền).
+  - Tuyệt đối không suy quyền giao diện từ JWT claim (JWT hook bị giới hạn 25 permissions, trong khi Owner có đầy đủ quyền trên mọi module).
   - Quyền hạn được truy vấn trực tiếp từ cơ sở dữ liệu qua chuỗi quan hệ: `tenant_members` $\rightarrow$ `member_roles` $\rightarrow$ `roles` $\rightarrow$ `role_permissions`.
   - Kết quả được lưu bộ nhớ đệm (single-flight in-memory cache) cho mỗi phiên làm việc để tối ưu số lần gọi mạng.
 
 ### 4.2. Chế Độ Platform Superadmin (Quản Trị Nền Tảng)
 
 - **Nhận diện danh tính:** Tài khoản sở hữu claim `raw_app_meta_data.platform_role = 'superadmin'` trong bảng `auth.users` (chỉ có thể gán bởi service role backend).
-- **Cơ chế Bypass RLS:** Hàm bảo mật `public.is_platform_admin()` kiểm tra claim trên; các chính sách RLS cho phép tài khoản superadmin đọc toàn bộ dữ liệu trên mọi tenant (`public.tenants`, `public.profiles`, `public.audit_logs`, `billing.subscriptions`).
-- **Giao diện:** Router gán quyền `superadmin` vào bộ quyền hiệu lực, mở khóa 4 màn hình quản trị cấp cao tại `/system/users`, `/system/audit-logs`, `/system/subscriptions`, `/system/roles`.
+- **Cơ chế Bypass RLS:** Hàm bảo mật `public.is_platform_admin()` kiểm tra claim trên; các chính sách RLS cho phép tài khoản superadmin đọc toàn bộ dữ liệu trên mọi tenant (`public.tenants`, `public.profiles`, `public.audit_logs`, `billing.subscriptions`, `commerce.orders`).
+- **Giao diện:** Router gán quyền `superadmin` vào bộ quyền hiệu lực, mở khóa các màn hình quản trị cấp cao tại `/system/users`, `/system/audit-logs`, `/system/subscriptions`, `/system/roles`, và `/commerce/admin`.
 
 ---
 
@@ -113,49 +120,56 @@ graph LR
     CoreIAM --> S1["/system/plugins, /system/users, /system/audit-logs, /system/roles"]
     Automa["automa"] --> A1["/automation/workflows, /automation/runs, /automation/runs/:id"]
     Runners["runners"] --> A2["/automation/devices, /automation/browsers, /automation/proxies"]
-    Subs["subscriptions"] --> S2["/system/plans, /system/subscriptions"]
+    Commerce["commerce"] --> C1["/commerce/store, /commerce/orders, /commerce/admin"]
+    Subs["subscriptions"] --> C2["/commerce/wallet"]
+    Subs --> S2["/system/plans, /system/subscriptions"]
 ```
 
-Khi ứng dụng khởi chạy, hàm thuần khiết [`filterRoutesByPlugins(routes, installedPluginIds)`](../../src/router/plugin-gate.ts) tự động ẩn toàn bộ các nhánh route có plugin chưa mang trạng thái `installed`. Trong nhóm hợp nhất `/automation`, từng tuyến con được lọc độc lập theo `automa` hoặc `runners`.
+Khi ứng dụng khởi chạy, hàm thuần khiết [`filterRoutesByPlugins(routes, installedPluginIds)`](../../src/router/plugin-gate.ts) tự động ẩn toàn bộ các nhánh route có plugin chưa mang trạng thái `installed`. Trong nhóm hợp nhất `/automation` và `/commerce`, từng tuyến con được lọc độc lập theo plugin tương ứng.
 
 ---
 
 ## 6. Cơ Chế Giám Sát Tác Vụ & Polling (Telemetry & Polling)
 
 - **Chiến lược Polling 3s:** Do bảng nhật ký `automa.execution_logs` phát sinh lưu lượng bản ghi lớn trong các chiến dịch tự động hóa hàng loạt, việc đưa bảng này vào WebSocket Realtime publication sẽ gây nghẽn băng thông.
-- Giao diện chi tiết lần chạy (`/automation/runs/:id`) thực hiện cơ chế polling định kỳ mỗi **3000ms** khi lần chạy ở trạng thái hoạt động (`pending`, `queued`, `running`).
-- Khi trạng thái chuyển sang kết thúc (`completed`, `failed`, `cancelled`), bộ đếm thời gian được hủy ngay lập tức để tiết kiệm tài nguyên mạng và pin thiết bị.
+- Giao diện chi tiết lần chạy (`/automation/runs/:id`) cũng như hộp thoại chờ thanh toán đơn hàng (`/commerce/store`, `/commerce/wallet`, `/store`) thực hiện cơ chế polling định kỳ mỗi **3000ms** khi tác vụ đang ở trạng thái chờ xử lý.
+- Khi trạng thái chuyển sang kết thúc (`completed`, `succeeded`, `failed`, `cancelled`), bộ đếm thời gian được hủy ngay lập tức để tiết kiệm tài nguyên mạng và pin thiết bị.
 
 ---
 
-## 7. Cây Định Tuyến Tổng Thể (Master Route Tree)
+## 7. Cây Định Tuyến Tổng Thể (27 Routes Master Tree)
 
-Hệ thống quản trị bao gồm **22 tuyến đường** chuẩn mực phân bổ trong **4 nhóm Sidebar chính** (15 tuyến nghiệp vụ) và cụm xác thực lõi (7 tuyến):
+Hệ thống quản trị bao gồm **27 tuyến đường** chuẩn mực phân bổ trong **5 nhóm Sidebar chính** (19 tuyến nghiệp vụ) và cụm tuyến lõi `core.ts` (8 tuyến):
 
 ```text
 /                                   BasicLayout (Chuyển hướng mặc định -> /dashboard/analytics)
-├── /dashboard                      [core-iam]        lucide:layout-dashboard
+├── /dashboard                      [core-iam]                lucide:layout-dashboard
 │   └── /dashboard/analytics        Thống kê Telemetry thực tế từ Cloud & Loopback
-├── /tenants                        [core-iam]        lucide:building-2
+├── /tenants                        [core-iam]                lucide:building-2
 │   ├── /tenants                    Danh sách Workspace (VxeGrid)
 │   └── /tenants/:id                Chi tiết Workspace (4 tabs: overview, members, usage, audit)
-├── /automation                     [automa|runners]  lucide:workflow
-│   ├── /automation/workflows       [automa]          Sơ đồ kịch bản Canvas Workflows
-│   ├── /automation/runs            [automa]          Lịch sử các đợt chạy chiến dịch
-│   ├── /automation/runs/:id        [automa]          Chi tiết lần chạy & Terminal Logs Viewer (Polling 3s)
-│   ├── /automation/devices         [runners]         Thiết bị & Nodes Specter Desk / Cloud VPS
-│   ├── /automation/browsers        [runners]         Hồ sơ trình duyệt Chromium tự động hóa
-│   └── /automation/proxies         [runners]         Pool Proxy mạng phân tán
-└── /system                         [core-iam]        lucide:shield-check
-    ├── /system/plugins             [core-iam]        Danh mục Microservice Plugins đã cài đặt
-    ├── /system/plans               [subscriptions]   Bảng giá cước & Quotas SaaS
-    ├── /system/users               [superadmin]      Người dùng toàn nền tảng
-    ├── /system/audit-logs          [superadmin]      Nhật ký kiểm toán an ninh toàn cầu
-    ├── /system/subscriptions       [superadmin]      Quản lý hợp đồng thuê bao các Workspace
-    └── /system/roles               [superadmin]      Ma trận 4 System Roles & 36 Permissions
+├── /automation                     [automa|runners]          lucide:workflow
+│   ├── /automation/workflows       [automa]                  Sơ đồ kịch bản Canvas Workflows
+│   ├── /automation/runs            [automa]                  Lịch sử các đợt chạy chiến dịch
+│   ├── /automation/runs/:id        [automa]                  Chi tiết lần chạy & Terminal Logs Viewer (Polling 3s)
+│   ├── /automation/devices         [runners]                 Thiết bị & Nodes Specter Desk / Cloud VPS
+│   ├── /automation/browsers        [runners]                 Hồ sơ trình duyệt Chromium tự động hóa
+│   └── /automation/proxies         [runners]                 Pool Proxy mạng phân tán
+├── /commerce                       [commerce|subscriptions]  lucide:shopping-bag
+│   ├── /commerce/store             [commerce]                Cửa hàng tài nguyên số & Thanh toán đa kênh
+│   ├── /commerce/orders            [commerce]                Lịch sử đơn hàng & Hộp thoại nhận tài nguyên
+│   ├── /commerce/wallet            [subscriptions]           Ví Xu trả trước & Sổ cái biến động số dư
+│   └── /commerce/admin             [commerce]                Quản trị sản phẩm, nạp kho, duyệt lệnh & cổng thanh toán
+└── /system                         [core-iam|subscriptions]  lucide:shield-check
+    ├── /system/plugins             [core-iam]                Danh mục Core Kernel & Extension Plugins
+    ├── /system/plans               [subscriptions]           Bảng giá cước & Quotas SaaS
+    ├── /system/users               [superadmin]              Người dùng toàn nền tảng
+    ├── /system/audit-logs          [superadmin]              Nhật ký kiểm toán an ninh toàn cầu
+    ├── /system/subscriptions       [superadmin]              Quản lý hợp đồng thuê bao các Workspace
+    └── /system/roles               [superadmin]              Ma trận 4 System Roles & Permissions
 
-Core & Auth (AuthPageLayout & BasicLayout):
-/auth/login, /auth/register, /auth/forget-password, /auth/reset-password, /auth/callback, /auth/desktop, /profile
+Core, Auth & Public Storefront (core.ts — 8 routes):
+/auth/login, /auth/register, /auth/forget-password, /auth/reset-password, /auth/callback, /auth/desktop, /profile, /store
 ```
 
 ---

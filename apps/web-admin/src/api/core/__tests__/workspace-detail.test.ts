@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -43,7 +46,7 @@ describe('mapRawMembersToWorkspaceMembers', () => {
             roles: {
               id: '00000000-0000-0000-0000-000000000001',
               name: 'owner',
-              display_name: 'Chủ sở hữu',
+              display_name: 'Owner',
             },
           },
         ],
@@ -65,7 +68,7 @@ describe('mapRawMembersToWorkspaceMembers', () => {
             roles: {
               id: '00000000-0000-0000-0000-000000000003',
               name: 'member',
-              display_name: 'Thành viên',
+              display_name: 'Member',
             },
           },
         ],
@@ -86,7 +89,7 @@ describe('mapRawMembersToWorkspaceMembers', () => {
       role: {
         id: '00000000-0000-0000-0000-000000000001',
         name: 'owner',
-        display_name: 'Chủ sở hữu',
+        display_name: 'Owner',
       },
     });
 
@@ -178,5 +181,57 @@ describe('computeWorkspaceQuota', () => {
     expect(quota.max_devices).toBe(3);
     expect(quota.used_devices).toBe(1);
     expect(quota.used_members).toBe(1);
+  });
+});
+
+describe('workspace Detail Responsive & Typography Contract', () => {
+  const tenantsDir = existsSync(
+    resolve(process.cwd(), 'apps/web-admin/src/views/tenants'),
+  )
+    ? resolve(process.cwd(), 'apps/web-admin/src/views/tenants')
+    : resolve(process.cwd(), 'src/views/tenants');
+
+  it('uses a responsive Description Grid in workspace-overview-tab.vue without VxeFormItem span="12"', () => {
+    const content = readFileSync(
+      resolve(tenantsDir, 'components/workspace-overview-tab.vue'),
+      'utf8',
+    );
+    expect(content).not.toContain('VxeFormItem');
+    expect(content).not.toContain('span="12"');
+    expect(content).toContain('grid-cols-1');
+    expect(content).toContain('sm:grid-cols-2');
+    expect(content).toContain('lg:grid-cols-3');
+  });
+
+  it('makes TabsList horizontally scrollable on mobile in detail.vue and aligns WorkspaceHero with Built-in Theme', () => {
+    const detailContent = readFileSync(
+      resolve(tenantsDir, 'detail.vue'),
+      'utf8',
+    );
+    expect(detailContent).toContain('overflow-x-auto');
+    expect(detailContent).toContain('whitespace-nowrap');
+
+    const heroContent = readFileSync(
+      resolve(tenantsDir, 'components/workspace-hero.vue'),
+      'utf8',
+    );
+    expect(heroContent).not.toContain('from-sky-600');
+    expect(heroContent).toContain('bg-primary/10');
+    expect(heroContent).toContain('text-primary');
+  });
+
+  it('eliminates arbitrary text-[11px] pixel classes across workspace views', () => {
+    const files = [
+      'detail.vue',
+      'components/workspace-hero.vue',
+      'components/workspace-overview-tab.vue',
+      'components/workspace-members-tab.vue',
+      'components/workspace-usage-tab.vue',
+      'components/workspace-audit-tab.vue',
+    ];
+    for (const file of files) {
+      const content = readFileSync(resolve(tenantsDir, file), 'utf8');
+      expect(content).not.toContain('text-[11px]');
+    }
   });
 });

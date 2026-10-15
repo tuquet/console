@@ -1,24 +1,43 @@
-# Implementation Plan: Interactive 3D Specter Ghost Banner (`specter-3d-ghost-banner`)
+# Implementation Plan: Enterprise Dynamic Supabase Schema + RLS Kết Hợp `VxeGrid` & `VxeForm` Detail/CRUD Sheet (`SPEC-mobile-vxe-detail-sheet.md`)
 
 ## Overview
 
-Triển khai bản đặc tả đã phê duyệt [`SPEC-specter-3d-ghost-banner.md`](../apps/web-admin/docs/specs/SPEC-specter-3d-ghost-banner.md): xây dựng mô hình **Con Ma 3D (`SpecterGhostBanner`)** bằng **WebGL / Three.js thời gian thực** lấy cảm hứng từ linh vật gốc [`specter-waving.svg`](../apps/web-admin/public/illustrations/specter-waving.svg), đồng bộ hiệu ứng ánh sáng `<Spotlight />` với [`spline-robot-banner.vue`](../apps/web-admin/src/components/common/spline-robot-banner.vue) và tích hợp vào bộ chuyển đổi 4 chế độ (`phone` · `robot 3d` · `ghost 3d` · `random`) tại [`auth.vue`](../apps/web-admin/src/layouts/auth.vue).
+Triển khai kiến trúc **Enterprise Dynamic Schema-Driven & RLS-Aware CRUD Sheet (`SPEC-mobile-vxe-detail-sheet.md` v2.0)** kết hợp trực tiếp **Supabase Multi-Schema (`public`, `automa`, `runners`, `commerce`, `billing`) + Row-Level Security (RLS) + `useVbenVxeGrid` (`VxeTable`) + `VxeForm` (`Sheet`)**:
+
+1. **Task 54 — Tầng Engine Động Supabase Schema & RLS (`src/api/core/supabase-schema-registry.ts`) + Unit Tests:**
+   - Xây dựng `SUPABASE_TABLE_REGISTRY` định nghĩa siêu dữ liệu cột, kiểu dữ liệu, liên kết Enum (`@vben/constants` / `#/constants` qua `buildEnumFilterOptions`), và **Ma trận Chính sách RLS (`evaluateRowRlsPolicy`)** cho toàn bộ **18 bảng dữ liệu trên 5 schema** (`public.tenants`, `automa.workflows`, `automa.campaign_runs`, `runners.devices`, `runners.browsers`, `runners.proxies`, `commerce.orders`, `commerce.products`, `billing.wallet_transactions`, `billing.payment_intents`, `billing.payment_gateways`, `billing.plans`, `billing.subscriptions`, `public.system_plugins`, `public.profiles`, `public.roles`, `public.permissions`, `public.audit_logs`).
+   - Xây dựng bộ suy luận trường động `buildDynamicVxeFormSchema(row, gridColumns, resource)` tự động hợp nhất cấu hình cột của `VxeGrid`, schema bảng Supabase và dữ liệu thực tế của `row` (bao gồm mọi cột ẩn trên Mobile `< 640px`).
+   - Xây dựng bộ thực thi CRUD PostgREST thông minh `computeDirtyMutablePayload(originalRow, formData, resource)` & `executeDynamicSupabasePatch(resource, originalRow, formData)` chỉ gửi `PATCH` cho các cột DB thực sự thay đổi và được phép sửa theo RLS.
+   - Viết bộ unit tests toàn diện tại `apps/web-admin/src/api/core/__tests__/supabase-schema-registry.test.ts`.
+
+2. **Task 55 — Xây dựng `VxeRowDetailSheet.vue` (`Sheet` + `VxeForm` + RLS Badge) & Tích hợp Tự động vào `useVbenVxeGrid` (`src/adapter/vxe-table.ts`):**
+   - Kích hoạt `VxeSwitch`, `VxeTextarea` (cùng `VxeForm`, `VxeFormItem`, `VxeInput`, `VxeSelect`, `VxeNumberInput`) trong `packages/effects/plugins/src/vxe-table/init.ts`.
+   - Xây dựng `apps/web-admin/src/components/vxe-detail-sheet/vxe-row-detail-sheet.vue`:
+     - Tự động mở **Bottom Sheet** (`side="bottom"`, `max-h-[88vh] rounded-t-2xl`) trên Mobile (`isMobile === true`) và **Side Sheet** (`side="right"`) trên Desktop.
+     - Hiển thị **Huy hiệu Bảo mật RLS (`RLS Policy Badge`)** trên Header cho biết chính sách RLS đang áp dụng (ví dụ: `workflows_manage · Cho phép sửa` hoặc `rls_append_only_ledger · Chỉ đọc`).
+     - Render **`VxeForm`** động chia thành nhóm trường nghiệp vụ cho phép sửa (`Editable Fields`) và nhóm trường hệ thống/định danh chỉ đọc (`System & Read-Only Metadata` + JSONB Inspector + Copy 1 chạm).
+     - Tự động kế thừa và hiển thị **Slot Action của dòng** (`#actions-cell`, `#action-cell`, `#role-actions-cell`, `#detail-cell`) ngay trong `SheetFooter` cùng nút **Lưu thay đổi (`VxeForm` submit)** và **Đóng**.
+   - Nâng cấp `useVbenVxeGrid` trong `apps/web-admin/src/adapter/vxe-table.ts` để tự động bọc mọi bảng với `VxeRowDetailSheet`, tự động lắng nghe `cellClick` (lọc bỏ click vào nút nội dòng qua `isInteractiveCellClick`), tự động suy luận `resource` từ route/options, và cung cấp `gridApi.openDetailSheet(row)`.
+   - Viết unit tests tại `apps/web-admin/src/components/vxe-detail-sheet/__tests__/vxe-row-detail-sheet.test.ts`.
+
+3. **Task 56 — Rà soát & Chuẩn hóa Mobile-First + Liên kết Schema/Actions cho 12 Bảng thuộc Workspaces, Automation & Commerce (`9 Views`):**
+   - Rà soát và gắn kết `detailSheetOptions: { resource }` + chuẩn hóa cột Mobile-First (`isMobile`) + Action Slots cho:
+     - Workspaces (1 grid): `views/tenants/index.vue` (`public.tenants`)
+     - Automation & Fleet (5 grids): `workflows` (`automa.workflows`), `runs` (`automa.campaign_runs`), `devices` (`runners.devices`), `browsers` (`runners.browsers`), `proxies` (`runners.proxies`)
+     - Commerce & Wallet (6 grids): `commerce/orders` (`commerce.orders`), `commerce/wallet` (`billing.wallet_transactions`), và 4 bảng trong `commerce/admin` (`commerce.products`, `commerce.orders`, `billing.payment_intents`, `billing.payment_gateways`).
+
+4. **Task 57 — Rà soát & Chuẩn hóa Liên kết Schema/Actions cho 7 Bảng thuộc System Governance (`6 Views`) + Kiểm định Toàn diện & `build:local`:**
+   - Gắn kết `detailSheetOptions: { resource }` và chuẩn hóa Action Slots cho 7 bảng thuộc `/system/*`:
+     - `system/plugins` (`public.system_plugins`), `system/plans` (`billing.plans`), `system/users` (`public.profiles`), 2 bảng trong `system/roles` (`public.roles` & `public.permissions`), `system/subscriptions` (`billing.subscriptions`), `system/audit-logs` (`public.audit_logs`).
+   - Chạy toàn bộ cổng chất lượng (`check:i18n`, `vitest run`, `typecheck`), cập nhật trạng thái `SPEC-mobile-vxe-detail-sheet.md` sang `ACCEPTED & IMPLEMENTED` và chạy `pnpm run build:local`.
 
 ---
 
 ## Architecture Decisions
 
-1. **Procedural 3D Ghost Mesh & Harmonic Cloth-Wave Vertex Displacement (`specter-ghost-banner.vue`):**
-   - Tải động `three@0.174.0` qua ESM CDN (`esm.sh` / `jsdelivr` fallback) để giữ bundle chính của `web-admin` bằng `0 KB` khi người dùng không mở tab `ghost 3d`.
-   - Thân ma 3D được tạo từ `SphereGeometry` / `LatheGeometry` mật độ lưới cao (`64 × 48` segments) với vật liệu **Matte Frosted Ceramic (`MeshPhysicalMaterial`)** có `roughness: 0.32`, `clearcoat: 0.25`, `sheen: 0.4` tạo hiệu ứng sứ mờ phản xạ ánh sáng viền (rim-light) sang trọng ở cả Dark mode (`#0a0a0a`) và Light mode (`#fafafa`).
-   - Nửa dưới thân ma (tà áo) được biến dạng đỉnh (vertex displacement) trong mỗi frame theo hàm sóng hài đa tần $\Delta r(\theta, t) = A_1 \sin(5\theta + \omega_1 t) + A_2 \cos(3\theta - \omega_2 t)$ kết hợp `computeVertexNormals()` để tạo chuyển động tà áo bay phấp phới 3D mềm mại.
-2. **Ba Đặc Trưng Nhận Diện Linh Vật Specter Gốc (`specter-waving.svg`):**
-   - **Mắt bầu dục đen bóng + Ngôi sao 4 cánh (`4-Point Star Catchlight`):** Dựng cặp mắt 3D hơi cong ôm sát mặt trước, bên trên đính geometry ngôi sao 4 cánh trắng phát sáng (`MeshBasicMaterial`) và chấm phản quang phụ; toàn bộ cụm mắt dịch chuyển parallax theo hướng con trỏ chuột (eye-tracking).
-   - **Đôi má ửng & miệng cười:** Hai khối elip dẹt màu hồng phấn/trung tính mờ (`opacity: 0.35`) hai bên má cùng khuôn miệng cười 3D.
-   - **Cánh tay 3D vẫy chào (`Wave Interaction`):** Tay trái thả nhẹ theo nhịp thở, tay phải giơ cao vẫy chào liên tục; khi người dùng rê chuột lại gần hoặc click vào con ma, biến `waveBoost` được kích hoạt làm con ma nảy người vui vẻ và vẫy tay nhanh chào đón.
-3. **Bộ Chuyển Đổi 4 Chế Độ Banner (`auth.vue`):**
-   - Mở rộng `BannerMode = 'phone' | 'robot' | 'ghost' | 'random'` và `ActiveScene = 'phone' | 'robot' | 'ghost'`.
-   - Khi ở chế độ `random`, chọn ngẫu nhiên 1 trong 3 cảnh (`phone`, `robot`, `ghost`) mỗi lần tải trang, và khi nhấn lại nút `random` sẽ xoay vòng sang cảnh tiếp theo ngay lập tức.
+- **Schema-Driven & Zero-Boilerplate Adapter Pattern:** Tích hợp trực tiếp vào `useVbenVxeGrid` tại `src/adapter/vxe-table.ts` kết hợp với `SUPABASE_TABLE_REGISTRY` để mọi bảng `VxeGrid` tự động sở hữu tính năng Row Click $\rightarrow$ RLS-Aware `VxeForm` Detail & Edit Sheet mà không gây lặp code.
+- **Auto-Slot Action Forwarding:** Tận dụng trực tiếp slot cột thao tác (`#actions-cell`, `#action-cell`, v.v.) mà trang cha truyền vào `<Grid>` để render nguyên vẹn các nút nghiệp vụ của dòng đó bên trong `SheetFooter`, bổ sung thêm các nút Action nhanh (Copy ID, Copy Endpoint) cho các bảng chưa có cột Action riêng.
+- **Strict PostgREST Dirty-Column Filtering & RLS Guard:** Chỉ gửi `PATCH` cho các cột thuộc `editableColumns` có giá trị thay đổi thực sự so với bản gốc, đồng thời khóa form tự động khi RLS policy trả về `allowed: false` (ví dụ: `is_system === true` trên `roles`, hoặc sổ cái `audit_logs` / `wallet_transactions`).
 
 ---
 
@@ -26,44 +45,23 @@ Triển khai bản đặc tả đã phê duyệt [`SPEC-specter-3d-ghost-banner.
 
 ```mermaid
 flowchart TD
-    T28["Task 28: Xây dựng pure state/math helpers & component SpecterGhostBanner (Three.js 3D Ghost + Spotlight)"]
-    T29["Task 29: Tích hợp chế độ ghost 3d vào bộ chuyển đổi 4 chế độ trong auth.vue"]
-    T30["Task 30: Viết Unit Tests (specter-ghost-banner.test.ts) & Cập nhật tài liệu"]
-    CP1["Checkpoint: Vitest, Typecheck & Production Build Verification"]
+    T54["Task 54: Dynamic Supabase Schema + RLS Registry & CRUD Engine + Unit Tests"]
+    T55["Task 55: VxeRowDetailSheet (Sheet + VxeForm) & useVbenVxeGrid Auto-Adapter"]
+    CP1["Checkpoint 1: Engine & Adapter Unit Tests + Typecheck"]
+    T56["Task 56: Audit & Bind 12 Grids (Tenants, Automation & Commerce)"]
+    T57["Task 57: Audit & Bind 7 Grids (System Governance) + Full Quality Gate & build:local"]
 
-    T28 --> T29
-    T29 --> T30
-    T30 --> CP1
+    T54 --> T55
+    T55 --> CP1
+    CP1 --> T56
+    T56 --> T57
 ```
 
 ---
 
 ## Task List
 
-### Phase 1: 3D Specter Ghost Component
-
-- [x] **Task 28:** Xây dựng [`apps/web-admin/src/components/common/specter-ghost-banner.vue`](../apps/web-admin/src/components/common/specter-ghost-banner.vue) với mô hình Three.js 3D Specter Ghost (thân sứ mờ, tà áo lượn sóng, mắt ngôi sao 4 cánh liếc theo chuột, tay vẫy chào khi hover/click, Spotlight SVG và dọn dẹp GPU đầy đủ).
-
-### Phase 2: Auth Layout Integration & Unit Tests
-
-- [x] **Task 29:** Cập nhật [`apps/web-admin/src/layouts/auth.vue`](../apps/web-admin/src/layouts/auth.vue) để bổ sung tuỳ chọn `ghost 3d` vào thanh chuyển đổi (`phone` · `robot 3d` · `ghost 3d` · `random`) và lưu trữ `localStorage`.
-- [x] **Task 30:** Viết unit test [`apps/web-admin/src/components/common/__tests__/specter-ghost-banner.test.ts`](../apps/web-admin/src/components/common/__tests__/specter-ghost-banner.test.ts) kiểm tra toán học giảm chấn chuột, biến dạng sóng tà áo, vòng đời component và chuyển đổi 4 chế độ.
-
-### Checkpoint: Complete Quality Gate
-
-- [x] Tất cả unit tests (`vitest`), kiểm tra kiểu (`typecheck`) và bản dựng production (`build:admin`) kết thúc với 0 lỗi.
-
----
-
-## Risks and Mitigations
-
-| Risk | Impact | Mitigation |
-| --- | --- | --- |
-| Rò rỉ bộ nhớ WebGL khi người dùng bấm chuyển liên tục giữa `robot 3d` và `ghost 3d` | High | Hủy `requestAnimationFrame`, gọi `geometry.dispose()`, `material.dispose()`, `renderer.dispose()` và `renderer.forceContextLoss()` trong `onBeforeUnmount`. |
-| Mất chi tiết khối trắng của con ma trên nền sáng (`#fafafa`) ở Light Mode | Medium | Sử dụng hệ thống 3 nguồn sáng (Key Light, Cool Rim Light, Warm Fill Light) + bóng đổ elip mềm dưới chân con ma để tách khối rõ ràng trên nền `#fafafa`. |
-
----
-
-## Open Questions
-
-- Không có câu hỏi mở.
+- [x] **Task 54:** Xây dựng Tầng Engine Động Supabase Schema & RLS (`src/api/core/supabase-schema-registry.ts`) + Unit Tests (`supabase-schema-registry.test.ts`).
+- [x] **Task 55:** Kích hoạt `VxeSwitch`/`VxeTextarea`, xây dựng `VxeRowDetailSheet.vue` (`Sheet` + `VxeForm` + RLS Badge) & tích hợp tự động vào `useVbenVxeGrid` (`src/adapter/vxe-table.ts`) + Unit Tests.
+- [x] **Task 56:** Rà soát & chuẩn hóa Mobile-First + liên kết Schema/Actions cho 12 bảng thuộc Workspaces, Automation & Commerce (`tenants`, `workflows`, `runs`, `devices`, `browsers`, `proxies`, `commerce/orders`, `commerce/wallet`, và 4 bảng `commerce/admin`).
+- [x] **Task 57:** Rà soát & chuẩn hóa liên kết Schema/Actions cho 7 bảng thuộc System Governance (`plugins`, `plans`, `users`, 2 bảng `roles`, `subscriptions`, `audit-logs`), chạy cổng kiểm định (`check:i18n`, `vitest`, `typecheck`) & `pnpm run build:local`.

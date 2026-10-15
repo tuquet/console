@@ -11,15 +11,15 @@ import type {
   PaymentIntentItem,
 } from '#/api';
 
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+
+import { usePreferences } from '@vben/preferences';
 
 import {
   AlertTriangle,
   CheckCircle2,
-  CreditCard,
   Layers,
   PackageCheck,
-  PackagePlus,
   Play,
   Plus,
   RefreshCw,
@@ -54,11 +54,18 @@ import {
   upsertProductVariantAdminApi,
 } from '#/api';
 import { useDateFormat } from '#/composables';
+import {
+  COMMERCE_PRODUCT_TYPE,
+  COMMERCE_PRODUCT_VISIBILITY,
+  COMMERCE_STOCK_MODE,
+  FILTER_ALL,
+} from '#/constants';
 import { $t } from '#/locales';
 
 defineOptions({ name: 'CommerceAdmin' });
 
 const { formatDate } = useDateFormat();
+const { isMobile } = usePreferences();
 
 type AdminTabMode = 'gateways' | 'manual_review' | 'orders' | 'products';
 const activeTab = ref<AdminTabMode>('products');
@@ -88,13 +95,13 @@ const productForm = ref<{
   is_active: true,
   name: '',
   price_credits: 50,
-  product_type: 'serial_stock',
+  product_type: COMMERCE_PRODUCT_TYPE.SERIAL_STOCK,
   short_description: '',
   sku: '',
   slug: '',
-  stock_mode: 'serialized',
-  variant_name: 'Gói tiêu chuẩn',
-  visibility: 'public',
+  stock_mode: COMMERCE_STOCK_MODE.SERIALIZED,
+  variant_name: $t('page.commerce_view.default_variant_name'),
+  visibility: COMMERCE_PRODUCT_VISIBILITY.PUBLIC,
 });
 
 // Bulk Stock Import Modal State
@@ -117,7 +124,7 @@ const serializedVariants = computed(() => {
   }> = [];
   for (const p of allProducts.value) {
     for (const v of p.variants || []) {
-      if (v.stock_mode === 'serialized') {
+      if (v.stock_mode === COMMERCE_STOCK_MODE.SERIALIZED) {
         list.push({ productName: p.name, variant: v });
       }
     }
@@ -125,73 +132,138 @@ const serializedVariants = computed(() => {
   return list;
 });
 
-const totalAvailableStock = computed(() => {
-  let sum = 0;
-  for (const p of allProducts.value) {
-    for (const v of p.variants || []) {
-      if (v.stock_mode !== 'unlimited') {
-        sum += v.available_stock || 0;
-      }
-    }
-  }
-  return sum;
-});
+function getProductColumns() {
+  const mobile = isMobile.value;
+  return [
+    {
+      field: 'name',
+      title: $t('page.commerce_view.col_product'),
+      minWidth: mobile ? 150 : 230,
+      slots: { default: 'name-cell' },
+    },
+    {
+      field: 'product_type',
+      title: $t('page.commerce_view.col_category'),
+      width: 170,
+      visible: !mobile,
+      slots: { default: 'type-cell' },
+    },
+    {
+      field: 'visibility',
+      title: $t('page.commerce_view.visibility_label'),
+      width: 130,
+      visible: !mobile,
+      slots: { default: 'vis-cell' },
+    },
+    {
+      field: 'variants',
+      title: $t('page.commerce_view.col_sku_and_price'),
+      minWidth: mobile ? 140 : 240,
+      slots: { default: 'sku-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('common.actions'),
+      width: mobile ? 95 : 145,
+      align: 'right' as const,
+      slots: { default: 'action-cell' },
+    },
+  ];
+}
 
 // 1. Products Grid
 const [ProductsGrid, productsGridApi] = useVbenVxeGrid<CommerceProductItem>({
   separator: false,
+  detailSheetOptions: {
+    resource: 'commerce.products',
+    subtitleField: 'slug',
+    titleField: 'name',
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Select',
         fieldName: 'product_type',
-        label: 'Loại sản phẩm',
-        defaultValue: 'all',
-        componentProps: {
+        label: () => $t('page.commerce_view.product_type_label'),
+        defaultValue: FILTER_ALL,
+        componentProps: () => ({
           options: [
-            { label: 'Tất cả loại', value: 'all' },
-            { label: 'Tài khoản / Key (serial_stock)', value: 'serial_stock' },
             {
-              label: 'Tài nguyên Specter (specter_resource)',
-              value: 'specter_resource',
+              label: $t('page.commerce_view.all_types'),
+              value: FILTER_ALL,
             },
-            { label: 'Tệp số (digital_file)', value: 'digital_file' },
-            { label: 'Gói nạp Xu (wallet_credit)', value: 'wallet_credit' },
+            {
+              label: $t('page.commerce_view.type_serial_stock_code'),
+              value: COMMERCE_PRODUCT_TYPE.SERIAL_STOCK,
+            },
+            {
+              label: $t('page.commerce_view.type_specter_resource_code'),
+              value: COMMERCE_PRODUCT_TYPE.SPECTER_RESOURCE,
+            },
+            {
+              label: $t('page.commerce_view.type_digital_file_code'),
+              value: COMMERCE_PRODUCT_TYPE.DIGITAL_FILE,
+            },
+            {
+              label: $t('page.commerce_view.type_wallet_credit_code'),
+              value: COMMERCE_PRODUCT_TYPE.WALLET_CREDIT,
+            },
           ],
-        },
+        }),
       },
       {
         component: 'Select',
         fieldName: 'visibility',
-        label: 'Hiển thị',
-        defaultValue: 'all',
-        componentProps: {
+        label: () => $t('page.commerce_view.visibility_label'),
+        defaultValue: FILTER_ALL,
+        componentProps: () => ({
           options: [
-            { label: 'Tất cả chế độ', value: 'all' },
-            { label: 'Public (Công khai)', value: 'public' },
-            { label: 'Tenant only (Nội bộ)', value: 'tenant_only' },
-            { label: 'Hidden (Ẩn)', value: 'hidden' },
+            {
+              label: $t('page.commerce_view.all_modes'),
+              value: FILTER_ALL,
+            },
+            {
+              label: $t('page.commerce_view.vis_public'),
+              value: COMMERCE_PRODUCT_VISIBILITY.PUBLIC,
+            },
+            {
+              label: $t('page.commerce_view.vis_tenant_only'),
+              value: COMMERCE_PRODUCT_VISIBILITY.TENANT_ONLY,
+            },
+            {
+              label: $t('page.commerce_view.vis_hidden'),
+              value: COMMERCE_PRODUCT_VISIBILITY.HIDDEN,
+            },
           ],
-        },
+        }),
       },
       {
         component: 'Input',
         fieldName: 'search',
-        label: 'Tìm kiếm',
-        componentProps: {
-          placeholder: 'Tìm theo tên sản phẩm, slug hoặc SKU...',
+        label: () => $t('common.search'),
+        componentProps: () => ({
+          placeholder: $t(
+            'page.commerce_view.search_admin_product_placeholder',
+          ),
           clearable: true,
-        },
+        }),
       },
     ],
     layout: 'vertical',
     showCollapseButton: false,
     submitOnChange: true,
     submitOnEnter: true,
-    submitButtonOptions: { content: $t('common.filter') },
-    resetButtonOptions: { content: $t('common.reset') },
-    actionWrapperClass: 'flex items-center justify-end gap-2',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3',
+    submitButtonOptions: { content: () => $t('common.filter') },
+    resetButtonOptions: { content: () => $t('common.reset') },
+    actionWrapperClass:
+      'col-span-2 lg:col-span-1 flex items-end justify-end gap-2',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
@@ -224,80 +296,112 @@ const [ProductsGrid, productsGridApi] = useVbenVxeGrid<CommerceProductItem>({
         },
       },
     },
-    columns: [
-      {
-        field: 'name',
-        title: 'Sản phẩm',
-        minWidth: 230,
-        slots: { default: 'name-cell' },
-      },
-      {
-        field: 'product_type',
-        title: 'Phân loại',
-        width: 170,
-        slots: { default: 'type-cell' },
-      },
-      {
-        field: 'visibility',
-        title: 'Hiển thị',
-        width: 130,
-        slots: { default: 'vis-cell' },
-      },
-      {
-        field: 'variants',
-        title: 'Biến thể SKU & Giá',
-        minWidth: 240,
-        slots: { default: 'sku-cell' },
-      },
-      {
-        field: 'actions',
-        title: 'Thao tác',
-        width: 145,
-        align: 'right',
-        slots: { default: 'action-cell' },
-      },
-    ],
+    columns: getProductColumns(),
   },
 });
+
+function getOrderColumns() {
+  const mobile = isMobile.value;
+  return [
+    {
+      field: 'order_code',
+      title: $t('page.commerce_view.col_order_code'),
+      minWidth: mobile ? 135 : 185,
+      slots: { default: 'code-cell' },
+    },
+    {
+      field: 'buyer_email',
+      title: $t('page.commerce_view.col_buyer_tenant'),
+      minWidth: 210,
+      visible: !mobile,
+      slots: { default: 'buyer-cell' },
+    },
+    {
+      field: 'payment_method',
+      title: $t('page.commerce_view.col_payment_channel_short'),
+      width: 150,
+      visible: !mobile,
+    },
+    {
+      field: 'total_credits',
+      title: $t('page.commerce_view.col_value'),
+      width: mobile ? 105 : 140,
+      slots: { default: 'total-cell' },
+    },
+    {
+      field: 'status',
+      title: $t('common.status'),
+      width: 145,
+      visible: !mobile,
+      slots: { default: 'status-cell' },
+    },
+    {
+      field: 'created_at',
+      title: $t('common.createdAt'),
+      width: 160,
+      visible: !mobile,
+      slots: { default: 'date-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('page.commerce_view.col_dispatch'),
+      width: mobile ? 95 : 150,
+      align: 'right' as const,
+      slots: { default: 'action-cell' },
+    },
+  ];
+}
 
 // 2. All Orders Grid
 const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrderRecord>({
   separator: false,
+  detailSheetOptions: {
+    resource: 'commerce.orders',
+    subtitleField: 'buyer_email',
+    titleField: 'order_code',
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Select',
         fieldName: 'status',
-        label: 'Trạng thái',
+        label: () => $t('common.status'),
         defaultValue: 'all',
-        componentProps: {
+        componentProps: () => ({
           options: [
-            { label: 'Tất cả trạng thái', value: 'all' },
+            { label: $t('page.runs_view.status_all'), value: 'all' },
             { label: 'completed', value: 'completed' },
             { label: 'pending_payment', value: 'pending_payment' },
             { label: 'manual_review', value: 'manual_review' },
             { label: 'failed', value: 'failed' },
           ],
-        },
+        }),
       },
       {
         component: 'Input',
         fieldName: 'search',
-        label: 'Tìm kiếm',
-        componentProps: {
-          placeholder: 'Tìm mã đơn ORD-..., email khách hoặc tenant UUID...',
+        label: () => $t('common.search'),
+        componentProps: () => ({
+          placeholder: $t('page.commerce_view.search_admin_order_placeholder'),
           clearable: true,
-        },
+        }),
       },
     ],
     layout: 'vertical',
     showCollapseButton: false,
     submitOnChange: true,
     submitOnEnter: true,
-    submitButtonOptions: { content: $t('common.filter') },
-    resetButtonOptions: { content: $t('common.reset') },
-    actionWrapperClass: 'flex items-center justify-end gap-2',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3',
+    submitButtonOptions: { content: () => $t('common.filter') },
+    resetButtonOptions: { content: () => $t('common.reset') },
+    actionWrapperClass:
+      'col-span-2 lg:col-span-2 flex items-end justify-end gap-2',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
@@ -329,57 +433,70 @@ const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrderRecord>({
         },
       },
     },
-    columns: [
-      {
-        field: 'order_code',
-        title: 'Mã đơn hàng',
-        minWidth: 185,
-        slots: { default: 'code-cell' },
-      },
-      {
-        field: 'buyer_email',
-        title: 'Khách hàng / Tenant',
-        minWidth: 210,
-        slots: { default: 'buyer-cell' },
-      },
-      {
-        field: 'payment_method',
-        title: 'Kênh TT',
-        width: 150,
-      },
-      {
-        field: 'total_credits',
-        title: 'Giá trị',
-        width: 140,
-        slots: { default: 'total-cell' },
-      },
-      {
-        field: 'status',
-        title: 'Trạng thái',
-        width: 145,
-        slots: { default: 'status-cell' },
-      },
-      {
-        field: 'created_at',
-        title: 'Ngày tạo',
-        width: 160,
-        slots: { default: 'date-cell' },
-      },
-      {
-        field: 'actions',
-        title: 'Điều phối',
-        width: 150,
-        align: 'right',
-        slots: { default: 'action-cell' },
-      },
-    ],
+    columns: getOrderColumns(),
   },
 });
+
+function getManualReviewColumns() {
+  const mobile = isMobile.value;
+  return [
+    {
+      field: 'transfer_code',
+      title: $t('page.commerce_view.col_transfer_code'),
+      width: mobile ? 130 : 165,
+      slots: { default: 'code-cell' },
+    },
+    {
+      field: 'gateway_id',
+      title: $t('page.commerce_view.payment_gateway_label'),
+      width: 160,
+      visible: !mobile,
+    },
+    {
+      field: 'target_type',
+      title: $t('page.commerce_view.col_target_type'),
+      width: 165,
+      visible: !mobile,
+    },
+    {
+      field: 'amount_credits',
+      title: $t('page.commerce_view.col_requested_xu'),
+      width: mobile ? 105 : 145,
+      slots: { default: 'credits-cell' },
+    },
+    {
+      field: 'pay_amount',
+      title: $t('page.commerce_view.col_converted_amount'),
+      width: 165,
+      visible: !mobile,
+      slots: { default: 'pay-cell' },
+    },
+    {
+      field: 'created_at',
+      title: $t('page.commerce_view.col_created_time'),
+      width: 165,
+      visible: !mobile,
+      slots: { default: 'date-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('page.commerce_view.col_approval'),
+      width: mobile ? 105 : 155,
+      align: 'right' as const,
+      slots: { default: 'action-cell' },
+    },
+  ];
+}
 
 // 3. Manual Review Intents Grid
 const [ManualReviewGrid, manualReviewGridApi] =
   useVbenVxeGrid<PaymentIntentItem>({
     separator: false,
+    detailSheetOptions: {
+      resource: 'billing.payment_intents',
+      subtitleField: 'gateway_id',
+      titleField: 'transfer_code',
+    },
     gridOptions: {
       border: false,
       round: true,
@@ -407,55 +524,62 @@ const [ManualReviewGrid, manualReviewGridApi] =
           },
         },
       },
-      columns: [
-        {
-          field: 'transfer_code',
-          title: 'Mã chuyển khoản',
-          width: 165,
-          slots: { default: 'code-cell' },
-        },
-        {
-          field: 'gateway_id',
-          title: 'Cổng thanh toán',
-          width: 160,
-        },
-        {
-          field: 'target_type',
-          title: 'Mục đích',
-          width: 165,
-        },
-        {
-          field: 'amount_credits',
-          title: 'Số Xu yêu cầu',
-          width: 145,
-          slots: { default: 'credits-cell' },
-        },
-        {
-          field: 'pay_amount',
-          title: 'Số tiền quy đổi',
-          width: 165,
-          slots: { default: 'pay-cell' },
-        },
-        {
-          field: 'created_at',
-          title: 'Thời gian tạo',
-          width: 165,
-          slots: { default: 'date-cell' },
-        },
-        {
-          field: 'actions',
-          title: 'Phê duyệt',
-          width: 155,
-          align: 'right',
-          slots: { default: 'action-cell' },
-        },
-      ],
+      columns: getManualReviewColumns(),
     },
   });
+
+function getGatewayColumns() {
+  const mobile = isMobile.value;
+  return [
+    {
+      field: 'name',
+      title: $t('page.commerce_view.col_gateway_name'),
+      minWidth: mobile ? 150 : 230,
+      slots: { default: 'name-cell' },
+    },
+    {
+      field: 'channel',
+      title: $t('page.commerce_view.col_channel'),
+      width: 155,
+      visible: !mobile,
+    },
+    {
+      field: 'driver',
+      title: $t('page.commerce_view.col_adapter_driver'),
+      width: 140,
+      visible: !mobile,
+    },
+    {
+      field: 'rate_per_credit',
+      title: $t('page.commerce_view.col_rate_per_xu'),
+      width: mobile ? 115 : 165,
+      slots: { default: 'rate-cell' },
+    },
+    {
+      field: 'is_active',
+      title: $t('common.status'),
+      width: 135,
+      visible: !mobile,
+      slots: { default: 'status-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('page.commerce_view.col_config'),
+      width: mobile ? 85 : 140,
+      align: 'right' as const,
+      slots: { default: 'action-cell' },
+    },
+  ];
+}
 
 // 4. Payment Gateways Grid
 const [GatewaysGrid, gatewaysGridApi] = useVbenVxeGrid<PaymentGatewayItem>({
   separator: false,
+  detailSheetOptions: {
+    resource: 'billing.payment_gateways',
+    subtitleField: 'channel',
+    titleField: 'name',
+  },
   gridOptions: {
     border: false,
     round: true,
@@ -473,44 +597,21 @@ const [GatewaysGrid, gatewaysGridApi] = useVbenVxeGrid<PaymentGatewayItem>({
         },
       },
     },
-    columns: [
-      {
-        field: 'name',
-        title: 'Tên cổng thanh toán',
-        minWidth: 230,
-        slots: { default: 'name-cell' },
-      },
-      {
-        field: 'channel',
-        title: 'Kênh (Channel)',
-        width: 155,
-      },
-      {
-        field: 'driver',
-        title: 'Adapter Driver',
-        width: 140,
-      },
-      {
-        field: 'rate_per_credit',
-        title: 'Tỷ giá (1 Xu)',
-        width: 165,
-        slots: { default: 'rate-cell' },
-      },
-      {
-        field: 'is_active',
-        title: 'Trạng thái',
-        width: 135,
-        slots: { default: 'status-cell' },
-      },
-      {
-        field: 'actions',
-        title: 'Cấu hình',
-        width: 140,
-        align: 'right',
-        slots: { default: 'action-cell' },
-      },
-    ],
+    columns: getGatewayColumns(),
   },
+});
+
+watch([() => $t('common.actions'), isMobile], () => {
+  productsGridApi.setGridOptions({ columns: getProductColumns() });
+  ordersGridApi.setGridOptions({ columns: getOrderColumns() });
+  manualReviewGridApi.setGridOptions({ columns: getManualReviewColumns() });
+  gatewaysGridApi.setGridOptions({ columns: getGatewayColumns() });
+  const commonConfig = {
+    componentProps: { class: 'w-full' },
+    hideLabel: isMobile.value,
+  };
+  productsGridApi.formApi?.setState({ commonConfig });
+  ordersGridApi.formApi?.setState({ commonConfig });
 });
 
 function reloadCurrentTab() {
@@ -533,7 +634,8 @@ function openCreateProductModal(existing?: CommerceProductItem) {
       sku: firstVar?.sku || `${existing.slug.toUpperCase()}-STD`,
       slug: existing.slug,
       stock_mode: firstVar?.stock_mode || 'serialized',
-      variant_name: firstVar?.name || 'Gói tiêu chuẩn',
+      variant_name:
+        firstVar?.name || $t('page.commerce_view.default_variant_name'),
       visibility: existing.visibility,
     };
   } else {
@@ -547,7 +649,7 @@ function openCreateProductModal(existing?: CommerceProductItem) {
       sku: '',
       slug: '',
       stock_mode: 'serialized',
-      variant_name: 'Gói tiêu chuẩn',
+      variant_name: $t('page.commerce_view.default_variant_name'),
       visibility: 'public',
     };
   }
@@ -557,7 +659,7 @@ function openCreateProductModal(existing?: CommerceProductItem) {
 async function handleSaveProductAndVariant() {
   const f = productForm.value;
   if (!f.name.trim() || !f.slug.trim() || !f.sku.trim()) {
-    toast.error('Vui lòng nhập đầy đủ Tên sản phẩm, Slug và Mã SKU');
+    toast.error($t('page.commerce_view.product_form_required'));
     return;
   }
   savingProduct.value = true;
@@ -574,18 +676,24 @@ async function handleSaveProductAndVariant() {
 
     await upsertProductVariantAdminApi({
       is_active: true,
-      name: f.variant_name.trim() || 'Gói tiêu chuẩn',
+      name:
+        f.variant_name.trim() || $t('page.commerce_view.default_variant_name'),
       price_credits: Math.max(0, Math.trunc(f.price_credits)),
       product_id: savedProduct.id,
       sku: f.sku.trim(),
       stock_mode: f.stock_mode,
     });
 
-    toast.success(`Đã lưu sản phẩm ${savedProduct.name} & SKU ${f.sku}`);
+    toast.success(
+      $t('page.commerce_view.product_saved_toast', {
+        name: savedProduct.name,
+        sku: f.sku,
+      }),
+    );
     productModalOpen.value = false;
     await productsGridApi.reload();
   } catch (error: any) {
-    toast.error(error?.message || 'Không thể lưu sản phẩm');
+    toast.error(error?.message || $t('page.commerce_view.product_save_failed'));
   } finally {
     savingProduct.value = false;
   }
@@ -608,7 +716,7 @@ function openBulkStockModal(variantId?: string) {
 
 async function handleBulkImportStock() {
   if (!selectedStockVariantId.value) {
-    toast.error('Vui lòng chọn biến thể SKU cần nạp kho');
+    toast.error($t('page.commerce_view.select_sku_for_stock'));
     return;
   }
   const lines = stockLinesRaw.value
@@ -617,7 +725,7 @@ async function handleBulkImportStock() {
     .filter(Boolean);
 
   if (lines.length === 0) {
-    toast.error('Vui lòng dán ít nhất 1 dòng dữ liệu kho');
+    toast.error($t('page.commerce_view.paste_at_least_one_stock_line'));
     return;
   }
 
@@ -629,12 +737,16 @@ async function handleBulkImportStock() {
       variant_id: selectedStockVariantId.value,
     });
     toast.success(
-      `Đã nạp +${res.imported_count} dòng mới (Bỏ qua ${res.skipped_duplicates} dòng trùng). Tồn kho mới: ${res.available_stock}`,
+      $t('page.commerce_view.stock_imported_toast', {
+        imported: res.imported_count,
+        skipped: res.skipped_duplicates,
+        available: res.available_stock,
+      }),
     );
     stockModalOpen.value = false;
     await productsGridApi.reload();
   } catch (error: any) {
-    toast.error(error?.message || 'Nạp kho thất bại');
+    toast.error(error?.message || $t('page.commerce_view.stock_import_failed'));
   } finally {
     importingStock.value = false;
   }
@@ -645,14 +757,22 @@ async function handleManualFulfillOrder(order: CommerceOrderRecord) {
     const res = await fulfillOrderAdminApi(order.id);
     if (res.fulfilled) {
       toast.success(
-        `Đã kích hoạt xuất kho thành công cho đơn ${order.order_code}`,
+        $t('page.commerce_view.order_fulfilled_toast', {
+          code: order.order_code,
+        }),
       );
     } else {
-      toast.info(`Đơn ${order.order_code} chưa đủ điều kiện hoặc hết tồn kho`);
+      toast.info(
+        $t('page.commerce_view.order_not_eligible_or_out_of_stock', {
+          code: order.order_code,
+        }),
+      );
     }
     await ordersGridApi.reload();
   } catch (error: any) {
-    toast.error(error?.message || 'Không thể xuất kho đơn hàng');
+    toast.error(
+      error?.message || $t('page.commerce_view.order_fulfill_failed'),
+    );
   }
 }
 
@@ -664,14 +784,19 @@ async function handleForceApproveIntent(intent: PaymentIntentItem) {
     );
     if (res.settled) {
       toast.success(
-        `Đã duyệt lệnh ${intent.transfer_code} (+${intent.amount_credits} Xu)`,
+        $t('page.commerce_view.intent_approved_toast', {
+          code: intent.transfer_code,
+          amount: intent.amount_credits,
+        }),
       );
       await manualReviewGridApi.reload();
     } else {
-      toast.error(res.reason || 'Không thể duyệt lệnh thanh toán');
+      toast.error(res.reason || $t('page.commerce_view.intent_approve_failed'));
     }
   } catch (error: any) {
-    toast.error(error?.message || 'Lỗi khi duyệt lệnh thanh toán');
+    toast.error(
+      error?.message || $t('page.commerce_view.intent_approve_error'),
+    );
   }
 }
 
@@ -691,7 +816,7 @@ async function handleSaveGateway() {
   try {
     parsedConfig = JSON.parse(gatewayPublicConfigText.value || '{}');
   } catch {
-    toast.error('Cấu hình public_config không đúng định dạng JSON');
+    toast.error($t('page.commerce_view.invalid_public_config_json'));
     return;
   }
 
@@ -708,11 +833,17 @@ async function handleSaveGateway() {
       rate_per_credit: Number(editingGateway.value.rate_per_credit),
       sort_order: Number(editingGateway.value.sort_order),
     });
-    toast.success(`Đã cập nhật cổng thanh toán ${editingGateway.value.name}`);
+    toast.success(
+      $t('page.commerce_view.gateway_updated_toast', {
+        name: editingGateway.value.name,
+      }),
+    );
     gatewayModalOpen.value = false;
     await gatewaysGridApi.reload();
   } catch (error: any) {
-    toast.error(error?.message || 'Không thể cập nhật cổng thanh toán');
+    toast.error(
+      error?.message || $t('page.commerce_view.gateway_update_failed'),
+    );
   } finally {
     savingGateway.value = false;
   }
@@ -727,23 +858,26 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+  <div class="space-y-3 p-3 sm:space-y-5 sm:p-5">
     <!-- Top Header -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="flex flex-col gap-1">
-        <h1
-          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.commerce.admin') }}
-        </h1>
-        <p class="text-xs text-muted-foreground">
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex min-w-0 flex-col gap-0.5">
+        <div class="flex items-center gap-2">
+          <h1
+            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          >
+            {{ $t('page.commerce.admin') }}
+          </h1>
+          <Badge variant="secondary" class="font-mono text-xs">
+            {{ allProducts.length }}
+          </Badge>
+        </div>
+        <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.commerce.admin_desc') }}
         </p>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <Button
           size="sm"
           variant="outline"
@@ -751,7 +885,9 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
           @click="() => openBulkStockModal()"
         >
           <Upload class="size-3.5 text-primary" />
-          Nạp kho hàng loạt
+          <span class="hidden sm:inline">{{
+            $t('page.commerce_view.bulk_import_stock_btn')
+          }}</span>
         </Button>
 
         <Button
@@ -760,115 +896,82 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
           @click="() => openCreateProductModal()"
         >
           <Plus class="size-3.5" />
-          Thêm sản phẩm / SKU
+          <span class="hidden sm:inline">{{
+            $t('page.commerce_view.add_product_sku_btn')
+          }}</span>
         </Button>
 
         <Button
           variant="outline"
           size="sm"
           class="gap-1.5"
+          :title="$t('common.refresh')"
           @click="reloadCurrentTab"
         >
           <RefreshCw class="size-3.5 text-muted-foreground" />
-          {{ $t('common.refresh') }}
+          <span class="hidden sm:inline">{{ $t('common.refresh') }}</span>
         </Button>
-      </div>
-    </div>
-
-    <!-- Summary KPI Cards -->
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
-      <div class="rounded-xl border border-border/60 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground">
-            Sản phẩm đang bán
-          </span>
-          <Layers class="size-4 text-primary" />
-        </div>
-        <p class="mt-2 font-mono text-2xl font-bold text-foreground">
-          {{ allProducts.length }}
-        </p>
-      </div>
-
-      <div class="rounded-xl border border-border/60 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground">
-            Tổng tồn kho khả dụng
-          </span>
-          <PackagePlus class="size-4 text-success" />
-        </div>
-        <p class="mt-2 font-mono text-2xl font-bold text-foreground">
-          {{ totalAvailableStock.toLocaleString('en-US') }}
-        </p>
-      </div>
-
-      <div class="rounded-xl border border-border/60 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground">
-            Lệnh chờ duyệt tay
-          </span>
-          <AlertTriangle class="size-4 text-warning" />
-        </div>
-        <p class="mt-2 font-mono text-2xl font-bold text-foreground">
-          {{ manualReviewIntents.length }}
-        </p>
-      </div>
-
-      <div class="rounded-xl border border-border/60 bg-card p-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-muted-foreground">
-            Cổng thanh toán kích hoạt
-          </span>
-          <CreditCard class="size-4 text-primary" />
-        </div>
-        <p class="mt-2 font-mono text-2xl font-bold text-foreground">
-          {{ allGateways.filter((g) => g.is_active).length }} /
-          {{ allGateways.length }}
-        </p>
       </div>
     </div>
 
     <!-- Mode Selector Tabs -->
     <div
-      class="flex flex-wrap items-center gap-2 border-b border-border/60 pb-2"
+      class="flex items-center gap-1.5 overflow-x-auto border-b border-border/60 pb-2 no-scrollbar"
     >
       <Button
         size="sm"
         :variant="activeTab === 'products' ? 'default' : 'outline'"
-        class="gap-1.5 text-xs"
+        class="shrink-0 gap-1.5 whitespace-nowrap text-xs"
         @click="activeTab = 'products'"
       >
         <Layers class="size-3.5" />
-        Sản phẩm & Kho hàng ({{ allProducts.length }})
+        {{
+          $t('page.commerce_view.tab_products_stock', {
+            count: allProducts.length,
+          })
+        }}
       </Button>
 
       <Button
         size="sm"
         :variant="activeTab === 'orders' ? 'default' : 'outline'"
-        class="gap-1.5 text-xs"
+        class="shrink-0 gap-1.5 whitespace-nowrap text-xs"
         @click="activeTab = 'orders'"
       >
         <PackageCheck class="size-3.5" />
-        Đơn hàng toàn hệ thống ({{ allOrders.length }})
+        {{
+          $t('page.commerce_view.tab_all_orders', {
+            count: allOrders.length,
+          })
+        }}
       </Button>
 
       <Button
         size="sm"
         :variant="activeTab === 'manual_review' ? 'default' : 'outline'"
-        class="gap-1.5 text-xs"
+        class="shrink-0 gap-1.5 whitespace-nowrap text-xs"
         @click="activeTab = 'manual_review'"
       >
         <AlertTriangle class="size-3.5" />
-        Duyệt thanh toán thủ công ({{ manualReviewIntents.length }})
+        {{
+          $t('page.commerce_view.tab_manual_review', {
+            count: manualReviewIntents.length,
+          })
+        }}
       </Button>
 
       <Button
         size="sm"
         :variant="activeTab === 'gateways' ? 'default' : 'outline'"
-        class="gap-1.5 text-xs"
+        class="shrink-0 gap-1.5 whitespace-nowrap text-xs"
         @click="activeTab = 'gateways'"
       >
         <SlidersHorizontal class="size-3.5" />
-        Cổng thanh toán ({{ allGateways.length }})
+        {{
+          $t('page.commerce_view.tab_gateways', {
+            count: allGateways.length,
+          })
+        }}
       </Button>
     </div>
 
@@ -913,7 +1016,9 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
               {{ v.sku }}: {{ v.price_credits }} Xu ({{
                 v.stock_mode === 'unlimited'
                   ? '∞'
-                  : `Kho: ${v.available_stock}`
+                  : $t('page.commerce_view.stock_short', {
+                      count: v.available_stock,
+                    })
               }})
             </Badge>
           </div>
@@ -933,7 +1038,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
               class="h-7 px-2 text-xs"
               @click="openBulkStockModal(row.variants?.[0]?.id)"
             >
-              Nạp kho
+              {{ $t('page.commerce_view.import_stock_btn') }}
             </Button>
             <Button
               size="sm"
@@ -941,7 +1046,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
               class="h-7 px-2 text-xs"
               @click="openCreateProductModal(row)"
             >
-              Sửa
+              {{ $t('common.edit') }}
             </Button>
           </div>
         </template>
@@ -963,13 +1068,13 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
         <template #buyer-cell="{ row }">
           <div class="flex flex-col py-1 text-left">
             <span class="text-xs font-medium text-foreground">
-              {{ row.buyer_email || 'Tenant Member' }}
+              {{ row.buyer_email || $t('page.commerce_view.tenant_member') }}
             </span>
             <span class="font-mono text-2xs text-muted-foreground">
               {{
                 row.buyer_tenant_id
                   ? `Tenant: ${row.buyer_tenant_id.slice(0, 8)}`
-                  : 'Guest Checkout'
+                  : $t('page.commerce_view.guest_checkout')
               }}
             </span>
           </div>
@@ -1001,7 +1106,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             @click="handleManualFulfillOrder(row)"
           >
             <Play class="size-3" />
-            Giao hàng lại
+            {{ $t('page.commerce_view.redeliver_btn') }}
           </Button>
         </template>
       </OrdersGrid>
@@ -1047,7 +1152,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             @click="handleForceApproveIntent(row)"
           >
             <CheckCircle2 class="size-3.5" />
-            Duyệt lệnh
+            {{ $t('page.commerce_view.approve_intent_btn') }}
           </Button>
         </template>
       </ManualReviewGrid>
@@ -1077,7 +1182,11 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
 
         <template #status-cell="{ row }">
           <Badge :variant="row.is_active ? 'default' : 'outline'">
-            {{ row.is_active ? 'Đang bật' : 'Đang tắt' }}
+            {{
+              row.is_active
+                ? $t('page.commerce_view.gateway_enabled')
+                : $t('page.commerce_view.gateway_disabled')
+            }}
           </Badge>
         </template>
 
@@ -1089,7 +1198,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             @click="openGatewayModal(row)"
           >
             <Settings2 class="size-3.5" />
-            Cấu hình
+            {{ $t('page.commerce_view.col_config') }}
           </Button>
         </template>
       </GatewaysGrid>
@@ -1100,29 +1209,29 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
       <DialogContent class="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle class="text-base font-semibold">
-            Thiết lập Sản phẩm số & Biến thể SKU
+            {{ $t('page.commerce_view.upsert_product_modal_title') }}
           </DialogTitle>
           <DialogDescription class="text-xs text-muted-foreground">
-            Tạo mới hoặc cập nhật sản phẩm theo `slug` và biến thể theo `sku`.
+            {{ $t('page.commerce_view.upsert_product_modal_desc') }}
           </DialogDescription>
         </DialogHeader>
 
         <div class="grid grid-cols-1 gap-3 py-2 sm:grid-cols-2">
           <div class="space-y-1 sm:col-span-2">
             <label class="text-xs font-medium text-foreground">
-              Tên sản phẩm
+              {{ $t('page.commerce_view.product_name_label') }}
             </label>
             <input
               v-model="productForm.name"
               type="text"
-              placeholder="VD: Tài khoản Via cổ 2FA"
+              :placeholder="$t('page.commerce_view.product_name_placeholder')"
               class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
             />
           </div>
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
-              Định danh Slug
+              {{ $t('page.commerce_view.product_slug_label') }}
             </label>
             <input
               v-model="productForm.slug"
@@ -1134,51 +1243,71 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
-              Loại sản phẩm
+              {{ $t('page.commerce_view.product_type_label') }}
             </label>
             <select
               v-model="productForm.product_type"
               class="h-8 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground"
             >
-              <option value="serial_stock">serial_stock (Tài khoản/Key)</option>
-              <option value="specter_resource">
-                specter_resource (Proxy/Workflow)
+              <option value="serial_stock">
+                {{ $t('page.commerce_view.opt_serial_stock') }}
               </option>
-              <option value="digital_file">digital_file (Tệp tải về)</option>
-              <option value="wallet_credit">wallet_credit (Nạp Xu)</option>
+              <option value="specter_resource">
+                {{ $t('page.commerce_view.opt_specter_resource') }}
+              </option>
+              <option value="digital_file">
+                {{ $t('page.commerce_view.opt_digital_file') }}
+              </option>
+              <option value="wallet_credit">
+                {{ $t('page.commerce_view.opt_wallet_credit') }}
+              </option>
             </select>
           </div>
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
-              Chế độ hiển thị
+              {{ $t('page.commerce_view.visibility_mode_label') }}
             </label>
             <select
               v-model="productForm.visibility"
               class="h-8 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground"
             >
-              <option value="public">public (Công khai & Storefront)</option>
-              <option value="tenant_only">tenant_only (Chỉ Tenant)</option>
-              <option value="hidden">hidden (Ẩn)</option>
+              <option value="public">
+                {{ $t('page.commerce_view.opt_vis_public') }}
+              </option>
+              <option value="tenant_only">
+                {{ $t('page.commerce_view.opt_vis_tenant_only') }}
+              </option>
+              <option value="hidden">
+                {{ $t('page.commerce_view.opt_vis_hidden') }}
+              </option>
             </select>
           </div>
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
-              Chế độ quản lý tồn kho
+              {{ $t('page.commerce_view.stock_mode_label') }}
             </label>
             <select
               v-model="productForm.stock_mode"
               class="h-8 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground"
             >
-              <option value="serialized">serialized (Kho từng dòng)</option>
-              <option value="unlimited">unlimited (Không giới hạn)</option>
-              <option value="finite_counter">finite_counter (Bộ đếm)</option>
+              <option value="serialized">
+                {{ $t('page.commerce_view.opt_stock_serialized') }}
+              </option>
+              <option value="unlimited">
+                {{ $t('page.commerce_view.opt_stock_unlimited') }}
+              </option>
+              <option value="finite_counter">
+                {{ $t('page.commerce_view.opt_stock_finite') }}
+              </option>
             </select>
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs font-medium text-foreground">Mã SKU</label>
+            <label class="text-xs font-medium text-foreground">
+              {{ $t('page.commerce_view.sku_code_label') }}
+            </label>
             <input
               v-model="productForm.sku"
               type="text"
@@ -1189,7 +1318,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
-              Đơn giá (Xu)
+              {{ $t('page.commerce_view.unit_price_xu_label') }}
             </label>
             <input
               v-model.number="productForm.price_credits"
@@ -1201,12 +1330,12 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
 
           <div class="space-y-1 sm:col-span-2">
             <label class="text-xs font-medium text-foreground">
-              Mô tả ngắn
+              {{ $t('page.commerce_view.short_desc_label') }}
             </label>
             <input
               v-model="productForm.short_description"
               type="text"
-              placeholder="Mô tả hiển thị trên thẻ sản phẩm..."
+              :placeholder="$t('page.commerce_view.short_desc_placeholder')"
               class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
             />
           </div>
@@ -1232,19 +1361,17 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
       <DialogContent class="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle class="text-base font-semibold">
-            Nạp kho hàng loạt (Chống trùng lặp SHA-256)
+            {{ $t('page.commerce_view.bulk_stock_modal_title') }}
           </DialogTitle>
           <DialogDescription class="text-xs text-muted-foreground">
-            Dán mỗi tài khoản (`uid|pass|2fa`), license key hoặc proxy
-            (`ip:port:user:pass`) trên 1 dòng. Các dòng trùng lặp sẽ tự động bị
-            bỏ qua.
+            {{ $t('page.commerce_view.bulk_stock_modal_desc') }}
           </DialogDescription>
         </DialogHeader>
 
         <div class="space-y-3 py-2">
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
-              Chọn biến thể SKU (`serialized`)
+              {{ $t('page.commerce_view.select_serialized_sku_label') }}
             </label>
             <select
               v-model="selectedStockVariantId"
@@ -1255,15 +1382,18 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
                 :key="item.variant.id"
                 :value="item.variant.id"
               >
-                {{ item.productName }} — {{ item.variant.sku }} (Tồn:
-                {{ item.variant.available_stock }})
+                {{ item.productName }} — {{ item.variant.sku }} ({{
+                  $t('page.commerce_view.stock_short', {
+                    count: item.variant.available_stock,
+                  })
+                }})
               </option>
             </select>
           </div>
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
-              Mã lô nhập (`batch_code`)
+              {{ $t('page.commerce_view.batch_code_label') }}
             </label>
             <input
               v-model="stockBatchCode"
@@ -1274,7 +1404,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
-              Danh sách dữ liệu kho (Mỗi dòng 1 mục)
+              {{ $t('page.commerce_view.stock_lines_label') }}
             </label>
             <textarea
               v-model="stockLinesRaw"
@@ -1294,7 +1424,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             :disabled="importingStock"
             @click="handleBulkImportStock"
           >
-            Nạp vào kho
+            {{ $t('page.commerce_view.submit_import_stock_btn') }}
           </Button>
         </div>
       </DialogContent>
@@ -1305,18 +1435,21 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
       <DialogContent class="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle class="text-base font-semibold">
-            Cấu hình cổng thanh toán: {{ editingGateway?.id }}
+            {{
+              $t('page.commerce_view.gateway_modal_title', {
+                id: editingGateway?.id || '',
+              })
+            }}
           </DialogTitle>
           <DialogDescription class="text-xs text-muted-foreground">
-            Điều chỉnh tỷ giá quy đổi 1 Xu, trạng thái kích hoạt và thông tin
-            nhận thanh toán (`public_config`).
+            {{ $t('page.commerce_view.gateway_modal_desc') }}
           </DialogDescription>
         </DialogHeader>
 
         <div v-if="editingGateway" class="space-y-3 py-2">
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
-              Tên hiển thị
+              {{ $t('page.commerce_view.display_name_label') }}
             </label>
             <input
               v-model="editingGateway.name"
@@ -1328,7 +1461,11 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
           <div class="grid grid-cols-2 gap-3">
             <div class="space-y-1">
               <label class="text-xs font-medium text-foreground">
-                Tỷ giá 1 Xu ({{ editingGateway.currency }})
+                {{
+                  $t('page.commerce_view.rate_1_xu_label', {
+                    currency: editingGateway.currency,
+                  })
+                }}
               </label>
               <input
                 v-model.number="editingGateway.rate_per_credit"
@@ -1340,21 +1477,25 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
 
             <div class="space-y-1">
               <label class="text-xs font-medium text-foreground">
-                Trạng thái cổng
+                {{ $t('page.commerce_view.gateway_status_label') }}
               </label>
               <select
                 v-model="editingGateway.is_active"
                 class="h-8 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground"
               >
-                <option :value="true">Đang bật (Active)</option>
-                <option :value="false">Tạm tắt (Disabled)</option>
+                <option :value="true">
+                  {{ $t('page.commerce_view.opt_gateway_active') }}
+                </option>
+                <option :value="false">
+                  {{ $t('page.commerce_view.opt_gateway_disabled') }}
+                </option>
               </select>
             </div>
           </div>
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
-              Cấu hình công khai (`public_config` JSON)
+              {{ $t('page.commerce_view.public_config_json_label') }}
             </label>
             <textarea
               v-model="gatewayPublicConfigText"

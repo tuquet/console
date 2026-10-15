@@ -14,6 +14,7 @@ import {
 import { Badge } from '@tuquet/vue-ui';
 
 import { useDateFormat } from '#/composables';
+import { $t } from '#/locales';
 
 interface Props {
   quota: WorkspaceUsageQuota;
@@ -66,13 +67,15 @@ const runsPercent = computed(() =>
                 {{ quota.plan_name }}
               </span>
               <Badge variant="secondary" class="text-xs font-medium">
-                ${{ subscription?.plan?.price_monthly_usd || 0 }}/tháng
+                ${{ subscription?.plan?.price_monthly_usd || 0 }}/{{
+                  $t('page.tenants_view.per_month')
+                }}
               </Badge>
             </div>
             <p class="text-xs text-muted-foreground mt-0.5">
               {{
                 subscription?.plan?.description ||
-                'Hạn mức tài nguyên được phân bổ tự động theo gói thuê bao Cloud'
+                $t('page.tenants_view.default_plan_desc')
               }}
             </p>
           </div>
@@ -84,7 +87,7 @@ const runsPercent = computed(() =>
         >
           <Calendar class="size-3.5" />
           <span
-            >Hết hạn chu kỳ:
+            >{{ $t('page.tenants_view.period_end') }}:
             <strong class="text-foreground">{{
               formatDateOnly(subscription.current_period_end)
             }}</strong></span
@@ -94,7 +97,7 @@ const runsPercent = computed(() =>
     </div>
 
     <!-- Resource Quotas Progress Grid -->
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div class="grid grid-cols-2 gap-2.5 sm:gap-4">
       <!-- Metric 1: Members -->
       <div
         class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-3"
@@ -104,7 +107,7 @@ const runsPercent = computed(() =>
             class="flex items-center gap-2 text-sm font-medium text-foreground"
           >
             <Users class="size-4 text-muted-foreground" />
-            <span>Thành Viên Workspace</span>
+            <span>{{ $t('page.tenants_view.quota_members_title') }}</span>
           </div>
           <span class="text-xs font-medium text-foreground">
             {{ quota.used_members }} / {{ quota.max_members }}
@@ -118,8 +121,12 @@ const runsPercent = computed(() =>
             :style="{ width: `${membersPercent}%` }"
           ></div>
         </div>
-        <div class="text-[11px] text-muted-foreground">
-          Đã sử dụng {{ membersPercent }}% hạn mức thành viên được phân bổ
+        <div class="text-xs text-muted-foreground">
+          {{
+            $t('page.tenants_view.quota_members_desc', {
+              percent: membersPercent,
+            })
+          }}
         </div>
       </div>
 
@@ -132,7 +139,7 @@ const runsPercent = computed(() =>
             class="flex items-center gap-2 text-sm font-medium text-foreground"
           >
             <Cpu class="size-4 text-muted-foreground" />
-            <span>Runner Devices Kết Nối</span>
+            <span>{{ $t('page.tenants_view.quota_devices_title') }}</span>
           </div>
           <span class="text-xs font-medium text-foreground">
             {{ quota.used_devices }} / {{ quota.max_devices }}
@@ -146,8 +153,12 @@ const runsPercent = computed(() =>
             :style="{ width: `${devicesPercent}%` }"
           ></div>
         </div>
-        <div class="text-[11px] text-muted-foreground">
-          Đã kết nối {{ devicesPercent }}% số lượng node Runner cho phép
+        <div class="text-xs text-muted-foreground">
+          {{
+            $t('page.tenants_view.quota_devices_desc', {
+              percent: devicesPercent,
+            })
+          }}
         </div>
       </div>
 
@@ -160,7 +171,7 @@ const runsPercent = computed(() =>
             class="flex items-center gap-2 text-sm font-medium text-foreground"
           >
             <HardDrive class="size-4 text-muted-foreground" />
-            <span>Dung Lượng Lưu Trữ</span>
+            <span>{{ $t('page.tenants_view.quota_storage_title') }}</span>
           </div>
           <span class="text-xs font-medium text-foreground">
             {{ quota.used_storage_mb }} MB / {{ quota.max_storage_mb }} MB
@@ -174,8 +185,8 @@ const runsPercent = computed(() =>
             :style="{ width: `${storagePercent}%` }"
           ></div>
         </div>
-        <div class="text-[11px] text-muted-foreground">
-          Lưu trữ artifacts, run profiles và media assets của workspace
+        <div class="text-xs text-muted-foreground">
+          {{ $t('page.tenants_view.quota_storage_desc') }}
         </div>
       </div>
 
@@ -188,7 +199,7 @@ const runsPercent = computed(() =>
             class="flex items-center gap-2 text-sm font-medium text-foreground"
           >
             <PlayCircle class="size-4 text-muted-foreground" />
-            <span>Lượt Chạy Hàng Tháng</span>
+            <span>{{ $t('page.tenants_view.quota_runs_title') }}</span>
           </div>
           <span class="text-xs font-medium text-foreground">
             {{ quota.used_monthly_runs }} / {{ quota.max_monthly_runs }}
@@ -202,8 +213,8 @@ const runsPercent = computed(() =>
             :style="{ width: `${runsPercent}%` }"
           ></div>
         </div>
-        <div class="text-[11px] text-muted-foreground">
-          Số lần kích hoạt chiến dịch và workflow tự động trong chu kỳ hiện tại
+        <div class="text-xs text-muted-foreground">
+          {{ $t('page.tenants_view.quota_runs_desc') }}
         </div>
       </div>
     </div>

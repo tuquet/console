@@ -16,10 +16,10 @@ Hệ thống quản trị `admin.tuquet.com` kết nối trực tiếp đến **
 1. **Không sử dụng Chrome Tabbar ảo trong SPA** (`tabbar: { enable: false }`):
    - Trình duyệt đã có thanh Tab. Không lồng thêm thanh tab kiểu Chrome trong web app làm mất 40px chiều cao màn hình quý giá của người dùng (nhất là trên điện thoại).
 2. **Tối giản hóa Header**:
-   - Không đưa vào các widget thừa thãi: khóa màn hình (lockScreen), chọn múi giờ thế giới (timezone selector), nút toàn màn hình (fullscreen), ngăn kéo cấu hình màu sắc (preferences drawer).
-   - Header chỉ giữ 3 thành phần cốt lõi: **Logo Tuquet** + **Gạt Theme Dark/Light Slate** + **Avatar Quản trị & Đăng xuất**.
-3. **Không dùng Breadcrumbs lặp lại**:
-   - Khi hệ thống có ít hơn 5 module chính, không lặp lại tên trang bằng Breadcrumb gây chiếm dụng không gian.
+   - Không đưa vào các widget thừa thãi: khóa màn hình (lockScreen), chọn múi giờ thế giới (timezone selector).
+   - Header chỉ giữ các thành phần cốt lõi: **Logo Tuquet** + **Chuyển đổi Ngôn ngữ/Theme & Preferences** + **Avatar Quản trị & Đăng xuất**.
+3. **Sidebar tinh gọn trong 5 phân hệ nghiệp vụ**:
+   - `Dashboard` (`/dashboard`), `Workspaces` (`/tenants`), `Automation` (`/automation`), `Commerce` (`/commerce`), và `System` (`/system`).
 
 ---
 
@@ -28,7 +28,7 @@ Hệ thống quản trị `admin.tuquet.com` kết nối trực tiếp đến **
 Toàn bộ console áp dụng phong cách thiết kế hiện đại của **Shadcn** (phong cách Cloud Console như Supabase, Vercel, Linear):
 
 - **Palette**: Tông màu Slate / Zinc trung tính, chiều sâu cao, độ tương phản hoàn hảo ở cả Light và Dark mode.
-- **Thư viện UI**: Sử dụng các thành phần từ `@tuquet/vue-ui` và `@tuquet/vue-table` đã publish trên NPM registry.
+- **Thư viện UI**: Sử dụng các thành phần từ `@tuquet/vue-ui` và `useVbenVxeGrid` (`@tuquet/plugins/vxe-table`).
 - **Borders & Radii**:
   - Viền siêu mỏng, tinh tế: `border border-border/60`.
   - Bo góc tiêu chuẩn: `rounded-xl` (12px) cho Cards/Containers, `rounded-lg` (8px) cho Input/Buttons.
@@ -60,7 +60,7 @@ Toàn bộ console áp dụng phong cách thiết kế hiện đại của **Sha
 
 ---
 
-## 4. Ưu Tiên Mobile-First (Bắt Buộc)
+## 4. Ưu Tiên Mobile-First & Chuẩn Hóa `useVbenVxeGrid` / `VxeForm` (`ADR-004`)
 
 Mọi màn hình, bảng dữ liệu và cửa sổ tương tác (Modal/Drawer) đều phải được thiết kế và kiểm thử tối ưu từ màn hình di động nhỏ (`< 640px`):
 
@@ -68,10 +68,9 @@ Mọi màn hình, bảng dữ liệu và cửa sổ tương tác (Modal/Drawer) 
    - Mobile: 1 cột (`grid-cols-1`).
    - Tablet: 2 cột (`sm:grid-cols-2`).
    - Desktop: 4 cột (`lg:grid-cols-4`).
-2. **Bảng Dữ Liệu (Data Tables) — Thiết kế Kép (Dual View)**:
-   - Trên **Desktop** (`hidden md:block`): Hiển thị bảng Data Table đầy đủ với sắp xếp, phân trang và các cột chi tiết.
-   - Trên **Mobile** (`block md:hidden`): Tự động chuyển đổi sang **Card View** cảm ứng. Mỗi bản ghi là 1 thẻ compact hiển thị đầy đủ thông tin nhận diện, trạng thái, ngày tháng và các nút hành động kích thước tối thiểu 40px (touch targets).
-   - Tuyệt đối không để xảy ra hiện tượng tràn vỡ layout hoặc bắt người dùng điện thoại phải cuộn ngang bảng dữ liệu.
+2. **Bảng Dữ Liệu (`useVbenVxeGrid`) & Biểu Mẫu (`VxeForm`)**:
+   - Toàn bộ các trang danh sách sử dụng `useVbenVxeGrid` từ [`apps/web-admin/src/adapter/vxe-table.ts`](apps/web-admin/src/adapter/vxe-table.ts) kèm bộ lọc `formOptions`, đường kẻ semantic token tinh tế (`--vxe-ui-table-border-color: hsl(var(--border) / 40%)`), cuộn ngang tự nhiên (`overflow-x: auto`) và thanh phân trang căn giữa trên thiết bị di động (`< 640px`).
+   - Toàn bộ trang chi tiết và hộp thoại modal sử dụng `VxeForm`. Tuyệt đối không tự viết bảng HTML `<table>` thủ công.
 3. **Nút Thao Tác (Action Buttons)**:
    - Trên mobile: Tự động xếp chồng dọc (stack) với độ rộng 100% (`w-full sm:w-auto`) để bấm 1 chạm dễ dàng.
 4. **Hộp Thoại (Modals/Dialogs)**:
@@ -82,9 +81,9 @@ Mọi màn hình, bảng dữ liệu và cửa sổ tương tác (Modal/Drawer) 
 ## 5. Dữ Liệu Đo Đếm Thực Tế (100% Real Telemetry — Không Mock Data)
 
 - **Tuyệt đối không sử dụng Mock Data, số ảo hoặc văn bản tiếng nước ngoài không liên quan (tiếng Trung)**.
-- Mọi chỉ số trên các trang **Workspace** và **Analytics** phải được truy vấn và tính toán trực tiếp từ **Tuquet Cloud**:
+- Mọi chỉ số trên các trang **Workspace**, **Commerce** và **Analytics** phải được truy vấn và tính toán trực tiếp từ **Tuquet Cloud**:
   - `public.tenants`: Số lượng Workspace, phân bổ gói thuê bao (Pro / Free / Enterprise), mốc thời gian tăng trưởng.
-  - `public.system_plugins`: Trạng thái và schema của 6 core plugins (`core-iam`, `runners`, `automa`, `storage`, `subscriptions`, `webhooks`).
+  - `public.system_plugins`: Trạng thái và schema của các Core Kernel Plugins (`core-iam`, `runners`, `automa`, `storage`, `subscriptions`, `webhooks`) và Extension Plugins (`commerce`, v.v.).
   - `Specter Fleet Bridge`: Trạng thái lắng nghe cổng SSO Desktop loopback (`127.0.0.1:8765`).
   - Độ trễ mạng thực tế (Latency Ms) giữa trình duyệt và Supabase REST API / Cloudflare Edge.
 
@@ -123,7 +122,7 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
    ```bash
    pnpm check:type
    ```
-   _Kết quả yêu cầu:_ `vue-tsc` trả về **0 lỗi** trên toàn bộ 39 packages.
+   _Kết quả yêu cầu:_ `vue-tsc` trả về **0 lỗi** trên toàn bộ packages.
 2. **Kiểm tra Lint & Định dạng Mã Nguồn**:
    ```bash
    pnpm run lint
@@ -137,8 +136,8 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
 
 ### 7.2. Quy Chuẩn Quản Lý Dependency & Catalog PNPM
 
-- Mọi dependency dùng chung hoặc thư viện bên ngoài phải được khai báo phiên bản tập trung tại file [`pnpm-workspace.yaml`](file:///D:/Repository/tuquet/admin/pnpm-workspace.yaml) trong khối `catalog:`.
-- Trong file `package.json` của từng ứng dụng/gói (ví dụ [`apps/web-admin/package.json`](file:///D:/Repository/tuquet/admin/apps/web-admin/package.json)): **BẮT BUỘC** dùng `"catalog:"`. Tuyệt đối không ghi phiên bản số trực tiếp (như `"0.2.1"`).
+- Mọi dependency dùng chung hoặc thư viện bên ngoài phải được khai báo phiên bản tập trung tại file [`pnpm-workspace.yaml`](pnpm-workspace.yaml) trong khối `catalog:`.
+- Trong file `package.json` của từng ứng dụng/gói (ví dụ [`apps/web-admin/package.json`](apps/web-admin/package.json)): **BẮT BUỘC** dùng `"catalog:"`. Tuyệt đối không ghi phiên bản số trực tiếp (như `"0.2.1"`).
 - Tuyệt đối không để lại các catalog item không được sử dụng (`pnpm/yaml-no-unused-catalog-item`).
 
 ### 7.3. Chiến Lược Tiết Kiệm Phút Build CI (CI Minutes Conservation)
@@ -160,7 +159,7 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
 
 - **Single Source of Truth cho Supabase HTTP:**
   - Toàn bộ các yêu cầu HTTP tới Supabase (Auth, REST, RPC) trong `apps/web-admin` **BẮT BUỘC** phải sử dụng hàm dùng chung `supabaseRequest<T>()` từ [`apps/web-admin/src/api/core/supabase-client.ts`](apps/web-admin/src/api/core/supabase-client.ts).
-  - Tuyệt đối không khai báo lặp lại hàm `getSupabaseConfig()` hoặc hardcode biến môi trường `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` tại các file `auth.ts`, `tenant.ts`, `user.ts`.
+  - Tuyệt đối không khai báo lặp lại hàm `getSupabaseConfig()` hoặc hardcode biến môi trường `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` tại các file `auth.ts`, `tenant.ts`, `user.ts`, `automation.ts`, `billing.ts`, `commerce.ts`.
 
 ---
 
@@ -169,7 +168,7 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
 - Khi web admin (`https://admin.tuquet.com`) thực hiện thăm dò hoặc gọi lệnh xuống daemon máy trạm (`http://127.0.0.1:8765`), trình duyệt Chromium 120+ sẽ hiển thị hộp thoại cấp quyền PNA (_"admin.tuquet.com muốn truy nhập các ứng dụng và dịch vụ khác trên thiết bị này"_).
 - **Yêu cầu kỹ thuật:**
   1. Phía Daemon Rust (`cli`/`runner`): Bắt buộc bật `.allow_private_network(true)` trong cấu hình CORS Layer và kiểm duyệt nghiêm ngặt origin `*.tuquet.com`, `localhost`, `127.0.0.1`.
-  2. Phía Web Admin (`fleet.ts`): Lệnh probe qua `fetch` phải có `mode: 'no-cors'`, gắn `AbortController` timeout ngắn ($\le 1200\text{ms}$) và xử lý lỗi không chặn giao diện (non-blocking) để trang web vẫn hoạt động trơn tru nếu người dùng bấm "Chặn".
+  2. Phía Web Admin (`automation.ts`): Lệnh probe qua `fetch` phải có `mode: 'no-cors'`, gắn `AbortController` timeout ngắn ($\le 1200\text{ms}$) và xử lý lỗi không chặn giao diện (non-blocking) để trang web vẫn hoạt động trơn tru nếu người dùng bấm "Chặn".
 
 ---
 
@@ -183,16 +182,16 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
 
 ### 10.2. Phân Cấp Thư Mục Tài Liệu Chuẩn (`docs/`)
 
-Toàn bộ tài liệu kỹ thuật trong kho lưu trữ `tuquet/admin` bắt buộc phải được sắp xếp vào đúng 4 thư mục chuyên biệt:
+Toàn bộ tài liệu kỹ thuật trong kho lưu trữ `tuquet/admin` (`apps/web-admin/docs/`) bắt buộc phải được sắp xếp vào đúng 4 thư mục chuyên biệt:
 
-1. `docs/architecture/`: Tài liệu kiến trúc hệ thống tổng thể (`overview.md`) và quy chuẩn thiết kế giao diện (`styling-guide.md`). Nghiêm cấm để file lẻ tại thư mục gốc `docs/`.
+1. `docs/architecture/`: Tài liệu kiến trúc hệ thống tổng thể (`overview.md`) và quy chuẩn thiết kế giao diện (`styling-guide.md`).
 2. `docs/decisions/`: Chuỗi bản ghi quyết định kiến trúc (ADR) tuân thủ quy tắc:
-   - Đánh số tuần tự 4 chữ số: `0001-...`, `0002-...`, `0003-...` (không trùng số hiệu).
+   - Đánh số tuần tự 4 chữ số: `0001-...`, `0002-...`, `0003-...`, `0004-...` (không trùng số hiệu).
    - Đặt tên file theo định dạng `kebab-case`, tuyệt đối không gắn hậu tố version (như `-v2`).
-3. `docs/routes/`: Sổ tay đặc tả kỹ thuật 22 routes, sơ đồ phân cấp và ranh giới plugin (`README.md`, `auth.md`, `dashboard.md`, `tenants.md`, `fleet.md`, `automation.md`, `system.md`).
-4. `docs/specs/`: Bản đồ năng lực (`capability-map.md`) và các bản đặc tả module (`SPEC-*.md`).
+3. `docs/routes/`: Sổ tay đặc tả kỹ thuật 27 routes, sơ đồ phân cấp và ranh giới plugin (`README.md`, `auth.md`, `dashboard.md`, `tenants.md`, `automation.md`, `commerce.md`, `system.md`).
+4. `docs/specs/`: Bản đồ năng lực (`capability-map.md`) và 15 bản đặc tả module chuẩn hóa (`SPEC-*.md`).
 
 ### 10.3. Tính Khả Chuyển Của Đường Dẫn Trong Tài Liệu Git
 
-- Trong các tệp tin markdown (`*.md`) được commit vào kho lưu trữ, **BẮT BUỘC sử dụng đường dẫn tương đối** (ví dụ: `[access.ts](../../apps/web-admin/src/api/core/access.ts)`).
+- Trong các tệp tin markdown (`*.md`) được commit vào kho lưu trữ, **BẮT BUỘC sử dụng đường dẫn tương đối** (ví dụ: `[access.ts](apps/web-admin/src/api/core/access.ts)`).
 - **Nghiêm cấm tuyệt đối** hardcode đường dẫn tuyệt đối của máy trạm cá nhân (như `file:///C:/Users/...` hoặc `file:///home/...`) vào tài liệu dự án để đảm bảo tài liệu luôn đọc và liên kết chính xác trên GitHub, GitLab và mọi môi trường hệ điều hành.

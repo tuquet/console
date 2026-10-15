@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import type { PlatformUserItem } from '#/api';
 
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+
+import { usePreferences } from '@vben/preferences';
 
 import {
   ArrowUpRight,
@@ -25,26 +27,26 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  toast,
 } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { filterPlatformUsers, getPlatformUsersApi } from '#/api';
 import RoleBadge from '#/components/iam/role-badge.vue';
-import { useDateFormat } from '#/composables';
+import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
 defineOptions({ name: 'SystemUsers' });
 
 const router = useRouter();
 const { formatDate } = useDateFormat();
+const { copyToClipboard, isCopied } = useClipboard();
+const { isMobile } = usePreferences();
 
 const allUsers = ref<PlatformUserItem[]>([]);
 const usersLoaded = ref(false);
 const loadingUsers = ref(false);
 const selectedUser = ref<null | PlatformUserItem>(null);
 const detailOpen = ref(false);
-const copiedId = ref<null | string>(null);
 
 let loadUsersPromise: null | Promise<void> = null;
 
@@ -70,13 +72,6 @@ async function ensureUsersLoaded(force = false): Promise<void> {
   return loadUsersPromise;
 }
 
-const activeOrgUsersCount = computed(
-  () => allUsers.value.filter((u) => u.tenant_count > 0).length,
-);
-const unassignedUsersCount = computed(
-  () => allUsers.value.filter((u) => u.tenant_count === 0).length,
-);
-
 function getInitials(name: null | string): string {
   if (!name) return 'U';
   return name
@@ -88,24 +83,12 @@ function getInitials(name: null | string): string {
     .toUpperCase();
 }
 
-async function handleCopyId(id: string) {
-  try {
-    await navigator.clipboard.writeText(id);
-    copiedId.value = id;
-    toast.success('Đã sao chép mã định danh UUID');
-    setTimeout(() => {
-      if (copiedId.value === id) {
-        copiedId.value = null;
-      }
-    }, 1800);
-  } catch {
-    toast.error('Không thể sao chép UUID');
-  }
+function handleCopyId(id: string) {
+  copyToClipboard(id, id);
 }
 
 function openUserDetail(user: PlatformUserItem) {
-  selectedUser.value = user;
-  detailOpen.value = true;
+  gridApi.openDetailSheet(user);
 }
 
 function navigateToWorkspace(tenantId: string) {
@@ -114,47 +97,132 @@ function navigateToWorkspace(tenantId: string) {
   router.push(`/tenants/${tenantId}`);
 }
 
+function getColumns() {
+  return [
+    {
+      field: 'full_name',
+      title: $t('term.user'),
+      minWidth: isMobile.value ? 185 : 250,
+      align: 'left' as const,
+      slots: { default: 'user-cell' },
+    },
+    {
+      field: 'primary_role',
+      title: $t('page.system_view.users_col_primary_role'),
+      width: isMobile.value ? 100 : 140,
+      align: 'left' as const,
+      slots: { default: 'role-cell' },
+    },
+    {
+      field: 'tenant_count',
+      title: $t('page.system_view.users_col_organizations'),
+      minWidth: 210,
+      align: 'left' as const,
+      visible: !isMobile.value,
+      slots: { default: 'tenant-cell' },
+    },
+    {
+      field: 'id',
+      title: $t('page.system_view.users_col_id'),
+      width: 175,
+      align: 'left' as const,
+      visible: !isMobile.value,
+      slots: { default: 'id-cell' },
+    },
+    {
+      field: 'created_at',
+      title: $t('page.system_view.users_col_joined_at'),
+      width: 150,
+      align: 'left' as const,
+      visible: !isMobile.value,
+      slots: { default: 'date-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('common.actions'),
+      width: isMobile.value ? 56 : 110,
+      align: 'right' as const,
+      slots: { default: 'actions-cell' },
+    },
+  ];
+}
+
 const [Grid, gridApi] = useVbenVxeGrid<PlatformUserItem>({
   separator: false,
+  detailSheetOptions: {
+    actions: [
+      {
+        disabled: (row) => !row?.workspaces?.[0]?.tenant_id,
+        icon: ArrowUpRight,
+        label: $t('page.system_view.users_open_workspace'),
+        onClick: (row) => {
+          const tenantId = row?.workspaces?.[0]?.tenant_id;
+          if (tenantId) {
+            navigateToWorkspace(tenantId);
+          }
+        },
+        variant: 'outline',
+      },
+    ],
+    forwardActionSlot: false,
+    resource: 'public.profiles',
+    subtitleField: 'primary_role',
+    titleField: 'full_name',
+    onSaved: async () => {
+      await ensureUsersLoaded(true);
+    },
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Select',
         fieldName: 'tenant_filter',
-        label: 'Tổ chức',
+        label: () => $t('page.system_view.users_filter_org'),
         defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả người dùng',
+        componentProps: () => ({
+          placeholder: $t('page.system_view.users_org_all'),
           options: [
-            { label: 'Tất cả người dùng', value: 'all' },
-            { label: 'Đã tham gia tổ chức', value: 'has_tenants' },
-            { label: 'Chưa có tổ chức', value: 'no_tenants' },
+            { label: $t('page.system_view.users_org_all'), value: 'all' },
+            {
+              label: $t('page.system_view.users_org_has_tenants'),
+              value: 'has_tenants',
+            },
+            {
+              label: $t('page.system_view.users_org_no_tenants'),
+              value: 'no_tenants',
+            },
           ],
-        },
+        }),
       },
       {
         component: 'Select',
         fieldName: 'role_filter',
-        label: 'Vai trò',
+        label: () => $t('term.role'),
         defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả vai trò',
+        componentProps: () => ({
+          placeholder: $t('page.system_view.roles_all'),
           options: [
-            { label: 'Tất cả vai trò', value: 'all' },
-            { label: 'Owner', value: 'owner' },
-            { label: 'Admin', value: 'admin' },
-            { label: 'Member', value: 'member' },
-            { label: 'Viewer', value: 'viewer' },
+            { label: $t('page.system_view.roles_all'), value: 'all' },
+            { label: $t('page.system_view.role_owner'), value: 'owner' },
+            { label: $t('page.system_view.role_admin'), value: 'admin' },
+            { label: $t('page.system_view.role_member'), value: 'member' },
+            { label: $t('page.system_view.role_viewer'), value: 'viewer' },
           ],
-        },
+        }),
       },
       {
         component: 'Input',
         fieldName: 'search',
-        label: 'Tìm kiếm',
-        componentProps: {
-          placeholder: 'Tìm theo tên, email, UUID hoặc workspace...',
-        },
+        label: () => $t('common.search'),
+        componentProps: () => ({
+          placeholder: $t('page.system_view.users_search_placeholder'),
+        }),
       },
     ],
     layout: 'vertical',
@@ -162,13 +230,14 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformUserItem>({
     submitOnChange: true,
     submitOnEnter: true,
     submitButtonOptions: {
-      content: $t('common.filter'),
+      content: computed(() => $t('common.filter')),
     },
     resetButtonOptions: {
-      content: $t('common.reset'),
+      content: computed(() => $t('common.reset')),
     },
-    actionWrapperClass: 'flex items-center justify-end gap-2',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3',
+    actionWrapperClass:
+      'col-span-2 sm:col-span-1 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
@@ -211,51 +280,20 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformUserItem>({
         },
       },
     },
-    columns: [
-      {
-        field: 'full_name',
-        title: 'Người dùng',
-        minWidth: 250,
-        align: 'left',
-        slots: { default: 'user-cell' },
-      },
-      {
-        field: 'primary_role',
-        title: 'Vai trò chính',
-        width: 140,
-        align: 'left',
-        slots: { default: 'role-cell' },
-      },
-      {
-        field: 'tenant_count',
-        title: 'Tổ chức tham gia',
-        minWidth: 210,
-        align: 'left',
-        slots: { default: 'tenant-cell' },
-      },
-      {
-        field: 'id',
-        title: 'Mã định danh',
-        width: 175,
-        align: 'left',
-        slots: { default: 'id-cell' },
-      },
-      {
-        field: 'created_at',
-        title: 'Ngày tham gia',
-        width: 150,
-        align: 'left',
-        slots: { default: 'date-cell' },
-      },
-      {
-        field: 'actions',
-        title: 'Thao tác',
-        width: 110,
-        align: 'right',
-        slots: { default: 'actions-cell' },
-      },
-    ],
+    columns: getColumns(),
   },
+});
+
+watch([() => $t('page.system_view.users_col_primary_role'), isMobile], () => {
+  gridApi.setGridOptions({ columns: getColumns() });
+  gridApi.formApi?.setState({
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
+  });
 });
 
 async function handleRefresh() {
@@ -265,70 +303,53 @@ async function handleRefresh() {
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Top Header -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="flex flex-col gap-1">
-        <h1
-          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.system.users') }}
-        </h1>
-        <p class="text-xs text-muted-foreground">
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1
+            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          >
+            {{ $t('page.system.users') }}
+          </h1>
+          <Badge variant="secondary" class="font-mono text-xs font-normal">
+            {{ allUsers.length }}
+          </Badge>
+        </div>
+        <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.system.users_desc') }}
         </p>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex shrink-0 items-center gap-2">
         <Button
           variant="outline"
-          size="sm"
+          size="icon"
+          class="size-8 shrink-0"
           :disabled="loadingUsers"
           :title="$t('common.refresh')"
           @click="handleRefresh"
-          class="gap-1.5"
         >
           <RefreshCw
-            class="size-3.5 text-muted-foreground"
+            class="size-3.5 shrink-0"
             :class="{ 'animate-spin': loadingUsers }"
           />
-          {{ $t('common.refresh') }}
         </Button>
       </div>
     </div>
 
-    <!-- Main Container: Stats Bar + VXE Grid -->
+    <!-- Main Container: VXE Grid -->
     <div
-      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-xs space-y-3"
+      class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs"
     >
-      <!-- Stats Bar -->
-      <div
-        class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-border/40 pb-3 px-3 sm:px-0 pt-2 sm:pt-0 text-xs"
-      >
-        <div class="flex items-center gap-2">
-          <Users class="size-4 shrink-0 text-muted-foreground" />
-          <span class="text-sm font-semibold text-foreground">
-            Danh bạ người dùng
-          </span>
-          <span class="text-muted-foreground">
-            · {{ allUsers.length }} tổng số
-          </span>
-        </div>
-
-        <div class="flex items-center gap-3 text-muted-foreground">
-          <span>{{ activeOrgUsersCount }} đã tham gia tổ chức</span>
-          <span>&bull;</span>
-          <span>{{ unassignedUsersCount }} chưa có tổ chức</span>
-        </div>
-      </div>
-
       <!-- VXE Grid Table -->
       <Grid class="users-vxe-grid">
         <template #user-cell="{ row }">
-          <div class="flex items-center gap-3">
-            <Avatar class="size-9 rounded-lg border border-border/50 shrink-0">
+          <div class="flex items-center gap-2.5 sm:gap-3">
+            <Avatar
+              class="size-8 shrink-0 rounded-lg border border-border/50 sm:size-9"
+            >
               <AvatarImage
                 v-if="row.avatar_url"
                 :src="row.avatar_url"
@@ -340,13 +361,23 @@ async function handleRefresh() {
                 {{ getInitials(row.full_name) }}
               </AvatarFallback>
             </Avatar>
-            <div class="flex flex-col text-left min-w-0 leading-snug">
-              <span class="text-xs font-semibold text-foreground truncate">
-                {{ row.full_name || 'Người dùng ẩn danh' }}
+            <div class="flex min-w-0 flex-col text-left leading-snug">
+              <span class="truncate text-xs font-semibold text-foreground">
+                {{ row.full_name || $t('page.system_view.users_anonymous') }}
               </span>
-              <span class="text-xs text-muted-foreground truncate">
-                {{ row.email || 'Chưa cập nhật email' }}
-              </span>
+              <div
+                class="flex items-center gap-1.5 text-2xs text-muted-foreground sm:text-xs"
+              >
+                <span class="truncate">
+                  {{ row.email || $t('page.system_view.users_no_email') }}
+                </span>
+                <span class="sm:hidden">&bull;</span>
+                <span class="shrink-0 sm:hidden">
+                  {{
+                    $t('page.system_view.users_orgs_count', [row.tenant_count])
+                  }}
+                </span>
+              </div>
             </div>
           </div>
         </template>
@@ -357,7 +388,9 @@ async function handleRefresh() {
             :role="row.primary_role"
             :uppercase="true"
           />
-          <span v-else class="text-xs text-muted-foreground">Chưa gán</span>
+          <span v-else class="text-xs text-muted-foreground">{{
+            $t('page.system_view.users_unassigned_role')
+          }}</span>
         </template>
 
         <template #tenant-cell="{ row }">
@@ -367,7 +400,9 @@ async function handleRefresh() {
               class="shrink-0 gap-1 font-normal text-xs"
             >
               <Building2 class="size-3 text-muted-foreground shrink-0" />
-              <span>{{ row.tenant_count }} tổ chức</span>
+              <span>{{
+                $t('page.system_view.users_orgs_count', [row.tenant_count])
+              }}</span>
             </Badge>
             <span
               v-if="row.workspaces?.[0]?.tenant_name"
@@ -391,10 +426,10 @@ async function handleRefresh() {
               variant="ghost"
               size="icon"
               class="size-6 shrink-0 text-muted-foreground hover:text-foreground"
-              title="Sao chép UUID"
+              :title="$t('page.system_view.users_copy_uuid')"
               @click.stop="handleCopyId(row.id)"
             >
-              <Check v-if="copiedId === row.id" class="size-3.5 text-success" />
+              <Check v-if="isCopied(row.id)" class="size-3.5 text-success" />
               <Copy v-else class="size-3.5" />
             </Button>
           </div>
@@ -411,11 +446,12 @@ async function handleRefresh() {
             <Button
               variant="outline"
               size="sm"
-              class="h-7 text-xs inline-flex items-center gap-1"
+              class="h-7 px-2 text-xs inline-flex items-center gap-1"
+              :title="$t('common.detail')"
               @click="openUserDetail(row as PlatformUserItem)"
             >
               <Eye class="size-3 shrink-0" />
-              <span>{{ $t('common.detail') }}</span>
+              <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
             </Button>
           </div>
         </template>
@@ -426,11 +462,10 @@ async function handleRefresh() {
           >
             <Users class="size-10 stroke-[1.5] text-muted-foreground/60 mb-3" />
             <p class="text-sm font-medium text-foreground">
-              Không tìm thấy người dùng phù hợp
+              {{ $t('page.system_view.users_empty_title') }}
             </p>
             <p class="text-xs text-muted-foreground max-w-sm mt-1">
-              Thử thay đổi bộ lọc trạng thái tổ chức, vai trò hoặc từ khóa tìm
-              kiếm.
+              {{ $t('page.system_view.users_empty_desc') }}
             </p>
           </div>
         </template>
@@ -443,10 +478,10 @@ async function handleRefresh() {
         <DialogHeader>
           <DialogTitle class="flex items-center gap-2 text-base">
             <ShieldCheck class="size-4 text-primary" />
-            Hồ sơ định danh người dùng
+            {{ $t('page.system_view.users_dialog_title') }}
           </DialogTitle>
           <DialogDescription class="text-xs">
-            Thông tin tài khoản gốc và danh sách không gian làm việc liên kết
+            {{ $t('page.system_view.users_dialog_desc') }}
           </DialogDescription>
         </DialogHeader>
 
@@ -472,14 +507,19 @@ async function handleRefresh() {
               </Avatar>
               <div class="min-w-0 space-y-0.5">
                 <div class="text-sm font-semibold text-foreground truncate">
-                  {{ selectedUser.full_name || 'Người dùng ẩn danh' }}
+                  {{
+                    selectedUser.full_name ||
+                    $t('page.system_view.users_anonymous')
+                  }}
                 </div>
                 <div class="text-xs text-muted-foreground truncate">
-                  {{ selectedUser.email || 'Chưa cập nhật email' }}
+                  {{
+                    selectedUser.email || $t('page.system_view.users_no_email')
+                  }}
                 </div>
                 <div class="flex items-center gap-1.5 pt-1">
                   <code
-                    class="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground"
+                    class="rounded bg-muted px-1.5 py-0.5 font-mono text-2xs text-muted-foreground"
                   >
                     {{ selectedUser.id }}
                   </code>
@@ -487,11 +527,11 @@ async function handleRefresh() {
                     variant="ghost"
                     size="icon"
                     class="size-5 text-muted-foreground hover:text-foreground"
-                    title="Sao chép UUID"
+                    :title="$t('page.system_view.users_copy_uuid')"
                     @click="handleCopyId(selectedUser.id)"
                   >
                     <Check
-                      v-if="copiedId === selectedUser.id"
+                      v-if="isCopied(selectedUser.id)"
                       class="size-3 text-success"
                     />
                     <Copy v-else class="size-3" />
@@ -511,13 +551,17 @@ async function handleRefresh() {
             class="grid grid-cols-2 gap-3 rounded-xl border border-border/60 p-3.5"
           >
             <div>
-              <div class="text-muted-foreground">Ngày tham gia</div>
+              <div class="text-muted-foreground">
+                {{ $t('page.system_view.users_col_joined_at') }}
+              </div>
               <div class="mt-0.5 font-mono font-medium text-foreground">
                 {{ formatDate(selectedUser.created_at) }}
               </div>
             </div>
             <div>
-              <div class="text-muted-foreground">Cập nhật gần nhất</div>
+              <div class="text-muted-foreground">
+                {{ $t('page.system_view.users_last_updated') }}
+              </div>
               <div class="mt-0.5 font-mono font-medium text-foreground">
                 {{ formatDate(selectedUser.updated_at) }}
               </div>
@@ -528,7 +572,11 @@ async function handleRefresh() {
           <div class="space-y-2">
             <div class="flex items-center justify-between">
               <h4 class="font-semibold text-foreground">
-                Tổ chức tham gia ({{ selectedUser.tenant_count }})
+                {{
+                  $t('page.system_view.users_orgs_header', [
+                    selectedUser.tenant_count,
+                  ])
+                }}
               </h4>
             </div>
 
@@ -554,7 +602,7 @@ async function handleRefresh() {
                       {{ ws.tenant_name }}
                     </div>
                     <div
-                      class="font-mono text-[11px] text-muted-foreground truncate"
+                      class="font-mono text-2xs text-muted-foreground truncate"
                     >
                       /{{ ws.tenant_slug || ws.tenant_id.slice(0, 8) }}
                     </div>
@@ -570,7 +618,9 @@ async function handleRefresh() {
                     class="h-7 px-2 text-xs gap-1"
                     @click="navigateToWorkspace(ws.tenant_id)"
                   >
-                    <span>Mở</span>
+                    <span>{{
+                      $t('page.system_view.users_open_workspace')
+                    }}</span>
                     <ArrowUpRight class="size-3" />
                   </Button>
                 </div>
@@ -581,18 +631,18 @@ async function handleRefresh() {
               v-else-if="selectedUser.tenant_count > 0"
               class="rounded-lg border border-border/60 bg-muted/10 p-4 text-center text-muted-foreground"
             >
-              Người dùng đang là thành viên của
-              <strong class="text-foreground">{{
-                selectedUser.tenant_count
-              }}</strong>
-              tổ chức trên hệ thống.
+              {{
+                $t('page.system_view.users_member_of_orgs', [
+                  selectedUser.tenant_count,
+                ])
+              }}
             </div>
 
             <div
               v-else
               class="rounded-lg border border-border/60 bg-muted/10 p-4 text-center text-muted-foreground"
             >
-              Tài khoản này chưa tham gia vào bất kỳ tổ chức nào.
+              {{ $t('page.system_view.users_no_orgs_desc') }}
             </div>
           </div>
         </div>

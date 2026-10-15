@@ -36,11 +36,9 @@ async function handleSubmit(values: Recordable<any>) {
   try {
     loading.value = true;
     await resetPasswordApi(values.email);
-    toast.success(
-      'Liên kết khôi phục mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.',
-    );
+    toast.success($t('authentication.resetLinkSent'));
   } catch (error: any) {
-    toast.error(error.message || 'Gửi yêu cầu khôi phục thất bại');
+    toast.error(error.message || $t('authentication.resetLinkFailed'));
   } finally {
     loading.value = false;
   }

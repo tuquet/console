@@ -1,3 +1,4 @@
+import { $t } from '@vben/locales';
 import { useAccessStore } from '@vben/stores';
 
 import { getEffectiveAccessApi } from './access';
@@ -84,7 +85,7 @@ export async function loginApi(
       resJson.msg ||
       resJson.error_description ||
       resJson.message ||
-      'Invalid email or password';
+      $t('authentication.passwordErrorTip');
     throw new Error(errorMsg);
   }
 
@@ -164,7 +165,7 @@ export async function resetPasswordApi(email: string): Promise<void> {
       resJson.msg ||
       resJson.error_description ||
       resJson.message ||
-      'Failed to send password recovery email';
+      $t('authentication.resetLinkFailed');
     throw new Error(errorMsg);
   }
 }
@@ -201,7 +202,7 @@ export async function updatePasswordApi(
       resJson.msg ||
       resJson.error_description ||
       resJson.message ||
-      'Password update failed';
+      $t('authentication.passwordResetFailed');
     throw new Error(errorMsg);
   }
 }

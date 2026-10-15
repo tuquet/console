@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { defaultPreferences } from '../src/config';
-import { isDarkTheme } from '../src/update-css-variables';
+import { isDarkTheme, updateCSSVariables } from '../src/update-css-variables';
 
 describe('preferences', () => {
   let PreferenceManager: typeof import('../src/preferences').PreferenceManager;
@@ -680,3 +680,66 @@ describe('isDarkTheme', () => {
     );
   });
 });
+
+describe('updateCSSVariables — built-in theme chart palette & zero-mutation', () => {
+  it('does not mutate the input preferences object when resolving a built-in theme', () => {
+    const input = structuredClone(defaultPreferences);
+    input.theme.builtinType = 'violet';
+    input.theme.colorPrimary = 'hsl(0 0% 98%)';
+
+    const snapshotBefore = structuredClone(input);
+    updateCSSVariables(input);
+
+    expect(input).toEqual(snapshotBefore);
+  });
+
+  it('synchronizes --chart-1 through --chart-5 when switching chromatic built-in themes', () => {
+    const rootStyle = document.documentElement.style;
+
+    preferenceManagerUpdateTheme('violet', 'dark');
+    const violetCharts = [1, 2, 3, 4, 5].map((i) =>
+      rootStyle.getPropertyValue(`--chart-${i}`).trim(),
+    );
+
+    expect(violetCharts.every((val) => val.length > 0)).toBe(true);
+    expect(new Set(violetCharts).size).toBe(5);
+    expect(violetCharts[0]).toBe(
+      rootStyle.getPropertyValue('--primary').trim(),
+    );
+
+    preferenceManagerUpdateTheme('green', 'dark');
+    const greenCharts = [1, 2, 3, 4, 5].map((i) =>
+      rootStyle.getPropertyValue(`--chart-${i}`).trim(),
+    );
+
+    expect(greenCharts.every((val) => val.length > 0)).toBe(true);
+    expect(new Set(greenCharts).size).toBe(5);
+    expect(greenCharts[0]).not.toBe(violetCharts[0]);
+    expect(greenCharts[0]).toBe(rootStyle.getPropertyValue('--primary').trim());
+  });
+
+  it('generates 5 distinct high-contrast --chart-1..5 steps for monochrome themes (neutral, zinc, slate, gray) in both light and dark modes', () => {
+    const rootStyle = document.documentElement.style;
+
+    for (const builtinType of ['neutral', 'zinc', 'slate', 'gray'] as const) {
+      for (const mode of ['dark', 'light'] as const) {
+        preferenceManagerUpdateTheme(builtinType, mode);
+        const charts = [1, 2, 3, 4, 5].map((i) =>
+          rootStyle.getPropertyValue(`--chart-${i}`).trim(),
+        );
+        expect(charts.every((val) => val.length > 0)).toBe(true);
+        expect(new Set(charts).size).toBe(5);
+      }
+    }
+  });
+});
+
+function preferenceManagerUpdateTheme(
+  builtinType: typeof defaultPreferences.theme.builtinType,
+  mode: 'dark' | 'light',
+) {
+  const pref = structuredClone(defaultPreferences);
+  pref.theme.builtinType = builtinType;
+  pref.theme.mode = mode;
+  updateCSSVariables(pref);
+}

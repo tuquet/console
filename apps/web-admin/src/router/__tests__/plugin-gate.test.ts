@@ -164,6 +164,7 @@ describe('filterRoutesByPlugins', () => {
     ]);
     expect(onlyAutoma).toHaveLength(1);
     expect(onlyAutoma[0]?.children?.map((c) => c.name)).toEqual([
+      'AutomationOverview',
       'AutomationWorkflows',
       'AutomationRuns',
       'AutomationRunDetail',
@@ -175,6 +176,7 @@ describe('filterRoutesByPlugins', () => {
     ]);
     expect(onlyRunners).toHaveLength(1);
     expect(onlyRunners[0]?.children?.map((c) => c.name)).toEqual([
+      'AutomationOverview',
       'AutomationDevices',
       'AutomationBrowsers',
       'AutomationProxies',

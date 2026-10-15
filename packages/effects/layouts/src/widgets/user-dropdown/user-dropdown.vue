@@ -102,7 +102,7 @@ defineOptions({
 const props = withDefaults(defineProps<Props>(), {
   avatar: '',
   avatarDot: true,
-  avatarDotClass: 'bottom-0 right-1 border-2 size-4 bg-success',
+  avatarDotClass: 'bottom-0 right-0 border-2 size-2.5 bg-success',
   description: '',
   menus: () => [],
   tagText: '',

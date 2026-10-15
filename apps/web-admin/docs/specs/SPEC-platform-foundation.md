@@ -1,15 +1,15 @@
-# Spec: Platform Foundation & Monorepo Architecture (Module `platform-foundation`)
+# Spec: Kiến Trúc Monorepo & Hạ Tầng Nền Tảng (`platform-foundation`)
 
 > **Mã đặc tả:** `SPEC-platform-foundation`  
-> **Module id:** `platform-foundation` (xem [`capability-map.md`](capability-map.md)) — **ĐÃ HOÀN THÀNH**  
+> **Module id:** `platform-foundation` (xem [`capability-map.md`](capability-map.md))  
 > **Kiến trúc nguồn:** [`docs/architecture/overview.md`](../architecture/overview.md)  
-> **Trạng thái:** **ACTIVE & ACCEPTED**
+> **Trạng thái:** **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**
 
 ---
 
-## 1. Mục Tiêu & Phạm Vi (Objective & Scope)
+## 1. Objective (Mục Tiêu & Phạm Vi)
 
-Module `platform-foundation` thiết lập và chuẩn hóa toàn bộ nền tảng kỹ thuật cho ứng dụng Tuquet Admin (`apps/web-admin` / `admin.tuquet.com`), bao gồm cấu trúc phân tầng monorepo 39 packages, hạ tầng build cục bộ không phát sinh rủi ro tài nguyên CI (`build:local`), cơ chế kiểm soát vòng đời PWA (Service Worker anti-cache & auto-update), và thực thi cổng kiểm định chất lượng 3 bước trước khi chuyển giao mã nguồn.
+Module `platform-foundation` thiết lập và chuẩn hóa toàn bộ nền tảng kỹ thuật cho ứng dụng Tuquet Admin (`apps/web-admin` / `admin.tuquet.com`), bao gồm cấu trúc phân tầng monorepo 39 packages, hạ tầng build cục bộ không phát sinh rủi ro tài nguyên CI (`build:local`), cơ chế kiểm soát vòng đời PWA (Service Worker anti-cache & auto-update), và thực thi cổng kiểm định chất lượng 4 bước trước khi chuyển giao mã nguồn.
 
 ### Trong phạm vi:
 
@@ -24,14 +24,72 @@ Module `platform-foundation` thiết lập và chuẩn hóa toàn bộ nền t�
 3. **Quản Lý Vòng Đời PWA & Header Chống Cache:**
    - Cấu hình Vite PWA với `registerType: 'autoUpdate'`, `workbox.skipWaiting: true`, và `workbox.clientsClaim: true`.
    - Nginx phục vụ `sw.js`, `manifest.webmanifest`, và `_app-config-*.js` với `Cache-Control: no-cache, no-store, must-revalidate; Expires: 0`.
-4. **Cổng Kiểm Định Chất Lượng Pre-Push 3 Bước:**
+4. **Cổng Kiểm Định Chất Lượng Pre-Push 4 Bước:**
    - Bước 1 (Typecheck): `pnpm run check:type` (`turbo run typecheck`) đạt 0 lỗi trên 39 packages.
-   - Bước 2 (Lint & Format): `oxfmt` + `eslint` + `stylelint` đạt 0 lỗi.
-   - Bước 3 (Admin Build): `pnpm run build:admin` đóng gói thành công.
+   - Bước 2 (Lint & Format): `pnpm run lint` (`oxlint` + `oxfmt` + `eslint` + `stylelint`) đạt 0 lỗi.
+   - Bước 3 (Headless Runtime Check): `pnpm run check:console` xác minh toàn bộ routes với 0 cảnh báo/lỗi runtime.
+   - Bước 4 (Admin Build): `pnpm run build:admin` đóng gói thành công.
 
 ---
 
-## 2. Kiến Trúc Phân Tầng Monorepo (Package Topology)
+## 2. Tech Stack
+
+- **Monorepo & Workspace:** `pnpm@11.16.0` (Catalog protocol) + `turbo@2.10.13`.
+- **Frontend Core:** Vue 3.5 (`<script setup lang="ts">`), Vite 8, TypeScript 5, Pinia, Vue Router 4.
+- **Design System & Table Engine:** Tailwind CSS v4 (`internal/tailwind-config/src/theme.css`), `@tuquet/vue-ui`, `@tuquet/vue-table` (`useVbenVxeGrid` / `VxeTable`, `VxeForm`), `@lucide/vue`.
+- **Quality & Tooling:** Vitest (`happy-dom`), `vue-tsc`, `oxlint`, `oxfmt`, `eslint`, `stylelint`, `vite-plugin-pwa`.
+
+---
+
+## 3. Commands (Lệnh Thực Thi & Kiểm Định)
+
+```bash
+# 1. Kiểm tra kiểu dữ liệu TypeScript toàn bộ 39 packages
+pnpm run check:type
+
+# 2. Kiểm tra linter và chuẩn hóa định dạng mã nguồn
+pnpm run lint
+pnpm run format
+
+# 3. Chạy toàn bộ bộ kiểm thử đơn vị (Vitest)
+pnpm run test:unit
+
+# 4. Đóng gói ứng dụng web-admin production
+pnpm run build:admin
+
+# 5. Thực thi bản dựng kiểm chứng cục bộ qua Nginx (Zero Git Push)
+pnpm run build:local
+```
+
+---
+
+## 4. Project Structure (Cấu Trúc Tệp Tác Động)
+
+```text
+admin/
+├── pnpm-workspace.yaml                       # Khai báo workspace & catalog tập trung
+├── turbo.json                                # Điều phối pipeline build, typecheck, test
+├── package.json                              # Các scripts cấp root (check:type, lint, build:local)
+├── scripts/
+│   ├── build-local.sh                        # Kịch bản 5 bước build & nạp Nginx an toàn
+│   └── check-console.mjs                     # Kịch bản kiểm định console runtime bằng trình duyệt headless
+├── internal/
+│   ├── lint-configs/                         # Cấu hình oxlint, oxfmt, eslint, stylelint, commitlint
+│   ├── tailwind-config/src/theme.css         # SSOT CSS Variables Design Tokens (HSL)
+│   ├── tsconfig/                             # Cấu hình TypeScript cơ sở
+│   └── vite-config/                          # Plugins Vite (PWA, compress, app-loading)
+├── packages/
+│   ├── @core/                                # Tầng 1-3: base, composables, preferences, ui-kit
+│   └── effects/                              # Tầng 4: access, layouts, locales, plugins, request
+└── apps/
+    └── web-admin/                            # Ứng dụng quản trị chính (@tuquet/admin-web)
+```
+
+---
+
+## 5. Code Style & Kiến Trúc Chi Tiết
+
+### 5.1. Kiến Trúc Phân Tầng Monorepo (Package Topology)
 
 Hệ thống monorepo gồm 39 packages được phân cấp theo 4 tầng phụ thuộc đơn hướng (không có vòng lặp):
 
@@ -82,32 +140,11 @@ graph TD
   VBEN_LAYOUTS --> WEB_ADMIN
 ```
 
-### Nguyên Tắc Bất Biến Về Phụ Thuộc:
-
 - **Zero Domain Clutter in Core:** Toàn bộ business logic và các views nghiệp vụ chỉ tồn tại trong `apps/web-admin/src/views/`, không đưa vào `packages/`.
-- **Defu Array Duplication Defense:** Sử dụng `mergeWithArrayOverride` từ `@vben-core/shared` thay cho hàm merge gốc của `defu` nhằm tránh hiện tượng nhân đôi mảng cấu hình (như `widget.order`).
+- **Defu Array Duplication Defense:** Sử dụng `mergeWithArrayOverride` từ `@vben-core/shared` thay cho hàm merge gốc của `defu` nhằm tránh hiện tượng nhân đôi mảng cấu hình.
 - **Strict Order-Sensitive Diffing:** Cung cấp hàm `diffStrict` so sánh thứ tự mảng (`arraysStrictEqual`) để phát hiện chính xác việc sắp xếp lại các widget trên Header.
 
----
-
-## 3. Quy Trình Build Cục Bộ & Vòng Đời PWA (Build Pipeline)
-
-### 3.1. Kịch Bản `scripts/build-local.sh`
-
-Kịch bản thực thi 5 giai đoạn nghiêm ngặt:
-
-1. **Kiểm tra an toàn đĩa cứng:** Đo đếm dung lượng đĩa `df /`. Nếu $> 85\%$, tự động dọn dẹp các thư mục cache tạm `.turbo`.
-2. **Kiểm tra hồi quy:** Chạy toàn bộ test suites cho Core Preferences:
-   ```bash
-   pnpm test:unit packages/@core/preferences/__tests__/preferences.test.ts
-   ```
-3. **Biên dịch đóng gói:** Thiết lập `NODE_OPTIONS="--max-old-space-size=4096"` và thực thi Vite production build cho `@tuquet/admin-web`.
-4. **Ghi nhận Metadata:** Xuất file `.build-meta.json` chứa commit hash rút gọn và timestamp ISO.
-5. **Nạp lại Web Server:** `nginx -t -q && systemctl reload nginx`.
-
-### 3.2. Cấu Hình Nginx & Header Chống Cache
-
-Tệp cấu hình Nginx lắng nghe nội bộ trên `127.0.0.1:80`:
+### 5.2. Cấu Hình Nginx & Header Chống Cache Cho PWA
 
 ```nginx
 # Service Worker và Webmanifest: Bắt buộc không lưu cache
@@ -127,13 +164,7 @@ location ~* \.(?:css|js|woff2?|svg|png|jpg|jpeg|gif|ico|webp)$ {
 }
 ```
 
----
-
-## 4. Chuẩn Mực Lập Trình & Thiết Kế Giao Diện (Patterns)
-
-### 4.1. Universal Data Access Pattern (`supabaseRequest`)
-
-Toàn bộ tương tác cơ sở dữ liệu tuân thủ chuẩn PostgREST profile header:
+### 5.3. Universal Data Access & VxeGrid Pattern
 
 ```typescript
 import { supabaseRequest } from '#/api/core/supabase-client';
@@ -150,66 +181,56 @@ export async function getFleetDevicesApi(status?: string) {
     path: `/rest/v1/devices?${query.toString()}`,
     options: {
       method: 'GET',
-      schema: 'runners', // Header Accept-Profile: runners
+      schema: 'runners', // Tự động đính kèm Accept-Profile: runners
     },
   });
 }
 ```
 
-### 4.2. Bảng Dữ Liệu `useVbenVxeGrid` & Biểu Mẫu `VxeForm`
-
-Mọi view chứa bảng dữ liệu danh sách và biểu mẫu sử dụng adapter `#/adapter/vxe-table`:
-
-1. **Data Grid (`useVbenVxeGrid`):** Bảng phẳng viền semantic token `border-border/40`, tích hợp lọc `formOptions`, cuộn ngang tự nhiên và phân trang căn giữa trên thiết bị di động.
-2. **Forms (`VxeForm`):** Áp dụng đồng nhất cho các trang chi tiết và hộp thoại modal.
-
-### 4.3. Lucide Icons Only Invariant
-
-- Chỉ sử dụng icon từ gói `@lucide/vue`.
-- Tuyệt đối không dùng unicode emoji làm biểu tượng chức năng trên giao diện.
-
 ---
 
-## 5. Chiến Lược Kiểm Thử (Testing Strategy)
+## 6. Testing Strategy (Chiến Lược Kiểm Thử)
 
 | Tầng Kiểm Thử | Công Cụ & Lệnh | Tiêu Chuẩn Nghiệm Thu |
 | :-- | :-- | :-- |
-| **Unit Tests** | `vitest run` (`happy-dom`) | 100% tests pass trên router, api, preferences. |
+| **Unit Tests** | `pnpm run test:unit` (`vitest run`) | 100% tests pass trên router, api, preferences, components. |
 | **Type Integrity** | `pnpm run check:type` | `vue-tsc` kết thúc với **0 lỗi** trên 39 packages. |
 | **Code Formatting** | `oxfmt --check` | Toàn bộ tệp mã nguồn tuân thủ cấu hình chuẩn. |
-| **Linting** | `oxlint` + `eslint` + `stylelint` | **0 warnings, 0 errors**. |
+| **Linting** | `pnpm run lint` (`oxlint` + `eslint` + `stylelint`) | **0 warnings, 0 errors**. |
 | **Local Verification** | `pnpm run build:local` | Nginx phản hồi HTTP 200 trên `http://127.0.0.1/`. |
 
 ---
 
-## 6. Ranh Giới Phát Triển (Boundaries)
+## 7. Boundaries (Ranh Giới Kỹ Thuật)
 
-### Always:
-
-- Thực thi `pnpm run build:local` để kiểm chứng trước khi kết thúc phiên làm việc.
-- Dùng `catalog:` trong `pnpm-workspace.yaml` khi khai báo dependency dùng chung.
-- Dùng đường dẫn tương đối trong toàn bộ tài liệu markdown (`*.md`).
-- Phục vụ `sw.js` và manifest với header `no-cache, no-store`.
-
-### Ask First:
-
-- Cập nhật phiên bản Node.js hoặc pnpm corepack.
-- Thay đổi cấu trúc schema của Nginx hoặc các port lắng nghe.
-- Thêm package bên ngoài vào danh mục `catalog`.
-
-### Never:
-
-- **Tuyệt đối không chạy `git push`** hoặc kích hoạt remote GitHub Actions CI khi người dùng không yêu cầu.
-- **Tuyệt đối không import `@supabase/supabase-js`** trong mã nguồn client.
-- **Tuyệt đối không sử dụng mock data** hoặc chuỗi văn bản không liên quan.
-- **Tuyệt đối không hardcode mã màu tĩnh** (`bg-[#0f172a]`) thay cho semantic CSS variables.
+- **Always:**
+  - Thực thi `pnpm run build:local` để kiểm chứng trước khi kết thúc phiên làm việc.
+  - Dùng `catalog:` trong `pnpm-workspace.yaml` khi khai báo dependency dùng chung.
+  - Dùng đường dẫn tương đối trong toàn bộ tài liệu markdown (`*.md`).
+  - Phục vụ `sw.js` và manifest với header `no-cache, no-store`.
+- **Ask first:**
+  - Cập nhật phiên bản Node.js hoặc pnpm corepack.
+  - Thay đổi cấu trúc schema của Nginx hoặc các port lắng nghe.
+  - Thêm package bên ngoài vào danh mục `catalog`.
+- **Never:**
+  - Tuyệt đối không chạy `git push` hoặc kích hoạt remote GitHub Actions CI khi người dùng không yêu cầu.
+  - Tuyệt đối không import `@supabase/supabase-js` trong mã nguồn client.
+  - Tuyệt đối không sử dụng mock data hoặc chuỗi văn bản không liên quan.
+  - Tuyệt đối không hardcode mã màu tĩnh (`bg-[#0f172a]`) thay cho semantic CSS variables.
 
 ---
 
-## 7. Tiêu Chí Nghiệm Thu (Acceptance Criteria)
+## 8. Success Criteria (Tiêu Chí Nghiệm Thu)
 
-- [x] **AC1:** Script `scripts/build-local.sh` hoạt động ổn định, nạp bản build thành công vào Nginx.
-- [x] **AC2:** Lệnh `pnpm run build:local` được cấu hình trong `package.json` và thực thi mượt mà.
-- [x] **AC3:** Tệp `apps/web-admin/vite.config.ts` tích hợp đầy đủ `registerType: 'autoUpdate'` và `workbox` auto claim.
-- [x] **AC4:** Header phản hồi của `http://127.0.0.1/sw.js` chứa đầy đủ `Cache-Control: no-cache, no-store, must-revalidate; Expires: 0`.
-- [x] **AC5:** Toàn bộ 99/99 unit tests và `vue-tsc` typecheck đạt 100% pass với 0 lỗi.
+- [x] **SC1:** Script [`scripts/build-local.sh`](../../../../scripts/build-local.sh) hoạt động ổn định, kiểm tra dung lượng đĩa và nạp bản build thành công vào Nginx.
+- [x] **SC2:** Lệnh `pnpm run build:local` được cấu hình trong [`package.json`](../../../../package.json) và thực thi mượt mà.
+- [x] **SC3:** Tệp [`apps/web-admin/vite.config.ts`](../../vite.config.ts) tích hợp đầy đủ `registerType: 'autoUpdate'`, `workbox.skipWaiting: true` và `workbox.clientsClaim: true`.
+- [x] **SC4:** Header phản hồi của `http://127.0.0.1/sw.js` chứa đầy đủ `Cache-Control: no-cache, no-store, must-revalidate; Expires: 0`.
+- [x] **SC5:** Toàn bộ unit tests, `pnpm run check:type`, và `pnpm run lint` đạt 100% pass với 0 lỗi.
+
+---
+
+## 9. Resolved Decisions (Các Quyết Định Đã Chốt)
+
+1. **Quản lý phiên bản tập trung qua PNPM Catalog:** Toàn bộ 39 packages trong workspace tham chiếu phiên bản thư viện qua `"catalog:"` trong `pnpm-workspace.yaml`, triệt tiêu xung đột phiên bản lệch giữa các gói `@vben-core/*` và `apps/web-admin`.
+2. **Cơ chế tự động cập nhật PWA tức thì (`autoUpdate` + `no-cache`):** Kết hợp `skipWaiting: true` trong Workbox và header `Cache-Control: no-cache, no-store` trên Nginx cho `sw.js` / `_app-config-*.js` để trình duyệt luôn nhận bản build mới ngay khi tải lại trang.

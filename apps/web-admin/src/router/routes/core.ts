@@ -91,7 +91,7 @@ const coreRoutes: RouteRecordRaw[] = [
         component: () =>
           import('#/views/_core/authentication/reset-password.vue'),
         meta: {
-          title: 'Đặt lại mật khẩu',
+          title: $t('authentication.resetPasswordTitle'),
         },
       },
       {
@@ -99,7 +99,7 @@ const coreRoutes: RouteRecordRaw[] = [
         path: 'callback',
         component: () => import('#/views/_core/authentication/callback.vue'),
         meta: {
-          title: 'Xác thực GitHub',
+          title: $t('authentication.githubCallbackTitle'),
         },
       },
       {
@@ -108,7 +108,7 @@ const coreRoutes: RouteRecordRaw[] = [
         component: () =>
           import('#/views/_core/authentication/desktop-bridge.vue'),
         meta: {
-          title: 'Authorize Specter Desk',
+          title: $t('authentication.desktopBridgeTitle'),
         },
       },
     ],

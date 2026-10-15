@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { $t } from '@vben/locales';
 import { useUserStore } from '@vben/stores';
 
 import {
@@ -92,7 +93,7 @@ async function fetchProfile() {
       userId.value = res.userId || '';
     }
   } catch (error: any) {
-    toast.error(`Không thể tải thông tin hồ sơ: ${error.message || ''}`);
+    toast.error($t('profile.loadProfileError', { error: error.message || '' }));
   } finally {
     loading.value = false;
   }
@@ -114,9 +115,9 @@ async function handleSaveProfile() {
       avatar: avatarUrl.value,
       realName: fullName.value,
     });
-    toast.success('Cập nhật thông tin hồ sơ thành công!');
+    toast.success($t('profile.saveProfileSuccess'));
   } catch (error: any) {
-    toast.error(`Lỗi lưu hồ sơ: ${error.message || ''}`);
+    toast.error($t('profile.saveProfileError', { error: error.message || '' }));
   } finally {
     savingProfile.value = false;
   }
@@ -124,26 +125,28 @@ async function handleSaveProfile() {
 
 async function handleSavePassword() {
   if (!newPassword.value) {
-    toast.warning('Vui lòng nhập mật khẩu mới');
+    toast.warning($t('authentication.newPasswordRequired'));
     return;
   }
   if (newPassword.value.length < 6) {
-    toast.warning('Mật khẩu phải có tối thiểu 6 ký tự');
+    toast.warning($t('authentication.passwordMinLength'));
     return;
   }
   if (newPassword.value !== confirmPassword.value) {
-    toast.warning('Mật khẩu xác nhận không khớp');
+    toast.warning($t('authentication.confirmPasswordTip'));
     return;
   }
 
   try {
     savingPassword.value = true;
     await updateUserPasswordApi(newPassword.value);
-    toast.success('Đổi mật khẩu thành công!');
+    toast.success($t('profile.changePasswordSuccess'));
     newPassword.value = '';
     confirmPassword.value = '';
   } catch (error: any) {
-    toast.error(`Lỗi đổi mật khẩu: ${error.message || ''}`);
+    toast.error(
+      $t('profile.changePasswordError', { error: error.message || '' }),
+    );
   } finally {
     savingPassword.value = false;
   }
@@ -163,9 +166,11 @@ onMounted(async () => {
         <ArrowLeft class="size-4" />
       </Button>
       <div class="text-xs text-muted-foreground">
-        <span>Cài đặt</span>
+        <span>{{ $t('profile.settingsBreadcrumb') }}</span>
         <span class="mx-1.5">/</span>
-        <span class="text-foreground font-medium">Hồ sơ cá nhân</span>
+        <span class="text-foreground font-medium">{{
+          $t('profile.personalProfile')
+        }}</span>
       </div>
     </div>
 
@@ -188,19 +193,19 @@ onMounted(async () => {
             <h1
               class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
             >
-              {{ fullName || 'Kỹ sư Tuquet' }}
+              {{ fullName || $t('profile.defaultEngineerName') }}
             </h1>
             <Badge
               variant="outline"
               class="bg-primary/10 text-primary border-primary/30 text-xs font-medium"
             >
-              Super Administrator
+              {{ $t('profile.superAdminBadge') }}
             </Badge>
             <Badge
               variant="outline"
               class="bg-success/10 text-success border-success/30 text-xs"
             >
-              Active
+              {{ $t('common.active') }}
             </Badge>
           </div>
 
@@ -236,7 +241,7 @@ onMounted(async () => {
           @click="fetchProfile"
         >
           <RefreshCw class="size-4" :class="{ 'animate-spin': loading }" />
-          <span>Làm mới</span>
+          <span>{{ $t('common.refresh') }}</span>
         </Button>
       </div>
     </div>
@@ -247,20 +252,24 @@ onMounted(async () => {
     >
       <Tabs default-value="info" class="w-full">
         <TabsList class="grid w-full max-w-xs grid-cols-3 mb-6">
-          <TabsTrigger value="info">Hồ sơ</TabsTrigger>
-          <TabsTrigger value="security">Bảo mật</TabsTrigger>
-          <TabsTrigger value="workspace">Workspace</TabsTrigger>
+          <TabsTrigger value="info">{{ $t('profile.tabProfile') }}</TabsTrigger>
+          <TabsTrigger value="security">
+            {{ $t('profile.tabSecurity') }}
+          </TabsTrigger>
+          <TabsTrigger value="workspace">
+            {{ $t('profile.tabWorkspace') }}
+          </TabsTrigger>
         </TabsList>
 
-        <!-- Tab 1: Hồ sơ cá nhân -->
+        <!-- Tab 1: Personal profile -->
         <TabsContent value="info">
           <div class="max-w-2xl space-y-5 pt-1">
             <div>
               <h3 class="text-base font-semibold text-foreground">
-                Hồ sơ cá nhân
+                {{ $t('profile.personalProfile') }}
               </h3>
               <p class="text-xs text-muted-foreground">
-                Thông tin hiển thị trên các Workspace của bạn.
+                {{ $t('profile.personalProfileDesc') }}
               </p>
             </div>
 
@@ -270,12 +279,12 @@ onMounted(async () => {
               size="small"
               class="w-full space-y-3"
             >
-              <VxeFormItem title="Họ và tên" span="24">
+              <VxeFormItem :title="$t('profile.fullName')" span="24">
                 <template #default>
                   <div class="relative w-full">
                     <Input
                       v-model="fullName"
-                      placeholder="Ví dụ: Nguyễn Đình Tứ"
+                      :placeholder="$t('profile.fullNamePlaceholder')"
                       class="h-10 pl-9"
                     />
                     <User
@@ -285,7 +294,7 @@ onMounted(async () => {
                 </template>
               </VxeFormItem>
 
-              <VxeFormItem title="Email đăng nhập" span="24">
+              <VxeFormItem :title="$t('profile.loginEmail')" span="24">
                 <template #default>
                   <div class="space-y-1.5 w-full">
                     <div class="relative w-full">
@@ -299,13 +308,13 @@ onMounted(async () => {
                       />
                     </div>
                     <p class="text-xs text-muted-foreground">
-                      Email định danh tài khoản, không thể thay đổi trực tiếp.
+                      {{ $t('profile.loginEmailHint') }}
                     </p>
                   </div>
                 </template>
               </VxeFormItem>
 
-              <VxeFormItem title="Ảnh đại diện URL" span="24">
+              <VxeFormItem :title="$t('profile.avatarUrl')" span="24">
                 <template #default>
                   <Input
                     v-model="avatarUrl"
@@ -315,11 +324,11 @@ onMounted(async () => {
                 </template>
               </VxeFormItem>
 
-              <VxeFormItem title="Tiểu sử" span="24">
+              <VxeFormItem :title="$t('profile.bio')" span="24">
                 <template #default>
                   <Textarea
                     v-model="bio"
-                    placeholder="Kỹ sư phần mềm, DevOps..."
+                    :placeholder="$t('profile.bioPlaceholder')"
                     :rows="3"
                   />
                 </template>
@@ -334,7 +343,9 @@ onMounted(async () => {
                   >
                     <Save class="size-4" />
                     <span>{{
-                      savingProfile ? 'Đang lưu...' : 'Lưu thay đổi'
+                      savingProfile
+                        ? $t('profile.saving')
+                        : $t('profile.saveChanges')
                     }}</span>
                   </Button>
                 </template>
@@ -343,15 +354,15 @@ onMounted(async () => {
           </div>
         </TabsContent>
 
-        <!-- Tab 2: Bảo Mật -->
+        <!-- Tab 2: Security -->
         <TabsContent value="security">
           <div class="max-w-2xl space-y-6 pt-1">
             <div>
               <h3 class="text-base font-semibold text-foreground">
-                Đổi mật khẩu
+                {{ $t('profile.changePasswordTitle') }}
               </h3>
               <p class="text-xs text-muted-foreground">
-                Cập nhật mật khẩu mới cho tài khoản đăng nhập.
+                {{ $t('profile.changePasswordDesc') }}
               </p>
             </div>
 
@@ -361,13 +372,13 @@ onMounted(async () => {
               size="small"
               class="w-full space-y-3"
             >
-              <VxeFormItem title="Mật khẩu mới" span="24">
+              <VxeFormItem :title="$t('authentication.newPassword')" span="24">
                 <template #default>
                   <div class="relative w-full">
                     <Input
                       v-model="newPassword"
                       type="password"
-                      placeholder="Tối thiểu 6 ký tự"
+                      :placeholder="$t('profile.min6CharsPlaceholder')"
                       class="h-10 pl-9"
                     />
                     <Lock
@@ -377,13 +388,16 @@ onMounted(async () => {
                 </template>
               </VxeFormItem>
 
-              <VxeFormItem title="Xác nhận mật khẩu" span="24">
+              <VxeFormItem
+                :title="$t('authentication.confirmPassword')"
+                span="24"
+              >
                 <template #default>
                   <div class="relative w-full">
                     <Input
                       v-model="confirmPassword"
                       type="password"
-                      placeholder="Nhập lại mật khẩu mới"
+                      :placeholder="$t('authentication.reenterNewPassword')"
                       class="h-10 pl-9"
                     />
                     <Lock
@@ -402,7 +416,9 @@ onMounted(async () => {
                   >
                     <KeyRound class="size-4" />
                     <span>{{
-                      savingPassword ? 'Đang lưu...' : 'Lưu mật khẩu'
+                      savingPassword
+                        ? $t('profile.saving')
+                        : $t('profile.savePassword')
                     }}</span>
                   </Button>
                 </template>
@@ -412,7 +428,7 @@ onMounted(async () => {
             <!-- Security Overview Cards -->
             <div class="border-t border-border/40 pt-5 space-y-4">
               <h4 class="text-sm font-semibold text-foreground">
-                Tình trạng bảo mật
+                {{ $t('profile.securityStatusTitle') }}
               </h4>
 
               <div
@@ -426,10 +442,10 @@ onMounted(async () => {
                   </div>
                   <div>
                     <div class="text-sm font-medium text-foreground">
-                      Xác thực 2 lớp MFA
+                      {{ $t('profile.mfaTitle') }}
                     </div>
                     <div class="text-xs text-muted-foreground">
-                      Bảo vệ tài khoản qua mã OTP hoặc FIDO2
+                      {{ $t('profile.mfaDesc') }}
                     </div>
                   </div>
                 </div>
@@ -437,7 +453,7 @@ onMounted(async () => {
                   variant="outline"
                   class="bg-muted text-muted-foreground border-border"
                 >
-                  Sẵn sàng
+                  {{ $t('profile.mfaReady') }}
                 </Badge>
               </div>
 
@@ -452,10 +468,10 @@ onMounted(async () => {
                   </div>
                   <div>
                     <div class="text-sm font-medium text-foreground">
-                      Phiên đăng nhập
+                      {{ $t('profile.sessionTitle') }}
                     </div>
                     <div class="text-xs text-muted-foreground">
-                      Mã hóa JWT tự động gia hạn an toàn
+                      {{ $t('profile.sessionDesc') }}
                     </div>
                   </div>
                 </div>
@@ -463,7 +479,7 @@ onMounted(async () => {
                   variant="outline"
                   class="bg-success/10 text-success border-success/30"
                 >
-                  Hoạt động
+                  {{ $t('common.active') }}
                 </Badge>
               </div>
             </div>
@@ -475,10 +491,10 @@ onMounted(async () => {
           <div class="max-w-2xl space-y-5 pt-1">
             <div>
               <h3 class="text-base font-semibold text-foreground">
-                Workspace đang hoạt động
+                {{ $t('profile.activeWorkspaceTitle') }}
               </h3>
               <p class="text-xs text-muted-foreground">
-                Không gian làm việc mặc định của tài khoản hiện tại.
+                {{ $t('profile.activeWorkspaceDesc') }}
               </p>
             </div>
 
@@ -488,19 +504,19 @@ onMounted(async () => {
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <Building2 class="size-4.5 text-primary" />
-                  <span class="font-semibold text-foreground"
-                    >Workspace hiện tại</span
-                  >
+                  <span class="font-semibold text-foreground">{{
+                    $t('profile.currentWorkspace')
+                  }}</span>
                 </div>
                 <Badge
                   variant="outline"
                   class="bg-primary/10 text-primary border-primary/30 font-mono text-xs"
                 >
-                  Active
+                  {{ $t('common.active') }}
                 </Badge>
               </div>
               <div class="text-xs text-muted-foreground font-mono">
-                ID: {{ activeTenantId || 'Chưa chọn workspace' }}
+                ID: {{ activeTenantId || $t('profile.noWorkspaceSelected') }}
               </div>
               <div class="pt-2">
                 <Button
@@ -508,13 +524,16 @@ onMounted(async () => {
                   variant="outline"
                   @click="router.push('/tenants')"
                 >
-                  Xem tất cả workspace
+                  {{ $t('profile.viewAllWorkspaces') }}
                 </Button>
               </div>
             </div>
 
             <!-- CLI Command -->
-            <CliSnippetCard command="tuquet login" label="Lệnh ghép nối CLI" />
+            <CliSnippetCard
+              command="tuquet login"
+              :label="$t('profile.cliPairingCommand')"
+            />
           </div>
         </TabsContent>
       </Tabs>

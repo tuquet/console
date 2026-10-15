@@ -1,21 +1,12 @@
 <script lang="ts" setup>
 import type { TenantItem } from '#/api';
 
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { useUserStore } from '@vben/stores';
+import { usePreferences } from '@vben/preferences';
 
-import {
-  Building2,
-  Check,
-  Eye,
-  Plus,
-  RefreshCw,
-  ShieldCheck,
-  Sparkles,
-  Terminal,
-} from '@lucide/vue';
+import { Building2, Check, Eye, Plus, RefreshCw, Terminal } from '@lucide/vue';
 import { Badge, Button, toast } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
@@ -26,6 +17,7 @@ import {
   setActiveTenantId,
 } from '#/api';
 import { useDateFormat } from '#/composables';
+import { FILTER_ALL, TENANT_PLAN, TENANT_STATUS } from '#/constants';
 import { $t } from '#/locales';
 
 import CreateWorkspaceModal from './components/modals/create-workspace-modal.vue';
@@ -33,8 +25,8 @@ import CreateWorkspaceModal from './components/modals/create-workspace-modal.vue
 defineOptions({ name: 'Workspace' });
 
 const router = useRouter();
-const userStore = useUserStore();
 const { formatDate } = useDateFormat();
+const { isMobile } = usePreferences();
 
 // Loading states
 const creatingTenant = ref(false);
@@ -56,13 +48,13 @@ const activeTenant = computed(() => {
 
 // Plan mapping config
 const PLAN_MAP: Record<string, { color: string; label: string }> = {
-  enterprise: { color: 'purple', label: 'Enterprise' },
-  free: { color: 'default', label: 'Free' },
-  pro: { color: 'geekblue', label: 'Pro' },
+  [TENANT_PLAN.ENTERPRISE]: { color: 'purple', label: 'Enterprise' },
+  [TENANT_PLAN.FREE]: { color: 'default', label: 'Free' },
+  [TENANT_PLAN.PRO]: { color: 'geekblue', label: 'Pro' },
 };
 
 function getPlanInfo(plan?: string) {
-  const key = plan?.toLowerCase() || 'pro';
+  const key = plan?.toLowerCase() || TENANT_PLAN.PRO;
   return PLAN_MAP[key] || { color: 'default', label: plan || 'Standard' };
 }
 
@@ -107,46 +99,105 @@ async function handleCreateTenant(payload: {
   }
 }
 
+function getColumns() {
+  const mobile = isMobile.value;
+  return [
+    {
+      field: 'name',
+      title: $t('page.workspace.col_name'),
+      minWidth: mobile ? 165 : 220,
+      slots: { default: 'name-cell' },
+    },
+    {
+      field: 'slug',
+      title: $t('page.workspace.col_slug'),
+      minWidth: 140,
+      visible: !mobile,
+      slots: { default: 'slug-cell' },
+    },
+    {
+      field: 'plan',
+      title: $t('page.workspace.col_plan'),
+      minWidth: 110,
+      visible: !mobile,
+      slots: { default: 'plan-cell' },
+    },
+    {
+      field: 'status',
+      title: $t('page.workspace.col_status'),
+      minWidth: mobile ? 95 : 130,
+      slots: { default: 'status-cell' },
+    },
+    {
+      field: 'created_at',
+      title: $t('page.workspace.col_created_at'),
+      minWidth: 140,
+      visible: !mobile,
+      slots: { default: 'date-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('page.workspace.col_actions'),
+      minWidth: mobile ? 110 : 280,
+      align: 'right' as const,
+      showOverflow: false,
+      slots: { default: 'actions-cell' },
+    },
+  ];
+}
+
 const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
   separator: false,
+  gridClass: 'p-0',
+  detailSheetOptions: {
+    resource: 'public.tenants',
+    subtitleField: 'slug',
+    titleField: 'name',
+  },
   formOptions: {
+    commonConfig: {
+      componentProps: {
+        class: 'w-full',
+      },
+      hideLabel: isMobile.value,
+    },
     schema: [
       {
         component: 'Select',
         fieldName: 'plan',
-        label: 'Gói cước',
-        defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả gói cước',
+        label: () => $t('page.tenants_view.filter_plan'),
+        defaultValue: FILTER_ALL,
+        componentProps: () => ({
+          placeholder: $t('page.tenants_view.plan_all'),
           options: [
-            { label: 'Tất cả gói cước', value: 'all' },
-            { label: 'Free', value: 'free' },
-            { label: 'Pro', value: 'pro' },
-            { label: 'Enterprise', value: 'enterprise' },
+            { label: $t('page.tenants_view.plan_all'), value: FILTER_ALL },
+            { label: 'Free', value: TENANT_PLAN.FREE },
+            { label: 'Pro', value: TENANT_PLAN.PRO },
+            { label: 'Enterprise', value: TENANT_PLAN.ENTERPRISE },
           ],
-        },
+        }),
       },
       {
         component: 'Select',
         fieldName: 'status',
-        label: 'Trạng thái',
-        defaultValue: 'all',
-        componentProps: {
-          placeholder: 'Tất cả trạng thái',
+        label: () => $t('common.status'),
+        defaultValue: FILTER_ALL,
+        componentProps: () => ({
+          placeholder: $t('page.tenants_view.status_all'),
           options: [
-            { label: 'Tất cả trạng thái', value: 'all' },
-            { label: 'Đang hoạt động', value: 'active' },
-            { label: 'Tạm khóa', value: 'suspended' },
+            { label: $t('page.tenants_view.status_all'), value: FILTER_ALL },
+            { label: $t('common.active'), value: TENANT_STATUS.ACTIVE },
+            { label: $t('common.suspended'), value: TENANT_STATUS.SUSPENDED },
           ],
-        },
+        }),
       },
       {
         component: 'Input',
         fieldName: 'search',
-        label: 'Tìm kiếm',
-        componentProps: {
-          placeholder: 'Tìm theo tên hoặc slug workspace...',
-        },
+        label: () => $t('common.search'),
+        componentProps: () => ({
+          placeholder: $t('page.tenants_view.search_placeholder'),
+        }),
       },
     ],
     layout: 'vertical',
@@ -154,19 +205,21 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
     submitOnChange: true,
     submitOnEnter: true,
     submitButtonOptions: {
-      content: $t('common.filter'),
+      content: computed(() => $t('common.filter')),
     },
     resetButtonOptions: {
-      content: $t('common.reset'),
+      content: computed(() => $t('common.reset')),
     },
-    actionWrapperClass: 'flex items-center justify-end gap-2',
-    wrapperClass: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3',
+    actionWrapperClass:
+      'col-span-2 sm:col-span-1 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
     border: false,
     round: true,
     showOverflow: true,
     pagerConfig: {
+      autoHidden: true,
       pageSize: 15,
       pageSizes: [10, 15, 30, 50],
     },
@@ -185,18 +238,18 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
           }
 
           let filtered = list;
-          if (formValues?.plan && formValues.plan !== 'all') {
+          if (formValues?.plan && formValues.plan !== FILTER_ALL) {
             filtered = filtered.filter(
               (t) =>
-                (t.metadata?.plan || 'pro').toLowerCase() ===
+                (t.metadata?.plan || TENANT_PLAN.PRO).toLowerCase() ===
                 formValues.plan.toLowerCase(),
             );
           }
 
-          if (formValues?.status && formValues.status !== 'all') {
+          if (formValues?.status && formValues.status !== FILTER_ALL) {
             filtered = filtered.filter(
               (t) =>
-                (t.status || 'active').toLowerCase() ===
+                (t.status || TENANT_STATUS.ACTIVE).toLowerCase() ===
                 formValues.status.toLowerCase(),
             );
           }
@@ -223,81 +276,54 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
         },
       },
     },
-    columns: [
-      {
-        field: 'name',
-        title: 'Tổ chức',
-        minWidth: 220,
-        slots: { default: 'name-cell' },
-      },
-      {
-        field: 'slug',
-        title: 'Slug',
-        minWidth: 140,
-        slots: { default: 'slug-cell' },
-      },
-      {
-        field: 'plan',
-        title: 'Gói cước',
-        minWidth: 120,
-        slots: { default: 'plan-cell' },
-      },
-      {
-        field: 'status',
-        title: 'Trạng thái',
-        minWidth: 130,
-        slots: { default: 'status-cell' },
-      },
-      {
-        field: 'created_at',
-        title: 'Ngày tạo',
-        minWidth: 140,
-        slots: { default: 'date-cell' },
-      },
-      {
-        field: 'actions',
-        title: 'Thao tác',
-        minWidth: 280,
-        align: 'right',
-        showOverflow: false,
-        slots: { default: 'actions-cell' },
-      },
-    ],
+    columns: getColumns(),
   },
+});
+
+watch([() => $t('page.workspace.col_name'), isMobile], () => {
+  gridApi.setGridOptions({ columns: getColumns() });
+  gridApi.formApi?.setState({
+    commonConfig: {
+      componentProps: { class: 'w-full' },
+      hideLabel: isMobile.value,
+    },
+  });
 });
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Top Action Bar -->
-    <div
-      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div>
-        <h1
-          class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.workspace.title') }}
-        </h1>
-        <p class="text-xs text-muted-foreground">
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h1
+            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          >
+            {{ $t('page.workspace.title') }}
+          </h1>
+          <Badge variant="secondary" class="font-mono text-xs font-normal">
+            {{ tenants.length }}
+          </Badge>
+        </div>
+        <p class="hidden text-xs text-muted-foreground sm:block">
           {{ $t('page.workspace.subtitle') }}
         </p>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
-          size="sm"
-          class="gap-1.5"
+          size="icon"
+          class="size-8 shrink-0"
           :title="$t('common.refresh')"
           @click="() => gridApi.reload()"
         >
           <RefreshCw class="size-3.5" />
-          <span>{{ $t('common.refresh') }}</span>
         </Button>
         <Button
           size="sm"
-          class="gap-1.5 text-xs font-medium"
+          class="h-8 gap-1.5 px-2.5 text-xs font-medium sm:px-3"
           @click="openCreateModal"
         >
           <Plus class="size-3.5" />
@@ -306,178 +332,52 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
       </div>
     </div>
 
-    <!-- Active Workspace Identity Card -->
+    <!-- Compact Active Workspace Strip -->
     <div
-      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
+      class="flex items-center justify-between gap-2.5 rounded-xl border border-border/60 bg-card px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-xs"
     >
-      <div
-        class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      <div class="flex min-w-0 items-center gap-2.5">
+        <div
+          class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
+        >
+          <Building2 class="size-4" />
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <span class="truncate text-sm font-semibold text-foreground">
+              {{ activeTenant?.name || $t('page.workspace.not_selected') }}
+            </span>
+            <Badge
+              variant="outline"
+              class="hidden font-mono text-2xs sm:inline-flex"
+            >
+              /{{ activeTenant?.slug || 'none' }}
+            </Badge>
+          </div>
+          <p class="truncate font-mono text-2xs text-muted-foreground">
+            ID: {{ activeTenant?.id || '—' }}
+          </p>
+        </div>
+      </div>
+
+      <Button
+        size="sm"
+        variant="outline"
+        class="h-7 shrink-0 gap-1.5 px-2.5 text-xs"
+        @click="handleConnectCli(activeTenant)"
       >
-        <div class="flex items-center gap-3">
-          <div
-            class="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm"
-          >
-            <Building2 class="size-5.5" />
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="text-base font-semibold text-foreground">
-                {{ activeTenant?.name || $t('page.workspace.not_selected') }}
-              </h2>
-              <Badge variant="outline" class="text-2xs font-mono">
-                /{{ activeTenant?.slug || 'none' }}
-              </Badge>
-            </div>
-            <p class="text-xs text-muted-foreground">
-              ID: <span class="font-mono">{{ activeTenant?.id || '—' }}</span>
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            class="gap-1.5 text-xs"
-            @click="handleConnectCli(activeTenant)"
-          >
-            <Terminal class="size-3.5" />
-            <span>{{ $t('page.workspace.connect_cli') }}</span>
-          </Button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Metric Cards Grid -->
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-muted-foreground">
-            {{ $t('page.workspace.tenants_count') }}
-          </span>
-          <span
-            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
-          >
-            <Building2 class="size-4.5" />
-          </span>
-        </div>
-        <div class="mt-2 flex items-baseline gap-2">
-          <span class="text-2xl font-bold tracking-tight text-foreground">
-            {{ tenants.length }}
-          </span>
-          <span class="text-xs font-medium text-muted-foreground">
-            {{ $t('page.workspace.tenants_label') }}
-          </span>
-        </div>
-        <div class="mt-2 text-xs text-muted-foreground truncate">
-          {{ $t('page.workspace.selected') }}:
-          <span class="font-semibold text-foreground">
-            {{ activeTenant?.name || $t('page.workspace.not_selected') }}
-          </span>
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-muted-foreground">
-            {{ $t('page.workspace.current_workspace') }}
-          </span>
-          <span
-            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
-          >
-            <Building2 class="size-4.5" />
-          </span>
-        </div>
-        <div class="mt-2 flex items-baseline gap-2 truncate">
-          <span
-            class="text-lg font-bold tracking-tight text-foreground truncate"
-          >
-            {{ activeTenant?.name || $t('page.workspace.not_selected') }}
-          </span>
-        </div>
-        <div class="mt-2 text-xs text-muted-foreground truncate font-mono">
-          slug: {{ activeTenant?.slug || 'none' }}
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-muted-foreground">
-            {{ $t('page.workspace.service_plan') }}
-          </span>
-          <span
-            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
-          >
-            <Sparkles class="size-4.5" />
-          </span>
-        </div>
-        <div class="mt-2 flex items-baseline gap-2">
-          <span class="text-xl font-bold tracking-tight text-foreground">
-            {{ getPlanInfo(activeTenant?.metadata?.plan).label }}
-          </span>
-          <Badge variant="secondary" class="text-xs font-normal capitalize">
-            <span
-              class="mr-1.5 size-1.5 rounded-full"
-              :class="
-                activeTenant?.status === 'active'
-                  ? 'bg-success'
-                  : 'bg-muted-foreground'
-              "
-            ></span>
-            {{ activeTenant?.status || 'Active' }}
-          </Badge>
-        </div>
-        <div class="mt-2 text-xs text-muted-foreground">
-          {{ $t('page.workspace.certified_by_cloud') }}
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-muted-foreground">
-            {{ $t('page.workspace.administrator') }}
-          </span>
-          <span
-            class="flex size-9 items-center justify-center rounded-lg bg-muted text-foreground"
-          >
-            <ShieldCheck class="size-4.5" />
-          </span>
-        </div>
-        <div class="mt-2 flex items-baseline gap-2 truncate">
-          <span
-            class="text-lg font-bold tracking-tight text-foreground truncate"
-          >
-            {{
-              userStore.userInfo?.realName ||
-              userStore.userInfo?.username ||
-              'Admin'
-            }}
-          </span>
-        </div>
-        <div class="mt-2 text-xs text-muted-foreground">
-          {{ $t('page.workspace.role_superadmin') }}
-        </div>
-      </div>
+        <Terminal class="size-3.5" />
+        <span class="hidden sm:inline">{{
+          $t('page.workspace.connect_cli')
+        }}</span>
+        <span class="sm:hidden">CLI</span>
+      </Button>
     </div>
 
     <!-- Main Content Container: Tenants Workspace List -->
     <div
-      class="overflow-hidden rounded-none sm:rounded-xl border-0 sm:border border-border/60 bg-card p-0 sm:p-5 shadow-none sm:shadow-sm space-y-4"
+      class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs"
     >
-      <div
-        class="flex items-center justify-between border-b border-border/40 pb-3 px-3 sm:px-0 pt-2 sm:pt-0"
-      >
-        <div class="flex items-center gap-2">
-          <Building2 class="size-4 text-foreground" />
-          <h2 class="text-sm font-semibold text-foreground">
-            {{ $t('page.workspace.list_title') }}
-          </h2>
-        </div>
-        <span class="text-xs text-muted-foreground">
-          {{ $t('page.workspace.available_count', [tenants.length]) }}
-        </span>
-      </div>
-
       <Grid class="tenants-vxe-grid">
         <template #name-cell="{ row }">
           <div class="flex items-center gap-2">
@@ -509,14 +409,18 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
         </template>
 
         <template #status-cell="{ row }">
-          <Badge variant="outline" class="text-xs capitalize font-normal">
+          <Badge variant="outline" class="text-xs font-normal">
             <span
               class="mr-1.5 size-1.5 rounded-full"
               :class="
                 row.status === 'active' ? 'bg-success' : 'bg-muted-foreground'
               "
             ></span>
-            {{ row.status || 'Active' }}
+            {{
+              row.status === 'active'
+                ? $t('common.active')
+                : $t('common.suspended')
+            }}
           </Badge>
         </template>
 

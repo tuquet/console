@@ -1,5 +1,7 @@
 import { ref } from 'vue';
 
+import { $t } from '@vben/locales';
+
 import { toast } from '@tuquet/vue-ui';
 
 export function useClipboard() {
@@ -7,12 +9,12 @@ export function useClipboard() {
 
   async function copyToClipboard(
     text: string,
-    label: string = 'Nội dung',
+    label: string = $t('common.content'),
   ): Promise<boolean> {
     try {
       await navigator.clipboard.writeText(text);
       copiedField.value = label;
-      toast.success(`Đã sao chép ${label}`);
+      toast.success($t('common.copiedLabel', { label }));
       setTimeout(() => {
         if (copiedField.value === label) {
           copiedField.value = null;
@@ -20,7 +22,7 @@ export function useClipboard() {
       }, 2000);
       return true;
     } catch {
-      toast.error(`Không thể sao chép ${label}`);
+      toast.error($t('common.copyFailedLabel', { label }));
       return false;
     }
   }

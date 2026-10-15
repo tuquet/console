@@ -1,60 +1,87 @@
-# Spec: `fleet-inventory`
+# Spec: Quản Trị Thiết Bị Runner, Hồ Sơ Trình Duyệt & Bể Proxy (`fleet-inventory`)
 
-> Module id: `fleet-inventory` (xem [capability-map.md](capability-map.md)) — **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**  
-> Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md) | Hợp nhất đường dẫn tại [`SPEC-route-consolidation-automation-fleet.md`](SPEC-route-consolidation-automation-fleet.md)
-
----
-
-## 1. Objective & Scope
-
-Module này hoàn thiện phân hệ Quản Trị Máy Trạm & Hạ Tầng Chạy Tự Động (**Specter Fleet**) bao gồm 3 màn hình nghiệp vụ (nay được hợp nhất dưới `/automation/*`):
-
-1. `/automation/devices` (Quản trị Thiết bị / Physical Devices & Edge Worker Nodes)
-2. `/automation/browsers` (Quản trị Hồ sơ Trình duyệt / Cloud Anti-Detect Browser Profiles)
-3. `/automation/proxies` (Quản trị Bể Proxy / Proxy Network Pool)
-
-Toàn bộ dữ liệu được truy vấn **100% đo đếm thực tế** từ schema `runners` của Tuquet Cloud thông qua header `Accept-Profile: runners`.
-
-### Trong phạm vi:
-
-1. **Loại bỏ hoàn toàn Fake / Mock Data:**
-   - Xóa bỏ hoàn toàn hàm `getInitialFallbackNodes()`, biến cache `TUQUET_FLEET_NODES_CACHE`, và cơ chế fallback `localStorage` (nay được hợp nhất tại `apps/web-admin/src/api/core/automation.ts`).
-   - Kết nối trực tiếp tới `runners.devices`, `runners.browsers`, và `runners.proxies` với `{ schema: 'runners' }`.
-   - Khi bảng dữ liệu rỗng (0 rows), hiển thị Empty State chuẩn mực với icon Lucide tương ứng và thông điệp hướng dẫn rõ ràng (tuân thủ AGENTS.md §5).
-2. **Quản trị Thiết Bị (`/automation/devices`):**
-   - Đọc dữ liệu từ `runners.devices` (`id`, `tenant_id`, `name`, `machine_fingerprint`, `status`, `version`, `os_info`, `cpu_cores`, `ram_mb`, `capabilities`, `active_jobs`, `last_heartbeat_at`, `registered_at`, `metadata`).
-   - Hỗ trợ trạng thái thiết bị theo đúng enum `runners.device_status`: `all`, `idle`, `busy`, `offline`, `maintenance`.
-   - Thăm dò Loopback Specter CLI Daemon (:8765) không chặn (non-blocking) qua `probeLocalDaemonApi()`.
-   - Thu hồi thiết bị qua API `DELETE /rest/v1/devices?id=eq.${id}` với `{ schema: 'runners' }`.
-   - Hỗ trợ bộ lọc URL query parameters: `?tenant=&status=`.
-   - Bảng dữ liệu chuẩn `useVbenVxeGrid`.
-3. **Quản trị Hồ Sơ Trình Duyệt (`/automation/browsers`):**
-   - Đọc dữ liệu từ `runners.browsers` (`id`, `tenant_id`, `name`, `browser_type`, `engine_version`, `os_platform`, `os_version`, `cpu_cores`, `ram_gb`, `status`, `proxy_id`, `locked_by_device_id`, `cookies_count`, `storage_size_bytes`, `created_at`, `last_synced_at`).
-   - Liên kết PostgREST foreign tables: `locked_by_device:locked_by_device_id(name)` và `proxy:proxy_id(host,port,protocol)`.
-   - Trạng thái profile: `all`, `idle`, `running`, `syncing`, `error`.
-   - Hỗ trợ bộ lọc URL query parameters: `?tenant=&status=`.
-   - Bảng dữ liệu chuẩn `useVbenVxeGrid`.
-4. **Quản trị Bể Proxy (`/automation/proxies`):**
-   - Đọc dữ liệu từ `runners.proxies` (`id`, `tenant_id`, `host`, `port`, `protocol`, `country_code`, `city`, `status`, `latency_ms`, `is_residential`, `error_count`, `last_checked_at`).
-   - Trạng thái proxy: `all`, `active`, `failing`, `testing`, `disabled`.
-   - Trực quan hóa độ trễ `latency_ms` (xanh: $< 300$ms, vàng: $300-800$ms, đỏ: $> 800$ms hoặc timeout).
-   - Hỗ trợ bộ lọc URL query parameters: `?tenant=&status=`.
-   - Bảng dữ liệu chuẩn `useVbenVxeGrid`.
-5. **Tiêu chuẩn Giao diện & Kỹ thuật:**
-   - 100% Lucide Icons, không dùng emoji (AGENTS.md §3).
-   - Semantic tokens Shadcn Slate (`bg-card`, `border-border/60`, `rounded-xl`, etc.) (AGENTS.md §2).
-   - Unit tests với Vitest cho các mappers và bộ tính metrics.
-
-### Ngoài phạm vi:
-
-- Không chỉnh sửa backend schema/RLS của Tuquet Cloud (đã hoàn thiện ở các module trước).
-- Không triển khai các tính năng tạo proxy / browser profile mới từ giao diện web (YAGNI / CLI & runner daemons quản lý provision trực tiếp).
+> **Mã đặc tả:** `SPEC-fleet-inventory`  
+> **Module id:** `fleet-inventory` (xem [`capability-map.md`](capability-map.md))  
+> **Kiến trúc nguồn:** [`docs/architecture/overview.md`](../architecture/overview.md), [`docs/routes/automation.md`](../routes/automation.md), [`ADR-004`](../decisions/0004-vxe-grid-form-and-i18n-terminology.md)  
+> **Trạng thái:** **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**
 
 ---
 
-## 2. Public Interfaces & Data Structures
+## 1. Objective (Mục Tiêu & Phạm Vi)
 
-### 2.1. Data Models (`apps/web-admin/src/api/core/automation.ts`)
+Xây dựng phân hệ Quản trị Hạ tầng Thực thi (**Runners Fleet** — plugin `runners`) thuộc nhánh điều hướng `/automation/*`, kết nối **100% dữ liệu đo đếm thực tế** từ schema `runners` của Tuquet Cloud qua header `Accept-Profile: runners` và thăm dò cổng loopback cục bộ (`127.0.0.1:8765`):
+
+1. **Quản Trị Thiết Bị & Máy Trạm (`/automation/devices`):**
+   - Hiển thị danh mục thiết bị từ `runners.devices` (`id`, `tenant_id`, `name`, `machine_fingerprint`, `status`, `version`, `os_info`, `cpu_cores`, `ram_mb`, `capabilities`, `active_jobs`, `last_heartbeat_at`) qua bảng `useVbenVxeGrid`.
+   - Hiển thị 4 thẻ chỉ số KPI thời gian thực: Tổng số máy trạm (`total_nodes`), Thiết bị trực tuyến (`online_nodes`: `idle` + `busy`), Tác vụ đang chạy (`active_jobs`), và Trạng thái kết nối Specter Loopback Daemon (`127.0.0.1:8765`).
+   - Hỗ trợ xem chi tiết cấu hình phần cứng (`NodeDetailModal` với `VxeForm`), hướng dẫn ghép nối máy trạm (`ConnectFleetModal`), và thu hồi quyền thiết bị (`revokeFleetDeviceApi`).
+2. **Quản Trị Hồ Sơ Trình Duyệt Anti-Detect (`/automation/browsers`):**
+   - Hiển thị danh mục hồ sơ trình duyệt từ `runners.browsers` liên kết `locked_by_device:locked_by_device_id(name)` và `proxy:proxy_id(host,port,protocol)` qua bảng `useVbenVxeGrid`.
+   - Hỗ trợ lọc theo trạng thái (`all`, `idle`, `running`, `syncing`, `error`) và theo Workspace (`?tenant=`).
+3. **Quản Trị Bể Proxy Mạng Phân Tán (`/automation/proxies`):**
+   - Hiển thị danh sách proxy từ `runners.proxies` (`host`, `port`, `protocol`, `country_code`, `city`, `status`, `latency_ms`, `is_residential`, `error_count`, `last_checked_at`) qua bảng `useVbenVxeGrid`.
+   - Trực quan hóa độ trễ mạng `latency_ms` (`< 300ms` tốt, `300-800ms` trung bình, `> 800ms` cao) và lọc theo trạng thái (`all`, `active`, `failing`, `testing`, `disabled`).
+
+---
+
+## 2. Tech Stack
+
+- **Framework:** Vue 3.5 (`<script setup lang="ts">`), Vue Router 4, TypeScript 5, `vue-i18n`.
+- **Data Grid & Form Engine:** `useVbenVxeGrid` (`VxeTable`) và `VxeForm` từ [`src/adapter/vxe-table.ts`](../../src/adapter/vxe-table.ts).
+- **UI & Icons:** `@tuquet/vue-ui` (`Badge`, `Button`, `Card`, `Dialog`, `toast`), `@lucide/vue`.
+- **Unified Data Access Layer:** [`src/api/core/automation.ts`](../../src/api/core/automation.ts) (phần 2 kết nối `schema: 'runners'` và `probeLocalDaemonApi`).
+
+---
+
+## 3. Commands (Lệnh Thực Thi & Kiểm Định)
+
+```bash
+# 1. Chạy unit tests cho API Runners/Automation và Router Plugin Gate
+pnpm exec vitest run apps/web-admin/src/api/core/__tests__/automation.test.ts apps/web-admin/src/router/__tests__/plugin-gate.test.ts
+
+# 2. Kiểm tra kiểu dữ liệu TypeScript
+pnpm --filter @tuquet/admin-web run typecheck
+
+# 3. Kiểm tra linter và định dạng
+npx oxlint apps/web-admin/src/
+pnpm run lint
+
+# 4. Đóng gói bản dựng production
+pnpm run build:admin
+```
+
+---
+
+## 4. Project Structure (Cấu Trúc Tệp Tác Động)
+
+```text
+apps/web-admin/src/
+├── api/core/
+│   ├── automation.ts                             # Tầng API hợp nhất (Phần 2: schema 'runners' & probeLocalDaemonApi)
+│   └── __tests__/
+│       └── automation.test.ts                    # Unit tests cho mapRawDeviceToFleetNode, calculateFleetMetrics, queries
+├── locales/langs/
+│   ├── en-US/page.json                           # Từ điển page.automation.{devices,browsers,proxies} (en-US)
+│   └── vi-VN/page.json                           # Từ điển page.automation.{devices,browsers,proxies} (vi-VN)
+├── router/routes/modules/
+│   └── automation.ts                             # Định tuyến /automation/{devices,browsers,proxies} (plugin: 'runners')
+└── views/automation/
+    ├── devices/
+    │   ├── index.vue                             # Bảng thiết bị Runner (useVbenVxeGrid) & 4 thẻ KPI
+    │   └── components/
+    │       ├── connect-fleet-modal.vue           # Hộp thoại hướng dẫn ghép nối Specter CLI Daemon
+    │       └── node-detail-modal.vue             # Hộp thoại chi tiết phần cứng & thu hồi thiết bị (VxeForm)
+    ├── browsers/
+    │   └── index.vue                             # Bảng hồ sơ trình duyệt Chromium (useVbenVxeGrid)
+    └── proxies/
+        └── index.vue                             # Bảng bể Proxy mạng phân tán (useVbenVxeGrid)
+```
+
+---
+
+## 5. Code Style & Kiến Trúc Chi Tiết
+
+### 5.1. Mô Hình Dữ Liệu & Hợp Đồng API (`src/api/core/automation.ts`)
 
 ```ts
 export type DeviceStatus =
@@ -80,51 +107,6 @@ export interface FleetDeviceItem {
   version: string;
 }
 
-export interface FleetBrowserItem {
-  browser_type: string;
-  cookies_count: number;
-  cpu_cores: number;
-  created_at: string;
-  engine_version: string;
-  id: string;
-  last_synced_at: null | string;
-  locked_by_device?: null | {
-    id?: string;
-    name: string;
-  };
-  name: string;
-  os_platform: string;
-  os_version: string;
-  proxy?: null | {
-    host: string;
-    port: number;
-    protocol: string;
-  };
-  ram_gb: number;
-  status: BrowserStatus;
-  storage_size_bytes: number;
-  tenant_id: string;
-}
-
-export interface FleetProxyItem {
-  city: null | string;
-  country_code: null | string;
-  created_at: string;
-  error_count: number;
-  host: string;
-  id: string;
-  ip_address?: null | string;
-  is_residential: boolean;
-  last_checked_at: null | string;
-  latency_ms: null | number;
-  port: number;
-  protocol: 'http' | 'https' | 'socks4' | 'socks5' | string;
-  status: ProxyStatus;
-  tags: string[];
-  tenant_id: string;
-  username?: null | string;
-}
-
 export interface FleetMetricsData {
   active_jobs: number;
   loopback_online: boolean;
@@ -132,94 +114,99 @@ export interface FleetMetricsData {
   online_nodes: number;
   total_nodes: number;
 }
-```
 
-### 2.2. API Functions Contract
-
-```ts
 export function buildFleetFilterQuery(
   basePath: string,
   params?: { status?: string; tenantId?: string },
 ): string;
-
 export function calculateFleetMetrics(
   nodes: FleetDeviceItem[],
   loopbackOnline: boolean,
 ): FleetMetricsData;
-
 export function mapRawDeviceToFleetNode(raw: any): FleetDeviceItem;
-
 export async function getFleetDevicesApi(params?: {
   status?: string;
   tenantId?: string;
 }): Promise<FleetDeviceItem[]>;
-
 export async function revokeFleetDeviceApi(deviceId: string): Promise<void>;
-
 export async function probeLocalDaemonApi(port?: number): Promise<{
   latencyMs?: number;
   online: boolean;
   port: number;
 }>;
-
 export async function getFleetBrowsersApi(params?: {
   status?: string;
   tenantId?: string;
 }): Promise<FleetBrowserItem[]>;
-
 export async function getFleetProxiesApi(params?: {
   status?: string;
   tenantId?: string;
 }): Promise<FleetProxyItem[]>;
 ```
 
----
+### 5.2. Chuẩn Thăm Dò Loopback Daemon Không Chặn Giao Diện (PNA Safe Probe)
 
-## 3. Screen Designs & Components Breakdown
-
-### 3.1. Devices Screen (`/fleet/devices`)
-
-- **Metric Cards (4 thẻ):**
-  1. Tổng số máy trạm (`total_nodes`)
-  2. Thiết bị trực tuyến (`online_nodes` - trạng thái `idle` hoặc `busy`)
-  3. Tác vụ đang thực thi (`active_jobs`)
-  4. Specter Loopback Daemon (:8765 status, latency ms)
-- **Status Filter:** Tất Cả, Sẵn Sàng (`idle`), Đang Bận (`busy`), Ngoại Tuyến (`offline`), Bảo Trì (`maintenance`).
-- **Dual View Table & Cards:**
-  - Cột/Trường: Tên thiết bị + Fingerprint, Hệ điều hành + CPU/RAM, Trạng thái (Badge), Heartbeat gần nhất, Tác vụ đang chạy, Hành động (Xem chi tiết, Thu hồi quyền).
-- **Modals:**
-  - `NodeDetailModal`: Chi tiết fingerprint, cấu hình phần cứng, capabilities, metadata JSON, nút Thu hồi.
-  - `ConnectFleetModal`: Hướng dẫn ghép nối thiết bị qua Specter CLI Daemon loopback bridge (:8765).
-
-### 3.2. Cloud Browsers Screen (`/fleet/browsers`)
-
-- **Dual View Table & Cards:**
-  - Cột/Trường: Tên Profile + Phiên bản engine, OS Platform, Bể Proxy được gán (`host:port` hoặc Trực tiếp), Lease Lock (`locked_by_device.name` hoặc "Chưa khóa"), Cookie / Snapshot Storage (`cookies_count`, KB/MB size), Trạng thái (`idle`, `running`, `syncing`, `error`), Ngày tạo.
-- **Status Filter:** Tất Cả, Rảnh (`idle`), Đang Chạy (`running`), Đang Đồng Bộ (`syncing`), Lỗi (`error`).
-- **Empty State:** Icon `Globe`, mô tả rõ ràng khi tenant chưa có cloud browser profile nào.
-
-### 3.3. Proxy Pool Screen (`/fleet/proxies`)
-
-- **Dual View Table & Cards:**
-  - Cột/Trường: Endpoint (`protocol://host:port`), Vị trí (`country_code`, `city`), Loại (`Residential` / `Datacenter`), Độ trễ (`latency_ms` kèm badge xanh/vàng/đỏ), Trạng thái (`active`, `failing`, `testing`, `disabled`), Lỗi tích lũy (`error_count`), Lần kiểm tra cuối.
-- **Status Filter:** Tất Cả, Hoạt Động (`active`), Lỗi (`failing`), Kiểm Tra (`testing`), Vô Hiệu (`disabled`).
-- **Empty State:** Icon `Network`, mô tả rõ ràng khi chưa có proxy nào trong pool.
+```ts
+export async function probeLocalDaemonApi(port = 8765) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 1200);
+  const start = performance.now();
+  try {
+    await fetch(`http://127.0.0.1:${port}/api/v1/status`, {
+      method: 'GET',
+      mode: 'no-cors',
+      signal: controller.signal,
+    });
+    return {
+      online: true,
+      port,
+      latencyMs: Math.round(performance.now() - start),
+    };
+  } catch {
+    return { online: false, port };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+```
 
 ---
 
-## 4. Verification Plan
+## 6. Testing Strategy (Chiến Lược Kiểm Thử)
 
-### Automated Vitest Unit Tests:
+1. **Unit Tests ([`automation.test.ts`](../../src/api/core/__tests__/automation.test.ts)):**
+   - Kiểm tra `mapRawDeviceToFleetNode` chuẩn hóa đúng dung lượng RAM, danh sách `capabilities` và các trường mặc định.
+   - Kiểm tra `calculateFleetMetrics` cộng chính xác số thiết bị trực tuyến (`idle` + `busy`) và tổng số `active_jobs`.
+   - Kiểm tra `buildFleetFilterQuery` và các hàm `getFleetDevicesApi`, `revokeFleetDeviceApi`, `getFleetBrowsersApi`, `getFleetProxiesApi` gửi đúng header `{ schema: 'runners' }`.
+2. **Router Plugin Gate Tests ([`plugin-gate.test.ts`](../../src/router/__tests__/plugin-gate.test.ts)):**
+   - Xác minh 3 tuyến `devices`, `browsers`, `proxies` được lọc độc lập theo plugin `runners` bên trong menu `/automation`.
 
-- `apps/web-admin/src/api/core/__tests__/automation.test.ts`:
-  - Kiểm tra `mapRawDeviceToFleetNode` chuyển đổi đúng `ram_mb` sang MB, nhận diện `capabilities` mảng/object, và gán default hợp lệ.
-  - Kiểm tra `calculateFleetMetrics` tính toán chính xác tổng nodes, số node trực tuyến (`idle` + `busy`), và tổng jobs.
-  - Kiểm tra `buildFleetFilterQuery` tạo đúng PostgREST query string với `tenant_id=eq.` và `status=eq.`.
+---
 
-### Quality Gate Suite:
+## 7. Boundaries (Ranh Giới Kỹ Thuật)
 
-1. `pnpm exec vitest run apps/web-admin/src/api/core apps/web-admin/src/router`
-2. `pnpm --filter @tuquet/admin-web run typecheck`
-3. `npx oxlint apps/web-admin/src/`
-4. `pnpm run lint`
-5. `pnpm run build:admin`
+- **Always:**
+  - Truyền `{ schema: 'runners' }` cho mọi truy vấn tới `devices`, `browsers`, `proxies`.
+  - Gắn `meta.plugin: 'runners'` trên 3 tuyến `/automation/devices`, `/automation/browsers`, `/automation/proxies`.
+  - Giới hạn timeout $\le 1200\text{ms}$ và `mode: 'no-cors'` khi gọi `probeLocalDaemonApi` để không bao giờ làm treo giao diện nếu người dùng chặn quyền Private Network Access (PNA).
+- **Ask first:**
+  - Thay đổi cấu trúc bảng trong schema `runners` tại `tuquet/cloud`.
+- **Never:**
+  - Không lưu trữ danh sách máy trạm giả lập trong `localStorage` để fallback khi bảng `runners.devices` rỗng.
+  - Không để lộ chuỗi mật khẩu proxy (`password_encrypted`) lên giao diện bảng.
+
+---
+
+## 8. Success Criteria (Tiêu Chí Nghiệm Thu)
+
+- [x] **SC1:** 3 màn hình `/automation/devices`, `/automation/browsers`, `/automation/proxies` hiển thị dữ liệu thực tế từ schema `runners` trên nền bảng `useVbenVxeGrid`.
+- [x] **SC2:** Thăm dò Loopback Daemon (`127.0.0.1:8765`) trên `/automation/devices` hoạt động bất đồng bộ, an toàn PNA và hiển thị độ trễ thực tế.
+- [x] **SC3:** Thao tác thu hồi thiết bị (`revokeFleetDeviceApi`) xóa bản ghi khỏi `runners.devices` và cập nhật lại bảng cùng 4 thẻ KPI.
+- [x] **SC4:** Toàn bộ unit tests trong `automation.test.ts` và `plugin-gate.test.ts` pass 100%, `typecheck` đạt 0 lỗi.
+
+---
+
+## 9. Resolved Decisions (Các Quyết Định Đã Chốt)
+
+1. **Hợp nhất điều hướng dưới `/automation/*` với ranh giới `plugin: 'runners'` độc lập:** Người vận hành theo dõi thiết bị, trình duyệt và proxy ngay trong cùng nhóm menu `/automation` với quy trình và phiên chạy, nhưng hệ thống vẫn kiểm tra quyền `runners:*:read` và trạng thái cài đặt plugin `runners` tách biệt với `automa`.
+2. **Provisioning hạ tầng qua Specter CLI & Commerce:** Việc khởi tạo hồ sơ trình duyệt vật lý được thực hiện trực tiếp từ Specter Desk / CLI daemon hoặc cấp phát tự động qua Cửa hàng Tài nguyên Số (`/commerce/store`), giữ cho giao diện quản trị tập trung vào giám sát telemetry và điều phối.

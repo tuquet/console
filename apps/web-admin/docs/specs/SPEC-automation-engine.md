@@ -1,57 +1,83 @@
-# Spec: `automation-engine`
+# Spec: Quản Trị Kịch Bản Tự Động Hóa & Nhật Ký Thực Thi (`automation-engine`)
 
-> Module id: `automation-engine` (xem [capability-map.md](capability-map.md)) — **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**  
-> Kiến trúc nguồn: [`docs/architecture/overview.md`](../architecture/overview.md)
-
----
-
-## 1. Objective & Scope
-
-Module này hoàn thiện phân hệ Quản Trị Tự Động Hóa Quy Trình (**Automa Engine**) bao gồm 3 màn hình nghiệp vụ:
-
-1. `/automation/workflows` (Quản trị Luồng Quy Trình / Visual Flow Graphs)
-2. `/automation/runs` (Quản trị Phiên Chạy Chiến Dịch / Campaign Runs)
-3. `/automation/runs/:id` (Chi tiết Phiên Chạy & Nhật Ký Thực Thi Thời Gian Thực / Execution Logs Polling)
-
-Toàn bộ dữ liệu được truy vấn **100% đo đếm thực tế** từ schema `automa` (và bảng liên kết `runners.devices`) của Tuquet Cloud qua header `Accept-Profile: automa`.
-
-### Trong phạm vi:
-
-1. **Loại bỏ hoàn toàn Fake & Mock Data (AGENTS.md §5):**
-   - Kết nối trực tiếp tới `automa.workflows`, `automa.campaign_runs`, và `automa.execution_logs`.
-   - Hiển thị Empty State chuẩn mực với icon Lucide khi chưa có quy trình hoặc phiên chạy nào.
-2. **Quản trị Luồng Quy Trình (`/automation/workflows`):**
-   - Đọc dữ liệu từ `automa.workflows` (`id`, `tenant_id`, `name`, `description`, `version`, `status`, `created_at`, `updated_at`). RLS tự động lọc `deleted_at IS NULL`.
-   - Hỗ trợ trạng thái workflow: `all`, `published`, `draft`, `archived`.
-   - Hỗ trợ bộ lọc URL query parameters: `?tenant=&status=`.
-   - Dual View: Bảng chi tiết trên Desktop (`hidden md:block`), Thẻ Compact chạm cảm ứng trên Mobile (`block md:hidden`).
-3. **Quản trị Phiên Chạy Chiến Dịch (`/automation/runs`):**
-   - Đọc dữ liệu từ `automa.campaign_runs` (`id`, `tenant_id`, `workflow_id`, `runner_id`, `name`, `status`, `total_tasks`, `completed_tasks`, `failed_tasks`, `started_at`, `ended_at`, `created_at`).
-   - Liên kết PostgREST foreign tables: `workflow:workflow_id(name)` và `runner:runner_id(name)`.
-   - Hỗ trợ trạng thái campaign run: `all`, `running`, `completed`, `failed`, `cancelled`, `queued`, `pending`.
-   - Hiển thị tiến độ hoàn thành: thanh tiến trình `completed_tasks / total_tasks` (phần trăm).
-   - Hỗ trợ bộ lọc URL query parameters: `?tenant=&status=&workflow=`.
-   - Dual View: Desktop table và Mobile cards.
-4. **Chi Tiết Phiên Chạy & Nhật Ký Thực Thi (`/automation/runs/:id`):**
-   - Hiển thị thông số chi tiết của phiên chạy: Trạng thái, thời gian chạy (runtime duration), máy trạm runner đảm nhiệm, tóm tắt kết quả (`result_summary`), lỗi (nếu có).
-   - **Cơ chế Polling 3s (Quyết định D3 & RFC §7.3):** Khi phiên chạy ở trạng thái `pending`, `queued`, hoặc `running`, hệ thống tự động thăm dò cập nhật `campaign_runs` và `execution_logs` mỗi 3000ms. Dừng polling ngay lập tức khi trạng thái chuyển sang `completed`, `failed`, `cancelled`, hoặc khi người dùng rời trang (`onUnmounted`).
-   - Console nhật ký thực thi (`automa.execution_logs`): Phân loại màu sắc theo `level` (`info`, `warn`, `error`, `debug`, `trace`), hiển thị timestamp và bước thực thi (`step_name`).
-   - Hỗ trợ nút "Hủy Phiên Chạy" (gọi cập nhật `status = 'cancelled'`).
-5. **Tiêu chuẩn Giao diện & Kỹ thuật:**
-   - 100% Lucide Icons, không dùng emoji (AGENTS.md §3).
-   - Semantic tokens Shadcn Slate (`bg-card`, `border-border/60`, `rounded-xl`, etc.) (AGENTS.md §2).
-   - Unit tests với Vitest cho các mappers và polling helpers.
-
-### Ngoài phạm vi:
-
-- Không chỉnh sửa visual graph editor (trình kéo thả Canvas Automa thực hiện trên ứng dụng mở rộng / extension).
-- Không sửa backend schema/RLS của Tuquet Cloud.
+> **Mã đặc tả:** `SPEC-automation-engine`  
+> **Module id:** `automation-engine` (xem [`capability-map.md`](capability-map.md))  
+> **Kiến trúc nguồn:** [`docs/architecture/overview.md`](../architecture/overview.md), [`docs/routes/automation.md`](../routes/automation.md), [`ADR-004`](../decisions/0004-vxe-grid-form-and-i18n-terminology.md)  
+> **Trạng thái:** **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**
 
 ---
 
-## 2. Public Interfaces & Data Structures
+## 1. Objective (Mục Tiêu & Phạm Vi)
 
-### 2.1. Data Models (`apps/web-admin/src/api/core/automation.ts`)
+Xây dựng phân hệ Quản trị Kịch bản Tự động hóa (**Automa Engine** — plugin `automa`) thuộc nhánh điều hướng `/automation/*`, kết nối **100% dữ liệu đo đếm thực tế** từ schema `automa` của Tuquet Cloud qua header `Accept-Profile: automa`:
+
+1. **Quản Trị Quy Trình Tự Động Hóa (`/automation/workflows`):**
+   - Hiển thị danh mục kịch bản từ `automa.workflows` (`id`, `tenant_id`, `name`, `description`, `version`, `status`, `created_at`, `updated_at`) qua bảng `useVbenVxeGrid`.
+   - Hỗ trợ lọc theo trạng thái (`all`, `published`, `draft`, `archived`), lọc theo Workspace (`?tenant=`) và tìm kiếm từ khóa.
+2. **Quản Trị Phiên Chạy Chiến Dịch (`/automation/runs`):**
+   - Hiển thị lịch sử các đợt thực thi từ `automa.campaign_runs` liên kết `workflow:workflow_id(name)` và `runner:runner_id(name)` qua bảng `useVbenVxeGrid`.
+   - Trực quan hóa tiến độ hoàn thành (`completed_tasks / total_tasks` kèm thanh phần trăm), lọc theo trạng thái (`running`, `completed`, `failed`, `cancelled`, `queued`, `pending`) và điều hướng sang trang chi tiết nhật ký.
+3. **Chi Tiết Phiên Chạy & Nhật Ký Thời Gian Thực (`/automation/runs/:id`):**
+   - Hiển thị thông số chi tiết của phiên chạy bằng `VxeForm` và bảng điều khiển nhật ký thực thi (`automa.execution_logs`) phân màu theo `level` (`info`, `warn`, `error`, `fatal`, `debug`, `trace`).
+   - **Cơ chế Polling 3 giây:** Khi phiên chạy đang hoạt động (`pending`, `queued`, `running`), hệ thống tự động thăm dò cập nhật `campaign_runs` và `execution_logs` mỗi `3000ms` (`sinceId` tăng dần) và tự động hủy bộ đếm ngay khi phiên chạy kết thúc hoặc khi rời trang (`onUnmounted`).
+   - Hỗ trợ nút hủy phiên chạy tức thì (`cancelCampaignRunApi`).
+
+---
+
+## 2. Tech Stack
+
+- **Framework:** Vue 3.5 (`<script setup lang="ts">`), Vue Router 4, TypeScript 5, `vue-i18n`.
+- **Data Grid & Form Engine:** `useVbenVxeGrid` (`VxeTable`) và `VxeForm` từ [`src/adapter/vxe-table.ts`](../../src/adapter/vxe-table.ts).
+- **UI & Icons:** `@tuquet/vue-ui` (`Badge`, `Button`, `Card`, `Dialog`, `toast`), `@lucide/vue`.
+- **Unified Data Access Layer:** [`src/api/core/automation.ts`](../../src/api/core/automation.ts) (phần 1 kết nối `schema: 'automa'`, dùng chung module với `schema: 'runners'`).
+
+---
+
+## 3. Commands (Lệnh Thực Thi & Kiểm Định)
+
+```bash
+# 1. Chạy unit tests cho API Automation (cả schema automa & runners) và Router
+pnpm exec vitest run apps/web-admin/src/api/core/__tests__/automation.test.ts apps/web-admin/src/router
+
+# 2. Kiểm tra kiểu dữ liệu TypeScript
+pnpm --filter @tuquet/admin-web run typecheck
+
+# 3. Kiểm tra linter và định dạng
+npx oxlint apps/web-admin/src/
+pnpm run lint
+
+# 4. Đóng gói bản dựng production
+pnpm run build:admin
+```
+
+---
+
+## 4. Project Structure (Cấu Trúc Tệp Tác Động)
+
+```text
+apps/web-admin/src/
+├── api/core/
+│   ├── automation.ts                             # Tầng API hợp nhất (Phần 1: schema 'automa' | Phần 2: schema 'runners')
+│   └── __tests__/
+│       └── automation.test.ts                    # Unit tests kiểm định isRunActive, calculateProgressPercentage, queries
+├── locales/langs/
+│   ├── en-US/page.json                           # Từ điển page.automation.* (en-US)
+│   └── vi-VN/page.json                           # Từ điển page.automation.* (vi-VN)
+├── router/routes/modules/
+│   └── automation.ts                             # Định tuyến /automation/{workflows,runs,runs/:id} (plugin: 'automa')
+└── views/automation/
+    ├── workflows/
+    │   └── index.vue                             # Bảng quy trình tự động hóa (useVbenVxeGrid)
+    └── runs/
+        ├── index.vue                             # Bảng lịch sử phiên chạy (useVbenVxeGrid)
+        └── detail.vue                            # Chi tiết phiên chạy (VxeForm) & Terminal Logs Console (Polling 3s)
+```
+
+---
+
+## 5. Code Style & Kiến Trúc Chi Tiết
+
+### 5.1. Mô Hình Dữ Liệu & Hợp Đồng API (`src/api/core/automation.ts`)
 
 ```ts
 export type WorkflowStatus = 'archived' | 'draft' | 'published';
@@ -86,19 +112,13 @@ export interface AutomaCampaignRunItem {
   failed_tasks: number;
   id: string;
   name: string;
-  runner?: null | {
-    id?: string;
-    name: string;
-  };
+  runner?: null | { id?: string; name: string };
   runner_id: null | string;
   started_at: null | string;
   status: CampaignStatus;
   tenant_id: string;
   total_tasks: number;
-  workflow?: null | {
-    id?: string;
-    name: string;
-  };
+  workflow?: null | { id?: string; name: string };
   workflow_id: null | string;
 }
 
@@ -113,88 +133,80 @@ export interface AutomaExecutionLogItem {
   step_name: null | string;
   tenant_id: string;
 }
-```
 
-### 2.2. API Functions Contract
-
-```ts
 export function isRunActive(status: CampaignStatus): boolean;
-
 export function calculateProgressPercentage(
   completed: number,
   total: number,
 ): number;
-
 export function buildAutomationFilterQuery(
   baseQuery: string,
   params?: { status?: string; tenantId?: string; workflowId?: string },
 ): string;
-
 export async function getWorkflowsApi(params?: {
   status?: string;
   tenantId?: string;
 }): Promise<AutomaWorkflowItem[]>;
-
 export async function getCampaignRunsApi(params?: {
   status?: string;
   tenantId?: string;
   workflowId?: string;
 }): Promise<AutomaCampaignRunItem[]>;
-
 export async function getCampaignRunDetailApi(
   runId: string,
 ): Promise<AutomaCampaignRunItem | null>;
-
 export async function getExecutionLogsApi(
   runId: string,
   params?: { limit?: number; sinceId?: number },
 ): Promise<AutomaExecutionLogItem[]>;
-
 export async function cancelCampaignRunApi(runId: string): Promise<void>;
+```
+
+### 5.2. Cơ Chế Polling 3 Giây Có Điều Kiện
+
+```ts
+// Chỉ duy trì bộ đếm 3000ms khi phiên chạy còn ở trạng thái hoạt động
+export function isRunActive(status: CampaignStatus): boolean {
+  return status === 'pending' || status === 'queued' || status === 'running';
+}
 ```
 
 ---
 
-## 3. Screen Designs & Components Breakdown
+## 6. Testing Strategy (Chiến Lược Kiểm Thử)
 
-### 3.1. Workflows Screen (`/automation/workflows`)
-
-- **Status Filter:** Tất Cả, Xuất Bản (`published`), Bản Nháp (`draft`), Lưu Trữ (`archived`).
-- **Dual View Table & Cards:**
-  - Cột/Trường: Tên Luồng + Phiên bản, Mô tả, Trạng thái (Badge), Ngày tạo, Cập nhật gần nhất.
-- **Empty State:** Icon `Workflow`, mô tả quy trình tự động chưa được đồng bộ từ extension/editor.
-
-### 3.2. Campaign Runs Screen (`/automation/runs`)
-
-- **Status Filter:** Tất Cả, Đang Chạy (`running`), Hoàn Thành (`completed`), Lỗi (`failed`), Đã Hủy (`cancelled`), Đang Chờ (`queued`/`pending`).
-- **Dual View Table & Cards:**
-  - Cột/Trường: Tên Phiên Chạy + Tên Workflow, Máy Trạm Thực Thi (`runner.name`), Tiến Độ (`completed_tasks / total_tasks` kèm Progress Bar), Trạng Thái (Badge sinh động), Bắt đầu / Kết thúc, Nút Xem Chi Tiết (`Eye`).
-- **Empty State:** Icon `PlaySquare`, thông báo chưa có phiên chạy nào.
-
-### 3.3. Run Detail & Live Logs (`/automation/runs/:id`)
-
-- **Header:** Tên Run, Badge trạng thái, Máy trạm đảm nhiệm, Thời lượng thực thi (Runtime duration).
-- **Thao tác:** Nút "Hủy Phiên Chạy" (hiển thị khi trạng thái là `running`, `queued`, `pending`).
-- **Console Nhật Ký (Execution Logs Console):**
-  - Giao diện Dark Console/Monospace với màu theo log level: xanh lá (`info`), vàng (`warn`), đỏ (`error`/`fatal`), lam (`debug`/`trace`).
-  - Tự động cuộn theo dòng mới nhất khi polling.
-  - Polling định kỳ 3000ms khi phiên chạy đang active, tự động hủy khi unmounted.
+1. **Unit Tests ([`automation.test.ts`](../../src/api/core/__tests__/automation.test.ts)):**
+   - Kiểm tra `isRunActive` nhận diện đúng các trạng thái cần poll (`running`, `queued`, `pending`) và dừng poll ở trạng thái kết thúc (`completed`, `failed`, `cancelled`).
+   - Kiểm tra `calculateProgressPercentage` tính chính xác tỷ lệ phần trăm và xử lý an toàn khi `total = 0`.
+   - Kiểm tra `buildAutomationFilterQuery` và các hàm `getWorkflowsApi`, `getCampaignRunsApi`, `getExecutionLogsApi`, `cancelCampaignRunApi` gửi đúng header `{ schema: 'automa' }`.
+2. **Typecheck & Lint Gate:** `pnpm --filter @tuquet/admin-web run typecheck` và `pnpm run lint` đạt `0 errors`.
 
 ---
 
-## 4. Verification Plan
+## 7. Boundaries (Ranh Giới Kỹ Thuật)
 
-### Automated Vitest Unit Tests:
+- **Always:**
+  - Truyền `{ schema: 'automa' }` cho mọi truy vấn tới `workflows`, `campaign_runs`, `execution_logs`.
+  - Gắn `meta.plugin: 'automa'` trên 3 tuyến `/automation/workflows`, `/automation/runs`, `/automation/runs/:id`.
+  - Hủy `clearInterval` của bộ đếm polling ngay trong `onUnmounted` hoặc khi `isRunActive(run.status)` trả về `false`.
+- **Ask first:**
+  - Thay đổi chu kỳ polling mặc định (`3000ms`) hoặc đưa bảng `automa.execution_logs` vào Supabase Realtime publication.
+- **Never:**
+  - Không duy trì polling ngầm khi người dùng đã chuyển sang trang khác.
+  - Không dùng dữ liệu mẫu giả lập cho danh sách quy trình hoặc nhật ký thực thi.
 
-- `apps/web-admin/src/api/core/__tests__/automation.test.ts`:
-  - Kiểm tra `isRunActive` nhận diện đúng các trạng thái cần poll (`running`, `queued`, `pending`) và không poll với trạng thái kết thúc (`completed`, `failed`, `cancelled`).
-  - Kiểm tra `calculateProgressPercentage` tính chính xác %, xử lý chia cho 0 an toàn.
-  - Kiểm tra `buildAutomationFilterQuery` tạo đúng PostgREST query string với `tenant_id`, `status`, `workflow_id`.
+---
 
-### Quality Gate Suite:
+## 8. Success Criteria (Tiêu Chí Nghiệm Thu)
 
-1. `pnpm exec vitest run apps/web-admin/src/api/core apps/web-admin/src/router`
-2. `pnpm --filter @tuquet/admin-web run typecheck`
-3. `npx oxlint apps/web-admin/src/`
-4. `pnpm run lint`
-5. `pnpm run build:admin`
+- [x] **SC1:** `/automation/workflows` và `/automation/runs` hiển thị dữ liệu thực tế từ schema `automa` qua bảng `useVbenVxeGrid` kèm bộ lọc trạng thái và Workspace.
+- [x] **SC2:** `/automation/runs/:id` hiển thị thông tin chi tiết phiên chạy (`VxeForm`) và bảng điều khiển nhật ký thực thi có tự động nạp dòng mới mỗi 3 giây (`sinceId`) khi đang chạy.
+- [x] **SC3:** Thao tác hủy phiên chạy (`cancelCampaignRunApi`) cập nhật trạng thái về `'cancelled'` và ngắt vòng lặp polling.
+- [x] **SC4:** Toàn bộ 23 bài kiểm thử đơn vị trong `automation.test.ts` pass 100% và `typecheck` đạt 0 lỗi.
+
+---
+
+## 9. Resolved Decisions (Các Quyết Định Đã Chốt)
+
+1. **Polling 3 giây thay cho WebSocket Realtime trên `automa.execution_logs`:** Do bảng nhật ký thực thi sinh lượng bản ghi lớn trong các chiến dịch song song, cơ chế HTTP Polling 3 giây theo con trỏ `id.gt.<sinceId>` chỉ kích hoạt khi người vận hành mở trang chi tiết phiên chạy đang hoạt động, bảo vệ băng thông WAL của PostgreSQL.
+2. **Kiến trúc 1 Tầng API Frontend (`automation.ts`) $\leftrightarrow$ 2 Schema DB (`automa` + `runners`):** Toàn bộ hàm truy vấn của nhánh `/automation/*` và khóa dịch `page.automation.*` được gom chung về một điểm tập trung ở frontend nhưng vẫn phân tách rõ `schema: 'automa'` và `schema: 'runners'` ở tầng PostgREST.
