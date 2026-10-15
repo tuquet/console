@@ -5,7 +5,14 @@ import { computed, ref, watch } from 'vue';
 
 import { usePreferences } from '@vben/preferences';
 
-import { Cpu, CreditCard, Eye, HardDrive, RefreshCw, Users } from '@lucide/vue';
+import {
+  Cpu,
+  CreditCard,
+  HardDrive,
+  Plus,
+  RefreshCw,
+  Users,
+} from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
@@ -76,19 +83,11 @@ function getColumns() {
       visible: !isMobile.value,
       slots: { default: 'date-cell' },
     },
-    {
-      field: 'actions',
-      title: $t('common.actions'),
-      width: isMobile.value ? 56 : 105,
-      align: 'right' as const,
-      slots: { default: 'actions-cell' },
-    },
   ];
 }
 
 const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
   detailSheetOptions: {
-    forwardActionSlot: false,
     resource: 'billing.plans',
     subtitleField: 'id',
     titleField: 'name',
@@ -223,7 +222,7 @@ watch([() => $t('page.system_view.plans_col_name'), isMobile], () => {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-2">
+      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -232,6 +231,14 @@ watch([() => $t('page.system_view.plans_col_name'), isMobile], () => {
           @click="gridApi.reload()"
         >
           <RefreshCw class="size-3.5 shrink-0" />
+        </Button>
+        <Button
+          size="sm"
+          class="h-8 gap-1.5 px-2.5 text-xs font-medium sm:px-3"
+          @click="() => gridApi.openCreateSheet()"
+        >
+          <Plus class="size-3.5 shrink-0" />
+          <span>{{ $t('common.createRecord') }}</span>
         </Button>
       </div>
     </div>
@@ -337,21 +344,6 @@ watch([() => $t('page.system_view.plans_col_name'), isMobile], () => {
           <span class="text-xs text-muted-foreground">
             {{ formatDate(row.created_at) }}
           </span>
-        </template>
-
-        <template #actions-cell="{ row }">
-          <div class="flex items-center justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              class="inline-flex h-7 items-center gap-1 px-2 text-xs"
-              :title="$t('common.detail')"
-              @click="gridApi.openDetailSheet(row as BillingPlanItem)"
-            >
-              <Eye class="size-3 shrink-0" />
-              <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
-            </Button>
-          </div>
         </template>
       </Grid>
     </div>

@@ -20,23 +20,15 @@ import { useDateFormat } from '#/composables';
 import { FILTER_ALL, TENANT_PLAN, TENANT_STATUS } from '#/constants';
 import { $t } from '#/locales';
 
-import CreateWorkspaceModal from './components/modals/create-workspace-modal.vue';
-
 defineOptions({ name: 'Workspace' });
 
 const router = useRouter();
 const { formatDate } = useDateFormat();
 const { isMobile } = usePreferences();
 
-// Loading states
-const creatingTenant = ref(false);
-
 // Data
 const tenants = ref<TenantItem[]>([]);
 const activeTenantId = ref(getActiveTenantId());
-
-// Modal state
-const isModalVisible = ref(false);
 
 const activeTenant = computed(() => {
   return (
@@ -69,34 +61,6 @@ function handleConnectCli(record?: any) {
   router.push(
     `/auth/desktop?machine_name=Local Workstation&tenant_id=${encodeURIComponent(targetId)}`,
   );
-}
-
-function openCreateModal() {
-  isModalVisible.value = true;
-}
-
-async function handleCreateTenant(payload: {
-  name: string;
-  plan: string;
-  slug: string;
-}) {
-  creatingTenant.value = true;
-  try {
-    const created = await createTenantApi({
-      name: payload.name,
-      plan: payload.plan,
-      slug: payload.slug,
-    });
-    toast.success($t('page.workspace.create_success', { name: created.name }));
-    isModalVisible.value = false;
-    activeTenantId.value = created.id;
-    setActiveTenantId(created.id);
-    gridApi.reload();
-  } catch (error: any) {
-    toast.error(error.message || $t('page.workspace.create_failed'));
-  } finally {
-    creatingTenant.value = false;
-  }
 }
 
 function getColumns() {
@@ -153,6 +117,19 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
     resource: 'public.tenants',
     subtitleField: 'slug',
     titleField: 'name',
+    onCreate: async ({ formData }) => {
+      return await createTenantApi({
+        name: String(formData.name || '').trim(),
+        plan: String(formData.plan || 'starter'),
+        slug: String(formData.slug || '').trim(),
+      });
+    },
+    onCreated: (created) => {
+      if (created?.id) {
+        activeTenantId.value = created.id;
+        setActiveTenantId(created.id);
+      }
+    },
   },
   formOptions: {
     commonConfig: {
@@ -324,10 +301,10 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
         <Button
           size="sm"
           class="h-8 gap-1.5 px-2.5 text-xs font-medium sm:px-3"
-          @click="openCreateModal"
+          @click="() => gridApi.openCreateSheet()"
         >
           <Plus class="size-3.5" />
-          <span>{{ $t('common.create') }}</span>
+          <span>{{ $t('common.createRecord') }}</span>
         </Button>
       </div>
     </div>
@@ -470,12 +447,5 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
         </template>
       </Grid>
     </div>
-
-    <!-- Create Workspace Modal -->
-    <CreateWorkspaceModal
-      v-model:open="isModalVisible"
-      :loading="creatingTenant"
-      @submit="handleCreateTenant"
-    />
   </div>
 </template>

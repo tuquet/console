@@ -2,51 +2,30 @@
 import type { PlatformUserItem } from '#/api';
 
 import { computed, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
 
 import { usePreferences } from '@vben/preferences';
 
-import {
-  ArrowUpRight,
-  Building2,
-  Check,
-  Copy,
-  Eye,
-  RefreshCw,
-  ShieldCheck,
-  Users,
-} from '@lucide/vue';
+import { Building2, RefreshCw, Users } from '@lucide/vue';
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   Badge,
   Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
 } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { filterPlatformUsers, getPlatformUsersApi } from '#/api';
 import RoleBadge from '#/components/iam/role-badge.vue';
-import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
 defineOptions({ name: 'SystemUsers' });
 
-const router = useRouter();
-const { formatDate } = useDateFormat();
-const { copyToClipboard, isCopied } = useClipboard();
 const { isMobile } = usePreferences();
 
 const allUsers = ref<PlatformUserItem[]>([]);
 const usersLoaded = ref(false);
 const loadingUsers = ref(false);
-const selectedUser = ref<null | PlatformUserItem>(null);
-const detailOpen = ref(false);
 
 let loadUsersPromise: null | Promise<void> = null;
 
@@ -83,20 +62,6 @@ function getInitials(name: null | string): string {
     .toUpperCase();
 }
 
-function handleCopyId(id: string) {
-  copyToClipboard(id, id);
-}
-
-function openUserDetail(user: PlatformUserItem) {
-  gridApi.openDetailSheet(user);
-}
-
-function navigateToWorkspace(tenantId: string) {
-  if (!tenantId) return;
-  detailOpen.value = false;
-  router.push(`/tenants/${tenantId}`);
-}
-
 function getColumns() {
   return [
     {
@@ -127,7 +92,7 @@ function getColumns() {
       width: 175,
       align: 'left' as const,
       visible: !isMobile.value,
-      slots: { default: 'id-cell' },
+      cellRender: { name: 'CellIdCopy' },
     },
     {
       field: 'created_at',
@@ -135,14 +100,7 @@ function getColumns() {
       width: 150,
       align: 'left' as const,
       visible: !isMobile.value,
-      slots: { default: 'date-cell' },
-    },
-    {
-      field: 'actions',
-      title: $t('common.actions'),
-      width: isMobile.value ? 56 : 110,
-      align: 'right' as const,
-      slots: { default: 'actions-cell' },
+      cellRender: { name: 'CellDate' },
     },
   ];
 }
@@ -150,21 +108,6 @@ function getColumns() {
 const [Grid, gridApi] = useVbenVxeGrid<PlatformUserItem>({
   separator: false,
   detailSheetOptions: {
-    actions: [
-      {
-        disabled: (row) => !row?.workspaces?.[0]?.tenant_id,
-        icon: ArrowUpRight,
-        label: $t('page.system_view.users_open_workspace'),
-        onClick: (row) => {
-          const tenantId = row?.workspaces?.[0]?.tenant_id;
-          if (tenantId) {
-            navigateToWorkspace(tenantId);
-          }
-        },
-        variant: 'outline',
-      },
-    ],
-    forwardActionSlot: false,
     resource: 'public.profiles',
     subtitleField: 'primary_role',
     titleField: 'full_name',
@@ -414,48 +357,6 @@ async function handleRefresh() {
           </div>
         </template>
 
-        <template #id-cell="{ row }">
-          <div class="inline-flex items-center gap-1">
-            <code
-              class="rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground"
-              :title="row.id"
-            >
-              {{ row.id.slice(0, 8) }}...{{ row.id.slice(-4) }}
-            </code>
-            <Button
-              variant="ghost"
-              size="icon"
-              class="size-6 shrink-0 text-muted-foreground hover:text-foreground"
-              :title="$t('page.system_view.users_copy_uuid')"
-              @click.stop="handleCopyId(row.id)"
-            >
-              <Check v-if="isCopied(row.id)" class="size-3.5 text-success" />
-              <Copy v-else class="size-3.5" />
-            </Button>
-          </div>
-        </template>
-
-        <template #date-cell="{ row }">
-          <span class="font-mono text-xs text-muted-foreground">
-            {{ formatDate(row.created_at) }}
-          </span>
-        </template>
-
-        <template #actions-cell="{ row }">
-          <div class="flex items-center justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              class="h-7 px-2 text-xs inline-flex items-center gap-1"
-              :title="$t('common.detail')"
-              @click="openUserDetail(row as PlatformUserItem)"
-            >
-              <Eye class="size-3 shrink-0" />
-              <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
-            </Button>
-          </div>
-        </template>
-
         <template #empty>
           <div
             class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground"
@@ -471,182 +372,5 @@ async function handleRefresh() {
         </template>
       </Grid>
     </div>
-
-    <!-- Enterprise User Inspector Dialog -->
-    <Dialog v-model:open="detailOpen">
-      <DialogContent class="max-w-[calc(100vw-2rem)] sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle class="flex items-center gap-2 text-base">
-            <ShieldCheck class="size-4 text-primary" />
-            {{ $t('page.system_view.users_dialog_title') }}
-          </DialogTitle>
-          <DialogDescription class="text-xs">
-            {{ $t('page.system_view.users_dialog_desc') }}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div v-if="selectedUser" class="space-y-4 text-xs">
-          <!-- Identity Card -->
-          <div
-            class="flex items-start justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 p-4"
-          >
-            <div class="flex items-center gap-3 min-w-0">
-              <Avatar
-                class="size-11 rounded-xl border border-border/40 shrink-0"
-              >
-                <AvatarImage
-                  v-if="selectedUser.avatar_url"
-                  :src="selectedUser.avatar_url"
-                  :alt="selectedUser.full_name || ''"
-                />
-                <AvatarFallback
-                  class="rounded-xl bg-muted text-sm font-semibold text-foreground"
-                >
-                  {{ getInitials(selectedUser.full_name) }}
-                </AvatarFallback>
-              </Avatar>
-              <div class="min-w-0 space-y-0.5">
-                <div class="text-sm font-semibold text-foreground truncate">
-                  {{
-                    selectedUser.full_name ||
-                    $t('page.system_view.users_anonymous')
-                  }}
-                </div>
-                <div class="text-xs text-muted-foreground truncate">
-                  {{
-                    selectedUser.email || $t('page.system_view.users_no_email')
-                  }}
-                </div>
-                <div class="flex items-center gap-1.5 pt-1">
-                  <code
-                    class="rounded bg-muted px-1.5 py-0.5 font-mono text-2xs text-muted-foreground"
-                  >
-                    {{ selectedUser.id }}
-                  </code>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    class="size-5 text-muted-foreground hover:text-foreground"
-                    :title="$t('page.system_view.users_copy_uuid')"
-                    @click="handleCopyId(selectedUser.id)"
-                  >
-                    <Check
-                      v-if="isCopied(selectedUser.id)"
-                      class="size-3 text-success"
-                    />
-                    <Copy v-else class="size-3" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <RoleBadge
-              v-if="selectedUser.primary_role"
-              :role="selectedUser.primary_role"
-            />
-          </div>
-
-          <!-- Metadata Grid -->
-          <div
-            class="grid grid-cols-2 gap-3 rounded-xl border border-border/60 p-3.5"
-          >
-            <div>
-              <div class="text-muted-foreground">
-                {{ $t('page.system_view.users_col_joined_at') }}
-              </div>
-              <div class="mt-0.5 font-mono font-medium text-foreground">
-                {{ formatDate(selectedUser.created_at) }}
-              </div>
-            </div>
-            <div>
-              <div class="text-muted-foreground">
-                {{ $t('page.system_view.users_last_updated') }}
-              </div>
-              <div class="mt-0.5 font-mono font-medium text-foreground">
-                {{ formatDate(selectedUser.updated_at) }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Workspaces Membership List -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <h4 class="font-semibold text-foreground">
-                {{
-                  $t('page.system_view.users_orgs_header', [
-                    selectedUser.tenant_count,
-                  ])
-                }}
-              </h4>
-            </div>
-
-            <div
-              v-if="
-                selectedUser.workspaces && selectedUser.workspaces.length > 0
-              "
-              class="max-h-56 space-y-2 overflow-y-auto pr-1"
-            >
-              <div
-                v-for="ws in selectedUser.workspaces"
-                :key="ws.tenant_id"
-                class="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-card p-3"
-              >
-                <div class="flex items-center gap-2.5 min-w-0">
-                  <div
-                    class="flex size-8 items-center justify-center rounded-lg bg-muted text-foreground shrink-0"
-                  >
-                    <Building2 class="size-4" />
-                  </div>
-                  <div class="min-w-0">
-                    <div class="font-medium text-foreground truncate">
-                      {{ ws.tenant_name }}
-                    </div>
-                    <div
-                      class="font-mono text-2xs text-muted-foreground truncate"
-                    >
-                      /{{ ws.tenant_slug || ws.tenant_id.slice(0, 8) }}
-                    </div>
-                  </div>
-                </div>
-
-                <div class="flex items-center gap-2 shrink-0">
-                  <RoleBadge :role="ws.role_name" />
-                  <Button
-                    v-if="ws.tenant_id"
-                    variant="outline"
-                    size="sm"
-                    class="h-7 px-2 text-xs gap-1"
-                    @click="navigateToWorkspace(ws.tenant_id)"
-                  >
-                    <span>{{
-                      $t('page.system_view.users_open_workspace')
-                    }}</span>
-                    <ArrowUpRight class="size-3" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <div
-              v-else-if="selectedUser.tenant_count > 0"
-              class="rounded-lg border border-border/60 bg-muted/10 p-4 text-center text-muted-foreground"
-            >
-              {{
-                $t('page.system_view.users_member_of_orgs', [
-                  selectedUser.tenant_count,
-                ])
-              }}
-            </div>
-
-            <div
-              v-else
-              class="rounded-lg border border-border/60 bg-muted/10 p-4 text-center text-muted-foreground"
-            >
-              {{ $t('page.system_view.users_no_orgs_desc') }}
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
   </div>
 </template>

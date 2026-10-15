@@ -30,9 +30,6 @@ catalogs:
     '@eslint/js':
       specifier: ^10.0.1
       version: 10.0.1
-    '@fontsource/be-vietnam-pro':
-      specifier: ^5.3.0
-      version: 5.3.0
     '@fontsource/inter':
       specifier: ^5.3.0
       version: 5.3.0
@@ -958,9 +955,6 @@ importers:
 
   packages/@core/base/design:
     dependencies:
-      '@fontsource/be-vietnam-pro':
-        specifier: 'catalog:'
-        version: 5.3.0
       '@fontsource/inter':
         specifier: 'catalog:'
         version: 5.3.0
@@ -3236,9 +3230,6 @@ packages:
 
   '@floating-ui/vue@1.1.11':
     resolution: {integrity: sha512-HzHKCNVxnGS35r9fCHBc3+uCnjw9IWIlCPL683cGgM9Kgj2BiAl8x1mS7vtvP6F9S/e/q4O6MApwSHj8hNLGfw==}
-
-  '@fontsource/be-vietnam-pro@5.3.0':
-    resolution: {integrity: sha512-xhAQBGHDxP5BF8IJxedy5MoWUmc1DlPCcZbMLhvnPkf8TaYCbbUVs3LjpuJ4BYdTrdiCLaewNaY8z+owq/FqFw==}
 
   '@fontsource/inter@5.3.0':
     resolution: {integrity: sha512-RofMylZmjlJEfELXeNHFWBRcSs75rGU/6bV2S2jfnvv/3rPXPGe0LgUJTklcHZ9lM4OZmAVFhcJPnACfb91A3g==}
@@ -12680,8 +12671,6 @@ snapshots:
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
-
-  '@fontsource/be-vietnam-pro@5.3.0': {}
 
   '@fontsource/inter@5.3.0': {}
 

@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import type { VxeDetailSheetOptions } from './types';
+import type { VxeDetailSheetMode, VxeDetailSheetOptions } from './types';
 
 import type { EffectiveAccess } from '#/api/core/access';
 import type {
   DynamicVxeFormField,
+  SupabaseRelationalTableDescriptor,
   SupabaseResourceKey,
 } from '#/api/core/supabase-schema-registry';
 
@@ -13,20 +14,24 @@ import { VxeForm, VxeFormItem } from '@vben/plugins/vxe-table';
 import { usePreferences } from '@vben/preferences';
 
 import {
+  ArrowUpRight,
   Check,
   Copy,
   Database,
-  Edit3,
-  FileJson,
   Loader2,
   Lock,
+  Plus,
   Save,
   ShieldCheck,
+  Table2,
 } from '@lucide/vue';
 import {
   Badge,
   Button,
   Input,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Sheet,
   SheetContent,
   SheetDescription,
@@ -40,16 +45,24 @@ import {
 
 import { getEffectiveAccessApi } from '#/api/core/access';
 import {
+  buildDynamicVxeCreateSchema,
   buildDynamicVxeFormSchema,
   computeDirtyMutablePayload,
+  computeInsertPayload,
+  executeDynamicSupabaseInsert,
   executeDynamicSupabasePatch,
   inferResourceFromRouteAndRow,
+  validateRequiredInsertFields,
 } from '#/api/core/supabase-schema-registry';
 import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
+import VxeRelationalTableSheet from './vxe-relational-table-sheet.vue';
+
 interface Props {
   gridColumns?: Array<{ field?: string; title?: string }>;
+  initialValues?: null | Record<string, any>;
+  mode?: VxeDetailSheetMode;
   open: boolean;
   options?: VxeDetailSheetOptions<any>;
   routePath?: string;
@@ -58,11 +71,14 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   gridColumns: () => [],
+  initialValues: null,
+  mode: 'edit',
   options: undefined,
   routePath: '',
 });
 
 const emit = defineEmits<{
+  created: [createdRow: Record<string, any>];
   saved: [updatedRow: Record<string, any>];
   'update:open': [value: boolean];
 }>();
@@ -74,6 +90,19 @@ const { formatDate } = useDateFormat();
 const effectiveAccess = ref<EffectiveAccess | null>(null);
 const saving = ref(false);
 const formData = reactive<Record<string, any>>({});
+const slugManuallyEdited = ref(false);
+const activeRelation = ref<null | SupabaseRelationalTableDescriptor>(null);
+const relationalSheetOpen = ref(false);
+
+const isCreateMode = computed<boolean>(() => props.mode === 'create');
+const isSuperadmin = computed<boolean>(() =>
+  Boolean(effectiveAccess.value?.isSuperadmin),
+);
+
+function openRelationalTable(relation: SupabaseRelationalTableDescriptor) {
+  activeRelation.value = relation;
+  relationalSheetOpen.value = true;
+}
 
 async function ensureEffectiveAccess() {
   if (effectiveAccess.value) {
@@ -99,25 +128,52 @@ const resolvedResource = computed<SupabaseResourceKey>(() => {
 });
 
 const dynamicSchema = computed(() => {
-  return buildDynamicVxeFormSchema({
+  if (isCreateMode.value) {
+    const createSchema = buildDynamicVxeCreateSchema({
+      access: effectiveAccess.value,
+      gridColumns: props.gridColumns,
+      initialValues: props.initialValues,
+      resource: resolvedResource.value,
+      translate: (key: string) => $t(key),
+    });
+    return {
+      ...createSchema,
+      relations: [] as SupabaseRelationalTableDescriptor[],
+      title: props.options?.createTitle || createSchema.title,
+    };
+  }
+
+  const editSchema = buildDynamicVxeFormSchema({
     access: effectiveAccess.value,
     gridColumns: props.gridColumns,
     resource: resolvedResource.value,
     row: props.row,
     translate: (key: string) => $t(key),
   });
+  return {
+    ...editSchema,
+    initialData: {} as Record<string, any>,
+  };
 });
 
-const editableFields = computed<DynamicVxeFormField[]>(() =>
-  dynamicSchema.value.fields.filter((f) => f.group === 'editable'),
+const hasEditableFields = computed<boolean>(() =>
+  dynamicSchema.value.fields.some((f) => f.editable),
 );
 
-const readonlyFields = computed<DynamicVxeFormField[]>(() =>
-  dynamicSchema.value.fields.filter((f) => f.group === 'readonly'),
+const isRlsWritable = computed<boolean>(() =>
+  isCreateMode.value
+    ? Boolean(
+        dynamicSchema.value.rls.canInsert.allowed && hasEditableFields.value,
+      )
+    : Boolean(
+        dynamicSchema.value.rls.canUpdate.allowed && hasEditableFields.value,
+      ),
 );
 
-const jsonFields = computed<DynamicVxeFormField[]>(() =>
-  dynamicSchema.value.fields.filter((f) => f.group === 'json'),
+const activePolicyName = computed<string>(() =>
+  isCreateMode.value
+    ? dynamicSchema.value.rls.canInsert.policyName
+    : dynamicSchema.value.rls.canUpdate.policyName,
 );
 
 function syncFormDataFromRow(row: null | Record<string, any>) {
@@ -136,10 +192,58 @@ function syncFormDataFromRow(row: null | Record<string, any>) {
   }
 }
 
+function syncFormDataForCreate() {
+  for (const key of Object.keys(formData)) {
+    Reflect.deleteProperty(formData, key);
+  }
+  slugManuallyEdited.value = false;
+  const initData = dynamicSchema.value.initialData || {};
+  for (const [key, val] of Object.entries(initData)) {
+    formData[key] =
+      val && typeof val === 'object' && !Array.isArray(val)
+        ? JSON.stringify(val, null, 2)
+        : val;
+  }
+}
+
+function slugifyText(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replaceAll(/[^\w\s-]/g, '')
+    .replaceAll(/[\s_-]+/g, '-')
+    .replaceAll(/^-+|-+$/g, '');
+}
+
+function handleTextInput(fieldKey: string) {
+  if (!isCreateMode.value) {
+    return;
+  }
+  if (fieldKey === 'slug') {
+    const currentSlug = String(formData.slug || '').trim();
+    slugManuallyEdited.value = currentSlug.length > 0;
+    return;
+  }
+  if (
+    fieldKey === 'name' &&
+    !slugManuallyEdited.value &&
+    dynamicSchema.value.fields.some((f) => f.field === 'slug')
+  ) {
+    formData.slug = slugifyText(String(formData.name || ''));
+  }
+}
+
 watch(
-  () => [props.open, props.row] as const,
-  ([isOpen, currentRow]) => {
-    if (isOpen && currentRow) {
+  () => [props.open, props.mode, props.row, props.initialValues] as const,
+  ([isOpen, currentMode, currentRow]) => {
+    if (!isOpen) {
+      relationalSheetOpen.value = false;
+      return;
+    }
+    if (currentMode === 'create') {
+      syncFormDataForCreate();
+      void ensureEffectiveAccess();
+    } else if (currentRow) {
       syncFormDataFromRow(currentRow);
       void ensureEffectiveAccess();
     }
@@ -189,6 +293,51 @@ function isCopyableIdentifier(field: DynamicVxeFormField): boolean {
     field.field === 'host' ||
     field.field === 'ip_address'
   );
+}
+
+async function handleCreate() {
+  if (saving.value) {
+    return;
+  }
+  const resource = resolvedResource.value;
+  const missingFields = validateRequiredInsertFields(formData, resource);
+  if (missingFields.length > 0) {
+    toast.warning($t('common.requiredFieldsMissing'));
+    return;
+  }
+
+  const insertPayload = computeInsertPayload(formData, resource);
+
+  saving.value = true;
+  try {
+    if (props.options?.onCreate) {
+      const customResult = await props.options.onCreate({
+        formData: { ...formData },
+        insertPayload,
+        resource,
+      });
+      const createdRow =
+        customResult && typeof customResult === 'object'
+          ? customResult
+          : insertPayload;
+      await props.options?.onCreated?.(createdRow);
+      emit('created', createdRow);
+    } else {
+      const result = await executeDynamicSupabaseInsert(
+        resource,
+        formData,
+        effectiveAccess.value,
+      );
+      await props.options?.onCreated?.(result.createdRow);
+      emit('created', result.createdRow);
+    }
+    toast.success($t('common.createdSuccessfully'));
+    emit('update:open', false);
+  } catch (error: any) {
+    toast.error(error?.message || $t('common.error'));
+  } finally {
+    saving.value = false;
+  }
 }
 
 async function handleSave() {
@@ -243,98 +392,123 @@ async function handleSave() {
   <Sheet :open="props.open" @update:open="(val) => emit('update:open', val)">
     <SheetContent
       :side="isMobile ? 'bottom' : 'right'"
+      :style="{ zIndex: 1050 }"
       :class="
         isMobile
-          ? 'flex max-h-[88vh] w-full flex-col rounded-t-2xl border-t border-border/80 p-0'
-          : 'flex h-full w-full flex-col border-l border-border/80 p-0 sm:max-w-lg'
+          ? 'vxe-detail-sheet-content z-[1050] flex max-h-[88vh] w-full flex-col rounded-t-2xl border-t border-border/80 p-0'
+          : 'vxe-detail-sheet-content inset-y-0 right-0 z-[1050] flex h-dvh w-full flex-col border-l border-border/80 p-0 sm:max-w-lg'
       "
     >
-      <!-- Sheet Header with Dynamic Title, Schema Badge & RLS Policy Badge -->
+      <!-- Sheet Header: Clean Record Title + Superadmin-Only Schema/RLS Popover -->
       <SheetHeader
-        class="shrink-0 space-y-2 border-b border-border/60 bg-muted/20 px-4 py-3.5 text-left sm:px-5"
+        class="shrink-0 space-y-1.5 border-b border-border/60 bg-muted/20 px-4 py-3.5 text-left sm:px-5"
       >
-        <div class="flex flex-wrap items-center gap-1.5 pr-6">
-          <span
-            class="inline-flex items-center gap-1 rounded-md border border-border/70 bg-background px-2 py-0.5 font-mono text-2xs text-muted-foreground"
-          >
-            <Database class="size-3 shrink-0 text-primary" />
-            {{ dynamicSchema.rls.resource }}
-          </span>
+        <div class="flex items-center gap-2 pr-6">
+          <SheetTitle class="truncate text-base font-semibold tracking-tight">
+            {{ dynamicSchema.title }}
+          </SheetTitle>
 
-          <span
-            v-if="
-              dynamicSchema.rls.canUpdate.allowed && editableFields.length > 0
-            "
-            class="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-2xs font-medium text-emerald-600 dark:text-emerald-400"
-          >
-            <ShieldCheck class="size-3 shrink-0" />
-            {{ $t('common.rlsWritable') }} ·
-            <span class="font-mono">{{
-              dynamicSchema.rls.canUpdate.policyName
-            }}</span>
-          </span>
-          <span
-            v-else
-            class="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/15 px-2 py-0.5 text-2xs font-medium text-amber-600 dark:text-amber-400"
-          >
-            <Lock class="size-3 shrink-0" />
-            {{ $t('common.rlsReadOnly') }} ·
-            <span class="font-mono">{{
-              dynamicSchema.rls.canUpdate.policyName
-            }}</span>
-          </span>
+          <!-- Superadmin-only Schema & RLS Inspector Popover -->
+          <Popover v-if="isSuperadmin">
+            <PopoverTrigger as-child>
+              <button
+                type="button"
+                class="inline-flex size-6 shrink-0 items-center justify-center rounded-md border border-border/60 bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                data-testid="vxe-superadmin-rls-trigger"
+                :title="$t('common.rlsWritable')"
+              >
+                <ShieldCheck
+                  v-if="isRlsWritable"
+                  class="size-3.5 text-emerald-500"
+                />
+                <Lock v-else class="size-3.5 text-amber-500" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              class="z-[1080] w-72 space-y-2 p-3 text-xs"
+              :style="{ zIndex: 1080 }"
+            >
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-muted-foreground">Schema / Table</span>
+                <span
+                  class="inline-flex items-center gap-1 rounded border border-border/70 bg-muted/40 px-1.5 py-0.5 font-mono text-2xs text-foreground"
+                >
+                  <Database class="size-3 shrink-0 text-primary" />
+                  {{ dynamicSchema.rls.resource }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-muted-foreground">RLS Mode</span>
+                <span
+                  v-if="isRlsWritable"
+                  class="inline-flex items-center gap-1 rounded border border-emerald-500/30 bg-emerald-500/15 px-1.5 py-0.5 text-2xs font-medium text-emerald-600 dark:text-emerald-400"
+                >
+                  <ShieldCheck class="size-3 shrink-0" />
+                  {{ $t('common.rlsWritable') }}
+                </span>
+                <span
+                  v-else
+                  class="inline-flex items-center gap-1 rounded border border-amber-500/30 bg-amber-500/15 px-1.5 py-0.5 text-2xs font-medium text-amber-600 dark:text-amber-400"
+                >
+                  <Lock class="size-3 shrink-0" />
+                  {{ $t('common.rlsReadOnly') }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-muted-foreground">RLS Policy</span>
+                <code
+                  class="truncate rounded bg-muted px-1.5 py-0.5 font-mono text-2xs text-foreground"
+                >
+                  {{ activePolicyName }}
+                </code>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
-
-        <SheetTitle class="truncate text-base font-semibold tracking-tight">
-          {{ dynamicSchema.title }}
-        </SheetTitle>
 
         <SheetDescription class="text-xs text-muted-foreground">
           {{
-            dynamicSchema.rls.canUpdate.reasonKey
-              ? $t(dynamicSchema.rls.canUpdate.reasonKey)
+            isCreateMode
+              ? $t('common.createSheetDescription')
               : $t('common.detailSheetTitle')
           }}
         </SheetDescription>
       </SheetHeader>
 
-      <!-- Scrollable Sheet Body powered by VxeForm -->
+      <!-- Unified Flat VxeForm Body -->
       <div
-        v-if="props.row"
-        class="flex-1 space-y-4 overflow-y-auto px-4 py-3.5 sm:px-5"
+        v-if="isCreateMode || props.row"
+        class="flex-1 overflow-y-auto px-4 py-4 sm:px-5"
       >
-        <!-- Section 1: Editable Fields via VxeForm -->
-        <div
-          v-if="editableFields.length > 0"
-          class="rounded-xl border border-border/60 bg-card p-3.5 shadow-2xs"
+        <VxeForm
+          :data="formData"
+          custom-layout
+          size="small"
+          class="w-full space-y-3"
         >
-          <div
-            class="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-foreground"
+          <VxeFormItem
+            v-for="field in dynamicSchema.fields"
+            :key="field.field"
+            :field="field.field"
+            :title="
+              field.required && field.editable
+                ? `${field.title} *`
+                : field.title
+            "
+            span="24"
           >
-            <Edit3 class="size-3.5 text-primary" />
-            <span>{{ $t('common.detailSheetEditableSection') }}</span>
-          </div>
-
-          <VxeForm
-            :data="formData"
-            custom-layout
-            size="small"
-            class="w-full space-y-2.5"
-          >
-            <VxeFormItem
-              v-for="field in editableFields"
-              :key="field.field"
-              :field="field.field"
-              :title="field.title"
-              span="24"
-            >
-              <template #default>
+            <template #default>
+              <!-- 1. Editable Controls -->
+              <template v-if="field.editable">
                 <!-- Enum Select -->
                 <select
                   v-if="field.type === 'enum' && field.options?.length"
                   v-model="formData[field.field]"
                   :data-testid="`vxe-field-${field.field}`"
-                  class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <option
                     v-for="opt in field.options"
@@ -348,9 +522,9 @@ async function handleSave() {
                 <!-- Boolean Switch -->
                 <div
                   v-else-if="field.type === 'boolean'"
-                  class="flex h-9 items-center justify-between rounded-md border border-border/60 bg-muted/20 px-3"
+                  class="flex h-9 items-center justify-between rounded-md border border-input bg-background px-3"
                 >
-                  <span class="text-xs text-foreground">
+                  <span class="text-sm text-foreground">
                     {{
                       formData[field.field]
                         ? $t('common.enabled')
@@ -366,13 +540,22 @@ async function handleSave() {
                   />
                 </div>
 
+                <!-- Editable JSON -->
+                <Textarea
+                  v-else-if="field.type === 'json'"
+                  v-model="formData[field.field]"
+                  :data-testid="`vxe-field-${field.field}`"
+                  rows="4"
+                  class="font-mono text-xs"
+                />
+
                 <!-- Multiline Textarea -->
                 <Textarea
                   v-else-if="field.type === 'textarea'"
                   v-model="formData[field.field]"
                   :data-testid="`vxe-field-${field.field}`"
                   rows="3"
-                  class="text-xs"
+                  class="text-sm"
                 />
 
                 <!-- Number Input -->
@@ -383,7 +566,7 @@ async function handleSave() {
                   :max="field.max"
                   :min="field.min"
                   type="number"
-                  class="h-9 text-xs"
+                  class="h-9 text-sm"
                 />
 
                 <!-- Default Text Input -->
@@ -391,71 +574,71 @@ async function handleSave() {
                   v-else
                   v-model="formData[field.field]"
                   :data-testid="`vxe-field-${field.field}`"
-                  class="h-9 text-xs"
+                  :placeholder="
+                    field.placeholderKey ? $t(field.placeholderKey) : undefined
+                  "
+                  class="h-9 text-sm"
+                  @input="handleTextInput(field.field)"
                 />
               </template>
-            </VxeFormItem>
-          </VxeForm>
-        </div>
 
-        <!-- Section 2: System & Identity Read-Only Metadata via VxeForm -->
-        <div
-          v-if="readonlyFields.length > 0"
-          class="rounded-xl border border-border/60 bg-muted/20 p-3.5"
-        >
-          <div
-            class="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-foreground"
-          >
-            <Database class="size-3.5 text-muted-foreground" />
-            <span>{{ $t('common.detailSheetMetadataSection') }}</span>
-          </div>
+              <!-- 2. Read-Only / Locked Controls -->
+              <template v-else>
+                <!-- Read-Only JSON Preview -->
+                <div v-if="field.type === 'json'" class="relative">
+                  <pre
+                    class="max-h-44 overflow-auto rounded-md border border-border/60 bg-muted/30 p-2.5 font-mono text-xs text-foreground"
+                    >{{ formatJsonPreview(field.field) }}</pre>
+                  <button
+                    type="button"
+                    class="absolute top-2 right-2 inline-flex size-6 items-center justify-center rounded border border-border/60 bg-background/80 text-muted-foreground hover:text-foreground"
+                    :title="$t('common.copy')"
+                    @click="
+                      copyToClipboard(
+                        formatJsonPreview(field.field),
+                        field.title,
+                      )
+                    "
+                  >
+                    <Check
+                      v-if="isCopied(field.title)"
+                      class="size-3 text-emerald-500"
+                    />
+                    <Copy v-else class="size-3" />
+                  </button>
+                </div>
 
-          <VxeForm
-            :data="props.row"
-            custom-layout
-            readonly
-            size="small"
-            class="w-full"
-          >
-            <VxeFormItem
-              v-for="field in readonlyFields"
-              :key="field.field"
-              :field="field.field"
-              :title="field.title"
-              :span="
-                field.type === 'uuid' ||
-                field.type === 'textarea' ||
-                field.field === 'id'
-                  ? 24
-                  : 12
-              "
-            >
-              <template #default>
                 <!-- Semantic Enum Status Badge -->
                 <div
-                  v-if="field.statusMeta"
-                  class="inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium"
-                  :class="field.statusMeta.badgeClass"
+                  v-else-if="field.statusMeta"
+                  class="flex h-9 items-center rounded-md border border-border/60 bg-muted/30 px-3"
                 >
                   <span
-                    class="size-1.5 rounded-full"
-                    :class="field.statusMeta.dotClass"
-                  ></span>
-                  <span>
-                    {{
-                      field.statusMeta.labelKey
-                        ? $t(field.statusMeta.labelKey)
-                        : field.statusMeta.fallbackLabel
-                    }}
+                    class="inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium"
+                    :class="field.statusMeta.badgeClass"
+                  >
+                    <span
+                      class="size-1.5 rounded-full"
+                      :class="field.statusMeta.dotClass"
+                    ></span>
+                    <span>
+                      {{
+                        field.statusMeta.labelKey
+                          ? $t(field.statusMeta.labelKey)
+                          : field.statusMeta.fallbackLabel
+                      }}
+                    </span>
                   </span>
                 </div>
 
                 <!-- Copyable Identifier / UUID / Code -->
                 <div
                   v-else-if="
-                    isCopyableIdentifier(field) && props.row[field.field]
+                    props.row &&
+                    isCopyableIdentifier(field) &&
+                    props.row[field.field]
                   "
-                  class="flex items-center justify-between gap-2 rounded-md border border-border/60 bg-background/80 px-2.5 py-1 font-mono text-xs text-foreground"
+                  class="flex h-9 items-center justify-between gap-2 rounded-md border border-border/60 bg-muted/30 px-3 font-mono text-xs text-muted-foreground"
                 >
                   <span class="truncate">{{ props.row[field.field] }}</span>
                   <button
@@ -477,194 +660,91 @@ async function handleSave() {
                   </button>
                 </div>
 
+                <!-- Read-Only Multiline Text -->
+                <div
+                  v-else-if="field.type === 'textarea'"
+                  class="min-h-9 rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-sm text-muted-foreground"
+                >
+                  {{ formatReadonlyValue(field) }}
+                </div>
+
                 <!-- Default Read-Only Scalar -->
                 <div
                   v-else
-                  class="truncate text-xs font-medium text-foreground"
+                  class="flex h-9 items-center truncate rounded-md border border-border/60 bg-muted/30 px-3 text-sm text-muted-foreground"
+                  :class="{
+                    'font-mono text-xs':
+                      field.type === 'datetime' || field.type === 'number',
+                  }"
                 >
                   {{ formatReadonlyValue(field) }}
                 </div>
               </template>
-            </VxeFormItem>
-          </VxeForm>
+            </template>
+          </VxeFormItem>
 
-          <!-- Relational Array Summaries (Permissions, Roles, Dependencies, Workspaces) -->
-          <div
-            v-if="
-              Array.isArray(props.row.permissions) &&
-              props.row.permissions.length > 0
-            "
-            class="mt-3 border-t border-border/50 pt-3"
+          <!-- Supabase-Style Relational Table Triggers (opens secondary stacked drawer without exposing raw schema.table) -->
+          <VxeFormItem
+            v-for="rel in dynamicSchema.relations"
+            :key="rel.field"
+            :field="rel.field"
+            :title="rel.title"
+            span="24"
           >
-            <div class="mb-1.5 text-2xs font-medium text-muted-foreground">
-              {{ $t('term.permissions') }} ({{ props.row.permissions.length }})
-            </div>
-            <div class="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto pr-1">
+            <template #default>
               <button
-                v-for="perm in props.row.permissions"
-                :key="perm"
                 type="button"
-                class="inline-flex items-center gap-1 rounded border border-border/60 bg-background px-2 py-0.5 font-mono text-2xs text-foreground transition-colors hover:bg-muted"
-                :title="$t('common.copy')"
-                @click="copyToClipboard(String(perm), String(perm))"
+                class="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-border/70 bg-muted/25 px-3 text-left transition-colors hover:border-primary/50 hover:bg-muted/60"
+                :data-testid="`vxe-relation-trigger-${rel.field}`"
+                @click="openRelationalTable(rel)"
               >
-                <span>{{ perm }}</span>
-                <Copy class="size-2.5 text-muted-foreground" />
+                <div class="flex min-w-0 items-center gap-2">
+                  <Table2 class="size-3.5 shrink-0 text-primary" />
+                  <span class="truncate text-sm font-normal text-foreground">
+                    {{ rel.title }}
+                  </span>
+                  <Badge
+                    variant="secondary"
+                    class="shrink-0 font-mono text-2xs"
+                  >
+                    {{
+                      $t('common.relationalRecordsCount', {
+                        count: rel.rows.length,
+                      })
+                    }}
+                  </Badge>
+                </div>
+
+                <span
+                  class="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary"
+                >
+                  <span>{{ $t('common.viewRelationalTable') }}</span>
+                  <ArrowUpRight class="size-3.5" />
+                </span>
               </button>
-            </div>
-          </div>
-
-          <div
-            v-if="Array.isArray(props.row.roles) && props.row.roles.length > 0"
-            class="mt-3 border-t border-border/50 pt-3"
-          >
-            <div class="mb-1.5 text-2xs font-medium text-muted-foreground">
-              {{ $t('page.system_view.roles_col_assigned_roles') }} ({{
-                props.row.roles.length
-              }})
-            </div>
-            <div class="flex flex-wrap gap-1.5">
-              <Badge
-                v-for="roleName in props.row.roles"
-                :key="roleName"
-                variant="outline"
-                class="font-mono text-2xs font-medium"
-              >
-                {{ roleName }}
-              </Badge>
-            </div>
-          </div>
-
-          <div
-            v-if="
-              Array.isArray(props.row.dependencies) &&
-              props.row.dependencies.length > 0
-            "
-            class="mt-3 border-t border-border/50 pt-3"
-          >
-            <div class="mb-1.5 text-2xs font-medium text-muted-foreground">
-              {{ $t('common.module') }} ({{ props.row.dependencies.length }})
-            </div>
-            <div class="flex flex-wrap gap-1.5">
-              <Badge
-                v-for="dep in props.row.dependencies"
-                :key="dep"
-                variant="secondary"
-                class="font-mono text-2xs font-normal"
-              >
-                {{ dep }}
-              </Badge>
-            </div>
-          </div>
-
-          <div
-            v-if="
-              Array.isArray(props.row.workspaces) &&
-              props.row.workspaces.length > 0
-            "
-            class="mt-3 border-t border-border/50 pt-3"
-          >
-            <div class="mb-1.5 text-2xs font-medium text-muted-foreground">
-              {{
-                $t('page.system_view.users_orgs_header', [
-                  props.row.workspaces.length,
-                ])
-              }}
-            </div>
-            <div class="max-h-40 space-y-1.5 overflow-y-auto pr-1">
-              <div
-                v-for="ws in props.row.workspaces"
-                :key="ws.tenant_id"
-                class="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs"
-              >
-                <div class="min-w-0">
-                  <div class="truncate font-medium text-foreground">
-                    {{ ws.tenant_name }}
-                  </div>
-                  <div
-                    class="truncate font-mono text-2xs text-muted-foreground"
-                  >
-                    /{{ ws.tenant_slug || String(ws.tenant_id).slice(0, 8) }}
-                  </div>
-                </div>
-                <Badge variant="outline" class="shrink-0 font-mono text-2xs">
-                  {{ ws.role_name }}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Section 3: Structured JSON Payload Inspector / Editor -->
-        <div
-          v-if="jsonFields.length > 0"
-          class="rounded-xl border border-border/60 bg-muted/20 p-3.5"
-        >
-          <div
-            class="mb-2.5 flex items-center gap-1.5 text-xs font-semibold text-foreground"
-          >
-            <FileJson class="size-3.5 text-muted-foreground" />
-            <span>{{ $t('common.detailSheetJsonSection') }}</span>
-          </div>
-
-          <VxeForm
-            :data="formData"
-            custom-layout
-            size="small"
-            class="w-full space-y-2.5"
-          >
-            <VxeFormItem
-              v-for="field in jsonFields"
-              :key="field.field"
-              :field="field.field"
-              :title="field.title"
-              span="24"
-            >
-              <template #default>
-                <Textarea
-                  v-if="field.editable"
-                  v-model="formData[field.field]"
-                  :data-testid="`vxe-field-${field.field}`"
-                  rows="4"
-                  class="font-mono text-xs"
-                />
-                <div v-else class="relative">
-                  <pre
-                    class="max-h-44 overflow-auto rounded-lg border border-border/60 bg-background p-2.5 font-mono text-2xs text-foreground"
-                    >{{ formatJsonPreview(field.field) }}</pre>
-                  <button
-                    type="button"
-                    class="absolute top-2 right-2 inline-flex size-6 items-center justify-center rounded border border-border/60 bg-muted/80 text-muted-foreground hover:text-foreground"
-                    :title="$t('common.copy')"
-                    @click="
-                      copyToClipboard(
-                        formatJsonPreview(field.field),
-                        field.title,
-                      )
-                    "
-                  >
-                    <Copy class="size-3" />
-                  </button>
-                </div>
-              </template>
-            </VxeFormItem>
-          </VxeForm>
-        </div>
+            </template>
+          </VxeFormItem>
+        </VxeForm>
       </div>
 
-      <!-- Sheet Footer with Auto-Forwarded Row Actions + Save/Close -->
+      <!-- Sheet Footer with Auto-Forwarded Business Row Actions + Save/Create/Close -->
       <SheetFooter
-        v-if="props.row"
+        v-if="isCreateMode || props.row"
         class="shrink-0 flex-col gap-2.5 border-t border-border/60 bg-muted/20 px-4 py-3 sm:flex-col sm:space-x-0 sm:px-5"
       >
-        <!-- Row Actions Bar (Auto-forwarded from Grid Action Slot + Declarative Actions) -->
+        <!-- Row Actions Bar (Only shown in Edit Mode when genuine business actions exist) -->
         <div
+          v-if="
+            !isCreateMode &&
+            props.row &&
+            ($slots['row-actions'] || props.options?.actions?.length)
+          "
           class="flex w-full flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-2.5"
         >
           <span class="text-2xs font-medium text-muted-foreground">
             {{ $t('common.detailSheetActionsSection') }}
           </span>
-          <div class="flex flex-wrap items-center gap-1.5">
+          <div class="flex flex-wrap items-center gap-1.5 [&_.hidden]:inline">
             <slot name="row-actions" :row="props.row"></slot>
 
             <Button
@@ -678,17 +758,6 @@ async function handleSave() {
             >
               <component :is="act.icon" v-if="act.icon" class="size-3.5" />
               <span>{{ act.label }}</span>
-            </Button>
-
-            <Button
-              v-if="props.row.id"
-              variant="ghost"
-              size="sm"
-              class="h-7 gap-1 px-2 text-xs text-muted-foreground"
-              @click="copyToClipboard(String(props.row.id), 'ID')"
-            >
-              <Copy class="size-3" />
-              <span>ID</span>
             </Button>
           </div>
         </div>
@@ -705,7 +774,25 @@ async function handleSave() {
           </Button>
           <Button
             v-if="
-              editableFields.length > 0 && dynamicSchema.rls.canUpdate.allowed
+              isCreateMode &&
+              hasEditableFields &&
+              dynamicSchema.rls.canInsert.allowed
+            "
+            size="sm"
+            class="h-9 gap-1.5 px-4 text-xs font-medium"
+            :disabled="saving"
+            data-testid="vxe-detail-sheet-create"
+            @click="handleCreate"
+          >
+            <Loader2 v-if="saving" class="size-3.5 animate-spin" />
+            <Plus v-else class="size-3.5" />
+            <span>{{ $t('common.createRecord') }}</span>
+          </Button>
+          <Button
+            v-else-if="
+              !isCreateMode &&
+              hasEditableFields &&
+              dynamicSchema.rls.canUpdate.allowed
             "
             size="sm"
             class="h-9 gap-1.5 px-4 text-xs font-medium"
@@ -721,4 +808,23 @@ async function handleSave() {
       </SheetFooter>
     </SheetContent>
   </Sheet>
+
+  <!-- Secondary Stacked Relational Table Drawer (Supabase Studio pattern) -->
+  <VxeRelationalTableSheet
+    v-model:open="relationalSheetOpen"
+    :is-superadmin="isSuperadmin"
+    :parent-resource="dynamicSchema.rls.resource"
+    :parent-title="dynamicSchema.title"
+    :relation="activeRelation"
+  />
 </template>
+
+<style>
+div.fixed.inset-0:has(+ .vxe-detail-sheet-content) {
+  z-index: 1040 !important;
+}
+
+div.fixed.inset-0:has(+ .vxe-relational-sheet-content) {
+  z-index: 1060 !important;
+}
+</style>

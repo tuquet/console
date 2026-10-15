@@ -1,15 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  buildDynamicVxeCreateSchema,
   buildDynamicVxeFormSchema,
   computeDirtyMutablePayload,
+  computeInsertPayload,
   evaluateRowRlsPolicy,
+  executeDynamicSupabaseInsert,
   executeDynamicSupabasePatch,
   inferResourceFromRouteAndRow,
   SUPABASE_TABLE_REGISTRY,
+  validateRequiredInsertFields,
 } from '../supabase-schema-registry';
 
 const mockSupabaseRequest = vi.fn();
+const mockGetActiveTenantId = vi.fn(() => 'tenant_active_01');
 
 vi.mock('../supabase-client', () => ({
   SUPABASE_SCHEMA: {
@@ -22,6 +27,10 @@ vi.mock('../supabase-client', () => ({
     RUNNERS: 'runners',
   },
   supabaseRequest: (...args: any[]) => mockSupabaseRequest(...args),
+}));
+
+vi.mock('../tenant', () => ({
+  getActiveTenantId: () => mockGetActiveTenantId(),
 }));
 
 describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', () => {
@@ -206,6 +215,16 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     expect(fieldMap.get('id')?.editable).toBe(false);
     expect(fieldMap.get('nodeCount')?.editable).toBe(false);
     expect(fieldMap.has('_X_ROW_KEY')).toBe(false);
+
+    // Table column order is preserved first, with trailing system metadata (id, created_at) at the end
+    const orderedKeys = schema.fields.map((f) => f.field);
+    expect(orderedKeys.indexOf('name')).toBe(0);
+    expect(orderedKeys.indexOf('nodeCount')).toBeLessThan(
+      orderedKeys.indexOf('id'),
+    );
+    expect(orderedKeys.indexOf('id')).toBeLessThan(
+      orderedKeys.indexOf('created_at'),
+    );
   });
 
   it('locks core plugin status field while keeping name/description editable for superadmin', () => {
@@ -334,5 +353,177 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     expect(planFieldMap.get('price_monthly_usd')?.editable).toBe(true);
     expect(planFieldMap.get('metadata')?.group).toBe('json');
     expect(planFieldMap.get('metadata')?.editable).toBe(true);
+  });
+
+  it('extracts Supabase-style relational table descriptors for permissions, roles, workspaces, variants, items, and deliveries', () => {
+    const roleSchema = buildDynamicVxeFormSchema({
+      resource: 'public.roles',
+      row: {
+        id: 'role_admin',
+        is_system: true,
+        name: 'admin',
+        permissions: ['system.roles.manage', 'tenants.read'],
+      },
+      translate: (k) => k,
+    });
+
+    expect(roleSchema.relations).toHaveLength(1);
+    expect(roleSchema.relations[0]?.field).toBe('permissions');
+    expect(roleSchema.relations[0]?.targetResource).toBe('public.permissions');
+    expect(roleSchema.relations[0]?.rows).toEqual([
+      { code: 'system.roles.manage', module: 'system' },
+      { code: 'tenants.read', module: 'tenants' },
+    ]);
+
+    const userSchema = buildDynamicVxeFormSchema({
+      resource: 'public.profiles',
+      row: {
+        email: 'admin@tuquet.com',
+        full_name: 'Admin User',
+        id: 'u_1',
+        workspaces: [
+          {
+            role_name: 'owner',
+            tenant_id: 't_100',
+            tenant_name: 'Acme HQ',
+            tenant_slug: 'acme',
+          },
+        ],
+      },
+      translate: (k) => k,
+    });
+
+    expect(userSchema.relations).toHaveLength(1);
+    expect(userSchema.relations[0]?.field).toBe('workspaces');
+    expect(userSchema.relations[0]?.targetResource).toBe('public.tenants');
+    expect(userSchema.relations[0]?.rows[0]).toMatchObject({
+      role_name: 'owner',
+      tenant_id: 't_100',
+      tenant_name: 'Acme HQ',
+      tenant_slug: '/acme',
+    });
+
+    const productSchema = buildDynamicVxeFormSchema({
+      resource: 'commerce.products',
+      row: {
+        id: 'prod_1',
+        name: 'Cloud Browser Pro',
+        product_type: 'subscription',
+        variants: [
+          {
+            is_active: true,
+            name: 'Monthly 100 Profiles',
+            price_credits: 200,
+            sku: 'CB-PRO-100',
+            stock_available: 99,
+          },
+        ],
+        visibility: 'public',
+      },
+      translate: (k) => k,
+    });
+
+    expect(productSchema.relations).toHaveLength(1);
+    expect(productSchema.relations[0]?.field).toBe('variants');
+    expect(productSchema.relations[0]?.targetResource).toBe(
+      'commerce.product_variants',
+    );
+    expect(productSchema.relations[0]?.rows[0]).toMatchObject({
+      name: 'Monthly 100 Profiles',
+      price_credits: 200,
+      sku: 'CB-PRO-100',
+    });
+  });
+
+  it('builds Supabase Studio Create Mode schema (hiding uuid/system fields while keeping text PKs with insertable: true)', () => {
+    const workflowCreate = buildDynamicVxeCreateSchema({
+      resource: 'automa.workflows',
+      translate: (k) => k,
+    });
+
+    expect(workflowCreate.rls.canInsert.allowed).toBe(true);
+    const wfFields = workflowCreate.fields.map((f) => f.field);
+    expect(wfFields).toEqual(['name', 'description', 'version', 'status']);
+    expect(wfFields).not.toContain('id');
+    expect(wfFields).not.toContain('created_at');
+    expect(wfFields).not.toContain('nodeCount');
+    expect(workflowCreate.initialData).toEqual({
+      description: '',
+      name: '',
+      status: 'draft',
+      version: '1.0.0',
+    });
+
+    // Text PK tables (`public.permissions`, `billing.plans`, `public.system_plugins`, `billing.payment_gateways`) include `id` first
+    const permCreate = buildDynamicVxeCreateSchema({
+      resource: 'public.permissions',
+      translate: (k) => k,
+    });
+    expect(permCreate.fields.map((f) => f.field)).toEqual([
+      'id',
+      'module',
+      'description',
+    ]);
+    expect(permCreate.initialData.module).toBe('core-iam');
+
+    // Append-only ledgers deny canInsert
+    const auditCreate = buildDynamicVxeCreateSchema({
+      resource: 'public.audit_logs',
+      translate: (k) => k,
+    });
+    expect(auditCreate.rls.canInsert.allowed).toBe(false);
+  });
+
+  it('validates required fields, auto-attaches tenant_id, and executes PostgREST POST in executeDynamicSupabaseInsert', async () => {
+    expect(validateRequiredInsertFields({}, 'automa.workflows')).toEqual([
+      'name',
+    ]);
+
+    await expect(
+      executeDynamicSupabaseInsert('automa.workflows', { name: '   ' }),
+    ).rejects.toThrow(/Missing required fields: name/);
+
+    const payload = computeInsertPayload(
+      {
+        description: '  Auto sync orders  ',
+        name: '  TikTok Order Sync  ',
+        status: 'draft',
+        version: '1.0.0',
+      },
+      'automa.workflows',
+    );
+    expect(payload).toEqual({
+      description: 'Auto sync orders',
+      name: 'TikTok Order Sync',
+      status: 'draft',
+      tenant_id: 'tenant_active_01',
+      version: '1.0.0',
+    });
+
+    mockSupabaseRequest.mockResolvedValueOnce([
+      {
+        ...payload,
+        id: 'wf_new_01',
+      },
+    ]);
+
+    const res = await executeDynamicSupabaseInsert('automa.workflows', {
+      description: 'Auto sync orders',
+      name: 'TikTok Order Sync',
+      status: 'draft',
+      version: '1.0.0',
+    });
+
+    expect(res.createdRow.id).toBe('wf_new_01');
+    expect(res.insertPayload.tenant_id).toBe('tenant_active_01');
+    expect(mockSupabaseRequest).toHaveBeenCalledWith(
+      '/rest/v1/workflows',
+      expect.objectContaining({
+        body: JSON.stringify(payload),
+        method: 'POST',
+        preferRepresentation: true,
+        schema: 'automa',
+      }),
+    );
   });
 });

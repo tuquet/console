@@ -2,6 +2,8 @@ import type { Component } from 'vue';
 
 import type { SupabaseResourceKey } from '#/api/core/supabase-schema-registry';
 
+export type VxeDetailSheetMode = 'create' | 'edit';
+
 export interface VxeDetailSheetAction<T = Record<string, any>> {
   disabled?: (row: T) => boolean;
   handler?: (row: T) => any;
@@ -22,6 +24,10 @@ export interface VxeDetailSheetOptions<T = Record<string, any>> {
    */
   actions?: VxeDetailSheetAction<T>[];
   /**
+   * Optional custom title when opened in Create Mode (`mode = 'create'`)
+   */
+  createTitle?: string;
+  /**
    * Whether clicking a row opens the Detail Sheet (defaults to `true`)
    */
   enabled?: boolean;
@@ -30,6 +36,18 @@ export interface VxeDetailSheetOptions<T = Record<string, any>> {
    * Set to `false` when the grid's action column only contains a "Detail" trigger button.
    */
   forwardActionSlot?: boolean;
+  /**
+   * Optional custom create handler overriding or augmenting the default PostgREST POST
+   */
+  onCreate?: (params: {
+    formData: Record<string, any>;
+    insertPayload: Record<string, any>;
+    resource: SupabaseResourceKey;
+  }) => any | Promise<any>;
+  /**
+   * Optional callback invoked after a new row is created via the Detail Sheet (`mode = 'create'`)
+   */
+  onCreated?: (row?: T) => any;
   /**
    * Optional custom save handler overriding or augmenting the default PostgREST PATCH
    */
@@ -40,7 +58,7 @@ export interface VxeDetailSheetOptions<T = Record<string, any>> {
     row: T;
   }) => Promise<void> | void;
   /**
-   * Optional callback invoked after a row is saved via the Detail Sheet
+   * Optional callback invoked after a row is saved via the Detail Sheet (`mode = 'edit'`)
    */
   onSaved?: (row?: T) => any;
   /**

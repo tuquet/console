@@ -8,23 +8,14 @@ import { usePreferences } from '@vben/preferences';
 import {
   Check,
   Copy,
-  Eye,
   Folder,
   KeyRound,
   Lock,
+  Plus,
   RefreshCw,
   ShieldCheck,
 } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  toast,
-} from '@tuquet/vue-ui';
+import { Badge, Button, toast } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
@@ -32,7 +23,6 @@ import {
   filterSystemRoles,
   getSystemPermissionsApi,
   getSystemRolesApi,
-  groupPermissionsByModule,
   sortRoleNamesByPriority,
 } from '#/api';
 import RoleBadge from '#/components/iam/role-badge.vue';
@@ -50,9 +40,6 @@ const allRoles = ref<SystemRoleItem[]>([]);
 const allPermissions = ref<SystemPermissionItem[]>([]);
 const catalogLoaded = ref(false);
 const loadingCatalog = ref(false);
-
-const selectedRole = ref<null | SystemRoleItem>(null);
-const roleDetailOpen = ref(false);
 
 let loadPromise: null | Promise<void> = null;
 
@@ -85,30 +72,6 @@ async function ensureCatalogLoaded(force = false): Promise<void> {
   return loadPromise;
 }
 
-const permissionMap = computed(() => {
-  const map = new Map<string, SystemPermissionItem>();
-  for (const p of allPermissions.value) {
-    map.set(p.id, p);
-  }
-  return map;
-});
-
-const selectedRoleGroupedPermissions = computed(() => {
-  if (!selectedRole.value) return {};
-  const resolvedItems: SystemPermissionItem[] =
-    selectedRole.value.permissions.map((permId) => {
-      const found = permissionMap.value.get(permId);
-      if (found) return found;
-      const prefix = permId.split(':')[0] || 'core-iam';
-      return {
-        description: null,
-        id: permId,
-        module: prefix,
-      };
-    });
-  return groupPermissionsByModule(resolvedItems);
-});
-
 const rolesByPermissionMap = computed<Record<string, string[]>>(() => {
   const map: Record<string, string[]> = {};
   for (const role of allRoles.value) {
@@ -127,15 +90,6 @@ const rolesByPermissionMap = computed<Record<string, string[]>>(() => {
 
 function handleCopyKey(text: string) {
   copyToClipboard(text, text);
-}
-
-function openRoleMatrixDialog(role: SystemRoleItem) {
-  selectedRole.value = role;
-  roleDetailOpen.value = true;
-}
-
-function openRoleDetail(role: SystemRoleItem) {
-  rolesGridApi.openDetailSheet(role);
 }
 
 function getModuleOptions() {
@@ -193,13 +147,6 @@ function getRoleColumns() {
       visible: !isMobile.value,
       slots: { default: 'role-date-cell' },
     },
-    {
-      field: 'actions',
-      title: $t('common.actions'),
-      width: isMobile.value ? 56 : 105,
-      align: 'right' as const,
-      slots: { default: 'role-actions-cell' },
-    },
   ];
 }
 
@@ -235,31 +182,18 @@ function getPermColumns() {
       visible: !isMobile.value,
       slots: { default: 'perm-roles-cell' },
     },
-    {
-      field: 'actions',
-      title: $t('common.actions'),
-      width: isMobile.value ? 56 : 105,
-      align: 'right' as const,
-      slots: { default: 'perm-actions-cell' },
-    },
   ];
 }
 
 const [RolesGrid, rolesGridApi] = useVbenVxeGrid<SystemRoleItem>({
   separator: false,
   detailSheetOptions: {
-    actions: [
-      {
-        icon: ShieldCheck,
-        label: $t('page.system_view.roles_dialog_title'),
-        onClick: (row) => openRoleMatrixDialog(row),
-        variant: 'outline',
-      },
-    ],
-    forwardActionSlot: false,
     resource: 'public.roles',
     subtitleField: 'id',
     titleField: 'name',
+    onCreated: async () => {
+      await ensureCatalogLoaded(true);
+    },
     onSaved: async () => {
       await ensureCatalogLoaded(true);
     },
@@ -376,17 +310,12 @@ const [RolesGrid, rolesGridApi] = useVbenVxeGrid<SystemRoleItem>({
 const [PermissionsGrid, permsGridApi] = useVbenVxeGrid<SystemPermissionItem>({
   separator: false,
   detailSheetOptions: {
-    forwardActionSlot: false,
     resource: 'public.permissions',
     subtitleField: 'module',
     titleField: 'id',
-    actions: [
-      {
-        label: $t('common.copy'),
-        onClick: (row) => handleCopyKey(row.id),
-        variant: 'outline',
-      },
-    ],
+    onCreated: async () => {
+      await ensureCatalogLoaded(true);
+    },
     onSaved: async () => {
       await ensureCatalogLoaded(true);
     },
@@ -528,6 +457,14 @@ async function handleRefresh() {
     permsGridApi.reload();
   }
 }
+
+function handleOpenCreate() {
+  if (activeTab.value === 'roles') {
+    rolesGridApi.openCreateSheet();
+  } else {
+    permsGridApi.openCreateSheet();
+  }
+}
 </script>
 
 <template>
@@ -552,7 +489,7 @@ async function handleRefresh() {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-2">
+      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -565,6 +502,14 @@ async function handleRefresh() {
             class="size-3.5 shrink-0"
             :class="{ 'animate-spin': loadingCatalog }"
           />
+        </Button>
+        <Button
+          size="sm"
+          class="h-8 gap-1.5 px-2.5 text-xs font-medium sm:px-3"
+          @click="handleOpenCreate"
+        >
+          <Plus class="size-3.5 shrink-0" />
+          <span>{{ $t('common.createRecord') }}</span>
         </Button>
       </div>
     </div>
@@ -664,8 +609,7 @@ async function handleRefresh() {
               <Badge
                 v-if="row.permissions.length > 2"
                 variant="secondary"
-                class="hidden shrink-0 cursor-pointer text-2xs font-normal hover:bg-accent sm:inline-flex"
-                @click.stop="openRoleDetail(row as SystemRoleItem)"
+                class="hidden shrink-0 text-2xs font-normal sm:inline-flex"
               >
                 {{
                   $t('page.system_view.roles_more_perms', [
@@ -680,21 +624,6 @@ async function handleRefresh() {
             <span class="font-mono text-xs text-muted-foreground">
               {{ formatDate(row.created_at) }}
             </span>
-          </template>
-
-          <template #role-actions-cell="{ row }">
-            <div class="flex items-center justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                class="h-7 px-2 text-xs inline-flex items-center gap-1"
-                :title="$t('common.detail')"
-                @click="openRoleDetail(row as SystemRoleItem)"
-              >
-                <Eye class="size-3 shrink-0" />
-                <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
-              </Button>
-            </div>
           </template>
 
           <template #empty>
@@ -773,23 +702,6 @@ async function handleRefresh() {
             </div>
           </template>
 
-          <template #perm-actions-cell="{ row }">
-            <div class="flex items-center justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                class="inline-flex h-7 items-center gap-1 px-2 text-xs"
-                :title="$t('common.detail')"
-                @click="
-                  permsGridApi.openDetailSheet(row as SystemPermissionItem)
-                "
-              >
-                <Eye class="size-3 shrink-0" />
-                <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
-              </Button>
-            </div>
-          </template>
-
           <template #empty>
             <div
               class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground"
@@ -808,116 +720,5 @@ async function handleRefresh() {
         </PermissionsGrid>
       </div>
     </div>
-
-    <!-- Role Policy Inspector Dialog -->
-    <Dialog v-model:open="roleDetailOpen">
-      <DialogContent class="max-w-[calc(100vw-2rem)] sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle class="flex items-center gap-2 text-base">
-            <ShieldCheck class="size-4 text-primary" />
-            <span>{{ $t('page.system_view.roles_dialog_title') }}</span>
-            <RoleBadge v-if="selectedRole" :role="selectedRole.name" />
-          </DialogTitle>
-          <DialogDescription class="text-xs">
-            {{
-              selectedRole?.description ||
-              $t('page.system_view.roles_dialog_desc')
-            }}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div
-          v-if="selectedRole"
-          class="space-y-4 max-h-[65vh] overflow-y-auto pr-1 text-xs"
-        >
-          <!-- Summary Bar -->
-          <div
-            class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/60 bg-muted/20 p-3.5"
-          >
-            <div class="flex items-center gap-2">
-              <Badge :variant="selectedRole.is_system ? 'default' : 'outline'">
-                {{
-                  selectedRole.is_system
-                    ? $t('page.system_view.roles_type_system')
-                    : $t('page.system_view.roles_type_custom')
-                }}
-              </Badge>
-              <span class="text-muted-foreground">
-                {{ $t('page.system_view.roles_id_prefix') }}
-                <code class="font-mono text-foreground">{{
-                  selectedRole.id
-                }}</code>
-              </span>
-            </div>
-            <div class="font-medium text-foreground">
-              {{
-                $t('page.system_view.roles_granted_summary', [
-                  selectedRole.permissions.length,
-                  allPermissions.length || selectedRole.permissions.length,
-                ])
-              }}
-            </div>
-          </div>
-
-          <!-- Grouped Permissions by Module -->
-          <div
-            v-for="(perms, moduleName) in selectedRoleGroupedPermissions"
-            :key="moduleName"
-            class="rounded-xl border border-border/60 bg-card p-4 space-y-3"
-          >
-            <div
-              class="flex items-center justify-between border-b border-border/40 pb-2"
-            >
-              <div class="flex items-center gap-2">
-                <Folder class="size-4 text-primary" />
-                <span class="font-semibold text-foreground">
-                  {{ $t('page.system_view.roles_module_header', [moduleName]) }}
-                </span>
-              </div>
-              <Badge variant="outline" class="font-mono text-2xs">
-                {{ $t('page.system_view.roles_perms_count', [perms.length]) }}
-              </Badge>
-            </div>
-
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div
-                v-for="perm in perms"
-                :key="perm.id"
-                class="flex items-start justify-between gap-2 rounded-lg border border-border/40 bg-muted/15 p-2.5"
-              >
-                <div class="min-w-0 space-y-0.5">
-                  <div class="flex items-center gap-1.5">
-                    <Check class="size-3 text-success shrink-0" />
-                    <code
-                      class="font-mono text-xs font-semibold text-foreground truncate"
-                    >
-                      {{ perm.id }}
-                    </code>
-                  </div>
-                  <p class="text-2xs text-muted-foreground pl-4.5">
-                    {{
-                      perm.description ||
-                      $t('page.system_view.perms_module_action_desc', [
-                        moduleName,
-                      ])
-                    }}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  class="size-6 shrink-0 text-muted-foreground hover:text-foreground"
-                  :title="$t('page.system_view.perms_copy_key')"
-                  @click="handleCopyKey(perm.id)"
-                >
-                  <Check v-if="isCopied(perm.id)" class="size-3 text-success" />
-                  <Copy v-else class="size-3" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
   </div>
 </template>

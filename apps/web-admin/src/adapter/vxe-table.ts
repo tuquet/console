@@ -3,7 +3,10 @@ import type { VxeTableGridOptions } from '@vben/plugins/vxe-table';
 
 import type { ComponentPropsMap, ComponentType } from './component';
 
-import type { VxeDetailSheetOptions } from '#/components/vxe-detail-sheet/types';
+import type {
+  VxeDetailSheetMode,
+  VxeDetailSheetOptions,
+} from '#/components/vxe-detail-sheet/types';
 
 import { computed, defineComponent, Fragment, h, ref } from 'vue';
 
@@ -22,7 +25,7 @@ import {
   useVbenVxeGrid as useGrid,
 } from '@vben/plugins/vxe-table';
 
-import { Button } from '@tuquet/vue-ui';
+import { Badge, Button } from '@tuquet/vue-ui';
 
 import {
   isInteractiveCellClick,
@@ -85,8 +88,12 @@ function resolveVxeTranslate(content: string, args?: any): string {
   return content;
 }
 
+let registeredVxeUI: any;
+export const getVxeUI = () => registeredVxeUI;
+
 setupVbenVxeTable({
   configVxeTable: (vxeUI) => {
+    registeredVxeUI = vxeUI;
     vxeUI.setConfig({
       translate: resolveVxeTranslate,
       grid: {
@@ -146,6 +153,143 @@ setupVbenVxeTable({
         );
       },
     });
+
+    // Formatted date cell: cellRender: { name: 'CellDate' }
+    vxeUI.renderer.add('CellDate', {
+      renderTableDefault(renderOpts, params) {
+        const { props } = renderOpts;
+        const { column, row } = params;
+        const raw = row[column.field];
+        if (!raw) return h('span', { class: 'text-muted-foreground' }, '—');
+
+        let text = String(raw);
+        try {
+          const opts: Intl.DateTimeFormatOptions = props?.options || {
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          };
+          text = new Date(raw).toLocaleString('vi-VN', opts);
+        } catch {
+          // fallback to raw string
+        }
+
+        return h(
+          'span',
+          { class: 'font-mono text-xs text-muted-foreground' },
+          text,
+        );
+      },
+    });
+
+    // ID Shortener & Copy: cellRender: { name: 'CellIdCopy' }
+    vxeUI.renderer.add('CellIdCopy', {
+      renderTableDefault(_renderOpts, params) {
+        const { column, row } = params;
+        const id = String(row[column.field] || '');
+        if (!id) return h('span', { class: 'text-muted-foreground' }, '—');
+
+        const shortId =
+          id.length > 12 ? `${id.slice(0, 8)}...${id.slice(-4)}` : id;
+
+        return h('div', { class: 'inline-flex items-center gap-1.5' }, [
+          h(
+            'code',
+            {
+              class:
+                'rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground',
+              title: id,
+            },
+            shortId,
+          ),
+          h(
+            Button,
+            {
+              class:
+                'size-6 shrink-0 text-muted-foreground hover:text-foreground',
+              size: 'icon',
+              title: 'Copy ID',
+              variant: 'ghost',
+              onClick(e: MouseEvent) {
+                e.stopPropagation();
+                if (navigator?.clipboard?.writeText) {
+                  navigator.clipboard.writeText(id);
+                }
+              },
+            },
+            {
+              default: () => [
+                h(
+                  'svg',
+                  {
+                    class: 'size-3.5',
+                    fill: 'none',
+                    height: '24',
+                    stroke: 'currentColor',
+                    strokeLinecap: 'round',
+                    strokeLinejoin: 'round',
+                    strokeWidth: '2',
+                    viewBox: '0 0 24 24',
+                    width: '24',
+                    xmlns: 'http://www.w3.org/2000/svg',
+                  },
+                  [
+                    h('rect', {
+                      height: '13',
+                      rx: '2',
+                      ry: '2',
+                      width: '13',
+                      x: '9',
+                      y: '9',
+                    }),
+                    h('path', {
+                      d: 'M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1',
+                    }),
+                  ],
+                ),
+              ],
+            },
+          ),
+        ]);
+      },
+    });
+
+    // Semantic Status Badge with dot: cellRender: { name: 'CellStatus', props: { statusMap } }
+    vxeUI.renderer.add('CellStatus', {
+      renderTableDefault(renderOpts, params) {
+        const { props } = renderOpts;
+        const { column, row } = params;
+        const val = row[column.field];
+        const statusMap = props?.statusMap || {};
+        const config = statusMap[val] || {
+          label: String(val ?? '—'),
+          variant: 'muted',
+        };
+
+        const dotClassMap: Record<string, string> = {
+          destructive: 'bg-destructive',
+          muted: 'bg-muted-foreground',
+          success: 'bg-success',
+          warning: 'bg-warning',
+        };
+        const dotClasses = dotClassMap[config.variant] || 'bg-muted-foreground';
+
+        return h(
+          Badge,
+          { class: 'text-xs font-normal', variant: 'outline' },
+          {
+            default: () => [
+              h('span', {
+                class: `mr-1.5 size-1.5 rounded-full ${dotClasses}`,
+              }),
+              config.label,
+            ],
+          },
+        );
+      },
+    });
   },
   useVbenForm,
 });
@@ -195,6 +339,7 @@ export type AdminExtendedVxeGridApi<
   TFormValues extends FormValues = FormValues,
   TSubmitValues extends FormValues = TFormValues,
 > = BaseExtendedVxeGridApi<T, TFormValues, TSubmitValues> & {
+  openCreateSheet: (initialValues?: Partial<T>) => void;
   openDetailSheet: (row: T) => void;
 };
 
@@ -217,11 +362,24 @@ export const useVbenVxeGrid = <
   AdminExtendedVxeGridApi<T, TFormValues, TSubmitValues>,
 ] => {
   const detailSheetOpen = ref(false);
+  const detailSheetMode = ref<VxeDetailSheetMode>('edit');
   const detailSheetRow = ref<null | T>(null);
+  const detailSheetInitialValues = ref<null | Record<string, any>>(null);
 
   const openDetailSheet = (row: T) => {
     if (!row) return;
+    detailSheetMode.value = 'edit';
+    detailSheetInitialValues.value = null;
     detailSheetRow.value = row;
+    detailSheetOpen.value = true;
+  };
+
+  const openCreateSheet = (initialValues?: Partial<T>) => {
+    detailSheetMode.value = 'create';
+    detailSheetRow.value = null;
+    detailSheetInitialValues.value = initialValues
+      ? { ...(initialValues as Record<string, any>) }
+      : null;
     detailSheetOpen.value = true;
   };
 
@@ -263,6 +421,7 @@ export const useVbenVxeGrid = <
     TSubmitValues
   >;
   extendedGridApi.openDetailSheet = openDetailSheet;
+  extendedGridApi.openCreateSheet = openCreateSheet;
 
   const gridStoreState = extendedGridApi.useStore();
 
@@ -320,9 +479,14 @@ export const useVbenVxeGrid = <
             VxeRowDetailSheet,
             {
               gridColumns: resolvedColumns.value,
+              initialValues: detailSheetInitialValues.value,
+              mode: detailSheetMode.value,
               open: detailSheetOpen.value,
               options: options.detailSheetOptions,
               row: detailSheetRow.value as null | Record<string, any>,
+              onCreated: () => {
+                void extendedGridApi.reload();
+              },
               onSaved: (updatedRow: Record<string, any>) => {
                 if (detailSheetRow.value && updatedRow) {
                   Object.assign(detailSheetRow.value, updatedRow);
@@ -363,6 +527,7 @@ export const VxeTextarea = _VxeTextarea;
 
 export type {
   VxeDetailSheetAction,
+  VxeDetailSheetMode,
   VxeDetailSheetOptions,
 } from '#/components/vxe-detail-sheet/types';
 export type * from '@vben/plugins/vxe-table';

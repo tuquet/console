@@ -23,7 +23,6 @@ import {
   Play,
   Plus,
   RefreshCw,
-  Settings2,
   SlidersHorizontal,
   Upload,
 } from '@lucide/vue';
@@ -110,12 +109,6 @@ const importingStock = ref(false);
 const selectedStockVariantId = ref<string>('');
 const stockBatchCode = ref<string>('');
 const stockLinesRaw = ref<string>('');
-
-// Gateway Edit Modal State
-const gatewayModalOpen = ref(false);
-const savingGateway = ref(false);
-const editingGateway = ref<null | PaymentGatewayItem>(null);
-const gatewayPublicConfigText = ref<string>('{}');
 
 const serializedVariants = computed(() => {
   const list: Array<{
@@ -562,13 +555,6 @@ function getGatewayColumns() {
       visible: !mobile,
       slots: { default: 'status-cell' },
     },
-    {
-      field: 'actions',
-      title: $t('page.commerce_view.col_config'),
-      width: mobile ? 85 : 140,
-      align: 'right' as const,
-      slots: { default: 'action-cell' },
-    },
   ];
 }
 
@@ -579,6 +565,15 @@ const [GatewaysGrid, gatewaysGridApi] = useVbenVxeGrid<PaymentGatewayItem>({
     resource: 'billing.payment_gateways',
     subtitleField: 'channel',
     titleField: 'name',
+    onCreate: async ({ insertPayload }) => {
+      return await upsertPaymentGatewayAdminApi(insertPayload as any);
+    },
+    onSave: async ({ dirtyPayload, row }) => {
+      await upsertPaymentGatewayAdminApi({
+        ...row,
+        ...dirtyPayload,
+      } as any);
+    },
   },
   gridOptions: {
     border: false,
@@ -800,55 +795,6 @@ async function handleForceApproveIntent(intent: PaymentIntentItem) {
   }
 }
 
-function openGatewayModal(gw: PaymentGatewayItem) {
-  editingGateway.value = { ...gw };
-  gatewayPublicConfigText.value = JSON.stringify(
-    gw.public_config || {},
-    null,
-    2,
-  );
-  gatewayModalOpen.value = true;
-}
-
-async function handleSaveGateway() {
-  if (!editingGateway.value) return;
-  let parsedConfig: Record<string, any>;
-  try {
-    parsedConfig = JSON.parse(gatewayPublicConfigText.value || '{}');
-  } catch {
-    toast.error($t('page.commerce_view.invalid_public_config_json'));
-    return;
-  }
-
-  savingGateway.value = true;
-  try {
-    await upsertPaymentGatewayAdminApi({
-      channel: editingGateway.value.channel,
-      currency: editingGateway.value.currency,
-      driver: editingGateway.value.driver,
-      id: editingGateway.value.id,
-      is_active: editingGateway.value.is_active,
-      name: editingGateway.value.name,
-      public_config: parsedConfig,
-      rate_per_credit: Number(editingGateway.value.rate_per_credit),
-      sort_order: Number(editingGateway.value.sort_order),
-    });
-    toast.success(
-      $t('page.commerce_view.gateway_updated_toast', {
-        name: editingGateway.value.name,
-      }),
-    );
-    gatewayModalOpen.value = false;
-    await gatewaysGridApi.reload();
-  } catch (error: any) {
-    toast.error(
-      error?.message || $t('page.commerce_view.gateway_update_failed'),
-    );
-  } finally {
-    savingGateway.value = false;
-  }
-}
-
 function getOrderStatusVariant(status: CommerceOrderStatus) {
   if (status === 'completed' || status === 'paid') return 'default';
   if (status === 'failed') return 'destructive';
@@ -891,6 +837,17 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
         </Button>
 
         <Button
+          v-if="activeTab === 'gateways'"
+          size="sm"
+          class="gap-1.5"
+          @click="() => gatewaysGridApi.openCreateSheet()"
+        >
+          <Plus class="size-3.5" />
+          <span>{{ $t('common.createRecord') }}</span>
+        </Button>
+
+        <Button
+          v-else
           size="sm"
           class="gap-1.5"
           @click="() => openCreateProductModal()"
@@ -1189,18 +1146,6 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             }}
           </Badge>
         </template>
-
-        <template #action-cell="{ row }">
-          <Button
-            size="sm"
-            variant="outline"
-            class="h-7 gap-1 px-2.5 text-xs"
-            @click="openGatewayModal(row)"
-          >
-            <Settings2 class="size-3.5" />
-            {{ $t('page.commerce_view.col_config') }}
-          </Button>
-        </template>
       </GatewaysGrid>
     </div>
 
@@ -1425,96 +1370,6 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             @click="handleBulkImportStock"
           >
             {{ $t('page.commerce_view.submit_import_stock_btn') }}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-
-    <!-- Modal 3: Edit Payment Gateway -->
-    <Dialog v-model:open="gatewayModalOpen">
-      <DialogContent class="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle class="text-base font-semibold">
-            {{
-              $t('page.commerce_view.gateway_modal_title', {
-                id: editingGateway?.id || '',
-              })
-            }}
-          </DialogTitle>
-          <DialogDescription class="text-xs text-muted-foreground">
-            {{ $t('page.commerce_view.gateway_modal_desc') }}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div v-if="editingGateway" class="space-y-3 py-2">
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-foreground">
-              {{ $t('page.commerce_view.display_name_label') }}
-            </label>
-            <input
-              v-model="editingGateway.name"
-              type="text"
-              class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
-            />
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div class="space-y-1">
-              <label class="text-xs font-medium text-foreground">
-                {{
-                  $t('page.commerce_view.rate_1_xu_label', {
-                    currency: editingGateway.currency,
-                  })
-                }}
-              </label>
-              <input
-                v-model.number="editingGateway.rate_per_credit"
-                type="number"
-                step="0.01"
-                class="h-8 w-full rounded-md border border-border bg-background px-2.5 font-mono text-xs text-foreground"
-              />
-            </div>
-
-            <div class="space-y-1">
-              <label class="text-xs font-medium text-foreground">
-                {{ $t('page.commerce_view.gateway_status_label') }}
-              </label>
-              <select
-                v-model="editingGateway.is_active"
-                class="h-8 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground"
-              >
-                <option :value="true">
-                  {{ $t('page.commerce_view.opt_gateway_active') }}
-                </option>
-                <option :value="false">
-                  {{ $t('page.commerce_view.opt_gateway_disabled') }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-foreground">
-              {{ $t('page.commerce_view.public_config_json_label') }}
-            </label>
-            <textarea
-              v-model="gatewayPublicConfigText"
-              rows="6"
-              class="w-full rounded-lg border border-border bg-background p-3 font-mono text-xs text-foreground focus:border-primary focus:outline-none"
-            ></textarea>
-          </div>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-2">
-          <Button variant="outline" size="sm" @click="gatewayModalOpen = false">
-            {{ $t('common.cancel') }}
-          </Button>
-          <Button
-            size="sm"
-            :disabled="savingGateway"
-            @click="handleSaveGateway"
-          >
-            {{ $t('common.save') }}
           </Button>
         </div>
       </DialogContent>

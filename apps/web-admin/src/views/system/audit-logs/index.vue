@@ -5,16 +5,8 @@ import { computed, ref, watch } from 'vue';
 
 import { usePreferences } from '@vben/preferences';
 
-import { Eye, RefreshCw, ShieldCheck, User } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@tuquet/vue-ui';
+import { RefreshCw, User } from '@lucide/vue';
+import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getGlobalAuditLogsApi } from '#/api';
@@ -26,8 +18,6 @@ defineOptions({ name: 'SystemAuditLogs' });
 const { formatDate } = useDateFormat();
 const { isMobile } = usePreferences();
 
-const selectedLog = ref<GlobalAuditLogItem | null>(null);
-const detailOpen = ref(false);
 const totalLogs = ref(0);
 
 function getColumns() {
@@ -72,19 +62,11 @@ function getColumns() {
       visible: !isMobile.value,
       slots: { default: 'ip-cell' },
     },
-    {
-      field: 'actions',
-      title: $t('common.detail'),
-      width: isMobile.value ? 56 : 100,
-      align: 'right' as const,
-      slots: { default: 'detail-cell' },
-    },
   ];
 }
 
 const [Grid, gridApi] = useVbenVxeGrid<GlobalAuditLogItem>({
   detailSheetOptions: {
-    forwardActionSlot: false,
     resource: 'public.audit_logs',
     subtitleField: 'entity_type',
     titleField: 'action',
@@ -182,10 +164,6 @@ watch([() => $t('page.system_view.audit_col_time'), isMobile], () => {
     },
   });
 });
-
-function openDetail(log: GlobalAuditLogItem) {
-  gridApi.openDetailSheet(log);
-}
 
 function getActionBadgeVariant(
   action: string,
@@ -310,85 +288,7 @@ function refresh() {
             {{ row.ip_address || '—' }}
           </span>
         </template>
-
-        <template #detail-cell="{ row }">
-          <Button
-            variant="ghost"
-            size="icon"
-            class="size-8"
-            @click="openDetail(row as GlobalAuditLogItem)"
-          >
-            <Eye class="size-4" />
-          </Button>
-        </template>
       </Grid>
     </div>
-
-    <!-- Detail Dialog -->
-    <Dialog v-model:open="detailOpen">
-      <DialogContent class="max-w-[calc(100vw-2rem)] sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle class="flex items-center gap-2 text-base">
-            <ShieldCheck class="size-4 text-primary" />
-            {{ $t('page.system_view.audit_dialog_title', [selectedLog?.id]) }}
-          </DialogTitle>
-          <DialogDescription class="font-mono text-xs">
-            {{
-              $t('page.system_view.audit_dialog_desc', [
-                selectedLog?.action,
-                selectedLog?.tenant_id,
-              ])
-            }}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div
-          v-if="selectedLog"
-          class="space-y-3 max-h-[60vh] overflow-y-auto text-xs"
-        >
-          <div>
-            <h4 class="font-semibold text-foreground mb-1">
-              {{ $t('page.system_view.audit_new_values') }}
-            </h4>
-            <pre
-              class="rounded-lg bg-muted p-3 font-mono overflow-x-auto text-2xs"
-              >{{
-                JSON.stringify(selectedLog.new_values, null, 2) || 'null'
-              }}</pre>
-          </div>
-
-          <div>
-            <h4 class="font-semibold text-foreground mb-1">
-              {{ $t('page.system_view.audit_old_values') }}
-            </h4>
-            <pre
-              class="rounded-lg bg-muted p-3 font-mono overflow-x-auto text-2xs"
-              >{{
-                JSON.stringify(selectedLog.old_values, null, 2) || 'null'
-              }}</pre>
-          </div>
-
-          <div
-            class="grid grid-cols-2 gap-2 text-2xs text-muted-foreground pt-2 border-t border-border/40"
-          >
-            <div>
-              <strong>{{ $t('page.system_view.audit_actor_id_label') }}</strong>
-              {{
-                selectedLog.actor_id ||
-                $t('page.system_view.audit_actor_system')
-              }}
-            </div>
-            <div>
-              <strong>{{ $t('page.system_view.audit_ip_label') }}</strong>
-              {{ selectedLog.ip_address || '—' }}
-            </div>
-            <div class="col-span-2 truncate">
-              <strong>{{ $t('page.system_view.audit_ua_label') }}</strong>
-              {{ selectedLog.user_agent || '—' }}
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
   </div>
 </template>

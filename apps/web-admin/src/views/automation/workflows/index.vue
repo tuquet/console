@@ -6,7 +6,7 @@ import { useRoute } from 'vue-router';
 
 import { usePreferences } from '@vben/preferences';
 
-import { Eye, GitBranch, RefreshCw } from '@lucide/vue';
+import { GitBranch, Plus, RefreshCw } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
@@ -21,8 +21,6 @@ import {
 } from '#/constants';
 import { $t } from '#/locales';
 
-import WorkflowDetailModal from './components/modals/workflow-detail-modal.vue';
-
 defineOptions({ name: 'AutomationWorkflows' });
 
 const route = useRoute();
@@ -30,13 +28,6 @@ const { isMobile } = usePreferences();
 const { formatDate } = useDateFormat();
 
 const allWorkflows = ref<AutomaWorkflowItem[]>([]);
-const isDetailModalVisible = ref(false);
-const selectedWorkflow = ref<AutomaWorkflowItem | null>(null);
-
-function handleOpenDetail(workflow: AutomaWorkflowItem) {
-  selectedWorkflow.value = workflow;
-  isDetailModalVisible.value = true;
-}
 
 function getStatusDotClass(status: string): string {
   return getStatusToneMeta(status, WORKFLOW_STATUS_META).dotClass;
@@ -83,14 +74,6 @@ function getColumns() {
       minWidth: 145,
       visible: !mobile,
       slots: { default: 'updated-cell' },
-    },
-    {
-      field: 'actions',
-      title: $t('common.actions'),
-      width: mobile ? 56 : 110,
-      align: 'right' as const,
-      showOverflow: false,
-      slots: { default: 'actions-cell' },
     },
   ];
 }
@@ -246,6 +229,14 @@ function refresh() {
           <RefreshCw class="size-3.5 shrink-0" />
           <span class="hidden sm:inline">{{ $t('common.refresh') }}</span>
         </Button>
+        <Button
+          size="sm"
+          class="h-8 gap-1.5 px-2.5 text-xs font-medium sm:px-3"
+          @click="() => gridApi.openCreateSheet()"
+        >
+          <Plus class="size-3.5 shrink-0" />
+          <span>{{ $t('common.createRecord') }}</span>
+        </Button>
       </div>
     </div>
 
@@ -256,11 +247,7 @@ function refresh() {
       <!-- Table Grid -->
       <Grid class="workflow-vxe-grid">
         <template #name-cell="{ row }">
-          <div
-            class="flex items-start gap-2.5 py-1 sm:items-center"
-            :class="{ 'cursor-pointer': isMobile }"
-            @click="isMobile && handleOpenDetail(row)"
-          >
+          <div class="flex items-start gap-2.5 py-1 sm:items-center">
             <div
               class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground sm:mt-0"
             >
@@ -330,19 +317,6 @@ function refresh() {
           </span>
         </template>
 
-        <template #actions-cell="{ row }">
-          <Button
-            variant="outline"
-            size="sm"
-            class="inline-flex h-7 items-center gap-1 px-2 text-xs sm:px-2.5"
-            :title="$t('common.detail')"
-            @click="handleOpenDetail(row)"
-          >
-            <Eye class="size-3.5 shrink-0" />
-            <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
-          </Button>
-        </template>
-
         <template #empty>
           <div
             class="flex flex-col items-center justify-center px-4 py-8 text-center text-muted-foreground"
@@ -360,10 +334,5 @@ function refresh() {
         </template>
       </Grid>
     </div>
-
-    <WorkflowDetailModal
-      v-model:open="isDetailModalVisible"
-      :workflow="selectedWorkflow"
-    />
   </div>
 </template>

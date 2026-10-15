@@ -13,8 +13,8 @@ import { usePreferences } from '@vben/preferences';
 import {
   CreditCard,
   Database,
-  Eye,
   HardDrive,
+  Plus,
   RefreshCw,
   ShieldCheck,
   Webhook,
@@ -25,12 +25,10 @@ import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSystemPluginsApi } from '#/api';
-import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
 defineOptions({ name: 'SystemPlugins' });
 
-const { formatDate } = useDateFormat();
 const { isMobile } = usePreferences();
 
 const allPlugins = ref<SystemPluginItem[]>([]);
@@ -69,21 +67,13 @@ function getColumns() {
       minWidth: 150,
       align: 'right' as const,
       visible: !isMobile.value,
-      slots: { default: 'date-cell' },
-    },
-    {
-      field: 'actions',
-      title: $t('common.actions'),
-      width: isMobile.value ? 56 : 105,
-      align: 'right' as const,
-      slots: { default: 'actions-cell' },
+      cellRender: { name: 'CellDate' },
     },
   ];
 }
 
 const [Grid, gridApi] = useVbenVxeGrid<SystemPluginItem>({
   detailSheetOptions: {
-    forwardActionSlot: false,
     resource: 'public.system_plugins',
     subtitleField: 'version',
     titleField: 'name',
@@ -253,7 +243,7 @@ function refresh() {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-2">
+      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -262,6 +252,14 @@ function refresh() {
           @click="refresh"
         >
           <RefreshCw class="size-3.5 shrink-0" />
+        </Button>
+        <Button
+          size="sm"
+          class="h-8 gap-1.5 px-2.5 text-xs font-medium sm:px-3"
+          @click="() => gridApi.openCreateSheet()"
+        >
+          <Plus class="size-3.5 shrink-0" />
+          <span>{{ $t('common.createRecord') }}</span>
         </Button>
       </div>
     </div>
@@ -347,27 +345,6 @@ function refresh() {
                   : $t('common.pending')
             }}
           </Badge>
-        </template>
-
-        <template #date-cell="{ row }">
-          <span class="text-xs text-muted-foreground">
-            {{ formatDate(row.installed_at) }}
-          </span>
-        </template>
-
-        <template #actions-cell="{ row }">
-          <div class="flex items-center justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              class="inline-flex h-7 items-center gap-1 px-2 text-xs"
-              :title="$t('common.detail')"
-              @click="gridApi.openDetailSheet(row as SystemPluginItem)"
-            >
-              <Eye class="size-3 shrink-0" />
-              <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
-            </Button>
-          </div>
         </template>
       </Grid>
     </div>

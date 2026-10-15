@@ -27,6 +27,7 @@ import {
 } from '#/constants';
 
 import { supabaseRequest } from './supabase-client';
+import { getActiveTenantId } from './tenant';
 
 export type SupabaseResourceKey =
   | 'automa.campaign_runs'
@@ -59,15 +60,19 @@ export type DynamicFieldType =
   | 'uuid';
 
 export interface SupabaseColumnSchema {
+  defaultValue?: (() => any) | any;
   editable?: boolean;
   enumMeta?: Record<string, EnumItemMeta>;
   field: string;
+  /** Allows user input during Create Mode (`mode = 'create'`) even when `editable` is false in Edit Mode (e.g. text primary key `id`) */
+  insertable?: boolean;
   /** Optional row-level guard that disables editing this specific column */
   isFieldLocked?: (row: Record<string, any>) => boolean;
   labelKey?: string;
   max?: number;
   min?: number;
   options?: Array<{ label: string; value: number | string }>;
+  placeholderKey?: string;
   required?: boolean;
   type: DynamicFieldType;
 }
@@ -80,6 +85,7 @@ export interface RlsDecision {
 
 export interface RowRlsEvaluation {
   canDelete: RlsDecision;
+  canInsert: RlsDecision;
   canSelect: RlsDecision;
   canUpdate: RlsDecision;
   resource: SupabaseResourceKey;
@@ -94,6 +100,7 @@ export interface SupabaseTableSchema {
     access?: EffectiveAccess | null,
   ) => {
     canDelete: RlsDecision;
+    canInsert?: RlsDecision;
     canSelect: RlsDecision;
     canUpdate: RlsDecision;
   };
@@ -105,16 +112,33 @@ export interface SupabaseTableSchema {
 }
 
 export interface DynamicVxeFormField {
+  defaultValue?: any;
   editable: boolean;
   field: string;
   group: 'editable' | 'json' | 'readonly';
   max?: number;
   min?: number;
   options?: Array<{ label: string; value: number | string }>;
+  placeholderKey?: string;
   required?: boolean;
   statusMeta?: ResolvedStatusMeta;
   title: string;
   type: DynamicFieldType;
+}
+
+export interface SupabaseRelationalColumn {
+  field: string;
+  title: string;
+  type?: 'badge' | 'boolean' | 'datetime' | 'mono' | 'number' | 'text';
+}
+
+export interface SupabaseRelationalTableDescriptor {
+  columns: SupabaseRelationalColumn[];
+  copyKey: string;
+  field: string;
+  rows: Array<Record<string, any>>;
+  targetResource: string;
+  title: string;
 }
 
 const PROXY_PROTOCOL_OPTIONS: Array<{ label: string; value: string }> = [
@@ -236,6 +260,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'text',
       },
       plan: {
+        defaultValue: 'pro',
         editable: true,
         enumMeta: TENANT_PLAN_META,
         field: 'plan',
@@ -243,6 +268,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'enum',
       },
       status: {
+        defaultValue: 'active',
         editable: true,
         enumMeta: TENANT_STATUS_META,
         field: 'status',
@@ -277,6 +303,10 @@ export const SUPABASE_TABLE_REGISTRY: Record<
       const canDelete =
         !access || access.isSuperadmin || row?.my_role === 'owner';
       return {
+        canInsert: {
+          allowed: true,
+          policyName: 'tenants_insert_authenticated',
+        },
         canSelect: { allowed: true, policyName: 'tenants_select_member' },
         canUpdate: {
           allowed: canUpdate,
@@ -314,12 +344,14 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'textarea',
       },
       version: {
+        defaultValue: '1.0.0',
         editable: true,
         field: 'version',
         labelKey: 'common.version',
         type: 'text',
       },
       status: {
+        defaultValue: 'draft',
         editable: true,
         enumMeta: WORKFLOW_STATUS_META,
         field: 'status',
@@ -355,6 +387,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         row?.tenant_id,
       );
       return {
+        canInsert: {
+          allowed,
+          policyName: 'workflows_manage',
+          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'workflows_select' },
         canUpdate: {
           allowed,
@@ -431,6 +468,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         row?.tenant_id,
       );
       return {
+        canInsert: {
+          allowed: false,
+          policyName: 'campaigns_run',
+          reasonKey: 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'campaigns_select' },
         canUpdate: {
           allowed,
@@ -503,6 +545,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         row?.tenant_id,
       );
       return {
+        canInsert: {
+          allowed: false,
+          policyName: 'devices_manage',
+          reasonKey: 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'devices_select' },
         canUpdate: {
           allowed,
@@ -534,6 +581,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'text',
       },
       status: {
+        defaultValue: 'idle',
         editable: true,
         enumMeta: BROWSER_STATUS_META,
         field: 'status',
@@ -541,12 +589,14 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'enum',
       },
       os_platform: {
+        defaultValue: 'windows',
         editable: true,
         field: 'os_platform',
         labelKey: 'page.automation_view.col_os',
         type: 'text',
       },
       browser_version: {
+        defaultValue: '134.0',
         editable: true,
         field: 'browser_version',
         labelKey: 'common.version',
@@ -558,6 +608,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'term.proxy',
         type: 'text',
       },
+      tenant_id: { field: 'tenant_id', labelKey: 'term.tenant', type: 'uuid' },
       created_at: {
         field: 'created_at',
         labelKey: 'common.createdAt',
@@ -571,6 +622,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         row?.tenant_id,
       );
       return {
+        canInsert: {
+          allowed,
+          policyName: 'browsers_manage',
+          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'browsers_select' },
         canUpdate: {
           allowed,
@@ -602,6 +658,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'text',
       },
       port: {
+        defaultValue: 1080,
         editable: true,
         field: 'port',
         labelKey: 'common.port',
@@ -611,6 +668,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'number',
       },
       protocol: {
+        defaultValue: 'socks5',
         editable: true,
         field: 'protocol',
         labelKey: 'common.type',
@@ -618,6 +676,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'enum',
       },
       status: {
+        defaultValue: 'active',
         editable: true,
         enumMeta: PROXY_STATUS_META,
         field: 'status',
@@ -625,12 +684,14 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'enum',
       },
       country_code: {
+        defaultValue: 'VN',
         editable: true,
         field: 'country_code',
         labelKey: 'common.country',
         type: 'text',
       },
       is_residential: {
+        defaultValue: false,
         editable: true,
         field: 'is_residential',
         labelKey: 'common.residential',
@@ -641,6 +702,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.latency',
         type: 'number',
       },
+      tenant_id: { field: 'tenant_id', labelKey: 'term.tenant', type: 'uuid' },
       last_checked_at: {
         field: 'last_checked_at',
         labelKey: 'common.updatedAt',
@@ -654,6 +716,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         row?.tenant_id,
       );
       return {
+        canInsert: {
+          allowed,
+          policyName: 'proxies_manage',
+          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'proxies_select' },
         canUpdate: {
           allowed,
@@ -727,6 +794,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
       const canUpdateBuyerPending =
         isSuperadmin || row?.status === 'pending_payment';
       return {
+        canInsert: {
+          allowed: false,
+          policyName: 'orders_platform_admin',
+          reasonKey: 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'orders_select_tenant' },
         canUpdate: {
           allowed: canUpdateBuyerPending,
@@ -769,6 +841,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'text',
       },
       product_type: {
+        defaultValue: 'serial_stock',
         editable: true,
         enumMeta: COMMERCE_PRODUCT_TYPE_META,
         field: 'product_type',
@@ -776,6 +849,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'enum',
       },
       visibility: {
+        defaultValue: 'public',
         editable: true,
         enumMeta: PRODUCT_VISIBILITY_META,
         field: 'visibility',
@@ -783,6 +857,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'enum',
       },
       is_active: {
+        defaultValue: true,
         editable: true,
         field: 'is_active',
         labelKey: 'common.status',
@@ -795,6 +870,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'textarea',
       },
       sort_order: {
+        defaultValue: 0,
         editable: true,
         field: 'sort_order',
         labelKey: 'common.sortOrder',
@@ -819,6 +895,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
       return {
+        canInsert: {
+          allowed,
+          policyName: 'products_platform_admin',
+          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'products_select_public' },
         canUpdate: {
           allowed,
@@ -880,6 +961,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
       },
     },
     evaluateRls: () => ({
+      canInsert: {
+        allowed: false,
+        policyName: 'rls_append_only_ledger',
+        reasonKey: 'common.rlsAppendOnlyLedger',
+      },
       canSelect: { allowed: true, policyName: 'wallet_tx_select_tenant' },
       canUpdate: {
         allowed: false,
@@ -946,6 +1032,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
       return {
+        canInsert: {
+          allowed: false,
+          policyName: 'rls_append_only_ledger',
+          reasonKey: 'common.rlsAppendOnlyLedger',
+        },
         canSelect: { allowed: true, policyName: 'payment_intents_select' },
         canUpdate: {
           allowed,
@@ -966,23 +1057,46 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     schema: SUPABASE_SCHEMA.BILLING,
     table: 'payment_gateways',
     primaryKey: 'id',
-    titleField: 'display_name',
+    titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
-      provider_code: {
-        enumMeta: PAYMENT_CHANNEL_META,
-        field: 'provider_code',
-        labelKey: 'common.type',
-        type: 'enum',
+      id: {
+        field: 'id',
+        insertable: true,
+        labelKey: 'common.id',
+        required: true,
+        type: 'text',
       },
-      display_name: {
+      name: {
         editable: true,
-        field: 'display_name',
+        field: 'name',
         labelKey: 'common.name',
         required: true,
         type: 'text',
       },
+      channel: {
+        defaultValue: 'bank_transfer',
+        editable: true,
+        enumMeta: PAYMENT_CHANNEL_META,
+        field: 'channel',
+        labelKey: 'common.type',
+        type: 'enum',
+      },
+      driver: {
+        defaultValue: 'manual',
+        editable: true,
+        field: 'driver',
+        labelKey: 'page.commerce_view.col_adapter_driver',
+        type: 'text',
+      },
+      currency: {
+        defaultValue: 'VND',
+        editable: true,
+        field: 'currency',
+        labelKey: 'common.currency',
+        type: 'text',
+      },
       rate_per_credit: {
+        defaultValue: 1000,
         editable: true,
         field: 'rate_per_credit',
         labelKey: 'common.price',
@@ -990,18 +1104,21 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'number',
       },
       is_active: {
+        defaultValue: true,
         editable: true,
         field: 'is_active',
         labelKey: 'common.status',
         type: 'boolean',
       },
       sort_order: {
+        defaultValue: 0,
         editable: true,
         field: 'sort_order',
         labelKey: 'common.sortOrder',
         type: 'number',
       },
       public_config: {
+        defaultValue: () => ({}),
         editable: true,
         field: 'public_config',
         labelKey: 'common.publicConfig',
@@ -1016,6 +1133,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
       return {
+        canInsert: {
+          allowed,
+          policyName: 'payment_gateways_platform_admin',
+          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'payment_gateways_select' },
         canUpdate: {
           allowed,
@@ -1038,7 +1160,13 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'text' },
+      id: {
+        field: 'id',
+        insertable: true,
+        labelKey: 'common.id',
+        required: true,
+        type: 'text',
+      },
       name: {
         editable: true,
         field: 'name',
@@ -1053,6 +1181,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'textarea',
       },
       version: {
+        defaultValue: '1.0.0',
         editable: true,
         field: 'version',
         labelKey: 'common.version',
@@ -1064,6 +1193,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'text',
       },
       status: {
+        defaultValue: 'installed',
         editable: true,
         enumMeta: SYSTEM_PLUGIN_STATUS_META,
         field: 'status',
@@ -1082,6 +1212,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'datetime',
       },
       metadata: {
+        defaultValue: () => ({}),
         editable: true,
         field: 'metadata',
         labelKey: 'common.publicConfig',
@@ -1091,6 +1222,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
       return {
+        canInsert: {
+          allowed,
+          policyName: 'system_plugins_manage_admin',
+          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'system_plugins_select_all' },
         canUpdate: {
           allowed,
@@ -1113,7 +1249,13 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'name',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'text' },
+      id: {
+        field: 'id',
+        insertable: true,
+        labelKey: 'common.id',
+        required: true,
+        type: 'text',
+      },
       name: {
         editable: true,
         field: 'name',
@@ -1128,6 +1270,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'textarea',
       },
       price_monthly_usd: {
+        defaultValue: 29,
         editable: true,
         field: 'price_monthly_usd',
         labelKey: 'common.price',
@@ -1135,6 +1278,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'number',
       },
       max_members: {
+        defaultValue: 10,
         editable: true,
         field: 'max_members',
         labelKey: 'term.members',
@@ -1142,6 +1286,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'number',
       },
       max_storage_mb: {
+        defaultValue: 10_240,
         editable: true,
         field: 'max_storage_mb',
         labelKey: 'common.storageMb',
@@ -1149,6 +1294,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'number',
       },
       max_monthly_runs: {
+        defaultValue: 5000,
         editable: true,
         field: 'max_monthly_runs',
         labelKey: 'common.monthlyRuns',
@@ -1156,12 +1302,14 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'number',
       },
       is_active: {
+        defaultValue: true,
         editable: true,
         field: 'is_active',
         labelKey: 'common.status',
         type: 'boolean',
       },
       metadata: {
+        defaultValue: () => ({}),
         editable: true,
         field: 'metadata',
         labelKey: 'common.publicConfig',
@@ -1176,6 +1324,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
       return {
+        canInsert: {
+          allowed,
+          policyName: 'plans_platform_admin',
+          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'plans_select_all' },
         canUpdate: {
           allowed,
@@ -1242,6 +1395,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
       return {
+        canInsert: {
+          allowed: false,
+          policyName: 'profiles_self_or_superadmin',
+          reasonKey: 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'profiles_select_auth' },
         canUpdate: {
           allowed,
@@ -1281,6 +1439,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'textarea',
       },
       is_system: {
+        defaultValue: false,
         field: 'is_system',
         labelKey: 'common.systemRole',
         type: 'boolean',
@@ -1302,8 +1461,18 @@ export const SUPABASE_TABLE_REGISTRY: Record<
       },
     },
     evaluateRls: (row, access) => {
+      const canManageRoles = hasTenantOrGlobalPermission(
+        access,
+        'roles.manage',
+        row?.tenant_id,
+      );
       if (row?.is_system) {
         return {
+          canInsert: {
+            allowed: canManageRoles,
+            policyName: 'roles_manage_custom',
+            reasonKey: canManageRoles ? undefined : 'common.rlsReadOnlyReason',
+          },
           canSelect: { allowed: true, policyName: 'roles_select_all' },
           canUpdate: {
             allowed: false,
@@ -1317,22 +1486,22 @@ export const SUPABASE_TABLE_REGISTRY: Record<
           },
         };
       }
-      const allowed = hasTenantOrGlobalPermission(
-        access,
-        'roles.manage',
-        row?.tenant_id,
-      );
       return {
+        canInsert: {
+          allowed: canManageRoles,
+          policyName: 'roles_manage_custom',
+          reasonKey: canManageRoles ? undefined : 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'roles_select_all' },
         canUpdate: {
-          allowed,
+          allowed: canManageRoles,
           policyName: 'roles_manage_custom',
-          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+          reasonKey: canManageRoles ? undefined : 'common.rlsReadOnlyReason',
         },
         canDelete: {
-          allowed,
+          allowed: canManageRoles,
           policyName: 'roles_manage_custom',
-          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+          reasonKey: canManageRoles ? undefined : 'common.rlsReadOnlyReason',
         },
       };
     },
@@ -1345,11 +1514,19 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     primaryKey: 'id',
     titleField: 'id',
     columns: {
-      id: { field: 'id', labelKey: 'common.id', type: 'text' },
+      id: {
+        field: 'id',
+        insertable: true,
+        labelKey: 'common.id',
+        required: true,
+        type: 'text',
+      },
       module: {
+        defaultValue: 'core-iam',
         editable: true,
         field: 'module',
         labelKey: 'common.module',
+        required: true,
         type: 'text',
       },
       description: {
@@ -1367,6 +1544,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
       return {
+        canInsert: {
+          allowed,
+          policyName: 'permissions_catalog_admin',
+          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'permissions_select_all' },
         canUpdate: {
           allowed,
@@ -1390,7 +1572,14 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     titleField: 'tenant_name',
     columns: {
       id: { field: 'id', labelKey: 'common.id', type: 'uuid' },
-      tenant_id: { field: 'tenant_id', labelKey: 'term.tenant', type: 'uuid' },
+      tenant_id: {
+        defaultValue: () => getActiveTenantId() || '',
+        field: 'tenant_id',
+        insertable: true,
+        labelKey: 'term.tenant',
+        required: true,
+        type: 'uuid',
+      },
       tenant_name: {
         field: 'tenant_name',
         labelKey: 'term.workspace',
@@ -1402,10 +1591,12 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'text',
       },
       plan_id: {
+        defaultValue: 'pro',
         editable: true,
         enumMeta: TENANT_PLAN_META,
         field: 'plan_id',
         labelKey: 'term.plan',
+        required: true,
         type: 'enum',
       },
       plan_name: {
@@ -1419,6 +1610,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'number',
       },
       status: {
+        defaultValue: 'active',
         editable: true,
         enumMeta: SUBSCRIPTION_STATUS_META,
         field: 'status',
@@ -1426,6 +1618,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'enum',
       },
       cancel_at_period_end: {
+        defaultValue: false,
         editable: true,
         field: 'cancel_at_period_end',
         labelKey: 'common.cancelAtPeriodEnd',
@@ -1450,6 +1643,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (_row, access) => {
       const allowed = !access || access.isSuperadmin;
       return {
+        canInsert: {
+          allowed,
+          policyName: 'subscriptions_platform_admin',
+          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+        },
         canSelect: { allowed: true, policyName: 'subscriptions_select_tenant' },
         canUpdate: {
           allowed,
@@ -1523,6 +1721,11 @@ export const SUPABASE_TABLE_REGISTRY: Record<
       },
     },
     evaluateRls: () => ({
+      canInsert: {
+        allowed: false,
+        policyName: 'rls_append_only_ledger',
+        reasonKey: 'common.rlsAppendOnlyLedger',
+      },
       canSelect: { allowed: true, policyName: 'audit_logs_select_authorized' },
       canUpdate: {
         allowed: false,
@@ -1581,7 +1784,10 @@ export function inferResourceFromRouteAndRow(
     if ('reference_code' in row && 'credits_amount' in row) {
       return 'billing.payment_intents';
     }
-    if ('rate_per_credit' in row && 'provider_code' in row) {
+    if (
+      'rate_per_credit' in row &&
+      ('channel' in row || 'provider_code' in row)
+    ) {
       return 'billing.payment_gateways';
     }
     if ('tx_type' in row && 'balance_after' in row) {
@@ -1652,6 +1858,11 @@ export function evaluateRowRlsPolicy(
   const decisions = tableSchema.evaluateRls(row ?? {}, access);
   return {
     ...decisions,
+    canInsert: decisions.canInsert ?? {
+      allowed: false,
+      policyName: `${tableSchema.table}_insert_restricted`,
+      reasonKey: 'common.rlsReadOnlyReason',
+    },
     resource: tableSchema.resource,
     schema: tableSchema.schema,
     table: tableSchema.table,
@@ -1729,6 +1940,288 @@ export interface BuildDynamicVxeFormSchemaInput {
 }
 
 /**
+ * Extracts relational collection fields (`1-N` / `M-N` arrays like `permissions`,
+ * `roles`, `dependencies`, `workspaces`, `variants`, `items`, `deliveries`) from a row
+ * into structured Supabase-style Relational Table Descriptors for the secondary stacked drawer.
+ */
+export function extractRelationalTablesFromRow(
+  row: null | Record<string, any> | undefined,
+  translate: (key: string) => string = (k) => k,
+): SupabaseRelationalTableDescriptor[] {
+  if (!row || typeof row !== 'object') {
+    return [];
+  }
+
+  const descriptors: SupabaseRelationalTableDescriptor[] = [];
+  const handledKeys = new Set<string>();
+
+  if (Array.isArray(row.permissions) && row.permissions.length > 0) {
+    handledKeys.add('permissions');
+    descriptors.push({
+      columns: [
+        { field: 'code', title: translate('term.permissions'), type: 'mono' },
+        { field: 'module', title: translate('common.module'), type: 'badge' },
+      ],
+      copyKey: 'code',
+      field: 'permissions',
+      rows: row.permissions.map((perm: any) => {
+        if (perm && typeof perm === 'object') {
+          const code = String(perm.code || perm.name || perm.id || '');
+          return {
+            ...perm,
+            code,
+            module:
+              perm.module || (code.includes('.') ? code.split('.')[0] : 'core'),
+          };
+        }
+        const code = String(perm);
+        return {
+          code,
+          module: code.includes('.') ? code.split('.')[0] : 'core',
+        };
+      }),
+      targetResource: 'public.permissions',
+      title: translate('term.permissions'),
+    });
+  }
+
+  if (Array.isArray(row.roles) && row.roles.length > 0) {
+    handledKeys.add('roles');
+    descriptors.push({
+      columns: [
+        { field: 'role_name', title: translate('common.name'), type: 'mono' },
+        { field: 'scope', title: translate('common.type'), type: 'badge' },
+      ],
+      copyKey: 'role_name',
+      field: 'roles',
+      rows: row.roles.map((r: any) => {
+        if (r && typeof r === 'object') {
+          return {
+            ...r,
+            role_name: String(r.role_name || r.name || r.id || ''),
+            scope: r.scope || 'RBAC',
+          };
+        }
+        return {
+          role_name: String(r),
+          scope: 'RBAC',
+        };
+      }),
+      targetResource: 'public.roles',
+      title: translate('page.system_view.roles_col_assigned_roles'),
+    });
+  }
+
+  if (Array.isArray(row.dependencies) && row.dependencies.length > 0) {
+    handledKeys.add('dependencies');
+    descriptors.push({
+      columns: [
+        { field: 'plugin_id', title: translate('common.id'), type: 'mono' },
+        { field: 'module', title: translate('common.module'), type: 'badge' },
+      ],
+      copyKey: 'plugin_id',
+      field: 'dependencies',
+      rows: row.dependencies.map((dep: any) => {
+        if (dep && typeof dep === 'object') {
+          const id = String(dep.plugin_id || dep.id || dep.name || '');
+          return {
+            ...dep,
+            module:
+              dep.module || (id.includes('.') ? id.split('.')[0] : 'core'),
+            plugin_id: id,
+          };
+        }
+        const id = String(dep);
+        return {
+          module: id.includes('.') ? id.split('.')[0] : 'core',
+          plugin_id: id,
+        };
+      }),
+      targetResource: 'public.system_plugins',
+      title: translate('common.module'),
+    });
+  }
+
+  if (Array.isArray(row.workspaces) && row.workspaces.length > 0) {
+    handledKeys.add('workspaces');
+    descriptors.push({
+      columns: [
+        { field: 'tenant_name', title: translate('common.name'), type: 'text' },
+        { field: 'tenant_slug', title: 'Slug', type: 'mono' },
+        { field: 'role_name', title: translate('common.type'), type: 'badge' },
+        { field: 'tenant_id', title: translate('common.id'), type: 'mono' },
+      ],
+      copyKey: 'tenant_id',
+      field: 'workspaces',
+      rows: row.workspaces.map((ws: any) => ({
+        ...ws,
+        role_name: ws?.role_name || 'member',
+        tenant_id: String(ws?.tenant_id || ''),
+        tenant_name: ws?.tenant_name || '—',
+        tenant_slug: ws?.tenant_slug
+          ? `/${ws.tenant_slug}`
+          : `/${String(ws?.tenant_id || '').slice(0, 8)}`,
+      })),
+      targetResource: 'public.tenants',
+      title: translate('term.tenant'),
+    });
+  }
+
+  if (Array.isArray(row.variants) && row.variants.length > 0) {
+    handledKeys.add('variants');
+    descriptors.push({
+      columns: [
+        { field: 'name', title: translate('common.name'), type: 'text' },
+        { field: 'sku', title: 'SKU', type: 'mono' },
+        {
+          field: 'price_credits',
+          title: translate('common.price'),
+          type: 'number',
+        },
+        {
+          field: 'stock_available',
+          title: translate('common.quantity'),
+          type: 'number',
+        },
+        {
+          field: 'is_active',
+          title: translate('common.status'),
+          type: 'boolean',
+        },
+      ],
+      copyKey: 'sku',
+      field: 'variants',
+      rows: row.variants.map((v: any) => ({
+        ...v,
+        is_active: v?.is_active ?? true,
+        name: v?.name || v?.title || '—',
+        price_credits: v?.price_credits ?? v?.price ?? 0,
+        sku: v?.sku || v?.code || v?.id || '—',
+        stock_available: v?.stock_available ?? v?.stock ?? 0,
+      })),
+      targetResource: 'commerce.product_variants',
+      title: humanizeFieldKey('variants'),
+    });
+  }
+
+  if (Array.isArray(row.items) && row.items.length > 0) {
+    handledKeys.add('items');
+    descriptors.push({
+      columns: [
+        {
+          field: 'product_name',
+          title: translate('common.name'),
+          type: 'text',
+        },
+        {
+          field: 'variant_name',
+          title: translate('common.type'),
+          type: 'mono',
+        },
+        {
+          field: 'quantity',
+          title: translate('common.quantity'),
+          type: 'number',
+        },
+        {
+          field: 'unit_price_credits',
+          title: translate('common.price'),
+          type: 'number',
+        },
+      ],
+      copyKey: 'product_name',
+      field: 'items',
+      rows: row.items.map((it: any) => ({
+        ...it,
+        product_name: it?.product_name || it?.name || '—',
+        quantity: it?.quantity ?? 1,
+        unit_price_credits: it?.unit_price_credits ?? it?.price_credits ?? 0,
+        variant_name: it?.variant_name || it?.sku || '—',
+      })),
+      targetResource: 'commerce.order_items',
+      title: humanizeFieldKey('items'),
+    });
+  }
+
+  if (Array.isArray(row.deliveries) && row.deliveries.length > 0) {
+    handledKeys.add('deliveries');
+    descriptors.push({
+      columns: [
+        {
+          field: 'delivery_type',
+          title: translate('common.type'),
+          type: 'badge',
+        },
+        { field: 'status', title: translate('common.status'), type: 'badge' },
+        {
+          field: 'delivered_at',
+          title: translate('common.createdAt'),
+          type: 'datetime',
+        },
+      ],
+      copyKey: 'delivery_type',
+      field: 'deliveries',
+      rows: row.deliveries.map((d: any) => ({
+        ...d,
+        delivered_at: d?.delivered_at || d?.created_at || '—',
+        delivery_type: d?.delivery_type || d?.type || 'digital',
+        status: d?.status || 'completed',
+      })),
+      targetResource: 'commerce.order_deliveries',
+      title: humanizeFieldKey('deliveries'),
+    });
+  }
+
+  // Fallback for any other non-empty relational array on the row
+  for (const [key, val] of Object.entries(row)) {
+    if (
+      key.startsWith('_X_ROW') ||
+      handledKeys.has(key) ||
+      !Array.isArray(val) ||
+      val.length === 0
+    ) {
+      continue;
+    }
+    const first = val[0];
+    if (first && typeof first === 'object') {
+      const sampleKeys = Object.keys(first)
+        .filter((k) => !k.startsWith('_') && typeof first[k] !== 'object')
+        .slice(0, 4);
+      if (sampleKeys.length > 0) {
+        descriptors.push({
+          columns: sampleKeys.map((k) => ({
+            field: k,
+            title: humanizeFieldKey(k),
+            type:
+              k === 'id' || k.endsWith('_id') || k.endsWith('_code')
+                ? 'mono'
+                : 'text',
+          })),
+          copyKey: sampleKeys[0] || 'id',
+          field: key,
+          rows: val,
+          targetResource: `relation.${key}`,
+          title: humanizeFieldKey(key),
+        });
+      }
+    } else {
+      descriptors.push({
+        columns: [
+          { field: 'value', title: humanizeFieldKey(key), type: 'mono' },
+        ],
+        copyKey: 'value',
+        field: key,
+        rows: val.map((item) => ({ value: String(item) })),
+        targetResource: `relation.${key}`,
+        title: humanizeFieldKey(key),
+      });
+    }
+  }
+
+  return descriptors;
+}
+
+/**
  * Dynamically builds the complete `VxeForm` field schema by merging:
  * 1. `gridOptions.columns` (for localized titles and column priority)
  * 2. `SUPABASE_TABLE_REGISTRY[resource].columns` (for DB types, Enum options, and mutability)
@@ -1738,6 +2231,7 @@ export function buildDynamicVxeFormSchema(
   input: BuildDynamicVxeFormSchemaInput,
 ): {
   fields: DynamicVxeFormField[];
+  relations: SupabaseRelationalTableDescriptor[];
   rls: RowRlsEvaluation;
   title: string;
 } {
@@ -1747,6 +2241,7 @@ export function buildDynamicVxeFormSchema(
     SUPABASE_TABLE_REGISTRY[input.resource] ??
     SUPABASE_TABLE_REGISTRY['public.tenants'];
   const rls = evaluateRowRlsPolicy(input.resource, row, input.access);
+  const relations = extractRelationalTablesFromRow(row, translate);
 
   // Map column titles from gridColumns
   const gridTitleMap = new Map<string, string>();
@@ -1758,9 +2253,18 @@ export function buildDynamicVxeFormSchema(
     }
   }
 
-  // Ordered union of fields: schema columns first, then grid columns, then remaining row keys
+  // Ordered union of fields: table gridColumns first, then schema columns, then remaining row keys, with system metadata trailing
   const orderedFieldNames: string[] = [];
   const seen = new Set<string>();
+  const SYSTEM_TRAILING_FIELDS = new Set([
+    'completed_at',
+    'created_at',
+    'id',
+    'last_seen_at',
+    'started_at',
+    'tenant_id',
+    'updated_at',
+  ]);
 
   const pushField = (field?: string) => {
     if (
@@ -1788,16 +2292,39 @@ export function buildDynamicVxeFormSchema(
     orderedFieldNames.push(field);
   };
 
-  for (const key of Object.keys(tableSchema.columns)) {
-    pushField(key);
-  }
   if (Array.isArray(input.gridColumns)) {
     for (const col of input.gridColumns) {
-      pushField(col?.field);
+      if (col?.field && !SYSTEM_TRAILING_FIELDS.has(col.field)) {
+        pushField(col.field);
+      }
+    }
+  }
+  for (const key of Object.keys(tableSchema.columns)) {
+    if (!SYSTEM_TRAILING_FIELDS.has(key)) {
+      pushField(key);
     }
   }
   for (const key of Object.keys(row)) {
-    pushField(key);
+    if (!SYSTEM_TRAILING_FIELDS.has(key)) {
+      pushField(key);
+    }
+  }
+  if (Array.isArray(input.gridColumns)) {
+    for (const col of input.gridColumns) {
+      if (col?.field && SYSTEM_TRAILING_FIELDS.has(col.field)) {
+        pushField(col.field);
+      }
+    }
+  }
+  for (const key of Object.keys(tableSchema.columns)) {
+    if (SYSTEM_TRAILING_FIELDS.has(key)) {
+      pushField(key);
+    }
+  }
+  for (const key of Object.keys(row)) {
+    if (SYSTEM_TRAILING_FIELDS.has(key)) {
+      pushField(key);
+    }
   }
 
   const fields: DynamicVxeFormField[] = orderedFieldNames.map((field) => {
@@ -1847,14 +2374,6 @@ export function buildDynamicVxeFormSchema(
     };
   });
 
-  // Sort so editable fields appear first, followed by readonly metadata, then JSON payloads
-  const groupPriority: Record<DynamicVxeFormField['group'], number> = {
-    editable: 0,
-    readonly: 1,
-    json: 2,
-  };
-  fields.sort((a, b) => groupPriority[a.group] - groupPriority[b.group]);
-
   const titleField = tableSchema.titleField || 'name';
   const rowTitle = String(
     row[titleField] ||
@@ -1870,6 +2389,7 @@ export function buildDynamicVxeFormSchema(
 
   return {
     fields,
+    relations,
     rls,
     title: rowTitle,
   };
@@ -2000,5 +2520,358 @@ export async function executeDynamicSupabasePatch<
     dirtyPayload,
     skipped: false,
     updatedRow,
+  };
+}
+
+export interface BuildDynamicVxeCreateSchemaInput {
+  access?: EffectiveAccess | null;
+  gridColumns?: Array<{
+    field?: string;
+    title?: string;
+  }>;
+  initialValues?: null | Record<string, any>;
+  resource: SupabaseResourceKey;
+  translate?: (key: string) => string;
+}
+
+function resolveColumnDefaultValue(
+  colMeta: SupabaseColumnSchema,
+  options?: Array<{ label: string; value: number | string }>,
+  initialValues?: null | Record<string, any>,
+): any {
+  if (
+    initialValues &&
+    colMeta.field in initialValues &&
+    initialValues[colMeta.field] !== undefined
+  ) {
+    return initialValues[colMeta.field];
+  }
+  if (colMeta.defaultValue !== undefined) {
+    return typeof colMeta.defaultValue === 'function'
+      ? colMeta.defaultValue()
+      : colMeta.defaultValue;
+  }
+  switch (colMeta.type) {
+    case 'boolean': {
+      return false;
+    }
+    case 'enum': {
+      return options?.[0]?.value ?? '';
+    }
+    case 'json': {
+      return {};
+    }
+    case 'number': {
+      return colMeta.min ?? 0;
+    }
+    default: {
+      return '';
+    }
+  }
+}
+
+/**
+ * Dynamically builds the `VxeForm` schema for Create Mode (`mode = 'create'`, Supabase Studio Insert Row).
+ * Includes only columns where `insertable ?? editable` is true (automatically hiding read-only/system
+ * generated columns like `uuid id`, `created_at`, `updated_at`, and virtual join counts).
+ */
+export function buildDynamicVxeCreateSchema(
+  input: BuildDynamicVxeCreateSchemaInput,
+): {
+  fields: DynamicVxeFormField[];
+  initialData: Record<string, any>;
+  rls: RowRlsEvaluation;
+  title: string;
+} {
+  const translate = input.translate ?? ((k: string) => k);
+  const tableSchema =
+    SUPABASE_TABLE_REGISTRY[input.resource] ??
+    SUPABASE_TABLE_REGISTRY['public.tenants'];
+  const rls = evaluateRowRlsPolicy(input.resource, {}, input.access);
+
+  const gridTitleMap = new Map<string, string>();
+  if (Array.isArray(input.gridColumns)) {
+    for (const col of input.gridColumns) {
+      if (col?.field && col.field !== 'actions' && col.title) {
+        gridTitleMap.set(col.field, translate(col.title));
+      }
+    }
+  }
+
+  const orderedFieldNames: string[] = [];
+  const seen = new Set<string>();
+
+  const pushInsertableField = (field?: string) => {
+    if (
+      !field ||
+      field === 'actions' ||
+      field === 'action' ||
+      IGNORED_INTERNAL_ROW_KEYS.has(field) ||
+      seen.has(field)
+    ) {
+      return;
+    }
+    const colMeta = tableSchema.columns[field];
+    if (!colMeta) {
+      return;
+    }
+    const isInsertable = Boolean(colMeta.insertable ?? colMeta.editable);
+    if (!isInsertable) {
+      return;
+    }
+    seen.add(field);
+    orderedFieldNames.push(field);
+  };
+
+  // 1. Place explicit text primary key (`id` with `insertable: true`) first in Create Mode
+  const pkField = tableSchema.primaryKey || 'id';
+  if (tableSchema.columns[pkField]?.insertable) {
+    pushInsertableField(pkField);
+  }
+
+  // 2. Preserve gridColumns visual order for primary business fields
+  if (Array.isArray(input.gridColumns)) {
+    for (const col of input.gridColumns) {
+      pushInsertableField(col?.field);
+    }
+  }
+
+  // 3. Append any remaining insertable columns from schema definition
+  for (const key of Object.keys(tableSchema.columns)) {
+    pushInsertableField(key);
+  }
+
+  const initialData: Record<string, any> = {};
+  const fields: DynamicVxeFormField[] = [];
+
+  for (const field of orderedFieldNames) {
+    const colMeta = tableSchema.columns[field];
+    if (!colMeta) {
+      continue;
+    }
+    const options = colMeta.enumMeta
+      ? buildEnumFilterOptions(colMeta.enumMeta, translate, {
+          includeAll: false,
+        })
+      : colMeta.options;
+
+    const defaultVal = resolveColumnDefaultValue(
+      colMeta,
+      options,
+      input.initialValues,
+    );
+    initialData[field] = defaultVal;
+
+    const rawTitle =
+      gridTitleMap.get(field) ||
+      (colMeta.labelKey ? translate(colMeta.labelKey) : '') ||
+      humanizeFieldKey(field);
+
+    const editable = Boolean(rls.canInsert.allowed);
+    const group: DynamicVxeFormField['group'] =
+      colMeta.type === 'json' ? 'json' : 'editable';
+
+    fields.push({
+      defaultValue: defaultVal,
+      editable,
+      field,
+      group,
+      max: colMeta.max,
+      min: colMeta.min,
+      options,
+      placeholderKey: colMeta.placeholderKey,
+      required: colMeta.required,
+      title: rawTitle,
+      type: colMeta.type,
+    });
+  }
+
+  return {
+    fields,
+    initialData,
+    rls,
+    title: translate('common.createRecord'),
+  };
+}
+
+function resolveRawInsertFieldValue(
+  colMeta: SupabaseColumnSchema,
+  formData: Record<string, any>,
+  field: string,
+): any {
+  if (field in formData && formData[field] !== undefined) {
+    return formData[field];
+  }
+  return typeof colMeta.defaultValue === 'function'
+    ? colMeta.defaultValue()
+    : colMeta.defaultValue;
+}
+
+/**
+ * Returns a list of missing `required: true` field keys for Create Mode validation.
+ */
+export function validateRequiredInsertFields(
+  formData: Record<string, any>,
+  resource: SupabaseResourceKey,
+): string[] {
+  const tableSchema = SUPABASE_TABLE_REGISTRY[resource];
+  if (!tableSchema) {
+    return [];
+  }
+
+  const missing: string[] = [];
+  for (const [field, colMeta] of Object.entries(tableSchema.columns)) {
+    const isInsertable = Boolean(colMeta.insertable ?? colMeta.editable);
+    if (!isInsertable || !colMeta.required) {
+      continue;
+    }
+    const rawVal = resolveRawInsertFieldValue(colMeta, formData, field);
+    const isEmpty =
+      rawVal === undefined ||
+      rawVal === null ||
+      (typeof rawVal === 'string' && rawVal.trim() === '');
+    if (isEmpty) {
+      missing.push(field);
+    }
+  }
+  return missing;
+}
+
+/**
+ * Builds a clean PostgREST `POST` payload for inserting a new row into `resource`:
+ * - Coerces numbers, booleans, and JSON objects
+ * - Applies `defaultValue` fallbacks
+ * - Automatically attaches `tenant_id = getActiveTenantId()` for multi-tenant tables
+ * - Omits empty optional fields so Postgres column defaults/nulls apply cleanly
+ */
+export function computeInsertPayload(
+  formData: Record<string, any>,
+  resource: SupabaseResourceKey,
+): Record<string, any> {
+  const tableSchema = SUPABASE_TABLE_REGISTRY[resource];
+  if (!tableSchema) {
+    return {};
+  }
+
+  const payload: Record<string, any> = {};
+
+  for (const [field, colMeta] of Object.entries(tableSchema.columns)) {
+    const isInsertable = Boolean(colMeta.insertable ?? colMeta.editable);
+
+    if (!isInsertable) {
+      if (field === 'tenant_id') {
+        const tenantVal = formData.tenant_id || getActiveTenantId();
+        if (tenantVal && String(tenantVal).trim() !== '') {
+          payload.tenant_id = String(tenantVal).trim();
+        }
+      } else if (colMeta.defaultValue !== undefined) {
+        payload[field] =
+          typeof colMeta.defaultValue === 'function'
+            ? colMeta.defaultValue()
+            : colMeta.defaultValue;
+      }
+      continue;
+    }
+
+    let val = resolveRawInsertFieldValue(colMeta, formData, field);
+
+    if (typeof val === 'string' && colMeta.type !== 'json') {
+      val = val.trim();
+    }
+
+    if (colMeta.type === 'number') {
+      if (val === '' || val === null || val === undefined) {
+        if (colMeta.required) {
+          payload[field] = colMeta.min ?? 0;
+        }
+        continue;
+      }
+      const parsed = Number(val);
+      if (!Number.isNaN(parsed)) {
+        payload[field] = parsed;
+      }
+      continue;
+    }
+
+    if (colMeta.type === 'boolean') {
+      payload[field] = Boolean(val);
+      continue;
+    }
+
+    if (colMeta.type === 'json') {
+      if (typeof val === 'string') {
+        try {
+          payload[field] = val.trim() ? JSON.parse(val) : {};
+        } catch {
+          payload[field] = {};
+        }
+      } else if (val && typeof val === 'object') {
+        payload[field] = val;
+      } else {
+        payload[field] = {};
+      }
+      continue;
+    }
+
+    if (
+      !colMeta.required &&
+      (val === '' || val === null || val === undefined)
+    ) {
+      continue;
+    }
+
+    payload[field] = val;
+  }
+
+  return payload;
+}
+
+/**
+ * Executes a real PostgREST `POST` request (`Prefer: return=representation`) to insert a new row,
+ * enforcing `canInsert` RLS and `required` column validation.
+ */
+export async function executeDynamicSupabaseInsert<
+  T extends Record<string, any> = Record<string, any>,
+>(
+  resource: SupabaseResourceKey,
+  formData: Record<string, any>,
+  access?: EffectiveAccess | null,
+): Promise<{
+  createdRow: T;
+  insertPayload: Record<string, any>;
+}> {
+  const tableSchema = SUPABASE_TABLE_REGISTRY[resource];
+  const rls = evaluateRowRlsPolicy(resource, formData, access);
+
+  if (!rls.canInsert.allowed) {
+    throw new Error(
+      rls.canInsert.reasonKey ||
+        `RLS policy (${rls.canInsert.policyName}) denied INSERT on ${resource}`,
+    );
+  }
+
+  const missingFields = validateRequiredInsertFields(formData, resource);
+  if (missingFields.length > 0) {
+    throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+  }
+
+  const insertPayload = computeInsertPayload(formData, resource);
+
+  const rows = await supabaseRequest<T[]>(`/rest/v1/${tableSchema.table}`, {
+    body: JSON.stringify(insertPayload),
+    method: 'POST',
+    preferRepresentation: true,
+    schema: tableSchema.schema,
+  });
+
+  const serverRow = Array.isArray(rows) && rows[0] ? rows[0] : (rows as any);
+  const createdRow = {
+    ...insertPayload,
+    ...(serverRow && typeof serverRow === 'object' ? serverRow : {}),
+  } as T;
+
+  return {
+    createdRow,
+    insertPayload,
   };
 }

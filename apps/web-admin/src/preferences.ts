@@ -24,7 +24,7 @@ export const overridesPreferences = defineOverridesPreferences({
     sourceDark: '/logo.svg',
   },
   breadcrumb: {
-    enable: false,
+    enable: true,
   },
   copyright: {
     companyName: 'tuquet',

@@ -6,7 +6,7 @@ import { useRoute } from 'vue-router';
 
 import { usePreferences } from '@vben/preferences';
 
-import { Activity, Copy, Eye, Network, RefreshCw } from '@lucide/vue';
+import { Activity, Copy, Network, Plus, RefreshCw } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
@@ -274,6 +274,14 @@ watch(
           <RefreshCw class="size-3.5" />
           <span class="hidden sm:inline">{{ $t('common.refresh') }}</span>
         </Button>
+        <Button
+          size="sm"
+          class="h-8 gap-1.5 px-2.5 text-xs font-medium sm:px-3"
+          @click="() => gridApi.openCreateSheet()"
+        >
+          <Plus class="size-3.5 shrink-0" />
+          <span>{{ $t('common.createRecord') }}</span>
+        </Button>
       </div>
     </div>
 
@@ -394,16 +402,6 @@ watch(
             >
               <Copy class="size-3 shrink-0" />
               <span class="hidden sm:inline">{{ $t('common.copy') }}</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              class="h-7 w-7 p-0 text-xs sm:w-auto sm:gap-1 sm:px-2"
-              :title="$t('common.detail')"
-              @click="gridApi.openDetailSheet(row)"
-            >
-              <Eye class="size-3.5 shrink-0" />
-              <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
             </Button>
           </div>
         </template>

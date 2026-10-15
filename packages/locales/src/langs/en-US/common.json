@@ -130,5 +130,13 @@
   "trigger": "Trigger",
   "nodes": "Nodes",
   "visBoth": "Public & internal",
-  "visTenant": "Internal workspace"
+  "visTenant": "Internal workspace",
+  "viewRelationalTable": "View table",
+  "relationalRecordsCount": "{count} records",
+  "relationalTableDescription": "Relational table records for {title}",
+  "searchRelationalRecords": "Filter relational records...",
+  "createRecord": "Create record",
+  "createSheetDescription": "Fill in the required fields below to insert a new record",
+  "createdSuccessfully": "Created record successfully",
+  "requiredFieldsMissing": "Please fill in all required fields"
 }

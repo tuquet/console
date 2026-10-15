@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import { $t } from '@vben/locales';
 import { usePreferences } from '@vben/preferences';
@@ -63,6 +63,7 @@ onMounted(async () => {
     await app.load(props.sceneUrl);
     if (!disposed) {
       isLoading.value = false;
+      updateSplineLighting(isDark.value);
     }
   } catch {
     if (!disposed) {
@@ -70,6 +71,30 @@ onMounted(async () => {
       hasError.value = true;
     }
   }
+});
+
+function updateSplineLighting(dark: boolean) {
+  if (!splineApp) return;
+  try {
+    const objects = (splineApp as any).getAllObjects?.() || [];
+    for (const obj of objects) {
+      const name = (obj.name || '').toLowerCase();
+      if (
+        (name.includes('light') ||
+          name.includes('sun') ||
+          name.includes('directional') ||
+          name.includes('point') ||
+          name.includes('ambient')) &&
+        typeof obj.intensity === 'number'
+      ) {
+        obj.intensity = dark ? 1 : 2.5;
+      }
+    }
+  } catch {}
+}
+
+watch(isDark, (newDark) => {
+  updateSplineLighting(newDark);
 });
 
 onBeforeUnmount(() => {
@@ -186,5 +211,15 @@ onBeforeUnmount(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Light mode calibration: enhance brightness and dynamic range so metallic surfaces shine cleanly */
+:root:not(.dark) canvas {
+  filter: brightness(1.22) contrast(1.08)
+    drop-shadow(0 15px 35px rgb(0 0 0 / 12%));
+}
+
+.dark canvas {
+  filter: drop-shadow(0 20px 40px rgb(0 0 0 / 50%));
 }
 </style>

@@ -6,7 +6,7 @@ import { useRoute } from 'vue-router';
 
 import { usePreferences } from '@vben/preferences';
 
-import { Cpu, Eye, HardDrive, Laptop, Plus, RefreshCw } from '@lucide/vue';
+import { Cpu, HardDrive, Laptop, Plus, RefreshCw } from '@lucide/vue';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,7 +32,6 @@ import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
 import ConnectFleetModal from './components/modals/connect-fleet-modal.vue';
-import NodeDetailModal from './components/modals/node-detail-modal.vue';
 
 defineOptions({ name: 'AutomationDevices' });
 
@@ -46,8 +45,6 @@ const loopbackOnline = ref(false);
 
 // Modals
 const isConnectModalVisible = ref(false);
-const isDetailModalVisible = ref(false);
-const selectedNode = ref<FleetDeviceItem | null>(null);
 
 function getOsBadgeVariant(os?: string): 'default' | 'outline' | 'secondary' {
   if (!os) return 'outline';
@@ -69,18 +66,12 @@ async function checkDaemonHealth() {
   }
 }
 
-function handleOpenDetail(node: FleetDeviceItem) {
-  selectedNode.value = node;
-  isDetailModalVisible.value = true;
-}
-
 async function handleRevokeNode(node: FleetDeviceItem) {
   try {
     await revokeFleetDeviceApi(node.id);
     toast.success(
       $t('page.automation_view.device_revoke_success', { name: node.name }),
     );
-    isDetailModalVisible.value = false;
     gridApi.reload();
   } catch (error: any) {
     toast.error(
@@ -142,7 +133,7 @@ function getColumns() {
     {
       field: 'actions',
       title: $t('common.actions'),
-      minWidth: mobile ? 115 : 185,
+      minWidth: mobile ? 85 : 115,
       align: 'right' as const,
       showOverflow: false,
       slots: { default: 'actions-cell' },
@@ -424,15 +415,6 @@ watch(
 
         <template #actions-cell="{ row }">
           <div class="flex items-center justify-end gap-1.5">
-            <Button
-              variant="outline"
-              size="sm"
-              class="h-7 text-xs flex items-center gap-1"
-              @click="handleOpenDetail(row)"
-            >
-              <Eye class="size-3 shrink-0" />
-              <span>{{ $t('common.detail') }}</span>
-            </Button>
             <AlertDialog>
               <AlertDialogTrigger as-child>
                 <Button variant="destructive" size="sm" class="h-7 text-xs">
@@ -490,12 +472,6 @@ watch(
       :loopback-port="8765"
       :probing="probingDaemon"
       @reprobe="checkDaemonHealth"
-    />
-
-    <NodeDetailModal
-      v-model:open="isDetailModalVisible"
-      :node="selectedNode"
-      @revoke="handleRevokeNode"
     />
   </div>
 </template>
