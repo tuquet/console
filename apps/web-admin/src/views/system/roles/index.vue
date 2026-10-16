@@ -15,7 +15,14 @@ import {
   RefreshCw,
   ShieldCheck,
 } from '@lucide/vue';
-import { Badge, Button, toast } from '@tuquet/vue-ui';
+import {
+  Badge,
+  Button,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  toast,
+} from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {

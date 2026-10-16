@@ -26,6 +26,9 @@ import {
   Badge,
   Button,
   Input,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
   Tabs,
   TabsContent,
   TabsList,
@@ -283,32 +286,27 @@ onMounted(async () => {
             >
               <VxeFormItem :title="$t('profile.fullName')" span="24">
                 <template #default>
-                  <div class="relative w-full">
-                    <Input
+                  <InputGroup class="h-10 w-full">
+                    <InputGroupAddon>
+                      <User class="size-4 text-muted-foreground" />
+                    </InputGroupAddon>
+                    <InputGroupInput
                       v-model="fullName"
                       :placeholder="$t('profile.fullNamePlaceholder')"
-                      class="h-10 pl-9"
                     />
-                    <User
-                      class="size-4 text-muted-foreground absolute left-3 top-3 pointer-events-none"
-                    />
-                  </div>
+                  </InputGroup>
                 </template>
               </VxeFormItem>
 
               <VxeFormItem :title="$t('profile.loginEmail')" span="24">
                 <template #default>
                   <div class="space-y-1.5 w-full">
-                    <div class="relative w-full">
-                      <Input
-                        :value="email"
-                        disabled
-                        class="h-10 pl-9 bg-muted"
-                      />
-                      <Mail
-                        class="size-4 text-muted-foreground absolute left-3 top-3 pointer-events-none"
-                      />
-                    </div>
+                    <InputGroup class="h-10 w-full bg-muted">
+                      <InputGroupAddon>
+                        <Mail class="size-4 text-muted-foreground" />
+                      </InputGroupAddon>
+                      <InputGroupInput :model-value="email" disabled />
+                    </InputGroup>
                     <p class="text-xs text-muted-foreground">
                       {{ $t('profile.loginEmailHint') }}
                     </p>
@@ -376,17 +374,16 @@ onMounted(async () => {
             >
               <VxeFormItem :title="$t('authentication.newPassword')" span="24">
                 <template #default>
-                  <div class="relative w-full">
-                    <Input
+                  <InputGroup class="h-10 w-full">
+                    <InputGroupAddon>
+                      <Lock class="size-4 text-muted-foreground" />
+                    </InputGroupAddon>
+                    <InputGroupInput
                       v-model="newPassword"
                       type="password"
                       :placeholder="$t('profile.min6CharsPlaceholder')"
-                      class="h-10 pl-9"
                     />
-                    <Lock
-                      class="size-4 text-muted-foreground absolute left-3 top-3 pointer-events-none"
-                    />
-                  </div>
+                  </InputGroup>
                 </template>
               </VxeFormItem>
 
@@ -395,17 +392,16 @@ onMounted(async () => {
                 span="24"
               >
                 <template #default>
-                  <div class="relative w-full">
-                    <Input
+                  <InputGroup class="h-10 w-full">
+                    <InputGroupAddon>
+                      <Lock class="size-4 text-muted-foreground" />
+                    </InputGroupAddon>
+                    <InputGroupInput
                       v-model="confirmPassword"
                       type="password"
                       :placeholder="$t('authentication.reenterNewPassword')"
-                      class="h-10 pl-9"
                     />
-                    <Lock
-                      class="size-4 text-muted-foreground absolute left-3 top-3 pointer-events-none"
-                    />
-                  </div>
+                  </InputGroup>
                 </template>
               </VxeFormItem>
 
