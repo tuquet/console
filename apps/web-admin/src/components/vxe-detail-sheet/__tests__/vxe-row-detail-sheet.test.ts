@@ -200,6 +200,36 @@ vi.mock('@tuquet/vue-ui', () => ({
       return () => h('button', attrs);
     },
   }),
+  Table: defineComponent({
+    setup(_, { attrs, slots }) {
+      return () => h('table', attrs, slots.default?.());
+    },
+  }),
+  TableBody: defineComponent({
+    setup(_, { attrs, slots }) {
+      return () => h('tbody', attrs, slots.default?.());
+    },
+  }),
+  TableCell: defineComponent({
+    setup(_, { attrs, slots }) {
+      return () => h('td', attrs, slots.default?.());
+    },
+  }),
+  TableHead: defineComponent({
+    setup(_, { attrs, slots }) {
+      return () => h('th', attrs, slots.default?.());
+    },
+  }),
+  TableHeader: defineComponent({
+    setup(_, { attrs, slots }) {
+      return () => h('thead', attrs, slots.default?.());
+    },
+  }),
+  TableRow: defineComponent({
+    setup(_, { attrs, slots }) {
+      return () => h('tr', attrs, slots.default?.());
+    },
+  }),
   Textarea: defineComponent({
     setup(_, { attrs }) {
       return () => h('textarea', attrs);
