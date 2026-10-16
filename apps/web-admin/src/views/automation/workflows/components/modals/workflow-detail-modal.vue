@@ -108,9 +108,11 @@ function getStatusLabel(status: string): string {
               class="flex items-center justify-between gap-2 text-xs text-foreground"
             >
               <span class="break-all">{{ props.workflow.id }}</span>
-              <button
+              <Button
                 type="button"
-                class="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                variant="ghost"
+                size="icon"
+                class="size-6 shrink-0 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                 :title="$t('page.workflows_view.workflow_id')"
                 @click="
                   copyToClipboard(
@@ -124,7 +126,7 @@ function getStatusLabel(status: string): string {
                   class="size-3.5 text-success"
                 />
                 <Copy v-else class="size-3.5" />
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -139,9 +141,11 @@ function getStatusLabel(status: string): string {
               class="flex items-center justify-between gap-2 text-xs text-foreground"
             >
               <span class="break-all">{{ props.workflow.tenant_id }}</span>
-              <button
+              <Button
                 type="button"
-                class="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                variant="ghost"
+                size="icon"
+                class="size-6 shrink-0 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                 :title="$t('page.workflows_view.workspace_id')"
                 @click="
                   copyToClipboard(
@@ -155,7 +159,7 @@ function getStatusLabel(status: string): string {
                   class="size-3.5 text-success"
                 />
                 <Copy v-else class="size-3.5" />
-              </button>
+              </Button>
             </div>
           </div>
 

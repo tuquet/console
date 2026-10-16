@@ -42,6 +42,13 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
   toast,
 } from '@tuquet/vue-ui';
 
@@ -552,32 +559,34 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <select
-              v-model="selectedProductType"
-              class="h-8 rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
-            >
-              <option value="all">
-                {{ $t('page.commerce_view.all_product_types') }}
-              </option>
-              <option value="serial_stock">
-                {{ $t('page.commerce_view.type_serial_stock') }}
-              </option>
-              <option value="digital_file">
-                {{ $t('page.commerce_view.type_digital_file') }}
-              </option>
-            </select>
+            <Select v-model="selectedProductType">
+              <SelectTrigger class="h-8 w-44 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  {{ $t('page.commerce_view.all_product_types') }}
+                </SelectItem>
+                <SelectItem value="serial_stock">
+                  {{ $t('page.commerce_view.type_serial_stock') }}
+                </SelectItem>
+                <SelectItem value="digital_file">
+                  {{ $t('page.commerce_view.type_digital_file') }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
 
             <div class="relative w-full sm:w-64">
               <Search
                 class="pointer-events-none absolute top-2.5 left-2.5 size-3.5 text-muted-foreground"
               />
-              <input
+              <Input
                 v-model="searchKeyword"
                 type="text"
                 :placeholder="
                   $t('page.commerce_view.search_product_sku_placeholder')
                 "
-                class="h-8 w-full rounded-md border border-border bg-background pr-3 pl-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+                class="h-8 w-full pr-3 pl-8 text-xs"
               />
             </div>
 
@@ -653,11 +662,13 @@ onBeforeUnmount(() => {
                   {{ $t('page.commerce_view.sku_category_label') }}
                 </span>
                 <div class="flex flex-wrap gap-1.5">
-                  <button
+                  <Button
                     v-for="variant in product.variants"
                     :key="variant.id"
                     type="button"
-                    class="rounded-lg border px-2.5 py-1 text-xs transition-colors"
+                    variant="outline"
+                    size="sm"
+                    class="h-auto rounded-lg px-2.5 py-1 text-xs transition-colors"
                     :class="
                       getSelectedVariant(product)?.id === variant.id
                         ? 'border-primary bg-primary/10 font-semibold text-primary'
@@ -666,7 +677,7 @@ onBeforeUnmount(() => {
                     @click="selectVariant(product.id, variant.id)"
                   >
                     {{ variant.name }}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -754,11 +765,11 @@ onBeforeUnmount(() => {
                 <label class="text-xs font-medium text-foreground">
                   {{ $t('page.commerce_view.order_code_field_label') }}
                 </label>
-                <input
+                <Input
                   v-model="lookupOrderCode"
                   type="text"
                   placeholder="ORD-261014-XXXXXX"
-                  class="h-9 w-full rounded-md border border-border bg-background px-3 text-xs text-foreground"
+                  class="h-9 w-full px-3 text-xs"
                 />
               </div>
 
@@ -766,11 +777,11 @@ onBeforeUnmount(() => {
                 <label class="text-xs font-medium text-foreground">
                   {{ $t('page.commerce_view.claim_token_field_label') }}
                 </label>
-                <input
+                <Input
                   v-model="lookupClaimToken"
                   type="text"
                   placeholder="CLM_..."
-                  class="h-9 w-full rounded-md border border-border bg-background px-3 text-xs text-foreground"
+                  class="h-9 w-full px-3 text-xs"
                 />
               </div>
 
@@ -799,11 +810,12 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="space-y-2">
-              <button
+              <Button
                 v-for="saved in savedOrders"
                 :key="saved.order_code"
                 type="button"
-                class="flex w-full items-center justify-between rounded-lg border border-border/60 bg-background p-3 text-left transition-colors hover:border-primary/50"
+                variant="outline"
+                class="flex h-auto w-full items-center justify-between rounded-lg border-border/60 bg-background p-3 text-left font-normal transition-colors hover:border-primary/50"
                 @click="
                   handleLookupGuestOrder(saved.order_code, saved.claim_token)
                 "
@@ -819,7 +831,7 @@ onBeforeUnmount(() => {
                 <Badge variant="outline" class="text-2xs">
                   {{ saved.total_credits }} Xu
                 </Badge>
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -940,12 +952,12 @@ onBeforeUnmount(() => {
                     </Button>
                   </div>
                 </div>
-                <textarea
+                <Textarea
                   readonly
-                  :value="serialLinesText"
-                  rows="8"
-                  class="w-full rounded-lg border border-border bg-muted/40 p-3 text-xs text-foreground focus:outline-none"
-                ></textarea>
+                  :model-value="serialLinesText"
+                  :rows="8"
+                  class="w-full rounded-lg bg-muted/40 p-3 text-xs"
+                />
               </div>
 
               <div
@@ -1039,12 +1051,12 @@ onBeforeUnmount(() => {
               <label class="text-xs font-medium text-foreground">
                 {{ $t('page.commerce_view.quantity_label') }}
               </label>
-              <input
+              <Input
                 v-model.number="checkoutQty"
                 type="number"
                 :min="activeVariant.min_qty || 1"
                 :max="activeVariant.max_qty || 100"
-                class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
+                class="h-8 w-full px-2.5 text-xs"
               />
             </div>
 
@@ -1052,11 +1064,11 @@ onBeforeUnmount(() => {
               <label class="text-xs font-medium text-foreground">
                 {{ $t('page.commerce_view.buyer_email_optional_label') }}
               </label>
-              <input
+              <Input
                 v-model="buyerEmail"
                 type="email"
                 placeholder="guest@example.com"
-                class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
+                class="h-8 w-full px-2.5 text-xs"
               />
             </div>
           </div>
@@ -1067,11 +1079,12 @@ onBeforeUnmount(() => {
             >
               {{ $t('page.commerce_view.select_payment_channel_label') }}
             </label>
-            <button
+            <Button
               v-for="gw in publicGateways"
               :key="gw.id"
               type="button"
-              class="flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors"
+              variant="outline"
+              class="flex h-auto w-full items-center justify-between rounded-lg p-3 text-left font-normal transition-colors"
               :class="
                 currentGateway?.id === gw.id
                   ? 'border-primary bg-primary/10'
@@ -1094,7 +1107,7 @@ onBeforeUnmount(() => {
               <Badge variant="outline" class="text-2xs">
                 {{ gw.currency }}
               </Badge>
-            </button>
+            </Button>
           </div>
 
           <div

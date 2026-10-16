@@ -13,6 +13,11 @@ import {
   Badge,
   Button,
   Card,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@tuquet/vue-ui';
 
 import { getTenantsApi } from '#/api';
@@ -291,18 +296,20 @@ onMounted(() => {
             <span class="text-xs text-muted-foreground block mb-2">{{
               $t('term.workspace')
             }}</span>
-            <select
-              v-model="selectedTenant"
-              class="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option
-                v-for="opt in tenantOptions"
-                :key="opt.value"
-                :value="opt.value"
-              >
-                {{ opt.label }}
-              </option>
-            </select>
+            <Select v-model="selectedTenant">
+              <SelectTrigger class="h-10 w-full bg-background text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="opt in tenantOptions"
+                  :key="opt.value"
+                  :value="opt.value"
+                >
+                  {{ opt.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

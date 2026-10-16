@@ -11,6 +11,11 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@tuquet/vue-ui';
 
 import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
@@ -124,41 +129,53 @@ function handleOk() {
             span="24"
           >
             <template #default>
-              <select
+              <Select
                 v-model="selectedRoleId"
                 :disabled="props.member?.role?.name === 'owner'"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <option
-                  v-if="props.member?.role?.name === 'owner'"
-                  :value="props.member.role.id"
-                >
-                  {{ $t('page.tenants_view.role_owner_immutable') }}
-                </option>
-                <option
-                  v-for="role in props.roles"
-                  :key="role.id"
-                  :value="role.id"
-                >
-                  {{ role.display_name }} · {{ role.name }}
-                </option>
-              </select>
+                <SelectTrigger class="h-10 w-full text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-if="props.member?.role?.name === 'owner'"
+                    :value="props.member.role.id"
+                  >
+                    {{ $t('page.tenants_view.role_owner_immutable') }}
+                  </SelectItem>
+                  <SelectItem
+                    v-for="role in props.roles"
+                    :key="role.id"
+                    :value="role.id"
+                  >
+                    {{ role.display_name }} · {{ role.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </template>
           </VxeFormItem>
 
           <VxeFormItem :title="$t('common.status')" span="24">
             <template #default>
-              <select
+              <Select
                 v-model="status"
                 :disabled="props.member?.role?.name === 'owner'"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <option value="active">{{ $t('common.active') }}</option>
-                <option value="suspended">{{ $t('common.suspended') }}</option>
-                <option value="invited">
-                  {{ $t('page.tenants_view.status_invited') }}
-                </option>
-              </select>
+                <SelectTrigger class="h-10 w-full text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">
+                    {{ $t('common.active') }}
+                  </SelectItem>
+                  <SelectItem value="suspended">
+                    {{ $t('common.suspended') }}
+                  </SelectItem>
+                  <SelectItem value="invited">
+                    {{ $t('page.tenants_view.status_invited') }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </template>
           </VxeFormItem>
         </VxeForm>

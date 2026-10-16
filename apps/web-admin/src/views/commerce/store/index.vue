@@ -42,6 +42,13 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
   toast,
 } from '@tuquet/vue-ui';
 
@@ -234,14 +241,12 @@ async function loadStoreData() {
   }
 }
 
-async function handleTenantChange(event: Event) {
-  const target = event.target as HTMLSelectElement;
-  const nextId = target.value;
+async function handleTenantChange(value: unknown) {
+  const nextId = String(value || '');
+  if (!nextId) return;
   selectedTenantId.value = nextId;
   setActiveTenantId(nextId);
-  if (nextId) {
-    wallet.value = await getTenantWalletApi(nextId).catch(() => null);
-  }
+  wallet.value = await getTenantWalletApi(nextId).catch(() => null);
 }
 
 function openCheckoutModal(product: CommerceProductItem) {
@@ -424,22 +429,28 @@ onBeforeUnmount(() => {
       <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <!-- Workspace Selector -->
         <div
-          class="hidden sm:flex items-center gap-1.5 rounded-lg border border-border/60 bg-card px-2.5 py-1.5"
+          class="hidden sm:flex items-center gap-1.5 rounded-lg border border-border/60 bg-card px-2.5 py-1"
         >
           <Building2 class="size-3.5 shrink-0 text-muted-foreground" />
-          <select
-            :value="selectedTenantId"
-            class="max-w-[150px] truncate bg-transparent text-xs font-medium text-foreground focus:outline-none"
-            @change="handleTenantChange"
+          <Select
+            :model-value="selectedTenantId"
+            @update:model-value="handleTenantChange"
           >
-            <option
-              v-for="tenant in tenants"
-              :key="tenant.id"
-              :value="tenant.id"
+            <SelectTrigger
+              class="h-6 max-w-[150px] border-0 bg-transparent px-1 py-0 text-xs font-medium text-foreground shadow-none focus:ring-0"
             >
-              {{ tenant.name }}
-            </option>
-          </select>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="tenant in tenants"
+                :key="tenant.id"
+                :value="tenant.id"
+              >
+                {{ tenant.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <!-- Xu Wallet Pill -->
@@ -526,38 +537,40 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-        <select
-          v-model="selectedProductType"
-          class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground focus:outline-none sm:w-auto"
-        >
-          <option value="all">
-            {{ $t('page.commerce_view.all_resource_types') }}
-          </option>
-          <option value="serial_stock">
-            {{ $t('page.commerce_view.type_serial_stock') }}
-          </option>
-          <option value="specter_resource">
-            {{ $t('page.commerce_view.type_specter_resource') }}
-          </option>
-          <option value="digital_file">
-            {{ $t('page.commerce_view.type_digital_file') }}
-          </option>
-          <option value="wallet_credit">
-            {{ $t('page.commerce_view.type_wallet_credit') }}
-          </option>
-        </select>
+        <Select v-model="selectedProductType">
+          <SelectTrigger class="h-8 w-full text-xs sm:w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              {{ $t('page.commerce_view.all_resource_types') }}
+            </SelectItem>
+            <SelectItem value="serial_stock">
+              {{ $t('page.commerce_view.type_serial_stock') }}
+            </SelectItem>
+            <SelectItem value="specter_resource">
+              {{ $t('page.commerce_view.type_specter_resource') }}
+            </SelectItem>
+            <SelectItem value="digital_file">
+              {{ $t('page.commerce_view.type_digital_file') }}
+            </SelectItem>
+            <SelectItem value="wallet_credit">
+              {{ $t('page.commerce_view.type_wallet_credit') }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
 
         <div class="relative w-full sm:w-64">
           <Search
             class="pointer-events-none absolute top-2.5 left-2.5 size-3.5 text-muted-foreground"
           />
-          <input
+          <Input
             v-model="searchKeyword"
             type="text"
             :placeholder="
               $t('page.commerce_view.search_product_sku_placeholder')
             "
-            class="h-8 w-full rounded-md border border-border bg-background pr-3 pl-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            class="h-8 w-full pr-3 pl-8 text-xs"
           />
         </div>
       </div>
@@ -626,11 +639,13 @@ onBeforeUnmount(() => {
               {{ $t('page.commerce_view.select_sku_label') }}
             </span>
             <div class="flex flex-wrap gap-1.5">
-              <button
+              <Button
                 v-for="variant in product.variants"
                 :key="variant.id"
                 type="button"
-                class="rounded-lg border px-2.5 py-1 text-left text-xs transition-colors"
+                variant="outline"
+                size="sm"
+                class="h-auto rounded-lg px-2.5 py-1 text-left text-xs transition-colors"
                 :class="
                   getSelectedVariant(product)?.id === variant.id
                     ? 'border-primary bg-primary/10 font-semibold text-primary'
@@ -639,7 +654,7 @@ onBeforeUnmount(() => {
                 @click="selectVariant(product.id, variant.id)"
               >
                 {{ variant.name }}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -766,12 +781,12 @@ onBeforeUnmount(() => {
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.quantity_to_buy') }}
             </label>
-            <input
+            <Input
               v-model.number="checkoutQty"
               type="number"
               :min="activeVariant.min_qty || 1"
               :max="activeVariant.max_qty || 100"
-              class="h-8 w-24 rounded-md border border-border bg-background px-2.5 text-right text-sm text-foreground focus:border-primary focus:outline-none"
+              class="h-8 w-24 px-2.5 text-right text-sm"
             />
           </div>
 
@@ -784,9 +799,10 @@ onBeforeUnmount(() => {
             </label>
 
             <!-- Option 1: Instant Xu Wallet -->
-            <button
+            <Button
               type="button"
-              class="flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors"
+              variant="outline"
+              class="flex h-auto w-full items-center justify-between rounded-lg p-3 text-left font-normal transition-colors"
               :class="
                 selectedGatewayId === 'internal_wallet'
                   ? 'border-primary bg-primary/10'
@@ -818,14 +834,15 @@ onBeforeUnmount(() => {
                     : $t('page.commerce_view.insufficient_xu')
                 }}
               </Badge>
-            </button>
+            </Button>
 
             <!-- External Payment Gateways -->
-            <button
+            <Button
               v-for="gw in externalGateways"
               :key="gw.id"
               type="button"
-              class="flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors"
+              variant="outline"
+              class="flex h-auto w-full items-center justify-between rounded-lg p-3 text-left font-normal transition-colors"
               :class="
                 selectedGatewayId === gw.id
                   ? 'border-primary bg-primary/10'
@@ -849,7 +866,7 @@ onBeforeUnmount(() => {
               <Badge variant="outline" class="text-2xs">
                 {{ gw.currency }}
               </Badge>
-            </button>
+            </Button>
           </div>
 
           <!-- Total Summary -->
@@ -1072,12 +1089,12 @@ onBeforeUnmount(() => {
                 </Button>
               </div>
             </div>
-            <textarea
+            <Textarea
               readonly
-              :value="serialLinesText"
-              rows="6"
-              class="w-full rounded-lg border border-border bg-muted/40 p-3 text-xs text-foreground focus:outline-none"
-            ></textarea>
+              :model-value="serialLinesText"
+              :rows="6"
+              class="w-full rounded-lg bg-muted/40 p-3 text-xs"
+            />
           </div>
 
           <!-- Other Deliverable Items (Specter Resource / Digital File / Wallet Credit) -->

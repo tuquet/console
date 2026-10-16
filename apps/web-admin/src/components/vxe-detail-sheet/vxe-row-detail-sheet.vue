@@ -32,6 +32,11 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Sheet,
   SheetContent,
   SheetDescription,
@@ -411,9 +416,11 @@ async function handleSave() {
           <!-- Superadmin-only Schema & RLS Inspector Popover -->
           <Popover v-if="isSuperadmin">
             <PopoverTrigger as-child>
-              <button
+              <Button
                 type="button"
-                class="inline-flex size-6 shrink-0 items-center justify-center rounded-md border border-border/60 bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                variant="outline"
+                size="icon"
+                class="size-6 shrink-0 rounded-md border-border/60 bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
                 data-testid="vxe-superadmin-rls-trigger"
                 :title="$t('common.rlsWritable')"
               >
@@ -422,7 +429,7 @@ async function handleSave() {
                   class="size-3.5 text-emerald-500"
                 />
                 <Lock v-else class="size-3.5 text-amber-500" />
-              </button>
+              </Button>
             </PopoverTrigger>
             <PopoverContent
               align="start"
@@ -504,20 +511,29 @@ async function handleSave() {
               <!-- 1. Editable Controls -->
               <template v-if="field.editable">
                 <!-- Enum Select -->
-                <select
+                <Select
                   v-if="field.type === 'enum' && field.options?.length"
-                  v-model="formData[field.field]"
-                  :data-testid="`vxe-field-${field.field}`"
-                  class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  :model-value="String(formData[field.field] ?? '')"
+                  @update:model-value="
+                    (val) => (formData[field.field] = String(val ?? ''))
+                  "
                 >
-                  <option
-                    v-for="opt in field.options"
-                    :key="String(opt.value)"
-                    :value="opt.value"
+                  <SelectTrigger
+                    :data-testid="`vxe-field-${field.field}`"
+                    class="h-9 w-full bg-background text-sm"
                   >
-                    {{ opt.label }}
-                  </option>
-                </select>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent class="z-[1090]">
+                    <SelectItem
+                      v-for="opt in field.options"
+                      :key="String(opt.value)"
+                      :value="String(opt.value)"
+                    >
+                      {{ opt.label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
 
                 <!-- Boolean Switch -->
                 <div
@@ -589,9 +605,11 @@ async function handleSave() {
                   <pre
                     class="max-h-44 overflow-auto rounded-md border border-border/60 bg-muted/30 p-2.5 text-xs text-foreground"
                     >{{ formatJsonPreview(field.field) }}</pre>
-                  <button
+                  <Button
                     type="button"
-                    class="absolute top-2 right-2 inline-flex size-6 items-center justify-center rounded border border-border/60 bg-background/80 text-muted-foreground hover:text-foreground"
+                    variant="outline"
+                    size="icon"
+                    class="absolute top-2 right-2 size-6 rounded border-border/60 bg-background/80 text-muted-foreground hover:text-foreground"
                     :title="$t('common.copy')"
                     @click="
                       copyToClipboard(
@@ -605,7 +623,7 @@ async function handleSave() {
                       class="size-3 text-emerald-500"
                     />
                     <Copy v-else class="size-3" />
-                  </button>
+                  </Button>
                 </div>
 
                 <!-- Semantic Enum Status Badge -->
@@ -641,9 +659,11 @@ async function handleSave() {
                   class="flex h-9 items-center justify-between gap-2 rounded-md border border-border/60 bg-muted/30 px-3 text-xs text-muted-foreground"
                 >
                   <span class="truncate">{{ props.row[field.field] }}</span>
-                  <button
+                  <Button
                     type="button"
-                    class="inline-flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    variant="ghost"
+                    size="icon"
+                    class="size-6 shrink-0 rounded text-muted-foreground hover:bg-muted hover:text-foreground"
                     :title="$t('common.copy')"
                     @click="
                       copyToClipboard(
@@ -657,7 +677,7 @@ async function handleSave() {
                       class="size-3.5 text-emerald-500"
                     />
                     <Copy v-else class="size-3.5" />
-                  </button>
+                  </Button>
                 </div>
 
                 <!-- Read-Only Multiline Text -->
@@ -692,9 +712,10 @@ async function handleSave() {
             span="24"
           >
             <template #default>
-              <button
+              <Button
                 type="button"
-                class="flex h-10 w-full items-center justify-between gap-2 rounded-md border border-border/70 bg-muted/25 px-3 text-left transition-colors hover:border-primary/50 hover:bg-muted/60"
+                variant="outline"
+                class="flex h-10 w-full items-center justify-between gap-2 rounded-md border-border/70 bg-muted/25 px-3 text-left font-normal transition-colors hover:border-primary/50 hover:bg-muted/60"
                 :data-testid="`vxe-relation-trigger-${rel.field}`"
                 @click="openRelationalTable(rel)"
               >
@@ -718,7 +739,7 @@ async function handleSave() {
                   <span>{{ $t('common.viewRelationalTable') }}</span>
                   <ArrowUpRight class="size-3.5" />
                 </span>
-              </button>
+              </Button>
             </template>
           </VxeFormItem>
         </VxeForm>

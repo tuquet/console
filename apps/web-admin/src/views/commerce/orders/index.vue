@@ -30,6 +30,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
   toast,
 } from '@tuquet/vue-ui';
 
@@ -337,10 +343,11 @@ async function initTenantsAndLoad() {
   await gridApi.reload();
 }
 
-async function handleTenantChange(event: Event) {
-  const target = event.target as HTMLSelectElement;
-  selectedTenantId.value = target.value;
-  setActiveTenantId(target.value);
+async function handleTenantChange(value: unknown) {
+  const nextId = String(value || '');
+  if (!nextId) return;
+  selectedTenantId.value = nextId;
+  setActiveTenantId(nextId);
   await gridApi.reload();
 }
 
@@ -405,23 +412,27 @@ onMounted(() => {
       </div>
 
       <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
-        <div
-          class="flex items-center gap-1.5 rounded-lg border border-border/60 bg-card px-2.5 py-1.5"
-        >
-          <Building2 class="size-3.5 shrink-0 text-muted-foreground" />
-          <select
-            :value="selectedTenantId"
-            class="max-w-[110px] sm:max-w-[160px] truncate bg-transparent text-xs font-medium text-foreground focus:outline-none"
-            @change="handleTenantChange"
+        <div class="flex items-center gap-1.5">
+          <Select
+            :model-value="selectedTenantId"
+            @update:model-value="handleTenantChange"
           >
-            <option
-              v-for="tenant in tenants"
-              :key="tenant.id"
-              :value="tenant.id"
+            <SelectTrigger
+              class="h-8 max-w-[140px] gap-1.5 bg-card px-2.5 text-xs font-medium sm:max-w-[190px]"
             >
-              {{ tenant.name }}
-            </option>
-          </select>
+              <Building2 class="size-3.5 shrink-0 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="tenant in tenants"
+                :key="tenant.id"
+                :value="tenant.id"
+              >
+                {{ tenant.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <Button
@@ -458,9 +469,11 @@ onMounted(() => {
             <span class="text-xs font-semibold text-foreground">
               {{ row.order_code }}
             </span>
-            <button
+            <Button
               type="button"
-              class="text-muted-foreground hover:text-foreground"
+              variant="ghost"
+              size="icon"
+              class="size-5 text-muted-foreground hover:text-foreground"
               @click="
                 copyText(
                   row.order_code,
@@ -469,7 +482,7 @@ onMounted(() => {
               "
             >
               <Copy class="size-3" />
-            </button>
+            </Button>
           </div>
         </template>
 
@@ -589,12 +602,12 @@ onMounted(() => {
                 </Button>
               </div>
             </div>
-            <textarea
+            <Textarea
               readonly
-              :value="serialLinesText"
-              rows="6"
+              :model-value="serialLinesText"
+              :rows="6"
               class="w-full rounded-lg border border-border bg-muted/40 p-3 text-xs text-foreground focus:outline-none"
-            ></textarea>
+            />
           </div>
 
           <div

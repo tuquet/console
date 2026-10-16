@@ -177,9 +177,11 @@ const { formatDate } = useDateFormat();
               <template #default>
                 <div class="flex items-center gap-2 text-xs text-foreground">
                   <span class="truncate">{{ props.node.id }}</span>
-                  <button
+                  <Button
                     type="button"
-                    class="size-5 inline-flex items-center justify-center text-muted-foreground hover:text-foreground shrink-0"
+                    variant="ghost"
+                    size="icon"
+                    class="size-5 shrink-0 text-muted-foreground hover:text-foreground"
                     @click="
                       copyToClipboard(
                         props.node.id,
@@ -194,7 +196,7 @@ const { formatDate } = useDateFormat();
                       class="size-3 text-success"
                     />
                     <Copy v-else class="size-3" />
-                  </button>
+                  </Button>
                 </div>
               </template>
             </VxeFormItem>

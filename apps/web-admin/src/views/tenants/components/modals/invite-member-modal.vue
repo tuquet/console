@@ -11,6 +11,11 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   toast,
 } from '@tuquet/vue-ui';
 
@@ -110,18 +115,20 @@ function handleOk() {
             span="24"
           >
             <template #default>
-              <select
-                v-model="selectedRoleId"
-                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option
-                  v-for="role in props.roles"
-                  :key="role.id"
-                  :value="role.id"
-                >
-                  {{ role.display_name }} · {{ role.name }}
-                </option>
-              </select>
+              <Select v-model="selectedRoleId">
+                <SelectTrigger class="h-10 w-full text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="role in props.roles"
+                    :key="role.id"
+                    :value="role.id"
+                  >
+                    {{ role.display_name }} · {{ role.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </template>
           </VxeFormItem>
         </VxeForm>

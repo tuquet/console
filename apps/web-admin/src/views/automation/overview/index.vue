@@ -240,11 +240,12 @@ onMounted(() => {
       <div
         class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5"
       >
-        <button
+        <Button
           v-for="mod in moduleCards"
           :key="mod.key"
           type="button"
-          class="group flex flex-col justify-between rounded-xl border border-border/60 bg-card p-3 text-left shadow-xs transition-all hover:border-primary/40 hover:bg-muted/20 sm:p-4"
+          variant="outline"
+          class="group flex h-auto flex-col items-stretch justify-between rounded-xl border border-border/60 bg-card p-3 text-left font-normal shadow-xs transition-all hover:border-primary/40 hover:bg-muted/20 sm:p-4"
           @click="navigateTo(mod.path)"
         >
           <div class="flex items-center justify-between gap-2">
@@ -274,7 +275,7 @@ onMounted(() => {
               {{ mod.subtext }}
             </p>
           </div>
-        </button>
+        </Button>
       </div>
     </div>
 

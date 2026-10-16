@@ -34,6 +34,13 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
   toast,
 } from '@tuquet/vue-ui';
 
@@ -1159,11 +1166,11 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.product_name_label') }}
             </label>
-            <input
+            <Input
               v-model="productForm.name"
               type="text"
               :placeholder="$t('page.commerce_view.product_name_placeholder')"
-              class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
+              class="h-8 text-xs"
             />
           </div>
 
@@ -1171,11 +1178,11 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.product_slug_label') }}
             </label>
-            <input
+            <Input
               v-model="productForm.slug"
               type="text"
               placeholder="via-co-2fa"
-              class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
+              class="h-8 text-xs"
             />
           </div>
 
@@ -1183,74 +1190,80 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.product_type_label') }}
             </label>
-            <select
-              v-model="productForm.product_type"
-              class="h-8 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground"
-            >
-              <option value="serial_stock">
-                {{ $t('page.commerce_view.opt_serial_stock') }}
-              </option>
-              <option value="specter_resource">
-                {{ $t('page.commerce_view.opt_specter_resource') }}
-              </option>
-              <option value="digital_file">
-                {{ $t('page.commerce_view.opt_digital_file') }}
-              </option>
-              <option value="wallet_credit">
-                {{ $t('page.commerce_view.opt_wallet_credit') }}
-              </option>
-            </select>
+            <Select v-model="productForm.product_type">
+              <SelectTrigger class="h-8 w-full text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="serial_stock">
+                  {{ $t('page.commerce_view.opt_serial_stock') }}
+                </SelectItem>
+                <SelectItem value="specter_resource">
+                  {{ $t('page.commerce_view.opt_specter_resource') }}
+                </SelectItem>
+                <SelectItem value="digital_file">
+                  {{ $t('page.commerce_view.opt_digital_file') }}
+                </SelectItem>
+                <SelectItem value="wallet_credit">
+                  {{ $t('page.commerce_view.opt_wallet_credit') }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.visibility_mode_label') }}
             </label>
-            <select
-              v-model="productForm.visibility"
-              class="h-8 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground"
-            >
-              <option value="public">
-                {{ $t('page.commerce_view.opt_vis_public') }}
-              </option>
-              <option value="tenant_only">
-                {{ $t('page.commerce_view.opt_vis_tenant_only') }}
-              </option>
-              <option value="hidden">
-                {{ $t('page.commerce_view.opt_vis_hidden') }}
-              </option>
-            </select>
+            <Select v-model="productForm.visibility">
+              <SelectTrigger class="h-8 w-full text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="public">
+                  {{ $t('page.commerce_view.opt_vis_public') }}
+                </SelectItem>
+                <SelectItem value="tenant_only">
+                  {{ $t('page.commerce_view.opt_vis_tenant_only') }}
+                </SelectItem>
+                <SelectItem value="hidden">
+                  {{ $t('page.commerce_view.opt_vis_hidden') }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.stock_mode_label') }}
             </label>
-            <select
-              v-model="productForm.stock_mode"
-              class="h-8 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground"
-            >
-              <option value="serialized">
-                {{ $t('page.commerce_view.opt_stock_serialized') }}
-              </option>
-              <option value="unlimited">
-                {{ $t('page.commerce_view.opt_stock_unlimited') }}
-              </option>
-              <option value="finite_counter">
-                {{ $t('page.commerce_view.opt_stock_finite') }}
-              </option>
-            </select>
+            <Select v-model="productForm.stock_mode">
+              <SelectTrigger class="h-8 w-full text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="serialized">
+                  {{ $t('page.commerce_view.opt_stock_serialized') }}
+                </SelectItem>
+                <SelectItem value="unlimited">
+                  {{ $t('page.commerce_view.opt_stock_unlimited') }}
+                </SelectItem>
+                <SelectItem value="finite_counter">
+                  {{ $t('page.commerce_view.opt_stock_finite') }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.sku_code_label') }}
             </label>
-            <input
+            <Input
               v-model="productForm.sku"
               type="text"
               placeholder="VIA-2FA-01"
-              class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
+              class="h-8 text-xs"
             />
           </div>
 
@@ -1258,11 +1271,11 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.unit_price_xu_label') }}
             </label>
-            <input
+            <Input
               v-model.number="productForm.price_credits"
               type="number"
               min="0"
-              class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
+              class="h-8 text-xs"
             />
           </div>
 
@@ -1270,11 +1283,11 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.short_desc_label') }}
             </label>
-            <input
+            <Input
               v-model="productForm.short_description"
               type="text"
               :placeholder="$t('page.commerce_view.short_desc_placeholder')"
-              class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
+              class="h-8 text-xs"
             />
           </div>
         </div>
@@ -1311,45 +1324,43 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.select_serialized_sku_label') }}
             </label>
-            <select
-              v-model="selectedStockVariantId"
-              class="h-8 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground"
-            >
-              <option
-                v-for="item in serializedVariants"
-                :key="item.variant.id"
-                :value="item.variant.id"
-              >
-                {{ item.productName }} — {{ item.variant.sku }} ({{
-                  $t('page.commerce_view.stock_short', {
-                    count: item.variant.available_stock,
-                  })
-                }})
-              </option>
-            </select>
+            <Select v-model="selectedStockVariantId">
+              <SelectTrigger class="h-8 w-full text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="item in serializedVariants"
+                  :key="item.variant.id"
+                  :value="item.variant.id"
+                >
+                  {{ item.productName }} — {{ item.variant.sku }} ({{
+                    $t('page.commerce_view.stock_short', {
+                      count: item.variant.available_stock,
+                    })
+                  }})
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.batch_code_label') }}
             </label>
-            <input
-              v-model="stockBatchCode"
-              type="text"
-              class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
-            />
+            <Input v-model="stockBatchCode" type="text" class="h-8 text-xs" />
           </div>
 
           <div class="space-y-1">
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.stock_lines_label') }}
             </label>
-            <textarea
+            <Textarea
               v-model="stockLinesRaw"
-              rows="7"
+              :rows="7"
               placeholder="1000881122|matkhau123|JBSWY3DPEHPK3PXP&#10;1000881123|matkhau456|KRSXG5CTMVRXEZLU"
               class="w-full rounded-lg border border-border bg-background p-3 text-xs text-foreground focus:border-primary focus:outline-none"
-            ></textarea>
+            />
           </div>
         </div>
 

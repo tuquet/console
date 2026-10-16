@@ -219,14 +219,16 @@ onMounted(async () => {
             <span class="hidden sm:inline">•</span>
             <span class="flex items-center gap-1 font-mono">
               UID: {{ userId.slice(0, 12) }}...
-              <button
+              <Button
                 type="button"
-                class="size-5 inline-flex items-center justify-center text-muted-foreground hover:text-foreground"
+                variant="ghost"
+                size="icon"
+                class="size-5 text-muted-foreground hover:text-foreground"
                 @click="copyToClipboard(userId, 'User ID')"
               >
                 <Check v-if="isCopied('User ID')" class="size-3 text-success" />
                 <Copy v-else class="size-3" />
-              </button>
+              </Button>
             </span>
           </div>
         </div>

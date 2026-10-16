@@ -31,6 +31,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   toast,
 } from '@tuquet/vue-ui';
 
@@ -321,10 +327,11 @@ async function initData() {
   await gridApi.reload();
 }
 
-async function handleTenantChange(event: Event) {
-  const target = event.target as HTMLSelectElement;
-  selectedTenantId.value = target.value;
-  setActiveTenantId(target.value);
+async function handleTenantChange(value: unknown) {
+  const nextId = String(value || '');
+  if (!nextId) return;
+  selectedTenantId.value = nextId;
+  setActiveTenantId(nextId);
   await gridApi.reload();
 }
 
@@ -459,23 +466,27 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
-        <div
-          class="flex items-center gap-1.5 rounded-lg border border-border/60 bg-card px-2.5 py-1.5"
-        >
-          <Building2 class="size-3.5 shrink-0 text-muted-foreground" />
-          <select
-            :value="selectedTenantId"
-            class="max-w-[100px] sm:max-w-[160px] truncate bg-transparent text-xs font-medium text-foreground focus:outline-none"
-            @change="handleTenantChange"
+        <div class="flex items-center gap-1.5">
+          <Select
+            :model-value="selectedTenantId"
+            @update:model-value="handleTenantChange"
           >
-            <option
-              v-for="tenant in tenants"
-              :key="tenant.id"
-              :value="tenant.id"
+            <SelectTrigger
+              class="h-8 max-w-[130px] gap-1.5 bg-card px-2.5 text-xs font-medium sm:max-w-[190px]"
             >
-              {{ tenant.name }}
-            </option>
-          </select>
+              <Building2 class="size-3.5 shrink-0 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="tenant in tenants"
+                :key="tenant.id"
+                :value="tenant.id"
+              >
+                {{ tenant.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <Button
@@ -613,20 +624,21 @@ onBeforeUnmount(() => {
               {{ $t('page.commerce_view.quick_select_xu_pack') }}
             </label>
             <div class="grid grid-cols-3 gap-2">
-              <button
+              <Button
                 v-for="preset in QUICK_TOPUP_PRESETS"
                 :key="preset"
                 type="button"
-                class="rounded-lg border py-2 text-center text-xs font-semibold transition-colors"
+                variant="outline"
+                class="h-auto rounded-lg border py-2 text-center text-xs font-semibold transition-colors"
                 :class="
                   topupCredits === preset
-                    ? 'border-primary bg-primary/10 text-primary'
+                    ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15'
                     : 'border-border/60 bg-background text-foreground hover:border-primary/40'
                 "
                 @click="topupCredits = preset"
               >
                 +{{ preset.toLocaleString('en-US') }} Xu
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -634,12 +646,12 @@ onBeforeUnmount(() => {
             <label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.custom_xu_amount_label') }}
             </label>
-            <input
+            <Input
               v-model.number="topupCredits"
               type="number"
               min="10"
               step="10"
-              class="h-8 w-32 rounded-md border border-border bg-background px-2.5 text-right text-sm text-foreground focus:border-primary focus:outline-none"
+              class="h-8 w-32 text-right text-sm"
             />
           </div>
 
@@ -649,14 +661,15 @@ onBeforeUnmount(() => {
             >
               {{ $t('page.commerce_view.payment_gateway_label') }}
             </label>
-            <button
+            <Button
               v-for="gw in topupGateways"
               :key="gw.id"
               type="button"
-              class="flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors"
+              variant="outline"
+              class="flex h-auto w-full items-center justify-between rounded-lg border p-3 text-left font-normal transition-colors"
               :class="
                 selectedGateway?.id === gw.id
-                  ? 'border-primary bg-primary/10'
+                  ? 'border-primary bg-primary/10 hover:bg-primary/15'
                   : 'border-border/60 bg-card hover:border-primary/40'
               "
               @click="selectedGatewayId = gw.id"
@@ -676,7 +689,7 @@ onBeforeUnmount(() => {
               <Badge variant="outline" class="text-2xs">
                 {{ gw.currency }}
               </Badge>
-            </button>
+            </Button>
           </div>
 
           <div

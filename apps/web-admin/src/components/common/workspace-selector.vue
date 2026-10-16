@@ -121,11 +121,12 @@ async function handleCreateWorkspace() {
     <Popover v-model:open="isOpen">
       <PopoverTrigger as-child>
         <!-- Collapsed button (icon-only mode when sidebar is collapsed) -->
-        <button
+        <Button
           v-if="props.collapsed"
           type="button"
+          variant="ghost"
           data-testid="workspace-selector-trigger-collapsed"
-          class="flex size-full items-center justify-center p-2 transition-colors hover:bg-accent/50 focus-visible:outline-none"
+          class="flex size-full h-auto items-center justify-center rounded-none p-2 transition-colors hover:bg-accent/50 focus-visible:outline-none"
           :title="activeWorkspace?.name || $t('page.workspace.not_selected')"
         >
           <div
@@ -139,14 +140,15 @@ async function handleCreateWorkspace() {
               {{ activeWorkspace.name.charAt(0).toUpperCase() }}
             </span>
           </div>
-        </button>
+        </Button>
 
         <!-- Expanded button (full workspace card replacing logo at top of sidebar/header) -->
-        <button
+        <Button
           v-else
           type="button"
+          variant="ghost"
           data-testid="workspace-selector-trigger"
-          class="group flex size-full items-center justify-between gap-2.5 px-3 py-2 text-left transition-colors hover:bg-accent/40 focus-visible:outline-none"
+          class="group flex size-full h-auto items-center justify-between gap-2.5 rounded-none px-3 py-2 text-left font-normal transition-colors hover:bg-accent/40 focus-visible:outline-none"
         >
           <!-- Workspace Avatar / Initial icon -->
           <div class="flex items-center gap-2.5 min-w-0">
@@ -184,7 +186,7 @@ async function handleCreateWorkspace() {
           <ChevronsUpDown
             class="size-3.5 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-foreground"
           />
-        </button>
+        </Button>
       </PopoverTrigger>
 
       <PopoverContent
@@ -196,12 +198,12 @@ async function handleCreateWorkspace() {
         <!-- Search Bar -->
         <div class="flex items-center border-b border-border px-3 py-2">
           <Search class="mr-2 size-3.5 shrink-0 text-muted-foreground" />
-          <input
+          <Input
             v-model="searchQuery"
             type="text"
             data-testid="workspace-search-input"
             :placeholder="$t('page.workspace.selector_search')"
-            class="flex h-6 w-full bg-transparent text-xs outline-none placeholder:text-muted-foreground text-foreground"
+            class="h-6 w-full border-0 bg-transparent px-0 py-0 text-xs shadow-none focus-visible:ring-0 placeholder:text-muted-foreground text-foreground"
           />
         </div>
 
@@ -213,11 +215,12 @@ async function handleCreateWorkspace() {
             {{ $t('page.workspace.tenants_label') }}
           </div>
 
-          <button
+          <Button
             v-for="ws in filteredWorkspaces"
             :key="ws.id"
             type="button"
-            class="flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-xs transition-colors text-left"
+            variant="ghost"
+            class="flex h-auto w-full items-center justify-between rounded-sm px-2 py-1.5 text-left text-xs font-normal transition-colors"
             :class="
               ws.id === activeWorkspace?.id
                 ? 'bg-accent font-medium text-accent-foreground'
@@ -251,7 +254,7 @@ async function handleCreateWorkspace() {
                 class="size-3.5 text-primary"
               />
             </div>
-          </button>
+          </Button>
 
           <div
             v-if="filteredWorkspaces.length === 0"
@@ -263,22 +266,24 @@ async function handleCreateWorkspace() {
 
         <!-- Quick Actions Footer -->
         <div class="border-t border-border p-1 bg-muted/20 space-y-0.5">
-          <button
+          <Button
             type="button"
-            class="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-xs hover:bg-muted/70 transition-colors text-foreground text-left"
+            variant="ghost"
+            class="flex h-auto w-full items-center justify-start gap-2 rounded-sm px-2 py-1.5 text-left text-xs font-normal text-foreground transition-colors hover:bg-muted/70"
             @click="handleManageWorkspaces"
           >
             <Settings class="size-3.5 text-muted-foreground" />
             <span>{{ $t('page.workspace.manage_workspaces') }}</span>
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            class="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-primary hover:bg-primary/10 transition-colors text-left font-medium"
+            variant="ghost"
+            class="flex h-auto w-full items-center justify-start gap-2 rounded-sm px-2 py-1.5 text-left text-xs font-medium text-primary transition-colors hover:bg-primary/10 hover:text-primary"
             @click="openCreateModal"
           >
             <Plus class="size-3.5" />
             <span>{{ $t('page.workspace.create_workspace') }}</span>
-          </button>
+          </Button>
         </div>
       </PopoverContent>
     </Popover>
@@ -319,7 +324,7 @@ async function handleCreateWorkspace() {
               {{ $t('page.workspace.col_plan') }}
             </label>
             <div class="grid grid-cols-3 gap-2">
-              <button
+              <Button
                 v-for="plan in [
                   TENANT_PLAN.FREE,
                   TENANT_PLAN.PRO,
@@ -327,16 +332,17 @@ async function handleCreateWorkspace() {
                 ]"
                 :key="plan"
                 type="button"
-                class="rounded-md border p-2 text-xs font-medium text-center transition-colors capitalize"
+                variant="outline"
+                class="h-auto rounded-md border p-2 text-center text-xs font-medium transition-colors capitalize"
                 :class="
                   newWorkspacePlan === plan
-                    ? 'border-primary bg-primary/10 text-primary'
+                    ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15'
                     : 'border-input hover:bg-muted text-foreground'
                 "
                 @click="newWorkspacePlan = plan"
               >
                 {{ plan }}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

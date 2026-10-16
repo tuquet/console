@@ -22,6 +22,12 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@tuquet/vue-ui';
 
 import { useClipboard, useDateFormat } from '#/composables';
@@ -131,13 +137,15 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
           <!-- Superadmin-Only Relational Table Schema Popover -->
           <Popover v-if="props.isSuperadmin">
             <PopoverTrigger as-child>
-              <button
+              <Button
                 type="button"
-                class="inline-flex size-6 shrink-0 items-center justify-center rounded-md border border-border/60 bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                variant="outline"
+                size="icon"
+                class="size-6 shrink-0 rounded-md border-border/60 bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
                 data-testid="vxe-superadmin-relation-schema-trigger"
               >
                 <Database class="size-3.5 text-primary" />
-              </button>
+              </Button>
             </PopoverTrigger>
             <PopoverContent
               align="start"
@@ -203,45 +211,47 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
         <div
           class="overflow-x-auto rounded-lg border border-border/70 bg-background"
         >
-          <table class="w-full border-collapse text-left">
-            <thead
+          <Table class="w-full text-left">
+            <TableHeader
               class="sticky top-0 z-10 border-b border-border/70 bg-muted/60 backdrop-blur-xs"
             >
-              <tr>
-                <th
+              <TableRow>
+                <TableHead
                   class="w-10 px-3 py-2 text-center text-xs font-semibold tracking-wider text-muted-foreground uppercase"
                 >
                   #
-                </th>
-                <th
+                </TableHead>
+                <TableHead
                   v-for="col in props.relation.columns"
                   :key="col.field"
                   class="px-3 py-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
                 >
                   {{ col.title }}
-                </th>
-                <th
+                </TableHead>
+                <TableHead
                   class="w-12 px-3 py-2 text-right text-xs font-semibold tracking-wider text-muted-foreground uppercase"
                 >
                   {{ $t('common.copy') }}
-                </th>
-              </tr>
-            </thead>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
 
-            <tbody
+            <TableBody
               v-if="filteredRows.length > 0"
               class="divide-y divide-border/50"
             >
-              <tr
+              <TableRow
                 v-for="(relRow, idx) in filteredRows"
                 :key="idx"
                 class="transition-colors hover:bg-muted/30"
               >
-                <td class="px-3 py-2 text-center text-xs text-muted-foreground">
+                <TableCell
+                  class="px-3 py-2 text-center text-xs text-muted-foreground"
+                >
                   {{ idx + 1 }}
-                </td>
+                </TableCell>
 
-                <td
+                <TableCell
                   v-for="col in props.relation.columns"
                   :key="col.field"
                   class="px-3 py-2 align-middle"
@@ -268,12 +278,14 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
                   <span v-else class="text-sm font-normal text-foreground">
                     {{ formatCellValue(relRow, col) }}
                   </span>
-                </td>
+                </TableCell>
 
-                <td class="px-3 py-2 text-right align-middle">
-                  <button
+                <TableCell class="px-3 py-2 text-right align-middle">
+                  <Button
                     type="button"
-                    class="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    variant="ghost"
+                    size="icon"
+                    class="size-7 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                     :title="$t('common.copy')"
                     @click="
                       copyToClipboard(
@@ -287,22 +299,22 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
                       class="size-3.5 text-emerald-500"
                     />
                     <Copy v-else class="size-3.5" />
-                  </button>
-                </td>
-              </tr>
-            </tbody>
+                  </Button>
+                </TableCell>
+              </TableRow>
+            </TableBody>
 
-            <tbody v-else>
-              <tr>
-                <td
+            <TableBody v-else>
+              <TableRow>
+                <TableCell
                   :colspan="props.relation.columns.length + 2"
                   class="px-4 py-8 text-center text-xs text-muted-foreground"
                 >
                   {{ $t('common.noMatchingRecords') }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </div>
       </div>
 

@@ -70,9 +70,11 @@ function navigateToFleet() {
             class="flex items-center justify-between gap-2 text-xs text-foreground"
           >
             <span class="break-all">{{ tenant.id }}</span>
-            <button
+            <Button
               type="button"
-              class="size-6 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground shrink-0"
+              variant="ghost"
+              size="icon"
+              class="size-6 shrink-0 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
               :title="$t('page.tenants_view.copy_tenant_id')"
               @click="copyTenantId"
             >
@@ -81,7 +83,7 @@ function navigateToFleet() {
                 class="size-3.5 text-success"
               />
               <Copy v-else class="size-3.5" />
-            </button>
+            </Button>
           </div>
         </div>
 
