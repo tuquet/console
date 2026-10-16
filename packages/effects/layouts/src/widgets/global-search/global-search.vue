@@ -8,6 +8,7 @@ import { $t } from '@vben/locales';
 import { isWindowsOs } from '@vben/utils';
 
 import { useVbenModal } from '@vben-core/popup-ui';
+import { Input, Kbd } from '@vben-core/shadcn-ui';
 
 import { useMagicKeys, whenever } from '@vueuse/core';
 
@@ -32,7 +33,7 @@ const props = withDefaults(
 );
 
 const keyword = ref('');
-const searchInputRef = ref<HTMLInputElement>();
+const searchInputRef = ref<InstanceType<typeof Input> | null>(null);
 
 const [Modal, modalApi] = useVbenModal({
   onCancel() {
@@ -63,7 +64,10 @@ if (cmd) {
 
 whenever(open, () => {
   nextTick(() => {
-    searchInputRef.value?.focus();
+    const el = (searchInputRef.value?.$el ?? searchInputRef.value) as
+      | HTMLElement
+      | undefined;
+    el?.focus?.();
   });
 });
 
@@ -113,11 +117,11 @@ defineExpose({
       <template #title>
         <div class="flex items-center">
           <Search class="mr-2 size-4 text-muted-foreground" />
-          <input
+          <Input
             ref="searchInputRef"
             v-model="keyword"
             :placeholder="$t('ui.widgets.search.searchNavigate')"
-            class="ring-none w-[80%] rounded-md border border-none bg-transparent p-2 pl-0 text-sm font-normal ring-0 ring-offset-transparent outline-hidden placeholder:text-muted-foreground focus-visible:ring-transparent"
+            class="h-8 w-[80%] border-none bg-transparent p-2 pl-0 text-sm font-normal shadow-none outline-hidden focus-visible:ring-0 focus-visible:ring-transparent"
           />
         </div>
       </template>
@@ -154,13 +158,12 @@ defineExpose({
       >
         {{ $t('ui.widgets.search.title') }}
       </span>
-      <span
+      <Kbd
         v-if="enableShortcutKey"
-        class="relative hidden rounded-sm rounded-r-xl border-foreground/60 bg-background px-1.5 py-1 text-xs leading-none text-muted-foreground group-hover:text-foreground group-hover:opacity-100 md:block"
+        class="hidden rounded-sm rounded-r-xl bg-background px-1.5 py-1 text-xs leading-none text-muted-foreground group-hover:text-foreground md:inline-flex"
       >
-        {{ isWindowsOs() ? 'Ctrl' : '⌘' }}
-        <kbd>K</kbd>
-      </span>
+        {{ isWindowsOs() ? 'Ctrl' : '⌘' }} K
+      </Kbd>
       <span v-else></span>
     </div>
   </div>

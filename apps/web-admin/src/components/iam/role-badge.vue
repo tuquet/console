@@ -49,7 +49,7 @@ const roleConfig = computed<RoleConfig>(() => {
 
   return (
     roleMap[props.role.toLowerCase()] || {
-      class: 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30',
+      class: 'bg-muted text-muted-foreground border-border',
       label: props.role,
     }
   );

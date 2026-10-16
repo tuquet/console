@@ -12,7 +12,9 @@ import { ArrowRight, Check, Copy, Database, Search, Table2 } from '@lucide/vue';
 import {
   Badge,
   Button,
-  Input,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -189,17 +191,17 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
         v-if="props.relation"
         class="shrink-0 border-b border-border/60 bg-background px-4 py-2.5 sm:px-5"
       >
-        <div class="relative flex items-center">
-          <Search
-            class="pointer-events-none absolute left-3 size-3.5 text-muted-foreground"
-          />
-          <Input
+        <InputGroup class="h-8">
+          <InputGroupAddon>
+            <Search class="size-3.5 text-muted-foreground" />
+          </InputGroupAddon>
+          <InputGroupInput
             v-model="searchQuery"
-            class="h-8 pl-8 text-xs"
+            class="h-8 text-xs"
             data-testid="vxe-relational-sheet-search"
             :placeholder="$t('common.searchRelationalRecords')"
           />
-        </div>
+        </InputGroup>
       </div>
 
       <!-- Structured Supabase-Style Relational Table Body -->

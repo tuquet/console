@@ -7,6 +7,10 @@ import { History, RefreshCw, ShieldCheck, User } from '@lucide/vue';
 import {
   Badge,
   Button,
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
   Table,
   TableBody,
   TableCell,
@@ -197,13 +201,19 @@ onMounted(() => {
         </div>
       </div>
 
-      <div
+      <Empty
         v-if="logs.length === 0 && !loading"
-        class="rounded-xl border border-border/60 bg-card p-8 text-center text-sm text-muted-foreground shadow-sm"
+        class="rounded-xl border border-border/60 bg-card p-8 shadow-sm"
       >
-        <History class="size-8 text-muted-foreground/60 mx-auto mb-2" />
-        <p>{{ $t('page.tenants_view.audit_empty') }}</p>
-      </div>
+        <EmptyHeader>
+          <EmptyMedia>
+            <History class="size-8 text-muted-foreground/60" />
+          </EmptyMedia>
+          <EmptyDescription>
+            {{ $t('page.tenants_view.audit_empty') }}
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     </div>
   </div>
 </template>

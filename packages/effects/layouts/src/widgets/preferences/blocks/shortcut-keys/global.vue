@@ -4,6 +4,8 @@ import { computed } from 'vue';
 import { $t } from '@vben/locales';
 import { isWindowsOs } from '@vben/utils';
 
+import { Kbd } from '@vben-core/shadcn-ui';
+
 import SwitchItem from '../switch-item.vue';
 
 defineOptions({
@@ -33,7 +35,7 @@ const altView = computed(() => (isWindowsOs() ? 'Alt' : '⌥'));
     {{ $t('preferences.shortcutKeys.search') }}
     <template #shortcut>
       {{ isWindowsOs() ? 'Ctrl' : '⌘' }}
-      <kbd> K </kbd>
+      <Kbd>K</Kbd>
     </template>
   </SwitchItem>
   <SwitchItem v-model="shortcutKeysLogout" :disabled="!shortcutKeysEnable">

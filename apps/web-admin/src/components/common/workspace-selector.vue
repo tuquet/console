@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
+  Label,
 } from '@tuquet/vue-ui';
 
 import { TENANT_PLAN } from '#/api/core/tenant';
@@ -173,12 +174,13 @@ async function handleCreateWorkspace() {
                 <span class="truncate text-2xs text-muted-foreground">
                   {{ activeWorkspace?.slug || 'workspace' }}
                 </span>
-                <span
+                <Badge
                   v-if="activeWorkspace?.metadata?.plan"
-                  class="rounded-xs bg-muted px-1 py-0 text-[10px] font-medium text-muted-foreground capitalize"
+                  variant="secondary"
+                  class="rounded-xs px-1 py-0 text-2xs font-medium text-muted-foreground capitalize"
                 >
                   {{ activeWorkspace.metadata.plan }}
-                </span>
+                </Badge>
               </div>
             </div>
           </div>
@@ -297,9 +299,9 @@ async function handleCreateWorkspace() {
 
         <div class="grid gap-3.5 py-3">
           <div class="grid gap-1.5">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.workspace.col_name') }}
-            </label>
+            </Label>
             <Input
               :value="newWorkspaceName"
               placeholder="e.g. Acme Corp"
@@ -309,9 +311,9 @@ async function handleCreateWorkspace() {
           </div>
 
           <div class="grid gap-1.5">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.workspace.col_slug') }}
-            </label>
+            </Label>
             <Input
               v-model="newWorkspaceSlug"
               placeholder="e.g. acme-corp"
@@ -320,9 +322,9 @@ async function handleCreateWorkspace() {
           </div>
 
           <div class="grid gap-1.5">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.workspace.col_plan') }}
-            </label>
+            </Label>
             <div class="grid grid-cols-3 gap-2">
               <Button
                 v-for="plan in [

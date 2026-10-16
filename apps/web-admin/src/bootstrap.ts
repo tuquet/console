@@ -14,6 +14,7 @@ import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
 import App from './app.vue';
 import { router } from './router';
+import { initBugsink } from './utils/bugsink';
 
 async function bootstrap(namespace: string) {
   // Initialize component adapter
@@ -33,6 +34,12 @@ async function bootstrap(namespace: string) {
 
   const app = createApp(App);
 
+  // Configure router and guards
+  app.use(router);
+
+  // Initialize Bugsink (Sentry-compatible) error tracking
+  initBugsink(app, router);
+
   // Register v-loading directive
   registerLoadingDirective(app, {
     loading: 'loading', // Customize directive name here or provide false to omit registration
@@ -51,9 +58,6 @@ async function bootstrap(namespace: string) {
   // Initialize Tippy
   const { initTippy } = await import('@vben/common-ui/es/tippy');
   initTippy(app);
-
-  // Configure router and guards
-  app.use(router);
 
   // Configure Motion plugin
   const { MotionPlugin } = await import('@vben/plugins/motion');

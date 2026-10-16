@@ -4,6 +4,7 @@ import type { WorkspaceSubscription, WorkspaceUsageQuota } from '#/api';
 import { computed } from 'vue';
 
 import { Calendar, Cpu, HardDrive, PlayCircle, Users } from '@lucide/vue';
+import { Progress } from '@tuquet/vue-ui';
 
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
@@ -75,13 +76,7 @@ const runsPercent = computed(() =>
           </span>
         </div>
 
-        <div class="h-2 w-full overflow-hidden rounded-full bg-muted/60">
-          <div
-            class="h-full rounded-full transition-all"
-            :class="membersPercent >= 90 ? 'bg-destructive' : 'bg-primary'"
-            :style="{ width: `${membersPercent}%` }"
-          ></div>
-        </div>
+        <Progress :model-value="membersPercent" class="h-2" />
         <div class="text-xs text-muted-foreground">
           {{
             $t('page.tenants_view.quota_members_desc', {
@@ -107,13 +102,7 @@ const runsPercent = computed(() =>
           </span>
         </div>
 
-        <div class="h-2 w-full overflow-hidden rounded-full bg-muted/60">
-          <div
-            class="h-full rounded-full transition-all"
-            :class="devicesPercent >= 90 ? 'bg-destructive' : 'bg-primary'"
-            :style="{ width: `${devicesPercent}%` }"
-          ></div>
-        </div>
+        <Progress :model-value="devicesPercent" class="h-2" />
         <div class="text-xs text-muted-foreground">
           {{
             $t('page.tenants_view.quota_devices_desc', {
@@ -139,13 +128,7 @@ const runsPercent = computed(() =>
           </span>
         </div>
 
-        <div class="h-2 w-full overflow-hidden rounded-full bg-muted/60">
-          <div
-            class="h-full rounded-full transition-all"
-            :class="storagePercent >= 90 ? 'bg-destructive' : 'bg-primary'"
-            :style="{ width: `${storagePercent}%` }"
-          ></div>
-        </div>
+        <Progress :model-value="storagePercent" class="h-2" />
         <div class="text-xs text-muted-foreground">
           {{ $t('page.tenants_view.quota_storage_desc') }}
         </div>
@@ -167,13 +150,7 @@ const runsPercent = computed(() =>
           </span>
         </div>
 
-        <div class="h-2 w-full overflow-hidden rounded-full bg-muted/60">
-          <div
-            class="h-full rounded-full transition-all"
-            :class="runsPercent >= 90 ? 'bg-destructive' : 'bg-primary'"
-            :style="{ width: `${runsPercent}%` }"
-          ></div>
-        </div>
+        <Progress :model-value="runsPercent" class="h-2" />
         <div class="text-xs text-muted-foreground">
           {{ $t('page.tenants_view.quota_runs_desc') }}
         </div>

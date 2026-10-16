@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@lucide/vue": "catalog:",
+    "@sentry/vue": "catalog:",
     "@tuquet/vue-table": "catalog:",
     "@tuquet/vue-ui": "catalog:",
     "@vben-core/shadcn-ui": "workspace:*",

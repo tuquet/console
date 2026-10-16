@@ -45,6 +45,12 @@ async function initApplication() {
     await bootstrap(namespace);
   } catch (error) {
     console.error('[Specter Admin] Failed to initialize application:', error);
+    try {
+      const { captureError } = await import('./utils/bugsink');
+      captureError(error, { phase: 'application_bootstrap' });
+    } catch {
+      // ignore
+    }
     const appEl = document.querySelector('#app');
     if (appEl && !appEl.innerHTML.trim()) {
       appEl.innerHTML = `

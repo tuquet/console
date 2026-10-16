@@ -27,6 +27,7 @@ import {
   AlertDialogTrigger,
   Badge,
   Button,
+  Progress,
   toast,
 } from '@tuquet/vue-ui';
 
@@ -357,12 +358,7 @@ onUnmounted(() => {
               ({{ progressPct }}%)
             </span>
           </div>
-          <div class="h-2 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              class="h-full rounded-full bg-primary transition-all"
-              :style="{ width: `${progressPct}%` }"
-            ></div>
-          </div>
+          <Progress :model-value="progressPct" class="h-2" />
         </div>
       </div>
 

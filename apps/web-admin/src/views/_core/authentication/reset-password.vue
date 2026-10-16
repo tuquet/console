@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 
 import { $t } from '@vben/locales';
 
-import { Button, Input, toast } from '@tuquet/vue-ui';
+import { Button, Input, Label, toast } from '@tuquet/vue-ui';
 
 import { updatePasswordApi } from '#/api/core/auth';
 
@@ -64,10 +64,10 @@ async function handleSubmit() {
 
     <form class="space-y-5" @submit.prevent="handleSubmit">
       <div class="space-y-2">
-        <label class="text-sm font-medium leading-none">
+        <Label class="text-sm font-medium leading-none">
           {{ $t('authentication.newPassword') }}
           <span class="text-destructive ml-0.5">*</span>
-        </label>
+        </Label>
         <Input
           v-model="password"
           type="password"
@@ -78,10 +78,10 @@ async function handleSubmit() {
       </div>
 
       <div class="space-y-2">
-        <label class="text-sm font-medium leading-none">
+        <Label class="text-sm font-medium leading-none">
           {{ $t('authentication.confirmPassword') }}
           <span class="text-destructive ml-0.5">*</span>
-        </label>
+        </Label>
         <Input
           v-model="confirmPassword"
           type="password"

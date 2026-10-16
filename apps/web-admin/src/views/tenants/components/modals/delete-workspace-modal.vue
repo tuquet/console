@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
+  Label,
   toast,
 } from '@tuquet/vue-ui';
 
@@ -67,10 +68,10 @@ function handleOk() {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-foreground mb-2">
+          <Label class="mb-2 block text-sm font-medium text-foreground">
             {{ $t('page.tenants_view.delete_confirm_prompt') }}
             <strong class="text-destructive">{{ props.slug }}</strong>
-          </label>
+          </Label>
           <Input v-model="confirmSlugInput" :placeholder="props.slug" />
         </div>
       </div>

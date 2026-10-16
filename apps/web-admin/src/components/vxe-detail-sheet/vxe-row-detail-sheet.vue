@@ -448,20 +448,22 @@ async function handleSave() {
 
               <div class="flex items-center justify-between gap-2">
                 <span class="text-muted-foreground">RLS Mode</span>
-                <span
+                <Badge
                   v-if="isRlsWritable"
-                  class="inline-flex items-center gap-1 rounded border border-emerald-500/30 bg-emerald-500/15 px-1.5 py-0.5 text-2xs font-medium text-emerald-600 dark:text-emerald-400"
+                  variant="outline"
+                  class="gap-1 border-success/30 bg-success/15 px-1.5 py-0.5 text-2xs font-medium text-success"
                 >
                   <ShieldCheck class="size-3 shrink-0" />
                   {{ $t('common.rlsWritable') }}
-                </span>
-                <span
+                </Badge>
+                <Badge
                   v-else
-                  class="inline-flex items-center gap-1 rounded border border-amber-500/30 bg-amber-500/15 px-1.5 py-0.5 text-2xs font-medium text-amber-600 dark:text-amber-400"
+                  variant="outline"
+                  class="gap-1 border-warning/30 bg-warning/15 px-1.5 py-0.5 text-2xs font-medium text-warning"
                 >
                   <Lock class="size-3 shrink-0" />
                   {{ $t('common.rlsReadOnly') }}
-                </span>
+                </Badge>
               </div>
 
               <div class="flex items-center justify-between gap-2">

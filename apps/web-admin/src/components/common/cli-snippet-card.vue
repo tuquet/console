@@ -4,7 +4,7 @@ import { computed } from 'vue';
 import { $t } from '@vben/locales';
 
 import { Check, Copy, Terminal } from '@lucide/vue';
-import { Button } from '@tuquet/vue-ui';
+import { Button, Label } from '@tuquet/vue-ui';
 
 import { useClipboard } from '#/composables';
 
@@ -30,11 +30,11 @@ const { copyToClipboard, isCopied } = useClipboard();
   <div class="rounded-xl border border-border/60 bg-muted/20 p-4">
     <div class="flex items-center gap-2 mb-2">
       <Terminal class="size-4 text-primary" />
-      <label
+      <Label
         class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
       >
         {{ resolvedLabel }}
-      </label>
+      </Label>
     </div>
     <div
       class="rounded bg-muted/50 p-3 text-xs text-foreground flex items-center justify-between gap-2 overflow-x-auto border border-border/40"
