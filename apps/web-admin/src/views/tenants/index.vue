@@ -279,7 +279,7 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
           >
             {{ $t('page.workspace.title') }}
           </h1>
-          <Badge variant="secondary" class="font-mono text-xs font-normal">
+          <Badge variant="secondary" class="text-xs font-normal">
             {{ tenants.length }}
           </Badge>
         </div>
@@ -324,14 +324,11 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
             <span class="truncate text-sm font-semibold text-foreground">
               {{ activeTenant?.name || $t('page.workspace.not_selected') }}
             </span>
-            <Badge
-              variant="outline"
-              class="hidden font-mono text-2xs sm:inline-flex"
-            >
+            <Badge variant="outline" class="hidden text-2xs sm:inline-flex">
               /{{ activeTenant?.slug || 'none' }}
             </Badge>
           </div>
-          <p class="truncate font-mono text-2xs text-muted-foreground">
+          <p class="truncate text-2xs text-muted-foreground">
             ID: {{ activeTenant?.id || '—' }}
           </p>
         </div>
@@ -372,9 +369,7 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
         </template>
 
         <template #slug-cell="{ row }">
-          <code
-            class="rounded bg-muted/60 px-2 py-0.5 font-mono text-xs text-foreground"
-          >
+          <code class="rounded bg-muted/60 px-2 py-0.5 text-xs text-foreground">
             {{ row.slug }}
           </code>
         </template>

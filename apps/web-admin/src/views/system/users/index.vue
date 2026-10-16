@@ -256,7 +256,7 @@ async function handleRefresh() {
           >
             {{ $t('page.system.users') }}
           </h1>
-          <Badge variant="secondary" class="font-mono text-xs font-normal">
+          <Badge variant="secondary" class="text-xs font-normal">
             {{ allUsers.length }}
           </Badge>
         </div>

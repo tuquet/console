@@ -551,9 +551,7 @@ function handleOpenCreate() {
           <template #role-name-cell="{ row }">
             <div class="flex items-center gap-2">
               <RoleBadge :role="row.name" :uppercase="true" />
-              <code
-                class="hidden font-mono text-2xs text-muted-foreground sm:inline"
-              >
+              <code class="hidden text-2xs text-muted-foreground sm:inline">
                 {{ row.name }}
               </code>
             </div>
@@ -581,10 +579,7 @@ function handleOpenCreate() {
 
           <template #role-perms-cell="{ row }">
             <div class="flex items-center gap-1.5 min-w-0">
-              <Badge
-                variant="outline"
-                class="shrink-0 font-mono text-xs font-semibold"
-              >
+              <Badge variant="outline" class="shrink-0 text-xs font-semibold">
                 {{
                   $t('page.system_view.roles_perms_count', [
                     row.permissions.length,
@@ -594,7 +589,7 @@ function handleOpenCreate() {
               <code
                 v-for="perm in row.permissions.slice(0, 2)"
                 :key="perm"
-                class="hidden max-w-36 truncate rounded bg-muted px-1.5 py-0.5 font-mono text-2xs text-muted-foreground sm:inline-block"
+                class="hidden max-w-36 truncate rounded bg-muted px-1.5 py-0.5 text-2xs text-muted-foreground sm:inline-block"
                 :title="perm"
               >
                 {{ perm }}
@@ -614,7 +609,7 @@ function handleOpenCreate() {
           </template>
 
           <template #role-date-cell="{ row }">
-            <span class="font-mono text-xs text-muted-foreground">
+            <span class="text-xs text-muted-foreground">
               {{ formatDate(row.created_at) }}
             </span>
           </template>
@@ -643,7 +638,7 @@ function handleOpenCreate() {
           <template #perm-id-cell="{ row }">
             <div class="inline-flex items-center gap-1">
               <code
-                class="rounded bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-primary"
+                class="rounded bg-muted px-2 py-0.5 text-xs font-semibold text-primary"
               >
                 {{ row.id }}
               </code>
@@ -661,10 +656,7 @@ function handleOpenCreate() {
           </template>
 
           <template #perm-module-cell="{ row }">
-            <Badge
-              variant="outline"
-              class="gap-1.5 font-mono text-xs font-normal"
-            >
+            <Badge variant="outline" class="gap-1.5 text-xs font-normal">
               <Folder class="size-3 text-primary shrink-0" />
               <span>{{ row.module }}</span>
             </Badge>

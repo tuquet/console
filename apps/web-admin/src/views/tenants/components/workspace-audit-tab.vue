@@ -109,9 +109,7 @@ onMounted(() => {
         </TableHeader>
         <TableBody>
           <TableRow v-for="log in logs" :key="log.id">
-            <TableCell
-              class="font-mono text-xs text-muted-foreground whitespace-nowrap"
-            >
+            <TableCell class="text-xs text-muted-foreground whitespace-nowrap">
               {{ formatDate(log.created_at) }}
             </TableCell>
             <TableCell>
@@ -148,9 +146,7 @@ onMounted(() => {
                 <span class="text-muted-foreground font-mono"
                   >{{ log.entity_type }}:</span
                 >
-                <span class="font-mono text-foreground">{{
-                  log.entity_id
-                }}</span>
+                <span class="text-foreground">{{ log.entity_id }}</span>
               </div>
             </TableCell>
           </TableRow>
@@ -194,7 +190,7 @@ onMounted(() => {
         </div>
 
         <div
-          class="pt-2 border-t border-border/40 font-mono text-xs text-muted-foreground"
+          class="pt-2 border-t border-border/40 text-xs text-muted-foreground"
         >
           <span>{{ log.entity_type }}: </span>
           <span class="text-foreground">{{ log.entity_id }}</span>

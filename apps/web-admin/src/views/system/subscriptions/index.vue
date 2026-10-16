@@ -230,7 +230,7 @@ watch([() => $t('page.system_view.subs_col_unit_price'), isMobile], () => {
           >
             {{ $t('page.system.subscriptions') }}
           </h1>
-          <Badge variant="secondary" class="font-mono text-xs font-normal">
+          <Badge variant="secondary" class="text-xs font-normal">
             {{ allSubscriptions.length }}
           </Badge>
         </div>
@@ -271,7 +271,7 @@ watch([() => $t('page.system_view.subs_col_unit_price'), isMobile], () => {
               {{ row.tenant_name }}
             </span>
             <div
-              class="flex items-center gap-1.5 font-mono text-2xs text-muted-foreground sm:text-xs"
+              class="flex items-center gap-1.5 text-2xs text-muted-foreground sm:text-xs"
             >
               <span class="truncate">
                 /{{ row.tenant_slug || row.tenant_id.slice(0, 8) }}

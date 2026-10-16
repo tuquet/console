@@ -158,9 +158,7 @@ const props = withDefaults(defineProps<Props>(), {
           {{ $t('page.fleet_view.standby') }}
         </span>
       </div>
-      <div
-        class="mt-1 hidden font-mono text-xs text-muted-foreground sm:mt-2 sm:block"
-      >
+      <div class="mt-1 hidden text-xs text-muted-foreground sm:mt-2 sm:block">
         {{ $t('page.fleet_view.process_supervisor') }}
       </div>
     </div>

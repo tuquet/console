@@ -234,7 +234,7 @@ function refresh() {
           >
             {{ $t('page.system.plugins') }}
           </h1>
-          <Badge variant="secondary" class="font-mono text-xs font-normal">
+          <Badge variant="secondary" class="text-xs font-normal">
             {{ allPlugins.length }}
           </Badge>
         </div>
@@ -282,7 +282,7 @@ function refresh() {
                 {{ row.name }}
               </div>
               <div
-                class="flex items-center gap-1.5 font-mono text-2xs text-muted-foreground sm:text-xs"
+                class="flex items-center gap-1.5 text-2xs text-muted-foreground sm:text-xs"
               >
                 <span class="truncate">{{ row.id }}</span>
                 <span class="sm:hidden">&bull;</span>
@@ -315,7 +315,7 @@ function refresh() {
 
         <template #version-cell="{ row }">
           <div class="flex items-center gap-2 text-xs font-mono">
-            <Badge variant="outline" class="font-mono text-xs">
+            <Badge variant="outline" class="text-xs">
               v{{ row.version }}
             </Badge>
             <span v-if="row.schema_name" class="text-muted-foreground">

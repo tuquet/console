@@ -317,24 +317,30 @@ const headerSlots = computed(() => {
   >
     <!-- logo -->
     <template #logo>
-      <VbenLogo
-        v-if="preferences.logo.enable"
-        :fit="preferences.logo.fit"
-        :class="logoClass"
+      <slot
         :collapsed="logoCollapsed"
-        :src="finalLogoSrc"
-        :src-dark="finalLogoSrcDark"
-        :text="finalLogoText"
-        :show-text="preferences.logo.showText"
-        :logo-mode="preferences.logo.logoMode"
-        :full-logo-height="preferences.logo.fullLogoHeight"
-        :theme="logoTheme"
-        @click="clickLogo"
+        :is-mobile="preferences.app.isMobile"
+        name="logo"
       >
-        <template v-if="$slots['logo-text']" #text>
-          <slot name="logo-text"></slot>
-        </template>
-      </VbenLogo>
+        <VbenLogo
+          v-if="preferences.logo.enable"
+          :fit="preferences.logo.fit"
+          :class="logoClass"
+          :collapsed="logoCollapsed"
+          :src="finalLogoSrc"
+          :src-dark="finalLogoSrcDark"
+          :text="finalLogoText"
+          :show-text="preferences.logo.showText"
+          :logo-mode="preferences.logo.logoMode"
+          :full-logo-height="preferences.logo.fullLogoHeight"
+          :theme="logoTheme"
+          @click="clickLogo"
+        >
+          <template v-if="$slots['logo-text']" #text>
+            <slot name="logo-text"></slot>
+          </template>
+        </VbenLogo>
+      </slot>
     </template>
     <!-- Header area -->
     <template #header>

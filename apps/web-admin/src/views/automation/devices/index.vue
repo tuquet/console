@@ -286,7 +286,7 @@ watch(
           >
             {{ $t('page.automation.devices') }}
           </h1>
-          <Badge variant="secondary" class="shrink-0 font-mono text-2xs">
+          <Badge variant="secondary" class="shrink-0 text-2xs">
             {{ nodes.length }}
           </Badge>
         </div>
@@ -333,7 +333,7 @@ watch(
               <div class="font-medium text-foreground truncate">
                 {{ row.name }}
               </div>
-              <div class="font-mono text-2xs text-muted-foreground truncate">
+              <div class="text-2xs text-muted-foreground truncate">
                 {{ row.hostname }} &bull; {{ row.ip_address }}
               </div>
             </div>
@@ -343,7 +343,7 @@ watch(
         <template #os-cell="{ row }">
           <Badge
             :variant="getOsBadgeVariant(row.os_info)"
-            class="text-xs font-mono font-medium capitalize"
+            class="text-xs font-medium capitalize"
           >
             {{ row.os_info }}
           </Badge>
@@ -398,7 +398,7 @@ watch(
 
         <template #jobs-cell="{ row }">
           <span
-            class="font-mono text-xs font-semibold"
+            class="text-xs font-semibold"
             :class="
               row.active_jobs > 0 ? 'text-primary' : 'text-muted-foreground'
             "

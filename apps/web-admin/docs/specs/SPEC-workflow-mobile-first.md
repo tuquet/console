@@ -184,7 +184,7 @@ watch([() => $t('page.workflows_view.col_name'), isMobile], () => {
       </div>
       <!-- Mobile-only inline metadata row -->
       <div v-if="isMobile" class="mt-1.5 flex flex-wrap items-center gap-1.5">
-        <Badge variant="outline" class="px-1.5 py-0 font-mono text-2xs">
+        <Badge variant="outline" class="px-1.5 py-0 text-2xs">
           v{{ row.version }}
         </Badge>
         <Badge variant="outline" class="px-1.5 py-0 text-2xs font-normal">
@@ -194,7 +194,7 @@ watch([() => $t('page.workflows_view.col_name'), isMobile], () => {
           ></span>
           {{ getWorkflowStatusLabel(row.status) }}
         </Badge>
-        <span class="font-mono text-2xs text-muted-foreground">
+        <span class="text-2xs text-muted-foreground">
           {{ formatDate(row.updated_at) }}
         </span>
       </div>

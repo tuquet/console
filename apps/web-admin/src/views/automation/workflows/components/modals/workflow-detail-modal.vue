@@ -64,7 +64,7 @@ function getStatusLabel(status: string): string {
                 {{ props.workflow.name }}
               </div>
               <div class="mt-0.5 flex items-center gap-1.5">
-                <Badge variant="outline" class="font-mono text-2xs">
+                <Badge variant="outline" class="text-2xs">
                   v{{ props.workflow.version }}
                 </Badge>
               </div>
@@ -105,7 +105,7 @@ function getStatusLabel(status: string): string {
               {{ $t('page.workflows_view.workflow_id') }}
             </div>
             <div
-              class="flex items-center justify-between gap-2 font-mono text-xs text-foreground"
+              class="flex items-center justify-between gap-2 text-xs text-foreground"
             >
               <span class="break-all">{{ props.workflow.id }}</span>
               <button
@@ -136,7 +136,7 @@ function getStatusLabel(status: string): string {
               {{ $t('page.workflows_view.workspace_id') }}
             </div>
             <div
-              class="flex items-center justify-between gap-2 font-mono text-xs text-foreground"
+              class="flex items-center justify-between gap-2 text-xs text-foreground"
             >
               <span class="break-all">{{ props.workflow.tenant_id }}</span>
               <button
@@ -166,7 +166,7 @@ function getStatusLabel(status: string): string {
             <div class="text-xs text-muted-foreground">
               {{ $t('page.workflows_view.col_created_at') }}
             </div>
-            <div class="font-mono text-xs font-medium text-foreground">
+            <div class="text-xs font-medium text-foreground">
               {{ formatDate(props.workflow.created_at) }}
             </div>
           </div>
@@ -178,7 +178,7 @@ function getStatusLabel(status: string): string {
             <div class="text-xs text-muted-foreground">
               {{ $t('page.workflows_view.col_updated_at') }}
             </div>
-            <div class="font-mono text-xs font-medium text-foreground">
+            <div class="text-xs font-medium text-foreground">
               {{ formatDate(props.workflow.updated_at) }}
             </div>
           </div>

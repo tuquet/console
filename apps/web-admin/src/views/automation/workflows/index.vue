@@ -209,7 +209,7 @@ function refresh() {
           >
             {{ $t('page.automation.workflows') }}
           </h1>
-          <Badge variant="secondary" class="shrink-0 font-mono text-2xs">
+          <Badge variant="secondary" class="shrink-0 text-2xs">
             {{ allWorkflows.length }}
           </Badge>
         </div>
@@ -268,7 +268,7 @@ function refresh() {
                 v-if="isMobile"
                 class="mt-1.5 flex flex-wrap items-center gap-1.5"
               >
-                <Badge variant="outline" class="px-1.5 py-0 font-mono text-2xs">
+                <Badge variant="outline" class="px-1.5 py-0 text-2xs">
                   v{{ row.version }}
                 </Badge>
                 <Badge
@@ -281,7 +281,7 @@ function refresh() {
                   ></span>
                   {{ getStatusLabel(row.status) }}
                 </Badge>
-                <span class="font-mono text-2xs text-muted-foreground">
+                <span class="text-2xs text-muted-foreground">
                   {{ formatDate(row.updated_at) }}
                 </span>
               </div>
@@ -290,9 +290,7 @@ function refresh() {
         </template>
 
         <template #version-cell="{ row }">
-          <Badge variant="outline" class="font-mono text-xs">
-            v{{ row.version }}
-          </Badge>
+          <Badge variant="outline" class="text-xs"> v{{ row.version }} </Badge>
         </template>
 
         <template #status-cell="{ row }">

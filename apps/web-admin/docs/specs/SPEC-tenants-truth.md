@@ -150,7 +150,7 @@ export async function removeWorkspaceMemberApi(memberId: string): Promise<void>;
 1. **Khắc phục lỗi tràn dọc 1 ký tự/dòng trên Mobile trong `workspace-overview-tab.vue`:**
    - **Nguyên nhân gốc rễ:** `VxeForm` với `<VxeFormItem span="12">` chia 2 cột `50%` cố định ngay cả trên màn hình điện thoại 375px và đặt nhãn (`title`) nằm ngang bên trái giá trị, khiến cột giá trị chỉ còn rộng ~20px và làm tên Workspace (`Nguyen Dinh Tu`), Slug (`personal-dev`), UUID (`b0000000-...`) bị bẻ gãy từng chữ cái theo chiều dọc.
    - **Giải pháp chuẩn:** Thay thế `VxeForm` chỉ đọc (read-only) trong `workspace-overview-tab.vue` bằng lưới thông tin **Responsive Description Grid** (`grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3`):
-     - Mỗi ô thông tin xếp nhãn (`text-xs text-muted-foreground`) nằm **phía trên** giá trị (`text-sm font-semibold text-foreground` hoặc `font-mono text-xs break-all`), đảm bảo hiển thị 1 cột rộng rãi trên Mobile, 2 cột trên Tablet và 3 cột trên Desktop.
+     - Mỗi ô thông tin xếp nhãn (`text-xs text-muted-foreground`) nằm **phía trên** giá trị (`text-sm font-semibold text-foreground` hoặc `text-xs break-all`), đảm bảo hiển thị 1 cột rộng rãi trên Mobile, 2 cột trên Tablet và 3 cột trên Desktop.
 2. **Thanh chuyển đổi 4 Tabs cuộn ngang mượt trên Mobile (`detail.vue`):**
    - Trên màn hình nhỏ, `<TabsList>` sử dụng `flex w-full justify-start overflow-x-auto no-scrollbar sm:w-auto sm:inline-flex` và mỗi `<TabsTrigger>` có `shrink-0 whitespace-nowrap gap-1.5` để 4 tab (`Overview`, `Members`, `Quotas & resources`, `Audit logs`) luôn nằm trên 1 hàng ngang, không bị tràn khỏi khung Card hoặc rớt dòng icon/chữ.
 3. **Đồng bộ Built-in Theme & Loại bỏ trùng lặp nút thao tác (`workspace-hero.vue` & `workspace-overview-tab.vue`):**

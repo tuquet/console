@@ -195,7 +195,7 @@ onMounted(() => {
       <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <Badge
           variant="outline"
-          class="hidden h-8 items-center gap-1.5 px-2.5 font-mono text-xs font-normal sm:inline-flex"
+          class="hidden h-8 items-center gap-1.5 px-2.5 text-xs font-normal sm:inline-flex"
         >
           <Terminal class="size-3.5 text-muted-foreground" />
           <span>:{{ overview.fleet.loopback_port }}</span>
@@ -264,9 +264,7 @@ onMounted(() => {
               >
                 {{ mod.title }}
               </span>
-              <span
-                class="font-mono text-base font-bold text-foreground sm:text-lg"
-              >
+              <span class="text-base font-bold text-foreground sm:text-lg">
                 {{ mod.total }}
               </span>
             </div>
@@ -413,15 +411,12 @@ onMounted(() => {
                 >
                   {{ device.name }}
                 </span>
-                <Badge
-                  variant="outline"
-                  class="shrink-0 font-mono text-2xs capitalize"
-                >
+                <Badge variant="outline" class="shrink-0 text-2xs capitalize">
                   {{ device.os_info }}
                 </Badge>
               </div>
               <div
-                class="mt-1 flex items-center gap-2 font-mono text-2xs text-muted-foreground"
+                class="mt-1 flex items-center gap-2 text-2xs text-muted-foreground"
               >
                 <span class="inline-flex items-center gap-1">
                   <Cpu class="size-3" />

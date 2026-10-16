@@ -206,9 +206,7 @@ onMounted(() => {
               >
                 {{ mod.title }}
               </span>
-              <span
-                class="font-mono text-base font-bold text-foreground sm:text-lg"
-              >
+              <span class="text-base font-bold text-foreground sm:text-lg">
                 {{ mod.total }}
               </span>
             </div>
@@ -260,13 +258,13 @@ onMounted(() => {
               <div class="flex items-center gap-2">
                 <Badge
                   variant="secondary"
-                  class="shrink-0 font-mono text-2xs font-medium"
+                  class="shrink-0 text-2xs font-medium"
                 >
                   {{ log.action }}
                 </Badge>
                 <span
                   v-if="log.entity_type"
-                  class="truncate font-mono text-2xs text-muted-foreground"
+                  class="truncate text-2xs text-muted-foreground"
                 >
                   {{ log.entity_type }}
                 </span>
@@ -274,7 +272,7 @@ onMounted(() => {
               <div
                 class="mt-1 flex items-center gap-2 text-2xs text-muted-foreground"
               >
-                <span class="truncate font-mono font-medium text-foreground">
+                <span class="truncate font-medium text-foreground">
                   {{
                     log.actor_id || $t('page.system_view.audit_actor_system')
                   }}
@@ -286,7 +284,7 @@ onMounted(() => {
               </div>
             </div>
 
-            <span class="shrink-0 font-mono text-2xs text-muted-foreground">
+            <span class="shrink-0 text-2xs text-muted-foreground">
               {{ formatDate(log.created_at) }}
             </span>
           </div>
@@ -344,7 +342,7 @@ onMounted(() => {
                 </Badge>
               </div>
               <div
-                class="mt-1 flex items-center gap-2 font-mono text-2xs text-muted-foreground"
+                class="mt-1 flex items-center gap-2 text-2xs text-muted-foreground"
               >
                 <span class="truncate">@{{ sub.tenant_slug }}</span>
                 <span>&bull;</span>

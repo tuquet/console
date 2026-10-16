@@ -204,7 +204,7 @@ function refresh() {
           >
             {{ $t('page.system.auditLogs') }}
           </h1>
-          <Badge variant="secondary" class="font-mono text-xs font-normal">
+          <Badge variant="secondary" class="text-xs font-normal">
             {{ totalLogs }}
           </Badge>
         </div>
@@ -232,22 +232,17 @@ function refresh() {
     >
       <Grid class="audit-logs-vxe-grid">
         <template #time-cell="{ row }">
-          <span class="font-mono text-xs text-muted-foreground">
+          <span class="text-xs text-muted-foreground">
             {{ formatDate(row.created_at) }}
           </span>
         </template>
 
         <template #action-cell="{ row }">
           <div class="flex min-w-0 flex-col items-start gap-0.5 py-0.5">
-            <Badge
-              :variant="getActionBadgeVariant(row.action)"
-              class="font-mono text-xs"
-            >
+            <Badge :variant="getActionBadgeVariant(row.action)" class="text-xs">
               {{ row.action }}
             </Badge>
-            <span
-              class="truncate font-mono text-2xs text-muted-foreground sm:hidden"
-            >
+            <span class="truncate text-2xs text-muted-foreground sm:hidden">
               {{ row.entity_type }} #{{ row.entity_id.slice(0, 6) }}
             </span>
           </div>
@@ -264,7 +259,7 @@ function refresh() {
 
         <template #tenant-cell="{ row }">
           <code
-            class="rounded bg-muted px-1.5 py-0.5 font-mono text-2xs text-muted-foreground"
+            class="rounded bg-muted px-1.5 py-0.5 text-2xs text-muted-foreground"
           >
             {{ row.tenant_id.slice(0, 8) }}...
           </code>
@@ -284,7 +279,7 @@ function refresh() {
         </template>
 
         <template #ip-cell="{ row }">
-          <span class="font-mono text-xs text-muted-foreground">
+          <span class="text-xs text-muted-foreground">
             {{ row.ip_address || '—' }}
           </span>
         </template>

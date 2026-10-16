@@ -1,5 +1,11 @@
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import {
+  onActivated,
+  onBeforeUnmount,
+  onDeactivated,
+  onMounted,
+  ref,
+} from 'vue';
 
 import { usePreferences } from '@vben/preferences';
 
@@ -12,6 +18,7 @@ const stageRef = ref<HTMLDivElement | null>(null);
 
 let destroyFigure: (() => void) | null = null;
 let stopTour: (() => void) | null = null;
+let currentStops: ([number, number] | null)[] | null = null;
 
 const W = 88;
 const L = 164;
@@ -337,6 +344,18 @@ function mountPhone(
   };
 }
 
+function startTourAnimation() {
+  if (stageRef.value && currentStops && !stopTour) {
+    const tourHandle = HL.tour(stageRef.value, currentStops);
+    stopTour = tourHandle.stop;
+  }
+}
+
+function pauseTourAnimation() {
+  stopTour?.();
+  stopTour = null;
+}
+
 onMounted(() => {
   if (typeof window === 'undefined' || !stageRef.value) return;
   const stage = stageRef.value;
@@ -350,22 +369,32 @@ onMounted(() => {
 
   const handle = mountPhone({ stage, svg }, 21);
   destroyFigure = handle.destroy;
+  currentStops = handle.stops;
 
-  const tourHandle = HL.tour(stage, handle.stops);
-  stopTour = tourHandle.stop;
+  startTourAnimation();
+});
+
+onDeactivated(() => {
+  // Suspend RAF tour animation while deactivated to save 100% of CPU cycles
+  pauseTourAnimation();
+});
+
+onActivated(() => {
+  // Resume RAF tour animation when switched back to Light mode
+  startTourAnimation();
 });
 
 onBeforeUnmount(() => {
-  stopTour?.();
-  stopTour = null;
+  pauseTourAnimation();
   destroyFigure?.();
   destroyFigure = null;
+  currentStops = null;
 });
 </script>
 
 <template>
   <div
-    class="hairline-phone-banner relative w-full max-w-[680px] select-none xl:max-w-[780px]"
+    class="hairline-phone-banner relative flex size-full items-center justify-center px-8 select-none"
   >
     <!-- Interactive Hairline SVG stage -->
     <div
@@ -374,7 +403,7 @@ onBeforeUnmount(() => {
       :data-hairline-theme="isDark ? 'dark' : 'light'"
       role="img"
       aria-label="Five notification cards on a phone screen: the one under the pointer lifts bright while its neighbours part."
-      class="hairline-stage relative z-10 w-full cursor-pointer"
+      class="hairline-stage relative z-10 w-full max-w-[680px] cursor-pointer xl:max-w-[780px]"
     ></div>
   </div>
 </template>

@@ -37,7 +37,7 @@ const { copyToClipboard, isCopied } = useClipboard();
       </label>
     </div>
     <div
-      class="rounded bg-muted/50 p-3 font-mono text-xs text-foreground flex items-center justify-between gap-2 overflow-x-auto border border-border/40"
+      class="rounded bg-muted/50 p-3 text-xs text-foreground flex items-center justify-between gap-2 overflow-x-auto border border-border/40"
     >
       <code class="break-all">{{ props.command }}</code>
       <Button

@@ -1,0 +1,110 @@
+import type { TenantItem } from '#/api/core/tenant';
+
+import { computed, ref } from 'vue';
+
+import { toast } from '@tuquet/vue-ui';
+import { defineStore } from 'pinia';
+
+import {
+  createTenantApi,
+  getActiveTenantId,
+  getTenantsApi,
+  setActiveTenantId,
+} from '#/api/core/tenant';
+import { $t } from '#/locales';
+
+export const useWorkspaceStore = defineStore('workspace', () => {
+  const workspaces = ref<TenantItem[]>([]);
+  const activeWorkspaceId = ref<string>(getActiveTenantId());
+  const isLoading = ref<boolean>(false);
+
+  const activeWorkspace = computed<null | TenantItem>(() => {
+    if (workspaces.value.length === 0) return null;
+    return (
+      workspaces.value.find((w) => w.id === activeWorkspaceId.value) ||
+      workspaces.value[0] ||
+      null
+    );
+  });
+
+  async function fetchWorkspaces(force = false) {
+    if (workspaces.value.length > 0 && !force) {
+      return workspaces.value;
+    }
+    try {
+      isLoading.value = true;
+      const list = await getTenantsApi();
+      workspaces.value = Array.isArray(list) ? list : [];
+
+      // If active workspace is not set or not in current list, pick first
+      const currentActiveExists = workspaces.value.some(
+        (w) => w.id === activeWorkspaceId.value,
+      );
+      if (!currentActiveExists && workspaces.value.length > 0) {
+        const first = workspaces.value[0];
+        if (first?.id) {
+          activeWorkspaceId.value = first.id;
+          setActiveTenantId(first.id);
+        }
+      }
+      return workspaces.value;
+    } catch {
+      return [];
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  function setWorkspace(id: string, notify = true) {
+    if (activeWorkspaceId.value === id) return;
+    const target = workspaces.value.find((w) => w.id === id);
+    activeWorkspaceId.value = id;
+    setActiveTenantId(id);
+
+    if (notify && target) {
+      toast.success($t('page.workspace.switched_to', { name: target.name }));
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('specter:workspace-changed', {
+          detail: { tenantId: id, tenant: target },
+        }),
+      );
+    }
+  }
+
+  async function createWorkspace(data: {
+    name: string;
+    plan?: string;
+    slug: string;
+  }) {
+    try {
+      isLoading.value = true;
+      const created = await createTenantApi(data);
+      if (created?.id) {
+        workspaces.value = [created, ...workspaces.value];
+        setWorkspace(created.id, true);
+        toast.success(
+          $t('page.workspace.create_success', { name: created.name }),
+        );
+      }
+      return created;
+    } catch (error: any) {
+      toast.error(error?.message || $t('page.workspace.create_failed'));
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  return {
+    activeWorkspace,
+    activeWorkspaceId,
+    createWorkspace,
+    fetchWorkspaces,
+    isLoading,
+    setWorkspace,
+    workspaces,
+  };
+});

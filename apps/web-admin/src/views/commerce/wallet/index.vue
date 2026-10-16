@@ -449,7 +449,7 @@ onBeforeUnmount(() => {
           >
             {{ $t('page.commerce.wallet') }}
           </h1>
-          <Badge variant="secondary" class="font-mono text-xs font-normal">
+          <Badge variant="secondary" class="text-xs font-normal">
             {{ allTransactions.length }}
           </Badge>
         </div>
@@ -513,7 +513,7 @@ onBeforeUnmount(() => {
           <span class="text-xs text-muted-foreground">
             {{ $t('page.commerce_view.available_balance_kpi') }}
           </span>
-          <p class="font-mono text-base sm:text-lg font-bold text-foreground">
+          <p class="text-base sm:text-lg font-bold text-foreground">
             {{ (wallet?.balance_credits ?? 0).toLocaleString('en-US') }} Xu
           </p>
         </div>
@@ -551,7 +551,7 @@ onBeforeUnmount(() => {
 
         <template #amount-cell="{ row }">
           <span
-            class="font-mono text-sm font-bold"
+            class="text-sm font-bold"
             :class="
               row.amount_credits >= 0 ? 'text-success' : 'text-destructive'
             "
@@ -562,13 +562,13 @@ onBeforeUnmount(() => {
         </template>
 
         <template #balance-cell="{ row }">
-          <span class="font-mono text-xs font-semibold text-foreground">
+          <span class="text-xs font-semibold text-foreground">
             {{ row.balance_after_credits.toLocaleString('en-US') }} Xu
           </span>
         </template>
 
         <template #ref-cell="{ row }">
-          <span class="font-mono text-xs text-muted-foreground">
+          <span class="text-xs text-muted-foreground">
             {{ row.reference_id ? row.reference_id.slice(0, 12) : '—' }}
           </span>
         </template>
@@ -617,7 +617,7 @@ onBeforeUnmount(() => {
                 v-for="preset in QUICK_TOPUP_PRESETS"
                 :key="preset"
                 type="button"
-                class="rounded-lg border py-2 text-center font-mono text-xs font-semibold transition-colors"
+                class="rounded-lg border py-2 text-center text-xs font-semibold transition-colors"
                 :class="
                   topupCredits === preset
                     ? 'border-primary bg-primary/10 text-primary'
@@ -639,7 +639,7 @@ onBeforeUnmount(() => {
               type="number"
               min="10"
               step="10"
-              class="h-8 w-32 rounded-md border border-border bg-background px-2.5 text-right font-mono text-sm text-foreground focus:border-primary focus:outline-none"
+              class="h-8 w-32 rounded-md border border-border bg-background px-2.5 text-right text-sm text-foreground focus:border-primary focus:outline-none"
             />
           </div>
 
@@ -673,7 +673,7 @@ onBeforeUnmount(() => {
                   </p>
                 </div>
               </div>
-              <Badge variant="outline" class="font-mono text-2xs">
+              <Badge variant="outline" class="text-2xs">
                 {{ gw.currency }}
               </Badge>
             </button>
@@ -686,11 +686,11 @@ onBeforeUnmount(() => {
               {{ $t('page.commerce_view.estimated_pay_amount') }}
             </span>
             <div class="text-right">
-              <p class="font-mono text-lg font-bold text-foreground">
+              <p class="text-lg font-bold text-foreground">
                 {{ estimatedPayAmount.toLocaleString('en-US') }}
                 {{ selectedGateway?.currency || 'VND' }}
               </p>
-              <p class="font-mono text-xs text-primary">
+              <p class="text-xs text-primary">
                 {{
                   $t('page.commerce_view.receive_immediately_xu', {
                     amount: topupCredits.toLocaleString('en-US'),
@@ -739,7 +739,7 @@ onBeforeUnmount(() => {
               <span class="text-muted-foreground">
                 {{ $t('page.commerce_view.xu_to_receive_label') }}
               </span>
-              <span class="font-mono text-sm font-bold text-primary">
+              <span class="text-sm font-bold text-primary">
                 +{{ activeIntent.amount_credits.toLocaleString('en-US') }} Xu
               </span>
             </div>
@@ -748,7 +748,7 @@ onBeforeUnmount(() => {
               <span class="text-muted-foreground">
                 {{ $t('page.commerce_view.transfer_amount_label') }}
               </span>
-              <span class="font-mono text-sm font-bold text-foreground">
+              <span class="text-sm font-bold text-foreground">
                 {{ activeIntent.pay_amount.toLocaleString('en-US') }}
                 {{ activeIntent.pay_currency }}
               </span>
@@ -760,7 +760,7 @@ onBeforeUnmount(() => {
               </span>
               <div class="flex items-center gap-1.5">
                 <code
-                  class="rounded bg-primary/15 px-2 py-0.5 font-mono text-sm font-bold text-primary"
+                  class="rounded bg-primary/15 px-2 py-0.5 text-sm font-bold text-primary"
                 >
                   {{ activeIntent.transfer_code }}
                 </code>

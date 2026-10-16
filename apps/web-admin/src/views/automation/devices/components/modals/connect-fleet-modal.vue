@@ -56,7 +56,7 @@ function handleOpenAuthBridge() {
             <span class="text-sm font-medium text-foreground">
               {{ $t('page.fleet_view.metric_loopback_port') }}
             </span>
-            <Badge variant="outline" class="font-mono text-xs">
+            <Badge variant="outline" class="text-xs">
               :{{ props.loopbackPort }}
             </Badge>
           </div>

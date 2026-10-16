@@ -1,5 +1,12 @@
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import {
+  onActivated,
+  onBeforeUnmount,
+  onDeactivated,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
 
 import { $t } from '@vben/locales';
 import { usePreferences } from '@vben/preferences';
@@ -23,6 +30,8 @@ const hasError = ref(false);
 interface SplineAppInstance {
   dispose?: () => void;
   load: (url: string) => Promise<void>;
+  play?: () => void;
+  stop?: () => void;
 }
 
 let splineApp: null | SplineAppInstance = null;
@@ -97,6 +106,21 @@ watch(isDark, (newDark) => {
   updateSplineLighting(newDark);
 });
 
+onDeactivated(() => {
+  // Suspend WebGL rendering while deactivated to save GPU/CPU
+  try {
+    splineApp?.stop?.();
+  } catch {}
+});
+
+onActivated(() => {
+  // Resume WebGL rendering and calibrate lighting
+  try {
+    splineApp?.play?.();
+    updateSplineLighting(isDark.value);
+  } catch {}
+});
+
 onBeforeUnmount(() => {
   disposed = true;
   try {
@@ -112,9 +136,9 @@ onBeforeUnmount(() => {
   <div
     class="spline-robot-banner relative flex size-full min-h-[520px] items-center justify-center overflow-hidden select-none"
   >
-    <!-- 21st.dev / Aceternity Spotlight SVG effect -->
+    <!-- 21st.dev / Aceternity Spotlight SVG effect with GPU layer isolation -->
     <svg
-      class="animate-spotlight pointer-events-none absolute -top-40 left-0 z-[1] h-[169%] w-[138%] opacity-0 lg:w-[84%]"
+      class="animate-spotlight pointer-events-none absolute -top-40 left-0 z-[1] h-[169%] w-[138%] opacity-0 transform-gpu will-change-transform lg:w-[84%]"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 3787 2842"
       fill="none"
@@ -160,7 +184,7 @@ onBeforeUnmount(() => {
     <Transition name="fade">
       <div
         v-if="isLoading"
-        class="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 font-mono text-xs tracking-wider text-muted-foreground"
+        class="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 text-xs tracking-wider text-muted-foreground"
       >
         <div
           class="size-7 animate-spin rounded-full border border-foreground/20 border-t-foreground/80"
@@ -172,15 +196,22 @@ onBeforeUnmount(() => {
     <!-- Fallback message if offline -->
     <div
       v-if="hasError"
-      class="z-20 flex flex-col items-center gap-2 px-6 text-center font-mono text-xs text-muted-foreground"
+      class="z-20 flex flex-col items-center gap-2 px-6 text-center text-xs text-muted-foreground"
     >
       <span>{{ $t('authentication.bannerOfflineScene') }}</span>
     </div>
 
+    <!-- Hardware-accelerated ambient ground shadow (0% WebGL canvas readback penalty) -->
+    <div
+      class="pointer-events-none absolute bottom-8 z-[2] h-12 w-3/4 max-w-[420px] rounded-full bg-black/25 blur-2xl transition-opacity duration-500 transform-gpu dark:bg-black/60"
+      :class="isLoading ? 'opacity-0' : 'opacity-100'"
+      aria-hidden="true"
+    ></div>
+
     <!-- Interactive WebGL Canvas -->
     <canvas
       ref="canvasRef"
-      class="relative z-10 block size-full cursor-grab transition-opacity duration-500 active:cursor-grabbing"
+      class="relative z-10 block size-full cursor-grab transition-opacity duration-500 active:cursor-grabbing transform-gpu will-change-transform"
       :class="isLoading ? 'opacity-0' : 'opacity-100'"
     ></canvas>
   </div>
@@ -213,13 +244,12 @@ onBeforeUnmount(() => {
   opacity: 0;
 }
 
-/* Light mode calibration: enhance brightness and dynamic range so metallic surfaces shine cleanly */
+/* Color calibration without per-frame canvas drop-shadow blur readback */
 :root:not(.dark) canvas {
-  filter: brightness(1.22) contrast(1.08)
-    drop-shadow(0 15px 35px rgb(0 0 0 / 12%));
+  filter: brightness(1.15) contrast(1.05);
 }
 
 .dark canvas {
-  filter: drop-shadow(0 20px 40px rgb(0 0 0 / 50%));
+  filter: none;
 }
 </style>

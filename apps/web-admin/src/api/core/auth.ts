@@ -39,8 +39,8 @@ export async function loginApi(
   const password = data.password || '';
   const captchaToken = data.captchaToken;
 
-  // Verify Turnstile with Cloudflare Pages Function if available (non-blocking)
-  if (captchaToken) {
+  // Verify Turnstile with Cloudflare Pages Function if in production (non-blocking)
+  if (captchaToken && !import.meta.env.DEV) {
     try {
       const verifyRes = await fetch('/api/verify-turnstile', {
         method: 'POST',

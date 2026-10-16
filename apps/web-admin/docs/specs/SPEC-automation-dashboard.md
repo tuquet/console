@@ -156,7 +156,7 @@ export interface AutomationOverviewSummary {
           >
             {{ $t('page.automation.devices') }}
           </h1>
-          <Badge variant="secondary" class="font-mono text-2xs shrink-0">
+          <Badge variant="secondary" class="text-2xs shrink-0">
             {{ nodes.length }}
           </Badge>
         </div>

@@ -73,7 +73,7 @@ const { formatDate } = useDateFormat();
               <div class="font-semibold text-foreground text-base">
                 {{ props.node.name }}
               </div>
-              <div class="font-mono text-xs text-muted-foreground">
+              <div class="text-xs text-muted-foreground">
                 {{ props.node.hostname }}
               </div>
             </div>
@@ -175,9 +175,7 @@ const { formatDate } = useDateFormat();
               span="24"
             >
               <template #default>
-                <div
-                  class="flex items-center gap-2 font-mono text-xs text-foreground"
-                >
+                <div class="flex items-center gap-2 text-xs text-foreground">
                   <span class="truncate">{{ props.node.id }}</span>
                   <button
                     type="button"
@@ -203,7 +201,7 @@ const { formatDate } = useDateFormat();
 
             <VxeFormItem :title="$t('page.fleet_view.col_ip')" span="12">
               <template #default>
-                <span class="font-mono text-xs text-foreground">{{
+                <span class="text-xs text-foreground">{{
                   props.node.ip_address
                 }}</span>
               </template>
@@ -211,7 +209,7 @@ const { formatDate } = useDateFormat();
 
             <VxeFormItem :title="$t('page.fleet_view.col_version')" span="12">
               <template #default>
-                <Badge variant="outline" class="font-mono text-xs">
+                <Badge variant="outline" class="text-xs">
                   {{ props.node.version || 'v0.8.4' }}
                 </Badge>
               </template>

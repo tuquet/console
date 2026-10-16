@@ -213,7 +213,7 @@ watch([() => $t('page.system_view.plans_col_name'), isMobile], () => {
           >
             {{ $t('page.system.plans') }}
           </h1>
-          <Badge variant="secondary" class="font-mono text-xs font-normal">
+          <Badge variant="secondary" class="text-xs font-normal">
             {{ plansCount }}
           </Badge>
         </div>
@@ -261,7 +261,7 @@ watch([() => $t('page.system_view.plans_col_name'), isMobile], () => {
                 {{ row.name }}
               </div>
               <div
-                class="flex items-center gap-1.5 font-mono text-2xs text-muted-foreground sm:text-xs"
+                class="flex items-center gap-1.5 text-2xs text-muted-foreground sm:text-xs"
               >
                 <span class="truncate">{{ row.id }}</span>
                 <span class="sm:hidden">&bull;</span>

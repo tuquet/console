@@ -254,7 +254,7 @@ watch(
           >
             {{ $t('page.automation.proxies') }}
           </h1>
-          <Badge variant="secondary" class="shrink-0 font-mono text-2xs">
+          <Badge variant="secondary" class="shrink-0 text-2xs">
             {{ allProxies.length }}
           </Badge>
         </div>
@@ -297,9 +297,7 @@ watch(
             >
               <Network class="size-4" />
             </div>
-            <div
-              class="min-w-0 font-mono text-xs font-medium text-foreground truncate"
-            >
+            <div class="min-w-0 text-xs font-medium text-foreground truncate">
               {{ row.protocol }}://{{ row.host }}:{{ row.port }}
             </div>
           </div>
@@ -344,7 +342,7 @@ watch(
 
         <template #error-cell="{ row }">
           <span
-            class="font-mono text-xs"
+            class="text-xs"
             :class="
               row.error_count > 0
                 ? 'text-destructive font-semibold'

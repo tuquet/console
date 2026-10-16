@@ -432,7 +432,7 @@ async function handleSave() {
               <div class="flex items-center justify-between gap-2">
                 <span class="text-muted-foreground">Schema / Table</span>
                 <span
-                  class="inline-flex items-center gap-1 rounded border border-border/70 bg-muted/40 px-1.5 py-0.5 font-mono text-2xs text-foreground"
+                  class="inline-flex items-center gap-1 rounded border border-border/70 bg-muted/40 px-1.5 py-0.5 text-2xs text-foreground"
                 >
                   <Database class="size-3 shrink-0 text-primary" />
                   {{ dynamicSchema.rls.resource }}
@@ -460,7 +460,7 @@ async function handleSave() {
               <div class="flex items-center justify-between gap-2">
                 <span class="text-muted-foreground">RLS Policy</span>
                 <code
-                  class="truncate rounded bg-muted px-1.5 py-0.5 font-mono text-2xs text-foreground"
+                  class="truncate rounded bg-muted px-1.5 py-0.5 text-2xs text-foreground"
                 >
                   {{ activePolicyName }}
                 </code>
@@ -546,7 +546,7 @@ async function handleSave() {
                   v-model="formData[field.field]"
                   :data-testid="`vxe-field-${field.field}`"
                   rows="4"
-                  class="font-mono text-xs"
+                  class="text-xs"
                 />
 
                 <!-- Multiline Textarea -->
@@ -587,7 +587,7 @@ async function handleSave() {
                 <!-- Read-Only JSON Preview -->
                 <div v-if="field.type === 'json'" class="relative">
                   <pre
-                    class="max-h-44 overflow-auto rounded-md border border-border/60 bg-muted/30 p-2.5 font-mono text-xs text-foreground"
+                    class="max-h-44 overflow-auto rounded-md border border-border/60 bg-muted/30 p-2.5 text-xs text-foreground"
                     >{{ formatJsonPreview(field.field) }}</pre>
                   <button
                     type="button"
@@ -638,7 +638,7 @@ async function handleSave() {
                     isCopyableIdentifier(field) &&
                     props.row[field.field]
                   "
-                  class="flex h-9 items-center justify-between gap-2 rounded-md border border-border/60 bg-muted/30 px-3 font-mono text-xs text-muted-foreground"
+                  class="flex h-9 items-center justify-between gap-2 rounded-md border border-border/60 bg-muted/30 px-3 text-xs text-muted-foreground"
                 >
                   <span class="truncate">{{ props.row[field.field] }}</span>
                   <button
@@ -673,7 +673,7 @@ async function handleSave() {
                   v-else
                   class="flex h-9 items-center truncate rounded-md border border-border/60 bg-muted/30 px-3 text-sm text-muted-foreground"
                   :class="{
-                    'font-mono text-xs':
+                    'text-xs':
                       field.type === 'datetime' || field.type === 'number',
                   }"
                 >
@@ -703,10 +703,7 @@ async function handleSave() {
                   <span class="truncate text-sm font-normal text-foreground">
                     {{ rel.title }}
                   </span>
-                  <Badge
-                    variant="secondary"
-                    class="shrink-0 font-mono text-2xs"
-                  >
+                  <Badge variant="secondary" class="shrink-0 text-2xs">
                     {{
                       $t('common.relationalRecordsCount', {
                         count: rel.rows.length,

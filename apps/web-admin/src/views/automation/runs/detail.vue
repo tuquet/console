@@ -213,9 +213,7 @@ onUnmounted(() => {
               {{ getRunStatusLabel(run.status) }}
             </Badge>
           </div>
-          <div
-            class="truncate font-mono text-2xs text-muted-foreground sm:text-xs"
-          >
+          <div class="truncate text-2xs text-muted-foreground sm:text-xs">
             {{ $t('page.automation_view.run_id_label') }}: {{ runId }}
           </div>
         </div>
@@ -330,7 +328,7 @@ onUnmounted(() => {
           <div class="text-xs text-muted-foreground">
             {{ $t('page.runs_view.duration') }}
           </div>
-          <div class="flex flex-wrap items-center gap-1.5 font-mono text-sm">
+          <div class="flex flex-wrap items-center gap-1.5 text-sm">
             <Clock class="size-4 shrink-0 text-muted-foreground" />
             <span class="font-semibold text-foreground">
               {{ formatDuration(run.started_at, run.ended_at) }}
@@ -349,7 +347,7 @@ onUnmounted(() => {
             <span class="text-muted-foreground">
               {{ $t('page.automation_view.task_progress') }}
             </span>
-            <span class="font-mono font-medium text-foreground">
+            <span class="font-medium text-foreground">
               {{
                 $t('page.automation_view.tasks_progress_count', [
                   run.completed_tasks,
@@ -374,7 +372,7 @@ onUnmounted(() => {
         class="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive"
       >
         <AlertCircle class="mt-0.5 size-4 shrink-0" />
-        <div class="font-mono leading-relaxed break-all">
+        <div class="leading-relaxed break-all">
           {{ run.error_message }}
         </div>
       </div>
@@ -409,7 +407,7 @@ onUnmounted(() => {
       <!-- Terminal Output Window -->
       <div
         ref="consoleRef"
-        class="max-h-[460px] min-h-[260px] space-y-1.5 overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-950 p-3 font-mono text-xs text-neutral-300 sm:p-4"
+        class="max-h-[460px] min-h-[260px] space-y-1.5 overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-950 p-3 text-xs text-neutral-300 sm:p-4"
       >
         <div
           v-for="log in logs"

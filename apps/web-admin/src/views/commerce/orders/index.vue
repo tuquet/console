@@ -395,7 +395,7 @@ onMounted(() => {
           >
             {{ $t('page.commerce.orders') }}
           </h1>
-          <Badge variant="secondary" class="font-mono text-xs font-normal">
+          <Badge variant="secondary" class="text-xs font-normal">
             {{ allOrders.length }}
           </Badge>
         </div>
@@ -455,7 +455,7 @@ onMounted(() => {
       <Grid>
         <template #code-cell="{ row }">
           <div class="flex items-center gap-2 py-1">
-            <span class="font-mono text-xs font-semibold text-foreground">
+            <span class="text-xs font-semibold text-foreground">
               {{ row.order_code }}
             </span>
             <button
@@ -480,7 +480,7 @@ onMounted(() => {
         </template>
 
         <template #total-cell="{ row }">
-          <span class="font-mono text-sm font-semibold text-foreground">
+          <span class="text-sm font-semibold text-foreground">
             {{ row.total_credits.toLocaleString('en-US') }} Xu
           </span>
         </template>
@@ -593,7 +593,7 @@ onMounted(() => {
               readonly
               :value="serialLinesText"
               rows="6"
-              class="w-full rounded-lg border border-border bg-muted/40 p-3 font-mono text-xs text-foreground focus:outline-none"
+              class="w-full rounded-lg border border-border bg-muted/40 p-3 text-xs text-foreground focus:outline-none"
             ></textarea>
           </div>
 
@@ -617,7 +617,7 @@ onMounted(() => {
               </Badge>
             </div>
             <pre
-              class="mt-2 overflow-x-auto rounded bg-background p-2 font-mono text-2xs text-muted-foreground"
+              class="mt-2 overflow-x-auto rounded bg-background p-2 text-2xs text-muted-foreground"
               >{{ JSON.stringify(item.delivered_payload, null, 2) }}</pre>
             <div
               v-if="item.delivered_payload?.download_url"

@@ -3,7 +3,7 @@
 > **Mã đặc tả:** `SPEC-specter-3d-ghost-banner`  
 > **Module id:** `specter-3d-ghost-banner` (xem [`capability-map.md`](capability-map.md))  
 > **Kiến trúc nguồn:** [`docs/architecture/overview.md`](../architecture/overview.md), [`docs/routes/auth.md`](../routes/auth.md)  
-> **Trạng thái:** **ĐÃ HOÀN THÀNH (ACCEPTED & IMPLEMENTED)**
+> **Trạng thái:** **ĐÃ HỦY BỎ / THAY THẾ (DEPRECATED & REMOVED)** — Chế độ ghost 3D và nút chọn thủ công đã được gỡ bỏ; giao diện xác thực chuyển sang cơ chế tự động thích ứng theo Theme: Dark Mode hiển thị Spline Robot 3D, Light Mode hiển thị Isometric Phone.
 
 ---
 

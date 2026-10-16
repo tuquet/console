@@ -109,7 +109,7 @@ onMounted(() => {
         <div class="mt-2.5 flex items-baseline justify-between gap-2">
           <span
             data-testid="kpi-workspaces-total"
-            class="font-mono text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+            class="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
           >
             {{ analyticsData.tenants.total }}
           </span>
@@ -147,7 +147,7 @@ onMounted(() => {
         <div class="mt-2.5 flex items-baseline justify-between gap-2">
           <span
             data-testid="kpi-plugins-total"
-            class="font-mono text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+            class="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
           >
             {{ analyticsData.plugins.total }}
           </span>
@@ -180,7 +180,7 @@ onMounted(() => {
         <div class="mt-2.5 flex items-baseline justify-between gap-2">
           <span
             data-testid="kpi-fleet-port"
-            class="font-mono text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+            class="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
           >
             :{{ analyticsData.fleet.loopbackPort }}
           </span>
@@ -215,7 +215,7 @@ onMounted(() => {
         <div class="mt-2.5 flex items-baseline justify-between gap-2">
           <span
             data-testid="kpi-latency-ms"
-            class="font-mono text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+            class="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
           >
             {{ analyticsData.system.latencyMs
             }}<span

@@ -453,7 +453,7 @@ const showHeaderToggleButton = computed(() => {
 });
 
 const showHeaderLogo = computed(() => {
-  return !isSideMode.value || isMixedNav.value || props.isMobile;
+  return (!isSideMode.value || isMixedNav.value) && !props.isMobile;
 });
 
 watch(

@@ -132,7 +132,11 @@
     "create_success": "Workspace created successfully: {name}",
     "create_failed": "Failed to create workspace",
     "fetch_failed": "Failed to load workspaces",
-    "switched_to": "Switched to workspace: {name}"
+    "switched_to": "Switched to workspace: {name}",
+    "selector_search": "Search workspaces...",
+    "manage_workspaces": "Manage Workspaces",
+    "create_workspace": "Create New Workspace",
+    "no_workspaces_found": "No workspaces found"
   },
   "fleet_view": {
     "title": "Device Fleet Management",

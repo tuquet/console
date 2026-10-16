@@ -234,7 +234,7 @@ watch(
           >
             {{ $t('page.automation.browsers') }}
           </h1>
-          <Badge variant="secondary" class="shrink-0 font-mono text-2xs">
+          <Badge variant="secondary" class="shrink-0 text-2xs">
             {{ allBrowsers.length }}
           </Badge>
         </div>
@@ -284,10 +284,7 @@ watch(
               <div
                 class="flex items-center gap-1.5 text-2xs text-muted-foreground"
               >
-                <Badge
-                  variant="outline"
-                  class="text-2xs font-mono capitalize py-0 px-1"
-                >
+                <Badge variant="outline" class="text-2xs capitalize py-0 px-1">
                   {{ row.os_platform }}
                 </Badge>
                 <span class="font-mono">{{ row.engine_version }}</span>
@@ -316,7 +313,7 @@ watch(
         <template #proxy-cell="{ row }">
           <div
             v-if="row.proxy"
-            class="inline-flex items-center gap-1.5 font-mono text-xs text-foreground truncate"
+            class="inline-flex items-center gap-1.5 text-xs text-foreground truncate"
           >
             <Shield class="size-3 text-success shrink-0" />
             <span class="truncate"

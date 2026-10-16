@@ -50,7 +50,7 @@ const runsPercent = computed(() =>
         <Calendar class="size-3.5" />
         <span
           >{{ $t('page.tenants_view.period_end') }}:
-          <strong class="font-mono text-foreground">{{
+          <strong class="text-foreground">{{
             formatDateOnly(subscription.current_period_end)
           }}</strong></span
         >

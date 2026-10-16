@@ -78,12 +78,23 @@ const logoStyle = computed((): CSSProperties => {
     :style="style"
     class="top-0 flex w-full flex-[0_0_auto] items-center border-b border-border bg-header pl-2 transition-[margin-top] duration-200"
   >
-    <div v-if="slots.logo || (!logoVisible && !isMobile)" :style="logoStyle">
+    <div
+      v-if="slots['toggle-button']"
+      :class="isMobile ? 'order-first mr-1' : 'order-2'"
+    >
+      <slot name="toggle-button"> </slot>
+    </div>
+
+    <div
+      v-if="slots.logo || (!logoVisible && !isMobile)"
+      :style="logoStyle"
+      :class="isMobile ? 'order-2 hidden md:block' : 'order-1'"
+    >
       <slot name="logo"></slot>
     </div>
 
-    <slot name="toggle-button"> </slot>
-
-    <slot></slot>
+    <div class="order-3 flex min-w-0 flex-1 items-center">
+      <slot></slot>
+    </div>
   </header>
 </template>

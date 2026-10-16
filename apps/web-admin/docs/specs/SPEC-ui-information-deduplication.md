@@ -15,7 +15,7 @@ Enforce an enterprise-grade **"One Fact, One Place per Viewport" (Zero-Redundanc
 1. **Executive Analytics KPI Cards (`views/dashboard/analytics/index.vue`)**:
    - Each of the 4 top KPI cards uses a 2-row high-signal layout:
      - **Row 1**: Metric title + muted icon container.
-     - **Row 2**: Single primary value (`font-mono text-xl sm:text-2xl font-bold`) on the left + single semantic status pill on the right.
+     - **Row 2**: Single primary value (`text-xl sm:text-2xl font-bold`) on the left + single semantic status pill on the right.
    - Eliminate adjacent duplicate numbers (`3 ● 3 Active`), synonymous status words (`Ready ● Online`), and 3rd-line chart echoes (`2 Pro plan • 1 Free tier`, `8 Core Kernel • Extension Modules`) that duplicate `PlansChart` and `PluginsChart` directly below.
    - Remove the duplicate `Desktop Bridge (:8765)` row from the `Infrastructure Services` list (already represented by the `Fleet Bridge :8765` KPI card) and remove the duplicate count in the `PluginsChart` card subtitle.
 
@@ -94,7 +94,7 @@ apps/web-admin/src/
     </span>
   </div>
   <div class="mt-2.5 flex items-baseline justify-between gap-2">
-    <span class="font-mono text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+    <span class="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
       {{ analyticsData.tenants.total }}
     </span>
     <span class="inline-flex items-center gap-1.5 truncate text-xs font-medium text-muted-foreground">

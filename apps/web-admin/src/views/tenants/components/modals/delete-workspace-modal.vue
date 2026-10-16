@@ -69,7 +69,7 @@ function handleOk() {
         <div>
           <label class="block text-sm font-medium text-foreground mb-2">
             {{ $t('page.tenants_view.delete_confirm_prompt') }}
-            <strong class="font-mono text-destructive">{{ props.slug }}</strong>
+            <strong class="text-destructive">{{ props.slug }}</strong>
           </label>
           <Input v-model="confirmSlugInput" :placeholder="props.slug" />
         </div>

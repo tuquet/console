@@ -39,7 +39,7 @@ Hệ thống quản trị Web Admin (`apps/web-admin`) cần đảm bảo tối 
 - **Quyết định:** Soạn thảo `skills/rules/TYPOGRAPHY.md` làm tiêu chuẩn tham chiếu duy nhất cho toàn bộ hệ sinh thái Tuquet (Web Admin, Tauri Desktop, Extension).
 - Quy định các điều khoản bắt buộc:
   - Thang đo font-size 7 cấp (`text-2xs` đến `text-2xl`).
-  - Ma trận kiểu chữ cho từng component: Table Headers (`text-xs font-semibold uppercase tracking-wider`), Table Cells (`text-sm font-normal`), KPI Values (`text-2xl font-bold tracking-tight`), Badges/IDs (`font-mono text-xs`).
+  - Ma trận kiểu chữ cho từng component: Table Headers (`text-xs font-semibold uppercase tracking-wider`), Table Cells (`text-sm font-normal`), KPI Values (`text-2xl font-bold tracking-tight`), Badges/IDs (`text-xs`).
   - Nghiêm cấm các class kích thước pixel tùy ý (`text-[13px]`, `text-[15px]`) và cấm dùng `italic` trên các thành phần điều hướng UI.
 
 ### D4: Đồng Bộ Tailwind CSS v4 `@theme`

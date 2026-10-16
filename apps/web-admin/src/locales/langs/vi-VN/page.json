@@ -132,7 +132,11 @@
     "create_success": "Tạo thành công workspace: {name}",
     "create_failed": "Tạo workspace thất bại",
     "fetch_failed": "Không thể tải danh sách workspace",
-    "switched_to": "Đã chuyển sang workspace: {name}"
+    "switched_to": "Đã chuyển sang workspace: {name}",
+    "selector_search": "Tìm kiếm workspace...",
+    "manage_workspaces": "Quản lý Workspaces",
+    "create_workspace": "Tạo Workspace mới",
+    "no_workspaces_found": "Không tìm thấy workspace nào"
   },
   "fleet_view": {
     "title": "Quản lý thiết bị",

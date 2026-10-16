@@ -510,7 +510,7 @@ onMounted(async () => {
                 </div>
                 <Badge
                   variant="outline"
-                  class="bg-primary/10 text-primary border-primary/30 font-mono text-xs"
+                  class="bg-primary/10 text-primary border-primary/30 text-xs"
                 >
                   {{ $t('common.active') }}
                 </Badge>

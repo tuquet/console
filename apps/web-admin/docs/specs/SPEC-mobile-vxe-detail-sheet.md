@@ -216,4 +216,3 @@ export interface SupabaseColumnSchema {
    - Hợp nhất toàn bộ luồng tạo mới (`Insert Row`) và chỉnh sửa (`Inspect / Patch Row`) của các bảng dữ liệu đơn về một kiến trúc duy nhất: `SUPABASE_TABLE_REGISTRY` + `VxeRowDetailSheet` (`mode = 'create' | 'edit'`) + `gridApi.openCreateSheet()`.
    - Xóa bỏ các Modal CRUD đơn bảng rời rạc (`CreateWorkspaceModal` trong `tenants`, `gatewayModalOpen` trong `commerce/admin`).
    - Giữ nguyên duy nhất các Modal tác vụ đặc thù đa bước/ngoại vi (`ConnectFleetModal` ghép nối CLI daemon và Modal `Bulk Stock Import` / `Product + Variant Upsert`).
-

@@ -623,7 +623,7 @@ onBeforeUnmount(() => {
                 </Badge>
                 <span
                   v-if="getSelectedVariant(product)"
-                  class="font-mono text-2xs text-muted-foreground"
+                  class="text-2xs text-muted-foreground"
                 >
                   {{ getSelectedVariant(product)?.sku }}
                 </span>
@@ -675,7 +675,7 @@ onBeforeUnmount(() => {
               class="mt-5 flex items-end justify-between border-t border-border/50 pt-4"
             >
               <div class="space-y-0.5">
-                <p class="font-mono text-xl font-bold text-foreground">
+                <p class="text-xl font-bold text-foreground">
                   {{
                     (
                       getSelectedVariant(product)?.price_credits ?? 0
@@ -758,7 +758,7 @@ onBeforeUnmount(() => {
                   v-model="lookupOrderCode"
                   type="text"
                   placeholder="ORD-261014-XXXXXX"
-                  class="h-9 w-full rounded-md border border-border bg-background px-3 font-mono text-xs text-foreground"
+                  class="h-9 w-full rounded-md border border-border bg-background px-3 text-xs text-foreground"
                 />
               </div>
 
@@ -770,7 +770,7 @@ onBeforeUnmount(() => {
                   v-model="lookupClaimToken"
                   type="text"
                   placeholder="CLM_..."
-                  class="h-9 w-full rounded-md border border-border bg-background px-3 font-mono text-xs text-foreground"
+                  class="h-9 w-full rounded-md border border-border bg-background px-3 text-xs text-foreground"
                 />
               </div>
 
@@ -809,14 +809,14 @@ onBeforeUnmount(() => {
                 "
               >
                 <div>
-                  <p class="font-mono text-xs font-bold text-foreground">
+                  <p class="text-xs font-bold text-foreground">
                     {{ saved.order_code }}
                   </p>
                   <p class="text-2xs text-muted-foreground">
                     {{ formatDate(saved.created_at) }}
                   </p>
                 </div>
-                <Badge variant="outline" class="font-mono text-2xs">
+                <Badge variant="outline" class="text-2xs">
                   {{ saved.total_credits }} Xu
                 </Badge>
               </button>
@@ -848,7 +848,7 @@ onBeforeUnmount(() => {
             >
               <div>
                 <div class="flex items-center gap-2">
-                  <h3 class="font-mono text-base font-bold text-foreground">
+                  <h3 class="text-base font-bold text-foreground">
                     {{ lookedUpOrder.order_code }}
                   </h3>
                   <Badge
@@ -863,7 +863,7 @@ onBeforeUnmount(() => {
                 </div>
                 <p class="mt-1 text-xs text-muted-foreground">
                   {{ $t('page.commerce_view.total_value_label') }}
-                  <span class="font-mono font-semibold text-foreground">
+                  <span class="font-semibold text-foreground">
                     {{ lookedUpOrder.total_credits.toLocaleString('en-US') }} Xu
                   </span>
                   • {{ $t('common.createdAt') }}:
@@ -944,7 +944,7 @@ onBeforeUnmount(() => {
                   readonly
                   :value="serialLinesText"
                   rows="8"
-                  class="w-full rounded-lg border border-border bg-muted/40 p-3 font-mono text-xs text-foreground focus:outline-none"
+                  class="w-full rounded-lg border border-border bg-muted/40 p-3 text-xs text-foreground focus:outline-none"
                 ></textarea>
               </div>
 
@@ -968,7 +968,7 @@ onBeforeUnmount(() => {
                   </Badge>
                 </div>
                 <pre
-                  class="mt-2 overflow-x-auto rounded bg-background p-2 font-mono text-2xs text-muted-foreground"
+                  class="mt-2 overflow-x-auto rounded bg-background p-2 text-2xs text-muted-foreground"
                   >{{ JSON.stringify(item.delivered_payload, null, 2) }}</pre>
                 <div
                   v-if="item.delivered_payload?.download_url"
@@ -1025,11 +1025,11 @@ onBeforeUnmount(() => {
               <p class="text-sm font-semibold text-foreground">
                 {{ activeVariant.name }}
               </p>
-              <p class="font-mono text-xs text-muted-foreground">
+              <p class="text-xs text-muted-foreground">
                 SKU: {{ activeVariant.sku }}
               </p>
             </div>
-            <p class="font-mono text-base font-bold text-primary">
+            <p class="text-base font-bold text-primary">
               {{ activeVariant.price_credits.toLocaleString('en-US') }} Xu
             </p>
           </div>
@@ -1044,7 +1044,7 @@ onBeforeUnmount(() => {
                 type="number"
                 :min="activeVariant.min_qty || 1"
                 :max="activeVariant.max_qty || 100"
-                class="h-8 w-full rounded-md border border-border bg-background px-2.5 font-mono text-xs text-foreground"
+                class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
               />
             </div>
 
@@ -1091,7 +1091,7 @@ onBeforeUnmount(() => {
                   </p>
                 </div>
               </div>
-              <Badge variant="outline" class="font-mono text-2xs">
+              <Badge variant="outline" class="text-2xs">
                 {{ gw.currency }}
               </Badge>
             </button>
@@ -1104,11 +1104,11 @@ onBeforeUnmount(() => {
               {{ $t('page.commerce_view.total_payment') }}
             </span>
             <div class="text-right">
-              <p class="font-mono text-lg font-bold text-foreground">
+              <p class="text-lg font-bold text-foreground">
                 {{ estimatedFiatAmount.toLocaleString('en-US') }}
                 {{ currentGateway?.currency || 'VND' }}
               </p>
-              <p class="font-mono text-xs text-muted-foreground">
+              <p class="text-xs text-muted-foreground">
                 ({{ totalCheckoutCredits.toLocaleString('en-US') }} Xu)
               </p>
             </div>
@@ -1156,7 +1156,7 @@ onBeforeUnmount(() => {
               </Button>
             </div>
             <code
-              class="block truncate rounded bg-background px-2 py-1 font-mono text-xs text-primary"
+              class="block truncate rounded bg-background px-2 py-1 text-xs text-primary"
             >
               {{ createdClaimToken }}
             </code>
@@ -1183,7 +1183,7 @@ onBeforeUnmount(() => {
               <span class="text-muted-foreground">
                 {{ $t('page.commerce_view.transfer_amount_label') }}
               </span>
-              <span class="font-mono text-sm font-bold text-foreground">
+              <span class="text-sm font-bold text-foreground">
                 {{ createdIntent.pay_amount.toLocaleString('en-US') }}
                 {{ createdIntent.pay_currency }}
               </span>
@@ -1195,7 +1195,7 @@ onBeforeUnmount(() => {
               </span>
               <div class="flex items-center gap-1.5">
                 <code
-                  class="rounded bg-primary/15 px-2 py-0.5 font-mono text-sm font-bold text-primary"
+                  class="rounded bg-primary/15 px-2 py-0.5 text-sm font-bold text-primary"
                 >
                   {{ createdIntent.transfer_code }}
                 </code>

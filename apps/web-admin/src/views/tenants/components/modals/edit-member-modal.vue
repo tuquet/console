@@ -101,7 +101,7 @@ function handleOk() {
               <Input
                 :model-value="props.member?.email"
                 disabled
-                class="bg-muted/40 font-mono text-xs h-10"
+                class="bg-muted/40 text-xs h-10"
               />
             </template>
           </VxeFormItem>

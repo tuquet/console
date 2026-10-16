@@ -57,7 +57,7 @@ function navigateToFleet() {
         </div>
       </div>
 
-      <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
+      <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
         <!-- 1. Tenant ID (Full UUID + Copy Action) -->
         <div
           data-testid="overview-card-tenant-id"
@@ -67,7 +67,7 @@ function navigateToFleet() {
             {{ $t('page.tenants_view.tenant_id') }}
           </div>
           <div
-            class="flex items-center justify-between gap-2 font-mono text-xs text-foreground"
+            class="flex items-center justify-between gap-2 text-xs text-foreground"
           >
             <span class="break-all">{{ tenant.id }}</span>
             <button

@@ -17,6 +17,7 @@ import { preferences, usePreferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 import { openWindow } from '@vben/utils';
 
+import WorkspaceSelector from '#/components/common/workspace-selector.vue';
 import { $t } from '#/locales';
 import { useAuthStore } from '#/store';
 import LoginForm from '#/views/_core/authentication/login.vue';
@@ -214,12 +215,8 @@ watch(
     @clear-preferences-and-logout="handleLogout"
     @logout="handleLogout"
   >
-    <template #logo-text>
-      <span
-        class="sm:inline text-foreground truncate font-semibold text-nowrap"
-      >
-        Specter
-      </span>
+    <template #logo="{ collapsed }">
+      <WorkspaceSelector :collapsed="collapsed" />
     </template>
     <template #user-dropdown>
       <UserDropdown

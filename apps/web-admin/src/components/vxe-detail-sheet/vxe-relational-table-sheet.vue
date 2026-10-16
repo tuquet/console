@@ -124,7 +124,7 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
             {{ props.relation.title }}
           </SheetTitle>
 
-          <Badge variant="secondary" class="shrink-0 font-mono text-2xs">
+          <Badge variant="secondary" class="shrink-0 text-2xs">
             {{ filteredRows.length }} / {{ props.relation.rows.length }}
           </Badge>
 
@@ -147,7 +147,7 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
               <div class="flex flex-wrap items-center gap-1.5">
                 <span
                   v-if="props.parentResource"
-                  class="inline-flex items-center gap-1 rounded border border-border/70 bg-muted/40 px-1.5 py-0.5 font-mono text-2xs text-muted-foreground"
+                  class="inline-flex items-center gap-1 rounded border border-border/70 bg-muted/40 px-1.5 py-0.5 text-2xs text-muted-foreground"
                 >
                   <Database class="size-3 shrink-0" />
                   {{ props.parentResource }}
@@ -157,7 +157,7 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
                   class="size-3 shrink-0 text-muted-foreground"
                 />
                 <span
-                  class="inline-flex items-center gap-1 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-2xs font-medium text-primary"
+                  class="inline-flex items-center gap-1 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-2xs font-medium text-primary"
                 >
                   <Table2 class="size-3 shrink-0" />
                   {{ props.relation.targetResource }}
@@ -237,9 +237,7 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
                 :key="idx"
                 class="transition-colors hover:bg-muted/30"
               >
-                <td
-                  class="px-3 py-2 text-center font-mono text-xs text-muted-foreground"
-                >
+                <td class="px-3 py-2 text-center text-xs text-muted-foreground">
                   {{ idx + 1 }}
                 </td>
 
@@ -251,7 +249,7 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
                   <Badge
                     v-if="col.type === 'badge'"
                     variant="outline"
-                    class="font-mono text-2xs font-medium"
+                    class="text-2xs font-medium"
                   >
                     {{ formatCellValue(relRow, col) }}
                   </Badge>
@@ -262,7 +260,7 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
                       col.type === 'number' ||
                       col.type === 'datetime'
                     "
-                    class="font-mono text-xs text-foreground"
+                    class="text-xs text-foreground"
                   >
                     {{ formatCellValue(relRow, col) }}
                   </span>

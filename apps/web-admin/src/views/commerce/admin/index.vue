@@ -936,14 +936,12 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
         <template #name-cell="{ row }">
           <div class="flex flex-col py-1 text-left">
             <span class="font-medium text-foreground">{{ row.name }}</span>
-            <span class="font-mono text-xs text-muted-foreground">
-              /{{ row.slug }}
-            </span>
+            <span class="text-xs text-muted-foreground"> /{{ row.slug }} </span>
           </div>
         </template>
 
         <template #type-cell="{ row }">
-          <Badge variant="outline" class="font-mono text-2xs">
+          <Badge variant="outline" class="text-2xs">
             {{ row.product_type }}
           </Badge>
         </template>
@@ -963,7 +961,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
               v-for="v in row.variants || []"
               :key="v.id"
               variant="outline"
-              class="font-mono text-2xs"
+              class="text-2xs"
             >
               {{ v.sku }}: {{ v.price_credits }} Xu ({{
                 v.stock_mode === 'unlimited'
@@ -1012,7 +1010,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
     >
       <OrdersGrid>
         <template #code-cell="{ row }">
-          <span class="font-mono text-xs font-semibold text-foreground">
+          <span class="text-xs font-semibold text-foreground">
             {{ row.order_code }}
           </span>
         </template>
@@ -1022,7 +1020,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             <span class="text-xs font-medium text-foreground">
               {{ row.buyer_email || $t('page.commerce_view.tenant_member') }}
             </span>
-            <span class="font-mono text-2xs text-muted-foreground">
+            <span class="text-2xs text-muted-foreground">
               {{
                 row.buyer_tenant_id
                   ? `Tenant: ${row.buyer_tenant_id.slice(0, 8)}`
@@ -1033,7 +1031,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
         </template>
 
         <template #total-cell="{ row }">
-          <span class="font-mono text-xs font-bold text-foreground">
+          <span class="text-xs font-bold text-foreground">
             {{ row.total_credits.toLocaleString('en-US') }} Xu
           </span>
         </template>
@@ -1072,20 +1070,20 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
       <ManualReviewGrid>
         <template #code-cell="{ row }">
           <code
-            class="rounded bg-primary/10 px-2 py-0.5 font-mono text-xs font-bold text-primary"
+            class="rounded bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary"
           >
             {{ row.transfer_code }}
           </code>
         </template>
 
         <template #credits-cell="{ row }">
-          <span class="font-mono text-xs font-bold text-foreground">
+          <span class="text-xs font-bold text-foreground">
             {{ row.amount_credits.toLocaleString('en-US') }} Xu
           </span>
         </template>
 
         <template #pay-cell="{ row }">
-          <span class="font-mono text-xs text-foreground">
+          <span class="text-xs text-foreground">
             {{ row.pay_amount.toLocaleString('en-US') }} {{ row.pay_currency }}
           </span>
         </template>
@@ -1119,14 +1117,14 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
         <template #name-cell="{ row }">
           <div class="flex flex-col py-1 text-left">
             <span class="font-medium text-foreground">{{ row.name }}</span>
-            <span class="font-mono text-2xs text-muted-foreground">
+            <span class="text-2xs text-muted-foreground">
               ID: {{ row.id }}
             </span>
           </div>
         </template>
 
         <template #rate-cell="{ row }">
-          <span class="font-mono text-xs font-semibold text-foreground">
+          <span class="text-xs font-semibold text-foreground">
             1 Xu = {{ row.rate_per_credit.toLocaleString('en-US') }}
             {{ row.currency }}
           </span>
@@ -1177,7 +1175,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
               v-model="productForm.slug"
               type="text"
               placeholder="via-co-2fa"
-              class="h-8 w-full rounded-md border border-border bg-background px-2.5 font-mono text-xs text-foreground"
+              class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
             />
           </div>
 
@@ -1252,7 +1250,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
               v-model="productForm.sku"
               type="text"
               placeholder="VIA-2FA-01"
-              class="h-8 w-full rounded-md border border-border bg-background px-2.5 font-mono text-xs text-foreground"
+              class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
             />
           </div>
 
@@ -1264,7 +1262,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
               v-model.number="productForm.price_credits"
               type="number"
               min="0"
-              class="h-8 w-full rounded-md border border-border bg-background px-2.5 font-mono text-xs text-foreground"
+              class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
             />
           </div>
 
@@ -1338,7 +1336,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             <input
               v-model="stockBatchCode"
               type="text"
-              class="h-8 w-full rounded-md border border-border bg-background px-2.5 font-mono text-xs text-foreground"
+              class="h-8 w-full rounded-md border border-border bg-background px-2.5 text-xs text-foreground"
             />
           </div>
 
@@ -1350,7 +1348,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
               v-model="stockLinesRaw"
               rows="7"
               placeholder="1000881122|matkhau123|JBSWY3DPEHPK3PXP&#10;1000881123|matkhau456|KRSXG5CTMVRXEZLU"
-              class="w-full rounded-lg border border-border bg-background p-3 font-mono text-xs text-foreground focus:border-primary focus:outline-none"
+              class="w-full rounded-lg border border-border bg-background p-3 text-xs text-foreground focus:border-primary focus:outline-none"
             ></textarea>
           </div>
         </div>

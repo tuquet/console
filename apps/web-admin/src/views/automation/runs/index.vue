@@ -244,7 +244,7 @@ watch(
           >
             {{ $t('page.automation.runs') }}
           </h1>
-          <Badge variant="secondary" class="shrink-0 font-mono text-2xs">
+          <Badge variant="secondary" class="shrink-0 text-2xs">
             {{ allRuns.length }}
           </Badge>
         </div>
@@ -334,9 +334,7 @@ watch(
                       }"
                     ></div>
                   </div>
-                  <span
-                    class="shrink-0 font-mono text-2xs text-muted-foreground"
-                  >
+                  <span class="shrink-0 text-2xs text-muted-foreground">
                     {{ row.completed_tasks }}/{{ row.total_tasks }} ({{
                       calculateProgressPercentage(
                         row.completed_tasks,
@@ -365,7 +363,7 @@ watch(
 
         <template #progress-cell="{ row }">
           <div class="w-full max-w-[170px] space-y-1">
-            <div class="flex items-center justify-between font-mono text-xs">
+            <div class="flex items-center justify-between text-xs">
               <span class="text-foreground">
                 {{ row.completed_tasks }} / {{ row.total_tasks }}
               </span>
