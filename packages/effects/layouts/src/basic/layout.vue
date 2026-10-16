@@ -187,6 +187,17 @@ const {
 } = useExtraMenu(mixHeaderMenus);
 
 /**
+ * Active domain title for two-column sidebar extra panel
+ */
+const extraDomainTitle = computed(() => {
+  const activeKey = extraActiveMenu.value;
+  const activeItem = (mixHeaderMenus.value || []).find(
+    (item) => item.path === activeKey || item.name === activeKey,
+  );
+  return activeItem ? $t(activeItem.name) : finalLogoText.value;
+});
+
+/**
  * Wrap menu items and translate menu titles
  * @param menus Raw menu data
  * @param deep Whether to wrap deeply (in mixed layout only first level is wrapped)
@@ -421,17 +432,15 @@ const headerSlots = computed(() => {
       />
     </template>
     <template #side-extra-title>
-      <VbenLogo
-        v-if="preferences.logo.enable"
-        :fit="preferences.logo.fit"
-        :text="finalLogoText"
-        :show-text="preferences.logo.showText"
-        :theme="sidebarThemeSub"
-      >
-        <template v-if="$slots['logo-text']" #text>
-          <slot name="logo-text"></slot>
-        </template>
-      </VbenLogo>
+      <slot :title="extraDomainTitle" name="side-extra-title">
+        <div class="flex h-full items-center px-3">
+          <span
+            class="text-sm font-semibold tracking-tight text-foreground truncate select-none"
+          >
+            {{ extraDomainTitle }}
+          </span>
+        </div>
+      </slot>
     </template>
 
     <template #tabbar>

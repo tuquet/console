@@ -9,6 +9,8 @@ import type { ClassType } from '@vben-core/typings';
 
 import { computed } from 'vue';
 
+import { cn } from '@vben-core/shared/utils';
+
 import { useForwardPropsEmits } from 'reka-ui';
 
 import {
@@ -49,8 +51,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
       <slot name="trigger"></slot>
 
       <PopoverContent
-        :class="contentClass"
-        class="side-content z-popup"
+        :class="cn('side-content z-popup', contentClass)"
         v-bind="contentProps"
       >
         <slot></slot>

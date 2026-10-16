@@ -75,9 +75,9 @@ function handleClick(path?: string) {
                   v-if="showIcon && item.icon"
                   :class="{ 'size-4.5': item.isHome, 'size-4': !item.isHome }"
                   :icon="item.icon"
-                  class="mr-1.5 shrink-0 align-middle"
+                  class="mr-1.5 shrink-0"
                 />
-                <span class="leading-none">{{ item.title }}</span>
+                <span class="leading-normal">{{ item.title }}</span>
               </span>
             </BreadcrumbLink>
             <BreadcrumbPage v-else>
@@ -86,9 +86,9 @@ function handleClick(path?: string) {
                   v-if="showIcon && item.icon"
                   :class="{ 'size-4.5': item.isHome, 'size-4': !item.isHome }"
                   :icon="item.icon"
-                  class="mr-1.5 shrink-0 align-middle"
+                  class="mr-1.5 shrink-0"
                 />
-                <span class="leading-none">{{ item.title }}</span>
+                <span class="leading-normal">{{ item.title }}</span>
               </span>
             </BreadcrumbPage>
             <BreadcrumbSeparator

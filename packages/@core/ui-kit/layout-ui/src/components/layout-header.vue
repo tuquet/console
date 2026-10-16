@@ -80,7 +80,11 @@ const logoStyle = computed((): CSSProperties => {
   >
     <div
       v-if="slots['toggle-button']"
-      :class="isMobile ? 'order-first mr-1' : 'order-2'"
+      :class="
+        isMobile
+          ? 'order-first mr-1 flex h-full items-center'
+          : 'order-2 flex h-full items-center'
+      "
     >
       <slot name="toggle-button"> </slot>
     </div>

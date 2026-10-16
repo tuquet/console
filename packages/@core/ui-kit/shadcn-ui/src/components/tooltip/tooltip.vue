@@ -5,6 +5,8 @@ import type { StyleValue } from 'vue';
 
 import type { ClassType } from '@vben-core/typings';
 
+import { cn } from '@vben-core/shared/utils';
+
 import {
   Tooltip,
   TooltipContent,
@@ -32,10 +34,11 @@ withDefaults(defineProps<Props>(), {
         <slot name="trigger"></slot>
       </TooltipTrigger>
       <TooltipContent
-        :class="contentClass"
+        :class="
+          cn('bg-accent text-popover-foreground rounded-md', contentClass)
+        "
         :side="side"
         :style="contentStyle"
-        class="bg-accent text-popover-foreground rounded-md"
       >
         <slot></slot>
       </TooltipContent>

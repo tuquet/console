@@ -301,7 +301,7 @@ function clearPreferencesAndLogout() {
       </template>
     </slot>
   </template>
-  <div class="flex-center hidden lg:block">
+  <div class="hidden h-full items-center lg:flex">
     <slot name="breadcrumb"></slot>
   </div>
   <template

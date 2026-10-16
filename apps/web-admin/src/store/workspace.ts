@@ -98,7 +98,14 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     }
   }
 
+  function $reset() {
+    workspaces.value = [];
+    activeWorkspaceId.value = '';
+    isLoading.value = false;
+  }
+
   return {
+    $reset,
     activeWorkspace,
     activeWorkspaceId,
     createWorkspace,

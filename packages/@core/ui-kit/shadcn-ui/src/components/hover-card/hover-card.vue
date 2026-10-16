@@ -9,6 +9,8 @@ import type { ClassType } from '@vben-core/typings';
 
 import { computed } from 'vue';
 
+import { cn } from '@vben-core/shared/utils';
+
 import { useForwardPropsEmits } from 'reka-ui';
 
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '../../ui';
@@ -45,9 +47,8 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
       </div>
     </HoverCardTrigger>
     <HoverCardContent
-      :class="contentClass"
+      :class="cn('side-content z-popup', contentClass)"
       v-bind="contentProps"
-      class="side-content z-popup"
     >
       <slot></slot>
     </HoverCardContent>

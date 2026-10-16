@@ -3,7 +3,7 @@ import type { MenuRecordRaw } from '@vben/types';
 
 import type { NormalMenuProps } from '@vben-core/menu-ui';
 
-import { onBeforeMount } from 'vue';
+import { onBeforeMount, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { findMenuByPath } from '@vben/utils';
@@ -22,7 +22,7 @@ const emit = defineEmits<{
 
 const route = useRoute();
 
-onBeforeMount(() => {
+function emitDefaultSelect() {
   const menu = findMenuByPath(props.menus || [], route.path);
   if (menu) {
     const rootMenu = (props.menus || []).find(
@@ -30,7 +30,19 @@ onBeforeMount(() => {
     );
     emit('defaultSelect', menu, rootMenu);
   }
+}
+
+onBeforeMount(() => {
+  emitDefaultSelect();
 });
+
+watch(
+  () => [props.menus, route.path] as const,
+  () => {
+    emitDefaultSelect();
+  },
+  { deep: false },
+);
 </script>
 
 <template>

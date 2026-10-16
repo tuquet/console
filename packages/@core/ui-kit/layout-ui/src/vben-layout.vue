@@ -673,14 +673,14 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
               <VbenIconButton
                 v-if="showHeaderToggleButton"
                 data-layout-action="toggle-sidebar"
-                class="my-0 mr-1 rounded-md"
+                class="my-0 size-8 rounded-md"
                 @click="handleHeaderToggle"
               >
                 <PanelLeftClose
                   v-if="isMobile ? !activeSidebarCollapse : showSidebar"
-                  class="size-4"
+                  class="size-5"
                 />
-                <PanelLeftOpen v-else class="size-4" />
+                <PanelLeftOpen v-else class="size-5" />
               </VbenIconButton>
             </template>
             <slot name="header"></slot>
