@@ -8,11 +8,10 @@ import {
   Building2,
   CheckCircle2,
   Layers,
-  Loader2,
   RefreshCw,
   Terminal,
 } from '@lucide/vue';
-import { Badge, Button, toast } from '@tuquet/vue-ui';
+import { Badge, Button, Spinner, toast } from '@tuquet/vue-ui';
 
 import { getRealAnalyticsDataApi } from '#/api';
 import { $t } from '#/locales';
@@ -113,9 +112,10 @@ onMounted(() => {
           >
             {{ analyticsData.tenants.total }}
           </span>
-          <span
+          <Badge
+            variant="outline"
             data-testid="kpi-workspaces-status"
-            class="inline-flex items-center gap-1.5 truncate rounded-full border border-border/60 bg-muted/30 px-2 py-0.5 text-2xs font-medium text-muted-foreground"
+            class="inline-flex items-center gap-1.5 truncate rounded-full border-border/60 bg-muted/30 px-2 py-0.5 text-2xs font-medium text-muted-foreground"
           >
             <span class="size-1.5 shrink-0 rounded-full bg-success"></span>
             <span class="truncate">{{
@@ -123,7 +123,7 @@ onMounted(() => {
                 ? $t('page.analytics.active_workspaces')
                 : `${analyticsData.tenants.activeCount}/${analyticsData.tenants.total} ${$t('page.analytics.active_workspaces')}`
             }}</span>
-          </span>
+          </Badge>
         </div>
       </div>
 
@@ -151,12 +151,13 @@ onMounted(() => {
           >
             {{ analyticsData.plugins.total }}
           </span>
-          <span
-            class="inline-flex items-center gap-1.5 truncate rounded-full border border-border/60 bg-muted/30 px-2 py-0.5 text-2xs font-medium text-muted-foreground"
+          <Badge
+            variant="outline"
+            class="inline-flex items-center gap-1.5 truncate rounded-full border-border/60 bg-muted/30 px-2 py-0.5 text-2xs font-medium text-muted-foreground"
           >
             <span class="size-1.5 shrink-0 rounded-full bg-primary"></span>
             <span class="truncate">{{ $t('page.analytics.ready') }}</span>
-          </span>
+          </Badge>
         </div>
       </div>
 
@@ -184,14 +185,15 @@ onMounted(() => {
           >
             :{{ analyticsData.fleet.loopbackPort }}
           </span>
-          <span
-            class="inline-flex items-center gap-1.5 truncate rounded-full border border-border/60 bg-muted/30 px-2 py-0.5 text-2xs font-medium text-muted-foreground"
+          <Badge
+            variant="outline"
+            class="inline-flex items-center gap-1.5 truncate rounded-full border-border/60 bg-muted/30 px-2 py-0.5 text-2xs font-medium text-muted-foreground"
           >
             <span
               class="size-1.5 shrink-0 animate-pulse rounded-full bg-success"
             ></span>
             <span class="truncate">{{ $t('page.analytics.online') }}</span>
-          </span>
+          </Badge>
         </div>
       </div>
 
@@ -223,12 +225,13 @@ onMounted(() => {
               >ms</span
             >
           </span>
-          <span
-            class="inline-flex items-center gap-1 truncate rounded-full border border-border/60 bg-muted/30 px-2 py-0.5 text-2xs font-medium text-muted-foreground"
+          <Badge
+            variant="outline"
+            class="inline-flex items-center gap-1 truncate rounded-full border-border/60 bg-muted/30 px-2 py-0.5 text-2xs font-medium text-muted-foreground"
           >
             <CheckCircle2 class="size-3 shrink-0 text-success" />
             <span class="truncate">{{ $t('page.analytics.operational') }}</span>
-          </span>
+          </Badge>
         </div>
       </div>
     </div>
@@ -252,7 +255,7 @@ onMounted(() => {
           class="flex h-[260px] items-center justify-center text-sm text-muted-foreground"
         >
           <div class="flex items-center gap-2">
-            <Loader2 class="size-5 animate-spin text-primary" />
+            <Spinner class="size-5 text-primary" />
             <span>{{ $t('common.loading') }}</span>
           </div>
         </div>
@@ -276,7 +279,7 @@ onMounted(() => {
           class="flex h-[260px] items-center justify-center text-sm text-muted-foreground"
         >
           <div class="flex items-center gap-2">
-            <Loader2 class="size-5 animate-spin text-primary" />
+            <Spinner class="size-5 text-primary" />
             <span>{{ $t('common.loading') }}</span>
           </div>
         </div>
@@ -303,7 +306,7 @@ onMounted(() => {
           class="flex h-[220px] items-center justify-center text-sm text-muted-foreground"
         >
           <div class="flex items-center gap-2">
-            <Loader2 class="size-5 animate-spin text-primary" />
+            <Spinner class="size-5 text-primary" />
             <span>{{ $t('common.loading') }}</span>
           </div>
         </div>

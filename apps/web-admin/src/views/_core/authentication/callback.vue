@@ -5,8 +5,7 @@ import { useRouter } from 'vue-router';
 import { $t } from '@vben/locales';
 import { useAccessStore, useUserStore } from '@vben/stores';
 
-import { Loader2 } from '@lucide/vue';
-import { Button, toast } from '@tuquet/vue-ui';
+import { Button, Spinner, toast } from '@tuquet/vue-ui';
 
 import { getAccessCodesApi } from '#/api';
 import { useAuthStore } from '#/store';
@@ -92,7 +91,7 @@ onMounted(async () => {
     class="flex min-h-[60vh] flex-col items-center justify-center p-6 text-center"
   >
     <div v-if="loading" class="space-y-4">
-      <Loader2 class="size-8 animate-spin mx-auto text-primary" />
+      <Spinner class="mx-auto size-8 text-primary" />
       <p class="text-muted-foreground text-sm">
         {{ $t('authentication.githubVerifying') }}
       </p>

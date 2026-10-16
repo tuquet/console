@@ -34,23 +34,23 @@ async function bootstrap(namespace: string) {
 
   const app = createApp(App);
 
-  // Configure router and guards
-  app.use(router);
-
-  // Initialize Bugsink (Sentry-compatible) error tracking
-  initBugsink(app, router);
-
   // Register v-loading directive
   registerLoadingDirective(app, {
     loading: 'loading', // Customize directive name here or provide false to omit registration
     spinning: 'spinning',
   });
 
+  // Configure Pinia store before router to ensure active Pinia during navigation guards
+  await initStores(app, { namespace });
+
   // Setup internationalization (i18n)
   await setupI18n(app);
 
-  // Configure Pinia store
-  await initStores(app, { namespace });
+  // Configure router and guards
+  app.use(router);
+
+  // Initialize Bugsink (Sentry-compatible) error tracking
+  initBugsink(app, router);
 
   // Register access control directives
   registerAccessDirective(app);

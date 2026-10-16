@@ -86,10 +86,14 @@ vi.mock('@tuquet/vue-ui', () => {
       },
     });
   return {
+    Alert: Stub('Alert'),
+    AlertDescription: Stub('AlertDescription'),
+    AlertTitle: Stub('AlertTitle'),
     Avatar: Stub('Avatar'),
     AvatarFallback: Stub('AvatarFallback'),
     Badge: Stub('Badge'),
     Button: Stub('Button'),
+    Spinner: Stub('Spinner'),
     toast: {
       error: vi.fn(),
       success: vi.fn(),

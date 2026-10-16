@@ -24,6 +24,11 @@ import {
   AvatarFallback,
   AvatarImage,
   Badge,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
   Button,
   Input,
   InputGroup,
@@ -168,13 +173,19 @@ onMounted(async () => {
       <Button variant="ghost" size="icon" class="size-8" @click="router.back()">
         <ArrowLeft class="size-4" />
       </Button>
-      <div class="text-xs text-muted-foreground">
-        <span>{{ $t('profile.settingsBreadcrumb') }}</span>
-        <span class="mx-1.5">/</span>
-        <span class="text-foreground font-medium">{{
-          $t('profile.personalProfile')
-        }}</span>
-      </div>
+      <Breadcrumb>
+        <BreadcrumbList class="text-xs">
+          <BreadcrumbItem>
+            <span>{{ $t('profile.settingsBreadcrumb') }}</span>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage class="font-medium">
+              {{ $t('profile.personalProfile') }}
+            </BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
     </div>
 
     <!-- Header Card: Minimalist Shadcn Style -->

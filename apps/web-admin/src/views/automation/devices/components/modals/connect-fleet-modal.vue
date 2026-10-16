@@ -3,6 +3,8 @@ import { useRouter } from 'vue-router';
 
 import { ExternalLink, RefreshCw, Terminal } from '@lucide/vue';
 import {
+  Alert,
+  AlertDescription,
   Badge,
   Button,
   Dialog,
@@ -142,14 +144,14 @@ function handleOpenAuthBridge() {
         </div>
 
         <!-- Footer Note -->
-        <div
-          class="rounded-lg bg-muted/50 p-3 border border-border text-xs text-muted-foreground"
-        >
-          <strong class="text-foreground"
-            >{{ $t('page.automation_view.tip_label') }}:</strong
-          >
-          {{ $t('page.automation_view.connect_tip_desc') }}
-        </div>
+        <Alert class="rounded-lg border-border bg-muted/50 p-3">
+          <AlertDescription class="text-xs text-muted-foreground">
+            <strong class="text-foreground"
+              >{{ $t('page.automation_view.tip_label') }}:</strong
+            >
+            {{ $t('page.automation_view.connect_tip_desc') }}
+          </AlertDescription>
+        </Alert>
       </div>
 
       <DialogFooter class="pt-2">

@@ -59,6 +59,8 @@ import {
   SelectValue,
   Textarea,
   toast,
+  ToggleGroup,
+  ToggleGroupItem,
 } from '@tuquet/vue-ui';
 
 import {
@@ -522,28 +524,33 @@ onBeforeUnmount(() => {
     <div
       class="flex flex-col gap-2.5 rounded-xl border border-border/60 bg-card p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4"
     >
-      <div
-        class="flex items-center gap-1.5 overflow-x-auto no-scrollbar whitespace-nowrap"
+      <ToggleGroup
+        type="single"
+        variant="outline"
+        size="sm"
+        :model-value="selectedCategoryId"
+        class="justify-start gap-1.5 overflow-x-auto no-scrollbar whitespace-nowrap"
+        @update:model-value="
+          (val) => {
+            if (val) selectedCategoryId = String(val);
+          }
+        "
       >
-        <Button
-          size="sm"
-          :variant="selectedCategoryId === 'all' ? 'default' : 'outline'"
-          class="h-8 shrink-0 text-xs"
-          @click="selectedCategoryId = 'all'"
+        <ToggleGroupItem
+          value="all"
+          class="h-8 shrink-0 rounded-md border border-border/60 px-3 text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
         >
           {{ $t('page.commerce_view.all_categories') }}
-        </Button>
-        <Button
+        </ToggleGroupItem>
+        <ToggleGroupItem
           v-for="cat in categories"
           :key="cat.id"
-          size="sm"
-          :variant="selectedCategoryId === cat.id ? 'default' : 'outline'"
-          class="h-8 shrink-0 text-xs"
-          @click="selectedCategoryId = cat.id"
+          :value="cat.id"
+          class="h-8 shrink-0 rounded-md border border-border/60 px-3 text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
         >
           {{ cat.name }}
-        </Button>
-      </div>
+        </ToggleGroupItem>
+      </ToggleGroup>
 
       <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center">
         <Select v-model="selectedProductType">
@@ -569,35 +576,39 @@ onBeforeUnmount(() => {
           </SelectContent>
         </Select>
 
-        <div class="relative w-full sm:w-64">
-          <Search
-            class="pointer-events-none absolute top-2.5 left-2.5 size-3.5 text-muted-foreground"
-          />
-          <Input
+        <InputGroup class="h-8 w-full sm:w-64">
+          <InputGroupAddon>
+            <Search class="size-3.5 text-muted-foreground" />
+          </InputGroupAddon>
+          <InputGroupInput
             v-model="searchKeyword"
             type="text"
             :placeholder="
               $t('page.commerce_view.search_product_sku_placeholder')
             "
-            class="h-8 w-full pr-3 pl-8 text-xs"
+            class="text-xs"
           />
-        </div>
+        </InputGroup>
       </div>
     </div>
 
     <!-- Empty State -->
-    <div
+    <Empty
       v-if="!loading && filteredProducts.length === 0"
-      class="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/60 bg-card/50 py-14 text-center"
+      class="bg-card/50 py-14"
     >
-      <ShoppingBag class="size-10 text-muted-foreground/50" />
-      <h3 class="mt-3 text-base font-semibold text-foreground">
-        {{ $t('page.commerce_view.empty_products_title') }}
-      </h3>
-      <p class="mt-1 max-w-md text-xs text-muted-foreground">
-        {{ $t('page.commerce_view.empty_products_desc') }}
-      </p>
-    </div>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <ShoppingBag class="size-5 text-muted-foreground" />
+        </EmptyMedia>
+        <EmptyTitle class="text-base font-semibold">
+          {{ $t('page.commerce_view.empty_products_title') }}
+        </EmptyTitle>
+        <EmptyDescription class="text-xs">
+          {{ $t('page.commerce_view.empty_products_desc') }}
+        </EmptyDescription>
+      </EmptyHeader>
+    </Empty>
 
     <!-- Product Grid -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -787,9 +798,9 @@ onBeforeUnmount(() => {
 
           <!-- Quantity Input -->
           <div class="flex items-center justify-between">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.quantity_to_buy') }}
-            </label>
+            </Label>
             <Input
               v-model.number="checkoutQty"
               type="number"
@@ -801,11 +812,11 @@ onBeforeUnmount(() => {
 
           <!-- Payment Method Selection -->
           <div class="space-y-2">
-            <label
+            <Label
               class="text-2xs font-semibold tracking-wider text-muted-foreground uppercase"
             >
               {{ $t('page.commerce_view.payment_method_label') }}
-            </label>
+            </Label>
 
             <!-- Option 1: Instant Xu Wallet -->
             <Button
@@ -931,7 +942,7 @@ onBeforeUnmount(() => {
               :alt="$t('page.commerce_view.payment_qr_alt')"
               class="h-52 w-52 object-contain"
             />
-            <span class="mt-2 text-2xs font-medium text-slate-600">
+            <span class="mt-2 text-2xs font-medium text-muted-foreground">
               {{ $t('page.commerce_view.scan_vietqr_hint') }}
             </span>
           </div>

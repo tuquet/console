@@ -878,64 +878,60 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
     </div>
 
     <!-- Mode Selector Tabs -->
-    <div
-      class="flex items-center gap-1.5 overflow-x-auto border-b border-border/60 pb-2 no-scrollbar"
-    >
-      <Button
-        size="sm"
-        :variant="activeTab === 'products' ? 'default' : 'outline'"
-        class="shrink-0 gap-1.5 whitespace-nowrap text-xs"
-        @click="activeTab = 'products'"
-      >
-        <Layers class="size-3.5" />
-        {{
-          $t('page.commerce_view.tab_products_stock', {
-            count: allProducts.length,
-          })
-        }}
-      </Button>
+    <div class="border-b border-border/60 pb-2">
+      <Tabs v-model="activeTab" class="w-full">
+        <TabsList
+          class="h-8 w-full justify-start overflow-x-auto no-scrollbar sm:w-fit"
+        >
+          <TabsTrigger
+            value="products"
+            class="h-7 shrink-0 gap-1.5 px-3 whitespace-nowrap text-xs"
+          >
+            <Layers class="size-3.5" />
+            {{
+              $t('page.commerce_view.tab_products_stock', {
+                count: allProducts.length,
+              })
+            }}
+          </TabsTrigger>
 
-      <Button
-        size="sm"
-        :variant="activeTab === 'orders' ? 'default' : 'outline'"
-        class="shrink-0 gap-1.5 whitespace-nowrap text-xs"
-        @click="activeTab = 'orders'"
-      >
-        <PackageCheck class="size-3.5" />
-        {{
-          $t('page.commerce_view.tab_all_orders', {
-            count: allOrders.length,
-          })
-        }}
-      </Button>
+          <TabsTrigger
+            value="orders"
+            class="h-7 shrink-0 gap-1.5 px-3 whitespace-nowrap text-xs"
+          >
+            <PackageCheck class="size-3.5" />
+            {{
+              $t('page.commerce_view.tab_all_orders', {
+                count: allOrders.length,
+              })
+            }}
+          </TabsTrigger>
 
-      <Button
-        size="sm"
-        :variant="activeTab === 'manual_review' ? 'default' : 'outline'"
-        class="shrink-0 gap-1.5 whitespace-nowrap text-xs"
-        @click="activeTab = 'manual_review'"
-      >
-        <AlertTriangle class="size-3.5" />
-        {{
-          $t('page.commerce_view.tab_manual_review', {
-            count: manualReviewIntents.length,
-          })
-        }}
-      </Button>
+          <TabsTrigger
+            value="manual_review"
+            class="h-7 shrink-0 gap-1.5 px-3 whitespace-nowrap text-xs"
+          >
+            <AlertTriangle class="size-3.5" />
+            {{
+              $t('page.commerce_view.tab_manual_review', {
+                count: manualReviewIntents.length,
+              })
+            }}
+          </TabsTrigger>
 
-      <Button
-        size="sm"
-        :variant="activeTab === 'gateways' ? 'default' : 'outline'"
-        class="shrink-0 gap-1.5 whitespace-nowrap text-xs"
-        @click="activeTab = 'gateways'"
-      >
-        <SlidersHorizontal class="size-3.5" />
-        {{
-          $t('page.commerce_view.tab_gateways', {
-            count: allGateways.length,
-          })
-        }}
-      </Button>
+          <TabsTrigger
+            value="gateways"
+            class="h-7 shrink-0 gap-1.5 px-3 whitespace-nowrap text-xs"
+          >
+            <SlidersHorizontal class="size-3.5" />
+            {{
+              $t('page.commerce_view.tab_gateways', {
+                count: allGateways.length,
+              })
+            }}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
     </div>
 
     <!-- Tab 1: Products & Stock VXE Grid -->
@@ -1167,9 +1163,9 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
 
         <div class="grid grid-cols-1 gap-3 py-2 sm:grid-cols-2">
           <div class="space-y-1 sm:col-span-2">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.product_name_label') }}
-            </label>
+            </Label>
             <Input
               v-model="productForm.name"
               type="text"
@@ -1179,9 +1175,9 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.product_slug_label') }}
-            </label>
+            </Label>
             <Input
               v-model="productForm.slug"
               type="text"
@@ -1191,9 +1187,9 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.product_type_label') }}
-            </label>
+            </Label>
             <Select v-model="productForm.product_type">
               <SelectTrigger class="h-8 w-full text-xs">
                 <SelectValue />
@@ -1216,9 +1212,9 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.visibility_mode_label') }}
-            </label>
+            </Label>
             <Select v-model="productForm.visibility">
               <SelectTrigger class="h-8 w-full text-xs">
                 <SelectValue />
@@ -1238,9 +1234,9 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.stock_mode_label') }}
-            </label>
+            </Label>
             <Select v-model="productForm.stock_mode">
               <SelectTrigger class="h-8 w-full text-xs">
                 <SelectValue />
@@ -1260,9 +1256,9 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.sku_code_label') }}
-            </label>
+            </Label>
             <Input
               v-model="productForm.sku"
               type="text"
@@ -1272,9 +1268,9 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.unit_price_xu_label') }}
-            </label>
+            </Label>
             <Input
               v-model.number="productForm.price_credits"
               type="number"
@@ -1284,9 +1280,9 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
           </div>
 
           <div class="space-y-1 sm:col-span-2">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.short_desc_label') }}
-            </label>
+            </Label>
             <Input
               v-model="productForm.short_description"
               type="text"
@@ -1325,9 +1321,9 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
 
         <div class="space-y-3 py-2">
           <div class="space-y-1">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.select_serialized_sku_label') }}
-            </label>
+            </Label>
             <Select v-model="selectedStockVariantId">
               <SelectTrigger class="h-8 w-full text-xs">
                 <SelectValue />
@@ -1349,16 +1345,16 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.batch_code_label') }}
-            </label>
+            </Label>
             <Input v-model="stockBatchCode" type="text" class="h-8 text-xs" />
           </div>
 
           <div class="space-y-1">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.stock_lines_label') }}
-            </label>
+            </Label>
             <Textarea
               v-model="stockLinesRaw"
               :rows="7"

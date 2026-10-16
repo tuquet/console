@@ -16,6 +16,8 @@ import {
   XCircle,
 } from '@lucide/vue';
 import {
+  Alert,
+  AlertDescription,
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -27,6 +29,10 @@ import {
   AlertDialogTrigger,
   Badge,
   Button,
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
   Progress,
   toast,
 } from '@tuquet/vue-ui';
@@ -222,13 +228,14 @@ onUnmounted(() => {
 
       <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <!-- Live Polling Indicator -->
-        <div
+        <Badge
           v-if="isActive"
-          class="hidden items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-2.5 py-1 text-xs text-muted-foreground sm:inline-flex"
+          variant="outline"
+          class="hidden items-center gap-1.5 rounded-full border-border/60 bg-muted/30 px-2.5 py-1 text-xs font-normal text-muted-foreground sm:inline-flex"
         >
           <span class="size-2 animate-pulse rounded-full bg-success"></span>
           <span>{{ $t('page.automation_view.live_polling_3s') }}</span>
-        </div>
+        </Badge>
 
         <AlertDialog v-if="isActive">
           <AlertDialogTrigger as-child>
@@ -363,15 +370,16 @@ onUnmounted(() => {
       </div>
 
       <!-- Error Message Banner -->
-      <div
+      <Alert
         v-if="run.error_message"
-        class="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive"
+        variant="destructive"
+        class="border-destructive/30 bg-destructive/10 p-3"
       >
-        <AlertCircle class="mt-0.5 size-4 shrink-0" />
-        <div class="leading-relaxed break-all">
+        <AlertCircle class="size-4" />
+        <AlertDescription class="text-xs leading-relaxed break-all">
           {{ run.error_message }}
-        </div>
-      </div>
+        </AlertDescription>
+      </Alert>
     </div>
 
     <!-- Execution Logs Console Section -->
@@ -442,13 +450,19 @@ onUnmounted(() => {
         </div>
 
         <!-- Empty Logs State -->
-        <div
+        <Empty
           v-if="logs.length === 0 && !loading"
-          class="flex h-48 flex-col items-center justify-center text-center text-neutral-500"
+          class="h-48 border-none text-neutral-500"
         >
-          <PlayCircle class="mb-2 size-6 text-neutral-600" />
-          <span>{{ $t('page.automation_view.logs_empty') }}</span>
-        </div>
+          <EmptyHeader>
+            <EmptyMedia variant="icon" class="bg-neutral-900 text-neutral-500">
+              <PlayCircle class="size-5" />
+            </EmptyMedia>
+            <EmptyDescription class="text-xs text-neutral-500">
+              {{ $t('page.automation_view.logs_empty') }}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </div>
     </div>
   </div>

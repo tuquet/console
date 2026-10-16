@@ -619,11 +619,11 @@ onBeforeUnmount(() => {
         <!-- Step 1: Select Amount & Gateway -->
         <div v-if="!activeIntent" class="space-y-4 py-2">
           <div class="space-y-2">
-            <label
+            <Label
               class="text-2xs font-semibold tracking-wider text-muted-foreground uppercase"
             >
               {{ $t('page.commerce_view.quick_select_xu_pack') }}
-            </label>
+            </Label>
             <div class="grid grid-cols-3 gap-2">
               <Button
                 v-for="preset in QUICK_TOPUP_PRESETS"
@@ -644,9 +644,9 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="flex items-center justify-between">
-            <label class="text-xs font-medium text-foreground">
+            <Label class="text-xs font-medium text-foreground">
               {{ $t('page.commerce_view.custom_xu_amount_label') }}
-            </label>
+            </Label>
             <Input
               v-model.number="topupCredits"
               type="number"
@@ -657,11 +657,11 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="space-y-2">
-            <label
+            <Label
               class="text-2xs font-semibold tracking-wider text-muted-foreground uppercase"
             >
               {{ $t('page.commerce_view.payment_gateway_label') }}
-            </label>
+            </Label>
             <Button
               v-for="gw in topupGateways"
               :key="gw.id"
@@ -741,7 +741,7 @@ onBeforeUnmount(() => {
               :alt="$t('page.commerce_view.payment_qr_alt')"
               class="h-52 w-52 object-contain"
             />
-            <span class="mt-2 text-2xs font-medium text-slate-600">
+            <span class="mt-2 text-2xs font-medium text-muted-foreground">
               {{ $t('page.commerce_view.scan_qr_bank_wallet_hint') }}
             </span>
           </div>

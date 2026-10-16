@@ -7,6 +7,9 @@ import { useAccessStore, useUserStore } from '@vben/stores';
 
 import { CheckCircle2, Laptop } from '@lucide/vue';
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -313,19 +316,26 @@ onMounted(() => {
           </div>
         </div>
 
-        <div
-          class="mt-4 p-3 bg-warning/10 rounded-lg border border-warning/20 text-xs text-warning"
+        <Alert
+          class="mt-4 rounded-lg border-warning/20 bg-warning/10 p-3 text-xs text-warning"
         >
-          <strong>{{ $t('authentication.desktopSecurityNoteTitle') }}</strong>
-          {{ $t('authentication.desktopSecurityNoteDesc') }}
-        </div>
+          <AlertTitle class="mb-0.5 text-xs font-semibold">
+            {{ $t('authentication.desktopSecurityNoteTitle') }}
+          </AlertTitle>
+          <AlertDescription class="text-xs text-warning">
+            {{ $t('authentication.desktopSecurityNoteDesc') }}
+          </AlertDescription>
+        </Alert>
 
-        <div
+        <Alert
           v-if="errorMessage"
-          class="mt-3 text-sm text-destructive font-medium"
+          variant="destructive"
+          class="mt-3 border-destructive/30 bg-destructive/10 p-3"
         >
-          {{ errorMessage }}
-        </div>
+          <AlertDescription class="text-xs font-medium">
+            {{ errorMessage }}
+          </AlertDescription>
+        </Alert>
 
         <div class="mt-6 flex gap-3">
           <Button variant="outline" class="flex-1 h-10" @click="handleCancel">

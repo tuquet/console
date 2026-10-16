@@ -519,37 +519,25 @@ function handleOpenCreate() {
       class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs space-y-3"
     >
       <!-- Mode Selector -->
-      <div class="flex items-center gap-1.5 border-b border-border/40 pb-2.5">
-        <Button
-          variant="ghost"
-          size="sm"
-          :class="{
-            'bg-muted font-medium text-foreground': activeTab === 'roles',
-          }"
-          @click="activeTab = 'roles'"
-          class="h-8 gap-1.5 text-xs"
-        >
-          <ShieldCheck class="size-3.5 text-primary" />
-          <span>{{
-            $t('page.system_view.roles_tab_roles', [allRoles.length])
-          }}</span>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          :class="{
-            'bg-muted font-medium text-foreground': activeTab === 'permissions',
-          }"
-          @click="activeTab = 'permissions'"
-          class="h-8 gap-1.5 text-xs"
-        >
-          <KeyRound class="size-3.5 text-muted-foreground" />
-          <span>{{
-            $t('page.system_view.roles_tab_permissions', [
-              allPermissions.length,
-            ])
-          }}</span>
-        </Button>
+      <div class="border-b border-border/40 pb-2.5">
+        <Tabs v-model="activeTab">
+          <TabsList class="h-8">
+            <TabsTrigger value="roles" class="h-7 gap-1.5 px-3 text-xs">
+              <ShieldCheck class="size-3.5 text-primary" />
+              <span>{{
+                $t('page.system_view.roles_tab_roles', [allRoles.length])
+              }}</span>
+            </TabsTrigger>
+            <TabsTrigger value="permissions" class="h-7 gap-1.5 px-3 text-xs">
+              <KeyRound class="size-3.5 text-muted-foreground" />
+              <span>{{
+                $t('page.system_view.roles_tab_permissions', [
+                  allPermissions.length,
+                ])
+              }}</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       <!-- Tab 1: System Roles VXE Grid -->

@@ -113,11 +113,36 @@ vi.mock('@tuquet/vue-ui', () => ({
       return () => h('h2', { class: 'dialog-title-stub' }, slots.default?.());
     },
   }),
+  Empty: defineComponent({
+    name: 'Empty',
+    setup(_props, { slots }) {
+      return () => h('div', { class: 'empty-stub' }, slots.default?.());
+    },
+  }),
+  EmptyDescription: defineComponent({
+    name: 'EmptyDescription',
+    setup(_props, { slots }) {
+      return () =>
+        h('div', { class: 'empty-description-stub' }, slots.default?.());
+    },
+  }),
+  EmptyHeader: defineComponent({
+    name: 'EmptyHeader',
+    setup(_props, { slots }) {
+      return () => h('div', { class: 'empty-header-stub' }, slots.default?.());
+    },
+  }),
   Input: defineComponent({
     name: 'Input',
     props: ['value'],
     setup(props) {
       return () => h('input', { class: 'input-stub', value: props.value });
+    },
+  }),
+  Label: defineComponent({
+    name: 'Label',
+    setup(_props, { slots }) {
+      return () => h('label', { class: 'label-stub' }, slots.default?.());
     },
   }),
   toast: {

@@ -62,6 +62,8 @@ import {
   TabsTrigger,
   Textarea,
   toast,
+  ToggleGroup,
+  ToggleGroupItem,
 } from '@tuquet/vue-ui';
 
 import {
@@ -459,32 +461,25 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-          <Button
-            size="sm"
-            :variant="activeMode === 'catalog' ? 'default' : 'outline'"
-            class="gap-1.5 text-xs"
-            @click="activeMode = 'catalog'"
-          >
-            <ShoppingBag class="size-3.5" />
-            {{ $t('page.commerce_view.product_catalog_tab') }}
-          </Button>
-
-          <Button
-            size="sm"
-            :variant="activeMode === 'lookup' ? 'default' : 'outline'"
-            class="gap-1.5 text-xs"
-            @click="activeMode = 'lookup'"
-          >
-            <PackageSearch class="size-3.5" />
-            {{ $t('page.commerce_view.order_lookup_tab') }}
-            <Badge
-              v-if="savedOrders.length > 0"
-              variant="secondary"
-              class="ml-0.5 text-2xs"
-            >
-              {{ savedOrders.length }}
-            </Badge>
-          </Button>
+          <Tabs v-model="activeMode">
+            <TabsList class="h-8">
+              <TabsTrigger value="catalog" class="h-7 gap-1.5 px-3 text-xs">
+                <ShoppingBag class="size-3.5" />
+                {{ $t('page.commerce_view.product_catalog_tab') }}
+              </TabsTrigger>
+              <TabsTrigger value="lookup" class="h-7 gap-1.5 px-3 text-xs">
+                <PackageSearch class="size-3.5" />
+                {{ $t('page.commerce_view.order_lookup_tab') }}
+                <Badge
+                  v-if="savedOrders.length > 0"
+                  variant="secondary"
+                  class="ml-0.5 text-2xs"
+                >
+                  {{ savedOrders.length }}
+                </Badge>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
           <Button
             size="sm"
@@ -549,26 +544,33 @@ onBeforeUnmount(() => {
         <div
           class="flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-4 sm:flex-row sm:items-center sm:justify-between"
         >
-          <div class="flex flex-wrap items-center gap-1.5">
-            <Button
-              size="sm"
-              :variant="selectedCategoryId === 'all' ? 'default' : 'outline'"
-              class="h-8 text-xs"
-              @click="selectedCategoryId = 'all'"
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="sm"
+            :model-value="selectedCategoryId"
+            class="flex-wrap justify-start gap-1.5"
+            @update:model-value="
+              (val) => {
+                if (val) selectedCategoryId = String(val);
+              }
+            "
+          >
+            <ToggleGroupItem
+              value="all"
+              class="h-8 rounded-md border border-border/60 px-3 text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               {{ $t('page.commerce_view.all_categories') }}
-            </Button>
-            <Button
+            </ToggleGroupItem>
+            <ToggleGroupItem
               v-for="cat in categories"
               :key="cat.id"
-              size="sm"
-              :variant="selectedCategoryId === cat.id ? 'default' : 'outline'"
-              class="h-8 text-xs"
-              @click="selectedCategoryId = cat.id"
+              :value="cat.id"
+              class="h-8 rounded-md border border-border/60 px-3 text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
               {{ cat.name }}
-            </Button>
-          </div>
+            </ToggleGroupItem>
+          </ToggleGroup>
 
           <div class="flex flex-wrap items-center gap-2">
             <Select v-model="selectedProductType">
@@ -588,19 +590,19 @@ onBeforeUnmount(() => {
               </SelectContent>
             </Select>
 
-            <div class="relative w-full sm:w-64">
-              <Search
-                class="pointer-events-none absolute top-2.5 left-2.5 size-3.5 text-muted-foreground"
-              />
-              <Input
+            <InputGroup class="h-8 w-full sm:w-64">
+              <InputGroupAddon>
+                <Search class="size-3.5 text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
                 v-model="searchKeyword"
                 type="text"
                 :placeholder="
                   $t('page.commerce_view.search_product_sku_placeholder')
                 "
-                class="h-8 w-full pr-3 pl-8 text-xs"
+                class="text-xs"
               />
-            </div>
+            </InputGroup>
 
             <Button
               variant="outline"
@@ -618,18 +620,22 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Product Cards Grid -->
-        <div
+        <Empty
           v-if="!loadingCatalog && publicProducts.length === 0"
-          class="rounded-xl border border-dashed border-border/60 bg-card/50 py-14 text-center"
+          class="bg-card/50 py-14"
         >
-          <ShoppingBag class="mx-auto size-10 text-muted-foreground/50" />
-          <p class="mt-3 text-base font-semibold text-foreground">
-            {{ $t('page.commerce_view.empty_public_products_title') }}
-          </p>
-          <p class="mt-1 text-xs text-muted-foreground">
-            {{ $t('page.commerce_view.empty_public_products_desc') }}
-          </p>
-        </div>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ShoppingBag class="size-5 text-muted-foreground" />
+            </EmptyMedia>
+            <EmptyTitle class="text-base font-semibold">
+              {{ $t('page.commerce_view.empty_public_products_title') }}
+            </EmptyTitle>
+            <EmptyDescription class="text-xs">
+              {{ $t('page.commerce_view.empty_public_products_desc') }}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div
@@ -774,9 +780,9 @@ onBeforeUnmount(() => {
 
             <div class="space-y-3">
               <div class="space-y-1">
-                <label class="text-xs font-medium text-foreground">
+                <Label class="text-xs font-medium text-foreground">
                   {{ $t('page.commerce_view.order_code_field_label') }}
-                </label>
+                </Label>
                 <Input
                   v-model="lookupOrderCode"
                   type="text"
@@ -786,9 +792,9 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="space-y-1">
-                <label class="text-xs font-medium text-foreground">
+                <Label class="text-xs font-medium text-foreground">
                   {{ $t('page.commerce_view.claim_token_field_label') }}
-                </label>
+                </Label>
                 <Input
                   v-model="lookupClaimToken"
                   type="text"
@@ -850,18 +856,19 @@ onBeforeUnmount(() => {
 
         <!-- Deliverables Output Panel -->
         <div class="lg:col-span-2">
-          <div
-            v-if="!lookedUpOrder"
-            class="flex h-full min-h-64 flex-col items-center justify-center rounded-xl border border-dashed border-border/60 bg-card/50 p-8 text-center"
-          >
-            <Lock class="size-9 text-muted-foreground/50" />
-            <p class="mt-3 text-sm font-semibold text-foreground">
-              {{ $t('page.commerce_view.no_order_selected_title') }}
-            </p>
-            <p class="mt-1 max-w-md text-xs text-muted-foreground">
-              {{ $t('page.commerce_view.no_order_selected_desc') }}
-            </p>
-          </div>
+          <Empty v-if="!lookedUpOrder" class="h-full min-h-64 bg-card/50 p-8">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Lock class="size-5 text-muted-foreground" />
+              </EmptyMedia>
+              <EmptyTitle class="text-sm font-semibold">
+                {{ $t('page.commerce_view.no_order_selected_title') }}
+              </EmptyTitle>
+              <EmptyDescription class="text-xs">
+                {{ $t('page.commerce_view.no_order_selected_desc') }}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
 
           <div
             v-else
@@ -912,16 +919,21 @@ onBeforeUnmount(() => {
               </Button>
             </div>
 
-            <div
-              v-if="lookedUpDeliveries.length === 0"
-              class="rounded-lg border border-dashed border-border/60 py-10 text-center text-xs text-muted-foreground"
-            >
-              {{ $t('page.commerce_view.order_status_no_deliveries_prefix') }}
-              <span class="font-semibold text-foreground">{{
-                lookedUpOrder.status
-              }}</span>
-              {{ $t('page.commerce_view.order_status_no_deliveries_suffix') }}
-            </div>
+            <Empty v-if="lookedUpDeliveries.length === 0" class="py-10">
+              <EmptyHeader>
+                <EmptyDescription class="text-xs">
+                  {{
+                    $t('page.commerce_view.order_status_no_deliveries_prefix')
+                  }}
+                  <span class="font-semibold text-foreground">{{
+                    lookedUpOrder.status
+                  }}</span>
+                  {{
+                    $t('page.commerce_view.order_status_no_deliveries_suffix')
+                  }}
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
 
             <div v-else class="space-y-4">
               <div v-if="serialLinesText" class="space-y-2">
@@ -1060,9 +1072,9 @@ onBeforeUnmount(() => {
 
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="space-y-1">
-              <label class="text-xs font-medium text-foreground">
+              <Label class="text-xs font-medium text-foreground">
                 {{ $t('page.commerce_view.quantity_label') }}
-              </label>
+              </Label>
               <Input
                 v-model.number="checkoutQty"
                 type="number"
@@ -1073,9 +1085,9 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="space-y-1">
-              <label class="text-xs font-medium text-foreground">
+              <Label class="text-xs font-medium text-foreground">
                 {{ $t('page.commerce_view.buyer_email_optional_label') }}
-              </label>
+              </Label>
               <Input
                 v-model="buyerEmail"
                 type="email"
@@ -1086,11 +1098,11 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="space-y-2">
-            <label
+            <Label
               class="text-2xs font-semibold tracking-wider text-muted-foreground uppercase"
             >
               {{ $t('page.commerce_view.select_payment_channel_label') }}
-            </label>
+            </Label>
             <Button
               v-for="gw in publicGateways"
               :key="gw.id"
@@ -1196,7 +1208,7 @@ onBeforeUnmount(() => {
               :alt="$t('page.commerce_view.payment_qr_alt')"
               class="h-52 w-52 object-contain"
             />
-            <span class="mt-2 text-2xs font-medium text-slate-600">
+            <span class="mt-2 text-2xs font-medium text-muted-foreground">
               {{ $t('page.commerce_view.scan_qr_exact_amount_hint') }}
             </span>
           </div>

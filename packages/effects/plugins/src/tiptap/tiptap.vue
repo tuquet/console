@@ -12,7 +12,7 @@ import { Check, ChevronDown, Eye } from '@vben/icons';
 import { $t } from '@vben/locales';
 
 import { useVbenModal } from '@vben-core/popup-ui';
-import { VbenIconButton, VbenPopover } from '@vben-core/shadcn-ui';
+import { VbenButton, VbenIconButton, VbenPopover } from '@vben-core/shadcn-ui';
 import { cn } from '@vben-core/shared/utils';
 
 import { EditorContent, useEditor } from '@tiptap/vue-3';
@@ -218,36 +218,40 @@ onBeforeUnmount(() => {
               v-if="action.palette"
               class="flex max-w-52 flex-wrap items-center gap-2"
             >
-              <button
+              <VbenButton
                 v-for="color in action.palette.colors"
                 :key="color"
                 :aria-label="`${action.label}-${color}`"
                 :class="getPaletteSwatchClass(action, color)"
                 :style="{ backgroundColor: color }"
                 type="button"
+                variant="ghost"
+                size="icon"
                 @click="applyPaletteColor(action, color)"
               >
                 <Check
                   v-if="getPaletteCurrentColor(action) === color"
                   class="size-4 text-white drop-shadow-sm"
                 />
-              </button>
-              <button
+              </VbenButton>
+              <VbenButton
                 v-if="action.palette.clear"
+                variant="outline"
                 class="h-8 w-full rounded-xl border border-border bg-secondary text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 type="button"
                 @click="clearPaletteColor(action)"
               >
                 {{ $t('ui.tiptap.toolbar.clear') }}
-              </button>
+              </VbenButton>
             </div>
             <div v-else-if="action.menu" class="flex min-w-32 flex-col gap-1">
-              <button
+              <VbenButton
                 v-for="item in action.menu.items"
                 :key="item.shortLabel"
                 :class="getMenuItemClass(item)"
                 :disabled="!canRunMenuItem(item)"
                 type="button"
+                variant="ghost"
                 @click="handleMenuItemClick(action, item)"
               >
                 <span class="w-7 text-xs font-semibold tracking-wide">
@@ -258,7 +262,7 @@ onBeforeUnmount(() => {
                   v-if="isMenuItemActive(item)"
                   class="size-4 text-primary"
                 />
-              </button>
+              </VbenButton>
             </div>
           </VbenPopover>
           <VbenIconButton

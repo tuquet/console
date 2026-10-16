@@ -4,7 +4,7 @@ import { computed } from 'vue';
 import { $t } from '@vben/locales';
 
 import { ShieldAlert, Trash2 } from '@lucide/vue';
-import { Button } from '@tuquet/vue-ui';
+import { Alert, AlertDescription, AlertTitle, Button } from '@tuquet/vue-ui';
 
 interface Props {
   buttonText: string;
@@ -26,27 +26,30 @@ const resolvedTitle = computed(() => props.title || $t('common.dangerZone'));
 </script>
 
 <template>
-  <div
-    class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-destructive/25 bg-destructive/5 p-4 sm:p-5"
+  <Alert
+    variant="destructive"
+    class="flex flex-col gap-3 rounded-xl border-destructive/25 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5 [&>svg]:static [&>svg~*]:pl-0"
   >
     <div class="space-y-0.5">
       <div class="flex items-center gap-1.5 text-destructive">
         <ShieldAlert class="size-4 shrink-0" />
-        <h3 class="text-xs font-semibold text-foreground">
+        <AlertTitle class="mb-0 text-xs font-semibold text-foreground">
           {{ resolvedTitle }}
-        </h3>
+        </AlertTitle>
       </div>
-      <p class="text-xs text-muted-foreground">{{ props.description }}</p>
+      <AlertDescription class="text-xs text-muted-foreground">
+        {{ props.description }}
+      </AlertDescription>
     </div>
     <Button
       variant="outline"
       size="sm"
-      class="h-8 text-xs flex items-center gap-1.5 border-destructive/40 text-destructive hover:text-destructive hover:bg-destructive/10 self-start sm:self-auto shrink-0"
+      class="flex h-8 shrink-0 items-center gap-1.5 self-start border-destructive/40 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive sm:self-auto"
       :disabled="props.loading"
       @click="emit('trigger')"
     >
       <Trash2 class="size-3.5" />
       <span>{{ props.buttonText }}</span>
     </Button>
-  </div>
+  </Alert>
 </template>

@@ -1,6 +1,7 @@
 # Spec: Nâng cấp Kỹ năng `specter-admin` Tối ưu Tốc độ Phát triển Frontend
 
 ## Objective
+
 Nâng cấp và hoàn thiện toàn diện kỹ năng `specter-admin` (`skills/specter-admin/SKILL.md`) trở thành **Cẩm nang Tăng tốc Phát triển Frontend** (Frontend Accelerator Runbook) cho Tuquet Admin Dashboard (`apps/web-admin` và `packages/`).
 
 Kỹ năng được trang bị đầy đủ các khuôn mẫu thành phần (Component Blueprints), hướng dẫn import UI chuẩn (`@tuquet/vue-ui`, `@lucide/vue`), mẫu kết nối API chuẩn qua BFF (`@vben/request`), quy chuẩn Tailwind v4, giải pháp cho các lỗi UI kinh điển (như modal không căn giữa trên mobile), cùng quy trình build & test cục bộ siêu tốc (Zero-Push).
@@ -10,6 +11,7 @@ Mục tiêu cốt lõi: Giảm thời gian khởi tạo tính năng mới từ h
 ---
 
 ## Tech Stack
+
 - **Framework:** Vue 3.5+ (Composition API, `<script setup lang="ts">`, `defineModel`, `defineProps`, `defineEmits`).
 - **UI Component Primitives:** `@tuquet/vue-ui` (Shadcn-Vue based: `Button`, `Dialog`, `DialogContent`, `DialogHeader`, `DialogFooter`, `DialogTitle`, `Input`, `Badge`, `Table`, `TableCell`, `TableHeader`, `TableRow`, `Tabs`, `toast`), `@lucide/vue`.
 - **Styling Engine:** Tailwind CSS v4 (`@tailwindcss/vite`), biến HSL theme tokens (`bg-background`, `text-foreground`, `border-border/40`, `text-muted-foreground`, `bg-accent`).
@@ -21,6 +23,7 @@ Mục tiêu cốt lõi: Giảm thời gian khởi tạo tính năng mới từ h
 ---
 
 ## Commands
+
 ```bash
 # 1. Kiểm tra an toàn đĩa trước khi thao tác
 df -h /
@@ -45,6 +48,7 @@ curl -s http://127.0.0.1/.build-meta.json
 ---
 
 ## Project Structure
+
 ```text
 /root/tuquet/admin/
 ├── apps/
@@ -71,6 +75,7 @@ curl -s http://127.0.0.1/.build-meta.json
 ## Code Style & Canonical Blueprints
 
 ### 1. Mẫu Page View Chuẩn (Table + Search + Action Header + Dialog Trigger)
+
 ```vue
 <script lang="ts" setup>
 import { computed, onMounted, ref } from 'vue';
@@ -94,7 +99,9 @@ defineOptions({ name: 'FleetDeviceList' });
 const loading = ref(false);
 const searchQuery = ref('');
 const isModalOpen = ref(false);
-const items = ref<Array<{ id: string; name: string; status: 'active' | 'offline' }>>([]);
+const items = ref<
+  Array<{ id: string; name: string; status: 'active' | 'offline' }>
+>([]);
 
 async function fetchData() {
   loading.value = true;
@@ -117,11 +124,21 @@ onMounted(fetchData);
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold tracking-tight">Thiết bị Fleet</h1>
-        <p class="text-sm text-muted-foreground">Quản lý và giám sát các node runner đang kết nối</p>
+        <p class="text-sm text-muted-foreground">
+          Quản lý và giám sát các node runner đang kết nối
+        </p>
       </div>
       <div class="flex items-center gap-2">
-        <Button variant="outline" size="sm" :disabled="loading" @click="fetchData">
-          <RefreshCw class="size-4 mr-1.5" :class="{ 'animate-spin': loading }" />
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="loading"
+          @click="fetchData"
+        >
+          <RefreshCw
+            class="size-4 mr-1.5"
+            :class="{ 'animate-spin': loading }"
+          />
           Làm mới
         </Button>
         <Button size="sm" @click="isModalOpen = true">
@@ -145,7 +162,9 @@ onMounted(fetchData);
           <TableRow v-for="item in items" :key="item.id">
             <TableCell class="font-medium">{{ item.name }}</TableCell>
             <TableCell>
-              <Badge :variant="item.status === 'active' ? 'default' : 'secondary'">
+              <Badge
+                :variant="item.status === 'active' ? 'default' : 'secondary'"
+              >
                 {{ item.status }}
               </Badge>
             </TableCell>
@@ -163,6 +182,7 @@ onMounted(fetchData);
 ```
 
 ### 2. Mẫu Dialog / Modal Chuẩn (Căn giữa chuẩn Mobile & Desktop)
+
 ```vue
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
@@ -225,14 +245,25 @@ async function handleSubmit() {
       </DialogHeader>
 
       <div class="py-4">
-        <label class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+        <label
+          class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block"
+        >
           Tên thiết bị
         </label>
-        <Input v-model="name" placeholder="vd: VPS-Tokyo-Node-01" :disabled="loading" />
+        <Input
+          v-model="name"
+          placeholder="vd: VPS-Tokyo-Node-01"
+          :disabled="loading"
+        />
       </div>
 
       <DialogFooter class="flex flex-row justify-end gap-2 pt-2">
-        <Button variant="outline" :disabled="loading" @click="emit('update:open', false)">Hủy</Button>
+        <Button
+          variant="outline"
+          :disabled="loading"
+          @click="emit('update:open', false)"
+          >Hủy</Button
+        >
         <Button :disabled="loading" @click="handleSubmit">Xác nhận</Button>
       </DialogFooter>
     </DialogContent>
@@ -241,6 +272,7 @@ async function handleSubmit() {
 ```
 
 ### 3. Mẫu Khai báo API Chuẩn (BFF Token Delegation)
+
 ```ts
 // apps/web-admin/src/api/fleet.ts
 import { requestClient } from './request';
@@ -265,6 +297,7 @@ export function createDeviceApi(data: { name: string }) {
 ---
 
 ## Testing Strategy
+
 - **Unit Tests:** Kiểm thử trạng thái logic bằng Vitest (`pnpm test:unit`).
 - **Kiểm tra Kiểu (Static Typing):** Chạy `pnpm run check:type` (sử dụng `vue-tsc --noEmit`).
 - **Kiểm chứng Trực quan Cục bộ:** Build bản phân phối qua `pnpm run build:local` và kiểm tra trên trình duyệt qua IP Tailscale: `http://100.68.217.61/`.
@@ -272,6 +305,7 @@ export function createDeviceApi(data: { name: string }) {
 ---
 
 ## Boundaries
+
 - **Luôn luôn làm (Always):**
   - Dùng component primitives từ `@tuquet/vue-ui` và icon từ `@lucide/vue`.
   - Luôn kiểm tra giao diện trên cả tỷ lệ màn hình điện thoại (mobile viewport $\le 640px$) và máy tính.
@@ -290,6 +324,7 @@ export function createDeviceApi(data: { name: string }) {
 ---
 
 ## Success Criteria
+
 1. Tệp kỹ năng `skills/specter-admin/SKILL.md` được cập nhật đầy đủ, ngắn gọn, chứa các bản thiết kế chuẩn (Blueprints) cho Page View, Modal/Dialog, Form, API Service, và Preferences Widget.
 2. Tài liệu giải thích rõ ràng kiến trúc thư mục, các alias đường dẫn (`#/api`, `#/store`), và cơ chế giao tiếp qua Nginx trên Tailscale.
 3. Kỹ năng có Frontmatter chuẩn xác, phản hồi đúng trigger `/specter-admin`, có hợp đồng đầu ra rõ ràng và tuân thủ tiêu chuẩn Ponytail.
@@ -299,6 +334,8 @@ export function createDeviceApi(data: { name: string }) {
 ---
 
 ## Open Questions
+
 > [!NOTE]
+>
 > 1. Ngoài `@tuquet/vue-ui`, bạn có muốn bổ sung thêm các mẫu bảng biểu phức tạp dạng `vxe-table` (dành cho bảng dữ liệu lớn hàng chục nghìn dòng) vào cẩm nang kỹ năng `specter-admin` không?
 > 2. Có cần bổ sung thêm các mẫu kiểm thử component E2E (Playwright) vào cẩm nang trong giai đoạn này không, hay ưu tiên Vitest unit test và kiểm tra giao diện qua Tailscale Nginx?

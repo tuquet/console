@@ -18,7 +18,6 @@ import {
   Check,
   Copy,
   Database,
-  Loader2,
   Lock,
   Plus,
   Save,
@@ -43,6 +42,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
+  Spinner,
   Switch,
   Textarea,
   toast,
@@ -633,7 +633,8 @@ async function handleSave() {
                   v-else-if="field.statusMeta"
                   class="flex h-9 items-center rounded-md border border-border/60 bg-muted/30 px-3"
                 >
-                  <span
+                  <Badge
+                    variant="outline"
                     class="inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium"
                     :class="field.statusMeta.badgeClass"
                   >
@@ -648,7 +649,7 @@ async function handleSave() {
                           : field.statusMeta.fallbackLabel
                       }}
                     </span>
-                  </span>
+                  </Badge>
                 </div>
 
                 <!-- Copyable Identifier / UUID / Code -->
@@ -804,7 +805,7 @@ async function handleSave() {
             data-testid="vxe-detail-sheet-create"
             @click="handleCreate"
           >
-            <Loader2 v-if="saving" class="size-3.5 animate-spin" />
+            <Spinner v-if="saving" class="size-3.5" />
             <Plus v-else class="size-3.5" />
             <span>{{ $t('common.createRecord') }}</span>
           </Button>
@@ -820,7 +821,7 @@ async function handleSave() {
             data-testid="vxe-detail-sheet-save"
             @click="handleSave"
           >
-            <Loader2 v-if="saving" class="size-3.5 animate-spin" />
+            <Spinner v-if="saving" class="size-3.5" />
             <Save v-else class="size-3.5" />
             <span>{{ $t('common.saveChanges') }}</span>
           </Button>

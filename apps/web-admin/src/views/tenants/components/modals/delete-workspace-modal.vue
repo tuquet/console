@@ -2,6 +2,8 @@
 import { ref, watch } from 'vue';
 
 import {
+  Alert,
+  AlertDescription,
   Button,
   Dialog,
   DialogContent,
@@ -61,11 +63,14 @@ function handleOk() {
       </DialogHeader>
 
       <div class="space-y-5 py-2">
-        <div
-          class="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive"
+        <Alert
+          variant="destructive"
+          class="border-destructive/30 bg-destructive/10 p-3"
         >
-          {{ $t('page.tenants_view.delete_modal_warning') }}
-        </div>
+          <AlertDescription class="text-xs">
+            {{ $t('page.tenants_view.delete_modal_warning') }}
+          </AlertDescription>
+        </Alert>
 
         <div>
           <Label class="mb-2 block text-sm font-medium text-foreground">

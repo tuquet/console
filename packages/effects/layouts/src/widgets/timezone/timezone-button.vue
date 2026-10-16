@@ -7,6 +7,7 @@ import { useTimezoneStore } from '@vben/stores';
 
 import { useVbenModal } from '@vben-core/popup-ui';
 import {
+  Label,
   RadioGroup,
   RadioGroupItem,
   VbenIconButton,
@@ -73,9 +74,9 @@ defineExpose({ open });
             :key="`container${item.value}`"
           >
             <RadioGroupItem :id="item.value" :value="item.value" />
-            <label :for="item.value" class="cursor-pointer">{{
+            <Label :for="item.value" class="cursor-pointer font-normal">{{
               item.label
-            }}</label>
+            }}</Label>
           </div>
         </RadioGroup>
       </div>

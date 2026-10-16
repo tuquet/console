@@ -22,6 +22,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
   Input,
   Label,
 } from '@tuquet/vue-ui';
@@ -258,12 +261,16 @@ async function handleCreateWorkspace() {
             </div>
           </Button>
 
-          <div
+          <Empty
             v-if="filteredWorkspaces.length === 0"
-            class="py-5 text-center text-xs text-muted-foreground"
+            class="border-none py-5"
           >
-            {{ $t('page.workspace.no_workspaces_found') }}
-          </div>
+            <EmptyHeader>
+              <EmptyDescription class="text-xs">
+                {{ $t('page.workspace.no_workspaces_found') }}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         </div>
 
         <!-- Quick Actions Footer -->

@@ -17,7 +17,14 @@ import {
   RefreshCw,
   Terminal,
 } from '@lucide/vue';
-import { Badge, Button, toast } from '@tuquet/vue-ui';
+import {
+  Badge,
+  Button,
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  toast,
+} from '@tuquet/vue-ui';
 
 import { calculateProgressPercentage, getAutomationOverviewApi } from '#/api';
 import { $t } from '#/locales';
@@ -369,9 +376,13 @@ onMounted(() => {
             </Button>
           </div>
         </div>
-        <div v-else class="py-6 text-center text-xs text-muted-foreground">
-          {{ $t('page.runs_view.empty_title') }}
-        </div>
+        <Empty v-else class="border-none py-6">
+          <EmptyHeader>
+            <EmptyDescription class="text-xs">
+              {{ $t('page.runs_view.empty_title') }}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </div>
 
       <!-- Recent Devices -->
@@ -453,9 +464,13 @@ onMounted(() => {
             </Badge>
           </div>
         </div>
-        <div v-else class="py-6 text-center text-xs text-muted-foreground">
-          {{ $t('page.fleet_view.devices_empty') }}
-        </div>
+        <Empty v-else class="border-none py-6">
+          <EmptyHeader>
+            <EmptyDescription class="text-xs">
+              {{ $t('page.fleet_view.devices_empty') }}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </div>
     </div>
 

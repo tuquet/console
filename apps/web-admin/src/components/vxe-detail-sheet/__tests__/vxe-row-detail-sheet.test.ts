@@ -44,7 +44,48 @@ vi.mock('@tuquet/vue-ui', () => ({
       return () => h('button', attrs, slots.default?.());
     },
   }),
+  Empty: defineComponent({
+    setup(_, { slots }) {
+      return () => h('div', { class: 'empty-stub' }, slots.default?.());
+    },
+  }),
+  EmptyDescription: defineComponent({
+    setup(_, { slots }) {
+      return () => h('p', { class: 'empty-desc-stub' }, slots.default?.());
+    },
+  }),
+  EmptyHeader: defineComponent({
+    setup(_, { slots }) {
+      return () => h('div', { class: 'empty-header-stub' }, slots.default?.());
+    },
+  }),
   Input: defineComponent({
+    props: ['modelValue'],
+    emits: ['input', 'update:modelValue'],
+    setup(props, { attrs, emit }) {
+      return () =>
+        h('input', {
+          ...attrs,
+          value: props.modelValue,
+          onInput: (e: Event) => {
+            emit('update:modelValue', (e.target as HTMLInputElement).value);
+            emit('input', e);
+          },
+        });
+    },
+  }),
+  InputGroup: defineComponent({
+    setup(_, { slots }) {
+      return () => h('div', { class: 'input-group-stub' }, slots.default?.());
+    },
+  }),
+  InputGroupAddon: defineComponent({
+    setup(_, { slots }) {
+      return () =>
+        h('div', { class: 'input-group-addon-stub' }, slots.default?.());
+    },
+  }),
+  InputGroupInput: defineComponent({
     props: ['modelValue'],
     emits: ['input', 'update:modelValue'],
     setup(props, { attrs, emit }) {
@@ -78,6 +119,34 @@ vi.mock('@tuquet/vue-ui', () => ({
     setup(_, { slots }) {
       return () =>
         h('span', { class: 'popover-trigger-stub' }, slots.default?.());
+    },
+  }),
+  Select: defineComponent({
+    props: ['modelValue'],
+    setup(_, { slots }) {
+      return () => h('div', { class: 'select-stub' }, slots.default?.());
+    },
+  }),
+  SelectContent: defineComponent({
+    setup(_, { slots }) {
+      return () =>
+        h('div', { class: 'select-content-stub' }, slots.default?.());
+    },
+  }),
+  SelectItem: defineComponent({
+    props: ['value'],
+    setup(_, { slots }) {
+      return () => h('div', { class: 'select-item-stub' }, slots.default?.());
+    },
+  }),
+  SelectTrigger: defineComponent({
+    setup(_, { attrs, slots }) {
+      return () => h('button', attrs, slots.default?.());
+    },
+  }),
+  SelectValue: defineComponent({
+    setup(_, { slots }) {
+      return () => h('span', slots.default?.());
     },
   }),
   Sheet: defineComponent({
@@ -119,6 +188,11 @@ vi.mock('@tuquet/vue-ui', () => ({
   SheetTitle: defineComponent({
     setup(_, { slots }) {
       return () => h('h2', slots.default?.());
+    },
+  }),
+  Spinner: defineComponent({
+    setup(_, { attrs }) {
+      return () => h('span', attrs);
     },
   }),
   Switch: defineComponent({

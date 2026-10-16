@@ -43,9 +43,7 @@ export function initBugsink(
     (import.meta.env.PROD ? 'production' : 'development');
 
   const release =
-    customConfig?.release ||
-    import.meta.env.VITE_APP_VERSION ||
-    '5.8.0';
+    customConfig?.release || import.meta.env.VITE_APP_VERSION || '5.8.0';
 
   try {
     Sentry.init({
@@ -57,9 +55,9 @@ export function initBugsink(
         ...(router ? [Sentry.browserTracingIntegration({ router })] : []),
       ],
       // 100% of errors are captured
-      sampleRate: 1.0,
+      sampleRate: 1,
       // Sample 20% of transactions in production to conserve bandwidth, 100% in development
-      tracesSampleRate: import.meta.env.PROD ? 0.2 : 1.0,
+      tracesSampleRate: import.meta.env.PROD ? 0.2 : 1,
       // Filter out non-actionable or transient browser exceptions
       ignoreErrors: [
         'ResizeObserver loop limit exceeded',
@@ -77,11 +75,8 @@ export function initBugsink(
         return event;
       },
     });
-
-    const maskedDsn = dsn.replace(/\/\/[^:]+:[^@]+@/, '//***:***@');
-    console.info(`[Bugsink] Error tracker initialized (${environment}) -> ${maskedDsn}`);
-  } catch (err) {
-    console.warn('[Bugsink] Failed to initialize error tracker:', err);
+  } catch (error) {
+    console.warn('[Bugsink] Failed to initialize error tracker:', error);
   }
 }
 

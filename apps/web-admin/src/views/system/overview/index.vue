@@ -14,7 +14,14 @@ import {
   ShieldCheck,
   Users,
 } from '@lucide/vue';
-import { Badge, Button, toast } from '@tuquet/vue-ui';
+import {
+  Badge,
+  Button,
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  toast,
+} from '@tuquet/vue-ui';
 
 import { getSystemOverviewApi } from '#/api';
 import { VxeRowDetailSheet } from '#/components/vxe-detail-sheet';
@@ -290,9 +297,13 @@ onMounted(() => {
             </span>
           </div>
         </div>
-        <div v-else class="py-6 text-center text-xs text-muted-foreground">
-          {{ $t('page.system_view.overview_audit_empty') }}
-        </div>
+        <Empty v-else class="border-none py-6">
+          <EmptyHeader>
+            <EmptyDescription class="text-xs">
+              {{ $t('page.system_view.overview_audit_empty') }}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </div>
 
       <!-- Recent Workspace Subscriptions -->
@@ -371,9 +382,13 @@ onMounted(() => {
             </Badge>
           </div>
         </div>
-        <div v-else class="py-6 text-center text-xs text-muted-foreground">
-          {{ $t('page.system_view.overview_subs_empty') }}
-        </div>
+        <Empty v-else class="border-none py-6">
+          <EmptyHeader>
+            <EmptyDescription class="text-xs">
+              {{ $t('page.system_view.overview_subs_empty') }}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </div>
     </div>
 

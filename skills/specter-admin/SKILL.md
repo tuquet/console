@@ -1,18 +1,14 @@
 ---
 name: specter-admin
 description: >
-  Master engineering runbook and domain skill for Tuquet Admin Dashboard (Vue 3, Vite, Vben 5, Shadcn UI).
-  Architectural navigation of preferences engine, 22 routes, Supabase SSOT data access, Shadcn Slate design tokens, local Tailscale preview, and pre-push gates.
-  Trigger: /specter-admin, "specter admin", "preferences bug", "admin preferences", "diff upstream admin", "admin layout", "admin widgets", "admin build", "admin routes", "supabase client", "admin quality gate".
-  Do NOT use for backend runner daemon (use /specter-runner) or cloud database migrations (use /specter-cloud).
-argument-hint: "[preferences|routes|api|tokens|gate|test|build] [--upstream <ref>]"
+  Master engineering runbook and domain skill for Tuquet Admin Dashboard (Vue 3, Vite, Vben 5, Shadcn UI). Architectural navigation of preferences engine, 22 routes, Supabase SSOT data access, Shadcn Slate design tokens, local Tailscale preview, and pre-push gates. Trigger: /specter-admin, "specter admin", "preferences bug", "admin preferences", "diff upstream admin", "admin layout", "admin widgets", "admin build", "admin routes", "supabase client", "admin quality gate". Do NOT use for backend runner daemon (use /specter-runner) or cloud database migrations (use /specter-cloud).
+argument-hint: '[preferences|routes|api|tokens|gate|test|build] [--upstream <ref>]'
 license: MIT
 ---
 
 # Tuquet Admin Dashboard — Master Engineering Runbook (`specter-admin`)
 
-Master engineering runbook for Tuquet Admin Dashboard (`/root/tuquet/admin` / `admin.tuquet.com`).
-Staccato cadence. Direct architecture maps, SSOT API protocols, 5 core preferences invariants, quality gates, and rapid diagnostic recipes.
+Master engineering runbook for Tuquet Admin Dashboard (`/root/tuquet/admin` / `admin.tuquet.com`). Staccato cadence. Direct architecture maps, SSOT API protocols, 5 core preferences invariants, quality gates, and rapid diagnostic recipes.
 
 ---
 
@@ -63,6 +59,7 @@ Monorepo of **39 packages** orchestrated via `turbo@2.10.13` and `pnpm@11.16.0` 
 ## 2. Route Architecture & The 22 Endpoints
 
 ### 2.1. Routing Topology & Guards Flow
+
 1. **`coreRoutes`** ([`src/router/routes/index.ts`](../../apps/web-admin/src/router/routes/index.ts)): Root, Profile, `/auth/*` cluster, 404 fallback. Bypasses access checks.
 2. **`accessRoutes`**: Modules loaded dynamically via `import.meta.glob`:
    - `dashboard.ts`: `/dashboard/analytics` + navigation shortcuts.
@@ -79,7 +76,7 @@ Monorepo of **39 packages** orchestrated via `turbo@2.10.13` and `pnpm@11.16.0` 
 ### 2.2. Complete 22 Routes Matrix
 
 | # | Route Path | Route Name | Plugin | Access Authority | Layout | Component File | Supabase Table / Source |
-|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | `/dashboard/analytics` | `Analytics` | `core-iam` | Authenticated | `BasicLayout` | [`views/dashboard/analytics/index.vue`](../../apps/web-admin/src/views/dashboard/analytics/index.vue) | `public.tenants`, `system_plugins` |
 | 2 | `/tenants` | `Tenants` | `core-iam` | `['superadmin', 'tenants:read']` | `BasicLayout` | [`views/tenants/index.vue`](../../apps/web-admin/src/views/tenants/index.vue) | `public.tenants` |
 | 3 | `/tenants/:id` | `TenantDetail` | `core-iam` | `['superadmin', 'tenants:read']` | `BasicLayout` | [`views/tenants/detail.vue`](../../apps/web-admin/src/views/tenants/detail.vue) | `public.tenants`, `tenant_members` |
@@ -106,6 +103,7 @@ Monorepo of **39 packages** orchestrated via `turbo@2.10.13` and `pnpm@11.16.0` 
 ### 2.3. Intra-Page Navigation & Route Transition Architecture
 
 When navigating between routes:
+
 1. **Inter-Page Navigation (`from.path !== to.path`):**
    - Triggers page entry/exit animations (`fade-slide` via `<Transition>`).
    - Resets layout container scroll and viewport to `top: 0` (or restores `savedPosition` on browser history back/forward).
@@ -119,6 +117,7 @@ When navigating between routes:
 ## 3. Data Access & Supabase REST SSOT
 
 ### 3.1. Single Source of Truth (`supabaseRequest`)
+
 - File: [`apps/web-admin/src/api/core/supabase-client.ts`](../../apps/web-admin/src/api/core/supabase-client.ts)
 - **Zero-Direct-Supabase Rule:** Strictly prohibit importing `@supabase/supabase-js` in client-side code. All queries route through `supabaseRequest<T>()`.
 - **PostgREST Schema Profile Switching:**
@@ -131,7 +130,8 @@ import { supabaseRequest } from '#/api/core/supabase-client';
 
 export async function getFleetDevicesApi(status?: string) {
   const query = new URLSearchParams({
-    select: 'id,machine_id,name,status,tags,cpu_usage,memory_usage,last_heartbeat_at',
+    select:
+      'id,machine_id,name,status,tags,cpu_usage,memory_usage,last_heartbeat_at',
     order: 'last_heartbeat_at.desc',
   });
   if (status) query.append('status', `eq.${status}`);
@@ -147,6 +147,7 @@ export async function getFleetDevicesApi(status?: string) {
 ```
 
 ### 3.2. Private Network Access (PNA) Loopback Standard
+
 - Function: `probeLocalDaemonApi(port = 8765)` in [`apps/web-admin/src/api/core/fleet.ts`](../../apps/web-admin/src/api/core/fleet.ts).
 - Calls local Rust daemon: `fetch('http://127.0.0.1:8765/api/v1/status', { method: 'GET', mode: 'no-cors', signal })`.
 - Timeout: Hard limit $\le 1200\text{ms}$ via `AbortController`.
@@ -157,6 +158,7 @@ export async function getFleetDevicesApi(status?: string) {
 ## 4. Shadcn Slate Design Tokens & UI Rules
 
 ### 4.1. Semantic Tokens SSOT (`internal/tailwind-config/src/theme.css`)
+
 - Colors resolve to HSL CSS variables: `--background`, `--foreground`, `--card`, `--primary`, `--border`, `--radius`.
 - **Prohibit hardcoded static colors:** Never write `bg-[#0f172a]`, `text-black`, `border-gray-200`. Always write:
   - Surfaces: `bg-background`, `bg-card`, `text-foreground`, `text-muted-foreground`.
@@ -164,12 +166,15 @@ export async function getFleetDevicesApi(status?: string) {
   - Corners: `rounded-xl` (12px container/cards), `rounded-lg` (8px inputs/buttons).
 
 ### 4.2. Lucide Icons Only Invariant
+
 - **Rule:** Strictly use `@lucide/vue`.
 - **Zero Emojis:** Never use unicode emojis (🏢, 🧩, ⚡, 📡, ✓) as functional icons.
 - Standard sizes: Header actions `size-4`, Metric badge `size-5`, Status indicators `size-3.5`.
 
 ### 4.3. Mobile-First Dual View Standard
+
 Every view with a data table must implement Dual View:
+
 ```vue
 <!-- Desktop View: Hidden on mobile, shown on desktop -->
 <div class="hidden rounded-xl border border-border/60 bg-card md:block">
@@ -186,6 +191,7 @@ Every view with a data table must implement Dual View:
 ```
 
 ### 4.4. Enterprise Typography & Capitalization Standards (Sentence Case & Strict Uppercase Boundaries)
+
 Follow global enterprise standards (Stripe, GitHub Primer, Vercel, Linear, Apple HIG):
 
 1. **Strict Sentence Case Rule:**
@@ -225,7 +231,11 @@ The VxeTable ecosystem in Tuquet Admin operates across 4 coordinated tiers:
        gridOptions: {
          columns: [
            { field: 'name', title: 'Tên', slots: { default: 'name-cell' } },
-           { field: 'status', title: 'Trạng thái', slots: { default: 'status-cell' } },
+           {
+             field: 'status',
+             title: 'Trạng thái',
+             slots: { default: 'status-cell' },
+           },
          ],
        },
      });
@@ -273,10 +283,10 @@ Managed by `PreferenceManager` singleton ([`packages/@core/preferences/src/prefe
 
 ## 6. Pre-Push Quality Gate & Zero-Waste CI
 
-> [!CAUTION]
-> GitHub Actions minutes are strictly rationed. NEVER push code to remote without passing all 4 local checks.
+> [!CAUTION] GitHub Actions minutes are strictly rationed. NEVER push code to remote without passing all 4 local checks.
 
 ### 6.1. The 4-Step Local Gate
+
 ```bash
 cd /root/tuquet/admin
 
@@ -294,9 +304,9 @@ pnpm run build:admin
 ```
 
 ### 6.2. Dependency Catalog & Commits
+
 - Always use `"catalog:"` in workspace `package.json` files for external libraries.
-- For documentation or non-code changes (`*.md`, `scratch/`), always append `[skip ci]` to the commit message:
-  `docs: update engineering runbook [skip ci]`
+- For documentation or non-code changes (`*.md`, `scratch/`), always append `[skip ci]` to the commit message: `docs: update engineering runbook [skip ci]`
 - Prohibit micro-pushes. Batch related commits and push only once.
 
 ---
@@ -304,12 +314,14 @@ pnpm run build:admin
 ## 7. Local Deployment & Tailscale Mesh Verification
 
 ### 7.1. Safe Local Build Script (`scripts/build-local.sh`)
+
 ```bash
 # Execute local verification build (disk check + vitest + vite build + nginx reload)
 pnpm run build:local
 ```
 
 ### 7.2. Live Verification Endpoints (Zero WAN Exposure)
+
 - **Localhost:** `http://127.0.0.1/`
 - **Tailscale Mesh IP:** `http://100.68.217.61/` (inspect directly from phone or workstation)
 - **Telemetry Check:** `curl -s http://127.0.0.1/.build-meta.json`
@@ -320,6 +332,7 @@ pnpm run build:local
 ## 8. Diagnostic Recipes & Troubleshooting
 
 ### Recipe 1: White Screen / Hydration Flash on F5 Reload
+
 - **Cause:** Stale user overrides in `localStorage` diverging from updated defaults.
 - **Fix:** In console or code, trigger clean cache purge:
   ```ts
@@ -328,28 +341,32 @@ pnpm run build:local
   ```
 
 ### Recipe 2: Mobile Modal Dialog Off-Screen
+
 - **Cause:** Hardcoded `translate(-50%, -50%)` conflicting with draggable `translate(offsetX, offsetY)`.
-- **Fix:** In `modal.vue` and `use-modal-draggable.ts`, use compound transform:
-  `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`.
-  Ensure container uses `max-w-[calc(100vw-2rem)] sm:w-130`.
+- **Fix:** In `modal.vue` and `use-modal-draggable.ts`, use compound transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`. Ensure container uses `max-w-[calc(100vw-2rem)] sm:w-130`.
 
 ### Recipe 3: Out of Memory During Local Build
+
 - **Cause:** Node heap exhaustion on resource-constrained VPS during Rollup DTS generation.
 - **Fix:** Set `export NODE_OPTIONS="--max-old-space-size=4096"` before building. `build:local` sets this automatically.
 
 ### Recipe 4: Circular Dependency Detected
+
 - **Cause:** Cyclic import across `@core/*` and `effects/*`.
 - **Fix:** Run `pnpm run check:circular`. Trace imports and extract common interfaces into `@vben-core/typings` or `@vben-core/shared`.
 
 ### Recipe 5: Stale PWA Service Worker Cache Lock
+
 - **Cause:** Browser retaining old chunk hashes.
 - **Fix:** Verify `vite.config.ts` has `workbox.skipWaiting: true` and `workbox.clientsClaim: true`. Check `curl -I http://127.0.0.1/sw.js` returns `Cache-Control: no-cache`.
 
 ### Recipe 6: Query Parameter Change Causes Page Transition / Component Remount
+
 - **Cause:** `getTabKey` defaulting to `fullPath`, mutating `:key="getTabKey(route)"` on query changes (`?tab=...`, `?status=...`) and triggering `<Transition>` unmount/remount.
 - **Fix:** Ensure `tabbar.ts` uses `rawKey = fullPathKey === true ? (fullPath ?? path) : path`, and `useLayoutHook()` returns `undefined` for `getTransitionName` when `from.matched?.length && to.path === from.path`.
 
 ### Recipe 7: Mobile Scroll Resets to Top 0 on Query/Filter Change
+
 - **Cause:** `use-layout-scroll.ts` calling `scrollElement.scrollTo({ top: 0 })` and `router.scrollBehavior` returning `{ left: 0, top: 0 }` unconditionally on query navigations.
 - **Fix:** In `use-layout-scroll.ts`, guard with `if (!isSamePath) scrollElement.scrollTo({ top: 0 })` where `isSamePath = Boolean(from?.matched?.length && to.path === from.path)`. In `router/index.ts`, return `false` from `scrollBehavior` when `from?.matched?.length && to.path === from.path`.
 
@@ -358,6 +375,7 @@ pnpm run build:local
 ## 9. Upstream Tracking & Triage
 
 Tracked against `vbenjs/vue-vben-admin` (`upstream/main`):
+
 ```bash
 # Check diff against upstream for a specific component:
 git diff upstream/main HEAD -- packages/@core/preferences/src/<file>
@@ -372,6 +390,7 @@ git log -p upstream/main -- packages/@core/preferences/src/<file>
 ## 10. Deterministic Output Contract
 
 When reporting admin status or diffs:
+
 ```text
 [ADMIN] Module: <routes|api|preferences|layout|build> | State: <CLEAN|DIRTY>
 • 22 Routes Integrity: <PASS (22/22 verified) | FAIL>

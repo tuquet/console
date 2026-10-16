@@ -38,6 +38,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Spinner,
   Textarea,
   toast,
 } from '@tuquet/vue-ui';
@@ -548,21 +549,23 @@ onMounted(() => {
           v-if="loadingDeliveries"
           class="py-8 text-center text-xs text-muted-foreground"
         >
+          <Spinner class="mx-auto mb-2 size-4 text-primary" />
           {{ $t('page.commerce_view.loading_deliveries') }}
         </div>
 
-        <div
-          v-else-if="orderDeliveries.length === 0"
-          class="rounded-lg border border-dashed border-border/60 py-8 text-center text-xs text-muted-foreground"
-        >
-          {{ $t('page.commerce_view.no_deliveries_yet') }} ({{
-            $t('page.commerce_view.current_status_label')
-          }}:
-          <span class="font-semibold text-foreground">{{
-            selectedOrder?.status
-          }}</span
-          >).
-        </div>
+        <Empty v-else-if="orderDeliveries.length === 0" class="py-8">
+          <EmptyHeader>
+            <EmptyDescription class="text-xs">
+              {{ $t('page.commerce_view.no_deliveries_yet') }} ({{
+                $t('page.commerce_view.current_status_label')
+              }}:
+              <span class="font-semibold text-foreground">{{
+                selectedOrder?.status
+              }}</span
+              >).
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
 
         <div v-else class="space-y-4 py-2">
           <div v-if="serialLinesText" class="space-y-2">
