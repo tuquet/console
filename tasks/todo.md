@@ -1,9 +1,8 @@
-# Todo List: Comprehensive Browser Error Observability
+# Todo List: Phase 01 Hardening & Acceptance Readiness
 
-- [x] Task 1.1: Refactor `src/utils/bugsink.ts` (early error buffer, default integrations preservation, PII sanitization, network breadcrumbs)
-- [x] Task 1.2: Add unit tests in `src/utils/__tests__/bugsink.test.ts`
-- [x] Task 2.1: Instrument `src/main.ts` (early error interceptor, `vite:preloadError` telemetry, boot crash handler)
-- [x] Task 2.2: Enrich `src/bootstrap.ts` (PWA, screen size, online/offline tags and breadcrumbs)
-- [x] Task 3.1: Add network breadcrumbs and error telemetry to `src/api/core/supabase-client.ts`
-- [x] Task 4.1: Run unit tests (`test:unit`)
-- [x] Task 4.2: Run `pnpm run build:local`
+- [x] Task 1.1: Harden `desktop-bridge.vue` with port validation (`1024..65535`) and loopback constraint
+- [x] Task 1.2: Harden `auth.ts`, `guard.ts`, and `callback.vue` with safe local redirect validation
+- [x] Task 2.1: Refactor `updateWorkspaceMemberRoleApi` in `workspace-detail.ts` for atomic role update
+- [x] Task 3.1: Add unit tests in `iam-security-hardening.test.ts`
+- [x] Task 3.2: Run full unit test suite (`test:unit`) (119/119 tests passed)
+- [x] Task 3.3: Run `pnpm run build:local` and verify Nginx (Deployed to http://100.68.217.61/)

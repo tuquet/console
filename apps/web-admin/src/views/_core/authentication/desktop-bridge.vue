@@ -26,6 +26,7 @@ import {
 import { getTenantsApi } from '#/api';
 import { useClipboard } from '#/composables';
 import { captureError } from '#/utils/bugsink';
+import { validateDesktopBridgePort } from '#/utils/security';
 
 defineOptions({ name: 'DesktopBridge' });
 
@@ -42,7 +43,10 @@ const machineName = computed(
     $t('authentication.desktopLocalWorkstation'),
 );
 const state = computed(() => (route.query.state as string) || '');
-const port = computed(() => (route.query.port as string) || '8765');
+const validatedPort = computed(() =>
+  validateDesktopBridgePort(route.query.port),
+);
+const port = computed(() => validatedPort.value ?? 8765);
 
 // Auth status
 const isLoggedIn = computed(() => Boolean(accessStore.accessToken));
@@ -118,11 +122,13 @@ async function handleAuthorize() {
     };
 
     try {
-      await fetch(`http://127.0.0.1:${port.value}/api/v1/auth/callback`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      if (validatedPort.value !== null) {
+        await fetch(`http://127.0.0.1:${port.value}/api/v1/auth/callback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      }
     } catch {
       // Loopback may fallback to custom URI protocol
     }

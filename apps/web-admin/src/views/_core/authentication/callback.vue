@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { $t } from '@vben/locales';
+import { preferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 
 import { Button, Spinner, toast } from '@tuquet/vue-ui';
@@ -10,6 +11,7 @@ import { Button, Spinner, toast } from '@tuquet/vue-ui';
 import { getAccessCodesApi } from '#/api';
 import { useAuthStore } from '#/store';
 import { captureError, captureMessage } from '#/utils/bugsink';
+import { sanitizeRedirectPath } from '#/utils/security';
 
 defineOptions({ name: 'AuthCallback' });
 
@@ -77,7 +79,14 @@ onMounted(async () => {
         duration: 3000,
       });
 
-      await router.push('/');
+      const rawRedirect =
+        searchParams.get('redirect') || params.get('redirect');
+      const defaultHome = userInfo?.homePath || preferences.app.defaultHomePath;
+      const targetPath = rawRedirect
+        ? sanitizeRedirectPath(rawRedirect, defaultHome)
+        : defaultHome;
+
+      await router.push(targetPath);
       return;
     }
 

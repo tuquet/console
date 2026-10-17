@@ -401,6 +401,8 @@ export async function inviteWorkspaceMemberApi(params: {
 
 /**
  * Update member's role in public.member_roles.
+ * Safely inserts the new role first (preventing 0-role orphaned state on network disruption)
+ * and then purges obsolete roles, propagating database guard exceptions (e.g. last owner protection).
  */
 export async function updateWorkspaceMemberRoleApi(params: {
   memberId: string;
@@ -408,24 +410,28 @@ export async function updateWorkspaceMemberRoleApi(params: {
   tenantId: string;
 }): Promise<void> {
   const encodedMemberId = encodeURIComponent(params.memberId);
+  const encodedRoleId = encodeURIComponent(params.roleId);
 
-  // Delete existing role association for this member
-  await supabaseRequest(
-    `/rest/v1/member_roles?member_id=eq.${encodedMemberId}`,
-    {
-      method: 'DELETE',
-    },
-  ).catch(() => {});
-
-  // Assign new role
+  // 1. Assign/Upsert new role first with merge-duplicates so caller never drops to 0 roles
   await supabaseRequest('/rest/v1/member_roles', {
     body: JSON.stringify({
       member_id: params.memberId,
       role_id: params.roleId,
       tenant_id: params.tenantId,
     }),
+    headers: {
+      Prefer: 'resolution=merge-duplicates',
+    },
     method: 'POST',
   });
+
+  // 2. Remove previous roles assigned to this member within this tenant (excluding the new one)
+  await supabaseRequest(
+    `/rest/v1/member_roles?member_id=eq.${encodedMemberId}&role_id=neq.${encodedRoleId}`,
+    {
+      method: 'DELETE',
+    },
+  );
 }
 
 /**

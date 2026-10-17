@@ -12,6 +12,7 @@ import {
 } from '#/api';
 import { accessRoutes, coreRouteNames } from '#/router/routes';
 import { useAuthStore } from '#/store';
+import { sanitizeRedirectPath } from '#/utils/security';
 
 import { generateAccess } from './access';
 
@@ -68,22 +69,12 @@ function setupAccessGuard(router: Router) {
     // Core routes bypass access interceptor
     if (coreRouteNames.includes(to.name as string)) {
       if (to.path === LOGIN_PATH && accessStore.accessToken) {
-        let redirectTarget = (to.query?.redirect as string) || '';
-        if (redirectTarget) {
-          try {
-            redirectTarget = decodeURIComponent(redirectTarget)
-              .trim()
-              .replace(/^#+/, '');
-          } catch {}
-        }
-        if (
-          !redirectTarget ||
-          redirectTarget.startsWith('/auth/login') ||
-          !redirectTarget.startsWith('/')
-        ) {
-          redirectTarget =
-            userStore.userInfo?.homePath || preferences.app.defaultHomePath;
-        }
+        const rawRedirect = to.query?.redirect as string | undefined;
+        const defaultHome =
+          userStore.userInfo?.homePath || preferences.app.defaultHomePath;
+        const redirectTarget = rawRedirect
+          ? sanitizeRedirectPath(rawRedirect, defaultHome)
+          : defaultHome;
         return redirectTarget;
       }
       return true;

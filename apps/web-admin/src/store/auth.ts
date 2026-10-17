@@ -25,6 +25,7 @@ import {
 import { $t } from '#/locales';
 import { router as appRouter } from '#/router';
 import { captureError, setBugsinkUser } from '#/utils/bugsink';
+import { sanitizeRedirectPath } from '#/utils/security';
 
 export const useAuthStore = defineStore('auth', () => {
   const accessStore = useAccessStore();
@@ -77,26 +78,11 @@ export const useAuthStore = defineStore('auth', () => {
           const redirectParam = router.currentRoute.value.query?.redirect as
             | string
             | undefined;
-          let targetPath =
+          const defaultHome =
             userInfo?.homePath || preferences.app.defaultHomePath;
-
-          if (redirectParam) {
-            try {
-              let decoded = decodeURIComponent(redirectParam).trim();
-              if (decoded.startsWith('#')) {
-                decoded = decoded.replace(/^#+/, '');
-              }
-              if (
-                decoded &&
-                !decoded.startsWith('/auth/login') &&
-                decoded.startsWith('/')
-              ) {
-                targetPath = decoded;
-              }
-            } catch {
-              // Ignore decoding error, fallback to targetPath
-            }
-          }
+          const targetPath = redirectParam
+            ? sanitizeRedirectPath(redirectParam, defaultHome)
+            : defaultHome;
 
           await router.push(targetPath);
         }
