@@ -41,6 +41,29 @@ export interface PaymentGatewayItem {
   sort_order: number;
 }
 
+export type BankAccountStatus =
+  | 'active'
+  | 'cooling'
+  | 'maintenance'
+  | 'suspended';
+
+export interface BankReceivingAccountItem {
+  account_name: string;
+  account_no: string;
+  bank_bin: string;
+  bank_name: string;
+  created_at: string;
+  current_daily_total: number;
+  daily_limit_vnd: number;
+  id: string;
+  is_active: boolean;
+  metadata: Record<string, any>;
+  priority: number;
+  qr_template: string;
+  status: BankAccountStatus;
+  updated_at: string;
+}
+
 export interface TenantWalletItem {
   balance_credits: number;
   id: string;
@@ -100,6 +123,26 @@ export interface SettlePaymentIntentResult {
   settled: boolean;
   target_id?: string;
   target_type?: PaymentTargetType;
+}
+
+export function mapRawBankReceivingAccount(raw: any): BankReceivingAccountItem {
+  return {
+    account_name: String(raw?.account_name || ''),
+    account_no: String(raw?.account_no || ''),
+    bank_bin: String(raw?.bank_bin || ''),
+    bank_name: String(raw?.bank_name || ''),
+    created_at: String(raw?.created_at || new Date().toISOString()),
+    current_daily_total: Number(raw?.current_daily_total ?? 0),
+    daily_limit_vnd: Number(raw?.daily_limit_vnd ?? 300_000_000),
+    id: String(raw?.id || ''),
+    is_active: raw?.is_active !== false,
+    metadata:
+      raw?.metadata && typeof raw.metadata === 'object' ? raw.metadata : {},
+    priority: Number(raw?.priority ?? 10),
+    qr_template: String(raw?.qr_template || 'compact2'),
+    status: (raw?.status || 'active') as BankAccountStatus,
+    updated_at: String(raw?.updated_at || new Date().toISOString()),
+  };
 }
 
 export function mapRawPaymentGateway(raw: any): PaymentGatewayItem {
@@ -318,6 +361,64 @@ export async function approveManualPaymentIntentAdminApi(
         _transfer_code: null,
       }),
       method: 'POST',
+      schema: SUPABASE_SCHEMA.BILLING,
+    },
+  );
+}
+
+/**
+ * Platform Admin: Fetch all bank receiving accounts in pool (active & inactive)
+ */
+export async function getBankReceivingAccountsApi(): Promise<
+  BankReceivingAccountItem[]
+> {
+  const rows = await supabaseRequest<any[]>(
+    '/rest/v1/bank_receiving_accounts?select=*&order=priority.asc,created_at.asc',
+    { schema: SUPABASE_SCHEMA.BILLING },
+  );
+  return Array.isArray(rows)
+    ? rows.map((r) => mapRawBankReceivingAccount(r))
+    : [];
+}
+
+/**
+ * Platform Admin: Upsert a bank receiving account in pool (rotate number, adjust daily limit)
+ */
+export async function upsertBankReceivingAccountApi(
+  payload: Partial<BankReceivingAccountItem> & { id: string },
+): Promise<BankReceivingAccountItem> {
+  const rows = await supabaseRequest<any[]>(
+    '/rest/v1/bank_receiving_accounts?on_conflict=id',
+    {
+      body: JSON.stringify(payload),
+      headers: {
+        Prefer: 'resolution=merge-duplicates,return=representation',
+      },
+      method: 'POST',
+      preferRepresentation: true,
+      schema: SUPABASE_SCHEMA.BILLING,
+    },
+  );
+  return mapRawBankReceivingAccount(Array.isArray(rows) ? rows[0] : rows);
+}
+
+/**
+ * Platform Admin: Fast toggle status of receiving account (active / cooling / suspended)
+ */
+export async function toggleBankReceivingAccountApi(
+  id: string,
+  status: BankAccountStatus,
+  isActive?: boolean,
+): Promise<void> {
+  const body: Record<string, any> = { status };
+  if (isActive !== undefined) {
+    body.is_active = isActive;
+  }
+  await supabaseRequest(
+    `/rest/v1/bank_receiving_accounts?id=eq.${encodeURIComponent(id)}`,
+    {
+      body: JSON.stringify(body),
+      method: 'PATCH',
       schema: SUPABASE_SCHEMA.BILLING,
     },
   );

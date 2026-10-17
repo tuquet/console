@@ -5,13 +5,17 @@ import {
   createPaymentIntentApi,
   filterWalletTransactions,
   getActivePaymentGatewaysApi,
+  getBankReceivingAccountsApi,
   getManualReviewIntentsAdminApi,
   getTenantWalletApi,
   getWalletTransactionsApi,
+  mapRawBankReceivingAccount,
   mapRawPaymentGateway,
   mapRawPaymentIntent,
   mapRawTenantWallet,
   mapRawWalletTransaction,
+  toggleBankReceivingAccountApi,
+  upsertBankReceivingAccountApi,
   upsertPaymentGatewayAdminApi,
 } from '../billing';
 import { supabaseRequest } from '../supabase-client';
@@ -309,6 +313,103 @@ describe('billing & payment-gateway core api', () => {
         filterWalletTransactions(txs, { search: 'ORD-261014' }),
       ).toHaveLength(1);
       expect(filterWalletTransactions([], { search: 'any' })).toEqual([]);
+    });
+  });
+
+  describe('bank receiving accounts pool & rotation', () => {
+    it('normalizes raw bank account row with daily limits and status', () => {
+      const raw = {
+        account_name: 'TUQUET PLATFORM',
+        account_no: '0000123456789',
+        bank_bin: '970422',
+        bank_name: 'MBBank',
+        current_daily_total: '125000000.50',
+        daily_limit_vnd: '300000000.00',
+        id: 'mbbank_primary',
+        is_active: true,
+        priority: '1',
+        qr_template: 'compact2',
+        status: 'active',
+      };
+
+      const mapped = mapRawBankReceivingAccount(raw);
+      expect(mapped).toEqual({
+        account_name: 'TUQUET PLATFORM',
+        account_no: '0000123456789',
+        bank_bin: '970422',
+        bank_name: 'MBBank',
+        created_at: expect.any(String),
+        current_daily_total: 125_000_000.5,
+        daily_limit_vnd: 300_000_000,
+        id: 'mbbank_primary',
+        is_active: true,
+        metadata: {},
+        priority: 1,
+        qr_template: 'compact2',
+        status: 'active',
+        updated_at: expect.any(String),
+      });
+    });
+
+    it('fetches, upserts, and toggles receiving accounts', async () => {
+      vi.mocked(supabaseRequest).mockResolvedValueOnce([
+        {
+          account_name: 'TUQUET PLATFORM',
+          account_no: '0000123456789',
+          bank_bin: '970422',
+          bank_name: 'MBBank',
+          id: 'mbbank_primary',
+          priority: 1,
+          status: 'active',
+        },
+      ] as any);
+
+      const accounts = await getBankReceivingAccountsApi();
+      expect(supabaseRequest).toHaveBeenCalledWith(
+        '/rest/v1/bank_receiving_accounts?select=*&order=priority.asc,created_at.asc',
+        { schema: 'billing' },
+      );
+      expect(accounts).toHaveLength(1);
+      expect(accounts[0]?.id).toBe('mbbank_primary');
+
+      // Test upsert
+      vi.mocked(supabaseRequest).mockResolvedValueOnce([
+        {
+          account_name: 'VPBANK NEW',
+          account_no: '9888777666',
+          bank_bin: '970432',
+          bank_name: 'VPBank',
+          id: 'vpbank_secondary',
+          status: 'active',
+        },
+      ] as any);
+
+      const upserted = await upsertBankReceivingAccountApi({
+        account_name: 'VPBANK NEW',
+        account_no: '9888777666',
+        id: 'vpbank_secondary',
+      });
+      expect(supabaseRequest).toHaveBeenCalledWith(
+        '/rest/v1/bank_receiving_accounts?on_conflict=id',
+        expect.objectContaining({
+          method: 'POST',
+          preferRepresentation: true,
+          schema: 'billing',
+        }),
+      );
+      expect(upserted.id).toBe('vpbank_secondary');
+
+      // Test toggle
+      vi.mocked(supabaseRequest).mockResolvedValueOnce({} as any);
+      await toggleBankReceivingAccountApi('mbbank_primary', 'cooling', false);
+      expect(supabaseRequest).toHaveBeenCalledWith(
+        '/rest/v1/bank_receiving_accounts?id=eq.mbbank_primary',
+        {
+          body: JSON.stringify({ status: 'cooling', is_active: false }),
+          method: 'PATCH',
+          schema: 'billing',
+        },
+      );
     });
   });
 });

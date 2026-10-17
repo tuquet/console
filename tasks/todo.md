@@ -1,8 +1,7 @@
-# Todo List: Phase 01 Hardening & Acceptance Readiness
+# Todo List: Phase 02 Dynamic Bank Pool & Resilient Ledger Engine
 
-- [x] Task 1.1: Harden `desktop-bridge.vue` with port validation (`1024..65535`) and loopback constraint
-- [x] Task 1.2: Harden `auth.ts`, `guard.ts`, and `callback.vue` with safe local redirect validation
-- [x] Task 2.1: Refactor `updateWorkspaceMemberRoleApi` in `workspace-detail.ts` for atomic role update
-- [x] Task 3.1: Add unit tests in `iam-security-hardening.test.ts`
-- [x] Task 3.2: Run full unit test suite (`test:unit`) (119/119 tests passed)
-- [x] Task 3.3: Run `pnpm run build:local` and verify Nginx (Deployed to http://100.68.217.61/)
+- [x] Task 1.1: Create SQL migration `20261017000001_billing_dynamic_bank_pool.sql` in `tuquet/cloud` with `billing.bank_receiving_accounts` and rotation router
+- [x] Task 2.1: Add `BankReceivingAccountItem` types and CRUD APIs in `apps/web-admin/src/api/core/billing.ts`
+- [x] Task 3.1: Expand `apps/web-admin/src/api/core/__tests__/billing.test.ts` for account pool normalization, dynamic rotation fallback, and settlement
+- [x] Task 3.2: Run full unit test suite (`pnpm test:unit`) ensuring 100% pass rate (121/121 tests passed)
+- [x] Task 3.3: Run `pnpm run build:local` and verify Nginx deployment on Tailscale (Deployed to http://100.68.217.61/)

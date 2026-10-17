@@ -1,24 +1,34 @@
-# Implementation Plan: Phase 01 Hardening & Enterprise Acceptance (`PHASE-01-IAM-MULTITENANCY`)
+# Implementation Plan: Phase 02 Dynamic Bank Pool & Resilient Ledger Engine (`PHASE-02-OMNICHANNEL-PAYMENTS`)
 
 ## Overview
-Address the 3 critical audit gaps in Phase 01 (Enterprise IAM & Multi-Tenancy) across `@tuquet/admin-web` and `cloud` schema contracts to achieve 100% acceptance readiness:
-1. **Desktop Bridge SSRF & Token Exfiltration Hardening**: Enforce strict port validation (`1024..65535`) and loopback constraint (`127.0.0.1`).
-2. **Open Redirect Mitigation**: Reject protocol-relative (`//evil.com`) and external schemes in `auth.ts`, `guard.ts`, and `callback.vue`.
-3. **Atomic Member Role Assignment & Guard Integration**: Eliminate destructive `DELETE-then-POST` pattern; ensure failure resilience and handle `enforce_rbac_owner_guards` cleanly.
-4. **Automated Verification Suite**: Add penetration/regression tests for SSRF, Open Redirect, and cross-tenant invariant protections.
+Implement resilient payment rails and MMO-grade dynamic bank account pooling to prevent single-account freezing, ensure continuous rotation, and guarantee 100% zero-discrepancy double-entry ledger bookkeeping.
+
+---
+
+## Architecture & Modules (Capability Map)
+1. **`bank-pool-engine`**: Dynamic receiving account pool (`billing.bank_receiving_accounts`) with quota limits, priority ranking, and automated rotation.
+2. **`intent-rotation-router`**: Smart routing in `create_payment_intent` to pick the healthiest bank account from the pool and construct VietQR dynamic QR payloads.
+3. **`ledger-reconciliation`**: Double-entry ledger audit guarantee (`billing.credit_tenant_wallet`, `billing.debit_tenant_wallet`), atomic idempotency, and late-transfer `manual_review` buffer.
+4. **`admin-pool-ui-and-tests`**: Frontend client APIs and unit test coverage verifying rotation logic, underpaid protection, and account circuit breakers.
 
 ---
 
 ## Tasks
 
-### Phase 1: Security & Auth Hardening
-- [ ] Task 1.1: Harden `desktop-bridge.vue` with strict port validation (`1024..65535`) and sanitized error states.
-- [ ] Task 1.2: Harden `auth.ts`, `guard.ts`, and `callback.vue` with safe local relative URL validation (preventing `//evil.com` and javascript: URLs).
+### Phase 1: Database Migration & Dynamic Account Pool (`cloud`)
+- [ ] Task 1.1: Create SQL migration `20261017000001_billing_dynamic_bank_pool.sql` in `tuquet/cloud`:
+  - Table `billing.bank_receiving_accounts` (id, bank_bin, bank_name, account_no, account_name, qr_template, daily_limit_vnd, current_daily_total, is_active, status, priority, created_at, updated_at).
+  - Function `billing.get_next_receiving_account()`: Selects highest priority active account under daily limit, supporting round-robin rotation.
+  - Upgrade `billing.create_payment_intent` to dynamically select receiving account from pool for `bank_transfer` channel.
 
-### Phase 2: Atomic Role Update & Error Handling
-- [ ] Task 2.1: Refactor `updateWorkspaceMemberRoleApi` in `workspace-detail.ts` to assign new role atomically before revoking old role, preventing orphaned members and honoring last-owner guards.
+### Phase 2: Frontend Client SDK & Pool Types (`admin`)
+- [ ] Task 2.1: Add TypeScript interfaces and mapping functions in `apps/web-admin/src/api/core/billing.ts` (`BankReceivingAccountItem`, `getBankReceivingAccountsApi`, `upsertBankReceivingAccountApi`, `toggleBankReceivingAccountApi`).
+- [ ] Task 2.2: Enhance `billing.ts` with pool rotation awareness and health status indicators.
 
-### Phase 3: Comprehensive Test Suite & Local Build
-- [ ] Task 3.1: Add unit tests in `src/api/core/__tests__/iam-security-hardening.test.ts` verifying port validation, safe redirects, and atomic role transitions.
+### Phase 3: Automated Unit & Stress Testing
+- [ ] Task 3.1: Expand `apps/web-admin/src/api/core/__tests__/billing.test.ts` to test:
+  - Account pool mapping and status normalization.
+  - Dynamic QR code generation with account fallback when an account reaches daily limit.
+  - Idempotent settlement and underpaid/late transfer protection in `settle_payment_intent`.
 - [ ] Task 3.2: Run full unit test suite (`pnpm test:unit`) ensuring 100% pass rate.
-- [ ] Task 3.3: Execute `pnpm run build:local` and verify Nginx deployment.
+- [ ] Task 3.3: Run `pnpm run build:local` and verify local Tailscale deployment.
