@@ -13,31 +13,31 @@ Các tài liệu dưới đây phân tích chi tiết mục tiêu kinh doanh, g�
 ┌────────────────────────────────────────────────────────────────────────┐
 │  PHASE 01: ENTERPRISE IAM & MULTI-TENANCY                             │
 │  📁 docs/phases/phase-01-enterprise-iam-multitenancy/README.md         │
-│  • Định danh doanh nghiệp • Cô lập dữ liệu 100% • RBAC hạt mịn         │
+│  • Định danh doanh nghiệp • Enterprise SSO • Cô lập dữ liệu 100%       │
 └────────────────────────────────────┬───────────────────────────────────┘
                                      ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │  PHASE 02: OMNICHANNEL & CROSS-BORDER PAYMENT GATEWAY                  │
 │  📁 docs/phases/phase-02-omnichannel-payment-gateway/README.md         │
-│  • VietQR / Virtual Account • MoMo / ZaloPay • Visa / PayPal • Crypto │
+│  • 2A: VietQR & USDT tức thời • 2B: Thẻ QT 3D-Secure & Chống gian lận │
 └────────────────────────────────────┬───────────────────────────────────┘
                                      ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │  PHASE 03: DIGITAL COMMERCE & INSTANT FULFILLMENT                      │
 │  📁 docs/phases/phase-03-digital-commerce-fulfillment/README.md        │
-│  • Chợ sản phẩm số • Kho số thông minh • Khóa giữ hàng • Bàn giao <=1s │
+│  • Chợ số • Live Health Check kiểm tra trước khi giao • Bàn giao <=1s  │
 └────────────────────────────────────┬───────────────────────────────────┘
                                      ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │  PHASE 04: CLOUD AUTOMATION & FLEET COMMAND                            │
 │  📁 docs/phases/phase-04-cloud-automation-fleet/README.md              │
-│  • Đám mây tự động hóa bán trên Shop • Giám sát VPS • Zero-Zombie     │
+│  • SaaS kịch bản trên shop • Đo cước động (Metered Billing) • Zero-Zombie│
 └────────────────────────────────────┬───────────────────────────────────┘
                                      ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │  PHASE 05: WHITE-LABEL FRANCHISE & OPEN MARKETPLACE                    │
 │  📁 docs/phases/phase-05-white-label-marketplace/README.md             │
-│  • Nhượng quyền đại lý • Sàn chia sẻ doanh thu • API Doanh nghiệp mở  │
+│  • Nhượng quyền đại lý • Hộp cát kiểm duyệt mã độc • Sàn chia sẻ mở   │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -47,11 +47,11 @@ Các tài liệu dưới đây phân tích chi tiết mục tiêu kinh doanh, g�
 
 | Thư mục Phase | Tên Giai Đoạn Trọng Tâm | Thời Gian Dự Kiến | Trọng Tâm Nghiệm Thu |
 | :--- | :--- | :---: | :--- |
-| [**`Phase 01`**](./phase-01-enterprise-iam-multitenancy/README.md) | **Enterprise IAM & Multi-Tenancy** | 18/10 – 08/11/2026 | Cô lập dữ liệu đa tổ chức 100%, bảo mật xác thực, phân quyền vai trò hạt mịn, vá SSRF & Open Redirect. |
-| [**`Phase 02`**](./phase-02-omnichannel-payment-gateway/README.md) | **Omnichannel Payment Gateway** | 09/11 – 30/11/2026 | Ngân hàng VietQR/VA, Ví Việt Nam (MoMo, ZaloPay), Thẻ quốc tế (Visa/PayPal), Crypto (USDT on-chain), Sổ cái kép. |
-| [**`Phase 03`**](./phase-03-digital-commerce-fulfillment/README.md) | **Digital Commerce & Fulfillment** | 01/12 – 22/12/2026 | Chợ tài nguyên số, kho quản lý key/proxy, khóa giữ hàng chống tranh chấp, xuất hàng tự động $\le 1\text{s}$. |
-| [**`Phase 04`**](./phase-04-cloud-automation-fleet/README.md) | **Cloud Automation & Fleet** | 05/01 – 15/02/2027 | Đóng gói workflow/bot bán trên Shop, kết nối WebSocket native BFF daemon, giám sát cụm máy chủ thời gian thực. |
-| [**`Phase 05`**](./phase-05-white-label-marketplace/README.md) | **White-Label & Marketplace** | 01/03 – 30/04/2027 | Nhượng quyền đối tác gắn tên miền/logo riêng, sàn kịch bản cộng đồng chia sẻ doanh thu, Public Developer API. |
+| [**`Phase 01`**](./phase-01-enterprise-iam-multitenancy/README.md) | **Enterprise IAM & Multi-Tenancy** | 18/10 – 08/11/2026 | Cô lập dữ liệu đa tổ chức 100%, Enterprise SSO (Google/MS), phân quyền vai trò hạt mịn, vá SSRF & Open Redirect. |
+| [**`Phase 02`**](./phase-02-omnichannel-payment-gateway/README.md) | **Omnichannel Payment Gateway** | 09/11 – 30/11/2026 | 2 Phân kỳ: (2A) VietQR/VA & USDT tức thời; (2B) Thẻ QT 3D-Secure có chống gian lận & Ví VN; Sổ cái kép. |
+| [**`Phase 03`**](./phase-03-digital-commerce-fulfillment/README.md) | **Digital Commerce & Fulfillment** | 01/12 – 22/12/2026 | Chợ tài nguyên số, Pre-delivery Live Health Check loại bỏ hàng die, khóa giữ hàng, xuất hàng tự động $\le 1\text{s}$. |
+| [**`Phase 04`**](./phase-04-cloud-automation-fleet/README.md) | **Cloud Automation & Fleet** | 05/01 – 15/02/2027 | Đóng gói workflow/bot bán trên Shop, đo cước tài nguyên động (Metered Billing), kết nối WebSocket native BFF daemon, Zero-Zombie. |
+| [**`Phase 05`**](./phase-05-white-label-marketplace/README.md) | **White-Label & Marketplace** | 01/03 – 30/04/2027 | Nhượng quyền đối tác gắn tên miền/logo riêng, hộp cát bảo mật kiểm duyệt kịch bản cộng đồng, Public Developer API. |
 
 ---
 
