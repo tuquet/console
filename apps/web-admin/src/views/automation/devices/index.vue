@@ -30,6 +30,7 @@ import {
 } from '#/api';
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 import ConnectFleetModal from './components/modals/connect-fleet-modal.vue';
 
@@ -74,6 +75,11 @@ async function handleRevokeNode(node: FleetDeviceItem) {
     );
     gridApi.reload();
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleRevokeNode',
+      nodeId: node.id,
+      view: 'AutomationDevices',
+    });
     toast.error(
       error.message || $t('page.automation_view.device_revoke_failed'),
     );
@@ -81,59 +87,53 @@ async function handleRevokeNode(node: FleetDeviceItem) {
 }
 
 function getColumns() {
-  const mobile = isMobile.value;
   return [
     {
       field: 'name',
       title: $t('page.automation_view.col_workstation'),
-      minWidth: mobile ? 175 : 240,
+      minWidth: 240,
       slots: { default: 'name-cell' },
     },
     {
       field: 'os_info',
       title: $t('page.automation_view.col_os'),
-      width: 140,
-      visible: !mobile,
+      minWidth: 140,
       slots: { default: 'os-cell' },
     },
     {
       field: 'hardware',
       title: $t('page.automation_view.col_hardware'),
-      width: 190,
-      visible: !mobile,
+      minWidth: 190,
       slots: { default: 'hardware-cell' },
     },
     {
       field: 'driver_type',
       title: $t('page.automation_view.col_driver'),
-      width: 130,
-      visible: !mobile,
+      minWidth: 130,
       slots: { default: 'driver-cell' },
     },
     {
       field: 'status',
       title: $t('common.status'),
-      width: mobile ? 95 : 140,
+      minWidth: 140,
       slots: { default: 'status-cell' },
     },
     {
       field: 'active_jobs',
       title: $t('term.jobs'),
-      width: 110,
-      visible: !mobile,
+      minWidth: 110,
       slots: { default: 'jobs-cell' },
     },
     {
       field: 'last_heartbeat_at',
       title: $t('page.fleet_view.col_last_seen'),
-      width: 150,
-      visible: !mobile,
+      minWidth: 150,
       slots: { default: 'heartbeat-cell' },
     },
     {
       field: 'actions',
       title: $t('common.actions'),
-      minWidth: mobile ? 85 : 115,
+      minWidth: 115,
       align: 'right' as const,
       showOverflow: false,
       slots: { default: 'actions-cell' },
@@ -160,6 +160,7 @@ const [Grid, gridApi] = useVbenVxeGrid<FleetDeviceItem>({
       {
         component: 'Select',
         fieldName: 'status',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.status'),
         defaultValue: (route.query.status as string) || 'all',
         componentProps: () => ({
@@ -186,6 +187,7 @@ const [Grid, gridApi] = useVbenVxeGrid<FleetDeviceItem>({
       {
         component: 'Input',
         fieldName: 'search',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.search'),
         componentProps: () => ({
           placeholder: $t('page.automation_view.device_search_placeholder'),
@@ -195,6 +197,8 @@ const [Grid, gridApi] = useVbenVxeGrid<FleetDeviceItem>({
     ],
     layout: 'vertical',
     showCollapseButton: false,
+    submitOnChange: true,
+    submitOnEnter: true,
     submitButtonOptions: {
       content: computed(() => $t('common.filter')),
     },
@@ -202,7 +206,7 @@ const [Grid, gridApi] = useVbenVxeGrid<FleetDeviceItem>({
       content: computed(() => $t('common.reset')),
     },
     actionWrapperClass:
-      'col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+      'hidden sm:flex sm:col-span-2 lg:col-span-2 items-center justify-end gap-2 pt-1 sm:pt-6',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -278,9 +282,9 @@ watch(
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Compact Single-Row Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <h1
             class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
           >
@@ -295,7 +299,7 @@ watch(
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="sm"

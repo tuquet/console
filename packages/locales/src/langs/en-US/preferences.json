@@ -1,89 +1,89 @@
 {
   "title": "Preferences",
   "subtitle": "",
-  "enableStickyPreferencesNavigationBar": "Enable sticky preferences navigation bar",
-  "disableStickyPreferencesNavigationBar": "Disable sticky preferences navigation bar",
-  "resetTip": "Data has changed, click to reset",
-  "resetTitle": "Reset Preferences",
-  "resetSuccess": "Preferences reset successfully",
+  "enableStickyPreferencesNavigationBar": "Pin navigation bar",
+  "disableStickyPreferencesNavigationBar": "Unpin navigation bar",
+  "resetTip": "Modified, click to reset",
+  "resetTitle": "Reset preferences",
+  "resetSuccess": "Preferences reset",
   "appearance": "Appearance",
   "layout": "Layout",
   "content": "Content",
   "other": "Other",
   "wide": "Wide",
   "compact": "Fixed",
-  "followSystem": "Follow System",
+  "followSystem": "System",
   "vertical": "Vertical",
-  "verticalTip": "Side vertical menu mode",
+  "verticalTip": "Left vertical sidebar menu",
   "horizontal": "Horizontal",
-  "horizontalTip": "Horizontal menu mode, all menus displayed at the top",
-  "twoColumn": "Two Column",
-  "twoColumnTip": "Vertical Two Column Menu Mode",
-  "headerSidebarNav": "Header Vertical",
-  "headerSidebarNavTip": "Header Full Width, Sidebar Navigation Mode",
-  "headerTwoColumn": "Header Two Column",
-  "headerTwoColumnTip": "Header Navigation & Sidebar Two Column co-exists",
-  "mixedMenu": "Mixed Menu",
-  "mixedMenuTip": "Vertical & Horizontal Menu Co-exists",
-  "fullContent": "Full Content",
-  "fullContentTip": "Only display content body, hide all menus",
+  "horizontalTip": "Top horizontal navigation menu",
+  "twoColumn": "Two-column",
+  "twoColumnTip": "Split vertical two-column menu",
+  "headerSidebarNav": "Header vertical",
+  "headerSidebarNavTip": "Full-width header with sidebar menu",
+  "headerTwoColumn": "Header two-column",
+  "headerTwoColumnTip": "Combined header and two-column sidebar",
+  "mixedMenu": "Mixed menu",
+  "mixedMenuTip": "Combined top and side navigation",
+  "fullContent": "Full content",
+  "fullContentTip": "Content only, hide all menus",
   "normal": "Normal",
   "plain": "Plain",
   "rounded": "Rounded",
-  "copyPreferences": "Copy Preferences",
-  "enableCopyPreferences": "Show copy preferences button",
-  "copyPreferencesSuccessTitle": "Copy successful",
-  "copyPreferencesSuccess": "Copy successful, please override in `src/preferences.ts` under app",
-  "clearAndLogout": "Clear Cache & Logout",
+  "copyPreferences": "Copy config",
+  "enableCopyPreferences": "Show copy config button",
+  "copyPreferencesSuccessTitle": "Copied",
+  "copyPreferencesSuccess": "Copied, paste into `src/preferences.ts`",
+  "clearAndLogout": "Clear cache & log out",
   "mode": "Mode",
   "general": "General",
   "language": "Language",
   "timezone": "Timezone",
-  "dynamicTitle": "Dynamic Title",
+  "dynamicTitle": "Dynamic title",
   "watermark": "Watermark",
-  "watermarkContent": "Please input Watermark content",
-  "checkUpdates": "Periodic update check",
+  "watermarkContent": "Enter watermark text",
+  "checkUpdates": "Auto-check updates",
   "position": {
-    "title": "Preferences Position",
+    "title": "Button position",
     "header": "Header",
     "auto": "Auto",
     "fixed": "Fixed",
-    "userDropdown": "User Dropdown"
+    "userDropdown": "User menu"
   },
   "sidebar": {
-    "buttons": "Show Buttons",
-    "buttonFixed": "Fixed",
-    "buttonCollapsed": "Collapsed",
+    "buttons": "Control buttons",
+    "buttonFixed": "Pin",
+    "buttonCollapsed": "Collapse",
     "title": "Sidebar",
     "width": "Width",
-    "visible": "Show Sidebar",
-    "visibleDisabledTip": "Cannot disable sidebar in Sidebar Nav mode as it is the primary navigation. Use collapse instead.",
-    "draggable": "Drag Sidebar Menu",
-    "collapsed": "Collapse Menu",
-    "collapsedShowTitle": "Show Menu Title",
-    "autoActivateChild": "Auto Activate SubMenu",
-    "autoActivateChildTip": "`Enabled` to automatically activate the submenu while click menu.",
-    "expandOnHover": "Expand On Hover",
-    "expandOnHoverTip": "When the mouse hovers over menu, \n `Enabled` to expand children menus \n `Disabled` to expand whole sidebar."
+    "visible": "Show sidebar",
+    "visibleDisabledTip": "Sidebar cannot be hidden in vertical navigation mode.",
+    "draggable": "Draggable menu",
+    "collapsed": "Collapse menu",
+    "collapsedShowTitle": "Show title when collapsed",
+    "autoActivateChild": "Auto-open submenu",
+    "autoActivateChildTip": "Automatically open submenu when clicking parent item.",
+    "expandOnHover": "Expand on hover",
+    "expandOnHoverTip": "Automatically expand sidebar when hovering."
   },
   "tabbar": {
-    "title": "Tabbar",
-    "enable": "Enable Tab Bar",
-    "showRefresh": "Show Refresh Button",
-    "icon": "Show Tabbar Icon",
-    "showMore": "Show More Button",
-    "showMaximize": "Show Maximize Button",
-    "persist": "Persist Tabs",
-    "visitHistory": "Visit History",
-    "visitHistoryTip": "When enabled, the tab bar records tab visit history. \nClosing the current tab will automatically select the last opened tab.",
-    "maxCount": "Max Count of Tabs",
-    "maxCountTip": "When the number of tabs exceeds the maximum,\nthe oldest tab will be closed.\n Set to 0 to disable count checking.",
-    "draggable": "Enable Draggable Sort",
-    "wheelable": "Support Mouse Wheel",
-    "middleClickClose": "Close Tab when Mouse Middle Button Click",
-    "wheelableTip": "When enabled, the Tabbar area responds to vertical scrolling events of the scroll wheel.",
+    "title": "Tab bar",
+    "enable": "Enable tab bar",
+    "showRefresh": "Refresh button",
+    "icon": "Tab icons",
+    "showMore": "More button",
+    "showMaximize": "Maximize button",
+    "persist": "Persist tabs",
+    "visitHistory": "Visit history",
+    "visitHistoryTip": "Closing a tab returns to the most recently visited tab.",
+    "maxCount": "Max tabs",
+    "maxCountTip": "Oldest tab closes when limit is reached (0 = unlimited).",
+    "draggable": "Draggable tabs",
+    "wheelable": "Mouse wheel scroll",
+    "middleClickClose": "Middle-click to close",
+    "wheelableTip": "Scroll tabs horizontally using the mouse wheel.",
     "styleType": {
-      "title": "Tabs Style",
+      "title": "Tab style",
       "chrome": "Chrome",
       "card": "Card",
       "plain": "Plain",
@@ -94,62 +94,62 @@
       "close": "Close",
       "pin": "Pin",
       "unpin": "Unpin",
-      "closeLeft": "Close Left Tabs",
-      "closeRight": "Close Right Tabs",
-      "closeOther": "Close Other Tabs",
-      "closeAll": "Close All Tabs",
-      "openInNewWindow": "Open in New Window",
+      "closeLeft": "Close tabs to left",
+      "closeRight": "Close tabs to right",
+      "closeOther": "Close other tabs",
+      "closeAll": "Close all",
+      "openInNewWindow": "Open in new window",
       "maximize": "Maximize",
       "restoreMaximize": "Restore"
     }
   },
   "navigationMenu": {
-    "title": "Navigation Menu",
-    "style": "Navigation Menu Style",
-    "accordion": "Sidebar Accordion Menu",
-    "split": "Navigation Menu Separation",
-    "splitTip": "When enabled, the sidebar displays the top bar's submenu"
+    "title": "Navigation menu",
+    "style": "Menu style",
+    "accordion": "Accordion mode",
+    "split": "Split menu",
+    "splitTip": "Sidebar displays submenus for the active top menu item."
   },
   "breadcrumb": {
     "title": "Breadcrumb",
-    "home": "Show Home Button",
-    "enable": "Enable Breadcrumb",
-    "enableTip": "Breadcrumb is visible on desktop screens (≥1024px) when the header does not carry primary navigation menus.",
-    "icon": "Show Breadcrumb Icon",
-    "background": "background",
-    "style": "Breadcrumb Style",
-    "hideOnlyOne": "Hidden when only one"
+    "home": "Home button",
+    "enable": "Enable breadcrumb",
+    "enableTip": "Visible on desktop screens.",
+    "icon": "Show icons",
+    "background": "Background",
+    "style": "Breadcrumb style",
+    "hideOnlyOne": "Hide single-level"
   },
   "animation": {
     "title": "Animation",
-    "loading": "Page Loading",
-    "transition": "Page Transition",
-    "progress": "Page Progress"
+    "loading": "Page loading",
+    "transition": "Page transition",
+    "progress": "Progress bar"
   },
   "theme": {
     "title": "Theme",
-    "radius": "Radius",
-    "fontSize": "Font Size",
-    "fontSizeTip": "Adjust global font size with real-time preview",
+    "radius": "Corner radius",
+    "fontSize": "Font size",
+    "fontSizeTip": "Adjust system-wide font size",
     "light": "Light",
     "dark": "Dark",
-    "darkSidebar": "Semi Dark Sidebar",
-    "darkSidebarTip": "It can be enabled when the theme is light, and the layout is neither 'Horizontal' nor 'Full Content'.",
-    "darkSidebarSub": "Semi Dark Sidebar Sub",
-    "darkSidebarSubTip": "It can be enabled when the theme is light, the semi dark sidebar is enabled, and the layout uses 'Two-Column' menu mode.",
-    "darkHeader": "Semi Dark Header",
-    "weakMode": "Weak Mode",
-    "grayMode": "Gray Mode",
+    "darkSidebar": "Dark sidebar",
+    "darkSidebarTip": "Applies when using light theme with a sidebar.",
+    "darkSidebarSub": "Dark sub-sidebar",
+    "darkSidebarSubTip": "Applies in two-column menu mode.",
+    "darkHeader": "Dark header",
+    "weakMode": "High contrast",
+    "grayMode": "Monochrome",
     "builtin": {
-      "title": "Built-in",
+      "title": "Accent color",
       "default": "Default",
       "violet": "Violet",
       "pink": "Pink",
       "rose": "Rose",
-      "skyBlue": "Sky Blue",
-      "deepBlue": "Deep Blue",
+      "skyBlue": "Sky blue",
+      "deepBlue": "Deep blue",
       "green": "Green",
-      "deepGreen": "Deep Green",
+      "deepGreen": "Forest green",
       "orange": "Orange",
       "yellow": "Yellow",
       "zinc": "Zinc",
@@ -161,124 +161,124 @@
   },
   "header": {
     "title": "Header",
-    "visible": "Show Header",
+    "visible": "Show header",
     "modeStatic": "Static",
     "modeFixed": "Fixed",
-    "modeAuto": "Auto hide & Show",
-    "modeAutoScroll": "Scroll to Hide & Show",
-    "menuAlign": "Menu Align",
-    "menuAlignStart": "Start",
-    "menuAlignEnd": "End",
+    "modeAuto": "Auto-hide",
+    "modeAutoScroll": "Hide on scroll",
+    "menuAlign": "Menu alignment",
+    "menuAlignStart": "Left",
+    "menuAlignEnd": "Right",
     "menuAlignCenter": "Center"
   },
   "footer": {
     "title": "Footer",
-    "visible": "Show Footer",
-    "fixed": "Fixed at Bottom"
+    "visible": "Show footer",
+    "fixed": "Fixed at bottom"
   },
   "copyright": {
     "title": "Copyright",
-    "enable": "Enable Copyright",
-    "companyName": "Company Name",
-    "companySiteLink": "Company Site Link",
-    "date": "Date",
-    "icp": "ICP License Number",
-    "icpLink": "ICP Site Link"
+    "enable": "Show copyright",
+    "companyName": "Company name",
+    "companySiteLink": "Website URL",
+    "date": "Year",
+    "icp": "License",
+    "icpLink": "License URL"
   },
   "shortcutKeys": {
-    "title": "Shortcut Keys",
+    "title": "Shortcuts",
     "global": "Global",
-    "search": "Global Search",
-    "logout": "Logout",
-    "escape": "Close Current Window",
+    "search": "Quick search",
+    "logout": "Log out",
+    "escape": "Close dialog",
     "preferences": "Preferences"
   },
   "widget": {
-    "title": "Widget",
-    "globalSearch": "Global Search",
-    "globalSearchPosition": "Global Search Position",
-    "fullscreen": "Enable Fullscreen",
-    "fullscreenPosition": "Fullscreen Position",
-    "themeToggle": "Enable Theme Toggle",
-    "themeTogglePosition": "Theme Toggle Position",
-    "languageToggle": "Language Toggle",
-    "languageTogglePosition": "Language Toggle Position",
-    "notification": "Enable Notification",
-    "notificationPosition": "Notification Position",
-    "sidebarToggle": "Enable Sidebar Toggle",
-    "lockScreen": "Enable Lock Screen",
-    "lockScreenPosition": "Lock Screen Button Position",
-    "logoutButtonPosition": "Logout Button Position",
+    "title": "Widgets",
+    "globalSearch": "Quick search",
+    "globalSearchPosition": "Search position",
+    "fullscreen": "Fullscreen",
+    "fullscreenPosition": "Fullscreen position",
+    "themeToggle": "Theme toggle",
+    "themeTogglePosition": "Theme position",
+    "languageToggle": "Language toggle",
+    "languageTogglePosition": "Language position",
+    "notification": "Notifications",
+    "notificationPosition": "Notification position",
+    "sidebarToggle": "Sidebar toggle",
+    "lockScreen": "Lock screen",
+    "lockScreenPosition": "Lock screen position",
+    "logoutButtonPosition": "Logout position",
     "header": "Header",
-    "userDropdown": "User Dropdown",
+    "userDropdown": "User menu",
     "hidden": "Hidden",
-    "refresh": "Enable Refresh",
-    "refreshPosition": "Refresh Position",
-    "timezone": "Enable Timezone",
-    "timezonePosition": "Timezone Position"
+    "refresh": "Refresh button",
+    "refreshPosition": "Refresh position",
+    "timezone": "Timezone",
+    "timezonePosition": "Timezone position"
   },
   "admin": {
-    "tabLabel": "Admin Extension",
-    "title": "Business Preferences",
+    "tabLabel": "Admin",
+    "title": "Business config",
     "fields": {
       "enableFormFullscreen": {
-        "label": "Enable Form Fullscreen Mode",
-        "tip": "Subprojects can read this extension configuration in their own business scenarios."
+        "label": "Fullscreen forms",
+        "tip": "Allow expanding data forms to fullscreen."
       },
       "tenantMode": {
-        "label": "Tenant Mode",
+        "label": "Workspace mode",
         "options": {
           "single": {
-            "label": "Single Tenant"
+            "label": "Single workspace"
           },
           "multi": {
-            "label": "Multi Tenant"
+            "label": "Multi-workspace"
           }
         }
       },
       "defaultTableSize": {
-        "label": "Default Page Size"
+        "label": "Rows per page"
       },
       "reportTitle": {
-        "label": "Default Report Title",
-        "placeholder": "Please enter the default report title"
+        "label": "Report title",
+        "placeholder": "Enter default report title"
       }
     }
   },
   "antd": {
-    "tabLabel": "Admin Extension",
-    "title": "Business Preferences",
+    "tabLabel": "Admin",
+    "title": "Business config",
     "fields": {
       "enableFormFullscreen": {
-        "label": "Enable Form Fullscreen Mode",
-        "tip": "Subprojects can read this extension configuration in their own business scenarios."
+        "label": "Fullscreen forms",
+        "tip": "Allow expanding data forms to fullscreen."
       },
       "tenantMode": {
-        "label": "Tenant Mode",
+        "label": "Workspace mode",
         "options": {
           "single": {
-            "label": "Single Tenant"
+            "label": "Single workspace"
           },
           "multi": {
-            "label": "Multi Tenant"
+            "label": "Multi-workspace"
           }
         }
       },
       "defaultTableSize": {
-        "label": "Default Page Size"
+        "label": "Rows per page"
       },
       "reportTitle": {
-        "label": "Default Report Title",
-        "placeholder": "Please enter the default report title"
+        "label": "Report title",
+        "placeholder": "Enter default report title"
       }
     }
   },
   "typography": {
     "title": "Typography",
-    "fontFamily": "UI Font Family",
-    "fontFamilyTip": "Switch interface font stack across Inter, Roboto, and System UI",
-    "inter": "Inter (Recommended / Default)",
-    "roboto": "Roboto (Google Classic)",
-    "systemUi": "System UI (Native OS)"
+    "fontFamily": "Font family",
+    "fontFamilyTip": "Select system-wide interface font",
+    "inter": "Inter (Default)",
+    "roboto": "Roboto",
+    "systemUi": "System UI"
   }
 }

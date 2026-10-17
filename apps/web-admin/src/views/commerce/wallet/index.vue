@@ -55,6 +55,7 @@ import {
 } from '#/api';
 import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'CommerceWallet' });
 
@@ -128,45 +129,41 @@ const estimatedPayAmount = computed(() => {
 });
 
 function getColumns() {
-  const mobile = isMobile.value;
   return [
     {
       field: 'tx_type',
       title: $t('page.commerce_view.tx_type_label'),
-      width: mobile ? 105 : 175,
+      minWidth: 175,
       slots: { default: 'type-cell' },
     },
     {
       field: 'description',
       title: $t('common.description'),
-      minWidth: mobile ? 155 : 240,
+      minWidth: 240,
       slots: { default: 'desc-cell' },
     },
     {
       field: 'amount_credits',
       title: $t('page.commerce_view.col_amount_change'),
-      width: mobile ? 105 : 155,
+      minWidth: 155,
       slots: { default: 'amount-cell' },
     },
     {
       field: 'balance_after_credits',
       title: $t('page.commerce_view.col_balance_after'),
-      width: 155,
-      visible: !mobile,
+      minWidth: 155,
       slots: { default: 'balance-cell' },
     },
     {
       field: 'reference_id',
       title: $t('page.commerce_view.col_reference_id'),
-      width: 175,
-      visible: !mobile,
+      minWidth: 175,
       slots: { default: 'ref-cell' },
     },
     {
       field: 'created_at',
       title: $t('page.commerce_view.col_created_time'),
-      width: 165,
-      visible: !mobile,
+      minWidth: 165,
       slots: { default: 'date-cell' },
     },
   ];
@@ -198,6 +195,7 @@ const [Grid, gridApi] = useVbenVxeGrid<WalletTransactionItem>({
       {
         component: 'Select',
         fieldName: 'tx_type',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('page.commerce_view.tx_type_label'),
         defaultValue: 'all',
         componentProps: () => ({
@@ -218,6 +216,7 @@ const [Grid, gridApi] = useVbenVxeGrid<WalletTransactionItem>({
       {
         component: 'Input',
         fieldName: 'search',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.search'),
         componentProps: () => ({
           placeholder: $t('page.commerce_view.search_tx_placeholder'),
@@ -236,7 +235,7 @@ const [Grid, gridApi] = useVbenVxeGrid<WalletTransactionItem>({
       content: computed(() => $t('common.reset')),
     },
     actionWrapperClass:
-      'col-span-2 sm:col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+      'hidden sm:flex sm:col-span-2 lg:col-span-2 items-center justify-end gap-2 pt-1 sm:pt-6',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -418,6 +417,10 @@ async function handleCreateTopupIntent() {
       }),
     );
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleCreateTopup',
+      view: 'CommerceWallet',
+    });
     toast.error(error?.message || $t('page.commerce_view.topup_create_failed'));
   } finally {
     creatingIntent.value = false;
@@ -449,15 +452,15 @@ onBeforeUnmount(() => {
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <h1
             class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
           >
             {{ $t('page.commerce.wallet') }}
           </h1>
-          <Badge variant="secondary" class="text-xs font-normal">
+          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
             {{ allTransactions.length }}
           </Badge>
         </div>
@@ -466,7 +469,7 @@ onBeforeUnmount(() => {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <div class="flex items-center gap-1.5">
           <Select
             :model-value="selectedTenantId"
@@ -513,7 +516,7 @@ onBeforeUnmount(() => {
 
     <!-- Compact Wallet Balance Strip -->
     <div
-      class="flex items-center justify-between gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-3.5 py-2.5 sm:px-4 sm:py-3"
+      class="flex flex-wrap items-center justify-between gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-3.5 py-2.5 sm:px-4 sm:py-3"
     >
       <div class="flex items-center gap-2.5">
         <div

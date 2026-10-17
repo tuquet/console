@@ -38,27 +38,25 @@ function getColumns() {
     {
       field: 'name',
       title: $t('term.plugin'),
-      minWidth: isMobile.value ? 180 : 220,
+      minWidth: 220,
       slots: { default: 'plugin-cell' },
     },
     {
       field: 'is_core',
       title: $t('page.system_view.plugins_col_type'),
-      width: 150,
-      visible: !isMobile.value,
+      minWidth: 150,
       slots: { default: 'type-cell' },
     },
     {
       field: 'version',
       title: $t('page.system_view.plugins_col_version_schema'),
       minWidth: 200,
-      visible: !isMobile.value,
       slots: { default: 'version-cell' },
     },
     {
       field: 'status',
       title: $t('common.status'),
-      width: isMobile.value ? 110 : 140,
+      minWidth: 140,
       slots: { default: 'status-cell' },
     },
     {
@@ -66,7 +64,6 @@ function getColumns() {
       title: $t('page.system_view.plugins_col_installed_at'),
       minWidth: 150,
       align: 'right' as const,
-      visible: !isMobile.value,
       cellRender: { name: 'CellDate' },
     },
   ];
@@ -89,6 +86,7 @@ const [Grid, gridApi] = useVbenVxeGrid<SystemPluginItem>({
       {
         component: 'Select',
         fieldName: 'is_core',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('page.system_view.plugins_filter_type'),
         defaultValue: FILTER_ALL,
         componentProps: () => ({
@@ -112,14 +110,18 @@ const [Grid, gridApi] = useVbenVxeGrid<SystemPluginItem>({
       {
         component: 'Input',
         fieldName: 'keyword',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.search'),
         componentProps: () => ({
           placeholder: $t('page.system_view.plugins_search_placeholder'),
+          clearable: true,
         }),
       },
     ],
     layout: 'vertical',
     showCollapseButton: false,
+    submitOnChange: true,
+    submitOnEnter: true,
     submitButtonOptions: {
       content: computed(() => $t('common.filter')),
     },
@@ -127,7 +129,7 @@ const [Grid, gridApi] = useVbenVxeGrid<SystemPluginItem>({
       content: computed(() => $t('common.reset')),
     },
     actionWrapperClass:
-      'col-span-2 sm:col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+      'hidden sm:flex sm:col-span-2 lg:col-span-2 items-center justify-end gap-2 pt-1 sm:pt-6',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -226,15 +228,15 @@ function refresh() {
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Top Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <h1
             class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
           >
             {{ $t('page.system.plugins') }}
           </h1>
-          <Badge variant="secondary" class="text-xs font-normal">
+          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
             {{ allPlugins.length }}
           </Badge>
         </div>
@@ -243,7 +245,7 @@ function refresh() {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -285,16 +287,6 @@ function refresh() {
                 class="flex items-center gap-1.5 text-2xs text-muted-foreground sm:text-xs"
               >
                 <span class="truncate">{{ row.id }}</span>
-                <span class="sm:hidden">&bull;</span>
-                <span class="sm:hidden">v{{ row.version }}</span>
-                <span class="sm:hidden">&bull;</span>
-                <span class="truncate font-sans sm:hidden">
-                  {{
-                    row.is_core
-                      ? $t('page.system_view.plugins_type_core')
-                      : $t('page.system_view.plugins_type_extension')
-                  }}
-                </span>
               </div>
             </div>
           </div>

@@ -28,6 +28,7 @@ import {
 
 import { calculateProgressPercentage, getAutomationOverviewApi } from '#/api';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 import ConnectFleetModal from '../devices/components/modals/connect-fleet-modal.vue';
 
@@ -119,6 +120,7 @@ async function loadOverview() {
     const tenantId = (route.query.tenant as string) || undefined;
     overview.value = await getAutomationOverviewApi({ tenantId });
   } catch (error: any) {
+    captureError(error, { action: 'loadOverview', view: 'AutomationOverview' });
     toast.error(
       error?.message || $t('page.automation_view.overview_load_failed'),
     );
@@ -187,7 +189,7 @@ onMounted(() => {
 <template>
   <div class="space-y-3.5 p-3 sm:space-y-5 sm:p-5">
     <!-- Compact Single-Row Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
         <h1
           class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
@@ -199,7 +201,7 @@ onMounted(() => {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Badge
           variant="outline"
           class="hidden h-8 items-center gap-1.5 px-2.5 text-xs font-normal sm:inline-flex"

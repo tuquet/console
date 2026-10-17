@@ -39,40 +39,37 @@ function getColumns() {
     {
       field: 'name',
       title: $t('page.system_view.plans_col_name'),
-      minWidth: isMobile.value ? 170 : 200,
+      minWidth: 200,
       slots: { default: 'name-cell' },
     },
     {
       field: 'price_monthly_usd',
       title: $t('page.system_view.plans_col_price'),
-      width: isMobile.value ? 100 : 140,
+      minWidth: 140,
       slots: { default: 'price-cell' },
     },
     {
       field: 'max_members',
       title: $t('page.system_view.plans_col_max_members'),
-      width: 170,
-      visible: !isMobile.value,
+      minWidth: 170,
       slots: { default: 'members-cell' },
     },
     {
       field: 'max_storage_mb',
       title: $t('page.system_view.plans_col_storage'),
-      width: 140,
-      visible: !isMobile.value,
+      minWidth: 140,
       slots: { default: 'storage-cell' },
     },
     {
       field: 'max_monthly_runs',
       title: $t('page.system_view.plans_col_monthly_runs'),
-      width: 160,
-      visible: !isMobile.value,
+      minWidth: 160,
       slots: { default: 'runs-cell' },
     },
     {
       field: 'is_active',
       title: $t('common.status'),
-      width: isMobile.value ? 105 : 130,
+      minWidth: 130,
       slots: { default: 'status-cell' },
     },
     {
@@ -80,7 +77,6 @@ function getColumns() {
       title: $t('common.createdAt'),
       minWidth: 150,
       align: 'right' as const,
-      visible: !isMobile.value,
       slots: { default: 'date-cell' },
     },
   ];
@@ -103,6 +99,7 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
       {
         component: 'Select',
         fieldName: 'status',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.status'),
         defaultValue: 'all',
         componentProps: () => ({
@@ -120,6 +117,7 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
       {
         component: 'Input',
         fieldName: 'search',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.search'),
         componentProps: () => ({
           placeholder: $t('page.system_view.plans_search_placeholder'),
@@ -129,6 +127,8 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
     ],
     layout: 'vertical',
     showCollapseButton: false,
+    submitOnChange: true,
+    submitOnEnter: true,
     submitButtonOptions: {
       content: computed(() => $t('common.filter')),
     },
@@ -136,7 +136,7 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
       content: computed(() => $t('common.reset')),
     },
     actionWrapperClass:
-      'col-span-2 sm:col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+      'hidden sm:flex sm:col-span-2 lg:col-span-2 items-center justify-end gap-2 pt-1 sm:pt-6',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -205,15 +205,15 @@ watch([() => $t('page.system_view.plans_col_name'), isMobile], () => {
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Top Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <h1
             class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
           >
             {{ $t('page.system.plans') }}
           </h1>
-          <Badge variant="secondary" class="text-xs font-normal">
+          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
             {{ plansCount }}
           </Badge>
         </div>
@@ -222,7 +222,7 @@ watch([() => $t('page.system_view.plans_col_name'), isMobile], () => {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -264,16 +264,6 @@ watch([() => $t('page.system_view.plans_col_name'), isMobile], () => {
                 class="flex items-center gap-1.5 text-2xs text-muted-foreground sm:text-xs"
               >
                 <span class="truncate">{{ row.id }}</span>
-                <span class="sm:hidden">&bull;</span>
-                <span class="truncate font-sans sm:hidden">
-                  {{
-                    $t('page.system_view.plans_members_unit', [row.max_members])
-                  }}
-                </span>
-                <span class="sm:hidden">&bull;</span>
-                <span class="sm:hidden">{{
-                  formatStorage(row.max_storage_mb)
-                }}</span>
               </div>
             </div>
           </div>

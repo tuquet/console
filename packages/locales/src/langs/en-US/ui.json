@@ -55,14 +55,14 @@
     "copied": "Copied"
   },
   "crop": {
-    "title": "Image Cropping",
-    "titleTip": "Cropping Ratio {0}",
+    "title": "Crop image",
+    "titleTip": "Aspect ratio {0}",
     "confirm": "Crop",
-    "cancel": "Cancel cropping",
+    "cancel": "Cancel",
     "errorTip": "Cropping error"
   },
   "tiptap": {
-    "placeholder": "Please enter content...",
+    "placeholder": "Enter content...",
     "prompts": {
       "image": "Enter image URL",
       "link": "Enter link URL"
@@ -73,7 +73,7 @@
       "underline": "Underline",
       "strike": "Strike",
       "code": "Code",
-      "codeBlock": "Code Block",
+      "codeBlock": "Code block",
       "heading": "Heading",
       "paragraph": "Paragraph",
       "heading1": "H1",
@@ -87,9 +87,9 @@
       "unlink": "Unlink",
       "image": "Image",
       "imageUrl": "Image URL",
-      "imageUpload": "Upload Image",
-      "textColor": "Text Color",
-      "highlightColor": "Highlight Color",
+      "imageUpload": "Upload image",
+      "textColor": "Text color",
+      "highlightColor": "Highlight color",
       "alignLeft": "Left",
       "alignCenter": "Center",
       "alignRight": "Right",
@@ -99,67 +99,67 @@
       "clear": "Clear"
     },
     "upload": {
-      "fileTooLarge": "File size exceeds the limit",
-      "fileTypeNotAllowed": "File type is not allowed",
-      "onlySingleImage": "Only single image upload is supported, the first one is selected",
-      "uploadFailed": "Upload Failed"
+      "fileTooLarge": "File size exceeds limit",
+      "fileTypeNotAllowed": "File type not supported",
+      "onlySingleImage": "Only single image upload supported",
+      "uploadFailed": "Upload failed"
     }
   },
   "fallback": {
-    "pageNotFound": "Oops! Page Not Found",
-    "pageNotFoundDesc": "Sorry, we couldn't find the page you were looking for.",
-    "forbidden": "Oops! Access Denied",
-    "forbiddenDesc": "Sorry, but you don't have permission to access this page.",
-    "internalError": "Oops! Something Went Wrong",
-    "internalErrorDesc": "Sorry, but the server encountered an error.",
-    "offline": "Offline Page",
-    "offlineError": "Oops! Network Error",
-    "offlineErrorDesc": "Sorry, can't connect to the internet. Check your connection.",
-    "comingSoon": "Coming Soon",
+    "pageNotFound": "Page not found",
+    "pageNotFoundDesc": "The page you are looking for does not exist or has been moved.",
+    "forbidden": "Access denied",
+    "forbiddenDesc": "You do not have permission to access this page.",
+    "internalError": "Something went wrong",
+    "internalErrorDesc": "The server encountered an error while processing your request.",
+    "offline": "Offline",
+    "offlineError": "Network error",
+    "offlineErrorDesc": "Unable to connect to the internet. Check your connection.",
+    "comingSoon": "Coming soon",
     "http": {
-      "requestTimeout": "The request timed out. Please try again later.",
-      "networkError": "A network error occurred. Please check your internet connection and try again.",
-      "badRequest": "Bad Request. Please check your input and try again.",
-      "unauthorized": "Unauthorized. Please log in to continue.",
-      "forbidden": "Forbidden. You do not have permission to access this resource.",
-      "notFound": "Not Found. The requested resource could not be found.",
-      "internalServerError": "Internal Server Error. Something went wrong on our end. Please try again later."
+      "requestTimeout": "Request timed out. Please try again.",
+      "networkError": "Network error. Please check your connection.",
+      "badRequest": "Invalid request. Please check your input.",
+      "unauthorized": "Session expired. Please log in again.",
+      "forbidden": "You do not have permission to access this resource.",
+      "notFound": "The requested resource was not found.",
+      "internalServerError": "Internal server error. Please try again later."
     }
   },
   "widgets": {
-    "document": "Document",
+    "document": "Docs",
     "qa": "Q&A",
     "setting": "Settings",
-    "logoutTip": "Do you want to logout?",
-    "viewAll": "View All Messages",
+    "logoutTip": "Do you want to log out?",
+    "viewAll": "View all",
     "notifications": "Notifications",
-    "markAllAsRead": "Make All as Read",
-    "clearNotifications": "Clear",
-    "checkUpdatesTitle": "New Version Available",
-    "checkUpdatesDescription": "Click to refresh and get the latest version",
+    "markAllAsRead": "Mark all read",
+    "clearNotifications": "Clear all",
+    "checkUpdatesTitle": "Update available",
+    "checkUpdatesDescription": "Click to refresh and update",
     "search": {
       "title": "Search",
-      "searchNavigate": "Search Navigation",
+      "searchNavigate": "Search navigation",
       "select": "Select",
       "navigate": "Navigate",
       "close": "Close",
-      "noResults": "No Search Results Found",
-      "noRecent": "No Search History",
-      "recent": "Search History"
+      "noResults": "No results found",
+      "noRecent": "No recent searches",
+      "recent": "Recent"
     },
     "lockScreen": {
-      "title": "Lock Screen",
+      "title": "Lock screen",
       "screenButton": "Lock",
       "password": "Password",
-      "placeholder": "Please enter password",
-      "unlock": "Click to unlock",
-      "errorPasswordTip": "Password error, please re-enter",
+      "placeholder": "Enter password",
+      "unlock": "Unlock",
+      "errorPasswordTip": "Incorrect password",
       "backToLogin": "Back to login",
-      "entry": "Enter the system"
+      "entry": "Enter system"
     },
     "timezone": {
-      "setTimezone": "Set Timezone",
-      "setSuccess": "Timezone set successfully"
+      "setTimezone": "Select timezone",
+      "setSuccess": "Timezone updated"
     }
   }
 }

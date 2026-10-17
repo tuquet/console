@@ -57,11 +57,13 @@ function navigateToFleet() {
         </div>
       </div>
 
-      <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-3.5 lg:grid-cols-3"
+      >
         <!-- 1. Tenant ID (Full UUID + Copy Action) -->
         <div
           data-testid="overview-card-tenant-id"
-          class="rounded-lg border border-border/50 bg-muted/20 p-3.5 space-y-1.5"
+          class="rounded-lg border border-border/50 bg-muted/20 p-3.5 space-y-1.5 min-w-0"
         >
           <div class="text-xs text-muted-foreground">
             {{ $t('page.tenants_view.tenant_id') }}
@@ -69,12 +71,12 @@ function navigateToFleet() {
           <div
             class="flex items-center justify-between gap-2 text-xs text-foreground"
           >
-            <span class="break-all">{{ tenant.id }}</span>
+            <span class="truncate">{{ tenant.id }}</span>
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              class="size-6 shrink-0 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+              class="size-7 shrink-0 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
               :title="$t('page.tenants_view.copy_tenant_id')"
               @click="copyTenantId"
             >
@@ -96,7 +98,7 @@ function navigateToFleet() {
             {{ $t('page.workspace.service_plan') }}
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <Badge variant="default" class="text-xs font-medium">
+            <Badge variant="default" class="text-xs font-medium capitalize">
               {{
                 subscription?.plan?.name || $t('page.tenants_view.free_starter')
               }}

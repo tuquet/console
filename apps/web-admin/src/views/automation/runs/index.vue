@@ -53,46 +53,41 @@ function getRunStatusLabel(status: string): string {
 }
 
 function getColumns() {
-  const mobile = isMobile.value;
   return [
     {
       field: 'name',
       title: $t('page.runs_view.col_name'),
-      minWidth: mobile ? 200 : 260,
+      minWidth: 260,
       slots: { default: 'name-cell' },
     },
     {
       field: 'runner',
       title: $t('page.runs_view.col_runner'),
-      width: 170,
-      visible: !mobile,
+      minWidth: 170,
       slots: { default: 'runner-cell' },
     },
     {
       field: 'progress',
       title: $t('page.runs_view.col_progress'),
-      width: 190,
-      visible: !mobile,
+      minWidth: 190,
       slots: { default: 'progress-cell' },
     },
     {
       field: 'status',
       title: $t('page.runs_view.col_status'),
-      width: 140,
-      visible: !mobile,
+      minWidth: 140,
       slots: { default: 'status-cell' },
     },
     {
       field: 'created_at',
       title: $t('page.runs_view.col_created_at'),
-      width: 160,
-      visible: !mobile,
+      minWidth: 160,
       slots: { default: 'created-cell' },
     },
     {
       field: 'actions',
       title: $t('page.runs_view.col_actions'),
-      width: mobile ? 56 : 110,
+      minWidth: 110,
       align: 'right' as const,
       showOverflow: false,
       slots: { default: 'actions-cell' },
@@ -119,6 +114,7 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomaCampaignRunItem>({
       {
         component: 'Select',
         fieldName: 'status',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('page.runs_view.filter_status'),
         defaultValue: (route.query.status as string) || FILTER_ALL,
         componentProps: () => ({
@@ -138,6 +134,7 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomaCampaignRunItem>({
       {
         component: 'Input',
         fieldName: 'search',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('page.runs_view.filter_search'),
         componentProps: () => ({
           placeholder: $t('page.runs_view.search_placeholder'),
@@ -147,6 +144,8 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomaCampaignRunItem>({
     ],
     layout: 'vertical',
     showCollapseButton: false,
+    submitOnChange: true,
+    submitOnEnter: true,
     submitButtonOptions: {
       content: computed(() => $t('common.filter')),
     },
@@ -154,7 +153,7 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomaCampaignRunItem>({
       content: computed(() => $t('common.reset')),
     },
     actionWrapperClass:
-      'col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-0.5 sm:pt-6',
+      'hidden sm:flex sm:col-span-2 lg:col-span-2 items-center justify-end gap-2 pt-0.5 sm:pt-6',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -236,9 +235,9 @@ watch(
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Compact Single-Row Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <h1
             class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
           >
@@ -253,7 +252,7 @@ watch(
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="sm"
@@ -273,13 +272,9 @@ watch(
     >
       <Grid class="runs-vxe-grid">
         <template #name-cell="{ row }">
-          <div
-            class="flex items-start gap-2.5 py-1 sm:items-center"
-            :class="{ 'cursor-pointer': isMobile }"
-            @click="isMobile && handleViewDetail(row.id)"
-          >
+          <div class="flex items-center gap-2.5 py-1">
             <div
-              class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground sm:mt-0"
+              class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
             >
               <PlayCircle class="size-4" />
             </div>
@@ -293,56 +288,6 @@ watch(
                     ? row.workflow.name
                     : $t('page.runs_view.unassigned_workflow')
                 }}
-              </div>
-
-              <!-- Mobile-only stacked status, runner & mini progress bar -->
-              <div v-if="isMobile" class="mt-1.5 space-y-1.5">
-                <div class="flex flex-wrap items-center gap-1.5">
-                  <Badge
-                    variant="outline"
-                    class="px-1.5 py-0 text-2xs font-normal"
-                  >
-                    <span
-                      class="mr-1 size-1.5 rounded-full"
-                      :class="getRunStatusDotClass(row.status)"
-                    ></span>
-                    {{ getRunStatusLabel(row.status) }}
-                  </Badge>
-                  <span
-                    class="inline-flex items-center gap-1 truncate text-2xs text-muted-foreground"
-                  >
-                    <Laptop class="size-3 shrink-0" />
-                    <span class="truncate">
-                      {{
-                        row.runner
-                          ? row.runner.name
-                          : $t('page.runs_view.auto_dispatch')
-                      }}
-                    </span>
-                  </span>
-                </div>
-
-                <div class="flex items-center gap-2">
-                  <div
-                    class="h-1.5 flex-1 overflow-hidden rounded-full bg-muted"
-                  >
-                    <div
-                      class="h-full rounded-full transition-all"
-                      :class="getRunStatusBarClass(row.status)"
-                      :style="{
-                        width: `${calculateProgressPercentage(row.completed_tasks, row.total_tasks)}%`,
-                      }"
-                    ></div>
-                  </div>
-                  <span class="shrink-0 text-2xs text-muted-foreground">
-                    {{ row.completed_tasks }}/{{ row.total_tasks }} ({{
-                      calculateProgressPercentage(
-                        row.completed_tasks,
-                        row.total_tasks,
-                      )
-                    }}%)
-                  </span>
-                </div>
               </div>
             </div>
           </div>
@@ -408,12 +353,12 @@ watch(
           <Button
             variant="outline"
             size="sm"
-            class="inline-flex h-7 items-center gap-1 px-2 text-xs sm:px-2.5"
+            class="inline-flex h-7 items-center gap-1 px-2.5 text-xs"
             :title="$t('common.detail')"
             @click="handleViewDetail(row.id)"
           >
             <Eye class="size-3.5 shrink-0" />
-            <span class="hidden sm:inline">{{ $t('common.detail') }}</span>
+            <span>{{ $t('common.detail') }}</span>
           </Button>
         </template>
 

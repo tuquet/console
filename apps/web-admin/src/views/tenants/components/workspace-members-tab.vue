@@ -50,43 +50,59 @@ const { formatDate } = useDateFormat();
 <template>
   <div class="space-y-4 pt-1">
     <!-- Action bar inside tab -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <h3 class="text-sm font-semibold text-foreground sm:text-base">
         {{ $t('page.tenants_view.members_list_title') }}
       </h3>
-      <Button size="sm" class="h-8 gap-1.5 font-medium" @click="emit('invite')">
+      <Button
+        size="sm"
+        class="h-8 shrink-0 gap-1.5 font-medium"
+        @click="emit('invite')"
+      >
         <UserPlus class="size-3.5" />
         <span>{{ $t('common.add') }}</span>
       </Button>
     </div>
 
-    <!-- Desktop Table (md:block) -->
+    <!-- Scrollable Members Table -->
     <div
-      class="hidden md:block overflow-x-auto rounded-lg border border-border/60"
+      class="overflow-x-auto rounded-lg border border-border/60 bg-card shadow-xs"
     >
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{{ $t('term.member') }}</TableHead>
-            <TableHead>{{ $t('common.email') }}</TableHead>
-            <TableHead>{{ $t('term.role') }}</TableHead>
-            <TableHead>{{ $t('common.status') }}</TableHead>
-            <TableHead>{{ $t('page.tenants_view.col_joined_at') }}</TableHead>
-            <TableHead class="text-right">{{ $t('common.actions') }}</TableHead>
+            <TableHead class="min-w-[200px] whitespace-nowrap">
+              {{ $t('term.member') }}
+            </TableHead>
+            <TableHead class="min-w-[200px] whitespace-nowrap">
+              {{ $t('common.email') }}
+            </TableHead>
+            <TableHead class="min-w-[120px] whitespace-nowrap">
+              {{ $t('term.role') }}
+            </TableHead>
+            <TableHead class="min-w-[130px] whitespace-nowrap">
+              {{ $t('common.status') }}
+            </TableHead>
+            <TableHead class="min-w-[150px] whitespace-nowrap">
+              {{ $t('page.tenants_view.col_joined_at') }}
+            </TableHead>
+            <TableHead class="min-w-[130px] text-right whitespace-nowrap">
+              {{ $t('common.actions') }}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow v-for="record in props.members" :key="record.id">
             <!-- User Column -->
-            <TableCell>
+            <TableCell class="whitespace-nowrap">
               <div class="flex items-center gap-2.5">
-                <Avatar class="size-8">
+                <Avatar class="size-8 shrink-0">
                   <AvatarImage
                     v-if="record.avatar_url"
                     :src="record.avatar_url"
                   />
                   <AvatarFallback
-                    class="bg-primary/10 text-primary text-xs font-semibold uppercase"
+                    class="bg-primary/10 text-xs font-semibold text-primary uppercase"
                   >
                     {{ (record.full_name || record.email || 'U').slice(0, 2) }}
                   </AvatarFallback>
@@ -100,7 +116,7 @@ const { formatDate } = useDateFormat();
                   </div>
                   <div
                     v-if="record.role?.name === 'owner'"
-                    class="text-xs text-primary font-medium"
+                    class="text-xs font-medium text-primary"
                   >
                     {{ $t('page.tenants_view.role_owner') }}
                   </div>
@@ -109,19 +125,19 @@ const { formatDate } = useDateFormat();
             </TableCell>
 
             <!-- Email Column -->
-            <TableCell>
+            <TableCell class="whitespace-nowrap">
               <span class="text-xs text-muted-foreground">
                 {{ record.email }}
               </span>
             </TableCell>
 
             <!-- Role Column -->
-            <TableCell>
+            <TableCell class="whitespace-nowrap">
               <RoleBadge :role="record.role?.name || 'member'" />
             </TableCell>
 
             <!-- Status Column -->
-            <TableCell>
+            <TableCell class="whitespace-nowrap">
               <Badge variant="outline" class="text-xs font-normal">
                 <span
                   class="mr-1.5 size-1.5 rounded-full"
@@ -144,19 +160,19 @@ const { formatDate } = useDateFormat();
             </TableCell>
 
             <!-- Joined At Column -->
-            <TableCell>
+            <TableCell class="whitespace-nowrap">
               <span class="text-xs text-muted-foreground">
                 {{ formatDate(record.joined_at) }}
               </span>
             </TableCell>
 
             <!-- Action Column -->
-            <TableCell class="text-right">
+            <TableCell class="text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-3">
                 <Button
                   variant="ghost"
                   size="sm"
-                  class="flex items-center gap-1 p-0 h-auto text-foreground hover:text-primary text-xs"
+                  class="flex h-auto items-center gap-1 p-0 text-xs text-foreground hover:text-primary"
                   @click="emit('edit', record)"
                 >
                   <Edit3 class="size-3.5" />
@@ -169,7 +185,7 @@ const { formatDate } = useDateFormat();
                       <Button
                         variant="ghost"
                         size="sm"
-                        class="p-0 h-auto text-destructive hover:text-destructive text-xs"
+                        class="h-auto p-0 text-xs text-destructive hover:text-destructive"
                       >
                         {{ $t('common.delete') }}
                       </Button>
@@ -214,112 +230,6 @@ const { formatDate } = useDateFormat();
           </TableRow>
         </TableBody>
       </Table>
-    </div>
-
-    <!-- Mobile Card List (md:hidden) -->
-    <div class="space-y-3 md:hidden">
-      <div
-        v-for="member in props.members"
-        :key="member.id"
-        class="rounded-xl border border-border/60 bg-muted/10 p-4 space-y-3"
-      >
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <Avatar class="size-8">
-              <AvatarImage v-if="member.avatar_url" :src="member.avatar_url" />
-              <AvatarFallback
-                class="bg-primary/10 text-primary text-xs font-semibold uppercase"
-              >
-                {{ (member.full_name || member.email || 'U').slice(0, 2) }}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <div class="font-medium text-foreground text-sm">
-                {{
-                  member.full_name ||
-                  $t('page.tenants_view.default_member_name')
-                }}
-              </div>
-              <div class="text-xs text-muted-foreground">
-                {{ member.email }}
-              </div>
-            </div>
-          </div>
-          <RoleBadge :role="member.role?.name || 'member'" />
-        </div>
-
-        <div
-          class="flex items-center justify-between border-t border-border/40 pt-2 text-xs text-muted-foreground"
-        >
-          <Badge variant="outline" class="text-xs font-normal">
-            <span
-              class="mr-1.5 size-1.5 rounded-full"
-              :class="
-                member.status === 'active'
-                  ? 'bg-success'
-                  : member.status === 'invited'
-                    ? 'bg-primary'
-                    : 'bg-destructive'
-              "
-            ></span>
-            {{
-              member.status === 'active'
-                ? $t('common.active')
-                : member.status === 'invited'
-                  ? $t('page.tenants_view.status_invited')
-                  : $t('common.suspended')
-            }}
-          </Badge>
-
-          <div class="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              class="flex items-center gap-1 p-0 h-auto text-foreground hover:text-primary text-xs"
-              @click="emit('edit', member)"
-            >
-              <Edit3 class="size-3.5" />
-              <span>{{ $t('common.edit') }}</span>
-            </Button>
-            <template v-if="member.role?.name !== 'owner'">
-              <span class="text-muted-foreground/40">•</span>
-              <AlertDialog>
-                <AlertDialogTrigger as-child>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    class="p-0 h-auto text-destructive hover:text-destructive text-xs"
-                  >
-                    {{ $t('common.delete') }}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {{ $t('page.tenants_view.remove_member_confirm_title') }}
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {{
-                        $t('page.tenants_view.remove_member_confirm_desc', {
-                          name: member.full_name || member.email,
-                        })
-                      }}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>
-                      {{ $t('common.cancel') }}
-                    </AlertDialogCancel>
-                    <AlertDialogAction @click="emit('remove', member)">
-                      {{ $t('common.delete') }}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </template>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>

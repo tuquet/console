@@ -67,14 +67,14 @@ function getColumns() {
     {
       field: 'full_name',
       title: $t('term.user'),
-      minWidth: isMobile.value ? 185 : 250,
+      minWidth: 250,
       align: 'left' as const,
       slots: { default: 'user-cell' },
     },
     {
       field: 'primary_role',
       title: $t('page.system_view.users_col_primary_role'),
-      width: isMobile.value ? 100 : 140,
+      minWidth: 140,
       align: 'left' as const,
       slots: { default: 'role-cell' },
     },
@@ -83,23 +83,20 @@ function getColumns() {
       title: $t('page.system_view.users_col_organizations'),
       minWidth: 210,
       align: 'left' as const,
-      visible: !isMobile.value,
       slots: { default: 'tenant-cell' },
     },
     {
       field: 'id',
       title: $t('page.system_view.users_col_id'),
-      width: 175,
+      minWidth: 175,
       align: 'left' as const,
-      visible: !isMobile.value,
       cellRender: { name: 'CellIdCopy' },
     },
     {
       field: 'created_at',
       title: $t('page.system_view.users_col_joined_at'),
-      width: 150,
+      minWidth: 150,
       align: 'left' as const,
-      visible: !isMobile.value,
       cellRender: { name: 'CellDate' },
     },
   ];
@@ -162,9 +159,11 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformUserItem>({
       {
         component: 'Input',
         fieldName: 'search',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.search'),
         componentProps: () => ({
           placeholder: $t('page.system_view.users_search_placeholder'),
+          clearable: true,
         }),
       },
     ],
@@ -179,7 +178,7 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformUserItem>({
       content: computed(() => $t('common.reset')),
     },
     actionWrapperClass:
-      'col-span-2 sm:col-span-1 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+      'hidden sm:flex sm:col-span-1 items-center justify-end gap-2 pt-1 sm:pt-6',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -248,15 +247,15 @@ async function handleRefresh() {
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Top Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <h1
             class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
           >
             {{ $t('page.system.users') }}
           </h1>
-          <Badge variant="secondary" class="text-xs font-normal">
+          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
             {{ allUsers.length }}
           </Badge>
         </div>
@@ -265,7 +264,7 @@ async function handleRefresh() {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -313,12 +312,6 @@ async function handleRefresh() {
               >
                 <span class="truncate">
                   {{ row.email || $t('page.system_view.users_no_email') }}
-                </span>
-                <span class="sm:hidden">&bull;</span>
-                <span class="shrink-0 sm:hidden">
-                  {{
-                    $t('page.system_view.users_orgs_count', [row.tenant_count])
-                  }}
                 </span>
               </div>
             </div>

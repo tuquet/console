@@ -54,12 +54,12 @@ const contentStyle = computed<StyleValue>(() => {
       "
       :class="
         cn(
-          'relative flex shrink-0 items-end border-b border-border bg-card px-6 py-4',
+          'relative flex shrink-0 flex-wrap items-end justify-between gap-2 border-b border-border bg-card px-4 py-3 sm:px-6 sm:py-4',
           headerClass,
         )
       "
     >
-      <div class="flex-auto">
+      <div class="min-w-0 flex-auto">
         <slot name="title">
           <div v-if="title" class="mb-2 flex text-lg font-semibold">
             {{ title }}
@@ -73,7 +73,10 @@ const contentStyle = computed<StyleValue>(() => {
         </slot>
       </div>
 
-      <div v-if="$slots.extra">
+      <div
+        v-if="$slots.extra"
+        class="flex shrink-0 flex-wrap items-center gap-2"
+      >
         <slot name="extra"></slot>
       </div>
     </div>

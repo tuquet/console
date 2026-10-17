@@ -1,284 +1,284 @@
 {
-  "title": "Cài Đặt",
+  "title": "Cài đặt",
   "subtitle": "",
-  "enableStickyPreferencesNavigationBar": "Cố định thanh điều hướng cài đặt",
-  "disableStickyPreferencesNavigationBar": "Bỏ cố định thanh điều hướng cài đặt",
-  "resetTip": "Dữ liệu đã thay đổi, nhấp để đặt lại",
-  "resetTitle": "Đặt Lại Cài Đặt",
-  "resetSuccess": "Đặt lại cài đặt thành công",
-  "appearance": "Giao Diện",
-  "layout": "Bố Cục",
-  "content": "Nội Dung",
+  "enableStickyPreferencesNavigationBar": "Cố định thanh điều hướng",
+  "disableStickyPreferencesNavigationBar": "Bỏ cố định thanh điều hướng",
+  "resetTip": "Đã thay đổi, nhấn để đặt lại",
+  "resetTitle": "Đặt lại cài đặt",
+  "resetSuccess": "Đã đặt lại cài đặt",
+  "appearance": "Giao diện",
+  "layout": "Bố cục",
+  "content": "Nội dung",
   "other": "Khác",
-  "wide": "Mở Rộng",
-  "compact": "Cố Định",
-  "followSystem": "Theo Hệ Thống",
-  "vertical": "Thanh Bên Dọc",
-  "verticalTip": "Chế độ menu dọc bên hông",
-  "horizontal": "Thanh Ngang Trên",
-  "horizontalTip": "Chế độ menu ngang, hiển thị toàn bộ trên đầu",
-  "twoColumn": "Hai Cột",
-  "twoColumnTip": "Chế độ menu dọc chia hai cột",
-  "headerSidebarNav": "Tiêu Đề Dọc",
-  "headerSidebarNavTip": "Tiêu đề toàn chiều rộng, menu thanh bên",
-  "headerTwoColumn": "Tiêu Đề Hai Cột",
-  "headerTwoColumnTip": "Kết hợp menu tiêu đề và thanh bên hai cột",
-  "mixedMenu": "Menu Hỗn Hợp",
-  "mixedMenuTip": "Kết hợp đồng thời menu ngang và menu dọc",
-  "fullContent": "Toàn Màn Hình",
-  "fullContentTip": "Chỉ hiển thị vùng nội dung, ẩn tất cả menu",
-  "normal": "Bình Thường",
-  "plain": "Đơn Giản",
-  "rounded": "Bo Tròn",
-  "copyPreferences": "Sao Chép Cấu Hình",
+  "wide": "Mở rộng",
+  "compact": "Cố định",
+  "followSystem": "Theo hệ thống",
+  "vertical": "Menu dọc",
+  "verticalTip": "Menu dọc bên trái",
+  "horizontal": "Menu ngang",
+  "horizontalTip": "Menu ngang trên đầu trang",
+  "twoColumn": "Hai cột",
+  "twoColumnTip": "Menu dọc chia hai cột",
+  "headerSidebarNav": "Tiêu đề dọc",
+  "headerSidebarNavTip": "Tiêu đề rộng, menu thanh bên",
+  "headerTwoColumn": "Tiêu đề hai cột",
+  "headerTwoColumnTip": "Kết hợp tiêu đề và thanh bên hai cột",
+  "mixedMenu": "Menu hỗn hợp",
+  "mixedMenuTip": "Kết hợp menu ngang và dọc",
+  "fullContent": "Toàn màn hình",
+  "fullContentTip": "Chỉ hiện nội dung, ẩn menu",
+  "normal": "Mặc định",
+  "plain": "Đơn giản",
+  "rounded": "Bo tròn",
+  "copyPreferences": "Sao chép cấu hình",
   "enableCopyPreferences": "Hiện nút sao chép cấu hình",
-  "copyPreferencesSuccessTitle": "Sao chép thành công",
-  "copyPreferencesSuccess": "Đã sao chép cấu hình, dán vào `src/preferences.ts` trong app",
-  "clearAndLogout": "Xóa Bộ Nhớ Đệm & Đăng Xuất",
-  "mode": "Chế Độ",
+  "copyPreferencesSuccessTitle": "Đã sao chép",
+  "copyPreferencesSuccess": "Đã sao chép, dán vào `src/preferences.ts`",
+  "clearAndLogout": "Xóa bộ nhớ đệm & đăng xuất",
+  "mode": "Chế độ",
   "general": "Chung",
-  "language": "Ngôn Ngữ",
-  "timezone": "Múi Giờ",
-  "dynamicTitle": "Tiêu Đề Động",
-  "watermark": "Hình Mờ (Watermark)",
+  "language": "Ngôn ngữ",
+  "timezone": "Múi giờ",
+  "dynamicTitle": "Tiêu đề động",
+  "watermark": "Hình mờ",
   "watermarkContent": "Nhập nội dung hình mờ",
-  "checkUpdates": "Tự động kiểm tra bản cập nhật",
+  "checkUpdates": "Tự kiểm tra cập nhật",
   "position": {
-    "title": "Vị Trí Nút Cài Đặt",
-    "header": "Thanh Tiêu Đề",
-    "auto": "Tự Động",
-    "fixed": "Cố Định Góc",
-    "userDropdown": "Menu Người Dùng"
+    "title": "Vị trí nút cài đặt",
+    "header": "Thanh tiêu đề",
+    "auto": "Tự động",
+    "fixed": "Cố định góc",
+    "userDropdown": "Menu người dùng"
   },
   "sidebar": {
-    "buttons": "Hiện Nút Bấm",
-    "buttonFixed": "Cố Định",
-    "buttonCollapsed": "Thu Gọn",
-    "title": "Thanh Bên",
-    "width": "Độ Rộng",
-    "visible": "Hiện Thanh Bên",
-    "visibleDisabledTip": "Không thể tắt thanh bên ở chế độ Sidebar Nav vì đây là điều hướng chính.",
-    "draggable": "Kéo Thả Menu Thanh Bên",
-    "collapsed": "Thu Gọn Menu",
-    "collapsedShowTitle": "Hiện Tiêu Đề Menu Khi Thu Gọn",
-    "autoActivateChild": "Tự Động Kích Hoạt Menu Con",
-    "autoActivateChildTip": "Tự động kích hoạt menu con khi nhấp chuột vào menu cha.",
-    "expandOnHover": "Mở Rộng Khi Di Chuột",
-    "expandOnHoverTip": "Khi di chuột qua menu, tự động mở rộng menu con hoặc thanh bên."
+    "buttons": "Hiện nút bấm",
+    "buttonFixed": "Cố định",
+    "buttonCollapsed": "Thu gọn",
+    "title": "Thanh bên",
+    "width": "Độ rộng",
+    "visible": "Hiện thanh bên",
+    "visibleDisabledTip": "Không thể tắt thanh bên ở chế độ điều hướng dọc.",
+    "draggable": "Kéo thả menu",
+    "collapsed": "Thu gọn menu",
+    "collapsedShowTitle": "Hiện tiêu đề khi thu gọn",
+    "autoActivateChild": "Tự mở menu con",
+    "autoActivateChildTip": "Tự mở menu con khi chọn menu cha.",
+    "expandOnHover": "Mở rộng khi di chuột",
+    "expandOnHoverTip": "Tự mở rộng thanh bên khi di chuột vào."
   },
   "tabbar": {
-    "title": "Thanh Tab",
-    "enable": "Bật Thanh Tab",
-    "showRefresh": "Hiện Nút Làm Mới",
-    "icon": "Hiện Biểu Tượng Tab",
-    "showMore": "Hiện Nút Thêm",
-    "showMaximize": "Hiện Nút Phóng To",
-    "persist": "Lưu Trạng Thái Tab",
-    "visitHistory": "Lịch Sử Truy Cập",
-    "visitHistoryTip": "Ghi nhớ lịch sử truy cập tab. Đóng tab hiện tại sẽ tự động chuyển về tab mở gần nhất.",
-    "maxCount": "Số Tab Tối Đa",
-    "maxCountTip": "Khi vượt quá số lượng, tab cũ nhất sẽ tự động đóng. Đặt 0 để không giới hạn.",
-    "draggable": "Kéo Thả Sắp Xếp Tab",
-    "wheelable": "Cuộn Chuột Chuyển Tab",
-    "middleClickClose": "Nhấp Chuột Giữa Để Đóng Tab",
-    "wheelableTip": "Cho phép dùng con lăn chuột để cuộn ngang qua các tab.",
+    "title": "Thanh tab",
+    "enable": "Bật thanh tab",
+    "showRefresh": "Nút làm mới",
+    "icon": "Biểu tượng tab",
+    "showMore": "Nút thêm",
+    "showMaximize": "Nút phóng to",
+    "persist": "Lưu trạng thái tab",
+    "visitHistory": "Lịch sử truy cập",
+    "visitHistoryTip": "Đóng tab hiện tại sẽ chuyển về tab mở gần nhất.",
+    "maxCount": "Số tab tối đa",
+    "maxCountTip": "Vượt giới hạn sẽ tự đóng tab cũ nhất (0 = không giới hạn).",
+    "draggable": "Kéo thả sắp xếp",
+    "wheelable": "Cuộn chuột chuyển tab",
+    "middleClickClose": "Chuột giữa đóng tab",
+    "wheelableTip": "Dùng con lăn chuột để cuộn ngang thanh tab.",
     "styleType": {
-      "title": "Kiểu Dáng Tab",
+      "title": "Kiểu tab",
       "chrome": "Chrome",
-      "card": "Thẻ Thường",
+      "card": "Thẻ",
       "plain": "Phẳng",
-      "brisk": "Gọn Nhẹ"
+      "brisk": "Gọn nhẹ"
     },
     "contextMenu": {
-      "reload": "Tải Lại",
+      "reload": "Tải lại",
       "close": "Đóng",
       "pin": "Ghim",
-      "unpin": "Bỏ Ghim",
-      "closeLeft": "Đóng Các Tab Bên Trái",
-      "closeRight": "Đóng Các Tab Bên Phải",
-      "closeOther": "Đóng Các Tab Khác",
-      "closeAll": "Đóng Tất Cả",
-      "openInNewWindow": "Mở Trong Cửa Sổ Mới",
-      "maximize": "Phóng To",
-      "restoreMaximize": "Khôi Phục"
+      "unpin": "Bỏ ghim",
+      "closeLeft": "Đóng tab bên trái",
+      "closeRight": "Đóng tab bên phải",
+      "closeOther": "Đóng các tab khác",
+      "closeAll": "Đóng tất cả",
+      "openInNewWindow": "Mở cửa sổ mới",
+      "maximize": "Phóng to",
+      "restoreMaximize": "Khôi phục"
     }
   },
   "navigationMenu": {
-    "title": "Menu Điều Hướng",
-    "style": "Kiểu Dáng Menu",
-    "accordion": "Thu Phóng Kiểu Accordion",
-    "split": "Tách Menu Điều Hướng",
-    "splitTip": "Thanh bên sẽ hiển thị submenu của thanh tiêu đề phía trên."
+    "title": "Menu điều hướng",
+    "style": "Kiểu menu",
+    "accordion": "Thu phóng accordion",
+    "split": "Tách menu",
+    "splitTip": "Thanh bên hiển thị menu con của thanh tiêu đề."
   },
   "breadcrumb": {
-    "title": "Thanh Đường Dẫn (Breadcrumb)",
-    "home": "Hiện Nút Trang Chủ",
-    "enable": "Bật Đường Dẫn",
-    "enableTip": "Đường dẫn hiển thị trên màn hình lớn khi thanh tiêu đề không mang menu chính.",
-    "icon": "Hiện Biểu Tượng",
-    "background": "Màu Nền",
-    "style": "Kiểu Dáng Đường Dẫn",
-    "hideOnlyOne": "Ẩn Khi Chỉ Có Một Cấp"
+    "title": "Đường dẫn",
+    "home": "Nút trang chủ",
+    "enable": "Bật đường dẫn",
+    "enableTip": "Hiển thị đường dẫn trên màn hình lớn.",
+    "icon": "Hiện biểu tượng",
+    "background": "Màu nền",
+    "style": "Kiểu đường dẫn",
+    "hideOnlyOne": "Ẩn khi chỉ có 1 cấp"
   },
   "animation": {
-    "title": "Hiệu Ứng",
-    "loading": "Hiệu Ứng Tải Trang",
-    "transition": "Chuyển Cảnh Trang",
-    "progress": "Thanh Tiến Trình"
+    "title": "Hiệu ứng",
+    "loading": "Tải trang",
+    "transition": "Chuyển trang",
+    "progress": "Thanh tiến trình"
   },
   "theme": {
-    "title": "Chủ Đề",
-    "radius": "Độ Bo Góc",
-    "fontSize": "Cỡ Chữ",
-    "fontSizeTip": "Điều chỉnh kích cỡ phông chữ toàn hệ thống với xem trước tức thì",
+    "title": "Chủ đề",
+    "radius": "Độ bo góc",
+    "fontSize": "Cỡ chữ",
+    "fontSizeTip": "Điều chỉnh cỡ chữ toàn hệ thống",
     "light": "Sáng",
     "dark": "Tối",
-    "darkSidebar": "Thanh Bên Tối",
-    "darkSidebarTip": "Kích hoạt khi chủ đề là sáng và chế độ hiển thị có thanh bên.",
-    "darkSidebarSub": "Thanh Bên Con Tối",
-    "darkSidebarSubTip": "Kích hoạt ở chế độ menu hai cột.",
-    "darkHeader": "Tiêu Đề Tối",
-    "weakMode": "Chế Độ Màu Nhạt",
-    "grayMode": "Chế Độ Đơn Sắc (Xám)",
+    "darkSidebar": "Thanh bên tối",
+    "darkSidebarTip": "Áp dụng khi dùng chủ đề sáng và có thanh bên.",
+    "darkSidebarSub": "Menu phụ tối",
+    "darkSidebarSubTip": "Áp dụng ở chế độ menu hai cột.",
+    "darkHeader": "Tiêu đề tối",
+    "weakMode": "Tương phản cao",
+    "grayMode": "Đơn sắc",
     "builtin": {
-      "title": "Màu Sắc Mặc Định",
-      "default": "Mặc Định",
-      "violet": "Tím Violet",
+      "title": "Màu chủ đạo",
+      "default": "Mặc định",
+      "violet": "Tím",
       "pink": "Hồng",
-      "rose": "Hoa Hồng",
-      "skyBlue": "Xanh Da Trời",
-      "deepBlue": "Xanh Đậm",
-      "green": "Xanh Lá",
-      "deepGreen": "Xanh Lá Đậm",
+      "rose": "Đỏ hồng",
+      "skyBlue": "Xanh trời",
+      "deepBlue": "Xanh đậm",
+      "green": "Xanh lá",
+      "deepGreen": "Xanh rêu",
       "orange": "Cam",
       "yellow": "Vàng",
-      "zinc": "Kẽm (Zinc)",
-      "neutral": "Trung Tính",
-      "slate": "Đá Phiến (Slate)",
+      "zinc": "Kẽm",
+      "neutral": "Trung tính",
+      "slate": "Đá phiến",
       "gray": "Xám",
-      "custom": "Tùy Chỉnh"
+      "custom": "Tùy chỉnh"
     }
   },
   "header": {
-    "title": "Thanh Tiêu Đề",
-    "visible": "Hiện Tiêu Đề",
+    "title": "Thanh tiêu đề",
+    "visible": "Hiện tiêu đề",
     "modeStatic": "Tĩnh",
-    "modeFixed": "Cố Định",
-    "modeAuto": "Tự Động Ẩn / Hiện",
-    "modeAutoScroll": "Cuộn Để Ẩn / Hiện",
-    "menuAlign": "Căn Chỉnh Menu",
-    "menuAlignStart": "Bắt Đầu (Trái)",
-    "menuAlignEnd": "Kết Thúc (Phải)",
-    "menuAlignCenter": "Ở Giữa"
+    "modeFixed": "Cố định",
+    "modeAuto": "Tự ẩn / hiện",
+    "modeAutoScroll": "Cuộn để ẩn / hiện",
+    "menuAlign": "Căn lề menu",
+    "menuAlignStart": "Trái",
+    "menuAlignEnd": "Phải",
+    "menuAlignCenter": "Giữa"
   },
   "footer": {
-    "title": "Chân Trang",
-    "visible": "Hiện Chân Trang",
-    "fixed": "Cố Định Ở Đáy"
+    "title": "Chân trang",
+    "visible": "Hiện chân trang",
+    "fixed": "Cố định đáy"
   },
   "copyright": {
-    "title": "Bản Quyền",
-    "enable": "Bật Bản Quyền",
-    "companyName": "Tên Doanh Nghiệp",
-    "companySiteLink": "Đường Dẫn Trang Web",
-    "date": "Năm Bản Quyền",
-    "icp": "Giấy Phép ICP",
-    "icpLink": "Liên Kết Giấy Phép"
+    "title": "Bản quyền",
+    "enable": "Hiện bản quyền",
+    "companyName": "Tên đơn vị",
+    "companySiteLink": "Liên kết trang chủ",
+    "date": "Năm",
+    "icp": "Giấy phép",
+    "icpLink": "Liên kết giấy phép"
   },
   "shortcutKeys": {
-    "title": "Phím Tắt",
-    "global": "Toàn Cục",
-    "search": "Tìm Kiếm Nhanh",
-    "logout": "Đăng Xuất",
-    "escape": "Đóng Cửa Sổ Hiện Tại",
-    "preferences": "Mở Cài Đặt"
+    "title": "Phím tắt",
+    "global": "Toàn cục",
+    "search": "Tìm kiếm nhanh",
+    "logout": "Đăng xuất",
+    "escape": "Đóng cửa sổ",
+    "preferences": "Mở cài đặt"
   },
   "widget": {
-    "title": "Tiện Ích",
-    "globalSearch": "Tìm Kiếm Nhanh",
-    "globalSearchPosition": "Vị Trí Tìm Kiếm",
-    "fullscreen": "Toàn Màn Hình",
-    "fullscreenPosition": "Vị Trí Nút Toàn Màn Hình",
-    "themeToggle": "Chuyển Đổi Sáng/Tối",
-    "themeTogglePosition": "Vị Trí Đổi Sáng/Tối",
-    "languageToggle": "Đổi Ngôn Ngữ",
-    "languageTogglePosition": "Vị Trí Đổi Ngôn Ngữ",
-    "notification": "Thông Báo",
-    "notificationPosition": "Vị Trí Thông Báo",
-    "sidebarToggle": "Đóng/Mở Thanh Bên",
-    "lockScreen": "Khóa Màn Hình",
-    "lockScreenPosition": "Vị Trí Nút Khóa Màn Hình",
-    "logoutButtonPosition": "Vị Trí Nút Đăng Xuất",
-    "header": "Thanh Tiêu Đề",
-    "userDropdown": "Menu Người Dùng",
+    "title": "Tiện ích",
+    "globalSearch": "Tìm kiếm nhanh",
+    "globalSearchPosition": "Vị trí tìm kiếm",
+    "fullscreen": "Toàn màn hình",
+    "fullscreenPosition": "Vị trí nút phóng to",
+    "themeToggle": "Đổi sáng / tối",
+    "themeTogglePosition": "Vị trí đổi giao diện",
+    "languageToggle": "Đổi ngôn ngữ",
+    "languageTogglePosition": "Vị trí đổi ngôn ngữ",
+    "notification": "Thông báo",
+    "notificationPosition": "Vị trí thông báo",
+    "sidebarToggle": "Đóng / mở thanh bên",
+    "lockScreen": "Khóa màn hình",
+    "lockScreenPosition": "Vị trí khóa màn hình",
+    "logoutButtonPosition": "Vị trí nút đăng xuất",
+    "header": "Thanh tiêu đề",
+    "userDropdown": "Menu người dùng",
     "hidden": "Ẩn",
-    "refresh": "Nút Làm Mới",
-    "refreshPosition": "Vị Trí Nút Làm Mới",
-    "timezone": "Múi Giờ",
-    "timezonePosition": "Vị Trí Múi Giờ"
+    "refresh": "Nút làm mới",
+    "refreshPosition": "Vị trí làm mới",
+    "timezone": "Múi giờ",
+    "timezonePosition": "Vị trí múi giờ"
   },
   "admin": {
-    "tabLabel": "Mở Rộng Quản Trị",
-    "title": "Cấu Hình Nghiệp Vụ",
+    "tabLabel": "Quản trị",
+    "title": "Cấu hình nghiệp vụ",
     "fields": {
       "enableFormFullscreen": {
-        "label": "Bật Chế Độ Biểu Mẫu Toàn Màn Hình",
-        "tip": "Các module có thể áp dụng cấu hình này cho biểu mẫu dữ liệu."
+        "label": "Biểu mẫu toàn màn hình",
+        "tip": "Mở rộng biểu mẫu dữ liệu toàn màn hình."
       },
       "tenantMode": {
-        "label": "Chế Độ Workspace",
+        "label": "Chế độ workspace",
         "options": {
           "single": {
-            "label": "Đơn Workspace"
+            "label": "Đơn workspace"
           },
           "multi": {
-            "label": "Multi-Tenant"
+            "label": "Đa workspace"
           }
         }
       },
       "defaultTableSize": {
-        "label": "Số Dòng Mặc Định Mỗi Trang"
+        "label": "Số dòng mỗi trang"
       },
       "reportTitle": {
-        "label": "Tiêu Đề Báo Cáo Mặc Định",
-        "placeholder": "Vui lòng nhập tiêu đề báo cáo mặc định"
+        "label": "Tiêu đề báo cáo",
+        "placeholder": "Nhập tiêu đề báo cáo mặc định"
       }
     }
   },
   "antd": {
-    "tabLabel": "Mở Rộng Quản Trị",
-    "title": "Cấu Hình Nghiệp Vụ",
+    "tabLabel": "Quản trị",
+    "title": "Cấu hình nghiệp vụ",
     "fields": {
       "enableFormFullscreen": {
-        "label": "Bật Chế Độ Biểu Mẫu Toàn Màn Hình",
-        "tip": "Các module có thể áp dụng cấu hình này cho biểu mẫu dữ liệu."
+        "label": "Biểu mẫu toàn màn hình",
+        "tip": "Mở rộng biểu mẫu dữ liệu toàn màn hình."
       },
       "tenantMode": {
-        "label": "Chế Độ Workspace",
+        "label": "Chế độ workspace",
         "options": {
           "single": {
-            "label": "Đơn Workspace"
+            "label": "Đơn workspace"
           },
           "multi": {
-            "label": "Multi-Tenant"
+            "label": "Đa workspace"
           }
         }
       },
       "defaultTableSize": {
-        "label": "Số Dòng Mặc Định Mỗi Trang"
+        "label": "Số dòng mỗi trang"
       },
       "reportTitle": {
-        "label": "Tiêu Đề Báo Cáo Mặc Định",
-        "placeholder": "Vui lòng nhập tiêu đề báo cáo mặc định"
+        "label": "Tiêu đề báo cáo",
+        "placeholder": "Nhập tiêu đề báo cáo mặc định"
       }
     }
   },
   "typography": {
-    "title": "Kiểu Chữ (Typography)",
-    "fontFamily": "Phông Chữ Giao Diện",
-    "fontFamilyTip": "Chuyển đổi phông chữ giữa Inter, Roboto và System UI",
-    "inter": "Inter (Mặc định / Khuyến nghị)",
-    "roboto": "Roboto (Google Classic)",
-    "systemUi": "System UI (Hệ điều hành gốc)"
+    "title": "Kiểu chữ",
+    "fontFamily": "Phông chữ",
+    "fontFamilyTip": "Chọn phông chữ hiển thị toàn hệ thống",
+    "inter": "Inter (Mặc định)",
+    "roboto": "Roboto",
+    "systemUi": "System UI"
   }
 }

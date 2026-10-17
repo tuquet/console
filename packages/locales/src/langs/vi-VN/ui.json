@@ -55,14 +55,14 @@
     "copied": "Đã sao chép"
   },
   "crop": {
-    "title": "Cắt Hình Ảnh",
-    "titleTip": "Tỷ Lệ Cắt {0}",
+    "title": "Cắt ảnh",
+    "titleTip": "Tỷ lệ cắt {0}",
     "confirm": "Cắt ảnh",
-    "cancel": "Hủy cắt",
-    "errorTip": "Lỗi khi cắt hình ảnh"
+    "cancel": "Hủy",
+    "errorTip": "Lỗi cắt ảnh"
   },
   "tiptap": {
-    "placeholder": "Vui lòng nhập nội dung...",
+    "placeholder": "Nhập nội dung...",
     "prompts": {
       "image": "Nhập URL hình ảnh",
       "link": "Nhập liên kết URL"
@@ -80,14 +80,14 @@
       "heading2": "H2",
       "heading3": "H3",
       "heading4": "H4",
-      "bulletList": "Danh sách dấu đầu dòng",
+      "bulletList": "Danh sách chấm",
       "orderedList": "Danh sách số",
       "blockquote": "Trích dẫn",
       "link": "Liên kết",
       "unlink": "Hủy liên kết",
       "image": "Hình ảnh",
-      "imageUrl": "URL Hình ảnh",
-      "imageUpload": "Tải lên hình ảnh",
+      "imageUrl": "URL hình ảnh",
+      "imageUpload": "Tải ảnh lên",
       "textColor": "Màu chữ",
       "highlightColor": "Màu đánh dấu",
       "alignLeft": "Trái",
@@ -99,67 +99,67 @@
       "clear": "Xóa định dạng"
     },
     "upload": {
-      "fileTooLarge": "Dung lượng tệp vượt quá giới hạn",
-      "fileTypeNotAllowed": "Loại tệp không được hỗ trợ",
-      "onlySingleImage": "Chỉ hỗ trợ tải lên một ảnh duy nhất, ảnh đầu tiên được chọn",
+      "fileTooLarge": "Tệp vượt quá dung lượng cho phép",
+      "fileTypeNotAllowed": "Định dạng tệp không hỗ trợ",
+      "onlySingleImage": "Chỉ hỗ trợ tải lên 1 ảnh",
       "uploadFailed": "Tải lên thất bại"
     }
   },
   "fallback": {
-    "pageNotFound": "Rất tiếc! Không Tìm Thấy Trang",
-    "pageNotFoundDesc": "Xin lỗi, chúng tôi không thể tìm thấy trang bạn đang tìm kiếm.",
-    "forbidden": "Rất tiếc! Truy Cập Bị Từ Chối",
-    "forbiddenDesc": "Xin lỗi, bạn không có quyền truy cập vào trang này.",
-    "internalError": "Rất tiếc! Đã Xảy Ra Lỗi",
-    "internalErrorDesc": "Xin lỗi, máy chủ đã gặp phải một lỗi trong quá trình xử lý.",
-    "offline": "Trang Ngoại Tuyến",
-    "offlineError": "Rất tiếc! Lỗi Mạng",
-    "offlineErrorDesc": "Xin lỗi, không thể kết nối Internet. Vui lòng kiểm tra lại đường truyền.",
-    "comingSoon": "Sắp Ra Mắt",
+    "pageNotFound": "Không tìm thấy trang",
+    "pageNotFoundDesc": "Trang bạn đang tìm không tồn tại hoặc đã bị di chuyển.",
+    "forbidden": "Truy cập bị từ chối",
+    "forbiddenDesc": "Bạn không có quyền truy cập trang này.",
+    "internalError": "Đã xảy ra lỗi",
+    "internalErrorDesc": "Máy chủ gặp sự cố khi xử lý yêu cầu.",
+    "offline": "Ngoại tuyến",
+    "offlineError": "Lỗi kết nối mạng",
+    "offlineErrorDesc": "Không thể kết nối Internet. Vui lòng kiểm tra đường truyền.",
+    "comingSoon": "Sắp ra mắt",
     "http": {
-      "requestTimeout": "Yêu cầu đã hết thời gian chờ. Vui lòng thử lại sau.",
-      "networkError": "Đã xảy ra lỗi mạng. Vui lòng kiểm tra kết nối Internet và thử lại.",
-      "badRequest": "Yêu cầu không hợp lệ. Vui lòng kiểm tra dữ liệu đầu vào.",
-      "unauthorized": "Chưa được xác thực. Vui lòng đăng nhập để tiếp tục.",
-      "forbidden": "Bị từ chối. Bạn không có quyền truy cập tài nguyên này.",
-      "notFound": "Không tìm thấy. Tài nguyên yêu cầu không tồn tại.",
+      "requestTimeout": "Hết thời gian chờ. Vui lòng thử lại.",
+      "networkError": "Lỗi kết nối mạng. Vui lòng kiểm tra đường truyền.",
+      "badRequest": "Yêu cầu không hợp lệ.",
+      "unauthorized": "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
+      "forbidden": "Bạn không có quyền truy cập tài nguyên này.",
+      "notFound": "Tài nguyên yêu cầu không tồn tại.",
       "internalServerError": "Lỗi máy chủ nội bộ. Vui lòng thử lại sau."
     }
   },
   "widgets": {
-    "document": "Tài Liệu",
-    "qa": "Hỏi & Đáp",
-    "setting": "Cài Đặt",
-    "logoutTip": "Bạn có chắc chắn muốn đăng xuất?",
-    "viewAll": "Xem Tất Cả Tin Nhắn",
-    "notifications": "Thông Báo",
-    "markAllAsRead": "Đánh Dấu Tất Cả Đã Đọc",
-    "clearNotifications": "Xóa Tất Cả",
-    "checkUpdatesTitle": "Có Phiên Bản Mới",
-    "checkUpdatesDescription": "Nhấn để làm mới và nhận phiên bản mới nhất",
+    "document": "Tài liệu",
+    "qa": "Hỏi & đáp",
+    "setting": "Cài đặt",
+    "logoutTip": "Bạn muốn đăng xuất khỏi hệ thống?",
+    "viewAll": "Xem tất cả",
+    "notifications": "Thông báo",
+    "markAllAsRead": "Đánh dấu đã đọc",
+    "clearNotifications": "Xóa tất cả",
+    "checkUpdatesTitle": "Có phiên bản mới",
+    "checkUpdatesDescription": "Nhấn để làm mới và cập nhật",
     "search": {
-      "title": "Tìm Kiếm",
-      "searchNavigate": "Điều Hướng Tìm Kiếm",
+      "title": "Tìm kiếm",
+      "searchNavigate": "Điều hướng tìm kiếm",
       "select": "Chọn",
-      "navigate": "Điều hướng",
+      "navigate": "Di chuyển",
       "close": "Đóng",
-      "noResults": "Không Tìm Thấy Kết Quả",
-      "noRecent": "Không Có Lịch Sử Tìm Kiếm",
-      "recent": "Lịch Sử Gần Đây"
+      "noResults": "Không có kết quả",
+      "noRecent": "Chưa có lịch sử tìm kiếm",
+      "recent": "Gần đây"
     },
     "lockScreen": {
-      "title": "Khóa Màn Hình",
+      "title": "Khóa màn hình",
       "screenButton": "Khóa",
       "password": "Mật khẩu",
-      "placeholder": "Vui lòng nhập mật khẩu",
-      "unlock": "Nhấn để mở khóa",
-      "errorPasswordTip": "Mật khẩu không đúng, vui lòng nhập lại",
-      "backToLogin": "Quay lại đăng nhập",
-      "entry": "Truy cập hệ thống"
+      "placeholder": "Nhập mật khẩu",
+      "unlock": "Mở khóa",
+      "errorPasswordTip": "Mật khẩu không đúng",
+      "backToLogin": "Về đăng nhập",
+      "entry": "Vào hệ thống"
     },
     "timezone": {
-      "setTimezone": "Đặt Múi Giờ",
-      "setSuccess": "Đặt múi giờ thành công"
+      "setTimezone": "Chọn múi giờ",
+      "setSuccess": "Đã đổi múi giờ"
     }
   }
 }

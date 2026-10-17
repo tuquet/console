@@ -1,6 +1,7 @@
 import { $t } from '@vben/locales';
 import { useAccessStore } from '@vben/stores';
 
+import { captureError } from '../../utils/bugsink';
 import { getEffectiveAccessApi } from './access';
 import {
   getSupabaseConfig,
@@ -55,6 +56,7 @@ export async function loginApi(
       }
     } catch (error: any) {
       if (error?.message?.includes('flagged automated access')) {
+        captureError(error, { action: 'turnstile_verify', email });
         throw error;
       }
       // Non-blocking for edge function network unavailability or Cloudflare challenge
@@ -86,7 +88,14 @@ export async function loginApi(
       resJson.error_description ||
       resJson.message ||
       $t('authentication.passwordErrorTip');
-    throw new Error(errorMsg);
+    const err = new Error(errorMsg);
+    captureError(err, {
+      action: 'loginApi',
+      email,
+      errorCode: resJson.error_code || resJson.code,
+      status: response.status,
+    });
+    throw err;
   }
 
   return {
@@ -166,7 +175,13 @@ export async function resetPasswordApi(email: string): Promise<void> {
       resJson.error_description ||
       resJson.message ||
       $t('authentication.resetLinkFailed');
-    throw new Error(errorMsg);
+    const err = new Error(errorMsg);
+    captureError(err, {
+      action: 'resetPasswordApi',
+      email: email.trim(),
+      status: response.status,
+    });
+    throw err;
   }
 }
 
@@ -203,7 +218,12 @@ export async function updatePasswordApi(
       resJson.error_description ||
       resJson.message ||
       $t('authentication.passwordResetFailed');
-    throw new Error(errorMsg);
+    const err = new Error(errorMsg);
+    captureError(err, {
+      action: 'updatePasswordApi',
+      status: response.status,
+    });
+    throw err;
   }
 }
 

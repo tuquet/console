@@ -24,6 +24,7 @@ import {
 } from '#/api';
 import { $t } from '#/locales';
 import { router as appRouter } from '#/router';
+import { captureError, setBugsinkUser } from '#/utils/bugsink';
 
 export const useAuthStore = defineStore('auth', () => {
   const accessStore = useAccessStore();
@@ -63,6 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
         userInfo = fetchUserInfoResult;
 
         userStore.setUserInfo(userInfo);
+        setBugsinkUser(userInfo);
         accessStore.setAccessCodes(accessCodes);
 
         if (accessStore.loginExpired) {
@@ -107,6 +109,10 @@ export const useAuthStore = defineStore('auth', () => {
         }
       }
     } catch (error: any) {
+      captureError(error, {
+        action: 'authLogin',
+        username: params?.username,
+      });
       toast.error($t('authentication.passwordErrorTip'), {
         description:
           error?.message || 'Login failed. Please check your credentials.',
@@ -124,6 +130,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout(redirect: boolean = true) {
     clearAccessCache();
+    setBugsinkUser(null);
     try {
       await logoutApi();
     } catch {
@@ -153,6 +160,7 @@ export const useAuthStore = defineStore('auth', () => {
    */
   async function handleSessionExpired(): Promise<'modal' | 'redirect'> {
     clearAccessCache();
+    setBugsinkUser(null);
     accessStore.setAccessToken(null);
     accessStore.setRefreshToken(null);
 
@@ -176,11 +184,13 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchUserInfo() {
     const userInfo = await getUserInfoApi();
     userStore.setUserInfo(userInfo);
+    setBugsinkUser(userInfo);
     return userInfo;
   }
 
   function $reset() {
     clearAccessCache();
+    setBugsinkUser(null);
     loginLoading.value = false;
   }
 

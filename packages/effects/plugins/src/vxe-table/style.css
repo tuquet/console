@@ -63,6 +63,13 @@
   color: hsl(var(--muted-foreground));
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.vxe-table--body-wrapper,
+.vxe-table--viewport-wrapper {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 
 .vxe-table.is--empty .vxe-table--body-wrapper {
@@ -160,6 +167,8 @@
 }
 
 .vxe-toolbar {
+  flex-wrap: wrap;
+  gap: 0.5rem;
   padding: 0;
 }
 

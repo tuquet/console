@@ -39,40 +39,35 @@ function getStatusLabel(status: string): string {
 }
 
 function getColumns() {
-  const mobile = isMobile.value;
   return [
     {
       field: 'name',
       title: $t('page.workflows_view.col_name'),
-      minWidth: mobile ? 200 : 260,
+      minWidth: 260,
       slots: { default: 'name-cell' },
     },
     {
       field: 'version',
       title: $t('page.workflows_view.col_version'),
-      width: 130,
-      visible: !mobile,
+      minWidth: 130,
       slots: { default: 'version-cell' },
     },
     {
       field: 'status',
       title: $t('page.workflows_view.col_status'),
-      width: 145,
-      visible: !mobile,
+      minWidth: 145,
       slots: { default: 'status-cell' },
     },
     {
       field: 'created_at',
       title: $t('page.workflows_view.col_created_at'),
       minWidth: 145,
-      visible: !mobile,
       slots: { default: 'created-cell' },
     },
     {
       field: 'updated_at',
       title: $t('page.workflows_view.col_updated_at'),
       minWidth: 145,
-      visible: !mobile,
       slots: { default: 'updated-cell' },
     },
   ];
@@ -97,6 +92,7 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomaWorkflowItem>({
       {
         component: 'Select',
         fieldName: 'status',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('page.workflows_view.filter_status'),
         defaultValue: (route.query.status as string) || FILTER_ALL,
         componentProps: () => ({
@@ -114,6 +110,7 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomaWorkflowItem>({
       {
         component: 'Input',
         fieldName: 'keyword',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('page.workflows_view.filter_search'),
         componentProps: () => ({
           placeholder: $t('page.workflows_view.search_placeholder'),
@@ -123,6 +120,8 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomaWorkflowItem>({
     ],
     layout: 'vertical',
     showCollapseButton: false,
+    submitOnChange: true,
+    submitOnEnter: true,
     submitButtonOptions: {
       content: computed(() => $t('common.filter')),
     },
@@ -130,7 +129,7 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomaWorkflowItem>({
       content: computed(() => $t('common.reset')),
     },
     actionWrapperClass:
-      'col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-0.5 sm:pt-6',
+      'hidden sm:flex sm:col-span-2 lg:col-span-2 items-center justify-end gap-2 pt-0.5 sm:pt-6',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -201,9 +200,9 @@ function refresh() {
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Compact Single-Row Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <h1
             class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
           >
@@ -218,7 +217,7 @@ function refresh() {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="sm"
@@ -247,9 +246,9 @@ function refresh() {
       <!-- Table Grid -->
       <Grid class="workflow-vxe-grid">
         <template #name-cell="{ row }">
-          <div class="flex items-start gap-2.5 py-1 sm:items-center">
+          <div class="flex items-center gap-2.5 py-1">
             <div
-              class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground sm:mt-0"
+              class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
             >
               <GitBranch class="size-4" />
             </div>
@@ -261,29 +260,6 @@ function refresh() {
                 {{
                   row.description || $t('page.workflows_view.no_description')
                 }}
-              </div>
-
-              <!-- Mobile-only stacked metadata row -->
-              <div
-                v-if="isMobile"
-                class="mt-1.5 flex flex-wrap items-center gap-1.5"
-              >
-                <Badge variant="outline" class="px-1.5 py-0 text-2xs">
-                  v{{ row.version }}
-                </Badge>
-                <Badge
-                  variant="outline"
-                  class="px-1.5 py-0 text-2xs font-normal"
-                >
-                  <span
-                    class="mr-1 size-1.5 rounded-full"
-                    :class="getStatusDotClass(row.status)"
-                  ></span>
-                  {{ getStatusLabel(row.status) }}
-                </Badge>
-                <span class="text-2xs text-muted-foreground">
-                  {{ formatDate(row.updated_at) }}
-                </span>
               </div>
             </div>
           </div>

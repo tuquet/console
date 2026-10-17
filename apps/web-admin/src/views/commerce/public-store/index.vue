@@ -81,6 +81,7 @@ import {
 } from '#/api';
 import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'PublicStorefront' });
 
@@ -297,6 +298,10 @@ async function checkGuestOrderStatus(
     }
   } catch (error: any) {
     if (!silent) {
+      captureError(error, {
+        action: 'checkGuestOrderDeliveries',
+        view: 'PublicStorefront',
+      });
       toast.error(
         error?.message || $t('page.commerce_view.check_order_status_failed'),
       );
@@ -353,6 +358,10 @@ async function handleCreateGuestOrder() {
       }),
     );
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleCreateGuestOrder',
+      view: 'PublicStorefront',
+    });
     toast.error(error?.message || $t('page.commerce_view.order_create_failed'));
   } finally {
     submittingOrder.value = false;
@@ -384,6 +393,11 @@ async function handleLookupGuestOrder(
       }),
     );
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleLookupGuestOrder',
+      orderCode: code,
+      view: 'PublicStorefront',
+    });
     toast.error(
       error?.message ||
         $t('page.commerce_view.order_not_found_or_invalid_token'),

@@ -81,6 +81,7 @@ import {
 } from '#/api';
 import { useClipboard } from '#/composables';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'CommerceStore' });
 
@@ -377,6 +378,10 @@ async function handleCreateOrder() {
       );
     }
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleCreateOrder',
+      view: 'CommerceStore',
+    });
     toast.error(error?.message || $t('page.commerce_view.order_create_failed'));
   } finally {
     submittingOrder.value = false;
@@ -420,15 +425,15 @@ onBeforeUnmount(() => {
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Top Header & Workspace Wallet Banner -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <h1
             class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
           >
             {{ $t('page.commerce.store') }}
           </h1>
-          <Badge variant="secondary" class="text-xs font-normal">
+          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
             {{ filteredProducts.length }}
           </Badge>
         </div>
@@ -437,7 +442,7 @@ onBeforeUnmount(() => {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <!-- Workspace Selector -->
         <div
           class="hidden sm:flex items-center gap-1.5 rounded-lg border border-border/60 bg-card px-2.5 py-1"

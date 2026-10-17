@@ -98,6 +98,7 @@ setupVbenVxeTable({
       translate: resolveVxeTranslate,
       grid: {
         align: 'left',
+        autoResize: true,
         border: false,
         cellConfig: {
           height: 54,
@@ -123,6 +124,9 @@ setupVbenVxeTable({
         round: true,
         rowConfig: {
           isHover: true,
+        },
+        scrollX: {
+          enabled: false,
         },
         showOverflow: true,
         size: 'medium',
@@ -386,6 +390,15 @@ export const useVbenVxeGrid = <
   const originalCellClick = options.gridEvents?.cellClick;
   const enhancedOptions: AdminVxeGridProps<T, TFormValues, TSubmitValues> = {
     ...options,
+    ...(options.formOptions
+      ? {
+          formOptions: {
+            submitOnChange: true,
+            submitOnEnter: true,
+            ...options.formOptions,
+          },
+        }
+      : {}),
     gridEvents: {
       ...options.gridEvents,
       cellClick(params: any) {

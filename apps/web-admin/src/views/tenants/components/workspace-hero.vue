@@ -44,31 +44,38 @@ const planName = computed(() => {
 </script>
 
 <template>
-  <div class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm">
+  <div
+    class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-5 shadow-sm"
+  >
     <div
-      class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+      class="flex flex-col gap-3.5 md:flex-row md:flex-wrap md:items-center md:justify-between"
     >
       <!-- Left: Avatar & Basic Information -->
-      <div class="flex items-start gap-3.5 sm:items-center">
+      <div class="flex min-w-0 items-start gap-3 sm:items-center sm:gap-3.5">
         <Avatar
-          class="size-12 sm:size-14 shrink-0 rounded-full border border-primary/20 bg-primary/10 font-semibold text-base sm:text-lg text-primary"
+          class="size-11 shrink-0 rounded-xl border border-primary/20 bg-primary/10 text-sm font-semibold text-primary sm:size-13 sm:text-base"
         >
           <AvatarFallback
-            class="bg-transparent text-primary font-semibold text-base sm:text-lg"
+            class="bg-transparent text-sm font-semibold text-primary sm:text-base"
           >
             {{ tenantInitials }}
           </AvatarFallback>
         </Avatar>
 
-        <div class="space-y-1 min-w-0">
-          <div class="flex flex-wrap items-center gap-2">
-            <h1 class="text-lg sm:text-xl font-bold text-foreground truncate">
+        <div class="min-w-0 flex-1 space-y-1.5">
+          <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <h1
+              class="max-w-full truncate text-base font-bold tracking-tight text-foreground sm:text-xl"
+            >
               {{ props.tenant.name }}
             </h1>
-            <Badge variant="secondary" class="text-xs font-medium">
+            <Badge
+              variant="secondary"
+              class="px-2 py-0.5 text-2xs font-medium capitalize"
+            >
               {{ planName }}
             </Badge>
-            <Badge variant="outline" class="text-xs font-normal">
+            <Badge variant="outline" class="px-2 py-0.5 text-2xs font-normal">
               <span
                 class="mr-1.5 size-1.5 rounded-full"
                 :class="
@@ -83,69 +90,73 @@ const planName = computed(() => {
                   : $t('common.suspended')
               }}
             </Badge>
+            <Badge
+              v-if="props.isCurrentActive"
+              variant="secondary"
+              data-testid="hero-current-workspace-badge"
+              class="inline-flex items-center gap-1 border border-primary/20 bg-primary/10 px-2 py-0.5 text-2xs font-medium text-primary"
+            >
+              <CheckCircle2 class="size-3 shrink-0 text-primary" />
+              <span>{{ $t('page.workspace.current_workspace') }}</span>
+            </Badge>
           </div>
 
           <div
-            class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground"
+            class="flex flex-wrap items-center gap-x-2 gap-y-1 text-2xs text-muted-foreground sm:text-xs"
           >
-            <span class="font-mono">slug: {{ props.tenant.slug }}</span>
-            <span class="hidden sm:inline">•</span>
-            <span class="flex items-center gap-1 font-mono">
-              ID: {{ props.tenant.id.slice(0, 8) }}...
+            <code
+              class="rounded bg-muted/60 px-1.5 py-0.5 font-mono text-2xs text-foreground"
+            >
+              /{{ props.tenant.slug }}
+            </code>
+            <span class="text-muted-foreground/40">·</span>
+            <span class="font-mono">
+              {{ props.tenant.id.slice(0, 8) }}
             </span>
-            <span class="hidden sm:inline">•</span>
-            <span class="flex items-center gap-1">
-              <Calendar class="size-3.5" />
-              <span
-                >{{ $t('common.createdAt') }}:
-                {{ formatDateOnly(props.tenant.created_at) }}</span
-              >
+            <span class="text-muted-foreground/40">·</span>
+            <span class="inline-flex items-center gap-1">
+              <Calendar class="size-3 shrink-0" />
+              <span>{{ formatDateOnly(props.tenant.created_at) }}</span>
             </span>
           </div>
         </div>
       </div>
 
       <!-- Right: Action Buttons -->
-      <div class="flex flex-wrap items-center gap-2">
+      <div
+        class="flex flex-wrap items-center gap-2 border-t border-border/40 pt-3 md:border-t-0 md:pt-0"
+      >
         <Button
           v-if="!props.isCurrentActive"
           variant="outline"
           size="sm"
-          class="h-8 gap-1.5 text-xs font-medium"
+          class="h-8 flex-1 justify-center gap-1.5 text-xs font-medium md:flex-initial"
           @click="emit('setActive')"
         >
-          <CheckCircle2 class="size-3.5" />
-          <span>{{ $t('page.tenants_view.set_primary') }}</span>
+          <CheckCircle2 class="size-3.5 shrink-0" />
+          <span class="truncate">{{
+            $t('page.tenants_view.set_primary')
+          }}</span>
         </Button>
-
-        <Badge
-          v-else
-          variant="secondary"
-          data-testid="hero-current-workspace-badge"
-          class="flex items-center gap-1.5 px-2.5 py-1 font-medium text-xs"
-        >
-          <CheckCircle2 class="size-3.5 text-primary" />
-          <span>{{ $t('page.workspace.current_workspace') }}</span>
-        </Badge>
 
         <Button
           variant="outline"
           size="sm"
-          class="h-8 gap-1.5 text-xs font-medium"
+          class="h-8 flex-1 justify-center gap-1.5 text-xs font-medium md:flex-initial"
           @click="emit('connectCli')"
         >
-          <Terminal class="size-3.5" />
-          <span>{{ $t('page.tenants_view.pair_cli') }}</span>
+          <Terminal class="size-3.5 shrink-0" />
+          <span class="truncate">{{ $t('page.tenants_view.pair_cli') }}</span>
         </Button>
 
         <Button
           variant="outline"
           size="sm"
-          class="h-8 gap-1.5 text-xs font-medium"
+          class="h-8 flex-1 justify-center gap-1.5 text-xs font-medium md:flex-initial"
           @click="emit('openSettings')"
         >
-          <Settings class="size-3.5" />
-          <span>{{ $t('page.tenants_view.settings') }}</span>
+          <Settings class="size-3.5 shrink-0" />
+          <span class="truncate">{{ $t('page.tenants_view.settings') }}</span>
         </Button>
 
         <Button

@@ -71,6 +71,7 @@ import {
   FILTER_ALL,
 } from '#/constants';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'CommerceAdmin' });
 
@@ -137,38 +138,35 @@ const serializedVariants = computed(() => {
 });
 
 function getProductColumns() {
-  const mobile = isMobile.value;
   return [
     {
       field: 'name',
       title: $t('page.commerce_view.col_product'),
-      minWidth: mobile ? 150 : 230,
+      minWidth: 230,
       slots: { default: 'name-cell' },
     },
     {
       field: 'product_type',
       title: $t('page.commerce_view.col_category'),
-      width: 170,
-      visible: !mobile,
+      minWidth: 170,
       slots: { default: 'type-cell' },
     },
     {
       field: 'visibility',
       title: $t('page.commerce_view.visibility_label'),
-      width: 130,
-      visible: !mobile,
+      minWidth: 130,
       slots: { default: 'vis-cell' },
     },
     {
       field: 'variants',
       title: $t('page.commerce_view.col_sku_and_price'),
-      minWidth: mobile ? 140 : 240,
+      minWidth: 240,
       slots: { default: 'sku-cell' },
     },
     {
       field: 'actions',
       title: $t('common.actions'),
-      width: mobile ? 95 : 145,
+      minWidth: 160,
       align: 'right' as const,
       slots: { default: 'action-cell' },
     },
@@ -250,6 +248,7 @@ const [ProductsGrid, productsGridApi] = useVbenVxeGrid<CommerceProductItem>({
       {
         component: 'Input',
         fieldName: 'search',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.search'),
         componentProps: () => ({
           placeholder: $t(
@@ -266,7 +265,7 @@ const [ProductsGrid, productsGridApi] = useVbenVxeGrid<CommerceProductItem>({
     submitButtonOptions: { content: () => $t('common.filter') },
     resetButtonOptions: { content: () => $t('common.reset') },
     actionWrapperClass:
-      'col-span-2 lg:col-span-1 flex items-end justify-end gap-2',
+      'hidden sm:flex sm:col-span-1 lg:col-span-1 items-end justify-end gap-2',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -305,51 +304,46 @@ const [ProductsGrid, productsGridApi] = useVbenVxeGrid<CommerceProductItem>({
 });
 
 function getOrderColumns() {
-  const mobile = isMobile.value;
   return [
     {
       field: 'order_code',
       title: $t('page.commerce_view.col_order_code'),
-      minWidth: mobile ? 135 : 185,
+      minWidth: 185,
       slots: { default: 'code-cell' },
     },
     {
       field: 'buyer_email',
       title: $t('page.commerce_view.col_buyer_tenant'),
       minWidth: 210,
-      visible: !mobile,
       slots: { default: 'buyer-cell' },
     },
     {
       field: 'payment_method',
       title: $t('page.commerce_view.col_payment_channel_short'),
-      width: 150,
-      visible: !mobile,
+      minWidth: 150,
     },
     {
       field: 'total_credits',
       title: $t('page.commerce_view.col_value'),
-      width: mobile ? 105 : 140,
+      minWidth: 140,
       slots: { default: 'total-cell' },
     },
     {
       field: 'status',
       title: $t('common.status'),
-      width: 145,
-      visible: !mobile,
+      minWidth: 145,
       slots: { default: 'status-cell' },
     },
     {
       field: 'created_at',
       title: $t('common.createdAt'),
-      width: 160,
-      visible: !mobile,
+      minWidth: 160,
       slots: { default: 'date-cell' },
     },
     {
       field: 'actions',
       title: $t('page.commerce_view.col_dispatch'),
-      width: mobile ? 95 : 150,
+      minWidth: 150,
       align: 'right' as const,
       slots: { default: 'action-cell' },
     },
@@ -375,6 +369,7 @@ const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrderRecord>({
       {
         component: 'Select',
         fieldName: 'status',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.status'),
         defaultValue: 'all',
         componentProps: () => ({
@@ -390,6 +385,7 @@ const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrderRecord>({
       {
         component: 'Input',
         fieldName: 'search',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.search'),
         componentProps: () => ({
           placeholder: $t('page.commerce_view.search_admin_order_placeholder'),
@@ -404,7 +400,7 @@ const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrderRecord>({
     submitButtonOptions: { content: () => $t('common.filter') },
     resetButtonOptions: { content: () => $t('common.reset') },
     actionWrapperClass:
-      'col-span-2 lg:col-span-2 flex items-end justify-end gap-2',
+      'hidden sm:flex sm:col-span-2 lg:col-span-2 items-end justify-end gap-2',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -442,50 +438,45 @@ const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrderRecord>({
 });
 
 function getManualReviewColumns() {
-  const mobile = isMobile.value;
   return [
     {
       field: 'transfer_code',
       title: $t('page.commerce_view.col_transfer_code'),
-      width: mobile ? 130 : 165,
+      minWidth: 165,
       slots: { default: 'code-cell' },
     },
     {
       field: 'gateway_id',
       title: $t('page.commerce_view.payment_gateway_label'),
-      width: 160,
-      visible: !mobile,
+      minWidth: 160,
     },
     {
       field: 'target_type',
       title: $t('page.commerce_view.col_target_type'),
-      width: 165,
-      visible: !mobile,
+      minWidth: 165,
     },
     {
       field: 'amount_credits',
       title: $t('page.commerce_view.col_requested_xu'),
-      width: mobile ? 105 : 145,
+      minWidth: 145,
       slots: { default: 'credits-cell' },
     },
     {
       field: 'pay_amount',
       title: $t('page.commerce_view.col_converted_amount'),
-      width: 165,
-      visible: !mobile,
+      minWidth: 165,
       slots: { default: 'pay-cell' },
     },
     {
       field: 'created_at',
       title: $t('page.commerce_view.col_created_time'),
-      width: 165,
-      visible: !mobile,
+      minWidth: 165,
       slots: { default: 'date-cell' },
     },
     {
       field: 'actions',
       title: $t('page.commerce_view.col_approval'),
-      width: mobile ? 105 : 155,
+      minWidth: 155,
       align: 'right' as const,
       slots: { default: 'action-cell' },
     },
@@ -533,37 +524,33 @@ const [ManualReviewGrid, manualReviewGridApi] =
   });
 
 function getGatewayColumns() {
-  const mobile = isMobile.value;
   return [
     {
       field: 'name',
       title: $t('page.commerce_view.col_gateway_name'),
-      minWidth: mobile ? 150 : 230,
+      minWidth: 230,
       slots: { default: 'name-cell' },
     },
     {
       field: 'channel',
       title: $t('page.commerce_view.col_channel'),
-      width: 155,
-      visible: !mobile,
+      minWidth: 155,
     },
     {
       field: 'driver',
       title: $t('page.commerce_view.col_adapter_driver'),
-      width: 140,
-      visible: !mobile,
+      minWidth: 140,
     },
     {
       field: 'rate_per_credit',
       title: $t('page.commerce_view.col_rate_per_xu'),
-      width: mobile ? 115 : 165,
+      minWidth: 165,
       slots: { default: 'rate-cell' },
     },
     {
       field: 'is_active',
       title: $t('common.status'),
-      width: 135,
-      visible: !mobile,
+      minWidth: 135,
       slots: { default: 'status-cell' },
     },
   ];
@@ -699,6 +686,10 @@ async function handleSaveProductAndVariant() {
     productModalOpen.value = false;
     await productsGridApi.reload();
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleSaveProduct',
+      view: 'CommerceAdmin',
+    });
     toast.error(error?.message || $t('page.commerce_view.product_save_failed'));
   } finally {
     savingProduct.value = false;
@@ -752,6 +743,10 @@ async function handleBulkImportStock() {
     stockModalOpen.value = false;
     await productsGridApi.reload();
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleBulkImportStock',
+      view: 'CommerceAdmin',
+    });
     toast.error(error?.message || $t('page.commerce_view.stock_import_failed'));
   } finally {
     importingStock.value = false;
@@ -776,6 +771,11 @@ async function handleManualFulfillOrder(order: CommerceOrderRecord) {
     }
     await ordersGridApi.reload();
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleManualFulfillOrder',
+      orderId: order.id,
+      view: 'CommerceAdmin',
+    });
     toast.error(
       error?.message || $t('page.commerce_view.order_fulfill_failed'),
     );
@@ -800,6 +800,11 @@ async function handleForceApproveIntent(intent: PaymentIntentItem) {
       toast.error(res.reason || $t('page.commerce_view.intent_approve_failed'));
     }
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleForceApproveIntent',
+      intentId: intent.id,
+      view: 'CommerceAdmin',
+    });
     toast.error(
       error?.message || $t('page.commerce_view.intent_approve_error'),
     );
@@ -817,7 +822,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
 <template>
   <div class="space-y-3 p-3 sm:space-y-5 sm:p-5">
     <!-- Top Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="flex min-w-0 flex-col gap-0.5">
         <h1
           class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
@@ -829,7 +834,7 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           size="sm"
           variant="outline"

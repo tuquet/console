@@ -70,14 +70,13 @@ const actionWrapperClass = computed(() => {
   const actionLayout = props.actionLayout || 'rowEnd';
   const actionPosition = props.actionPosition || 'right';
 
-  const cls = [
+  const cls: Array<typeof props.actionWrapperClass> = [
     'flex',
     'items-center',
     'gap-3',
     props.compact ? 'pb-2' : 'pb-4',
     props.layout === 'vertical' ? 'self-end' : 'self-center',
     props.layout === 'inline' ? '' : 'w-full',
-    props.actionWrapperClass,
   ];
 
   switch (actionLayout) {
@@ -106,6 +105,10 @@ const actionWrapperClass = computed(() => {
       cls.push('justify-end');
       break;
     }
+  }
+
+  if (props.actionWrapperClass) {
+    cls.push(props.actionWrapperClass);
   }
 
   return cls.join(' ');

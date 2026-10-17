@@ -10,6 +10,7 @@ import { $t } from '@vben/locales';
 import { toast } from '@tuquet/vue-ui';
 
 import { resetPasswordApi } from '#/api/core/auth';
+import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'ForgetPassword' });
 
@@ -38,6 +39,7 @@ async function handleSubmit(values: Recordable<any>) {
     await resetPasswordApi(values.email);
     toast.success($t('authentication.resetLinkSent'));
   } catch (error: any) {
+    captureError(error, { view: 'ForgetPassword' });
     toast.error(error.message || $t('authentication.resetLinkFailed'));
   } finally {
     loading.value = false;

@@ -7,6 +7,7 @@ import { $t } from '@vben/locales';
 import { Button, Input, Label, toast } from '@tuquet/vue-ui';
 
 import { updatePasswordApi } from '#/api/core/auth';
+import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'ResetPassword' });
 
@@ -44,6 +45,7 @@ async function handleSubmit() {
     toast.success($t('authentication.passwordResetSuccess'));
     router.push('/auth/login');
   } catch (error: any) {
+    captureError(error, { view: 'ResetPassword' });
     toast.error(error.message || $t('authentication.passwordResetFailed'));
   } finally {
     loading.value = false;

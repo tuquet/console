@@ -64,45 +64,41 @@ function handleConnectCli(record?: any) {
 }
 
 function getColumns() {
-  const mobile = isMobile.value;
   return [
     {
       field: 'name',
       title: $t('page.workspace.col_name'),
-      minWidth: mobile ? 165 : 220,
+      minWidth: 240,
       slots: { default: 'name-cell' },
     },
     {
       field: 'slug',
       title: $t('page.workspace.col_slug'),
-      minWidth: 140,
-      visible: !mobile,
+      minWidth: 150,
       slots: { default: 'slug-cell' },
     },
     {
       field: 'plan',
       title: $t('page.workspace.col_plan'),
-      minWidth: 110,
-      visible: !mobile,
+      minWidth: 120,
       slots: { default: 'plan-cell' },
     },
     {
       field: 'status',
       title: $t('page.workspace.col_status'),
-      minWidth: mobile ? 95 : 130,
+      minWidth: 130,
       slots: { default: 'status-cell' },
     },
     {
       field: 'created_at',
       title: $t('page.workspace.col_created_at'),
-      minWidth: 140,
-      visible: !mobile,
+      minWidth: 150,
       slots: { default: 'date-cell' },
     },
     {
       field: 'actions',
       title: $t('page.workspace.col_actions'),
-      minWidth: mobile ? 110 : 280,
+      minWidth: 280,
       align: 'right' as const,
       showOverflow: false,
       slots: { default: 'actions-cell' },
@@ -171,8 +167,10 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
       {
         component: 'Input',
         fieldName: 'search',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.search'),
         componentProps: () => ({
+          clearable: true,
           placeholder: $t('page.tenants_view.search_placeholder'),
         }),
       },
@@ -188,7 +186,7 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
       content: computed(() => $t('common.reset')),
     },
     actionWrapperClass:
-      'col-span-2 sm:col-span-1 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+      'hidden sm:flex sm:col-span-1 items-center justify-end gap-2 pt-1 sm:pt-6',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -271,15 +269,15 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Top Action Bar -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <h1
             class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
           >
             {{ $t('page.workspace.title') }}
           </h1>
-          <Badge variant="secondary" class="text-xs font-normal">
+          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
             {{ tenants.length }}
           </Badge>
         </div>
@@ -288,7 +286,7 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -311,7 +309,7 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
 
     <!-- Compact Active Workspace Strip -->
     <div
-      class="flex items-center justify-between gap-2.5 rounded-xl border border-border/60 bg-card px-3.5 py-2.5 sm:px-4 sm:py-3 shadow-xs"
+      class="flex flex-wrap items-center justify-between gap-2.5 rounded-xl border border-border/60 bg-card px-3.5 py-2.5 shadow-xs sm:px-4 sm:py-3"
     >
       <div class="flex min-w-0 items-center gap-2.5">
         <div
@@ -354,14 +352,14 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
     >
       <Grid class="tenants-vxe-grid">
         <template #name-cell="{ row }">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 whitespace-nowrap">
             <span class="font-medium text-foreground">
               {{ row.name }}
             </span>
             <Badge
               v-if="row.id === activeTenantId"
               variant="secondary"
-              class="text-xs font-normal"
+              class="shrink-0 px-1.5 py-0 text-2xs font-normal"
             >
               {{ $t('page.workspace.action_selected') }}
             </Badge>
@@ -403,12 +401,12 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
         </template>
 
         <template #actions-cell="{ row }">
-          <div class="flex items-center justify-end gap-1.5">
+          <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
             <Button
               size="sm"
               :variant="row.id === activeTenantId ? 'secondary' : 'default'"
-              class="h-7 px-2.5 text-xs gap-1"
-              @click="handleSelectTenant(row)"
+              class="h-7 shrink-0 px-2.5 text-xs gap-1"
+              @click.stop="handleSelectTenant(row)"
             >
               <Check v-if="row.id === activeTenantId" class="size-3 shrink-0" />
               <span>
@@ -422,8 +420,8 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
             <Button
               variant="outline"
               size="sm"
-              class="h-7 px-2.5 text-xs gap-1"
-              @click="router.push(`/tenants/${row.id}`)"
+              class="h-7 shrink-0 px-2.5 text-xs gap-1"
+              @click.stop="router.push(`/tenants/${row.id}`)"
             >
               <Eye class="size-3 shrink-0" />
               <span>{{ $t('page.workspace.action_detail') }}</span>
@@ -431,9 +429,9 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
             <Button
               variant="outline"
               size="sm"
-              class="h-7 px-2 text-xs gap-1"
+              class="h-7 shrink-0 px-2 text-xs gap-1"
               :title="$t('page.workspace.action_connect')"
-              @click="handleConnectCli(row)"
+              @click.stop="handleConnectCli(row)"
             >
               <Terminal class="size-3 shrink-0" />
               <span>CLI</span>

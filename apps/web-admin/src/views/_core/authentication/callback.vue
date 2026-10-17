@@ -9,6 +9,7 @@ import { Button, Spinner, toast } from '@tuquet/vue-ui';
 
 import { getAccessCodesApi } from '#/api';
 import { useAuthStore } from '#/store';
+import { captureError, captureMessage } from '#/utils/bugsink';
 
 defineOptions({ name: 'AuthCallback' });
 
@@ -34,6 +35,10 @@ onMounted(async () => {
       params.get('error_description');
 
     if (error) {
+      captureError(new Error(error), {
+        phase: 'oauth_error_param',
+        view: 'AuthCallback',
+      });
       loading.value = false;
       errorMessage.value = $t('authentication.githubLoginFailedWithReason', {
         error,
@@ -76,9 +81,16 @@ onMounted(async () => {
       return;
     }
 
+    captureMessage('GitHub OAuth callback missing access_token', 'warning', {
+      view: 'AuthCallback',
+    });
     loading.value = false;
     errorMessage.value = $t('authentication.githubSessionMissing');
   } catch (error: any) {
+    captureError(error, {
+      phase: 'oauth_exchange',
+      view: 'AuthCallback',
+    });
     loading.value = false;
     errorMessage.value =
       error.message || $t('authentication.githubCallbackError');

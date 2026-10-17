@@ -25,6 +25,7 @@ import {
 
 import { getTenantsApi } from '#/api';
 import { useClipboard } from '#/composables';
+import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'DesktopBridge' });
 
@@ -69,7 +70,7 @@ async function loadTenants() {
       selectedTenant.value = tenantOptions.value[0]?.value || '';
     }
   } catch (error) {
-    console.error('Failed to load tenants:', error);
+    captureError(error, { phase: 'loadTenants', view: 'DesktopBridge' });
   }
 
   if (tenantOptions.value.length === 0) {
@@ -136,6 +137,7 @@ async function handleAuthorize() {
       loading.value = false;
     }, 600);
   } catch (error: any) {
+    captureError(error, { phase: 'handleAuthorize', view: 'DesktopBridge' });
     loading.value = false;
     errorMessage.value =
       error?.message || $t('authentication.desktopSendAuthFailed');

@@ -64,6 +64,7 @@ import {
   PAYMENT_CHANNEL_META,
 } from '#/constants';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'CommerceOrders' });
 
@@ -152,45 +153,41 @@ function getPaymentMethodLabel(method: null | string) {
 }
 
 function getColumns() {
-  const mobile = isMobile.value;
   return [
     {
       field: 'order_code',
       title: $t('page.commerce_view.col_order_code'),
-      minWidth: mobile ? 145 : 190,
+      minWidth: 190,
       slots: { default: 'code-cell' },
     },
     {
       field: 'payment_method',
       title: $t('page.commerce_view.col_payment_method'),
       minWidth: 170,
-      visible: !mobile,
       slots: { default: 'method-cell' },
     },
     {
       field: 'total_credits',
       title: $t('page.commerce_view.total_payment'),
-      width: mobile ? 105 : 150,
+      minWidth: 150,
       slots: { default: 'total-cell' },
     },
     {
       field: 'status',
       title: $t('common.status'),
-      width: mobile ? 110 : 155,
-      visible: !mobile,
+      minWidth: 155,
       slots: { default: 'status-cell' },
     },
     {
       field: 'created_at',
       title: $t('page.commerce_view.col_created_time'),
-      width: 165,
-      visible: !mobile,
+      minWidth: 165,
       slots: { default: 'date-cell' },
     },
     {
       field: 'actions',
       title: $t('page.commerce_view.col_delivery'),
-      width: mobile ? 95 : 150,
+      minWidth: 150,
       align: 'right' as const,
       slots: { default: 'action-cell' },
     },
@@ -252,6 +249,7 @@ const [Grid, gridApi] = useVbenVxeGrid<CommerceOrderRecord>({
       {
         component: 'Input',
         fieldName: 'search',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.search'),
         componentProps: () => ({
           placeholder: $t('page.commerce_view.search_order_placeholder'),
@@ -270,7 +268,7 @@ const [Grid, gridApi] = useVbenVxeGrid<CommerceOrderRecord>({
       content: computed(() => $t('common.reset')),
     },
     actionWrapperClass:
-      'col-span-2 sm:col-span-1 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+      'hidden sm:flex sm:col-span-1 items-center justify-end gap-2 pt-1 sm:pt-6',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -363,6 +361,11 @@ async function openDeliveriesModal(order: CommerceOrderRecord) {
   try {
     orderDeliveries.value = await getOrderDeliveriesApi(order.id);
   } catch (error: any) {
+    captureError(error, {
+      action: 'getOrderDeliveriesApi',
+      orderId: order.id,
+      view: 'CommerceOrders',
+    });
     toast.error(
       error?.message || $t('page.commerce_view.load_deliveries_failed'),
     );
@@ -398,15 +401,15 @@ onMounted(() => {
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <h1
             class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
           >
             {{ $t('page.commerce.orders') }}
           </h1>
-          <Badge variant="secondary" class="text-xs font-normal">
+          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
             {{ allOrders.length }}
           </Badge>
         </div>
@@ -415,7 +418,7 @@ onMounted(() => {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <div class="flex items-center gap-1.5">
           <Select
             :model-value="selectedTenantId"

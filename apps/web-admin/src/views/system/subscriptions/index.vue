@@ -55,42 +55,38 @@ function getColumns() {
     {
       field: 'tenant_name',
       title: $t('term.workspace'),
-      minWidth: isMobile.value ? 180 : 220,
+      minWidth: 220,
       slots: { default: 'workspace-cell' },
     },
     {
       field: 'plan_name',
       title: $t('term.plan'),
-      width: 150,
-      visible: !isMobile.value,
+      minWidth: 150,
       slots: { default: 'plan-cell' },
     },
     {
       field: 'price_monthly_usd',
       title: $t('page.system_view.subs_col_unit_price'),
-      width: 150,
-      visible: !isMobile.value,
+      minWidth: 150,
       slots: { default: 'price-cell' },
     },
     {
       field: 'status',
       title: $t('common.status'),
-      width: isMobile.value ? 115 : 160,
+      minWidth: 160,
       slots: { default: 'status-cell' },
     },
     {
       field: 'current_period_end',
       title: $t('page.system_view.subs_col_next_billing'),
       minWidth: 170,
-      visible: !isMobile.value,
       slots: { default: 'period-cell' },
     },
     {
       field: 'cancel_at_period_end',
       title: $t('page.system_view.subs_col_auto_renew'),
-      width: 150,
+      minWidth: 150,
       align: 'right' as const,
-      visible: !isMobile.value,
       slots: { default: 'renewal-cell' },
     },
   ];
@@ -113,6 +109,7 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscriptionItem>({
       {
         component: 'Select',
         fieldName: 'status',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.status'),
         defaultValue: FILTER_ALL,
         componentProps: () => ({
@@ -137,6 +134,7 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscriptionItem>({
       {
         component: 'Input',
         fieldName: 'search',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.search'),
         componentProps: () => ({
           placeholder: $t('page.system_view.subs_search_placeholder'),
@@ -146,6 +144,8 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscriptionItem>({
     ],
     layout: 'vertical',
     showCollapseButton: false,
+    submitOnChange: true,
+    submitOnEnter: true,
     submitButtonOptions: {
       content: computed(() => $t('common.filter')),
     },
@@ -153,7 +153,7 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscriptionItem>({
       content: computed(() => $t('common.reset')),
     },
     actionWrapperClass:
-      'col-span-2 sm:col-span-2 lg:col-span-2 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+      'hidden sm:flex sm:col-span-2 lg:col-span-2 items-center justify-end gap-2 pt-1 sm:pt-6',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -222,15 +222,15 @@ watch([() => $t('page.system_view.subs_col_unit_price'), isMobile], () => {
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <h1
             class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
           >
             {{ $t('page.system.subscriptions') }}
           </h1>
-          <Badge variant="secondary" class="text-xs font-normal">
+          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
             {{ allSubscriptions.length }}
           </Badge>
         </div>
@@ -239,7 +239,7 @@ watch([() => $t('page.system_view.subs_col_unit_price'), isMobile], () => {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -275,17 +275,6 @@ watch([() => $t('page.system_view.subs_col_unit_price'), isMobile], () => {
             >
               <span class="truncate">
                 /{{ row.tenant_slug || row.tenant_id.slice(0, 8) }}
-              </span>
-              <span class="sm:hidden">&bull;</span>
-              <span
-                class="truncate font-sans font-medium text-foreground sm:hidden"
-              >
-                {{ row.plan_name }}
-              </span>
-              <span class="sm:hidden">&bull;</span>
-              <span class="sm:hidden">
-                ${{ row.price_monthly_usd
-                }}{{ $t('page.system_view.per_month_suffix') }}
               </span>
             </div>
           </div>

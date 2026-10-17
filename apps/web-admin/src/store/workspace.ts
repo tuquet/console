@@ -12,6 +12,7 @@ import {
   setActiveTenantId,
 } from '#/api/core/tenant';
 import { $t } from '#/locales';
+import { captureError, setBugsinkTag } from '#/utils/bugsink';
 
 export const useWorkspaceStore = defineStore('workspace', () => {
   const workspaces = ref<TenantItem[]>([]);
@@ -47,8 +48,12 @@ export const useWorkspaceStore = defineStore('workspace', () => {
           setActiveTenantId(first.id);
         }
       }
+      if (activeWorkspaceId.value) {
+        setBugsinkTag('workspace_id', activeWorkspaceId.value);
+      }
       return workspaces.value;
-    } catch {
+    } catch (error) {
+      captureError(error, { action: 'fetchWorkspaces' });
       return [];
     } finally {
       isLoading.value = false;
@@ -60,6 +65,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     const target = workspaces.value.find((w) => w.id === id);
     activeWorkspaceId.value = id;
     setActiveTenantId(id);
+    setBugsinkTag('workspace_id', id);
 
     if (notify && target) {
       toast.success($t('page.workspace.switched_to', { name: target.name }));
@@ -91,6 +97,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
       }
       return created;
     } catch (error: any) {
+      captureError(error, { action: 'createWorkspace', slug: data.slug });
       toast.error(error?.message || $t('page.workspace.create_failed'));
       throw error;
     } finally {
@@ -101,6 +108,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   function $reset() {
     workspaces.value = [];
     activeWorkspaceId.value = '';
+    setBugsinkTag('workspace_id', null);
     isLoading.value = false;
   }
 

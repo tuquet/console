@@ -16,6 +16,7 @@ import { useAccessStore } from '@vben/stores';
 import { toast } from '@tuquet/vue-ui';
 
 import { useAuthStore } from '#/store';
+import { addNetworkBreadcrumb, captureError } from '#/utils/bugsink';
 
 import { refreshTokenApi } from './core';
 
@@ -88,6 +89,17 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
       // Customize based on business needs using error code/payload
       const responseData = error?.response?.data ?? {};
       const errorMessage = responseData?.error ?? responseData?.message ?? '';
+      addNetworkBreadcrumb({
+        method: error?.config?.method || 'GET',
+        status: error?.response?.status || 0,
+        url: error?.config?.url || '',
+      });
+      captureError(error, {
+        message: errorMessage || msg,
+        phase: 'request_client',
+        status: error?.response?.status,
+        url: error?.config?.url,
+      });
       // Fallback to HTTP status code message if no error payload
       toast.error(errorMessage || msg);
     }),

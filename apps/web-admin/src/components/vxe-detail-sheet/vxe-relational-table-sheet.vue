@@ -219,19 +219,19 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
             >
               <TableRow>
                 <TableHead
-                  class="w-10 px-3 py-2 text-center text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                  class="w-10 px-3 py-2 text-center text-xs font-semibold tracking-wider whitespace-nowrap text-muted-foreground uppercase"
                 >
                   #
                 </TableHead>
                 <TableHead
                   v-for="col in props.relation.columns"
                   :key="col.field"
-                  class="px-3 py-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                  class="px-3 py-2 text-xs font-semibold tracking-wider whitespace-nowrap text-muted-foreground uppercase"
                 >
                   {{ col.title }}
                 </TableHead>
                 <TableHead
-                  class="w-12 px-3 py-2 text-right text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                  class="w-12 px-3 py-2 text-right text-xs font-semibold tracking-wider whitespace-nowrap text-muted-foreground uppercase"
                 >
                   {{ $t('common.copy') }}
                 </TableHead>
@@ -248,7 +248,7 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
                 class="transition-colors hover:bg-muted/30"
               >
                 <TableCell
-                  class="px-3 py-2 text-center text-xs text-muted-foreground"
+                  class="px-3 py-2 text-center text-xs whitespace-nowrap text-muted-foreground"
                 >
                   {{ idx + 1 }}
                 </TableCell>
@@ -256,7 +256,7 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
                 <TableCell
                   v-for="col in props.relation.columns"
                   :key="col.field"
-                  class="px-3 py-2 align-middle"
+                  class="px-3 py-2 align-middle whitespace-nowrap"
                 >
                   <Badge
                     v-if="col.type === 'badge'"
@@ -282,7 +282,9 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
                   </span>
                 </TableCell>
 
-                <TableCell class="px-3 py-2 text-right align-middle">
+                <TableCell
+                  class="px-3 py-2 text-right align-middle whitespace-nowrap"
+                >
                   <Button
                     type="button"
                     variant="ghost"

@@ -51,6 +51,7 @@ import {
 } from '#/api';
 import CliSnippetCard from '#/components/common/cli-snippet-card.vue';
 import { useClipboard } from '#/composables';
+import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'Profile' });
 
@@ -101,6 +102,7 @@ async function fetchProfile() {
       userId.value = res.userId || '';
     }
   } catch (error: any) {
+    captureError(error, { action: 'fetchProfile', view: 'Profile' });
     toast.error($t('profile.loadProfileError', { error: error.message || '' }));
   } finally {
     loading.value = false;
@@ -125,6 +127,7 @@ async function handleSaveProfile() {
     });
     toast.success($t('profile.saveProfileSuccess'));
   } catch (error: any) {
+    captureError(error, { action: 'handleSaveProfile', view: 'Profile' });
     toast.error($t('profile.saveProfileError', { error: error.message || '' }));
   } finally {
     savingProfile.value = false;
@@ -152,6 +155,7 @@ async function handleSavePassword() {
     newPassword.value = '';
     confirmPassword.value = '';
   } catch (error: any) {
+    captureError(error, { action: 'handleSavePassword', view: 'Profile' });
     toast.error(
       $t('profile.changePasswordError', { error: error.message || '' }),
     );

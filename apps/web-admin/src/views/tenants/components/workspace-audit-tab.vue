@@ -7,10 +7,6 @@ import { History, RefreshCw, ShieldCheck, User } from '@lucide/vue';
 import {
   Badge,
   Button,
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
   Table,
   TableBody,
   TableCell,
@@ -23,6 +19,7 @@ import {
 import { getTenantAuditLogsApi } from '#/api';
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 interface Props {
   tenantId: string;
@@ -40,6 +37,7 @@ async function loadAuditLogs() {
   try {
     logs.value = await getTenantAuditLogsApi(props.tenantId);
   } catch (error: any) {
+    captureError(error, { action: 'loadAuditLogs', view: 'WorkspaceAuditTab' });
     toast.error(error.message || $t('page.tenants_view.audit_load_failed'));
   } finally {
     loading.value = false;
@@ -59,22 +57,22 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-3 sm:space-y-4">
     <!-- Header with Action -->
     <div
-      class="flex items-center justify-between rounded-xl border border-border/60 bg-card p-4 shadow-sm"
+      class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-3.5 shadow-sm sm:p-4"
     >
-      <div class="flex items-center gap-2.5">
+      <div class="flex min-w-0 items-center gap-2.5">
         <div
-          class="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary"
+          class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
         >
           <ShieldCheck class="size-4.5" />
         </div>
-        <div>
-          <h3 class="text-sm font-semibold text-foreground">
+        <div class="min-w-0">
+          <h3 class="truncate text-sm font-semibold text-foreground">
             {{ $t('page.tenants_view.audit_title') }}
           </h3>
-          <p class="text-xs text-muted-foreground">
+          <p class="line-clamp-1 text-xs text-muted-foreground">
             {{ $t('page.tenants_view.audit_desc') }}
           </p>
         </div>
@@ -83,48 +81,50 @@ onMounted(() => {
       <Button
         variant="outline"
         size="sm"
-        class="h-8 text-xs flex items-center gap-1.5"
+        class="h-8 shrink-0 text-xs flex items-center gap-1.5"
         :disabled="loading"
         @click="loadAuditLogs"
       >
         <RefreshCw class="size-3.5" :class="{ 'animate-spin': loading }" />
-        <span>{{ $t('common.refresh') }}</span>
+        <span class="hidden sm:inline">{{ $t('common.refresh') }}</span>
       </Button>
     </div>
 
-    <!-- Dual View: Desktop Table -->
+    <!-- Scrollable Audit Logs Table -->
     <div
-      class="hidden md:block overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm"
+      class="overflow-x-auto rounded-xl border border-border/60 bg-card shadow-sm"
     >
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead class="w-[180px]">
+            <TableHead class="min-w-[170px] whitespace-nowrap">
               {{ $t('page.tenants_view.audit_col_time') }}
             </TableHead>
-            <TableHead class="w-[220px]">
+            <TableHead class="min-w-[220px] whitespace-nowrap">
               {{ $t('page.tenants_view.audit_col_actor') }}
             </TableHead>
-            <TableHead class="w-[180px]">{{ $t('common.action') }}</TableHead>
-            <TableHead>
+            <TableHead class="min-w-[160px] whitespace-nowrap">
+              {{ $t('common.action') }}
+            </TableHead>
+            <TableHead class="min-w-[220px] whitespace-nowrap">
               {{ $t('page.tenants_view.audit_col_target') }}
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow v-for="log in logs" :key="log.id">
-            <TableCell class="text-xs text-muted-foreground whitespace-nowrap">
+            <TableCell class="text-xs whitespace-nowrap text-muted-foreground">
               {{ formatDate(log.created_at) }}
             </TableCell>
-            <TableCell>
+            <TableCell class="whitespace-nowrap">
               <div class="flex items-center gap-2">
                 <div
                   class="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
                 >
                   <User class="size-3" />
                 </div>
-                <div class="truncate max-w-[180px]">
-                  <div class="text-xs font-medium text-foreground truncate">
+                <div>
+                  <div class="text-xs font-medium text-foreground">
                     {{
                       log.actor_name ||
                       log.actor_email ||
@@ -133,21 +133,21 @@ onMounted(() => {
                   </div>
                   <div
                     v-if="log.actor_name && log.actor_email"
-                    class="text-2xs text-muted-foreground truncate"
+                    class="text-2xs text-muted-foreground"
                   >
                     {{ log.actor_email }}
                   </div>
                 </div>
               </div>
             </TableCell>
-            <TableCell>
+            <TableCell class="whitespace-nowrap">
               <Badge variant="outline" class="text-xs font-normal">
                 {{ log.action }}
               </Badge>
             </TableCell>
-            <TableCell>
+            <TableCell class="whitespace-nowrap">
               <div class="flex items-center gap-2 text-xs">
-                <span class="text-muted-foreground font-mono"
+                <span class="text-muted-foreground"
                   >{{ log.entity_type }}:</span
                 >
                 <span class="text-foreground">{{ log.entity_id }}</span>
@@ -168,52 +168,6 @@ onMounted(() => {
           </TableRow>
         </TableBody>
       </Table>
-    </div>
-
-    <!-- Dual View: Mobile Card List -->
-    <div class="block space-y-3 md:hidden">
-      <div
-        v-for="log in logs"
-        :key="log.id"
-        class="rounded-xl border border-border/60 bg-card p-4 shadow-sm space-y-2 text-xs"
-      >
-        <div class="flex items-center justify-between">
-          <Badge variant="outline" class="text-xs font-normal">
-            {{ log.action }}
-          </Badge>
-          <span class="text-xs text-muted-foreground">
-            {{ formatDate(log.created_at) }}
-          </span>
-        </div>
-
-        <div class="flex items-center gap-2 pt-1 text-muted-foreground">
-          <User class="size-3.5" />
-          <span>{{
-            log.actor_name || log.actor_email || $t('page.system.title')
-          }}</span>
-        </div>
-
-        <div
-          class="pt-2 border-t border-border/40 text-xs text-muted-foreground"
-        >
-          <span>{{ log.entity_type }}: </span>
-          <span class="text-foreground">{{ log.entity_id }}</span>
-        </div>
-      </div>
-
-      <Empty
-        v-if="logs.length === 0 && !loading"
-        class="rounded-xl border border-border/60 bg-card p-8 shadow-sm"
-      >
-        <EmptyHeader>
-          <EmptyMedia>
-            <History class="size-8 text-muted-foreground/60" />
-          </EmptyMedia>
-          <EmptyDescription>
-            {{ $t('page.tenants_view.audit_empty') }}
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
     </div>
   </div>
 </template>

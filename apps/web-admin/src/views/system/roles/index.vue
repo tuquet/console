@@ -35,6 +35,7 @@ import {
 import RoleBadge from '#/components/iam/role-badge.vue';
 import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'SystemRoles' });
 
@@ -69,6 +70,10 @@ async function ensureCatalogLoaded(force = false): Promise<void> {
       allPermissions.value = permsData;
       catalogLoaded.value = true;
     } catch (error: any) {
+      captureError(error, {
+        action: 'ensureCatalogLoaded',
+        view: 'SystemRoles',
+      });
       toast.error(error.message || $t('page.system_view.roles_load_error'));
     } finally {
       loadingCatalog.value = false;
@@ -119,7 +124,7 @@ function getRoleColumns() {
     {
       field: 'name',
       title: $t('term.role'),
-      minWidth: isMobile.value ? 130 : 175,
+      minWidth: 175,
       align: 'left' as const,
       slots: { default: 'role-name-cell' },
     },
@@ -128,30 +133,27 @@ function getRoleColumns() {
       title: $t('page.system_view.roles_col_policy_desc'),
       minWidth: 250,
       align: 'left' as const,
-      visible: !isMobile.value,
       slots: { default: 'role-desc-cell' },
     },
     {
       field: 'is_system',
       title: $t('page.system_view.plugins_col_type'),
-      width: 140,
+      minWidth: 140,
       align: 'left' as const,
-      visible: !isMobile.value,
       slots: { default: 'role-type-cell' },
     },
     {
       field: 'permissions',
       title: $t('page.system_view.roles_col_assigned_perms'),
-      minWidth: isMobile.value ? 120 : 290,
+      minWidth: 290,
       align: 'left' as const,
       slots: { default: 'role-perms-cell' },
     },
     {
       field: 'created_at',
       title: $t('common.createdAt'),
-      width: 145,
+      minWidth: 145,
       align: 'left' as const,
-      visible: !isMobile.value,
       slots: { default: 'role-date-cell' },
     },
   ];
@@ -162,14 +164,14 @@ function getPermColumns() {
     {
       field: 'id',
       title: $t('page.system_view.perms_col_id'),
-      minWidth: isMobile.value ? 180 : 230,
+      minWidth: 230,
       align: 'left' as const,
       slots: { default: 'perm-id-cell' },
     },
     {
       field: 'module',
       title: $t('page.system_view.roles_col_module'),
-      width: isMobile.value ? 115 : 155,
+      minWidth: 155,
       align: 'left' as const,
       slots: { default: 'perm-module-cell' },
     },
@@ -178,7 +180,6 @@ function getPermColumns() {
       title: $t('page.system_view.perms_col_desc'),
       minWidth: 260,
       align: 'left' as const,
-      visible: !isMobile.value,
       slots: { default: 'perm-desc-cell' },
     },
     {
@@ -186,7 +187,6 @@ function getPermColumns() {
       title: $t('page.system_view.roles_col_assigned_roles'),
       minWidth: 260,
       align: 'left' as const,
-      visible: !isMobile.value,
       slots: { default: 'perm-roles-cell' },
     },
   ];
@@ -246,9 +246,11 @@ const [RolesGrid, rolesGridApi] = useVbenVxeGrid<SystemRoleItem>({
       {
         component: 'Input',
         fieldName: 'search',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.search'),
         componentProps: () => ({
           placeholder: $t('page.system_view.roles_search_placeholder'),
+          clearable: true,
         }),
       },
     ],
@@ -263,7 +265,7 @@ const [RolesGrid, rolesGridApi] = useVbenVxeGrid<SystemRoleItem>({
       content: computed(() => $t('common.reset')),
     },
     actionWrapperClass:
-      'col-span-2 sm:col-span-1 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+      'hidden sm:flex sm:col-span-1 items-center justify-end gap-2 pt-1 sm:pt-6',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -364,9 +366,11 @@ const [PermissionsGrid, permsGridApi] = useVbenVxeGrid<SystemPermissionItem>({
       {
         component: 'Input',
         fieldName: 'search',
+        formItemClass: 'col-span-2 sm:col-span-1',
         label: () => $t('common.search'),
         componentProps: () => ({
           placeholder: $t('page.system_view.perms_search_placeholder'),
+          clearable: true,
         }),
       },
     ],
@@ -381,7 +385,7 @@ const [PermissionsGrid, permsGridApi] = useVbenVxeGrid<SystemPermissionItem>({
       content: computed(() => $t('common.reset')),
     },
     actionWrapperClass:
-      'col-span-2 sm:col-span-1 flex items-center justify-end gap-2 pt-1 sm:pt-6',
+      'hidden sm:flex sm:col-span-1 items-center justify-end gap-2 pt-1 sm:pt-6',
     wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
@@ -477,7 +481,7 @@ function handleOpenCreate() {
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Top Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
         <h1
           class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
@@ -489,7 +493,7 @@ function handleOpenCreate() {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -516,7 +520,7 @@ function handleOpenCreate() {
 
     <!-- Main Container: Mode Tabs + VXE Grid -->
     <div
-      class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs space-y-3"
+      class="space-y-3 overflow-hidden rounded-xl border border-border/60 bg-card p-3 shadow-xs sm:p-5"
     >
       <!-- Mode Selector -->
       <div class="border-b border-border/40 pb-2.5">
@@ -546,7 +550,7 @@ function handleOpenCreate() {
           <template #role-name-cell="{ row }">
             <div class="flex items-center gap-2">
               <RoleBadge :role="row.name" :uppercase="true" />
-              <code class="hidden text-2xs text-muted-foreground sm:inline">
+              <code class="text-2xs text-muted-foreground">
                 {{ row.name }}
               </code>
             </div>
@@ -584,7 +588,7 @@ function handleOpenCreate() {
               <code
                 v-for="perm in row.permissions.slice(0, 2)"
                 :key="perm"
-                class="hidden max-w-36 truncate rounded bg-muted px-1.5 py-0.5 text-2xs text-muted-foreground sm:inline-block"
+                class="inline-block max-w-36 truncate rounded bg-muted px-1.5 py-0.5 text-2xs text-muted-foreground"
                 :title="perm"
               >
                 {{ perm }}
@@ -592,7 +596,7 @@ function handleOpenCreate() {
               <Badge
                 v-if="row.permissions.length > 2"
                 variant="secondary"
-                class="hidden shrink-0 text-2xs font-normal sm:inline-flex"
+                class="inline-flex shrink-0 text-2xs font-normal"
               >
                 {{
                   $t('page.system_view.roles_more_perms', [

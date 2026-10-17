@@ -33,6 +33,7 @@ import {
   updateWorkspaceMemberRoleApi,
 } from '#/api';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 import DeleteWorkspaceModal from './components/modals/delete-workspace-modal.vue';
 import EditMemberModal from './components/modals/edit-member-modal.vue';
@@ -108,6 +109,7 @@ async function loadData() {
     detailData.value = detail;
     availableRoles.value = roles;
   } catch (error: any) {
+    captureError(error, { action: 'loadData', view: 'TenantDetail' });
     toast.error(error.message || $t('page.tenants_view.load_detail_failed'));
   } finally {
     loading.value = false;
@@ -155,6 +157,10 @@ async function handleInviteMemberSubmit(payload: {
     isInviteModalVisible.value = false;
     await loadData();
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleInviteMemberSubmit',
+      view: 'TenantDetail',
+    });
     toast.error(error.message || $t('page.tenants_view.invite_sent_failed'));
   } finally {
     inviting.value = false;
@@ -177,6 +183,10 @@ async function handleEditMemberSubmit(payload: {
     isEditMemberModalVisible.value = false;
     await loadData();
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleEditMemberSubmit',
+      view: 'TenantDetail',
+    });
     toast.error(error.message || $t('page.tenants_view.member_update_failed'));
   } finally {
     updatingMember.value = false;
@@ -193,6 +203,7 @@ async function handleRemoveMember(member: WorkspaceMember) {
     );
     await loadData();
   } catch (error: any) {
+    captureError(error, { action: 'handleRemoveMember', view: 'TenantDetail' });
     toast.error(error.message || $t('page.tenants_view.member_remove_failed'));
   }
 }
@@ -212,6 +223,10 @@ async function handleEditWorkspaceSubmit(payload: {
     isEditWorkspaceModalVisible.value = false;
     await loadData();
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleEditWorkspaceSubmit',
+      view: 'TenantDetail',
+    });
     toast.error(
       error.message || $t('page.tenants_view.workspace_update_failed'),
     );
@@ -228,6 +243,10 @@ async function handleDeleteWorkspaceSubmit() {
     isDeleteWorkspaceModalVisible.value = false;
     router.push('/tenants');
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleDeleteWorkspaceSubmit',
+      view: 'TenantDetail',
+    });
     toast.error(
       error.message || $t('page.tenants_view.workspace_delete_failed'),
     );
@@ -242,7 +261,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-4 p-4 sm:space-y-5 sm:p-5">
+  <div class="space-y-3 p-3 sm:space-y-5 sm:p-5">
     <!-- Navigation Back Button -->
     <div>
       <Button
@@ -271,41 +290,47 @@ onMounted(() => {
     <!-- Main Workspace 4-Tab Container -->
     <div
       v-if="detailData"
-      class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
+      class="sm:rounded-xl sm:border sm:border-border/60 sm:bg-card sm:p-5 sm:shadow-sm"
     >
       <Tabs v-model="currentTab" class="w-full">
         <TabsList
-          class="mb-4 flex h-auto w-full justify-start gap-1 overflow-x-auto p-1 sm:inline-flex sm:w-auto"
+          class="mb-3 grid h-auto w-full grid-cols-4 gap-1 overflow-x-auto p-1 sm:mb-4 sm:inline-flex sm:w-auto"
         >
           <TabsTrigger
             value="overview"
-            class="flex shrink-0 items-center gap-1.5 whitespace-nowrap"
+            class="whitespace-nowrap px-2 py-1.5 text-xs sm:px-3 sm:text-sm [&>span]:inline-flex [&>span]:items-center [&>span]:gap-1.5"
           >
-            <LayoutDashboard class="size-4 shrink-0" />
-            <span>{{ $t('page.tenants_view.tab_overview') }}</span>
+            <LayoutDashboard class="hidden size-4 shrink-0 sm:block" />
+            <span class="truncate">{{
+              $t('page.tenants_view.tab_overview')
+            }}</span>
           </TabsTrigger>
           <TabsTrigger
             value="members"
-            class="flex shrink-0 items-center gap-1.5 whitespace-nowrap"
+            class="whitespace-nowrap px-2 py-1.5 text-xs sm:px-3 sm:text-sm [&>span]:inline-flex [&>span]:items-center [&>span]:gap-1.5"
           >
-            <Users class="size-4 shrink-0" />
-            <span
+            <Users class="hidden size-4 shrink-0 sm:block" />
+            <span class="truncate"
               >{{ $t('term.members') }} · {{ detailData.members.length }}</span
             >
           </TabsTrigger>
           <TabsTrigger
             value="usage"
-            class="flex shrink-0 items-center gap-1.5 whitespace-nowrap"
+            class="whitespace-nowrap px-2 py-1.5 text-xs sm:px-3 sm:text-sm [&>span]:inline-flex [&>span]:items-center [&>span]:gap-1.5"
           >
-            <Gauge class="size-4 shrink-0" />
-            <span>{{ $t('page.tenants_view.tab_usage') }}</span>
+            <Gauge class="hidden size-4 shrink-0 sm:block" />
+            <span class="truncate">{{
+              $t('page.tenants_view.tab_usage')
+            }}</span>
           </TabsTrigger>
           <TabsTrigger
             value="audit"
-            class="flex shrink-0 items-center gap-1.5 whitespace-nowrap"
+            class="whitespace-nowrap px-2 py-1.5 text-xs sm:px-3 sm:text-sm [&>span]:inline-flex [&>span]:items-center [&>span]:gap-1.5"
           >
-            <History class="size-4 shrink-0" />
-            <span>{{ $t('page.tenants_view.tab_audit') }}</span>
+            <History class="hidden size-4 shrink-0 sm:block" />
+            <span class="truncate">{{
+              $t('page.tenants_view.tab_audit')
+            }}</span>
           </TabsTrigger>
         </TabsList>
 

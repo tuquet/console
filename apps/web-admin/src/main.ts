@@ -6,12 +6,41 @@ import {
   overridesPreferences,
   typographyPreferencesExtension,
 } from './preferences';
+import {
+  captureError,
+  captureMessage,
+  initEarlyErrorInterception,
+} from './utils/bugsink';
 
-// Auto-reload on stale chunk failures after new deployments
+// Early intercept all unhandled promise rejections and global runtime/resource errors
 if (typeof window !== 'undefined') {
-  window.addEventListener('vite:preloadError', (event) => {
+  initEarlyErrorInterception();
+
+  // Auto-reload on stale chunk failures after new deployments with telemetry and reload loop protection
+  window.addEventListener('vite:preloadError', (event: any) => {
     event.preventDefault();
-    window.location.reload();
+    try {
+      const targetUrl =
+        event?.payload?.url || event?.target?.src || window.location.href;
+      captureMessage(
+        `Vite preload chunk failure: ${event?.payload?.message || event?.message || 'dynamic chunk load failed'}`,
+        'warning',
+        {
+          phase: 'vite_preload_error',
+          target_url: targetUrl,
+        },
+      );
+    } catch {
+      // Fail-safe
+    }
+
+    const lastReloadKey = 'specter:last_preload_reload';
+    const lastReload = sessionStorage.getItem(lastReloadKey);
+    const now = Date.now();
+    if (!lastReload || now - Number(lastReload) > 10_000) {
+      sessionStorage.setItem(lastReloadKey, String(now));
+      window.location.reload();
+    }
   });
 }
 
@@ -46,7 +75,6 @@ async function initApplication() {
   } catch (error) {
     console.error('[Specter Admin] Failed to initialize application:', error);
     try {
-      const { captureError } = await import('./utils/bugsink');
       captureError(error, { phase: 'application_bootstrap' });
     } catch {
       // ignore

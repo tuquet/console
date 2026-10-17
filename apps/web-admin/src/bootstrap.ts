@@ -14,7 +14,7 @@ import { initComponentAdapter } from './adapter/component';
 import { initSetupVbenForm } from './adapter/form';
 import App from './app.vue';
 import { router } from './router';
-import { initBugsink } from './utils/bugsink';
+import { addBreadcrumb, initBugsink, setBugsinkTag } from './utils/bugsink';
 
 async function bootstrap(namespace: string) {
   // Initialize component adapter
@@ -51,6 +51,32 @@ async function bootstrap(namespace: string) {
 
   // Initialize Bugsink (Sentry-compatible) error tracking
   initBugsink(app, router);
+
+  if (typeof window !== 'undefined') {
+    // Hardware and environment tags
+    const isPwa = window.matchMedia('(display-mode: standalone)').matches;
+    setBugsinkTag('pwa', isPwa ? 'true' : 'false');
+    setBugsinkTag('screen', `${window.innerWidth}x${window.innerHeight}`);
+    setBugsinkTag('online', navigator.onLine ? 'true' : 'false');
+
+    window.addEventListener('online', () => {
+      setBugsinkTag('online', 'true');
+      addBreadcrumb({
+        category: 'network',
+        level: 'info',
+        message: 'Browser connection restored (online)',
+      });
+    });
+
+    window.addEventListener('offline', () => {
+      setBugsinkTag('online', 'false');
+      addBreadcrumb({
+        category: 'network',
+        level: 'warning',
+        message: 'Browser connection lost (offline)',
+      });
+    });
+  }
 
   // Register access control directives
   registerAccessDirective(app);

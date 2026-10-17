@@ -40,15 +40,15 @@ const runsPercent = computed(() =>
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-3 sm:space-y-4">
     <!-- Billing Cycle Context Strip -->
     <div
       v-if="subscription?.current_period_end"
-      class="flex items-center justify-between gap-2 rounded-lg border border-border/50 bg-muted/20 px-3.5 py-2 text-xs text-muted-foreground"
+      class="flex flex-col gap-1.5 rounded-lg border border-border/50 bg-muted/20 px-3.5 py-2.5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:py-2"
     >
       <span>{{ $t('page.tenants_view.default_plan_desc') }}</span>
       <span class="inline-flex shrink-0 items-center gap-1.5">
-        <Calendar class="size-3.5" />
+        <Calendar class="size-3.5 shrink-0" />
         <span
           >{{ $t('page.tenants_view.period_end') }}:
           <strong class="text-foreground">{{
@@ -59,19 +59,28 @@ const runsPercent = computed(() =>
     </div>
 
     <!-- Resource Quotas Progress Grid -->
-    <div class="grid grid-cols-2 gap-2.5 sm:gap-4">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
       <!-- Metric 1: Members -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-3"
+        class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-5 shadow-sm space-y-2.5"
       >
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-2">
           <div
-            class="flex items-center gap-2 text-sm font-medium text-foreground"
+            class="flex min-w-0 items-center gap-2 text-sm font-medium text-foreground"
           >
-            <Users class="size-4 text-muted-foreground" />
-            <span>{{ $t('page.tenants_view.quota_members_title') }}</span>
+            <Users class="size-4 shrink-0 text-muted-foreground" />
+            <span class="truncate">{{
+              $t('page.tenants_view.quota_members_title')
+            }}</span>
           </div>
-          <span class="text-xs font-medium text-foreground">
+          <span
+            class="shrink-0 whitespace-nowrap font-mono text-xs font-semibold"
+            :class="
+              quota.used_members > quota.max_members
+                ? 'text-destructive'
+                : 'text-foreground'
+            "
+          >
             {{ quota.used_members }} / {{ quota.max_members }}
           </span>
         </div>
@@ -88,16 +97,25 @@ const runsPercent = computed(() =>
 
       <!-- Metric 2: Runner Devices -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-3"
+        class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-5 shadow-sm space-y-2.5"
       >
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-2">
           <div
-            class="flex items-center gap-2 text-sm font-medium text-foreground"
+            class="flex min-w-0 items-center gap-2 text-sm font-medium text-foreground"
           >
-            <Cpu class="size-4 text-muted-foreground" />
-            <span>{{ $t('page.tenants_view.quota_devices_title') }}</span>
+            <Cpu class="size-4 shrink-0 text-muted-foreground" />
+            <span class="truncate">{{
+              $t('page.tenants_view.quota_devices_title')
+            }}</span>
           </div>
-          <span class="text-xs font-medium text-foreground">
+          <span
+            class="shrink-0 whitespace-nowrap font-mono text-xs font-semibold"
+            :class="
+              quota.used_devices > quota.max_devices
+                ? 'text-destructive'
+                : 'text-foreground'
+            "
+          >
             {{ quota.used_devices }} / {{ quota.max_devices }}
           </span>
         </div>
@@ -114,17 +132,26 @@ const runsPercent = computed(() =>
 
       <!-- Metric 3: Storage -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-3"
+        class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-5 shadow-sm space-y-2.5"
       >
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-2">
           <div
-            class="flex items-center gap-2 text-sm font-medium text-foreground"
+            class="flex min-w-0 items-center gap-2 text-sm font-medium text-foreground"
           >
-            <HardDrive class="size-4 text-muted-foreground" />
-            <span>{{ $t('page.tenants_view.quota_storage_title') }}</span>
+            <HardDrive class="size-4 shrink-0 text-muted-foreground" />
+            <span class="truncate">{{
+              $t('page.tenants_view.quota_storage_title')
+            }}</span>
           </div>
-          <span class="text-xs font-medium text-foreground">
-            {{ quota.used_storage_mb }} MB / {{ quota.max_storage_mb }} MB
+          <span
+            class="shrink-0 whitespace-nowrap font-mono text-xs font-semibold"
+            :class="
+              quota.used_storage_mb > quota.max_storage_mb
+                ? 'text-destructive'
+                : 'text-foreground'
+            "
+          >
+            {{ quota.used_storage_mb }} / {{ quota.max_storage_mb }} MB
           </span>
         </div>
 
@@ -136,16 +163,25 @@ const runsPercent = computed(() =>
 
       <!-- Metric 4: Monthly Runs -->
       <div
-        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-3"
+        class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-5 shadow-sm space-y-2.5"
       >
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-2">
           <div
-            class="flex items-center gap-2 text-sm font-medium text-foreground"
+            class="flex min-w-0 items-center gap-2 text-sm font-medium text-foreground"
           >
-            <PlayCircle class="size-4 text-muted-foreground" />
-            <span>{{ $t('page.tenants_view.quota_runs_title') }}</span>
+            <PlayCircle class="size-4 shrink-0 text-muted-foreground" />
+            <span class="truncate">{{
+              $t('page.tenants_view.quota_runs_title')
+            }}</span>
           </div>
-          <span class="text-xs font-medium text-foreground">
+          <span
+            class="shrink-0 whitespace-nowrap font-mono text-xs font-semibold"
+            :class="
+              quota.used_monthly_runs > quota.max_monthly_runs
+                ? 'text-destructive'
+                : 'text-foreground'
+            "
+          >
             {{ quota.used_monthly_runs }} / {{ quota.max_monthly_runs }}
           </span>
         </div>

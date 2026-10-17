@@ -3,6 +3,8 @@ import type { SupabaseSchema } from '@vben/constants';
 import { $t } from '@vben/locales';
 import { useAccessStore } from '@vben/stores';
 
+import { addNetworkBreadcrumb, captureError } from '../../utils/bugsink';
+
 export { SUPABASE_SCHEMA } from '@vben/constants';
 export type { SupabaseSchema };
 
@@ -296,10 +298,40 @@ export async function supabaseRequest<T = any>(
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
-    ...fetchInit,
-    headers,
-  });
+  let response: Response;
+  const startTime = typeof performance === 'undefined' ? 0 : performance.now();
+  try {
+    response = await fetch(url, {
+      ...fetchInit,
+      headers,
+    });
+    const durationMs = startTime
+      ? Math.round(performance.now() - startTime)
+      : undefined;
+    addNetworkBreadcrumb({
+      durationMs,
+      method: fetchInit.method || 'GET',
+      status: response.status,
+      url,
+    });
+  } catch (error) {
+    const durationMs = startTime
+      ? Math.round(performance.now() - startTime)
+      : undefined;
+    addNetworkBreadcrumb({
+      durationMs,
+      method: fetchInit.method || 'GET',
+      status: 0,
+      url,
+    });
+    captureError(error, {
+      method: fetchInit.method || 'GET',
+      path,
+      phase: 'supabase_network',
+      schema: schema || 'public',
+    });
+    throw error;
+  }
 
   if (!response.ok) {
     const errorJson = (await response.json().catch(() => ({}))) as Record<
@@ -336,12 +368,22 @@ export async function supabaseRequest<T = any>(
       );
     }
 
-    throw new Error(
+    const apiError = new Error(
       errorJson.message ||
         errorJson.msg ||
         errorJson.error_description ||
         $t('authentication.supabaseRequestFailed', { status: response.status }),
     );
+    captureError(apiError, {
+      errorCode: errorJson.code || errorJson.error_code,
+      errorDetails: errorJson.details || errorJson.hint,
+      method: fetchInit.method || 'GET',
+      path,
+      phase: 'supabase_rest',
+      schema: schema || 'public',
+      status: response.status,
+    });
+    throw apiError;
   }
 
   if (response.status === 204) {

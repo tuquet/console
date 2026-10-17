@@ -32,6 +32,7 @@ import {
   TENANT_PLAN_META,
 } from '#/constants';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'SystemOverview' });
 
@@ -135,6 +136,7 @@ async function loadOverview() {
   try {
     overview.value = await getSystemOverviewApi();
   } catch (error: any) {
+    captureError(error, { action: 'loadOverview', view: 'SystemOverview' });
     toast.error(error?.message || $t('page.system_view.overview_load_failed'));
   } finally {
     loading.value = false;
@@ -157,7 +159,7 @@ onMounted(() => {
 <template>
   <div class="space-y-3.5 p-3 sm:space-y-5 sm:p-5">
     <!-- Compact Single-Row Header -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
         <h1
           class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
@@ -169,7 +171,7 @@ onMounted(() => {
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
           size="sm"

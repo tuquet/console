@@ -15,6 +15,7 @@ import { Badge, Button, Spinner, toast } from '@tuquet/vue-ui';
 
 import { getRealAnalyticsDataApi } from '#/api';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 import GrowthChart from './growth-chart.vue';
 import PlansChart from './plans-chart.vue';
@@ -46,6 +47,7 @@ async function loadAnalytics() {
     const data = await getRealAnalyticsDataApi();
     analyticsData.value = data;
   } catch (error: any) {
+    captureError(error, { action: 'loadAnalytics', view: 'Analytics' });
     toast.error(error.message || $t('common.error'));
   } finally {
     loading.value = false;
@@ -60,7 +62,7 @@ onMounted(() => {
 <template>
   <div class="space-y-3 p-3 sm:space-y-5 sm:p-5">
     <!-- Top Header: Streamlined, Flat & Compact -->
-    <div class="flex items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="min-w-0">
         <h1
           class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
@@ -72,7 +74,7 @@ onMounted(() => {
         </p>
       </div>
 
-      <div class="flex items-center shrink-0">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           :disabled="loading"
           variant="outline"

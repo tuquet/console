@@ -47,6 +47,7 @@ import {
 import { useDateFormat } from '#/composables';
 import { CAMPAIGN_STATUS_META, getStatusToneMeta } from '#/constants';
 import { $t } from '#/locales';
+import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'AutomationRunDetail' });
 
@@ -139,7 +140,11 @@ async function fetchRunAndLogs() {
       stopPolling();
     }
   } catch (error: any) {
-    console.error('[Automa Detail] Failed polling:', error);
+    captureError(error, {
+      action: 'fetchRunAndLogs',
+      runId: runId.value,
+      view: 'AutomationRunDetail',
+    });
   }
 }
 
@@ -160,6 +165,11 @@ async function handleCancelRun() {
     toast.success($t('page.automation_view.cancel_run_success'));
     await fetchRunAndLogs();
   } catch (error: any) {
+    captureError(error, {
+      action: 'handleCancelRun',
+      runId: runId.value,
+      view: 'AutomationRunDetail',
+    });
     toast.error(error.message || $t('page.automation_view.cancel_run_failed'));
   } finally {
     canceling.value = false;
@@ -176,6 +186,11 @@ onMounted(async () => {
     await fetchRunAndLogs();
     startPolling();
   } catch (error: any) {
+    captureError(error, {
+      action: 'onMounted',
+      runId: runId.value,
+      view: 'AutomationRunDetail',
+    });
     toast.error(error.message || $t('page.automation_view.load_run_failed'));
   } finally {
     loading.value = false;
@@ -190,7 +205,9 @@ onUnmounted(() => {
 <template>
   <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
     <!-- Mobile-First Navigation & Action Header -->
-    <div class="flex items-start justify-between gap-2 sm:items-center">
+    <div
+      class="flex flex-wrap items-start justify-between gap-2 sm:items-center"
+    >
       <div class="flex min-w-0 items-start gap-2.5 sm:items-center">
         <Button
           variant="outline"
@@ -226,7 +243,7 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <!-- Live Polling Indicator -->
         <Badge
           v-if="isActive"
