@@ -11,15 +11,15 @@
 ```text
 2026-10 ───► 2026-11 ───► 2026-12 ───► 2027-01 ───► 2027-02 ───► 2027-04
 MILESTONE 1   MILESTONE 2   MILESTONE 3   MILESTONE 4   MILESTONE 5
-Enterprise    Treasury &    Digital Shop  Cloud Fleet   White-Label &
-IAM & RBAC    Automated Pay & Fulfillment Automation    Marketplace
+Enterprise    Omnichannel   Digital Shop  Cloud Fleet   White-Label &
+IAM & RBAC    Payment Rails & Fulfillment Automation    Marketplace
 ```
 
 | Mốc Bàn Giao (Milestone) | Trọng Tâm Chiến Lược (Strategic Focus) | Sản Phẩm Bàn Giao Thực Tế (Deliverables) | Chỉ Số Cam Kết (Target KPIs / SLAs) | Thời Hạn (Target Date) | Trạng Thái (Status) |
 | :--- | :--- | :--- | :--- | :---: | :---: |
 | **`MILESTONE 01`** | **Nền Tảng Định Danh & Cô Lập Đa Doanh Nghiệp (IAM & Multi-Tenancy)** | Cổng quản trị phân quyền đa tổ chức; Khung bảo mật chống rò rỉ dữ liệu chéo; Xác thực bảo mật chuẩn ngân hàng. | • Độ cô lập dữ liệu: **100%**<br>• Độ trễ xác thực: $\le 50\text{ ms}$<br>• Tải đồng thời: $\ge 10.000$ Tenants | **08/11/2026** | 🟡 **Đang kiểm toán (In Audit)** |
-| **`MILESTONE 02`** | **Hạ Tầng Tài Chính & Thanh Toán Tự Động (Treasury & Automated Pay)** | Cổng nạp tiền tự động qua VietQR & Crypto; Sổ cái số dư minh bạch; Hệ thống cảnh báo dòng tiền cho Ban Lãnh đạo. | • Tốc độ nạp tiền: $\le 5\text{ giây}$<br>• Tỷ lệ sai lệch vốn: **0.00%**<br>• Đối soát tự động: **100%** | **30/11/2026** | ⚪ **Sắp triển khai** |
-| **`MILESTONE 03`** | **Sàn Thương Mại Số & Cung Ứng Tức Thì (Digital Shop & Instant Delivery)** | Cửa hàng số doanh nghiệp; Kho hàng số tự động; Cơ chế thanh toán chống trừ tiền 2 lần; Bàn giao tài nguyên 1-click. | • Thời gian xuất đơn: $\le 1\text{ giây}$<br>• Tranh chấp kho: **0.00%**<br>• Tỷ lệ chuyển đổi: $\ge 98.5\%$ | **22/12/2026** | ⚪ **Kế hoạch Q4** |
+| **`MILESTONE 02`** | **Cổng Thanh Toán Đa Kênh & Xuyên Biên Giới (Omnichannel Payments)** | • Ngân hàng: VietQR PRO & Virtual Account<br>• Ví Việt Nam: MoMo, ZaloPay, VNPay, Viettel<br>• Thẻ & Ví Quốc Tế: Visa/Mastercard, PayPal<br>• Crypto: USDT/USDC TRC20/TON on-chain | • Tốc độ nạp tiền: $\le 3\text{ giây}$<br>• Tỷ lệ sai lệch vốn: **0.00%**<br>• Tỷ lệ thành công: $\ge 99.2\%$ | **30/11/2026** | ⚪ **Kế hoạch Sprint tới** |
+| **`MILESTONE 03`** | **Sàn Thương Mại Số & Cung Ứng Tức Thì (Digital Shop & Instant Delivery)** | Cửa hàng số doanh nghiệp; Kho hàng số tự động; Cơ chế thanh toán chống trừ tiền 2 lần; Bàn giao tài nguyên 1-click. | • Thời gian xuất đơn: $\le 1\text{ giây}$<br>• Tranh chấp kho: **0.00%**<br>• Tỷ lệ chuyển đổi: $\ge 98.5\%$ | **22/12/2026** | ⚪ **Kế hoạch Tháng 12/2026** |
 | **`MILESTONE 04`** | **Đám Mây Tự Động Hóa & Đưa Lên Chợ Bán (Cloud Automation & Fleet)** | Gói thuê bao kịch bản và máy chủ bán trên Shop; Bảng điều hành cụm máy chủ phân tán thời gian thực; Tiết kiệm 40% chi phí vận hành. | • Cam kết Uptime: **99.9%**<br>• Giảm tiến trình thừa: $\ge 95\%$<br>• Mở rộng cụm: $\ge 1.000$ VPS | **15/02/2027** | ⚪ **Kế hoạch Q1/2027** |
 | **`MILESTONE 05`** | **Nhượng Quyền Thương Hiệu (White-Label) & Thị Trường Mở Toàn Cầu** | Nền tảng nhượng quyền cho đại lý (Custom domain/logo); Sàn kịch bản chia sẻ doanh thu cho cộng đồng; API Doanh nghiệp. | • Triển khai đại lý: $\le 15\text{ phút}$<br>• Tăng trưởng doanh thu: $\ge 300\%$<br>• Hệ sinh thái lập trình viên mở | **30/04/2027** | ⚪ **Kế hoạch Q2/2027** |
 
@@ -40,15 +40,24 @@ IAM & RBAC    Automated Pay & Fulfillment Automation    Marketplace
 
 ---
 
-### ⚪ MILESTONE 02: Hạ Tầng Tài Chính & Thanh Toán Tự Động (Treasury & Automated Clearing)
+### ⚪ MILESTONE 02: Cổng Thanh Toán Đa Kênh & Xuyên Biên Giới (Omnichannel & Cross-Border Gateway)
 * **Thời gian:** 09/11/2026 – 30/11/2026
 * **Mục tiêu Doanh nghiệp:**  
-  Tự động hóa hoàn toàn dòng tiền nạp vào của khách hàng. Loại bỏ công sức đối soát thủ công của nhân viên, giúp nền tảng vận hành và thu tiền tự động ngay cả trong đêm hoặc ngày nghỉ lễ.
+  Xây dựng hạ tầng thanh toán đa lĩnh vực toàn diện, tự động hóa 100% dòng tiền nạp vào của khách hàng trong và ngoài nước qua mọi phương thức phổ biến nhất.
 * **Gói nghiệm thu bàn giao (Deliverables):**
-  1. Mã QR Thanh toán Động (VietQR) quét là tiền vào ví ngay trong 5 giây.
-  2. Cổng thanh toán quốc tế đa tiền tệ phục vụ khách hàng toàn cầu.
-  3. Hệ thống sổ cái kế toán kép minh bạch, xuất báo cáo tài chính cho cổ đông 1-click.
-  4. Trợ lý Bot Telegram gửi thông báo doanh thu từng giờ về điện thoại của Ban Giám đốc.
+  1. **Hạ tầng Ngân hàng Việt Nam:**
+     - Mã QR động VietQR PRO quét là tiền vào ví ngay trong 3 giây.
+     - Tài khoản Định danh Chuyên dụng (Virtual Account MBBank/VPBank): Mỗi Workspace có 1 số tài khoản riêng, chuyển khoản không cần ghi nội dung nạp.
+  2. **Tổ hợp Ví Điện Tử Việt Nam:**
+     - Tích hợp thanh toán 1-chạm MoMo, ZaloPay, VNPay, Viettel Money, ShopeePay.
+  3. **Cổng Thanh Toán Quốc Tế & Thẻ Toàn Cầu:**
+     - Hỗ trợ thẻ Visa, MasterCard, JCB, Amex chuẩn 3D-Secure 2.0 chống gian lận.
+     - Ví quốc tế: PayPal, Apple Pay, Google Pay cho khách hàng Bắc Mỹ và Châu Âu.
+  4. **Hạ Tầng Tiền Mã Hóa & Web3 (Digital Asset Rails):**
+     - Thanh toán tự động qua USDT / USDC (mạng TRC20, TON, Polygon, Solana) đối soát on-chain tự động.
+  5. **Sổ Cái Tài Chính Kép (Double-Entry Ledger Engine):**
+     - Đối soát dòng tiền tự động 100%, chống sai lệch số dư, xuất báo cáo tài chính kiểm toán 1-click.
+     - Trợ lý Bot Telegram gửi thông báo doanh thu từng giờ về điện thoại Ban Giám đốc.
 
 ---
 

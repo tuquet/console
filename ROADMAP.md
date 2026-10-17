@@ -1,14 +1,14 @@
 # Tuquet Admin — Product Strategy & Executive Roadmap
 
 > **Tài liệu Chiến lược Sản phẩm Dành cho Ban Lãnh đạo & Nhà Tài Trợ**  
-> **Sứ mệnh:** Xây dựng Trung tâm Điều hành Doanh nghiệp (Enterprise Command Center) điều phối tập trung toàn bộ Định danh, Tài chính Số, Thương mại Điện tử và Hạ tầng Tự động hóa của Hệ sinh thái Tuquet.
+> **Sứ mệnh:** Xây dựng Trung tâm Điều hành Doanh nghiệp (Enterprise Command Center) điều phối tập trung toàn bộ Định danh, Hạ tầng Thanh toán Đa kênh Toàn cầu, Thương mại Điện tử và Hạ tầng Tự động hóa của Hệ sinh thái Tuquet.
 
 ---
 
 ## 🎯 4 Trụ Cột Năng Lực Cốt Lõi (Core Capability Pillars)
 
 1. **Enterprise Identity & Multi-Tenancy:** Cô lập dữ liệu tuyệt đối chuẩn ngân hàng, phân quyền vai trò hạt mịn, đáp ứng hàng chục nghìn doanh nghiệp cùng vận hành độc lập.
-2. **Autonomous Treasury & Financial Clearing:** Tự động hóa 100% dòng tiền nạp vào qua VietQR và Crypto, thanh toán tức thì, chống sai lệch số dư với độ chính xác $100\%$.
+2. **Omnichannel & Cross-Border Payment Gateway:** Hạ tầng thanh toán đa lĩnh vực tự động 100%: Ngân hàng VietQR/VA, Ví điện tử Việt Nam (MoMo, ZaloPay, VNPay), Thẻ quốc tế (Visa/Mastercard/PayPal) và Tiền mã hóa (USDT/TON).
 3. **Digital Commerce & Instant Fulfillment:** Sàn thương mại tài nguyên số tốc độ cao, giữ hàng chống tranh chấp, bàn giao bản quyền/proxy trong $\le 1\text{ giây}$.
 4. **Cloud Fleet & Distributed Automation:** Điều khiển cụm máy chủ và bot phân tán thời gian thực, cam kết Uptime $99.9\%$, tiết kiệm $40\%$ chi phí phần cứng nhờ triệt tiêu tiến trình thừa.
 
@@ -35,20 +35,22 @@
 
 ---
 
-### ⚪ MILESTONE 02: Hạ Tầng Tài Chính & Thanh Toán Tự Động (Treasury & Automated Clearing)
+### ⚪ MILESTONE 02: Cổng Thanh Toán Đa Kênh & Xuyên Biên Giới (Omnichannel & Cross-Border Gateway)
 *Thời gian:* 09/11/2026 – 30/11/2026 | *Tình trạng:* **Kế hoạch Sprint tiếp theo**
 
 * **Giá trị Doanh nghiệp:**  
-  Mở thông dòng máu tài chính cho hệ thống. Khách hàng nạp tiền là có số dư để tiêu dùng ngay lập tức mà không cần nhân viên kế toán duyệt thủ công.
+  Phá vỡ mọi rào cản thanh toán địa lý và phương thức tiền tệ. Cho phép khách hàng doanh nghiệp trong nước và quốc tế nạp tiền thanh toán qua bất kỳ kênh nào: chuyển khoản ngân hàng, ví nội địa, thẻ quốc tế hoặc tài sản số.
 * **Gói bàn giao nghiệm thu:**
-  - Cổng Nạp Tiền Động Thông Minh qua VietQR: Quét mã QR là tiền vào ví ngay trong 5 giây.
-  - Cổng Thanh toán Quốc tế Đa tiền tệ (Crypto USDT) phục vụ khách hàng toàn cầu.
-  - Bảng đối soát sổ cái tài chính kép minh bạch, xuất báo cáo dòng tiền cho cổ đông 1-click.
-  - Trợ lý tài chính ảo gửi thông báo doanh thu và cảnh báo rủi ro về Telegram của Ban Giám đốc.
+  - **Kênh Ngân hàng Việt Nam:** Cổng VietQR PRO tự động cộng tiền trong 3 giây; Tài khoản Định danh Chuyên dụng (Virtual Account) cho từng Workspace.
+  - **Kênh Ví Điện Tử Việt Nam:** Tích hợp thanh toán 1-chạm MoMo, ZaloPay, VNPay, Viettel Money, ShopeePay.
+  - **Kênh Thẻ & Ví Quốc Tế:** Cổng thanh toán thẻ Visa/Mastercard/JCB chuẩn 3D-Secure 2.0; Ví PayPal, Apple Pay, Google Pay.
+  - **Kênh Tài Sản Số & Crypto:** Cổng nạp USDT / USDC (mạng TRC20, TON, Polygon, Solana) đối soát tự động on-chain.
+  - **Sổ Cái Tài Chính Kép (Double-Entry Ledger):** Bảng đối soát số dư bất biến, xuất báo cáo tài chính cho cổ đông 1-click.
+  - **Trợ Lý Tài Chính Bot Telegram:** Báo cáo doanh thu từng giờ và cảnh báo rủi ro biến động số dư lớn.
 * **Chỉ số Cam kết (Target KPIs):**
-  - Tốc độ cộng tiền tự động: $\le 5\text{ giây}$
+  - Tốc độ cộng tiền tự động: $\le 3\text{ giây}$ (VietQR/Ví VN), $\le 15\text{ giây}$ (Thẻ/Crypto)
   - Tỷ lệ sai lệch vốn: **0.00%**
-  - Đối soát sổ sách tự động: **100%**
+  - Tỷ lệ thành công cổng thanh toán: $\ge 99.2\%$
 
 ---
 
