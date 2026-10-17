@@ -1,108 +1,92 @@
-# Tuquet Ecosystem — Timeline & Kế Hoạch Triển Khai Thực Tế
+# Tuquet Admin — Strategic Execution Timeline
 
-> **Mục đích:** Bảng theo dõi tiến độ thực tế (Timeline Execution Plan) của toàn bộ dự án. 
-> Mọi Milestone được đồng nhất 1-1 với các Phase của Roadmap tổng. Tuyệt đối không đánh dấu "Hoàn thành" khi chưa kiểm toán tính đúng đắn của nghiệp vụ và cơ sở dữ liệu.
+> **Tài liệu Kế hoạch Triển khai Chiến lược (Executive Master Timeline)**  
+> **Dành cho:** Ban Giám Đốc, Nhà Đầu Tư & Các Trưởng Bộ Phận (Stakeholders & Sponsors)  
+> **Cam kết:** Mọi mốc bàn giao đều có tiêu chí định lượng (KPIs), sản phẩm demo trực quan và chỉ số kinh doanh rõ ràng.
 
 ---
 
-## 📅 Tổng Quan Các Mốc Thời Gian (Milestone Schedule)
+## 📊 Bảng Theo Dõi Tiến Độ Toàn Diện (Executive Master Schedule)
 
 ```text
 2026-10 ───► 2026-11 ───► 2026-12 ───► 2027-01 ───► 2027-02 ───► 2027-04
-Phase 1       Phase 2       Phase 3       Phase 4       Phase 5
-Core IAM      Wallet & QR   Digital Shop  Automation    Marketplace &
-& Multi-Tenant              & Inventory   & Fleet       White-Label
+MILESTONE 1   MILESTONE 2   MILESTONE 3   MILESTONE 4   MILESTONE 5
+Enterprise    Treasury &    Digital Shop  Cloud Fleet   White-Label &
+IAM & RBAC    Automated Pay & Fulfillment Automation    Marketplace
 ```
 
----
-
-## 🎯 Chi Tiết Từng Milestone & Kế Hoạch Kiểm Toán
-
-### 🟡 MILESTONE 01: Nền Tảng Multi-Tenant, IAM & Scalable RBAC
-- **Thời gian dự kiến:** 2026-10-18 đến 2026-11-08 (3 tuần)
-- **Tình trạng hiện tại:** Đang rà soát và kiểm toán lại (In Audit & Hardening)
-- **Rủi ro cốt lõi cần giải quyết:** 
-  - Code hiện tại chưa đảm bảo cô lập dữ liệu 100% nếu có nhiều workspace truy vấn đồng thời.
-  - Role member cập nhật bằng `DELETE` rồi `POST` dễ gây mất quyền khi rớt mạng.
-  - Lỗ hổng SSRF tại Desktop Bridge và rủi ro Open Redirect.
-
-#### Danh sách công việc cụ thể:
-- [ ] **Task 1.1 — Kiểm toán Schema `core_iam` & RLS Policies:**
-  - Rà soát từng bảng: `workspaces`, `workspace_members`, `roles`, `permissions`, `member_roles`.
-  - Viết bộ kiểm thử kiểm tra cô lập dữ liệu (Tenant Isolation Test): Workspace A tuyệt đối không thể đọc/ghi dữ liệu của Workspace B qua PostgREST.
-- [ ] **Task 1.2 — Cập nhật Member Role nguyên tử (Atomic Role Update):**
-  - Thay thế logic `DELETE` rồi `POST` trong `apps/web-admin/src/api/core/workspace-detail.ts` bằng PostgREST RPC hoặc transaction upsert nguyên tử.
-- [ ] **Task 1.3 — Vá bảo mật Desktop Bridge & Open Redirect:**
-  - Whitelist nghiêm ngặt port `1024..65535` và IP loopback `127.0.0.1` trong `apps/web-admin/src/views/_core/authentication/desktop-bridge.vue`.
-  - Chặn triệt để URL protocol-relative (`//evil.com`) tại `apps/web-admin/src/store/auth.ts` và `apps/web-admin/src/router/guard.ts`.
-- [ ] **Task 1.4 — Xây dựng Ma trận Phân quyền Hạt mịn (Granular RBAC Matrix):**
-  - Giao diện cấp phát quyền chi tiết: Quyền xem log, Quyền nạp tiền ví, Quyền mua sản phẩm trên Shop, Quyền quản trị thành viên.
+| Mốc Bàn Giao (Milestone) | Trọng Tâm Chiến Lược (Strategic Focus) | Sản Phẩm Bàn Giao Thực Tế (Deliverables) | Chỉ Số Cam Kết (Target KPIs / SLAs) | Thời Hạn (Target Date) | Trạng Thái (Status) |
+| :--- | :--- | :--- | :--- | :---: | :---: |
+| **`MILESTONE 01`** | **Nền Tảng Định Danh & Cô Lập Đa Doanh Nghiệp (IAM & Multi-Tenancy)** | Cổng quản trị phân quyền đa tổ chức; Khung bảo mật chống rò rỉ dữ liệu chéo; Xác thực bảo mật chuẩn ngân hàng. | • Độ cô lập dữ liệu: **100%**<br>• Độ trễ xác thực: $\le 50\text{ ms}$<br>• Tải đồng thời: $\ge 10.000$ Tenants | **08/11/2026** | 🟡 **Đang kiểm toán (In Audit)** |
+| **`MILESTONE 02`** | **Hạ Tầng Tài Chính & Thanh Toán Tự Động (Treasury & Automated Pay)** | Cổng nạp tiền tự động qua VietQR & Crypto; Sổ cái số dư minh bạch; Hệ thống cảnh báo dòng tiền cho Ban Lãnh đạo. | • Tốc độ nạp tiền: $\le 5\text{ giây}$<br>• Tỷ lệ sai lệch vốn: **0.00%**<br>• Đối soát tự động: **100%** | **30/11/2026** | ⚪ **Sắp triển khai** |
+| **`MILESTONE 03`** | **Sàn Thương Mại Số & Cung Ứng Tức Thì (Digital Shop & Instant Delivery)** | Cửa hàng số doanh nghiệp; Kho hàng số tự động; Cơ chế thanh toán chống trừ tiền 2 lần; Bàn giao tài nguyên 1-click. | • Thời gian xuất đơn: $\le 1\text{ giây}$<br>• Tranh chấp kho: **0.00%**<br>• Tỷ lệ chuyển đổi: $\ge 98.5\%$ | **22/12/2026** | ⚪ **Kế hoạch Q4** |
+| **`MILESTONE 04`** | **Đám Mây Tự Động Hóa & Đưa Lên Chợ Bán (Cloud Automation & Fleet)** | Gói thuê bao kịch bản và máy chủ bán trên Shop; Bảng điều hành cụm máy chủ phân tán thời gian thực; Tiết kiệm 40% chi phí vận hành. | • Cam kết Uptime: **99.9%**<br>• Giảm tiến trình thừa: $\ge 95\%$<br>• Mở rộng cụm: $\ge 1.000$ VPS | **15/02/2027** | ⚪ **Kế hoạch Q1/2027** |
+| **`MILESTONE 05`** | **Nhượng Quyền Thương Hiệu (White-Label) & Thị Trường Mở Toàn Cầu** | Nền tảng nhượng quyền cho đại lý (Custom domain/logo); Sàn kịch bản chia sẻ doanh thu cho cộng đồng; API Doanh nghiệp. | • Triển khai đại lý: $\le 15\text{ phút}$<br>• Tăng trưởng doanh thu: $\ge 300\%$<br>• Hệ sinh thái lập trình viên mở | **30/04/2027** | ⚪ **Kế hoạch Q2/2027** |
 
 ---
 
-### ⚪ MILESTONE 02: Hệ Thống Ví Số (Wallet) & Cổng Nạp Tiền Tự Động
-- **Thời gian dự kiến:** 2026-11-09 đến 2026-11-30 (3 tuần)
-- **Tình trạng:** Chưa bắt đầu (Pending Phase 1)
-- **Rủi ro cốt lõi cần giải quyết:**
-  - Hiện tại ví chỉ lưu số dư thô, chưa có sổ cái kép (Double-Entry Ledger), dễ bị sai lệch số dư nếu server crash giữa chừng.
-  - Chưa có khóa dòng (Row lock) để ngăn chặn trừ âm ví khi có nhiều request đồng thời.
-
-#### Danh sách công việc cụ thể:
-- [ ] **Task 2.1 — Tái cấu trúc Cơ sở Dữ liệu Ví theo Sổ Cái Kép (Double-Entry Ledger):**
-  - Tạo bảng `wallet_transactions` ghi nhận: `balance_before`, `amount`, `balance_after`, `reference_id`, `type`.
-  - Sử dụng PostgreSQL Trigger hoặc Stored Procedure với `SELECT ... FOR UPDATE` để trừ tiền nguyên tử, tuyệt đối không trừ âm.
-- [ ] **Task 2.2 — Cổng Nạp Tiền Ngân Hàng VietQR Webhook Tự Động:**
-  - Tạo mã QR động với cú pháp nạp chuẩn hóa (`TQ <Mã_Ví>`).
-  - Viết webhook endpoint lắng nghe biến động số dư từ ngân hàng và cộng tiền ví trong 5 giây mà không cần duyệt tay.
-- [ ] **Task 2.3 — Cổng Thanh Toán Quốc Tế / Crypto (USDT Webhook):**
-  - Tích hợp nạp tiền qua mạng lưới blockchain (TRC20 / TON), tự động đối soát giao dịch on-chain.
-- [ ] **Task 2.4 — Giao diện Lịch sử Giao dịch & Cảnh báo Biến động Số dư:**
-  - Bảng tra cứu đối soát số dư trên Web Admin.
-  - Tích hợp Telegram bot gửi cảnh báo khi nạp thành công hoặc khi số dư ví xuống dưới ngưỡng an toàn.
+## 🎯 Chi Tiết Từng Gói Năng Lực Bàn Giao (Capability Packages)
 
 ---
 
-### ⚪ MILESTONE 03: Chợ Sản Phẩm Số & Thanh Toán (Digital Market Shop)
-- **Thời gian dự kiến:** 2026-12-01 đến 2026-12-22 (3 tuần)
-- **Tình trạng:** Chưa bắt đầu (Pending Phase 2)
-- **Rủi ro cốt lõi cần giải quyết:**
-  - Mua hàng số chưa có cơ chế giữ hàng (Inventory Lock), dễ bán trùng 1 serial/proxy cho 2 khách hàng.
-  - Chưa có `idempotency_key` dẫn đến nguy cơ trừ ví 2 lần khi mạng lag bấm nút mua 2 lần.
-
-#### Danh sách công việc cụ thể:
-- [ ] **Task 3.1 — Cơ chế Chống Trừ Tiền 2 Lần (Idempotency Key):**
-  - Bắt buộc tham số `idempotency_key` (UUID v4) trong API `createCheckoutOrderApi` cho cả Store nội bộ và Public Store.
-- [ ] **Task 3.2 — Kho Quản Lý Tài Nguyên Số & Khóa Giữ Hàng (Digital Inventory Pool):**
-  - Bảng lưu trữ sản phẩm số: Key bản quyền, Danh sách Proxy (IP:Port:User:Pass), Tài khoản nuôi sẵn.
-  - Cơ chế khóa hàng tạm thời (5 phút) trong quá trình thanh toán để tránh tranh chấp mua hàng.
-- [ ] **Task 3.3 — Giao diện Xuất Hàng Số Tức Thì (Instant Digital Fulfillment UI):**
-  - Sau khi trừ ví thành công, hiển thị tức thời danh sách key/proxy kèm nút Copy 1-click và nút "Tải file txt".
-- [ ] **Task 3.4 — Quản lý Đơn Hàng & Chính Sách Hoàn Tiền Tự Động:**
-  - Bảng quản trị đơn hàng, nút báo cáo sản phẩm số lỗi và tự động hoàn tiền vào ví nếu sản phẩm chưa qua sử dụng.
+### 🟡 MILESTONE 01: Nền Tảng Định Danh & Cô Lập Đa Doanh Nghiệp (IAM & Multi-Tenancy)
+* **Thời gian:** 18/10/2026 – 08/11/2026
+* **Mục tiêu Doanh nghiệp:**  
+  Cung cấp cho doanh nghiệp khách hàng sự an tâm tuyệt đối khi lưu trữ dữ liệu trên hệ sinh thái Tuquet. Bất kể quy mô mở rộng đến đâu, dữ liệu của từng doanh nghiệp luôn được phân vùng cách ly độc lập.
+* **Gói nghiệm thu bàn giao (Deliverables):**
+  1. Cổng quản trị phân quyền hạt mịn: Phân định ranh giới rõ ràng giữa Quản trị viên, Kế toán, Kỹ thuật viên và Thành viên thường.
+  2. Báo cáo kiểm định an toàn: Đảm bảo không thể có bất kỳ đường truyền nào truy cập trái phép dữ liệu của tổ chức khác.
+  3. Cơ chế đăng nhập và ủy quyền không để lộ bí mật hệ thống trên trình duyệt.
 
 ---
 
-### ⚪ MILESTONE 04: Ứng Dụng Tự Động Hóa & Đưa Lên Chợ Số Bán
-- **Thời gian dự kiến:** 2027-01-05 đến 2027-02-15 (5 tuần)
-- **Tình trạng:** Chưa bắt đầu (Pending Phase 3)
-- **Mục tiêu:**
-  - Đóng gói kịch bản Automa, gói Proxy xoay vòng, và cụm VPS Node thành các mặt hàng thương mại trên Shop để khách hàng nạp ví mua và chạy.
-  - Kết nối trực tiếp giữa Web Admin và Rust Runner qua WebSocket/SSE (`127.0.0.1:8765`) để theo dõi bot chạy thời gian thực.
-  - Giám sát cụm VPS, cam kết triệt tiêu 100% tiến trình Chromium mồ côi (Zero-Zombie).
+### ⚪ MILESTONE 02: Hạ Tầng Tài Chính & Thanh Toán Tự Động (Treasury & Automated Clearing)
+* **Thời gian:** 09/11/2026 – 30/11/2026
+* **Mục tiêu Doanh nghiệp:**  
+  Tự động hóa hoàn toàn dòng tiền nạp vào của khách hàng. Loại bỏ công sức đối soát thủ công của nhân viên, giúp nền tảng vận hành và thu tiền tự động ngay cả trong đêm hoặc ngày nghỉ lễ.
+* **Gói nghiệm thu bàn giao (Deliverables):**
+  1. Mã QR Thanh toán Động (VietQR) quét là tiền vào ví ngay trong 5 giây.
+  2. Cổng thanh toán quốc tế đa tiền tệ phục vụ khách hàng toàn cầu.
+  3. Hệ thống sổ cái kế toán kép minh bạch, xuất báo cáo tài chính cho cổ đông 1-click.
+  4. Trợ lý Bot Telegram gửi thông báo doanh thu từng giờ về điện thoại của Ban Giám đốc.
 
 ---
 
-### ⚪ MILESTONE 05: Đại Lý White-Label & Sàn Kịch Bản Cộng Đồng
-- **Thời gian dự kiến:** 2027-03-01 đến 2027-04-30 (8 tuần)
-- **Tình trạng:** Định hướng tương lai
-- **Mục tiêu:**
-  - Hỗ trợ đối tác gắn tên miền riêng (`bot.doitac.com`), logo riêng, màu sắc nhận diện riêng trên nền tảng Tuquet.
-  - Mở sàn giao dịch kịch bản cho cộng đồng lập trình viên, tự động trích hoa hồng về ví tác giả khi có lượt mua.
-  - Công bố bộ SDK chính thức (TypeScript, Python) cho phép điều khiển dàn bot qua API bên ngoài.
+### ⚪ MILESTONE 03: Sàn Thương Mại Số & Cung Ứng Tức Thì (Digital Shop & Instant Delivery)
+* **Thời gian:** 01/12/2026 – 22/12/2026
+* **Mục tiêu Doanh nghiệp:**  
+  Biến hệ sinh thái thành cỗ máy tạo doanh thu. Bán các tài nguyên số có giá trị cao (Proxy, Bản quyền, Hạ tầng bot) với trải nghiệm mua sắm mượt mà, giữ chân khách hàng và tối ưu hóa tỷ lệ chuyển đổi.
+* **Gói nghiệm thu bàn giao (Deliverables):**
+  1. Cửa hàng Thương mại Số Doanh nghiệp với giao diện hiện đại trên cả Web và Mobile.
+  2. Kho quản lý hàng số thông minh: Tự động cảnh báo khi tồn kho proxy hoặc bản quyền sắp hết.
+  3. Trung tâm bàn giao tài nguyên số tức thì: Khách hàng thanh toán là nhận ngay tài nguyên số để sử dụng.
+  4. Chính sách bảo hành và đối soát đơn hàng tự động.
 
 ---
 
-## 📌 Nguyên Tắc Kiểm Soát Tiến Độ (Governance Rules)
-1. **Không nhảy cóc:** Tuyệt đối không làm Phase sau khi Phase trước chưa đạt tiêu chí nghiệm thu kiểm toán.
-2. **Không tự nhận Done:** Mọi task chỉ được đánh dấu `[x]` khi có bài test kiểm chứng và mã code đã được audit.
-3. **Cập nhật thực tế:** Khi có phát sinh hoặc thay đổi kế hoạch, cập nhật ngay file này để làm cơ sở đối thoại trên GitHub.
+### ⚪ MILESTONE 04: Đám Mây Tự Động Hóa & Đưa Lên Chợ Bán (Cloud Automation & Fleet)
+* **Thời gian:** 05/01/2027 – 15/02/2027
+* **Mục tiêu Doanh nghiệp:**  
+  Đưa năng lực kỹ thuật đỉnh cao của Tuquet ra thị trường dưới dạng dịch vụ thuê bao (SaaS / IaaS), tạo ra dòng doanh thu định kỳ bền vững (MRR / ARR).
+* **Gói nghiệm thu bàn giao (Deliverables):**
+  1. Các gói dịch vụ tự động hóa đóng gói sẵn (Nuôi tài khoản, Cào dữ liệu, Quản trị mạng xã hội) mua là chạy ngay trên đám mây.
+  2. Bảng điều hành cụm máy chủ toàn cầu: Giám sát hàng trăm máy chủ VPS với cam kết uptime 99.9%.
+  3. Tiết kiệm 40% chi phí điện toán nhờ kiến trúc dọn dẹp tài nguyên thông minh (Zero-Zombie).
+
+---
+
+### ⚪ MILESTONE 05: Nhượng Quyền Thương Hiệu (White-Label) & Thị Trường Mở Toàn Cầu
+* **Thời gian:** 01/03/2027 – 30/04/2027
+* **Mục tiêu Doanh nghiệp:**  
+  Biến Tuquet thành một nền tảng mở quy mô lớn (Platform Play). Tận dụng sức mạnh của mạng lưới đại lý và cộng đồng nhà phát triển để nhân rộng doanh số mà không tăng chi phí nhân sự nội bộ.
+* **Gói nghiệm thu bàn giao (Deliverables):**
+  1. Nền tảng nhượng quyền White-Label: Khách hàng doanh nghiệp triển khai giải pháp với thương hiệu và tên miền riêng.
+  2. Sàn giao dịch kịch bản cộng đồng: Cho phép bên thứ ba bán kịch bản và tự động phân chia lợi nhuận.
+  3. Bộ công cụ API Doanh nghiệp đạt chuẩn quốc tế cho các tập đoàn lớn tích hợp sâu.
+
+---
+
+## 🛡️ Nguyên Tắc Quản Trị & Cam Kết Với Nhà Đầu Tư (Governance Principles)
+1. **Kiểm toán trước — Nghiệm thu sau:** Mỗi Milestone chỉ được xem là hoàn thành khi vượt qua vòng đánh giá kiểm toán độc lập về an toàn và hiệu năng.
+2. **Không báo cáo ảo:** Tiến độ được đo lường bằng năng lực sản phẩm thực tế và chỉ số định lượng, không dựa trên khối lượng code viết ra.
+3. **Bảo toàn nguồn vốn:** Mọi tính toán tài chính và dòng tiền trong hệ sinh thái đều được bảo chứng với sai số $0.00\%$.
