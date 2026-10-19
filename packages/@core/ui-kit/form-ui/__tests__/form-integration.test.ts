@@ -1072,7 +1072,9 @@ describe('useVbenForm integration', () => {
     await wrapper.get('form').trigger('submit');
     await flushPromises();
 
-    expect(onSubmit).toHaveBeenCalledOnce();
+    await vi.waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledOnce();
+    });
     expect(onSubmit).toHaveBeenCalledWith(undefined);
   });
 
