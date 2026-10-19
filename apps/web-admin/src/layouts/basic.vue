@@ -17,10 +17,14 @@ import { preferences, usePreferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 import { openWindow } from '@vben/utils';
 
+import { isTauriEnvironment } from '#/adapter/desktop';
 import WorkspaceSelector from '#/components/common/workspace-selector.vue';
+import DashboardTitlebar from '#/layouts/widgets/dashboard-titlebar.vue';
 import { $t } from '#/locales';
 import { useAuthStore } from '#/store';
 import LoginForm from '#/views/_core/authentication/login.vue';
+
+const isDesktop = ref(isTauriEnvironment());
 
 const notifications = ref<NotificationItem[]>([
   {
@@ -209,48 +213,59 @@ watch(
 </script>
 
 <template>
-  <BasicLayout
-    :avatar
-    :text="userStore.userInfo?.realName"
-    @clear-preferences-and-logout="handleLogout"
-    @logout="handleLogout"
+  <div
+    :class="
+      isDesktop
+        ? 'flex h-screen w-full flex-col overflow-hidden bg-background'
+        : 'contents'
+    "
   >
-    <template #logo="{ collapsed }">
-      <WorkspaceSelector :collapsed="collapsed" />
-    </template>
-    <template #user-dropdown>
-      <UserDropdown
+    <DashboardTitlebar v-if="isDesktop" />
+    <div :class="isDesktop ? 'relative flex-1 overflow-hidden' : 'contents'">
+      <BasicLayout
         :avatar
-        :menus
         :text="userStore.userInfo?.realName"
-        description="admin@tuquet.com"
-        tag-text="ID"
         @clear-preferences-and-logout="handleLogout"
         @logout="handleLogout"
-      />
-    </template>
-    <template #notification>
-      <Notification
-        :dot="showDot"
-        :notifications="notifications"
-        @clear="handleNoticeClear"
-        @read="(item) => item.id && markRead(item.id)"
-        @remove="(item) => item.id && remove(item.id)"
-        @make-all="handleMakeAll"
-        @on-click="handleClick"
-        @view-all="viewAll"
-      />
-    </template>
-    <template #extra>
-      <AuthenticationLoginExpiredModal
-        v-model:open="accessStore.loginExpired"
-        :avatar
       >
-        <LoginForm />
-      </AuthenticationLoginExpiredModal>
-    </template>
-    <template #lock-screen>
-      <LockScreen :avatar @to-login="handleLogout" />
-    </template>
-  </BasicLayout>
+        <template #logo="{ collapsed }">
+          <WorkspaceSelector :collapsed="collapsed" />
+        </template>
+        <template #user-dropdown>
+          <UserDropdown
+            :avatar
+            :menus
+            :text="userStore.userInfo?.realName"
+            description="admin@tuquet.com"
+            tag-text="ID"
+            @clear-preferences-and-logout="handleLogout"
+            @logout="handleLogout"
+          />
+        </template>
+        <template #notification>
+          <Notification
+            :dot="showDot"
+            :notifications="notifications"
+            @clear="handleNoticeClear"
+            @read="(item) => item.id && markRead(item.id)"
+            @remove="(item) => item.id && remove(item.id)"
+            @make-all="handleMakeAll"
+            @on-click="handleClick"
+            @view-all="viewAll"
+          />
+        </template>
+        <template #extra>
+          <AuthenticationLoginExpiredModal
+            v-model:open="accessStore.loginExpired"
+            :avatar
+          >
+            <LoginForm />
+          </AuthenticationLoginExpiredModal>
+        </template>
+        <template #lock-screen>
+          <LockScreen :avatar @to-login="handleLogout" />
+        </template>
+      </BasicLayout>
+    </div>
+  </div>
 </template>

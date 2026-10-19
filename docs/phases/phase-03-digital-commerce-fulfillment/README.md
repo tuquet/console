@@ -10,7 +10,7 @@
 
 Sau khi khách hàng đã có tài khoản (Phase 01) và tiền đã sẵn sàng trong ví số (Phase 02), nền tảng cần một **Chợ Thương Mại Điện Tử Chuyên Nghiệp** để người dùng tiêu dùng số dư.
 
-Tuy nhiên, "nỗi đau" lớn nhất của khách hàng khi mua tài nguyên số (Proxy, Key bản quyền, Tài khoản) là **nhận phải hàng lỗi/die** dẫn đến khiếu nại và đòi hoàn tiền. 
+Tuy nhiên, "nỗi đau" lớn nhất của khách hàng khi mua tài nguyên số (Proxy, Key bản quyền, Tài khoản) là **nhận phải hàng lỗi/die** dẫn đến khiếu nại và đòi hoàn tiền.
 
 Phase 03 giải quyết triệt để bài toán này bằng **Cơ Chế Kiểm Tra Sức Khỏe Tự Động Trước Khi Xuất Kho (Pre-delivery Live Health Check)** kết hợp với giao dịch nguyên tử chống trừ tiền 2 lần, cam kết tỷ lệ hàng lỗi $\le 0.5\%$ và bàn giao ngay trên màn hình trong $1\text{ giây}$.
 
@@ -47,7 +47,7 @@ Phase 03 giải quyết triệt để bài toán này bằng **Cơ Chế Kiểm 
 ## 📊 3. Chỉ Số Cam Kết Định Lượng (Target KPIs & SLAs)
 
 | Chỉ số đo lường | Mục tiêu cam kết | Phương pháp kiểm chứng |
-| :--- | :---: | :--- |
+| :-- | :-: | :-- |
 | **Thời gian xuất hàng số (Fulfillment SLA)** | $\le 1\text{ giây}$ | Đo lường từ lúc trừ ví thành công đến khi tài nguyên hiển thị trên màn hình |
 | **Tỷ lệ tranh chấp kho / bán trùng hàng** | **Tuyệt đối 0.00%** | Kiểm toán lịch sử gán `serial_id` và `proxy_id` trên toàn bộ đơn hàng |
 | **Tỷ lệ hoàn tiền do lỗi hàng (Defect Rate)** | $\le 0.5\%$ | Tỷ lệ đơn hàng khiếu nại lỗi tài nguyên số sau khi nhận hàng |

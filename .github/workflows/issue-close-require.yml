@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   close-issues:
-    if: github.repository == 'vbenjs/vue-vben-admin'
+    if: github.repository == 'tuquet/admin'
     runs-on: ubuntu-latest
     steps:
       # Close inactive issues

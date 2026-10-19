@@ -41,7 +41,7 @@ Phase 01 thiết lập chuẩn mực bảo mật cấp cơ sở dữ liệu (Pos
 ## 📊 3. Chỉ Số Cam Kết Định Lượng (Target KPIs & SLAs)
 
 | Chỉ số đo lường | Mục tiêu cam kết | Phương pháp kiểm chứng |
-| :--- | :---: | :--- |
+| :-- | :-: | :-- |
 | **Độ cô lập dữ liệu tổ chức** | **100%** | Kiểm thử tấn công giả lập truy cập chéo tenant qua PostgREST API (0 vi phạm) |
 | **Độ trễ xác thực trung bình** | $\le 50\text{ ms}$ | Benchmark đo lường thời gian phản hồi GoTrue token verification |
 | **Tỷ lệ đăng nhập SSO thành công** | $\ge 99.8\%$ | Kiểm thử luồng xác thực Google Workspace và Microsoft Entra ID |

@@ -1,50 +1,59 @@
+import process from 'node:process';
+
 import { defineConfig } from '@vben/vite-config';
+
+const isTauri = Boolean(process.env.TAURI_ENV_PLATFORM);
 
 export default defineConfig(async () => {
   return {
     application: {
-      pwa: true,
-      pwaOptions: {
-        registerType: 'autoUpdate',
-        workbox: {
-          clientsClaim: true,
-          skipWaiting: true,
-        },
-        manifest: {
-          background_color: '#09090b',
-          description:
-            'Tuquet Admin - Unified Management & Operations Console (admin.tuquet.com)',
-          display: 'standalone',
-          icons: [
-            {
-              sizes: '192x192',
-              src: '/pwa-192x192.png',
-              type: 'image/png',
+      pwa: !isTauri,
+      pwaOptions: isTauri
+        ? undefined
+        : {
+            registerType: 'autoUpdate',
+            workbox: {
+              clientsClaim: true,
+              skipWaiting: true,
             },
-            {
-              sizes: '512x512',
-              src: '/pwa-512x512.png',
-              type: 'image/png',
+            manifest: {
+              background_color: '#09090b',
+              description:
+                'Tuquet Admin - Unified Management & Operations Console (admin.tuquet.com)',
+              display: 'standalone',
+              icons: [
+                {
+                  sizes: '192x192',
+                  src: '/pwa-192x192.png',
+                  type: 'image/png',
+                },
+                {
+                  sizes: '512x512',
+                  src: '/pwa-512x512.png',
+                  type: 'image/png',
+                },
+                {
+                  purpose: 'any maskable',
+                  sizes: '512x512',
+                  src: '/pwa-512x512.png',
+                  type: 'image/png',
+                },
+              ],
+              name: 'Tuquet Admin',
+              short_name: 'Tuquet Admin',
+              theme_color: '#09090b',
             },
-            {
-              purpose: 'any maskable',
-              sizes: '512x512',
-              src: '/pwa-512x512.png',
-              type: 'image/png',
-            },
-          ],
-          name: 'Tuquet Admin',
-          short_name: 'Tuquet Admin',
-          theme_color: '#09090b',
-        },
-      },
+          },
     },
     vite: {
+      clearScreen: false,
       plugins: [],
       resolve: {
         dedupe: ['vue', 'vue-router', 'pinia'],
       },
       server: {
+        strictPort: true,
+        port: 5320,
         proxy: {
           '/api': {
             changeOrigin: true,
@@ -55,6 +64,7 @@ export default defineConfig(async () => {
           },
         },
       },
+      envPrefix: ['VITE_', 'TAURI_ENV_*'],
     },
   };
 });

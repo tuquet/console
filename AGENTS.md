@@ -182,14 +182,15 @@ Trước khi thực hiện `git push` lên bất kỳ nhánh nào (đặc biệt
 
 ### 10.2. Phân Cấp Thư Mục Tài Liệu Chuẩn (`docs/`)
 
-Toàn bộ tài liệu kỹ thuật trong kho lưu trữ `tuquet/admin` (`apps/web-admin/docs/`) bắt buộc phải được sắp xếp vào đúng 4 thư mục chuyên biệt:
+Toàn bộ tài liệu kỹ thuật trong kho lưu trữ `tuquet/admin` (`docs/`) bắt buộc phải được sắp xếp vào đúng 5 thư mục chuyên biệt:
 
 1. `docs/architecture/`: Tài liệu kiến trúc hệ thống tổng thể (`overview.md`) và quy chuẩn thiết kế giao diện (`styling-guide.md`).
 2. `docs/decisions/`: Chuỗi bản ghi quyết định kiến trúc (ADR) tuân thủ quy tắc:
    - Đánh số tuần tự 4 chữ số: `0001-...`, `0002-...`, `0003-...`, `0004-...` (không trùng số hiệu).
    - Đặt tên file theo định dạng `kebab-case`, tuyệt đối không gắn hậu tố version (như `-v2`).
 3. `docs/routes/`: Sổ tay đặc tả kỹ thuật 27 routes, sơ đồ phân cấp và ranh giới plugin (`README.md`, `auth.md`, `dashboard.md`, `tenants.md`, `automation.md`, `commerce.md`, `system.md`).
-4. `docs/specs/`: Bản đồ năng lực (`capability-map.md`) và 15 bản đặc tả module chuẩn hóa (`SPEC-*.md`).
+4. `docs/phases/`: Hồ sơ 5 giai đoạn chiến lược phát triển hệ thống (`phase-01` đến `phase-05`).
+5. `docs/specs/`: Bản đồ năng lực (`capability-map.md`) và các bản đặc tả module chuẩn hóa (`SPEC-*.md`).
 
 ### 10.3. Tính Khả Chuyển Của Đường Dẫn Trong Tài Liệu Git
 

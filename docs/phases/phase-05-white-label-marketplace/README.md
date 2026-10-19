@@ -8,9 +8,10 @@
 
 ## 🎯 1. Tầm Nhìn Chiến Lược & Quản Trị Rủi Ro Kịch Bản Độc Hại
 
-Một sản phẩm phần mềm dù tốt đến đâu cũng sẽ bị giới hạn tốc độ tăng trưởng nếu chỉ dựa vào đội ngũ bán hàng nội bộ. 
+Một sản phẩm phần mềm dù tốt đến đâu cũng sẽ bị giới hạn tốc độ tăng trưởng nếu chỉ dựa vào đội ngũ bán hàng nội bộ.
 
 Phase 05 nâng tầm Tuquet từ một "Sản phẩm Phần mềm" thành một **"Nền Tảng Kinh Doanh Mở (Open Platform Ecosystem)"**:
+
 1. **Mô hình Nhượng quyền Đại lý (White-Label Franchise):** Các doanh nghiệp đối tác có thể mua bản quyền để kinh doanh dịch vụ tự động hóa và proxy dưới thương hiệu, tên miền và bảng giá riêng của họ mà không cần xây dựng lại công nghệ.
 2. **Mô hình Kinh tế Sáng tạo (Creator Economy Marketplace):** Mở sàn cho hàng nghìn lập trình viên bên ngoài đăng tải và bán các kịch bản tự động hóa, tạo ra hiệu ứng mạng lưới (Network Effect) tự mở rộng không tốn chi phí R&D.
 
@@ -45,7 +46,7 @@ Mở sàn cộng đồng đồng nghĩa với nguy cơ bị kẻ xấu tải lê
 ## 📊 3. Chỉ Số Cam Kết Định Lượng (Target KPIs & SLAs)
 
 | Chỉ số đo lường | Mục tiêu cam kết | Phương pháp kiểm chứng |
-| :--- | :---: | :--- |
+| :-- | :-: | :-- |
 | **Thời gian khởi tạo đại lý White-Label mới** | $\le 15\text{ phút}$ | Đo lường thời gian từ lúc gán tên miền đến khi đại lý lên sóng hoàn chỉnh |
 | **Tỷ lệ kịch bản độc hại lọt kiểm duyệt** | **Tuyệt đối 0.00%** | Kiểm toán tự động toàn bộ kịch bản qua Security Sandbox và chữ ký số |
 | **Tăng trưởng doanh thu hệ sinh thái** | $\ge 300\%$ | So sánh tổng GMV giao dịch trước và sau khi kích hoạt mạng lưới đối tác |

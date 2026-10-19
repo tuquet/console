@@ -1,34 +1,58 @@
-# Implementation Plan: Phase 02 Dynamic Bank Pool & Resilient Ledger Engine (`PHASE-02-OMNICHANNEL-PAYMENTS`)
+# Implementation Plan: Tuquet Admin Public Repo, CI Quality Gates & CD Desktop Release (`INITIATIVE-CICD-PUBLIC-RELEASE`)
 
-## Overview
-Implement resilient payment rails and MMO-grade dynamic bank account pooling to prevent single-account freezing, ensure continuous rotation, and guarantee 100% zero-discrepancy double-entry ledger bookkeeping.
+## 1. Overview
 
----
+Thiết lập toàn bộ hạ tầng tự động hóa CI/CD và chuẩn hóa Public Repository cho **Tuquet Admin Console** (`admin.tuquet.com`) trên nền tảng GitHub Actions:
 
-## Architecture & Modules (Capability Map)
-1. **`bank-pool-engine`**: Dynamic receiving account pool (`billing.bank_receiving_accounts`) with quota limits, priority ranking, and automated rotation.
-2. **`intent-rotation-router`**: Smart routing in `create_payment_intent` to pick the healthiest bank account from the pool and construct VietQR dynamic QR payloads.
-3. **`ledger-reconciliation`**: Double-entry ledger audit guarantee (`billing.credit_tenant_wallet`, `billing.debit_tenant_wallet`), atomic idempotency, and late-transfer `manual_review` buffer.
-4. **`admin-pool-ui-and-tests`**: Frontend client APIs and unit test coverage verifying rotation logic, underpaid protection, and account circuit breakers.
+- **Public Repository Readiness:** Dọn dẹp triệt để mã nguồn thừa từ upstream (`vbenjs/vue-vben-admin`), rà soát bảo mật không để lộ secrets, bổ sung `SECURITY.md`, xác nhận `LICENSE` MIT, đính kèm badges CI & Download links trên `README.md`.
+- **Continuous Integration (CI):** Pipeline kiểm định chất lượng đa tầng (`.github/workflows/ci.yml`) bắt buộc vượt qua 5 cổng kiểm tra: Lint & Format, Typecheck 38 packages, Vitest Suite (105 files), Headless Chrome Console Gate (22 routes), và Rust Backend `cargo check`.
+- **Continuous Deployment (CD Release):** Pipeline phát hành tự động (`.github/workflows/release.yml`) kích hoạt khi push tag `v*.*.*` hoặc `workflow_dispatch`: Chạy trên runner `windows-latest`, đóng gói bộ cài đặt Windows NSIS `.exe` và `.msi`, ký số điện tử Ed25519, upload trực tiếp lên GitHub Releases cùng manifest cập nhật OTA `latest.json`.
 
 ---
 
-## Tasks
+## 2. Architecture & Design Decisions
 
-### Phase 1: Database Migration & Dynamic Account Pool (`cloud`)
-- [ ] Task 1.1: Create SQL migration `20261017000001_billing_dynamic_bank_pool.sql` in `tuquet/cloud`:
-  - Table `billing.bank_receiving_accounts` (id, bank_bin, bank_name, account_no, account_name, qr_template, daily_limit_vnd, current_daily_total, is_active, status, priority, created_at, updated_at).
-  - Function `billing.get_next_receiving_account()`: Selects highest priority active account under daily limit, supporting round-robin rotation.
-  - Upgrade `billing.create_payment_intent` to dynamically select receiving account from pool for `bank_transfer` channel.
+1. **Phân tách Runner theo Năng Lực (Compute Optimization):**
+   - **CI Pipeline:** Sử dụng `ubuntu-latest` để tận dụng tốc độ khởi động nhanh và chi phí compute minutes tối ưu. Cài đặt `dtolnay/rust-toolchain@stable` chỉ để chạy `cargo check` cho crate `src-tauri`.
+   - **CD Desktop Release:** Sử dụng `windows-latest` vì đã cài sẵn WiX Toolset v3, NSIS `makensis` và Windows SDK, đảm bảo xuất xưởng file cài đặt Windows `.exe` và `.msi` 100% native.
+2. **Quy ước Tag & Release Triggers:**
+   - Kích hoạt phát hành tự động qua Git tag tuân thủ chuẩn SemVer: `v*.*.*` (ví dụ: `v0.1.0`, `v0.1.1`, `v1.0.0`).
+   - Hỗ trợ thêm `workflow_dispatch` để có thể kích hoạt build thủ công trực tiếp từ giao diện GitHub Actions UI.
+3. **Bảo mật Khóa Ký Số (OTA Signing):**
+   - Public Key đã nhúng cố định trong `tauri.conf.json`.
+   - Private Key được truyền qua biến môi trường bảo mật của GitHub Secrets: `TAURI_SIGNING_PRIVATE_KEY` và `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.
+4. **Action Chuẩn Hóa:** Sử dụng GitHub Action chính thức `tauri-apps/tauri-action@v0` được phát triển bởi đội ngũ Tauri core team để đảm bảo tính tương thích và tự động hóa toàn diện từ bước build, sign đến publish release assets.
 
-### Phase 2: Frontend Client SDK & Pool Types (`admin`)
-- [ ] Task 2.1: Add TypeScript interfaces and mapping functions in `apps/web-admin/src/api/core/billing.ts` (`BankReceivingAccountItem`, `getBankReceivingAccountsApi`, `upsertBankReceivingAccountApi`, `toggleBankReceivingAccountApi`).
-- [ ] Task 2.2: Enhance `billing.ts` with pool rotation awareness and health status indicators.
+---
 
-### Phase 3: Automated Unit & Stress Testing
-- [ ] Task 3.1: Expand `apps/web-admin/src/api/core/__tests__/billing.test.ts` to test:
-  - Account pool mapping and status normalization.
-  - Dynamic QR code generation with account fallback when an account reaches daily limit.
-  - Idempotent settlement and underpaid/late transfer protection in `settle_payment_intent`.
-- [ ] Task 3.2: Run full unit test suite (`pnpm test:unit`) ensuring 100% pass rate.
-- [ ] Task 3.3: Run `pnpm run build:local` and verify local Tailscale deployment.
+## 3. Implementation Order & Dependency Graph
+
+```text
+Phase 1: Public Repo Sanitization & OSS Compliance
+   │ (Xóa ref cũ, tạo SECURITY.md, cập nhật LICENSE, README download links)
+   ▼
+Phase 2: Multi-Gate CI Pipeline Automation
+   │ (Tối ưu ci.yml: 5 Quality Gates + ci-ok merge blocker trên ubuntu-latest)
+   ▼
+Phase 3: Automated CD Desktop Release on Tag
+     (Tạo release.yml trên windows-latest: build NSIS exe, msi, sign & publish GitHub Releases)
+```
+
+---
+
+## 4. Risks and Mitigations
+
+| Rủi ro (Risk) | Mức độ | Biện pháp giảm thiểu (Mitigation) |
+| --- | --- | --- |
+| **Lộ Secrets hoặc Private Key** | Rất cao | Private key `tauri.key` đã được khóa chặt trong `.gitignore`. Tuyệt đối không commit file key; chỉ dùng GitHub Action Secrets. |
+| **Thiếu Toolset đóng gói trên Windows Runner** | Thấp | Runner `windows-latest` của GitHub Actions đã tích hợp sẵn NSIS và WiX 3.14. Không cần download ngoài. |
+| **Xung đột Permissions khi Publish Release** | Trung bình | Khai báo tường minh `permissions: contents: write` trong `release.yml` để GitHub Action có quyền tạo Release và upload binary. |
+| **Thời gian CI quá dài** | Trung bình | Sử dụng pnpm cache (`@pnpm/action-setup`) và Rust sccache/cargo cache để rút ngắn thời gian build. |
+
+---
+
+## 5. Checkpoints & Verification Gates
+
+- **Checkpoint 1 (Public Repo):** Quét toàn bộ repository không còn tham chiếu nào tới `vbenjs/vue-vben-admin`. File `SECURITY.md` và `README.md` hiển thị đầy đủ link tải `.exe`.
+- **Checkpoint 2 (CI Pipeline):** File `.github/workflows/ci.yml` vượt qua kiểm tra cú pháp actionlint; các câu lệnh trong CI khớp 100% với 5 Quality Gates local.
+- **Checkpoint 3 (CD Release):** File `.github/workflows/release.yml` sẵn sàng kích hoạt với tag `v*.*.*`, đầy đủ biến môi trường và bước build Windows desktop.

@@ -11,6 +11,7 @@
 Một nền tảng phần mềm chỉ thực sự cất cánh khi khách hàng có thể nạp tiền và thanh toán dễ dàng trong vòng vài giây bằng bất kỳ phương thức nào họ đang sở hữu.
 
 Tuy nhiên, rủi ro lớn nhất của khâu thanh toán là **thời gian chờ thẩm định hồ sơ pháp lý đối tác (KYC/KYB của Stripe, MoMo, ZaloPay)** và **rủi ro gian lận thẻ tín dụng (Chargeback Fraud)**. Do đó, Phase 02 áp dụng chiến lược **Triển khai 2 Phân kỳ Thực tế**:
+
 - **Phân kỳ 2A (Vận hành ngay trong 2 tuần đầu):** Kích hoạt các kênh tiền về tài khoản tức thời, không phụ thuộc xét duyệt giấy phép bên thứ 3: **VietQR PRO động, Tài khoản ảo Virtual Account và Tiền mã hóa USDT on-chain**.
 - **Phân kỳ 2B (Hoàn tất thẩm định song song):** Tích hợp cổng thẻ tín dụng quốc tế Visa/Mastercard có tích hợp AI chống gian lận và các ví điện tử Việt Nam.
 
@@ -40,7 +41,7 @@ Tuy nhiên, rủi ro lớn nhất của khâu thanh toán là **thời gian ch�
 ## 📊 3. Chỉ Số Cam Kết Định Lượng (Target KPIs & SLAs)
 
 | Chỉ số đo lường | Mục tiêu cam kết | Phương pháp kiểm chứng |
-| :--- | :---: | :--- |
+| :-- | :-: | :-- |
 | **Tốc độ ghi nhận nạp tiền nội địa** | $\le 3\text{ giây}$ | Đo lường thời gian từ lúc nhận webhook VietQR/Ví VN đến khi ví nhảy số |
 | **Tốc độ ghi nhận nạp tiền quốc tế/crypto** | $\le 15\text{ giây}$ | Đo lường thời gian từ lúc giao dịch thẻ hoàn tất hoặc 1 block confirmation |
 | **Tỷ lệ thất thoát / sai lệch số dư** | **Tuyệt đối 0.00%** | Kiểm toán tự động tổng số dư ví so với tổng nhật ký giao dịch sổ cái kép |

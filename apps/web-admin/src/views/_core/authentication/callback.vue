@@ -6,9 +6,11 @@ import { $t } from '@vben/locales';
 import { preferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 
-import { Button, Spinner, toast } from '@tuquet/vue-ui';
+import { Copy, ExternalLink, Laptop } from '@lucide/vue';
+import { Button, Card, Spinner, toast } from '@tuquet/vue-ui';
 
 import { getAccessCodesApi } from '#/api';
+import { useClipboard } from '#/composables';
 import { useAuthStore } from '#/store';
 import { captureError, captureMessage } from '#/utils/bugsink';
 import { sanitizeRedirectPath } from '#/utils/security';
@@ -19,9 +21,66 @@ const router = useRouter();
 const accessStore = useAccessStore();
 const userStore = useUserStore();
 const authStore = useAuthStore();
+const { copyToClipboard, isCopied } = useClipboard();
 
 const loading = ref(true);
 const errorMessage = ref('');
+const isDesktopBridge = ref(false);
+const deepLinkUrl = ref('');
+const cachedAccessToken = ref('');
+const cachedRefreshToken = ref('');
+
+function handleOpenDesktop() {
+  if (deepLinkUrl.value) {
+    window.location.href = deepLinkUrl.value;
+  }
+}
+
+function handleCopyToken() {
+  if (cachedAccessToken.value) {
+    copyToClipboard(cachedAccessToken.value, 'token');
+  }
+}
+
+async function handleContinueOnWeb() {
+  if (!cachedAccessToken.value) return;
+
+  loading.value = true;
+  isDesktopBridge.value = false;
+
+  try {
+    accessStore.setAccessToken(cachedAccessToken.value);
+    if (cachedRefreshToken.value) {
+      accessStore.setRefreshToken(cachedRefreshToken.value);
+    }
+
+    const [userInfo, accessCodes] = await Promise.all([
+      authStore.fetchUserInfo(),
+      getAccessCodesApi(),
+    ]);
+
+    if (userInfo) {
+      userStore.setUserInfo(userInfo);
+    }
+    accessStore.setAccessCodes(accessCodes);
+
+    toast.success($t('authentication.loginSuccessDesc'), {
+      description: $t('authentication.githubLoginSuccess'),
+      duration: 3000,
+    });
+
+    const defaultHome = userInfo?.homePath || preferences.app.defaultHomePath;
+    await router.push(defaultHome);
+  } catch (error: any) {
+    captureError(error, {
+      phase: 'continue_on_web',
+      view: 'AuthCallback',
+    });
+    loading.value = false;
+    errorMessage.value =
+      error.message || $t('authentication.githubCallbackError');
+  }
+}
 
 onMounted(async () => {
   if (typeof window === 'undefined') return;
@@ -58,6 +117,37 @@ onMounted(async () => {
     }
 
     if (accessToken) {
+      cachedAccessToken.value = accessToken;
+      if (refreshToken) {
+        cachedRefreshToken.value = refreshToken;
+      }
+
+      // Check if initiated from desktop app (VS Code / Linear Web Bridge pattern)
+      const isDesktopTarget = searchParams.get('target') === 'desktop';
+
+      if (isDesktopTarget) {
+        loading.value = false;
+        isDesktopBridge.value = true;
+        const targetDeepLink = `tuquet://auth/callback?token=${encodeURIComponent(accessToken)}${refreshToken ? `&refresh_token=${encodeURIComponent(refreshToken)}` : ''}`;
+        deepLinkUrl.value = targetDeepLink;
+
+        // Automatically trigger protocol handler
+        try {
+          const iframe = document.createElement('iframe');
+          iframe.style.display = 'none';
+          iframe.src = targetDeepLink;
+          document.body.append(iframe);
+
+          setTimeout(() => {
+            window.location.href = targetDeepLink;
+          }, 350);
+        } catch {
+          // Handled via manual button click if popup blocked
+        }
+        return;
+      }
+
+      // Standard Web SPA Authentication
       accessStore.setAccessToken(accessToken);
       if (refreshToken) {
         accessStore.setRefreshToken(refreshToken);
@@ -109,7 +199,7 @@ onMounted(async () => {
 
 <template>
   <div
-    class="flex min-h-[60vh] flex-col items-center justify-center p-6 text-center"
+    class="flex min-h-[70vh] flex-col items-center justify-center p-6 text-center"
   >
     <div v-if="loading" class="space-y-4">
       <Spinner class="mx-auto size-8 text-primary" />
@@ -118,6 +208,63 @@ onMounted(async () => {
       </p>
     </div>
 
+    <!-- Desktop Web Bridge View (VS Code / Linear Style) -->
+    <div v-else-if="isDesktopBridge" class="w-full max-w-md">
+      <Card class="border-border/60 p-6 shadow-xl text-center space-y-5">
+        <div
+          class="mx-auto flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary"
+        >
+          <Laptop class="size-8" />
+        </div>
+
+        <div class="space-y-2">
+          <h2 class="text-xl font-bold tracking-tight text-foreground">
+            {{ $t('authentication.desktopAuthorizedTitle') }}
+          </h2>
+          <p
+            class="text-xs text-muted-foreground leading-relaxed max-w-xs mx-auto"
+          >
+            {{ $t('authentication.desktopAuthorizedDesc') }}
+          </p>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <Button
+            class="w-full h-10 font-medium flex items-center justify-center gap-2"
+            @click="handleOpenDesktop"
+          >
+            <ExternalLink class="size-4" />
+            <span>{{ $t('authentication.desktopReopenBtn') }}</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            class="w-full h-10 font-medium flex items-center justify-center gap-2"
+            @click="handleCopyToken"
+          >
+            <Copy class="size-4" />
+            <span>{{
+              isCopied('token')
+                ? $t('common.copied')
+                : $t('authentication.desktopCopyTokenBtn')
+            }}</span>
+          </Button>
+        </div>
+
+        <div class="pt-4 border-t border-border/40">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="text-xs text-muted-foreground hover:text-foreground"
+            @click="handleContinueOnWeb"
+          >
+            Tiếp tục đăng nhập trên trình duyệt này &rarr;
+          </Button>
+        </div>
+      </Card>
+    </div>
+
+    <!-- Error View -->
     <div v-else class="space-y-4 max-w-md">
       <div class="text-3xl text-destructive font-bold">!</div>
       <h3 class="text-lg font-semibold text-destructive">

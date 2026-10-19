@@ -6,3 +6,6 @@ coverage
 .claude
 .agent
 .agents
+apps/web-admin/src-tauri/**
+**/src-tauri/**
+**/target/**

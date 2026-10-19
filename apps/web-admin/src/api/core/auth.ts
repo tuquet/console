@@ -1,6 +1,8 @@
 import { $t } from '@vben/locales';
 import { useAccessStore } from '@vben/stores';
 
+import { isTauriEnvironment } from '#/adapter/desktop';
+
 import { captureError } from '../../utils/bugsink';
 import { getEffectiveAccessApi } from './access';
 import {
@@ -229,9 +231,30 @@ export async function updatePasswordApi(
 
 /**
  * GitHub OAuth Login (Supabase GoTrue REST)
+ * On Desktop (Tauri): Uses Web Bridge pattern (like VS Code / Linear / Figma).
+ * Opens the external system browser pointing to the Web Callback bridge with `target=desktop`.
+ * The web bridge then seamlessly hands the token back to the desktop application via `tuquet://auth/callback`.
+ * On Web: redirects via standard window.location.href.
  */
-export function loginWithGitHubApi(redirectTo?: string) {
+export async function loginWithGitHubApi(redirectTo?: string): Promise<void> {
   const { supabaseUrl } = getSupabaseConfig();
+
+  if (isTauriEnvironment()) {
+    const isDev = import.meta.env.DEV;
+    const baseCallback = isDev
+      ? 'http://localhost:5320/auth/callback'
+      : 'https://admin.tuquet.com/auth/callback';
+    const target = redirectTo || `${baseCallback}?target=desktop`;
+    const authUrl = `${supabaseUrl}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(target)}`;
+    try {
+      const { openUrl } = await import('@tauri-apps/plugin-opener');
+      await openUrl(authUrl);
+    } catch {
+      window.open(authUrl, '_blank');
+    }
+    return;
+  }
+
   const target = redirectTo || `${window.location.origin}/auth/callback`;
   const authUrl = `${supabaseUrl}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(target)}`;
   window.location.href = authUrl;

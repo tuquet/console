@@ -61,3 +61,13 @@ skills-lock.json
 .atomcode
 datalog
 .playwright-mcp
+
+# Tauri & Rust build artifacts
+src-tauri/target
+**/src-tauri/target
+**/src-tauri/gen
+**/*.key
+**/*.pem
+**/*.pub
+tauri.key*
+

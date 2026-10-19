@@ -1,0 +1,114 @@
+name: Release Desktop Windows
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tagName:
+        description: 'Tag name to release (e.g. v0.1.0)'
+        required: false
+        default: ''
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  CI: true
+
+jobs:
+  build-and-release:
+    name: Build & Release Windows (x64 NSIS + MSI)
+    if: github.repository == 'tuquet/admin'
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node & Dependencies
+        uses: ./.github/actions/setup-node
+
+      - name: Setup Rust Stable MSVC Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Rust Target Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: apps/web-admin/src-tauri -> target
+
+      - name: Build Web Production Dist
+        run: pnpm run build:admin
+
+      - name: Determine Release Tag
+        id: tag
+        shell: bash
+        run: |
+          RAW_TAG="${{ github.event.inputs.tagName || github.ref_name }}"
+          echo "TAG_NAME=$RAW_TAG" >> $GITHUB_ENV
+          echo "tag=$RAW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Build & Publish Tauri Desktop Bundle
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: ./apps/web-admin
+          tagName: ${{ env.TAG_NAME }}
+          releaseName: 'Tuquet Admin Desktop ${{ env.TAG_NAME }}'
+          releaseBody: |
+            ### Tuquet Admin Desktop Windows Production Release
+
+            Bản phát hành chính thức ứng dụng **Tuquet Admin Desktop** dành cho hệ điều hành Windows x64.
+
+            #### 📦 Tệp Cài Đặt (Release Downloads):
+            - **Windows NSIS Installer (`.exe`)**: [Tuquet-Admin-Setup.exe](https://github.com/tuquet/admin/releases/download/${{ env.TAG_NAME }}/Tuquet-Admin-Setup.exe) (Khuyên dùng, hỗ trợ tự động cập nhật OTA)
+            - **Windows MSI Enterprise Package (`.msi`)**: [Tuquet-Admin.msi](https://github.com/tuquet/admin/releases/download/${{ env.TAG_NAME }}/Tuquet-Admin.msi) (Triển khai chính sách Active Directory / Intune)
+
+            #### 🛡️ Tính Năng Tích Hợp:
+            - Native Webview2 hiệu năng cao với Custom Titlebar Shadcn Slate.
+            - Deep-Link SSO handler qua giao thức an toàn `tuquet://auth/callback`.
+            - Tự động kiểm tra và nâng cấp phiên bản không gián đoạn (OTA Updater).
+            - Thu nhỏ vào khay hệ thống (System Tray) phục vụ vận hành liên tục.
+          releaseDraft: false
+          prerelease: false
+
+      - name: Publish Direct Download Aliases (Tuquet-Admin-Setup.exe & Tuquet-Admin.msi)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ env.TAG_NAME }}"
+          Write-Host "Creating and uploading static aliases for tag: $tag"
+
+          # Locate NSIS setup .exe
+          $nsisExe = Get-ChildItem -Path "apps/web-admin/src-tauri/target/release/bundle/nsis/*.exe" | Select-Object -First 1
+          if ($nsisExe) {
+            Write-Host "Found NSIS binary: $($nsisExe.FullName)"
+            Copy-Item -Path $nsisExe.FullName -Destination "Tuquet-Admin-Setup.exe" -Force
+            gh release upload $tag "Tuquet-Admin-Setup.exe" --clobber
+          } else {
+            Write-Warning "No NSIS .exe installer found in release bundle output."
+          }
+
+          # Locate MSI package
+          $msiFile = Get-ChildItem -Path "apps/web-admin/src-tauri/target/release/bundle/msi/*.msi" | Select-Object -First 1
+          if ($msiFile) {
+            Write-Host "Found MSI binary: $($msiFile.FullName)"
+            Copy-Item -Path $msiFile.FullName -Destination "Tuquet-Admin.msi" -Force
+            gh release upload $tag "Tuquet-Admin.msi" --clobber
+          } else {
+            Write-Warning "No MSI package found in release bundle output."
+          }

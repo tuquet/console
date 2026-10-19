@@ -11,6 +11,7 @@
 Sau khi Chợ sản phẩm số và hệ thống thanh toán đã vận hành trơn tru (Phase 02 & 03), đây là thời điểm đưa các **Vũ khí Công nghệ Độc quyền của Tuquet** ra thị trường dưới dạng gói dịch vụ thuê bao (SaaS / IaaS).
 
 Để tạo ra dòng doanh thu định kỳ bền vững (MRR / ARR), Phase 04 tích hợp **Động Cơ Đo Cước Động (Metered Billing Engine)** rõ ràng và minh bạch cho nhà đầu tư:
+
 1. **Mô hình Dùng bao nhiêu trả bấy nhiêu (Pay-As-You-Go):** Trừ tiền ví theo block thời gian thực tế máy chủ/bot chạy (ví dụ: $0.05\text{ USD}$ / giờ chạy bot).
 2. **Mô hình Gói thuê bao cố định (Monthly Subscriptions):** Thuê node VPS chuyên dụng chạy 24/7 hoặc thuê bao kịch bản VIP theo tháng.
 3. **Mô hình Đo cước Băng thông Proxy:** Tự động trừ tiền ví theo số GB proxy xoay vòng tiêu thụ trong quá trình cào dữ liệu.
@@ -46,7 +47,7 @@ Sau khi Chợ sản phẩm số và hệ thống thanh toán đã vận hành tr
 ## 📊 3. Chỉ Số Cam Kết Định Lượng (Target KPIs & SLAs)
 
 | Chỉ số đo lường | Mục tiêu cam kết | Phương pháp kiểm chứng |
-| :--- | :---: | :--- |
+| :-- | :-: | :-- |
 | **Độ sẵn sàng hệ thống (Uptime SLA)** | **99.9%** | Giám sát liên tục trạng thái cụm máy chủ VPS 24/7/365 |
 | **Độ chính xác đo cước tài nguyên** | **Tuyệt đối 100%** | Kiểm toán đối soát thời gian chạy thực tế và số tiền trừ ví qua Sổ cái kép |
 | **Tỷ lệ triệt tiêu tiến trình mồ côi** | **100% (Zero-Zombie)** | Kiểm toán RAM/CPU của VPS sau 10.000 phiên chạy kịch bản liên tục |

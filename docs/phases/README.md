@@ -46,7 +46,7 @@ Các tài liệu dưới đây phân tích chi tiết mục tiêu kinh doanh, g�
 ## 📑 Danh Sách Tài Liệu Từng Phase
 
 | Thư mục Phase | Tên Giai Đoạn Trọng Tâm | Thời Gian Dự Kiến | Trọng Tâm Nghiệm Thu |
-| :--- | :--- | :---: | :--- |
+| :-- | :-- | :-: | :-- |
 | [**`Phase 01`**](./phase-01-enterprise-iam-multitenancy/README.md) | **Enterprise IAM & Multi-Tenancy** | 18/10 – 08/11/2026 | Cô lập dữ liệu đa tổ chức 100%, Enterprise SSO (Google/MS), phân quyền vai trò hạt mịn, vá SSRF & Open Redirect. |
 | [**`Phase 02`**](./phase-02-omnichannel-payment-gateway/README.md) | **Omnichannel Payment Gateway** | 09/11 – 30/11/2026 | 2 Phân kỳ: (2A) VietQR/VA & USDT tức thời; (2B) Thẻ QT 3D-Secure có chống gian lận & Ví VN; Sổ cái kép. |
 | [**`Phase 03`**](./phase-03-digital-commerce-fulfillment/README.md) | **Digital Commerce & Fulfillment** | 01/12 – 22/12/2026 | Chợ tài nguyên số, Pre-delivery Live Health Check loại bỏ hàng die, khóa giữ hàng, xuất hàng tự động $\le 1\text{s}$. |
@@ -56,6 +56,7 @@ Các tài liệu dưới đây phân tích chi tiết mục tiêu kinh doanh, g�
 ---
 
 ## 🔗 Liên Kết Quản Trị Hệ Thống
+
 - **Bảng Tiến độ Chiến lược Tổng thể:** [`TIMELINE.md`](../../TIMELINE.md)
 - **Chiến lược Sản phẩm Cấp cao:** [`ROADMAP.md`](../../ROADMAP.md)
-- **Đặc tả Kỹ thuật Chi tiết:** [`apps/web-admin/docs/specs/`](../../apps/web-admin/docs/specs/)
+- **Đặc tả Kỹ thuật Chi tiết:** [`docs/specs/`](../specs/)

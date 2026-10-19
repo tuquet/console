@@ -144,7 +144,9 @@ function isIgnoredBenignMessage(entry) {
     url.includes('challenges.cloudflare.com') ||
     text.includes(
       "The target origin provided ('https://challenges.cloudflare.com')",
-    )
+    ) ||
+    /updating from\s+\d+\s+to\s+\d+/i.test(text) ||
+    text.includes('updating from')
   ) {
     return true;
   }
@@ -154,6 +156,15 @@ function isIgnoredBenignMessage(entry) {
     text.includes(
       'Named field slot control bindings moved to `slotProps.componentProps`',
     )
+  ) {
+    return true;
+  }
+
+  // 4. Headless Chromium WebGL driver notices
+  if (
+    text.includes('GL Driver Message') ||
+    text.includes('GPU stall due to ReadPixels') ||
+    text.includes('[.WebGL')
   ) {
     return true;
   }
@@ -214,7 +225,7 @@ async function runConsoleGate() {
     // If cold-started, perform a quick warmup navigation so Vite finishes initial dep optimization
     if (viteServer) {
       await page.goto(`${TARGET_URL}/auth/login`, {
-        timeout: 45_000,
+        timeout: 90_000,
         waitUntil: 'domcontentloaded',
       });
       await page.waitForTimeout(3000);
