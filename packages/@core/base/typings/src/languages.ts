@@ -6,7 +6,7 @@
  * Extend via declaration merging:
  *
  * ```ts
- * declare module '@vben-core/typings' {
+ * declare module '@tuquet-core/typings' {
  *   interface SupportedLanguages {
  *     'zh-TW': 'Traditional Chinese';
  *   }

@@ -10,7 +10,7 @@ import type {
 
 import { computed, shallowRef } from 'vue';
 
-import { mergeWithArrayOverride } from '@vben-core/shared/utils';
+import { mergeWithArrayOverride } from '@tuquet-core/shared/utils';
 
 import { batch } from '@tanstack/store';
 import { useForm } from '@tanstack/vue-form';

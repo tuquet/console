@@ -3,9 +3,9 @@ import type { GrowthPoint } from '#/api';
 
 import { computed } from 'vue';
 
-import { $t } from '@vben/locales';
+import { $t } from '@tuquet/locales';
 
-import { AreaChart } from '@vben-core/shadcn-ui';
+import { AreaChart } from '@tuquet-core/shadcn-ui';
 
 const props = defineProps<{
   data: GrowthPoint[];

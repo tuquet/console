@@ -39,7 +39,7 @@ import {
   WORKFLOW_STATUS_VALUES,
 } from '../index';
 
-describe('enum & Constants SSOT (@vben/constants + #/constants)', () => {
+describe('enum & Constants SSOT (@tuquet/constants + #/constants)', () => {
   it('exposes all 7 canonical PostgREST schemas', () => {
     expect(SUPABASE_SCHEMA_VALUES).toEqual([
       'automa',

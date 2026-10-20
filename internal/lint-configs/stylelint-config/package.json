@@ -1,5 +1,5 @@
 {
-  "name": "@vben/stylelint-config",
+  "name": "@tuquet/stylelint-config",
   "version": "5.8.0",
   "private": true,
   "homepage": "https://github.com/tuquet/admin",

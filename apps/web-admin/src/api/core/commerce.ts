@@ -5,7 +5,7 @@ import type {
   CommerceStockMode,
   CommerceStockStatus,
   PaymentChannelType,
-} from '@vben/constants';
+} from '@tuquet/constants';
 
 import type { PaymentIntentItem } from './billing';
 
@@ -18,7 +18,7 @@ import {
   FILTER_ALL,
   PAYMENT_CHANNEL,
   STORAGE_KEYS,
-} from '@vben/constants';
+} from '@tuquet/constants';
 
 import { mapRawPaymentIntent } from './billing';
 import { supabaseRequest } from './supabase-client';

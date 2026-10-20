@@ -3,8 +3,8 @@ import type { PlatformSubscriptionItem } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 
-import { FILTER_ALL, SUBSCRIPTION_STATUS } from '@vben/constants';
-import { usePreferences } from '@vben/preferences';
+import { FILTER_ALL, SUBSCRIPTION_STATUS } from '@tuquet/constants';
+import { usePreferences } from '@tuquet/preferences';
 
 import { Plus, RefreshCw } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';

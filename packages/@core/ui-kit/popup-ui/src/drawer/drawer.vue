@@ -15,9 +15,9 @@ import {
   useIsMobile,
   usePriorityValues,
   useSimpleLocale,
-} from '@vben-core/composables';
-import { X } from '@vben-core/icons';
-import { usePreferences } from '@vben-core/preferences';
+} from '@tuquet-core/composables';
+import { X } from '@tuquet-core/icons';
+import { usePreferences } from '@tuquet-core/preferences';
 import {
   Separator,
   Sheet,
@@ -32,10 +32,10 @@ import {
   VbenIconButton,
   VbenLoading,
   VisuallyHidden,
-} from '@vben-core/shadcn-ui';
-import { ELEMENT_ID_MAIN_CONTENT } from '@vben-core/shared/constants';
-import { globalShareState } from '@vben-core/shared/global-state';
-import { cn } from '@vben-core/shared/utils';
+} from '@tuquet-core/shadcn-ui';
+import { ELEMENT_ID_MAIN_CONTENT } from '@tuquet-core/shared/constants';
+import { globalShareState } from '@tuquet-core/shared/global-state';
+import { cn } from '@tuquet-core/shared/utils';
 
 interface Props extends DrawerProps {
   drawerApi?: ExtendedDrawerApi;

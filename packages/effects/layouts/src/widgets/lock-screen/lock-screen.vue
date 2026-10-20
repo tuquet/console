@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 
-import { LockKeyhole } from '@vben/icons';
-import { $t, useI18n } from '@vben/locales';
-import { storeToRefs, useAccessStore } from '@vben/stores';
+import { LockKeyhole } from '@tuquet/icons';
+import { $t, useI18n } from '@tuquet/locales';
+import { storeToRefs, useAccessStore } from '@tuquet/stores';
 
-import { useScrollLock } from '@vben-core/composables';
-import { useVbenForm, z } from '@vben-core/form-ui';
-import { VbenAvatar, VbenButton } from '@vben-core/shadcn-ui';
+import { useScrollLock } from '@tuquet-core/composables';
+import { useVbenForm, z } from '@tuquet-core/form-ui';
+import { VbenAvatar, VbenButton } from '@tuquet-core/shadcn-ui';
 
 import { useDateFormat, useNow } from '@vueuse/core';
 

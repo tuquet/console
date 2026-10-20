@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
-import { $t } from '@vben/locales';
+import { $t } from '@tuquet/locales';
 
 import { Check, Copy, Terminal } from '@lucide/vue';
 import { Button, Label } from '@tuquet/vue-ui';

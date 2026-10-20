@@ -6,7 +6,7 @@ import type {
   ProxyProtocol,
   ProxyStatus,
   WorkflowStatus,
-} from '@vben/constants';
+} from '@tuquet/constants';
 
 import {
   BROWSER_STATUS,
@@ -18,7 +18,7 @@ import {
   PROXY_STATUS,
   SUPABASE_SCHEMA,
   WORKFLOW_STATUS,
-} from '@vben/constants';
+} from '@tuquet/constants';
 
 import { supabaseRequest } from './supabase-client';
 
@@ -429,7 +429,7 @@ export function buildFleetFilterQuery(
 }
 
 /**
- * Thăm dò trực tiếp cổng loopback SSO của Specter CLI Daemon (:8765)
+ * Thăm dò trực tiếp cổng loopback SSO của CLI Daemon (:8765)
  * Non-blocking, timeout <= 1200ms theo AGENTS.md §9
  */
 export async function probeLocalDaemonApi(port = 8765): Promise<{
@@ -464,7 +464,7 @@ export async function probeLocalDaemonApi(port = 8765): Promise<{
 }
 
 /**
- * Lấy danh sách máy trạm Specter từ schema runners.devices
+ * Lấy danh sách máy trạm từ schema runners.devices
  */
 export async function getFleetDevicesApi(params?: {
   status?: string;

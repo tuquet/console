@@ -545,34 +545,34 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.9.7
-      '@vben/commitlint-config':
+      '@tuquet/commitlint-config':
         specifier: workspace:*
         version: link:internal/lint-configs/commitlint-config
-      '@vben/eslint-config':
+      '@tuquet/eslint-config':
         specifier: workspace:*
         version: link:internal/lint-configs/eslint-config
-      '@vben/oxfmt-config':
+      '@tuquet/oxfmt-config':
         specifier: workspace:*
         version: link:internal/lint-configs/oxfmt-config
-      '@vben/oxlint-config':
+      '@tuquet/oxlint-config':
         specifier: workspace:*
         version: link:internal/lint-configs/oxlint-config
-      '@vben/stylelint-config':
+      '@tuquet/stylelint-config':
         specifier: workspace:*
         version: link:internal/lint-configs/stylelint-config
-      '@vben/tailwind-config':
+      '@tuquet/tailwind-config':
         specifier: workspace:*
         version: link:internal/tailwind-config
-      '@vben/tsconfig':
+      '@tuquet/tsconfig':
         specifier: workspace:*
         version: link:internal/tsconfig
-      '@vben/turbo-run':
+      '@tuquet/turbo-run':
         specifier: workspace:*
         version: link:scripts/turbo-run
-      '@vben/vite-config':
+      '@tuquet/vite-config':
         specifier: workspace:*
         version: link:internal/vite-config
-      '@vben/vsh':
+      '@tuquet/vsh':
         specifier: workspace:*
         version: link:scripts/vsh
       '@vitejs/plugin-vue':
@@ -683,49 +683,49 @@ importers:
       '@tuquet/vue-ui':
         specifier: 'catalog:'
         version: 0.3.0(@nuxt/kit@4.5.2(magic-string@1.2.2)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.13)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.13)(rollup@4.62.5)(vite@8.3.4(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0(supports-color@10.2.2))(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.50.0)(yaml@2.9.1))))(supports-color@10.2.2)(vue@3.5.41(typescript@6.0.3))
-      '@vben-core/shadcn-ui':
+      '@tuquet-core/shadcn-ui':
         specifier: workspace:*
         version: link:../../packages/@core/ui-kit/shadcn-ui
-      '@vben/access':
+      '@tuquet/access':
         specifier: workspace:*
         version: link:../../packages/effects/access
-      '@vben/common-ui':
+      '@tuquet/common-ui':
         specifier: workspace:*
         version: link:../../packages/effects/common-ui
-      '@vben/constants':
+      '@tuquet/constants':
         specifier: workspace:*
         version: link:../../packages/constants
-      '@vben/hooks':
+      '@tuquet/hooks':
         specifier: workspace:*
         version: link:../../packages/effects/hooks
-      '@vben/icons':
+      '@tuquet/icons':
         specifier: workspace:*
         version: link:../../packages/icons
-      '@vben/layouts':
+      '@tuquet/layouts':
         specifier: workspace:*
         version: link:../../packages/effects/layouts
-      '@vben/locales':
+      '@tuquet/locales':
         specifier: workspace:*
         version: link:../../packages/locales
-      '@vben/plugins':
+      '@tuquet/plugins':
         specifier: workspace:*
         version: link:../../packages/effects/plugins
-      '@vben/preferences':
+      '@tuquet/preferences':
         specifier: workspace:*
         version: link:../../packages/preferences
-      '@vben/request':
+      '@tuquet/request':
         specifier: workspace:*
         version: link:../../packages/effects/request
-      '@vben/stores':
+      '@tuquet/stores':
         specifier: workspace:*
         version: link:../../packages/stores
-      '@vben/styles':
+      '@tuquet/styles':
         specifier: workspace:*
         version: link:../../packages/styles
-      '@vben/types':
+      '@tuquet/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@vben/utils':
+      '@tuquet/utils':
         specifier: workspace:*
         version: link:../../packages/utils
       '@vueuse/core':
@@ -762,7 +762,7 @@ importers:
       '@commitlint/config-conventional':
         specifier: 'catalog:'
         version: 21.2.2
-      '@vben/node-utils':
+      '@tuquet/node-utils':
         specifier: workspace:*
         version: link:../../node-utils
       commitlint-plugin-function-rules:
@@ -783,7 +783,7 @@ importers:
       '@typescript-eslint/parser':
         specifier: 'catalog:'
         version: 8.68.0(eslint@10.12.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
-      '@vben/oxlint-config':
+      '@tuquet/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
       eslint:
@@ -931,7 +931,7 @@ importers:
 
   internal/tsconfig:
     dependencies:
-      '@vben/types':
+      '@tuquet/types':
         specifier: workspace:*
         version: link:../../packages/types
       vite:
@@ -949,7 +949,7 @@ importers:
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.3(vite@8.3.4(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0(supports-color@10.2.2))(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.50.0)(yaml@2.9.0))
-      '@vben/node-utils':
+      '@tuquet/node-utils':
         specifier: workspace:*
         version: link:../node-utils
       archiver:
@@ -1098,10 +1098,10 @@ importers:
 
   packages/@core/composables:
     dependencies:
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../base/shared
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../base/typings
       '@vueuse/core':
@@ -1123,10 +1123,10 @@ importers:
 
   packages/@core/preferences:
     dependencies:
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../base/shared
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../base/typings
       '@vueuse/core':
@@ -1144,19 +1144,19 @@ importers:
       '@tanstack/vue-form':
         specifier: 'catalog:'
         version: 1.33.5(vue@3.5.41(typescript@6.0.3))
-      '@vben-core/composables':
+      '@tuquet-core/composables':
         specifier: workspace:*
         version: link:../../composables
-      '@vben-core/icons':
+      '@tuquet-core/icons':
         specifier: workspace:*
         version: link:../../base/icons
-      '@vben-core/shadcn-ui':
+      '@tuquet-core/shadcn-ui':
         specifier: workspace:*
         version: link:../shadcn-ui
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../../base/shared
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../../base/typings
       '@vueuse/core':
@@ -1181,19 +1181,19 @@ importers:
 
   packages/@core/ui-kit/layout-ui:
     dependencies:
-      '@vben-core/composables':
+      '@tuquet-core/composables':
         specifier: workspace:*
         version: link:../../composables
-      '@vben-core/icons':
+      '@tuquet-core/icons':
         specifier: workspace:*
         version: link:../../base/icons
-      '@vben-core/shadcn-ui':
+      '@tuquet-core/shadcn-ui':
         specifier: workspace:*
         version: link:../shadcn-ui
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../../base/shared
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../../base/typings
       '@vueuse/core':
@@ -1209,22 +1209,22 @@ importers:
 
   packages/@core/ui-kit/menu-ui:
     dependencies:
-      '@vben-core/composables':
+      '@tuquet-core/composables':
         specifier: workspace:*
         version: link:../../composables
-      '@vben-core/design':
+      '@tuquet-core/design':
         specifier: workspace:*
         version: link:../../base/design
-      '@vben-core/icons':
+      '@tuquet-core/icons':
         specifier: workspace:*
         version: link:../../base/icons
-      '@vben-core/shadcn-ui':
+      '@tuquet-core/shadcn-ui':
         specifier: workspace:*
         version: link:../shadcn-ui
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../../base/shared
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../../base/typings
       '@vueuse/core':
@@ -1246,22 +1246,22 @@ importers:
 
   packages/@core/ui-kit/popup-ui:
     dependencies:
-      '@vben-core/composables':
+      '@tuquet-core/composables':
         specifier: workspace:*
         version: link:../../composables
-      '@vben-core/icons':
+      '@tuquet-core/icons':
         specifier: workspace:*
         version: link:../../base/icons
-      '@vben-core/preferences':
+      '@tuquet-core/preferences':
         specifier: workspace:*
         version: link:../../preferences
-      '@vben-core/shadcn-ui':
+      '@tuquet-core/shadcn-ui':
         specifier: workspace:*
         version: link:../shadcn-ui
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../../base/shared
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../../base/typings
       '@vueuse/core':
@@ -1286,19 +1286,19 @@ importers:
       '@unovis/vue':
         specifier: 'catalog:'
         version: 1.7.1(@unovis/ts@1.7.1(supports-color@10.2.2))(vue@3.5.41(typescript@6.0.3))
-      '@vben-core/composables':
+      '@tuquet-core/composables':
         specifier: workspace:*
         version: link:../../composables
-      '@vben-core/design':
+      '@tuquet-core/design':
         specifier: workspace:*
         version: link:../../base/design
-      '@vben-core/icons':
+      '@tuquet-core/icons':
         specifier: workspace:*
         version: link:../../base/icons
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../../base/shared
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../../base/typings
       '@vueuse/core':
@@ -1316,19 +1316,19 @@ importers:
 
   packages/@core/ui-kit/tabs-ui:
     dependencies:
-      '@vben-core/composables':
+      '@tuquet-core/composables':
         specifier: workspace:*
         version: link:../../composables
-      '@vben-core/design':
+      '@tuquet-core/design':
         specifier: workspace:*
         version: link:../../base/design
-      '@vben-core/icons':
+      '@tuquet-core/icons':
         specifier: workspace:*
         version: link:../../base/icons
-      '@vben-core/shadcn-ui':
+      '@tuquet-core/shadcn-ui':
         specifier: workspace:*
         version: link:../shadcn-ui
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../../base/typings
       '@vueuse/core':
@@ -1344,25 +1344,25 @@ importers:
 
   packages/constants:
     dependencies:
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../@core/base/shared
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../@core/base/typings
 
   packages/effects/access:
     dependencies:
-      '@vben/preferences':
+      '@tuquet/preferences':
         specifier: workspace:*
         version: link:../../preferences
-      '@vben/stores':
+      '@tuquet/stores':
         specifier: workspace:*
         version: link:../../stores
-      '@vben/types':
+      '@tuquet/types':
         specifier: workspace:*
         version: link:../../types
-      '@vben/utils':
+      '@tuquet/utils':
         specifier: workspace:*
         version: link:../../utils
       vue:
@@ -1371,37 +1371,37 @@ importers:
 
   packages/effects/common-ui:
     dependencies:
-      '@vben-core/design':
+      '@tuquet-core/design':
         specifier: workspace:*
         version: link:../../@core/base/design
-      '@vben-core/form-ui':
+      '@tuquet-core/form-ui':
         specifier: workspace:*
         version: link:../../@core/ui-kit/form-ui
-      '@vben-core/popup-ui':
+      '@tuquet-core/popup-ui':
         specifier: workspace:*
         version: link:../../@core/ui-kit/popup-ui
-      '@vben-core/preferences':
+      '@tuquet-core/preferences':
         specifier: workspace:*
         version: link:../../@core/preferences
-      '@vben-core/shadcn-ui':
+      '@tuquet-core/shadcn-ui':
         specifier: workspace:*
         version: link:../../@core/ui-kit/shadcn-ui
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../../@core/base/shared
-      '@vben/constants':
+      '@tuquet/constants':
         specifier: workspace:*
         version: link:../../constants
-      '@vben/hooks':
+      '@tuquet/hooks':
         specifier: workspace:*
         version: link:../hooks
-      '@vben/icons':
+      '@tuquet/icons':
         specifier: workspace:*
         version: link:../../icons
-      '@vben/locales':
+      '@tuquet/locales':
         specifier: workspace:*
         version: link:../../locales
-      '@vben/types':
+      '@tuquet/types':
         specifier: workspace:*
         version: link:../../types
       '@vueuse/core':
@@ -1444,19 +1444,19 @@ importers:
 
   packages/effects/hooks:
     dependencies:
-      '@vben-core/composables':
+      '@tuquet-core/composables':
         specifier: workspace:*
         version: link:../../@core/composables
-      '@vben/preferences':
+      '@tuquet/preferences':
         specifier: workspace:*
         version: link:../../preferences
-      '@vben/stores':
+      '@tuquet/stores':
         specifier: workspace:*
         version: link:../../stores
-      '@vben/types':
+      '@tuquet/types':
         specifier: workspace:*
         version: link:../../types
-      '@vben/utils':
+      '@tuquet/utils':
         specifier: workspace:*
         version: link:../../utils
       '@vueuse/core':
@@ -1477,58 +1477,58 @@ importers:
       '@types/sortablejs':
         specifier: 'catalog:'
         version: 1.15.9
-      '@vben-core/composables':
+      '@tuquet-core/composables':
         specifier: workspace:*
         version: link:../../@core/composables
-      '@vben-core/design':
+      '@tuquet-core/design':
         specifier: workspace:*
         version: link:../../@core/base/design
-      '@vben-core/form-ui':
+      '@tuquet-core/form-ui':
         specifier: workspace:*
         version: link:../../@core/ui-kit/form-ui
-      '@vben-core/layout-ui':
+      '@tuquet-core/layout-ui':
         specifier: workspace:*
         version: link:../../@core/ui-kit/layout-ui
-      '@vben-core/menu-ui':
+      '@tuquet-core/menu-ui':
         specifier: workspace:*
         version: link:../../@core/ui-kit/menu-ui
-      '@vben-core/popup-ui':
+      '@tuquet-core/popup-ui':
         specifier: workspace:*
         version: link:../../@core/ui-kit/popup-ui
-      '@vben-core/shadcn-ui':
+      '@tuquet-core/shadcn-ui':
         specifier: workspace:*
         version: link:../../@core/ui-kit/shadcn-ui
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../../@core/base/shared
-      '@vben-core/tabs-ui':
+      '@tuquet-core/tabs-ui':
         specifier: workspace:*
         version: link:../../@core/ui-kit/tabs-ui
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../../@core/base/typings
-      '@vben/constants':
+      '@tuquet/constants':
         specifier: workspace:*
         version: link:../../constants
-      '@vben/hooks':
+      '@tuquet/hooks':
         specifier: workspace:*
         version: link:../hooks
-      '@vben/icons':
+      '@tuquet/icons':
         specifier: workspace:*
         version: link:../../icons
-      '@vben/locales':
+      '@tuquet/locales':
         specifier: workspace:*
         version: link:../../locales
-      '@vben/preferences':
+      '@tuquet/preferences':
         specifier: workspace:*
         version: link:../../preferences
-      '@vben/stores':
+      '@tuquet/stores':
         specifier: workspace:*
         version: link:../../stores
-      '@vben/types':
+      '@tuquet/types':
         specifier: workspace:*
         version: link:../../types
-      '@vben/utils':
+      '@tuquet/utils':
         specifier: workspace:*
         version: link:../../utils
       '@vueuse/core':
@@ -1582,40 +1582,40 @@ importers:
       '@tiptap/vue-3':
         specifier: 'catalog:'
         version: 3.30.3(@floating-ui/dom@1.8.0)(@tiptap/core@3.30.3(@tiptap/pm@3.30.3))(@tiptap/pm@3.30.3)(vue@3.5.41(typescript@6.0.3))
-      '@vben-core/design':
+      '@tuquet-core/design':
         specifier: workspace:*
         version: link:../../@core/base/design
-      '@vben-core/form-ui':
+      '@tuquet-core/form-ui':
         specifier: workspace:*
         version: link:../../@core/ui-kit/form-ui
-      '@vben-core/popup-ui':
+      '@tuquet-core/popup-ui':
         specifier: workspace:*
         version: link:../../@core/ui-kit/popup-ui
-      '@vben-core/shadcn-ui':
+      '@tuquet-core/shadcn-ui':
         specifier: workspace:*
         version: link:../../@core/ui-kit/shadcn-ui
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../../@core/base/shared
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../../@core/base/typings
-      '@vben/hooks':
+      '@tuquet/hooks':
         specifier: workspace:*
         version: link:../hooks
-      '@vben/icons':
+      '@tuquet/icons':
         specifier: workspace:*
         version: link:../../icons
-      '@vben/locales':
+      '@tuquet/locales':
         specifier: workspace:*
         version: link:../../locales
-      '@vben/preferences':
+      '@tuquet/preferences':
         specifier: workspace:*
         version: link:../../preferences
-      '@vben/types':
+      '@tuquet/types':
         specifier: workspace:*
         version: link:../../types
-      '@vben/utils':
+      '@tuquet/utils':
         specifier: workspace:*
         version: link:../../utils
       '@vueuse/core':
@@ -1639,10 +1639,10 @@ importers:
 
   packages/effects/request:
     dependencies:
-      '@vben/locales':
+      '@tuquet/locales':
         specifier: workspace:*
         version: link:../../locales
-      '@vben/utils':
+      '@tuquet/utils':
         specifier: workspace:*
         version: link:../../utils
       axios:
@@ -1661,7 +1661,7 @@ importers:
 
   packages/icons:
     dependencies:
-      '@vben-core/icons':
+      '@tuquet-core/icons':
         specifier: workspace:*
         version: link:../@core/base/icons
 
@@ -1670,10 +1670,10 @@ importers:
       '@intlify/core-base':
         specifier: 'catalog:'
         version: 11.4.10
-      '@vben-core/composables':
+      '@tuquet-core/composables':
         specifier: workspace:*
         version: link:../@core/composables
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../@core/base/typings
       vue:
@@ -1685,22 +1685,22 @@ importers:
 
   packages/preferences:
     dependencies:
-      '@vben-core/preferences':
+      '@tuquet-core/preferences':
         specifier: workspace:*
         version: link:../@core/preferences
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../@core/base/typings
 
   packages/stores:
     dependencies:
-      '@vben-core/preferences':
+      '@tuquet-core/preferences':
         specifier: workspace:*
         version: link:../@core/preferences
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../@core/base/shared
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../@core/base/typings
       pinia:
@@ -1721,13 +1721,13 @@ importers:
 
   packages/styles:
     dependencies:
-      '@vben-core/design':
+      '@tuquet-core/design':
         specifier: workspace:*
         version: link:../@core/base/design
 
   packages/types:
     dependencies:
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../@core/base/typings
       vue:
@@ -1739,10 +1739,10 @@ importers:
 
   packages/utils:
     dependencies:
-      '@vben-core/shared':
+      '@tuquet-core/shared':
         specifier: workspace:*
         version: link:../@core/base/shared
-      '@vben-core/typings':
+      '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../@core/base/typings
       vue-router:
@@ -1754,7 +1754,7 @@ importers:
       '@clack/prompts':
         specifier: 'catalog:'
         version: 1.7.0
-      '@vben/node-utils':
+      '@tuquet/node-utils':
         specifier: workspace:*
         version: link:../../internal/node-utils
       cac:
@@ -1763,7 +1763,7 @@ importers:
 
   scripts/vsh:
     dependencies:
-      '@vben/node-utils':
+      '@tuquet/node-utils':
         specifier: workspace:*
         version: link:../../internal/node-utils
       cac:

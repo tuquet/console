@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
-import { $t } from '@vben/locales';
+import { $t } from '@tuquet/locales';
 
-import { DonutChart } from '@vben-core/shadcn-ui';
+import { DonutChart } from '@tuquet-core/shadcn-ui';
 
 const props = defineProps<{
   coreCount: number;

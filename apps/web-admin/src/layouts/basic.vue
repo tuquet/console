@@ -1,21 +1,21 @@
 <script lang="ts" setup>
-import type { NotificationItem } from '@vben/layouts';
+import type { NotificationItem } from '@tuquet/layouts';
 
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { AuthenticationLoginExpiredModal } from '@vben/common-ui';
-import { useWatermark } from '@vben/hooks';
-import { BookOpenText, SvgGithubIcon } from '@vben/icons';
+import { AuthenticationLoginExpiredModal } from '@tuquet/common-ui';
+import { useWatermark } from '@tuquet/hooks';
+import { BookOpenText, SvgGithubIcon } from '@tuquet/icons';
 import {
   BasicLayout,
   LockScreen,
   Notification,
   UserDropdown,
-} from '@vben/layouts';
-import { preferences, usePreferences } from '@vben/preferences';
-import { useAccessStore, useUserStore } from '@vben/stores';
-import { openWindow } from '@vben/utils';
+} from '@tuquet/layouts';
+import { preferences, usePreferences } from '@tuquet/preferences';
+import { useAccessStore, useUserStore } from '@tuquet/stores';
+import { openWindow } from '@tuquet/utils';
 
 import { isTauriEnvironment } from '#/adapter/desktop';
 import WorkspaceSelector from '#/components/common/workspace-selector.vue';

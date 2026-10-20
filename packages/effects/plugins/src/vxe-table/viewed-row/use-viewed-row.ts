@@ -9,13 +9,13 @@ import type {
 
 import { isRef, shallowRef, toRaw, triggerRef, watch } from 'vue';
 
-import { isBoolean, isFunction } from '@vben/utils';
+import { isBoolean, isFunction } from '@tuquet/utils';
 
 import {
   IndexedDBDriver,
   LocalStorageDriver,
   StorageManager,
-} from '@vben-core/shared/cache';
+} from '@tuquet-core/shared/cache';
 
 import { useDebounceFn } from '@vueuse/core';
 

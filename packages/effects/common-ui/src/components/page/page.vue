@@ -5,7 +5,7 @@ import type { PageProps } from './types';
 
 import { computed } from 'vue';
 
-import { cn } from '@vben-core/shared/utils';
+import { cn } from '@tuquet-core/shared/utils';
 
 defineOptions({
   name: 'Page',

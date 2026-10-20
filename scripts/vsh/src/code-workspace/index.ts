@@ -11,7 +11,7 @@ import {
   gitAdd,
   outputJSON,
   toPosixPath,
-} from '@vben/node-utils';
+} from '@tuquet/node-utils';
 
 const CODE_WORKSPACE_FILE = join('admin.code-workspace');
 

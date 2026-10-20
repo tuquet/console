@@ -1,5 +1,5 @@
 {
-  "name": "@vben/stores",
+  "name": "@tuquet/stores",
   "version": "5.8.0",
   "homepage": "https://github.com/tuquet/admin",
   "bugs": "https://github.com/tuquet/admin/issues",
@@ -20,9 +20,9 @@
     }
   },
   "dependencies": {
-    "@vben-core/preferences": "workspace:*",
-    "@vben-core/shared": "workspace:*",
-    "@vben-core/typings": "workspace:*",
+    "@tuquet-core/preferences": "workspace:*",
+    "@tuquet-core/shared": "workspace:*",
+    "@tuquet-core/typings": "workspace:*",
     "pinia": "catalog:",
     "pinia-plugin-persistedstate": "catalog:",
     "secure-ls": "catalog:",

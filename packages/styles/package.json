@@ -1,5 +1,5 @@
 {
-  "name": "@vben/styles",
+  "name": "@tuquet/styles",
   "version": "5.8.0",
   "homepage": "https://github.com/tuquet/admin",
   "bugs": "https://github.com/tuquet/admin/issues",
@@ -37,6 +37,6 @@
     }
   },
   "dependencies": {
-    "@vben-core/design": "workspace:*"
+    "@tuquet-core/design": "workspace:*"
   }
 }

@@ -1,8 +1,8 @@
-# @vben/turbo-run
+# @tuquet/turbo-run
 
 ## 5.8.0
 
 ### Patch Changes
 
 - Updated dependencies []:
-  - @vben/node-utils@5.8.0
+  - @tuquet/node-utils@5.8.0

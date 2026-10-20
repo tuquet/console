@@ -1,4 +1,4 @@
-# @vben/turbo-run
+# @tuquet/turbo-run
 
 `turbo-run` is a CLI tool that allows running commands across multiple packages in parallel. It provides an interactive UI to choose packages.
 
@@ -12,7 +12,7 @@
 ## Installation
 
 ```bash
-pnpm add -D @vben/turbo-run
+pnpm add -D @tuquet/turbo-run
 ```
 
 ## Usage
@@ -35,9 +35,9 @@ The tool automatically detects which packages have the `dev` command and display
 
 Suppose your project contains the following packages:
 
-- `@vben/app`
-- `@vben/admin`
-- `@vben/website`
+- `@tuquet/app`
+- `@tuquet/admin`
+- `@tuquet/website`
 
 When you run:
 

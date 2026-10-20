@@ -2,12 +2,12 @@ import type {
   CustomPreferencesRecord,
   Preferences,
   PreferencesExtension,
-} from '@vben-core/preferences';
-import type { DeepPartial } from '@vben-core/typings';
+} from '@tuquet-core/preferences';
+import type { DeepPartial } from '@tuquet-core/typings';
 
 /**
  * If you want all apps to use the same default preferences, you can define them here
- * instead of modifying the default preferences in @vben-core/preferences.
+ * instead of modifying the default preferences in @tuquet-core/preferences.
  * @param preferences
  * @returns
  */
@@ -39,4 +39,4 @@ export {
   definePreferencesExtension,
 };
 
-export * from '@vben-core/preferences';
+export * from '@tuquet-core/preferences';

@@ -1,4 +1,4 @@
-# @vben/vsh
+# @tuquet/vsh
 
 A collection of shell utility scripts for project development and management.
 
@@ -14,13 +14,13 @@ A collection of shell utility scripts for project development and management.
 
 ```bash
 # Install with pnpm
-pnpm add -D @vben/vsh
+pnpm add -D @tuquet/vsh
 
 # Or with npm
-npm install -D @vben/vsh
+npm install -D @tuquet/vsh
 
 # Or with yarn
-yarn add -D @vben/vsh
+yarn add -D @tuquet/vsh
 ```
 
 ## Usage
@@ -29,7 +29,7 @@ yarn add -D @vben/vsh
 
 ```bash
 # Global install
-pnpm add -g @vben/vsh
+pnpm add -g @tuquet/vsh
 
 # Use vsh command
 vsh [command]

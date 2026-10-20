@@ -1,6 +1,6 @@
-import type { IconifyIconStructure } from '@vben-core/icons';
+import type { IconifyIconStructure } from '@tuquet-core/icons';
 
-import { addIcon } from '@vben-core/icons';
+import { addIcon } from '@tuquet-core/icons';
 
 loadSvgIcons();
 

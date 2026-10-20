@@ -151,7 +151,7 @@ vi.mock('@tuquet/vue-ui', () => ({
   },
 }));
 
-vi.mock('@vben-core/shadcn-ui', () => ({
+vi.mock('@tuquet-core/shadcn-ui', () => ({
   Popover: defineComponent({
     name: 'Popover',
     setup(_props, { slots }) {

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Maximize, Minimize } from '@vben-core/icons';
+import { Maximize, Minimize } from '@tuquet-core/icons';
 
 import { useFullscreen } from '@vueuse/core';
 

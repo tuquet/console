@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useVbenDrawer } from '../use-drawer';
 
-vi.mock('@vben-core/preferences', () => ({
+vi.mock('@tuquet-core/preferences', () => ({
   usePreferences: () => ({
     globalEscapeShortcutKey: { value: true },
   }),

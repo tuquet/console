@@ -5,7 +5,7 @@ import { computed, ref } from 'vue';
 import {
   CSS_VARIABLE_LAYOUT_FOOTER_HEIGHT,
   CSS_VARIABLE_LAYOUT_HEADER_HEIGHT,
-} from '@vben-core/shared/constants';
+} from '@tuquet-core/shared/constants';
 
 import { useCssVar } from '@vueuse/core';
 

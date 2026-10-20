@@ -1,6 +1,6 @@
-import type { UserInfo } from '@vben/types';
+import type { UserInfo } from '@tuquet/types';
 
-import { useAccessStore } from '@vben/stores';
+import { useAccessStore } from '@tuquet/stores';
 
 import { getEffectiveAccessApi } from './access';
 import { supabaseRequest } from './supabase-client';
@@ -35,7 +35,7 @@ export async function getUserInfoApi(): Promise<UserInfo> {
 
   return {
     avatar,
-    desc: user.email || 'Specter Administrator',
+    desc: user.email || 'Administrator',
     homePath: '/dashboard/analytics',
     realName,
     roles,

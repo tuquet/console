@@ -16,7 +16,7 @@ vi.mock('#/locales', () => ({
   $t: (key: string) => key,
 }));
 
-vi.mock('@vben/locales', () => ({
+vi.mock('@tuquet/locales', () => ({
   $t: (key: string) => key,
 }));
 

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
-import { $t } from '@vben/locales';
+import { $t } from '@tuquet/locales';
 
 import { ShieldAlert, Trash2 } from '@lucide/vue';
 import { Alert, AlertDescription, AlertTitle, Button } from '@tuquet/vue-ui';

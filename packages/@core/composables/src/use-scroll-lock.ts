@@ -4,7 +4,7 @@ import {
   getLayoutScrollElement,
   getScrollbarWidth,
   needsScrollbar,
-} from '@vben-core/shared/utils';
+} from '@tuquet-core/shared/utils';
 
 import {
   useScrollLock as _useScrollLock,

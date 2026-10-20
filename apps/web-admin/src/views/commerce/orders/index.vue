@@ -9,7 +9,7 @@ import type {
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { usePreferences } from '@vben/preferences';
+import { usePreferences } from '@tuquet/preferences';
 
 import {
   Building2,

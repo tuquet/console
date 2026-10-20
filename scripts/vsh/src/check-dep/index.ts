@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
-import { execa } from '@vben/node-utils';
+import { execa } from '@tuquet/node-utils';
 
 const require = createRequire(import.meta.url);
 const knipMain = require.resolve('knip');
@@ -16,13 +16,13 @@ const DEFAULT_CONFIG = {
   ignoreBinaries: [] as string[],
   ignoreDependencies: [
     '@iconify/json',
-    '@vben-core/design',
-    '@vben/commitlint-config',
-    '@vben/eslint-config',
-    '@vben/stylelint-config',
-    '@vben/tailwind-config',
-    '@vben/vite-config',
-    '@vben/oxlint-config',
+    '@tuquet-core/design',
+    '@tuquet/commitlint-config',
+    '@tuquet/eslint-config',
+    '@tuquet/stylelint-config',
+    '@tuquet/tailwind-config',
+    '@tuquet/vite-config',
+    '@tuquet/oxlint-config',
     'playwright',
     'rimraf',
     'tailwindcss',

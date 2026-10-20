@@ -1,6 +1,6 @@
-# @vben/icons
+# @tuquet/icons
 
-Shared icon assets for multiple apps, inheriting all capabilities from `@vben-core/icons`. Common business icons can be placed here.
+Shared icon assets for multiple apps, inheriting all capabilities from `@tuquet-core/icons`. Common business icons can be placed here.
 
 ## Usage
 
@@ -9,11 +9,11 @@ Shared icon assets for multiple apps, inheriting all capabilities from `@vben-co
 ```bash
 # Navigate to target app directory, e.g. apps/xxxx-app
 # cd apps/xxxx-app
-pnpm add @vben/icons
+pnpm add @tuquet/icons
 ```
 
 ### Usage
 
 ```ts
-import { X } from '@vben/icons';
+import { X } from '@tuquet/icons';
 ```

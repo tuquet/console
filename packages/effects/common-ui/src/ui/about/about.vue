@@ -7,9 +7,9 @@ import {
   VBEN_DOC_URL,
   VBEN_GITHUB_URL,
   VBEN_PREVIEW_URL,
-} from '@vben/constants';
+} from '@tuquet/constants';
 
-import { VbenRenderContent } from '@vben-core/shadcn-ui';
+import { VbenRenderContent } from '@tuquet-core/shadcn-ui';
 
 import { Page } from '../../components';
 

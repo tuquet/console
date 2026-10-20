@@ -1,6 +1,6 @@
-# @vben/utils
+# @tuquet/utils
 
-Shared utility functions for multiple apps, inheriting all capabilities from `@vben-core/shared/utils`. Common utility functions can be placed here.
+Shared utility functions for multiple apps, inheriting all capabilities from `@tuquet-core/shared/utils`. Common utility functions can be placed here.
 
 ## Usage
 
@@ -9,11 +9,11 @@ Shared utility functions for multiple apps, inheriting all capabilities from `@v
 ```bash
 # Navigate to target app directory, e.g. apps/xxxx-app
 # cd apps/xxxx-app
-pnpm add @vben/utils
+pnpm add @tuquet/utils
 ```
 
 ### Usage
 
 ```ts
-import { isString } from '@vben/utils';
+import { isString } from '@tuquet/utils';
 ```

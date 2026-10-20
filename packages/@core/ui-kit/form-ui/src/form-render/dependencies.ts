@@ -18,7 +18,7 @@ import {
   isBoolean,
   isEqual,
   isFunction,
-} from '@vben-core/shared/utils';
+} from '@tuquet-core/shared/utils';
 
 import { warnDeprecatedOnce } from '../deprecation';
 import { resolveFieldNamePath } from '../field-name';

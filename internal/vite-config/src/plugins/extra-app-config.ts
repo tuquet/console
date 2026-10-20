@@ -4,7 +4,7 @@ import {
   colors,
   generatorContentHash,
   readPackageJSON,
-} from '@vben/node-utils';
+} from '@tuquet/node-utils';
 
 import { loadEnv } from '../utils/env';
 

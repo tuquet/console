@@ -21,7 +21,7 @@ import {
   setupVbenVxeTable,
   useVbenVxeGrid,
   VbenVxeGrid,
-} from '@vben/plugins/vxe-table';
+} from '@tuquet/plugins/vxe-table';
 ```
 
 ## Initialization
@@ -29,8 +29,8 @@ import {
 Invoke at application entrypoint:
 
 ```ts
-import { setupVbenVxeTable } from '@vben/plugins/vxe-table';
-import { useVbenForm } from '@vben-core/form-ui';
+import { setupVbenVxeTable } from '@tuquet/plugins/vxe-table';
+import { useVbenForm } from '@tuquet-core/form-ui';
 
 setupVbenVxeTable({
   configVxeTable: (vxeUI) => {
@@ -46,5 +46,5 @@ setupVbenVxeTable({
 import type {
   VxeTableGridOptions,
   VxeGridProps,
-} from '@vben/plugins/vxe-table';
+} from '@tuquet/plugins/vxe-table';
 ```

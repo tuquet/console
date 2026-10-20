@@ -40,7 +40,7 @@
   <!-- Quầng sáng neon xung quanh (Đã bỏ nền trắng đục) -->
   <circle cx="256" cy="255" r="125" fill="url(#auraGlowGrad3)" filter="url(#auraBlur3)" />
 
-  <!-- Khối thân Specter Ghost -->
+  <!-- Khối thân Ghost -->
   <path 
     d="M 256,110 
        C 185,110 144,165 144,235 
@@ -68,7 +68,7 @@
     fill="url(#ghostShine3)" 
   />
 
-  <!-- Đôi mắt Specter -->
+  <!-- Đôi mắt -->
   <ellipse cx="220" cy="235" rx="13" ry="20" fill="#09090b" />
   <ellipse cx="292" cy="235" rx="13" ry="20" fill="#09090b" />
 

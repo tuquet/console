@@ -2,7 +2,7 @@ import type { PluginOption } from 'vite';
 
 import { EOL } from 'node:os';
 
-import { dateUtil, readPackageJSON } from '@vben/node-utils';
+import { dateUtil, readPackageJSON } from '@tuquet/node-utils';
 
 /**
  * Inject license / copyright information

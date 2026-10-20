@@ -1,5 +1,5 @@
 {
-  "name": "@vben/locales",
+  "name": "@tuquet/locales",
   "version": "5.8.0",
   "homepage": "https://github.com/tuquet/admin",
   "bugs": "https://github.com/tuquet/admin/issues",
@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "@intlify/core-base": "catalog:",
-    "@vben-core/composables": "workspace:*",
-    "@vben-core/typings": "workspace:*",
+    "@tuquet-core/composables": "workspace:*",
+    "@tuquet-core/typings": "workspace:*",
     "vue": "catalog:",
     "vue-i18n": "catalog:"
   }

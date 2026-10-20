@@ -4,7 +4,7 @@ import type { DefineApplicationOptions } from '../typing';
 
 import path, { relative } from 'node:path';
 
-import { findMonorepoRoot } from '@vben/node-utils';
+import { findMonorepoRoot } from '@tuquet/node-utils';
 
 import { NodePackageImporter } from 'sass-embedded';
 import { defineConfig, loadEnv, mergeConfig } from 'vite';
@@ -108,7 +108,7 @@ function createCssOptions(injectGlobalScss = true): CSSOptions {
               const relativePath = relative(root, filepath);
               // Inject global styles into apps
               if (relativePath.startsWith(`apps${path.sep}`)) {
-                return `@use "@vben/styles/global" as *;\n${content}`;
+                return `@use "@tuquet/styles/global" as *;\n${content}`;
               }
               return content;
             },

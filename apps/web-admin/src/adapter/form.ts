@@ -2,12 +2,12 @@ import type {
   VbenFormProps as FormProps,
   VbenFormSchema as FormSchema,
   FormValues,
-} from '@vben/common-ui';
+} from '@tuquet/common-ui';
 
 import type { ComponentPropsMap, ComponentType } from './component';
 
-import { setupVbenForm, useVbenForm as useForm, z } from '@vben/common-ui';
-import { $t } from '@vben/locales';
+import { setupVbenForm, useVbenForm as useForm, z } from '@tuquet/common-ui';
+import { $t } from '@tuquet/locales';
 
 async function initSetupVbenForm() {
   setupVbenForm<ComponentType>({

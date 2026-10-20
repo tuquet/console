@@ -6,13 +6,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { isInteractiveCellClick } from '../types';
 import VxeRowDetailSheet from '../vxe-row-detail-sheet.vue';
 
-vi.mock('@vben/preferences', () => ({
+vi.mock('@tuquet/preferences', () => ({
   usePreferences: () => ({
     isMobile: ref(false),
   }),
 }));
 
-vi.mock('@vben/plugins/vxe-table', () => ({
+vi.mock('@tuquet/plugins/vxe-table', () => ({
   VxeForm: defineComponent({
     name: 'VxeForm',
     setup(_, { slots }) {

@@ -1,16 +1,16 @@
-import type { Recordable, UserInfo } from '@vben/types';
+import type { Recordable, UserInfo } from '@tuquet/types';
 
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { LOGIN_PATH } from '@vben/constants';
-import { preferences } from '@vben/preferences';
+import { LOGIN_PATH } from '@tuquet/constants';
+import { preferences } from '@tuquet/preferences';
 import {
   resetAllStores,
   useAccessStore,
   useTabbarStore,
   useUserStore,
-} from '@vben/stores';
+} from '@tuquet/stores';
 
 import { toast } from '@tuquet/vue-ui';
 import { defineStore } from 'pinia';

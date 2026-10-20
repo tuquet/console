@@ -35,7 +35,7 @@ Asynchronous storage management solution based on the **Strategy Pattern**, supp
 ### Basic Usage (Default localStorage)
 
 ```typescript
-import { StorageManager } from '@vben-core/shared/cache';
+import { StorageManager } from '@tuquet-core/shared/cache';
 
 const cache = new StorageManager({ prefix: 'myapp' });
 // Use IndexedDB
@@ -94,7 +94,7 @@ await cache.clearExpiredItems();
 Persists data using browser `localStorage` or `sessionStorage`.
 
 ```typescript
-import { LocalStorageDriver, StorageManager } from '@vben-core/shared/cache';
+import { LocalStorageDriver, StorageManager } from '@tuquet-core/shared/cache';
 
 // Using localStorage (default)
 const cache = new StorageManager({
@@ -125,7 +125,7 @@ const sessionCache = new StorageManager({
 Based on browser IndexedDB, supporting high-capacity structured data storage.
 
 ```typescript
-import { IndexedDBDriver, StorageManager } from '@vben-core/shared/cache';
+import { IndexedDBDriver, StorageManager } from '@tuquet-core/shared/cache';
 
 const cache = new StorageManager({
   driver: new IndexedDBDriver({
@@ -163,7 +163,7 @@ await cache.setItem('config', {
 In-memory Map driver; data does not persist and clears on page reload.
 
 ```typescript
-import { MemoryStorageDriver, StorageManager } from '@vben-core/shared/cache';
+import { MemoryStorageDriver, StorageManager } from '@tuquet-core/shared/cache';
 
 const cache = new StorageManager({
   driver: new MemoryStorageDriver(),
@@ -229,7 +229,7 @@ interface IStorageDriver {
 ### Custom Driver
 
 ```typescript
-import type { IStorageDriver } from '@vben-core/shared/cache';
+import type { IStorageDriver } from '@tuquet-core/shared/cache';
 
 class CookieStorageDriver implements IStorageDriver {
   async getItem<T>(key: string): Promise<null | T> {
@@ -269,7 +269,7 @@ import {
   LocalStorageDriver,
   MemoryStorageDriver,
   StorageManager,
-} from '@vben-core/shared/cache';
+} from '@tuquet-core/shared/cache';
 
 function createStorageManager(prefix: string) {
   // Use memory driver in SSR environment

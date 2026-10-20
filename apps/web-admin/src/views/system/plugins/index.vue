@@ -7,8 +7,8 @@ import {
   FILTER_ALL,
   SYSTEM_PLUGIN_CATEGORY,
   SYSTEM_PLUGIN_STATUS,
-} from '@vben/constants';
-import { usePreferences } from '@vben/preferences';
+} from '@tuquet/constants';
+import { usePreferences } from '@tuquet/preferences';
 
 import {
   CreditCard,

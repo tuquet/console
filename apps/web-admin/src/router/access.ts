@@ -1,10 +1,10 @@
 import type {
   ComponentRecordType,
   GenerateMenuAndRoutesOptions,
-} from '@vben/types';
+} from '@tuquet/types';
 
-import { generateAccessible } from '@vben/access';
-import { preferences } from '@vben/preferences';
+import { generateAccessible } from '@tuquet/access';
+import { preferences } from '@tuquet/preferences';
 
 import { toast } from '@tuquet/vue-ui';
 

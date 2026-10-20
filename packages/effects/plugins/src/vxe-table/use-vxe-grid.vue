@@ -10,7 +10,7 @@ import type {
 
 import type { SetupContext } from 'vue';
 
-import type { VbenFormProps } from '@vben-core/form-ui';
+import type { VbenFormProps } from '@tuquet-core/form-ui';
 
 import type { ExtendedVxeGridApi, VxeGridProps } from './types';
 
@@ -25,18 +25,18 @@ import {
   watch,
 } from 'vue';
 
-import { usePriorityValues } from '@vben/hooks';
-import { $t } from '@vben/locales';
-import { usePreferences } from '@vben/preferences';
+import { usePriorityValues } from '@tuquet/hooks';
+import { $t } from '@tuquet/locales';
+import { usePreferences } from '@tuquet/preferences';
 import {
   cloneDeep,
   cn,
   isBoolean,
   isEqual,
   mergeWithArrayOverride,
-} from '@vben/utils';
+} from '@tuquet/utils';
 
-import { VbenHelpTooltip, VbenLoading } from '@vben-core/shadcn-ui';
+import { VbenHelpTooltip, VbenLoading } from '@tuquet-core/shadcn-ui';
 
 import { VxeButton } from 'vxe-pc-ui';
 import { VxeGrid, VxeUI } from 'vxe-table';

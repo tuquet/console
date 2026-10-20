@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import type { VbenFormSchema } from '@vben/common-ui';
-import type { Recordable } from '@vben/types';
+import type { VbenFormSchema } from '@tuquet/common-ui';
+import type { Recordable } from '@tuquet/types';
 
 import { computed, ref } from 'vue';
 
-import { AuthenticationForgetPassword, z } from '@vben/common-ui';
-import { $t } from '@vben/locales';
+import { AuthenticationForgetPassword, z } from '@tuquet/common-ui';
+import { $t } from '@tuquet/locales';
 
 import { toast } from '@tuquet/vue-ui';
 

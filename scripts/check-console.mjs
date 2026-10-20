@@ -151,7 +151,7 @@ function isIgnoredBenignMessage(entry) {
     return true;
   }
 
-  // 3. Built-in upstream @vben/vite-config serve-time migration notice banner
+  // 3. Built-in upstream @tuquet/vite-config serve-time migration notice banner
   if (
     text.includes(
       'Named field slot control bindings moved to `slotProps.componentProps`',

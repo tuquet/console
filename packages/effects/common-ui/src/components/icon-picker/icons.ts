@@ -1,4 +1,4 @@
-import type { Recordable } from '@vben/types';
+import type { Recordable } from '@tuquet/types';
 
 /**
  * Cache object to avoid duplicate remote API requests

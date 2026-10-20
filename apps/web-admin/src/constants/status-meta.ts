@@ -13,7 +13,7 @@ import type {
   TenantStatus,
   WalletTxType,
   WorkflowStatus,
-} from '@vben/constants';
+} from '@tuquet/constants';
 
 import type { EnumItemMeta } from './enum-helper';
 
@@ -32,7 +32,7 @@ import {
   TENANT_STATUS,
   WALLET_TX_TYPE,
   WORKFLOW_STATUS,
-} from '@vben/constants';
+} from '@tuquet/constants';
 
 import { STATUS_TONE } from './enum-helper';
 
@@ -212,7 +212,7 @@ export const COMMERCE_PRODUCT_TYPE_META: Record<
     tone: STATUS_TONE.PRIMARY,
   },
   [COMMERCE_PRODUCT_TYPE.SPECTER_RESOURCE]: {
-    fallbackLabel: 'Specter resource',
+    fallbackLabel: 'resource',
     labelKey: 'page.commerce_view.type_resource',
     tone: STATUS_TONE.INFO,
   },

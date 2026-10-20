@@ -2,7 +2,7 @@ import type { CAC } from 'cac';
 
 import { availableParallelism, freemem } from 'node:os';
 
-import { colors, execa } from '@vben/node-utils';
+import { colors, execa } from '@tuquet/node-utils';
 
 interface LintCommandOptions {
   /**

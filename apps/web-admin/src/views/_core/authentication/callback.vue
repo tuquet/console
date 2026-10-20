@@ -2,9 +2,9 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { $t } from '@vben/locales';
-import { preferences } from '@vben/preferences';
-import { useAccessStore, useUserStore } from '@vben/stores';
+import { $t } from '@tuquet/locales';
+import { preferences } from '@tuquet/preferences';
+import { useAccessStore, useUserStore } from '@tuquet/stores';
 
 import { Copy, ExternalLink, Laptop } from '@lucide/vue';
 import { Button, Card, Spinner, toast } from '@tuquet/vue-ui';

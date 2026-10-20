@@ -1,5 +1,5 @@
 {
-  "name": "@vben/preferences",
+  "name": "@tuquet/preferences",
   "version": "5.8.0",
   "homepage": "https://github.com/tuquet/admin",
   "bugs": "https://github.com/tuquet/admin/issues",
@@ -20,7 +20,7 @@
     }
   },
   "dependencies": {
-    "@vben-core/preferences": "workspace:*",
-    "@vben-core/typings": "workspace:*"
+    "@tuquet-core/preferences": "workspace:*",
+    "@tuquet-core/typings": "workspace:*"
   }
 }

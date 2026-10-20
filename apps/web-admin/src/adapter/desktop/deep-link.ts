@@ -109,10 +109,10 @@ export async function initDesktopAuthHandling(): Promise<() => void> {
 
   return setupDeepLinkListener(async (payload) => {
     try {
-      const { useAccessStore, useUserStore } = await import('@vben/stores');
-      const { preferences } = await import('@vben/preferences');
+      const { useAccessStore, useUserStore } = await import('@tuquet/stores');
+      const { preferences } = await import('@tuquet/preferences');
       const { toast } = await import('@tuquet/vue-ui');
-      const { $t } = await import('@vben/locales');
+      const { $t } = await import('@tuquet/locales');
       const { getAccessCodesApi } = await import('#/api');
       const { useAuthStore } = await import('#/store');
       const { router } = await import('#/router');

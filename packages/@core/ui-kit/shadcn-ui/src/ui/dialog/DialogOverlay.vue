@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { inject } from 'vue';
 
-import { useScrollLock } from '@vben-core/composables';
-import { cn } from '@vben-core/shared/utils';
+import { useScrollLock } from '@tuquet-core/composables';
+import { cn } from '@tuquet-core/shared/utils';
 
 const props = withDefaults(
   defineProps<{

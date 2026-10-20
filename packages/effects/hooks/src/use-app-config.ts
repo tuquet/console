@@ -1,7 +1,7 @@
 import type {
   ApplicationConfig,
   VbenAdminProAppConfigRaw,
-} from '@vben/types/global';
+} from '@tuquet/types/global';
 
 /**
  * Global configuration injected by vite-inject-app-config

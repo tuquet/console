@@ -1,11 +1,11 @@
-import type { SupabaseSchema } from '@vben/constants';
+import type { SupabaseSchema } from '@tuquet/constants';
 
-import { $t } from '@vben/locales';
-import { useAccessStore } from '@vben/stores';
+import { $t } from '@tuquet/locales';
+import { useAccessStore } from '@tuquet/stores';
 
 import { addNetworkBreadcrumb, captureError } from '../../utils/bugsink';
 
-export { SUPABASE_SCHEMA } from '@vben/constants';
+export { SUPABASE_SCHEMA } from '@tuquet/constants';
 export type { SupabaseSchema };
 
 export interface SupabaseRequestOptions extends RequestInit {

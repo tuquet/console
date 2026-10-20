@@ -1,4 +1,4 @@
-# @vben/plugins
+# @tuquet/plugins
 
 This directory contains third-party library integrations and plugins. Each plugin encapsulates reusable logic, configuration, and components for unified management.
 
@@ -22,7 +22,7 @@ Taking `echarts` as an example:
 **Usage**
 
 ```ts
-import { useEcharts } from '@vben/plugins/echarts';
+import { useEcharts } from '@tuquet/plugins/echarts';
 ```
 
 This ensures apps only bundle required plugins without unnecessary overhead or side-effects.

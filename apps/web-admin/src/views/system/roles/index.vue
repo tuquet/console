@@ -3,7 +3,7 @@ import type { SystemPermissionItem, SystemRoleItem } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 
-import { usePreferences } from '@vben/preferences';
+import { usePreferences } from '@tuquet/preferences';
 
 import {
   Check,

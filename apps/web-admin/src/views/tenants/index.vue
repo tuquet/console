@@ -4,7 +4,7 @@ import type { TenantItem } from '#/api';
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { usePreferences } from '@vben/preferences';
+import { usePreferences } from '@tuquet/preferences';
 
 import { Building2, Check, Eye, Plus, RefreshCw, Terminal } from '@lucide/vue';
 import { Badge, Button, toast } from '@tuquet/vue-ui';

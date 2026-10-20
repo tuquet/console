@@ -1,5 +1,5 @@
 {
-  "name": "@vben/tsconfig",
+  "name": "@tuquet/tsconfig",
   "version": "5.8.0",
   "private": true,
   "homepage": "https://github.com/tuquet/admin",
@@ -19,7 +19,7 @@
     "web.json"
   ],
   "dependencies": {
-    "@vben/types": "workspace:*",
+    "@tuquet/types": "workspace:*",
     "vite": "catalog:"
   }
 }

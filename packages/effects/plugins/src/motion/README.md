@@ -14,7 +14,7 @@ Animation plugin based on @vueuse/motion.
 ## Usage
 
 ```ts
-import { MotionPlugin, Motion, MotionDirective } from '@vben/plugins/motion';
+import { MotionPlugin, Motion, MotionDirective } from '@tuquet/plugins/motion';
 
 app.use(MotionPlugin);
 ```
@@ -22,5 +22,5 @@ app.use(MotionPlugin);
 ## Types
 
 ```ts
-import type { MotionOptions, MotionVariants } from '@vben/plugins/motion';
+import type { MotionOptions, MotionVariants } from '@tuquet/plugins/motion';
 ```

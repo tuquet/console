@@ -1,23 +1,23 @@
 <script lang="ts" setup>
 import type { SetupContext } from 'vue';
 
-import type { MenuRecordRaw } from '@vben/types';
+import type { MenuRecordRaw } from '@tuquet/types';
 
 import { computed, useSlots, watch } from 'vue';
 
-import { useRefresh } from '@vben/hooks';
-import { $t, i18n } from '@vben/locales';
+import { useRefresh } from '@tuquet/hooks';
+import { $t, i18n } from '@tuquet/locales';
 import {
   preferences,
   updatePreferences,
   usePreferences,
-} from '@vben/preferences';
-import { useAccessStore, useTabbarStore, useTimezoneStore } from '@vben/stores';
-import { cloneDeep, mapTree } from '@vben/utils';
+} from '@tuquet/preferences';
+import { useAccessStore, useTabbarStore, useTimezoneStore } from '@tuquet/stores';
+import { cloneDeep, mapTree } from '@tuquet/utils';
 
-import { VbenAdminLayout } from '@vben-core/layout-ui';
-import { VbenBackTop, VbenLogo } from '@vben-core/shadcn-ui';
-import { ELEMENT_ID_LAYOUT_SCROLL } from '@vben-core/shared/constants';
+import { VbenAdminLayout } from '@tuquet-core/layout-ui';
+import { VbenBackTop, VbenLogo } from '@tuquet-core/shadcn-ui';
+import { ELEMENT_ID_LAYOUT_SCROLL } from '@tuquet-core/shared/constants';
 
 import { Breadcrumb, CheckUpdates, Preferences } from '../widgets';
 import { LayoutContent, LayoutContentSpinner } from './content';

@@ -2,8 +2,8 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { $t } from '@vben/locales';
-import { useAccessStore, useUserStore } from '@vben/stores';
+import { $t } from '@tuquet/locales';
+import { useAccessStore, useUserStore } from '@tuquet/stores';
 
 import { CheckCircle2, Laptop } from '@lucide/vue';
 import {

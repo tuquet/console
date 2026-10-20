@@ -19,7 +19,7 @@ const mockPreferences = vi.hoisted(() => ({
   }),
 }));
 
-vi.mock('@vben/preferences', () => mockPreferences);
+vi.mock('@tuquet/preferences', () => mockPreferences);
 
 const routerHolder = vi.hoisted(() => ({
   current: undefined as Router | undefined,

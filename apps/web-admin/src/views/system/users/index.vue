@@ -3,7 +3,7 @@ import type { PlatformUserItem } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 
-import { usePreferences } from '@vben/preferences';
+import { usePreferences } from '@tuquet/preferences';
 
 import { Building2, RefreshCw, Users } from '@lucide/vue';
 import {

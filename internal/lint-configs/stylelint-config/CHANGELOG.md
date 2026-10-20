@@ -1,3 +1,3 @@
-# @vben/stylelint-config
+# @tuquet/stylelint-config
 
 ## 5.8.0

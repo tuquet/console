@@ -1,5 +1,5 @@
-import type { FormValues } from '@vben/common-ui';
-import type { VxeTableGridOptions } from '@vben/plugins/vxe-table';
+import type { FormValues } from '@tuquet/common-ui';
+import type { VxeTableGridOptions } from '@tuquet/plugins/vxe-table';
 
 import type { ComponentPropsMap, ComponentType } from './component';
 
@@ -10,7 +10,7 @@ import type {
 
 import { computed, defineComponent, Fragment, h, ref } from 'vue';
 
-import { i18n } from '@vben/locales';
+import { i18n } from '@tuquet/locales';
 import {
   VxeForm as _VxeForm,
   VxeFormGather as _VxeFormGather,
@@ -23,7 +23,7 @@ import {
   VxeTextarea as _VxeTextarea,
   setupVbenVxeTable,
   useVbenVxeGrid as useGrid,
-} from '@vben/plugins/vxe-table';
+} from '@tuquet/plugins/vxe-table';
 
 import { Badge, Button } from '@tuquet/vue-ui';
 
@@ -543,4 +543,4 @@ export type {
   VxeDetailSheetMode,
   VxeDetailSheetOptions,
 } from '#/components/vxe-detail-sheet/types';
-export type * from '@vben/plugins/vxe-table';
+export type * from '@tuquet/plugins/vxe-table';

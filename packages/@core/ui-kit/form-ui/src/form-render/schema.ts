@@ -18,7 +18,7 @@ import {
   get,
   isFunction,
   mergeWithArrayOverride,
-} from '@vben-core/shared/utils';
+} from '@tuquet-core/shared/utils';
 
 import { resolveChildUpdateFieldName } from '../field-name';
 

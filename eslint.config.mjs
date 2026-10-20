@@ -1,4 +1,4 @@
-import { defineConfig } from '@vben/eslint-config';
+import { defineConfig } from '@tuquet/eslint-config';
 
 export default defineConfig([
   {

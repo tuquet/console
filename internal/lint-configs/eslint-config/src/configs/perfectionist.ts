@@ -28,12 +28,12 @@ export async function perfectionist(): Promise<Linter.Config[]> {
               {
                 selector: 'type',
                 groupName: 'vben-core-type',
-                elementNamePattern: '^@vben-core/.+',
+                elementNamePattern: '^@tuquet-core/.+',
               },
               {
                 selector: 'type',
                 groupName: 'vben-type',
-                elementNamePattern: '^@vben/.+',
+                elementNamePattern: '^@tuquet/.+',
               },
               {
                 selector: 'type',
@@ -42,11 +42,11 @@ export async function perfectionist(): Promise<Linter.Config[]> {
               },
               {
                 groupName: 'vben',
-                elementNamePattern: '^@vben/.+',
+                elementNamePattern: '^@tuquet/.+',
               },
               {
                 groupName: 'vben-core',
-                elementNamePattern: '^@vben-core/.+',
+                elementNamePattern: '^@tuquet-core/.+',
               },
               {
                 groupName: 'vue',

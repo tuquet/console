@@ -27,11 +27,11 @@ import {
   Underline,
   Undo2,
   Unlink2,
-} from '@vben/icons';
-import { $t } from '@vben/locales';
-import { COLOR_PRESETS } from '@vben/preferences';
+} from '@tuquet/icons';
+import { $t } from '@tuquet/locales';
+import { COLOR_PRESETS } from '@tuquet/preferences';
 
-import { prompt } from '@vben-core/popup-ui';
+import { prompt } from '@tuquet-core/popup-ui';
 
 const headingLevels = [1, 2, 3, 4] as const;
 const editorColorPresets = [

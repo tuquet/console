@@ -1,6 +1,6 @@
 import type { TenantItem } from './tenant';
 
-import { $t } from '@vben/locales';
+import { $t } from '@tuquet/locales';
 
 import { supabaseRequest } from './supabase-client';
 

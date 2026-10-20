@@ -1,5 +1,5 @@
 {
-  "name": "@vben/request",
+  "name": "@tuquet/request",
   "version": "5.8.0",
   "homepage": "https://github.com/tuquet/admin",
   "bugs": "https://github.com/tuquet/admin/issues",
@@ -20,8 +20,8 @@
     }
   },
   "dependencies": {
-    "@vben/locales": "workspace:*",
-    "@vben/utils": "workspace:*",
+    "@tuquet/locales": "workspace:*",
+    "@tuquet/utils": "workspace:*",
     "axios": "catalog:",
     "qs": "catalog:"
   },

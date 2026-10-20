@@ -5,7 +5,7 @@ import type { DescriptionsItemType, DescriptionsProps } from './types';
 
 import { computed, useSlots } from 'vue';
 
-import { cn } from '@vben-core/shared/utils';
+import { cn } from '@tuquet-core/shared/utils';
 
 import DescriptionsRow from './descriptions-row.vue';
 import {

@@ -4,7 +4,7 @@ import type { FleetBrowserItem } from '#/api';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { usePreferences } from '@vben/preferences';
+import { usePreferences } from '@tuquet/preferences';
 
 import {
   Copy,

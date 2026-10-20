@@ -6,8 +6,8 @@ import type { ExtendedFormApi, FormActions, VbenFormProps } from './types';
 
 import { computed, toRaw, unref, useSlots } from 'vue';
 
-import { createContext } from '@vben-core/shadcn-ui';
-import { isString, mergeWithArrayOverride, set } from '@vben-core/shared/utils';
+import { createContext } from '@tuquet-core/shadcn-ui';
+import { isString, mergeWithArrayOverride, set } from '@tuquet-core/shared/utils';
 
 import {
   object,

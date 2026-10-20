@@ -3,8 +3,8 @@ import type { ActionItem, TableActionProps } from './types';
 
 import { computed, ref } from 'vue';
 
-import { Ellipsis } from '@vben-core/icons';
-import { cn } from '@vben-core/shared/utils';
+import { Ellipsis } from '@tuquet-core/icons';
+import { cn } from '@tuquet-core/shared/utils';
 
 import {
   DropdownMenu,

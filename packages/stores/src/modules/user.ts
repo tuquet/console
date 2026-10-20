@@ -1,4 +1,4 @@
-import type { BasicUserInfo } from '@vben-core/typings';
+import type { BasicUserInfo } from '@tuquet-core/typings';
 
 import { acceptHMRUpdate, defineStore } from 'pinia';
 

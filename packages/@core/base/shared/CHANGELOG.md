@@ -1,3 +1,3 @@
-# @vben-core/shared
+# @tuquet-core/shared
 
 ## 5.8.0

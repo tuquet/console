@@ -1,13 +1,13 @@
 import { createApp, defineComponent, h, nextTick, ref } from 'vue';
 
-import { globalShareState } from '@vben/common-ui';
+import { globalShareState } from '@tuquet/common-ui';
 
 import { describe, expect, it, vi } from 'vitest';
 
 import { initComponentAdapter } from '../component';
 import { initSetupVbenForm, useVbenForm } from '../form';
 
-vi.mock('@vben/locales', () => ({
+vi.mock('@tuquet/locales', () => ({
   $t: (key: string) => key,
 }));
 

@@ -1,4 +1,4 @@
-@reference "@vben/tailwind-config/theme";
+@reference "@tuquet/tailwind-config/theme";
 
 /* Make clicks pass-through */
 #nprogress {

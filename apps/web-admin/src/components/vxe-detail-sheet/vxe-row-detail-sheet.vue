@@ -10,8 +10,8 @@ import type {
 
 import { computed, reactive, ref, watch } from 'vue';
 
-import { VxeForm, VxeFormItem } from '@vben/plugins/vxe-table';
-import { usePreferences } from '@vben/preferences';
+import { VxeForm, VxeFormItem } from '@tuquet/plugins/vxe-table';
+import { usePreferences } from '@tuquet/preferences';
 
 import {
   ArrowUpRight,

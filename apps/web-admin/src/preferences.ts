@@ -1,4 +1,4 @@
-import { defineOverridesPreferences } from '@vben/preferences';
+import { defineOverridesPreferences } from '@tuquet/preferences';
 
 /**
  * @description Project preferences configuration

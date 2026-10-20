@@ -1,4 +1,4 @@
-import { updatePreferences, usePreferences } from '@vben/preferences';
+import { updatePreferences, usePreferences } from '@tuquet/preferences';
 /**
  * Maximize content area
  */

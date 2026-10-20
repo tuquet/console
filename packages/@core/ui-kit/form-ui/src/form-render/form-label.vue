@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { CustomRenderType } from '../types';
 
-import { useForwardExpose } from '@vben-core/composables';
+import { useForwardExpose } from '@tuquet-core/composables';
 import {
   FormLabel,
   VbenHelpTooltip,
   VbenRenderContent,
-} from '@vben-core/shadcn-ui';
-import { cn } from '@vben-core/shared/utils';
+} from '@tuquet-core/shadcn-ui';
+import { cn } from '@tuquet-core/shared/utils';
 
 interface Props {
   class?: string;

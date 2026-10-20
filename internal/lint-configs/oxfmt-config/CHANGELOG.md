@@ -1,3 +1,3 @@
-# @vben/oxfmt-config
+# @tuquet/oxfmt-config
 
 ## 5.8.0

@@ -1,3 +1,3 @@
 export * from './core';
 export * from './domains';
-export * from '@vben-core/shared/constants';
+export * from '@tuquet-core/shared/constants';

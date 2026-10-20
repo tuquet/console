@@ -1,6 +1,6 @@
 import process from 'node:process';
 
-import { defineConfig } from '@vben/vite-config';
+import { defineConfig } from '@tuquet/vite-config';
 
 const isTauri = Boolean(process.env.TAURI_ENV_PLATFORM);
 

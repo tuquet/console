@@ -1,5 +1,5 @@
 {
-  "name": "@vben/vite-config",
+  "name": "@tuquet/vite-config",
   "version": "5.8.0",
   "private": true,
   "homepage": "https://github.com/tuquet/admin",
@@ -30,7 +30,7 @@
     "@intlify/unplugin-vue-i18n": "catalog:",
     "@jspm/generator": "catalog:",
     "@tailwindcss/vite": "catalog:",
-    "@vben/node-utils": "workspace:*",
+    "@tuquet/node-utils": "workspace:*",
     "archiver": "catalog:",
     "cheerio": "catalog:",
     "get-port": "catalog:",

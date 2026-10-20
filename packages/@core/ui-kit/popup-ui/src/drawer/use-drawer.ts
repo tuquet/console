@@ -19,8 +19,8 @@ import {
   shallowReactive,
 } from 'vue';
 
-import { usePreferences } from '@vben-core/preferences';
-import { useSelector } from '@vben-core/shared/store';
+import { usePreferences } from '@tuquet-core/preferences';
+import { useSelector } from '@tuquet-core/shared/store';
 
 import { DrawerApi } from './drawer-api';
 import VbenDrawer from './drawer.vue';

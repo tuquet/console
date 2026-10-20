@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import Alert from '../alert.vue';
 
-vi.mock('@vben-core/composables', () => ({
+vi.mock('@tuquet-core/composables', () => ({
   useScrollLock: () =>
     computed({
       get: () => false,
@@ -17,7 +17,7 @@ vi.mock('@vben-core/composables', () => ({
   }),
 }));
 
-vi.mock('@vben-core/preferences', () => ({
+vi.mock('@tuquet-core/preferences', () => ({
   usePreferences: () => ({
     globalEscapeShortcutKey: { value: true },
   }),

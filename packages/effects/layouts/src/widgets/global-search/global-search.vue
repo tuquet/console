@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import type { MenuRecordRaw } from '@vben/types';
+import type { MenuRecordRaw } from '@tuquet/types';
 
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
-import { ArrowDown, ArrowUp, CornerDownLeft, Search, X } from '@vben/icons';
-import { $t } from '@vben/locales';
-import { isWindowsOs } from '@vben/utils';
+import { ArrowDown, ArrowUp, CornerDownLeft, Search, X } from '@tuquet/icons';
+import { $t } from '@tuquet/locales';
+import { isWindowsOs } from '@tuquet/utils';
 
-import { useVbenModal } from '@vben-core/popup-ui';
-import { Input, Kbd } from '@vben-core/shadcn-ui';
+import { useVbenModal } from '@tuquet-core/popup-ui';
+import { Input, Kbd } from '@tuquet-core/shadcn-ui';
 
 import { useMagicKeys, whenever } from '@vueuse/core';
 

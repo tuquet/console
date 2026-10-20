@@ -2,13 +2,13 @@ import type { App } from 'vue';
 
 import { createApp, defineComponent, h, nextTick } from 'vue';
 
-import { ELEMENT_ID_MAIN_CONTENT } from '@vben-core/shared/constants';
+import { ELEMENT_ID_MAIN_CONTENT } from '@tuquet-core/shared/constants';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useVbenDrawer } from '../use-drawer';
 
-vi.mock('@vben-core/preferences', () => ({
+vi.mock('@tuquet-core/preferences', () => ({
   usePreferences: () => ({
     globalEscapeShortcutKey: { value: true },
   }),

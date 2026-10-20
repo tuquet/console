@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue';
 
-import type { ContentCompactType } from '@vben-core/typings';
+import type { ContentCompactType } from '@tuquet-core/typings';
 
 import { computed } from 'vue';
 

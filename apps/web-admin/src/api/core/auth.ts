@@ -1,5 +1,5 @@
-import { $t } from '@vben/locales';
-import { useAccessStore } from '@vben/stores';
+import { $t } from '@tuquet/locales';
+import { useAccessStore } from '@tuquet/stores';
 
 import { isTauriEnvironment } from '#/adapter/desktop';
 

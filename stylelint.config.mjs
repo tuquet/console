@@ -1,4 +1,4 @@
 export default {
-  extends: ['@vben/stylelint-config'],
+  extends: ['@tuquet/stylelint-config'],
   root: true,
 };

@@ -6,7 +6,7 @@ import type {
 
 import { computed, ref, watch } from 'vue';
 
-import { usePreferences } from '@vben/preferences';
+import { usePreferences } from '@tuquet/preferences';
 
 import { ArrowRight, Check, Copy, Database, Search, Table2 } from '@lucide/vue';
 import {

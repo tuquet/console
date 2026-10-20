@@ -1,5 +1,5 @@
 /**
- * Security and Input Sanitization Utilities for Specter Admin
+ * Security and Input Sanitization Utilities for Admin
  * Enforces strict boundaries against SSRF, Open Redirect, and Privilege Escalation.
  */
 

@@ -7,12 +7,12 @@
 
 import type { Component } from 'vue';
 
-import type { BaseFormComponentType, IconPickerProps } from '@vben/common-ui';
+import type { BaseFormComponentType, IconPickerProps } from '@tuquet/common-ui';
 
 import { defineComponent, h, ref } from 'vue';
 
-import { globalShareState, IconPicker } from '@vben/common-ui';
-import { $t } from '@vben/locales';
+import { globalShareState, IconPicker } from '@tuquet/common-ui';
+import { $t } from '@tuquet/locales';
 
 import {
   Button,

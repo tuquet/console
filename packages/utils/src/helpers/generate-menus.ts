@@ -4,9 +4,9 @@ import type {
   ExRouteRecordRaw,
   MenuRecordRaw,
   RouteMeta,
-} from '@vben-core/typings';
+} from '@tuquet-core/typings';
 
-import { filterTree, mapTree, sortTree } from '@vben-core/shared/utils';
+import { filterTree, mapTree, sortTree } from '@tuquet-core/shared/utils';
 
 /**
  * Generate menu list based on routes

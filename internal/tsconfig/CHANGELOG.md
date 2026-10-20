@@ -1,8 +1,8 @@
-# @vben/tsconfig
+# @tuquet/tsconfig
 
 ## 5.8.0
 
 ### Patch Changes
 
 - Updated dependencies []:
-  - @vben/types@5.8.0
+  - @tuquet/types@5.8.0

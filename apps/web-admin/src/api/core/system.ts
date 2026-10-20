@@ -2,7 +2,7 @@ import type {
   SubscriptionStatus,
   SystemPluginCategory,
   SystemPluginStatus,
-} from '@vben/constants';
+} from '@tuquet/constants';
 
 import {
   FILTER_ALL,
@@ -11,8 +11,8 @@ import {
   SYSTEM_PLUGIN_CATEGORY,
   SYSTEM_PLUGIN_STATUS,
   TENANT_STATUS,
-} from '@vben/constants';
-import { $t } from '@vben/locales';
+} from '@tuquet/constants';
+import { $t } from '@tuquet/locales';
 
 import { supabaseRequest } from './supabase-client';
 

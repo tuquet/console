@@ -9,7 +9,7 @@ import type {
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { useUserStore } from '@vben/stores';
+import { useUserStore } from '@tuquet/stores';
 
 import { ArrowLeft, Gauge, History, LayoutDashboard, Users } from '@lucide/vue';
 import {

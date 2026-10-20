@@ -3,9 +3,9 @@ import type { IconPickerProps } from './types';
 
 import { computed, ref, useAttrs, watch, watchEffect } from 'vue';
 
-import { usePagination } from '@vben/hooks';
-import { EmptyIcon, Grip, listIcons } from '@vben/icons';
-import { $t } from '@vben/locales';
+import { usePagination } from '@tuquet/hooks';
+import { EmptyIcon, Grip, listIcons } from '@tuquet/icons';
+import { $t } from '@tuquet/locales';
 
 import {
   Button,
@@ -21,8 +21,8 @@ import {
   VbenIcon,
   VbenIconButton,
   VbenPopover,
-} from '@vben-core/shadcn-ui';
-import { isFunction } from '@vben-core/shared/utils';
+} from '@tuquet-core/shadcn-ui';
+import { isFunction } from '@tuquet-core/shared/utils';
 
 import { objectOmit, refDebounced, watchDebounced } from '@vueuse/core';
 

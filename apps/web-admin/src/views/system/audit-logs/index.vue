@@ -3,7 +3,7 @@ import type { GlobalAuditLogItem } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 
-import { usePreferences } from '@vben/preferences';
+import { usePreferences } from '@tuquet/preferences';
 
 import { RefreshCw, User } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';

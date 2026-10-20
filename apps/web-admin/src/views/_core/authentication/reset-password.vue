@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { $t } from '@vben/locales';
+import { $t } from '@tuquet/locales';
 
 import { Button, Input, Label, toast } from '@tuquet/vue-ui';
 

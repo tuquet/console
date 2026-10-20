@@ -1,6 +1,6 @@
-import { $t } from '@vben/locales';
-import { initPreferences, updatePreferences } from '@vben/preferences';
-import { unmountGlobalLoading } from '@vben/utils';
+import { $t } from '@tuquet/locales';
+import { initPreferences, updatePreferences } from '@tuquet/preferences';
+import { unmountGlobalLoading } from '@tuquet/utils';
 
 import {
   overridesPreferences,
@@ -73,7 +73,7 @@ async function initApplication() {
     const { bootstrap } = await import('./bootstrap');
     await bootstrap(namespace);
   } catch (error) {
-    console.error('[Specter Admin] Failed to initialize application:', error);
+    console.error('[Admin] Failed to initialize application:', error);
     try {
       captureError(error, { phase: 'application_bootstrap' });
     } catch {

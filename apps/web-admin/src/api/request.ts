@@ -1,17 +1,17 @@
 /**
  * Adjust this file according to specific business logic requirements
  */
-import type { RequestClientOptions } from '@vben/request';
+import type { RequestClientOptions } from '@tuquet/request';
 
-import { useAppConfig } from '@vben/hooks';
-import { preferences } from '@vben/preferences';
+import { useAppConfig } from '@tuquet/hooks';
+import { preferences } from '@tuquet/preferences';
 import {
   authenticateResponseInterceptor,
   defaultResponseInterceptor,
   errorMessageResponseInterceptor,
   RequestClient,
-} from '@vben/request';
-import { useAccessStore } from '@vben/stores';
+} from '@tuquet/request';
+import { useAccessStore } from '@tuquet/stores';
 
 import { toast } from '@tuquet/vue-ui';
 

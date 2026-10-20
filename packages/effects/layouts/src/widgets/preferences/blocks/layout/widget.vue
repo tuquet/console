@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { PreferencesButtonPositionType, SelectOption } from '@vben/types';
+import type { PreferencesButtonPositionType, SelectOption } from '@tuquet/types';
 
 import { computed } from 'vue';
 
-import { $t } from '@vben/locales';
+import { $t } from '@tuquet/locales';
 
 import DraggableList from '../draggable-list.vue';
 

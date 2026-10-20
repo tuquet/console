@@ -3,8 +3,8 @@ import type { ExtendedFormApi, VbenFormProps, VbenFormSlots } from './types';
 
 import { nextTick, onMounted, readonly, watch } from 'vue';
 
-import { useForwardPriorityValues } from '@vben-core/composables';
-import { get, isEqual } from '@vben-core/shared/utils';
+import { useForwardPriorityValues } from '@tuquet-core/composables';
+import { get, isEqual } from '@tuquet-core/shared/utils';
 
 import { useDebounceFn } from '@vueuse/core';
 

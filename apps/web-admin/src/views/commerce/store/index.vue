@@ -1122,7 +1122,7 @@ onBeforeUnmount(() => {
             />
           </div>
 
-          <!-- Other Deliverable Items (Specter Resource / Digital File / Wallet Credit) -->
+          <!-- Other Deliverable Items (Resource / Digital File / Wallet Credit) -->
           <div
             v-for="item in deliveredItems.filter(
               (d) => d.delivery_type !== 'serial_stock',

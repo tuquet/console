@@ -84,7 +84,7 @@ const logoSrc = computed(() => {
 });
 
 /**
- * Whether to render the inline theme-reactive Specter SVG logo
+ * Whether to render the inline theme-reactive SVG logo
  */
 const isBuiltinSpecterLogo = computed(() => {
   const s = logoSrc.value.trim();

@@ -2,16 +2,16 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { useContentMaximize, useTabs } from '@vben/hooks';
-import { preferences } from '@vben/preferences';
-import { useTabbarStore } from '@vben/stores';
+import { useContentMaximize, useTabs } from '@tuquet/hooks';
+import { preferences } from '@tuquet/preferences';
+import { useTabbarStore } from '@tuquet/stores';
 
 import {
   TabsToolMore,
   TabsToolRefresh,
   TabsToolScreen,
   TabsView,
-} from '@vben-core/tabs-ui';
+} from '@tuquet-core/tabs-ui';
 
 import { useTabbar } from './use-tabbar';
 

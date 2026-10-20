@@ -1,5 +1,5 @@
 {
-  "name": "@vben/commitlint-config",
+  "name": "@tuquet/commitlint-config",
   "version": "5.8.0",
   "private": true,
   "homepage": "https://github.com/tuquet/admin",
@@ -26,7 +26,7 @@
   "dependencies": {
     "@commitlint/cli": "catalog:",
     "@commitlint/config-conventional": "catalog:",
-    "@vben/node-utils": "workspace:*",
+    "@tuquet/node-utils": "workspace:*",
     "commitlint-plugin-function-rules": "catalog:",
     "cz-git": "catalog:",
     "czg": "catalog:"

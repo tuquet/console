@@ -4,9 +4,9 @@ import type {
   ComponentRecordType,
   GenerateMenuAndRoutesOptions,
   RouteRecordStringComponent,
-} from '@vben-core/typings';
+} from '@tuquet-core/typings';
 
-import { mapTree } from '@vben-core/shared/utils';
+import { mapTree } from '@tuquet-core/shared/utils';
 
 /**
  * Check if route is visible in menu but displays 403 upon access (letting user know feature exists and request permission)

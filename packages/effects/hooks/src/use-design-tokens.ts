@@ -1,7 +1,7 @@
 import { reactive, watch } from 'vue';
 
-import { preferences, usePreferences } from '@vben/preferences';
-import { convertToRgb, updateCSSVariables } from '@vben/utils';
+import { preferences, usePreferences } from '@tuquet/preferences';
+import { convertToRgb, updateCSSVariables } from '@tuquet/utils';
 
 /**
  * Adapt design systems across various component libraries

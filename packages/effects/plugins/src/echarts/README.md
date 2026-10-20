@@ -14,13 +14,13 @@ ECharts chart plugin with preset components and chart types.
 ## Usage
 
 ```ts
-import { EchartsUI, useEcharts, ECOption } from '@vben/plugins/echarts';
+import { EchartsUI, useEcharts, ECOption } from '@tuquet/plugins/echarts';
 ```
 
 ## Types
 
 ```ts
-import type { ECOption } from '@vben/plugins/echarts';
+import type { ECOption } from '@tuquet/plugins/echarts';
 ```
 
 ## Preset Components

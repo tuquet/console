@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import type { VbenFormSchema } from '@vben/common-ui';
-import type { Recordable } from '@vben/types';
+import type { VbenFormSchema } from '@tuquet/common-ui';
+import type { Recordable } from '@tuquet/types';
 
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
-import { AuthenticationLogin, z } from '@vben/common-ui';
-import { SvgGithubIcon } from '@vben/icons';
-import { $t } from '@vben/locales';
+import { AuthenticationLogin, z } from '@tuquet/common-ui';
+import { SvgGithubIcon } from '@tuquet/icons';
+import { $t } from '@tuquet/locales';
 
 import { Button } from '@tuquet/vue-ui';
 

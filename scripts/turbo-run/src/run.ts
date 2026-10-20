@@ -1,4 +1,4 @@
-import { execa, getPackages } from '@vben/node-utils';
+import { execa, getPackages } from '@tuquet/node-utils';
 
 import { cancel, isCancel, select } from '@clack/prompts';
 
@@ -15,7 +15,7 @@ export async function run(options: RunOptions) {
   const { packages } = await getPackages();
   // const appPkgs = await findApps(process.cwd(), packages);
   // const websitePkg = packages.find(
-  //   (item) => item.packageJson.name === '@vben/website',
+  //   (item) => item.packageJson.name === '@tuquet/website',
   // );
 
   // Only show packages that contain the corresponding command

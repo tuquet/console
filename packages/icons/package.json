@@ -1,5 +1,5 @@
 {
-  "name": "@vben/icons",
+  "name": "@tuquet/icons",
   "version": "5.8.0",
   "homepage": "https://github.com/tuquet/admin",
   "bugs": "https://github.com/tuquet/admin/issues",
@@ -17,6 +17,6 @@
     }
   },
   "dependencies": {
-    "@vben-core/icons": "workspace:*"
+    "@tuquet-core/icons": "workspace:*"
   }
 }

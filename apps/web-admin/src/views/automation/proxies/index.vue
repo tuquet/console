@@ -4,7 +4,7 @@ import type { FleetProxyItem } from '#/api';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { usePreferences } from '@vben/preferences';
+import { usePreferences } from '@tuquet/preferences';
 
 import { Activity, Copy, Network, Plus, RefreshCw } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';

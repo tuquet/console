@@ -1,12 +1,12 @@
 {
-  "name": "@vben-core/popup-ui",
+  "name": "@tuquet-core/popup-ui",
   "version": "5.8.0",
   "homepage": "https://github.com/tuquet/admin",
   "bugs": "https://github.com/tuquet/admin/issues",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tuquet/admin.git",
-    "directory": "packages/@vben-core/uikit/popup-ui"
+    "directory": "packages/@tuquet-core/uikit/popup-ui"
   },
   "license": "MIT",
   "type": "module",
@@ -40,12 +40,12 @@
     }
   },
   "dependencies": {
-    "@vben-core/composables": "workspace:*",
-    "@vben-core/icons": "workspace:*",
-    "@vben-core/preferences": "workspace:*",
-    "@vben-core/shadcn-ui": "workspace:*",
-    "@vben-core/shared": "workspace:*",
-    "@vben-core/typings": "workspace:*",
+    "@tuquet-core/composables": "workspace:*",
+    "@tuquet-core/icons": "workspace:*",
+    "@tuquet-core/preferences": "workspace:*",
+    "@tuquet-core/shadcn-ui": "workspace:*",
+    "@tuquet-core/shared": "workspace:*",
+    "@tuquet-core/typings": "workspace:*",
     "@vueuse/core": "catalog:",
     "vue": "catalog:"
   },

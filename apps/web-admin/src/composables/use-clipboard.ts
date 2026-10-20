@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 
-import { $t } from '@vben/locales';
+import { $t } from '@tuquet/locales';
 
 import { toast } from '@tuquet/vue-ui';
 

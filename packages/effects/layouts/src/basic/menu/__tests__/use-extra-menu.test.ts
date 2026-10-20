@@ -1,6 +1,6 @@
 import type { App } from 'vue';
 
-import type { MenuRecordRaw } from '@vben/types';
+import type { MenuRecordRaw } from '@tuquet/types';
 
 import { computed, createApp } from 'vue';
 
@@ -14,7 +14,7 @@ const mockPreferences = vi.hoisted(() => ({
   sidebar: { expandOnHover: true },
 }));
 
-vi.mock('@vben/preferences', () => ({
+vi.mock('@tuquet/preferences', () => ({
   preferences: mockPreferences,
 }));
 
@@ -30,7 +30,7 @@ vi.mock('vue-router', () => ({
   useRoute: () => routeHolder.current,
 }));
 
-vi.mock('@vben/stores', () => ({
+vi.mock('@tuquet/stores', () => ({
   useAccessStore: () => ({ accessMenus: [] }),
 }));
 

@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer';
 
-import { $t } from '@vben/locales';
+import { $t } from '@tuquet/locales';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -15,7 +15,7 @@ const mockAccessStore = {
   accessToken: '' as null | string,
 };
 
-vi.mock('@vben/stores', () => ({
+vi.mock('@tuquet/stores', () => ({
   useAccessStore: () => mockAccessStore,
 }));
 

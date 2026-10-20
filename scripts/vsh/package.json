@@ -1,5 +1,5 @@
 {
-  "name": "@vben/vsh",
+  "name": "@tuquet/vsh",
   "version": "5.8.0",
   "private": true,
   "license": "MIT",
@@ -22,7 +22,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@vben/node-utils": "workspace:*",
+    "@tuquet/node-utils": "workspace:*",
     "cac": "catalog:",
     "circular-dependency-scanner": "catalog:",
     "knip": "catalog:",

@@ -58,7 +58,7 @@ const customConfig: Linter.Config[] = [
     },
   },
   {
-    // @core internal components must not import packages from @vben/*
+    // @core internal components must not import packages from @tuquet/*
     files: ['packages/@core/**/**'],
     ignores: restrictedImportIgnores,
     rules: {
@@ -67,9 +67,9 @@ const customConfig: Linter.Config[] = [
         {
           patterns: [
             {
-              group: ['@vben/*'],
+              group: ['@tuquet/*'],
               message:
-                'The @core package cannot import the @vben package, please use the @core package itself',
+                'The @core package cannot import the @tuquet package, please use the @core package itself',
             },
           ],
         },
@@ -77,7 +77,7 @@ const customConfig: Linter.Config[] = [
     },
   },
   {
-    // @core/shared internal components must not import packages from @vben/* or @vben-core/*
+    // @core/shared internal components must not import packages from @tuquet/* or @tuquet-core/*
     files: ['packages/@core/base/**/**'],
     ignores: restrictedImportIgnores,
     rules: {
@@ -86,9 +86,9 @@ const customConfig: Linter.Config[] = [
         {
           patterns: [
             {
-              group: ['@vben/*', '@vben-core/*'],
+              group: ['@tuquet/*', '@tuquet-core/*'],
               message:
-                'The @vben-core/shared package cannot import the @vben package, please use the @core/shared package itself',
+                'The @tuquet-core/shared package cannot import the @tuquet package, please use the @core/shared package itself',
             },
           ],
         },
@@ -97,7 +97,7 @@ const customConfig: Linter.Config[] = [
   },
 
   {
-    // Must not import packages from @vben/*
+    // Must not import packages from @tuquet/*
     files: [
       'packages/types/**/**',
       'packages/utils/**/**',
@@ -115,9 +115,9 @@ const customConfig: Linter.Config[] = [
         {
           patterns: [
             {
-              group: ['@vben/*'],
+              group: ['@tuquet/*'],
               message:
-                'The @vben package cannot be imported, please use the @core package itself',
+                'The @tuquet package cannot be imported, please use the @core package itself',
             },
           ],
         },

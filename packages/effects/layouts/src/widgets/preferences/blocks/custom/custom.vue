@@ -2,11 +2,11 @@
 import type {
   CustomPreferencesField,
   CustomPreferencesRecord,
-} from '@vben/preferences';
+} from '@tuquet/preferences';
 
 import { computed } from 'vue';
 
-import { $t } from '@vben/locales';
+import { $t } from '@tuquet/locales';
 
 import InputItem from '../input-item.vue';
 import NumberFieldItem from '../number-field-item.vue';

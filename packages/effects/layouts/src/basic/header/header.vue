@@ -1,18 +1,18 @@
 <script lang="ts" setup>
 import { computed, useSlots } from 'vue';
 
-import { useRefresh } from '@vben/hooks';
-import { LockKeyhole, LogOut, RotateCw } from '@vben/icons';
-import { $t } from '@vben/locales';
-import { preferences, usePreferences } from '@vben/preferences';
-import { useAccessStore } from '@vben/stores';
+import { useRefresh } from '@tuquet/hooks';
+import { LockKeyhole, LogOut, RotateCw } from '@tuquet/icons';
+import { $t } from '@tuquet/locales';
+import { preferences, usePreferences } from '@tuquet/preferences';
+import { useAccessStore } from '@tuquet/stores';
 
-import { useVbenModal } from '@vben-core/popup-ui';
+import { useVbenModal } from '@tuquet-core/popup-ui';
 import {
   VbenFullScreen,
   VbenIconButton,
   VbenTooltip,
-} from '@vben-core/shadcn-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import { useMagicKeys, whenever } from '@vueuse/core';
 

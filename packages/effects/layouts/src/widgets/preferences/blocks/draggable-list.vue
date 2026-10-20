@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { SelectOption } from '@vben/types';
+import type { SelectOption } from '@tuquet/types';
 
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 
-import { GripVertical } from '@vben/icons';
-import { $t } from '@vben/locales';
+import { GripVertical } from '@tuquet/icons';
+import { $t } from '@tuquet/locales';
 
 import Sortable from 'sortablejs';
 

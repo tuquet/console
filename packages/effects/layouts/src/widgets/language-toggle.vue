@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import type { LanguageOption } from '@vben/constants';
-import type { SupportedLanguagesType } from '@vben/locales';
+import type { LanguageOption } from '@tuquet/constants';
+import type { SupportedLanguagesType } from '@tuquet/locales';
 
 import { onUnmounted, ref } from 'vue';
 
-import { onSupportLanguagesChange } from '@vben/constants';
-import { Languages } from '@vben/icons';
-import { loadLocaleMessages } from '@vben/locales';
-import { preferences, updatePreferences } from '@vben/preferences';
+import { onSupportLanguagesChange } from '@tuquet/constants';
+import { Languages } from '@tuquet/icons';
+import { loadLocaleMessages } from '@tuquet/locales';
+import { preferences, updatePreferences } from '@tuquet/preferences';
 
-import { VbenDropdownRadioMenu, VbenIconButton } from '@vben-core/shadcn-ui';
+import { VbenDropdownRadioMenu, VbenIconButton } from '@tuquet-core/shadcn-ui';
 
 defineOptions({
   name: 'LanguageToggle',

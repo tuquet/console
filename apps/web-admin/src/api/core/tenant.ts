@@ -1,6 +1,6 @@
-import type { TenantPlan, TenantStatus } from '@vben/constants';
+import type { TenantPlan, TenantStatus } from '@tuquet/constants';
 
-import { STORAGE_KEYS, TENANT_PLAN, TENANT_STATUS } from '@vben/constants';
+import { STORAGE_KEYS, TENANT_PLAN, TENANT_STATUS } from '@tuquet/constants';
 
 import { supabaseRequest } from './supabase-client';
 

@@ -185,7 +185,7 @@ export function initBugsink(
         'Failed to fetch dynamically imported module',
       ],
       beforeSend(event) {
-        // Tag events specifically as Specter Admin client
+        // Tag events specifically as Admin client
         event.tags = {
           ...event.tags,
           app: 'specter-admin',

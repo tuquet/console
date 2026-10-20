@@ -6,9 +6,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import LayoutSidebar from '../components/layout-sidebar.vue';
 
-vi.mock('@vben-core/composables', async (importOriginal) => {
+vi.mock('@tuquet-core/composables', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import('@vben-core/composables')>();
+    await importOriginal<typeof import('@tuquet-core/composables')>();
   return {
     ...actual,
     useScrollLock: () => computed({ get: () => false, set: () => {} }),

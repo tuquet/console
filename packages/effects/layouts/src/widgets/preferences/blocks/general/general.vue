@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type { LanguageOption } from '@vben/constants';
-import type { SupportedLanguagesType } from '@vben/locales';
+import type { LanguageOption } from '@tuquet/constants';
+import type { SupportedLanguagesType } from '@tuquet/locales';
 
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 
-import { onSupportLanguagesChange } from '@vben/constants';
-import { $t, loadLocaleMessages } from '@vben/locales';
-import { preferences, updatePreferences } from '@vben/preferences';
-import { useTimezoneStore } from '@vben/stores';
+import { onSupportLanguagesChange } from '@tuquet/constants';
+import { $t, loadLocaleMessages } from '@tuquet/locales';
+import { preferences, updatePreferences } from '@tuquet/preferences';
+import { useTimezoneStore } from '@tuquet/stores';
 
 import InputItem from '../input-item.vue';
 import SelectItem from '../select-item.vue';

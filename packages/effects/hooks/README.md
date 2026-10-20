@@ -1,6 +1,6 @@
-# @vben/hooks
+# @tuquet/hooks
 
-Shared hooks for multiple apps, inheriting all capabilities from `@vben/hooks`. Common business hooks can be placed here.
+Shared hooks for multiple apps, inheriting all capabilities from `@tuquet/hooks`. Common business hooks can be placed here.
 
 ## Usage
 
@@ -9,11 +9,11 @@ Shared hooks for multiple apps, inheriting all capabilities from `@vben/hooks`. 
 ```bash
 # Navigate to target app directory, e.g. apps/xxxx-app
 # cd apps/xxxx-app
-pnpm add @vben/hooks
+pnpm add @tuquet/hooks
 ```
 
 ### Usage
 
 ```ts
-import { useNamespace } from '@vben/hooks';
+import { useNamespace } from '@tuquet/hooks';
 ```

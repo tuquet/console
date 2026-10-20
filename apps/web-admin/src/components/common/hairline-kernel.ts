@@ -1,4 +1,4 @@
-/* hairline kernel - exported for Specter web-admin */
+/* hairline kernel - exported for web-admin */
 export interface HairlineCam {
   az: number;
   k: number;

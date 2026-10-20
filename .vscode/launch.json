@@ -13,7 +13,7 @@
     },
     {
       "type": "chrome",
-      "name": "Specter web dev",
+      "name": "web dev",
       "request": "launch",
       "url": "http://localhost:5666",
       "env": { "NODE_ENV": "development" },

@@ -5,9 +5,9 @@ import type { Extensions } from '@tiptap/vue-3';
 
 import type { ImageUploadOptions, VbenTiptapExtensionOptions } from './types';
 
-import { $t } from '@vben/locales';
+import { $t } from '@tuquet/locales';
 
-import { alert } from '@vben-core/popup-ui';
+import { alert } from '@tuquet-core/popup-ui';
 
 import Highlight from '@tiptap/extension-highlight';
 import Image from '@tiptap/extension-image';

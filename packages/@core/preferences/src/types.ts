@@ -15,7 +15,7 @@ import type {
   SupportedLanguagesType,
   TabsStyleType,
   ThemeModeType,
-} from '@vben-core/typings';
+} from '@tuquet-core/typings';
 
 type CustomPreferencesValue = boolean | number | string;
 

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, nextTick } from 'vue';
 
-import { VbenButton } from '@vben-core/shadcn-ui';
+import { VbenButton } from '@tuquet-core/shadcn-ui';
 
 interface Props {
   /**
@@ -119,7 +119,7 @@ function toggleTheme(event: MouseEvent) {
 </template>
 
 <style scoped>
-@reference "@vben/tailwind-config/theme";
+@reference "@tuquet/tailwind-config/theme";
 
 .theme-toggle__moon > circle {
   transition: transform 0.5s cubic-bezier(0, 0, 0.3, 1);

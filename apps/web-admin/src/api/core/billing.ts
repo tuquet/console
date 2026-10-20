@@ -3,7 +3,7 @@ import type {
   PaymentIntentStatusType,
   PaymentTargetType,
   WalletTxType,
-} from '@vben/constants';
+} from '@tuquet/constants';
 
 import {
   FILTER_ALL,
@@ -12,7 +12,7 @@ import {
   PAYMENT_TARGET_TYPE,
   SUPABASE_SCHEMA,
   WALLET_TX_TYPE,
-} from '@vben/constants';
+} from '@tuquet/constants';
 
 import { supabaseRequest } from './supabase-client';
 

@@ -22,7 +22,7 @@ const mockAccessStore = {
   }),
 };
 
-vi.mock('@vben/stores', () => ({
+vi.mock('@tuquet/stores', () => ({
   useAccessStore: () => mockAccessStore,
 }));
 

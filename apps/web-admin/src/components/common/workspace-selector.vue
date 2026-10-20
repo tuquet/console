@@ -4,7 +4,7 @@ import type { TenantItem } from '#/api/core/tenant';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { Popover, PopoverContent, PopoverTrigger } from '@vben-core/shadcn-ui';
+import { Popover, PopoverContent, PopoverTrigger } from '@tuquet-core/shadcn-ui';
 
 import {
   Building2,

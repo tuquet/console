@@ -1,6 +1,6 @@
-# @vben/styles
+# @tuquet/styles
 
-Shared style files for multiple apps, inheriting all capabilities from `@vben-core/design`. Common style files can be placed here.
+Shared style files for multiple apps, inheriting all capabilities from `@tuquet-core/design`. Common style files can be placed here.
 
 ## Usage
 
@@ -9,11 +9,11 @@ Shared style files for multiple apps, inheriting all capabilities from `@vben-co
 ```bash
 # Navigate to target app directory, e.g. apps/xxxx-app
 # cd apps/xxxx-app
-pnpm add @vben/styles
+pnpm add @tuquet/styles
 ```
 
 ### Usage
 
 ```ts
-import '@vben/styles';
+import '@tuquet/styles';
 ```

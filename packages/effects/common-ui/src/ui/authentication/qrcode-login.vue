@@ -2,9 +2,9 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { $t } from '@vben/locales';
+import { $t } from '@tuquet/locales';
 
-import { VbenButton } from '@vben-core/shadcn-ui';
+import { VbenButton } from '@tuquet-core/shadcn-ui';
 
 import { useQRCode } from '@vueuse/integrations/useQRCode';
 

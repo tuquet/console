@@ -2,8 +2,8 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { $t } from '@vben/locales';
-import { useUserStore } from '@vben/stores';
+import { $t } from '@tuquet/locales';
+import { useUserStore } from '@tuquet/stores';
 
 import {
   ArrowLeft,

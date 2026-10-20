@@ -1,6 +1,6 @@
-import type { FilterAll } from '@vben/constants';
+import type { FilterAll } from '@tuquet/constants';
 
-import { FILTER_ALL } from '@vben/constants';
+import { FILTER_ALL } from '@tuquet/constants';
 
 /**
  * Semantic Status Tone for Shadcn Slate Badges (Sentence case, never uppercase)

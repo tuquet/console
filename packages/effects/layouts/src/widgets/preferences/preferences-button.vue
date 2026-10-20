@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 
-import { Settings } from '@vben/icons';
+import { Settings } from '@tuquet/icons';
 
-import { VbenIconButton } from '@vben-core/shadcn-ui';
+import { VbenIconButton } from '@tuquet-core/shadcn-ui';
 
 import Preferences from './preferences.vue';
 

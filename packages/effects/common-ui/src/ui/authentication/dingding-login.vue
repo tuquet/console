@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
 
-import { SvgDingDingIcon } from '@vben/icons';
-import { $t } from '@vben/locales';
+import { SvgDingDingIcon } from '@tuquet/icons';
+import { $t } from '@tuquet/locales';
 
-import { alert, useVbenModal } from '@vben-core/popup-ui';
-import { VbenIconButton } from '@vben-core/shadcn-ui';
-import { loadScript } from '@vben-core/shared/utils';
+import { alert, useVbenModal } from '@tuquet-core/popup-ui';
+import { VbenIconButton } from '@tuquet-core/shadcn-ui';
+import { loadScript } from '@tuquet-core/shared/utils';
 
 interface Props {
   clientId: string;
