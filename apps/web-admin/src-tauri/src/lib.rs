@@ -92,5 +92,5 @@ pub fn run() {
             Ok(())
         })
         .run(tauri::generate_context!())
-        .expect("error while running tuquet admin tauri application");
+        .expect("error while running tq admin tauri application");
 }
