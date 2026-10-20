@@ -3,7 +3,7 @@
  * Placed here instead of inside index.html #app to avoid harsh flash when rendering quickly
  * Improves experience by adding CSS fade-out animation first, then removing loading node once animation finishes
  * Trade-off: slightly adds code complexity
- * Custom loading docs: https://doc.vben.pro/guide/in-depth/loading.html
+ * Custom loading docs
  */
 export function unmountGlobalLoading() {
   // Find global loading element

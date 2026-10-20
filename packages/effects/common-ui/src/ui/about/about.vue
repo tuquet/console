@@ -22,7 +22,7 @@ defineOptions({
 withDefaults(defineProps<Props>(), {
   description:
     'is a modern, ready-to-use mid-to-backend solution using Vue 3, Vite, Tailwind CSS, and TypeScript, featuring strict standards and rich configurations for enterprise applications.',
-  name: 'Vben Admin',
+  name: 'Tuquet Admin',
   title: 'About Project',
 });
 

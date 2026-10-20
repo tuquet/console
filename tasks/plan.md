@@ -4,7 +4,7 @@
 
 Thiết lập toàn bộ hạ tầng tự động hóa CI/CD và chuẩn hóa Public Repository cho **Tuquet Admin Console** (`admin.tuquet.com`) trên nền tảng GitHub Actions:
 
-- **Public Repository Readiness:** Dọn dẹp triệt để mã nguồn thừa từ upstream (`vbenjs/vue-vben-admin`), rà soát bảo mật không để lộ secrets, bổ sung `SECURITY.md`, xác nhận `LICENSE` MIT, đính kèm badges CI & Download links trên `README.md`.
+- **Public Repository Readiness:** Dọn dẹp triệt để mã nguồn thừa từ upstream (`tuquet/admin`), rà soát bảo mật không để lộ secrets, bổ sung `SECURITY.md`, xác nhận `LICENSE` MIT, đính kèm badges CI & Download links trên `README.md`.
 - **Continuous Integration (CI):** Pipeline kiểm định chất lượng đa tầng (`.github/workflows/ci.yml`) bắt buộc vượt qua 5 cổng kiểm tra: Lint & Format, Typecheck 38 packages, Vitest Suite (105 files), Headless Chrome Console Gate (22 routes), và Rust Backend `cargo check`.
 - **Continuous Deployment (CD Release):** Pipeline phát hành tự động (`.github/workflows/release.yml`) kích hoạt khi push tag `v*.*.*` hoặc `workflow_dispatch`: Chạy trên runner `windows-latest`, đóng gói bộ cài đặt Windows NSIS `.exe` và `.msi`, ký số điện tử Ed25519, upload trực tiếp lên GitHub Releases cùng manifest cập nhật OTA `latest.json`.
 
@@ -53,6 +53,6 @@ Phase 3: Automated CD Desktop Release on Tag
 
 ## 5. Checkpoints & Verification Gates
 
-- **Checkpoint 1 (Public Repo):** Quét toàn bộ repository không còn tham chiếu nào tới `vbenjs/vue-vben-admin`. File `SECURITY.md` và `README.md` hiển thị đầy đủ link tải `.exe`.
+- **Checkpoint 1 (Public Repo):** Quét toàn bộ repository không còn tham chiếu nào tới upstream cũ. File `SECURITY.md` và `README.md` hiển thị đầy đủ link tải `.exe`.
 - **Checkpoint 2 (CI Pipeline):** File `.github/workflows/ci.yml` vượt qua kiểm tra cú pháp actionlint; các câu lệnh trong CI khớp 100% với 5 Quality Gates local.
 - **Checkpoint 3 (CD Release):** File `.github/workflows/release.yml` sẵn sàng kích hoạt với tag `v*.*.*`, đầy đủ biến môi trường và bước build Windows desktop.

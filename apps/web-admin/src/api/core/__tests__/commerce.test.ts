@@ -335,7 +335,7 @@ describe('commerce core api (digital-commerce)', () => {
           category_id: 'cat-proxy',
           id: 'p-2',
           name: 'Proxy Dan Cu VN',
-          product_type: 'specter_resource',
+          product_type: 'tuquet_resource',
           slug: 'proxy-vn',
           variants: [
             {
@@ -351,7 +351,7 @@ describe('commerce core api (digital-commerce)', () => {
       ];
 
       expect(
-        filterCommerceProducts(products, { product_type: 'specter_resource' }),
+        filterCommerceProducts(products, { product_type: 'tuquet_resource' }),
       ).toHaveLength(1);
       expect(
         filterCommerceProducts(products, { search: 'PRX-VN-10' }),

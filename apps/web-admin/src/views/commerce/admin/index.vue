@@ -205,7 +205,7 @@ const [ProductsGrid, productsGridApi] = useVbenVxeGrid<CommerceProductItem>({
               value: COMMERCE_PRODUCT_TYPE.SERIAL_STOCK,
             },
             {
-              label: $t('page.commerce_view.type_specter_resource_code'),
+              label: $t('page.commerce_view.type_tuquet_resource_code'),
               value: COMMERCE_PRODUCT_TYPE.SPECTER_RESOURCE,
             },
             {
@@ -1203,8 +1203,8 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
                 <SelectItem value="serial_stock">
                   {{ $t('page.commerce_view.opt_serial_stock') }}
                 </SelectItem>
-                <SelectItem value="specter_resource">
-                  {{ $t('page.commerce_view.opt_specter_resource') }}
+                <SelectItem value="tuquet_resource">
+                  {{ $t('page.commerce_view.opt_tuquet_resource') }}
                 </SelectItem>
                 <SelectItem value="digital_file">
                   {{ $t('page.commerce_view.opt_digital_file') }}

@@ -125,7 +125,7 @@ export function saveGuestOrderLocal(
   - Lưu trữ `claim_token` vào `localStorage` ngay tại thời điểm tạo đơn thành công trước khi hiển thị mã QR thanh toán.
   - Chỉ cho phép Guest Checkout đặt mua các sản phẩm có `visibility === 'public'` và `product_type IN ('serial_stock', 'digital_file')`.
 - **Ask first (Hỏi trước khi thực hiện):**
-  - Cho phép khách vãng lai mua các loại tài nguyên gắn chặt với định danh Tenant (`specter_resource` hoặc `wallet_credit`).
+  - Cho phép khách vãng lai mua các loại tài nguyên gắn chặt với định danh Tenant (`tuquet_resource` hoặc `wallet_credit`).
 - **Never do (Tuyệt đối cấm):**
   - Không bao giờ cho phép khách vãng lai sử dụng phương thức `internal_wallet` (Ví Xu nội bộ chỉ dành cho Tenant đã xác thực).
   - Không bao giờ lưu trữ thông tin thẻ tín dụng hoặc khóa bí mật thanh toán trong `localStorage`.

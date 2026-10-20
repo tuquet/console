@@ -4,7 +4,7 @@
 export const COMMERCE_PRODUCT_TYPE = {
   DIGITAL_FILE: 'digital_file',
   SERIAL_STOCK: 'serial_stock',
-  SPECTER_RESOURCE: 'specter_resource',
+  SPECTER_RESOURCE: 'tuquet_resource',
   WALLET_CREDIT: 'wallet_credit',
 } as const;
 

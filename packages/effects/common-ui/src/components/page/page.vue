@@ -28,7 +28,7 @@ const contentStyle = computed<StyleValue>(() => {
     // Size containment prevents the inner content's min-content height from
     // feeding back into the outer flex layout, which would clamp the content
     // region taller than the available space and push the layout footer below
-    // the viewport (see https://github.com/vbenjs/vue-vben-admin/issues/5677).
+    // the viewport (upstream issue #5677).
     contain: 'size',
     marginBlockEnd: 'var(--page-content-height-offset)',
   };

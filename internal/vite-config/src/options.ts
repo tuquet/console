@@ -7,7 +7,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 const getDefaultPwaOptions = (name: string): Partial<PwaPluginOptions> => ({
   manifest: {
     description:
-      'Vben Admin is a modern admin dashboard template based on Vue 3. ',
+      'Tuquet Admin is the unified administration portal for Tuquet Platform.',
     icons: [
       {
         sizes: '192x192',

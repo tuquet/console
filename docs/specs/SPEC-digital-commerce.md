@@ -15,7 +15,7 @@ Xây dựng phân hệ thương mại sản phẩm số đa năng (`schema: comm
 1. **Tài khoản / License Key / Serial Text (`serial_stock`):**
    - Quản trị kho hàng dạng dòng văn bản (`uid|pass|2fa|recovery_mail`, mã kích hoạt phần mềm, voucher).
    - **Chống bán trùng tuyệt đối (Zero Double-Selling):** Sử dụng khóa dòng `FOR UPDATE SKIP LOCKED` để tạm giữ (`reserved`) khi tạo đơn và xuất kho (`sold`) nguyên tử ngay khi thanh toán thành công.
-2. **Tài nguyên Hệ sinh thái Specter (`specter_resource`):**
+2. **Tài nguyên Hệ sinh thái Specter (`tuquet_resource`):**
    - Tự động cấp phát tài nguyên thẳng vào Workspace (`buyer_tenant_id`) của người mua ngay khi đơn hàng hoàn tất:
      - `proxy_pool`: Xuất proxy từ kho và nạp thẳng vào bảng `runners.proxies` của Tenant.
      - `automa_workflow`: Nhân bản (clone) kịch bản tự động hóa mẫu vào bảng `automa.workflows` của Tenant.
@@ -108,7 +108,7 @@ sequenceDiagram
 ### 5.2. Mô Hình Dữ Liệu (`schema: commerce`)
 
 - **Kiểu liệt kê (`ENUM`):**
-  - `commerce.product_type`: `'serial_stock'`, `'specter_resource'`, `'digital_file'`, `'wallet_credit'`
+  - `commerce.product_type`: `'serial_stock'`, `'tuquet_resource'`, `'digital_file'`, `'wallet_credit'`
   - `commerce.stock_status`: `'available'`, `'reserved'`, `'sold'`, `'defective'`
   - `commerce.order_status`: `'pending_payment'`, `'paid'`, `'fulfilling'`, `'completed'`, `'manual_review'`, `'failed'`, `'cancelled'`, `'refunded'`
 - **7 Bảng dữ liệu cốt lõi:**
@@ -125,7 +125,7 @@ sequenceDiagram
 1. **`commerce.import_stock_batch(_variant_id UUID, _lines TEXT[], _batch_code VARCHAR)`:** Dành riêng cho `public.is_platform_admin()`, lọc bỏ dòng trống, chèn vào `commerce.stock_items` với `ON CONFLICT (variant_id, secret_payload) DO NOTHING` và đồng bộ `available_stock`.
 2. **`commerce.release_expired_reservations(_variant_id UUID DEFAULT NULL)`:** Giải phóng các dòng `reserved` đã quá hạn (`reserved_until < now()`) về lại `'available'` và hủy các đơn `pending_payment` quá hạn.
 3. **`commerce.create_checkout_order(...)`:** Kiểm tra quyền mua (Tenant hoặc Guest Checkout với `visibility = 'public'`), khóa tồn kho bằng `FOR UPDATE SKIP LOCKED`, trừ Ví Xu tức thì (nếu `internal_wallet`) hoặc khởi tạo `billing.payment_intents` kèm `claim_token` bảo mật (nếu Guest).
-4. **`commerce.fulfill_order(_order_id UUID)`:** Thực thi bàn giao idempotent cho từng loại sản phẩm (`serial_stock`, `specter_resource`, `digital_file`, `wallet_credit`) và cập nhật `orders.status = 'completed'`.
+4. **`commerce.fulfill_order(_order_id UUID)`:** Thực thi bàn giao idempotent cho từng loại sản phẩm (`serial_stock`, `tuquet_resource`, `digital_file`, `wallet_credit`) và cập nhật `orders.status = 'completed'`.
 5. **Trigger `trg_commerce_on_payment_intent_settled`:** Lắng nghe bảng `billing.payment_intents`; tự động gọi `commerce.fulfill_order()` ngay khi lệnh thanh toán chuyển sang `'succeeded'` hoặc đánh dấu đơn hàng `'manual_review'` khi lệnh thanh toán bị giữ lại.
 6. **`commerce.get_guest_order_deliveries(_order_code VARCHAR, _claim_token VARCHAR)`:** Cho phép khách vãng lai (`anon` / `authenticated`) tra cứu trạng thái đơn và nhận tài nguyên bàn giao thông qua mã băm SHA-256 của `_claim_token`.
 
@@ -135,7 +135,7 @@ sequenceDiagram
 
 1. **Kiểm thử SQL & Chống bán trùng (`08_verify_commerce_plugin.sql`):**
    - Xác minh toàn bộ 7 bảng trong `schema: commerce` bật RLS 100% và cô lập tuyệt đối bảng `commerce.stock_items` (chỉ Platform Admin được phép truy cập trực tiếp).
-   - Xác minh luồng mua `serial_stock`, `specter_resource` (`automa_workflow`, `proxy_pool`, `plan_upgrade`), `digital_file`, và `wallet_credit` hoạt động chính xác, không xuất trùng phôi hàng.
+   - Xác minh luồng mua `serial_stock`, `tuquet_resource` (`automa_workflow`, `proxy_pool`, `plan_upgrade`), `digital_file`, và `wallet_credit` hoạt động chính xác, không xuất trùng phôi hàng.
 2. **Kiểm thử Typed Client API (`apps/web-admin/src/api/core/__tests__/commerce.test.ts`):**
    - Kiểm thử các hàm `getCommerceCategoriesApi`, `getCommerceProductsApi`, `getCommerceOrdersApi`, `getOrderDeliveriesApi`, `createCheckoutOrderApi`, `getGuestOrderDeliveriesApi`, `importStockBatchAdminApi`, `fulfillOrderAdminApi`, cùng các hàm lọc `filterCommerceProducts` và `filterCommerceOrders`.
 
@@ -148,7 +148,7 @@ sequenceDiagram
   - Cô lập tuyệt đối `commerce.stock_items`: người mua chỉ nhận dữ liệu đã xuất kho thông qua `commerce.order_deliveries` khi đơn hàng đạt trạng thái `'completed'`.
   - Sử dụng khóa dòng `FOR UPDATE SKIP LOCKED` khi giữ hàng hoặc xuất kho.
 - **Ask first (Hỏi trước khi thực hiện):**
-  - Bổ sung loại sản phẩm mới ngoài 4 loại chuẩn (`serial_stock`, `specter_resource`, `digital_file`, `wallet_credit`).
+  - Bổ sung loại sản phẩm mới ngoài 4 loại chuẩn (`serial_stock`, `tuquet_resource`, `digital_file`, `wallet_credit`).
 - **Never do (Tuyệt đối cấm):**
   - Không bao giờ trả về cột `secret_payload` của `commerce.stock_items` khi đơn hàng chưa hoàn tất thanh toán (`status != 'completed'`).
   - Không bao giờ trừ tồn kho bằng câu lệnh `SELECT` rồi `UPDATE` tách rời ngoài khóa giao dịch.
@@ -159,12 +159,12 @@ sequenceDiagram
 
 - [x] Plugin `cloud/supabase/plugins/commerce/` cài đặt sạch 7 bảng, các hàm RPC nguyên tử và trigger liên kết `billing.payment_intents`.
 - [x] Chống bán trùng 100% (`FOR UPDATE SKIP LOCKED` + `UNIQUE (variant_id, secret_payload)`).
-- [x] Tự động cấp phát tài nguyên `specter_resource` trực tiếp vào `automa.workflows`, `runners.proxies`, và `billing.subscriptions` của Tenant mua hàng.
+- [x] Tự động cấp phát tài nguyên `tuquet_resource` trực tiếp vào `automa.workflows`, `runners.proxies`, và `billing.subscriptions` của Tenant mua hàng.
 - [x] Lớp API `apps/web-admin/src/api/core/commerce.ts` và bộ kiểm thử `commerce.test.ts` vượt qua 100% bài test với `0` lỗi TypeScript/oxlint.
 
 ---
 
 ## 9. Resolved Decisions
 
-1. **Tự động cấp phát xuyên Schema (Cross-Schema Auto-Fulfillment):** Khi người mua đặt gói `specter_resource`, hàm `commerce.fulfill_order` thực thi cấp phát trực tiếp trong cùng giao dịch PostgreSQL vào `runners.proxies`, `automa.workflows`, hoặc `billing.subscriptions` mà không cần worker trung gian bên ngoài.
+1. **Tự động cấp phát xuyên Schema (Cross-Schema Auto-Fulfillment):** Khi người mua đặt gói `tuquet_resource`, hàm `commerce.fulfill_order` thực thi cấp phát trực tiếp trong cùng giao dịch PostgreSQL vào `runners.proxies`, `automa.workflows`, hoặc `billing.subscriptions` mà không cần worker trung gian bên ngoài.
 2. **Cơ chế Giữ hàng Tạm thời (`reserved_until` 15 phút):** Đối với các kênh thanh toán ngoại vi (VietQR, MoMo, Stripe, USDT), phôi hàng được giữ chỗ trong 15 phút và tự động giải phóng về `'available'` thông qua `commerce.release_expired_reservations` nếu người mua không hoàn tất thanh toán.

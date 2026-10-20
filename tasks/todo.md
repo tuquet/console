@@ -2,15 +2,15 @@
 
 ## Phase 1: Public Repo Sanitization & OSS Compliance
 
-### Task 1.1: Quét & Loại Bỏ Triệt Để Các Tham Chiếu Upstream Cũ (`vbenjs/vue-vben-admin`)
+### Task 1.1: Quét & Loại Bỏ Triệt Để Các Tham Chiếu Upstream Cũ (`tuquet/admin`)
 
-**Description:** Rà soát toàn bộ thư mục `.github/` (các workflows, issue templates, dependabot, semantic, release-drafter) và thay thế toàn bộ chuỗi repo cũ `vbenjs/vue-vben-admin` thành định danh chính thức `tuquet/admin`.  
+**Description:** Rà soát toàn bộ thư mục `.github/` (các workflows, issue templates, dependabot, semantic, release-drafter) và thay thế toàn bộ chuỗi repo cũ `tuquet/admin` thành định danh chính thức `tuquet/admin`.  
 **Acceptance criteria:**
 
-- [x] Không còn bất kỳ file nào trong `.github/` chứa chuỗi `vbenjs/vue-vben-admin`.
+- [x] Không còn bất kỳ file nào trong `.github/` chứa chuỗi `tuquet/admin`.
 - [x] File `.github/workflows/release-tag.yml`, `dependabot.yml`, `config.yml`, `ISSUE_TEMPLATE/*` đều cập nhật chính xác.  
       **Verification:**
-- [x] Command check: `git grep "vbenjs/vue-vben-admin" .github/` trả về kết quả rỗng (exit code 1).  
+- [x] Command check: `git grep "tuquet/admin" .github/` trả về kết quả rỗng (exit code 1).  
       **Dependencies:** None  
       **Files touched:**
 - `.github/CODEOWNERS`

@@ -37,7 +37,7 @@ pnpm test:unit packages/@core/preferences/__tests__/preferences.test.ts
 # 4. Biên dịch và nạp trực tiếp vào Nginx trên Tailscale (Không push git)
 pnpm run build:local
 
-# 5. So sánh diff với code gốc Upstream (vbenjs/vue-vben-admin)
+# 5. So sánh diff với code gốc Tuquet Admin
 git diff upstream/main HEAD -- <đường_dẫn_tệp>
 
 # 6. Kiểm tra phản hồi header từ Nginx cục bộ

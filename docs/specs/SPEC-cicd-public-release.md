@@ -4,7 +4,7 @@
 
 | Module ID | Responsibility | Depends on |
 | --- | --- | --- |
-| `public-repo` | Chuẩn hóa repo Public: Loại bỏ triệt để reference upstream cũ (`vbenjs/vue-vben-admin`), rà soát chống rò rỉ secrets, cập nhật `SECURITY.md`, `LICENSE`, badges và release instructions. | — |
+| `public-repo` | Chuẩn hóa repo Public: Loại bỏ triệt để reference upstream cũ (`tuquet/admin`), rà soát chống rò rỉ secrets, cập nhật `SECURITY.md`, `LICENSE`, badges và release instructions. | — |
 | `ci-pipeline` | Tự động hóa Quality Gate trên GitHub Actions (PR & Push `main`): Lint, Typecheck, Unit Test, Headless Console Gate, và Rust Backend `cargo check`. | `public-repo` |
 | `cd-release` | Tự động hóa đóng gói phát hành Windows Desktop App (Tauri v2) khi push tag (`v*.*.*`): Build NSIS `.exe` & MSI, ký số OTA với Ed25519, upload artifacts & `latest.json` lên GitHub Releases. | `ci-pipeline` |
 
@@ -92,7 +92,7 @@ README.md                      # Bổ sung Badges trạng thái CI & Release Dow
 ### 7.1. Module `public-repo`: Dọn Dẹp & Vệ Sinh Repo
 
 1. **Thay thế định danh repo cũ:**
-   - Quét và thay thế toàn bộ chuỗi `vbenjs/vue-vben-admin` thành `tuquet/admin` trong `.github/workflows/`, `.github/config.yml`, `.github/dependabot.yml`, và `.github/release-drafter.yml`.
+   - Quét và thay thế toàn bộ chuỗi `tuquet/admin` thành `tuquet/admin` trong `.github/workflows/`, `.github/config.yml`, `.github/dependabot.yml`, và `.github/release-drafter.yml`.
 2. **Bảo mật & Open Source Hygiene:**
    - Tạo file `SECURITY.md` định rõ địa chỉ nhận thông báo lỗ hổng (`security@tuquet.com`) và phạm vi hỗ trợ phiên bản.
    - Xác nhận file `LICENSE` chuẩn MIT License mang tên sở hữu `Tuquet Team`.
@@ -167,7 +167,7 @@ Các bước chi tiết trên runner `windows-latest`:
 
 ## 9. Success Criteria (Tiêu Chí Nghiệm Thu)
 
-1. **Repo Sanitization Clean:** Không còn bất kỳ file workflow hay template nào tham chiếu tới `vbenjs/vue-vben-admin`.
+1. **Repo Sanitization Clean:** Không còn bất kỳ file workflow hay template nào tham chiếu tới `tuquet/admin`.
 2. **OSS Compliance:** Đầy đủ file `LICENSE` (MIT) và `SECURITY.md`.
 3. **CI Pipeline Validation:** File `.github/workflows/ci.yml` chuẩn cú pháp GitHub Actions, bao gồm cả gate `tauri:check` và `check:console`.
 4. **CD Release Workflow Ready:** File `.github/workflows/release.yml` sẵn sàng biên dịch trên Windows runner, tích hợp `tauri-action`, tự động tạo GitHub Release và đính kèm file cài đặt `.exe`, `.msi`, cùng `latest.json` khi push tag `v*.*.*`.

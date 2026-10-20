@@ -164,8 +164,8 @@ function getProductTypeLabel(type: CommerceProductType): string {
   if (type === 'digital_file') {
     return $t('page.commerce_view.type_digital_file');
   }
-  if (type === 'specter_resource') {
-    return $t('page.commerce_view.type_specter_resource_workspace');
+  if (type === 'tuquet_resource') {
+    return $t('page.commerce_view.type_tuquet_resource_workspace');
   }
   return $t('page.commerce_view.type_wallet_credit_workspace');
 }

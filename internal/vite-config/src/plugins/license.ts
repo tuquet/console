@@ -24,7 +24,7 @@ async function viteLicensePlugin(
       handler(_options, bundle) {
         const date = dateUtil().format('YYYY-MM-DD ');
         const copyrightText = `/*!
-  * Vben Admin
+  * Tuquet Admin
   * Version: ${version}
   * Author: vben
   * Copyright (C) 2024 Vben
@@ -32,7 +32,7 @@ async function viteLicensePlugin(
   * Description: ${description}
   * Date Created: ${date}
   * Homepage: ${homepage}
-  * Contact: ann.vben@gmail.com
+  * Contact: dev@tuquet.com
 */
               `.trim();
 

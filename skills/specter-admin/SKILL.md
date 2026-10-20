@@ -374,7 +374,7 @@ pnpm run build:local
 
 ## 9. Upstream Tracking & Triage
 
-Tracked against `vbenjs/vue-vben-admin` (`upstream/main`):
+Tuquet Admin repository baseline:
 
 ```bash
 # Check diff against upstream for a specific component:
