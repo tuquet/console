@@ -34,7 +34,7 @@ if (typeof window !== 'undefined') {
       // Fail-safe
     }
 
-    const lastReloadKey = 'specter:last_preload_reload';
+    const lastReloadKey = 'tq:last_preload_reload';
     const lastReload = sessionStorage.getItem(lastReloadKey);
     const now = Date.now();
     if (!lastReload || now - Number(lastReload) > 10_000) {

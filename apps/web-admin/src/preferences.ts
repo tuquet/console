@@ -13,7 +13,7 @@ export const overridesPreferences = defineOverridesPreferences({
     enableRefreshToken: true,
     locale: 'en-US',
     loginExpiredMode: 'modal',
-    name: 'Specter',
+    name: 'Tuquet',
     preferencesButtonPosition: 'header',
     authPageLayout: 'panel-right',
   },

@@ -17,7 +17,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const resolvedLabel = computed(
-  () => props.label || $t('common.specterCliCommand'),
+  () => props.label || $t('common.tqCliCommand'),
 );
 const resolvedCopiedLabel = computed(
   () => props.copiedLabel || $t('common.cliCommand'),

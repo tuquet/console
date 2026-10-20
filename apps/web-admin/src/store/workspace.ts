@@ -73,7 +73,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
 
     if (typeof window !== 'undefined') {
       window.dispatchEvent(
-        new CustomEvent('specter:workspace-changed', {
+        new CustomEvent('tq:workspace-changed', {
           detail: { tenantId: id, tenant: target },
         }),
       );

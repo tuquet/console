@@ -188,7 +188,7 @@ export function initBugsink(
         // Tag events specifically as Admin client
         event.tags = {
           ...event.tags,
-          app: 'specter-admin',
+          app: 'tuquet-admin',
         };
 
         // Redact any sensitive tokens from URL
@@ -240,7 +240,7 @@ export function initBugsink(
     }
 
     if (typeof window !== 'undefined') {
-      window.addEventListener('specter:workspace-changed', ((
+      window.addEventListener('tq:workspace-changed', ((
         event: CustomEvent<{ tenantId?: string }>,
       ) => {
         if (event.detail?.tenantId) {
