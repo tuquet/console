@@ -139,6 +139,7 @@ export interface CommerceOrderRecord {
   buyer_user_id: null | string;
   cancelled_at: null | string;
   created_at: string;
+  deliveries?: CommerceOrderDeliveryItem[];
   discount_credits: number;
   fulfilled_at: null | string;
   id: string;
@@ -193,6 +194,26 @@ export interface GuestOrderLookupResult {
   deliveries: CommerceOrderDeliveryItem[];
   items: CommerceOrderItem[];
   order: CommerceOrderRecord;
+}
+
+export interface ClaimOrderWarrantyResult {
+  claimed_at: string;
+  delivery_id: string;
+  new_wallet_balance: null | number;
+  order_code: string;
+  order_id: string;
+  refund_amount_credits: number;
+  stock_item_id: null | string;
+  success: boolean;
+}
+
+export interface AdminInspectStockItemResult {
+  health_status: string;
+  inspected_at: string;
+  status: CommerceStockStatus;
+  stock_id: string;
+  success: boolean;
+  variant_id: string;
 }
 
 export function mapRawCommerceCategory(raw: any): CommerceCategoryItem {
@@ -613,6 +634,28 @@ export async function getAllOrdersAdminApi(
   return Array.isArray(rows) ? rows.map((row) => mapRawCommerceOrder(row)) : [];
 }
 
+export function mapRawStockItem(raw: any): CommerceStockItem {
+  return {
+    batch_code: raw?.batch_code ? String(raw.batch_code) : null,
+    created_at: String(raw?.created_at || ''),
+    id: String(raw?.id || ''),
+    metadata:
+      raw?.metadata && typeof raw.metadata === 'object' ? raw.metadata : {},
+    order_item_id: raw?.order_item_id ? String(raw.order_item_id) : null,
+    public_hint: raw?.public_hint ? String(raw.public_hint) : null,
+    reserved_until: raw?.reserved_until ? String(raw.reserved_until) : null,
+    secret_payload: String(raw?.secret_payload || ''),
+    sold_at: raw?.sold_at ? String(raw.sold_at) : null,
+    sold_to_tenant_id: raw?.sold_to_tenant_id
+      ? String(raw.sold_to_tenant_id)
+      : null,
+    status: (raw?.status ||
+      COMMERCE_STOCK_STATUS.AVAILABLE) as CommerceStockStatus,
+    updated_at: String(raw?.updated_at || ''),
+    variant_id: String(raw?.variant_id || ''),
+  };
+}
+
 /**
  * [Platform Admin] Manually trigger or retry atomic fulfillment for an order.
  */
@@ -640,6 +683,104 @@ export async function fulfillOrderAdminApi(orderId: string): Promise<{
     order_code: String(res?.order_code || ''),
     order_id: String(res?.order_id || orderId),
   };
+}
+
+/**
+ * [Buyer/Tenant/Admin] Submit a warranty claim for a delivered item (within warranty period) with automatic Xu refund.
+ */
+export async function claimOrderWarrantyApi(params: {
+  delivery_id: string;
+  order_id: string;
+  reason?: string;
+}): Promise<ClaimOrderWarrantyResult> {
+  const res = await supabaseRequest<any>('/rest/v1/rpc/claim_order_warranty', {
+    body: JSON.stringify({
+      _delivery_id: params.delivery_id,
+      _order_id: params.order_id,
+      _reason: params.reason ?? 'Item defective/dead upon delivery',
+    }),
+    method: 'POST',
+    schema: 'commerce',
+  });
+
+  return {
+    claimed_at: String(res?.claimed_at || new Date().toISOString()),
+    delivery_id: String(res?.delivery_id || params.delivery_id),
+    new_wallet_balance:
+      res?.new_wallet_balance === null || res?.new_wallet_balance === undefined
+        ? null
+        : Math.trunc(Number(res.new_wallet_balance)),
+    order_code: String(res?.order_code || ''),
+    order_id: String(res?.order_id || params.order_id),
+    refund_amount_credits: Math.trunc(Number(res?.refund_amount_credits ?? 0)),
+    stock_item_id: res?.stock_item_id ? String(res.stock_item_id) : null,
+    success: Boolean(res?.success),
+  };
+}
+
+/**
+ * [Platform Admin] Live stock health inspection & defect marker / recovery switcher.
+ */
+export async function adminInspectStockItemApi(params: {
+  is_healthy: boolean;
+  notes?: string;
+  stock_id: string;
+}): Promise<AdminInspectStockItemResult> {
+  const res = await supabaseRequest<any>(
+    '/rest/v1/rpc/admin_inspect_stock_item',
+    {
+      body: JSON.stringify({
+        _is_healthy: params.is_healthy,
+        _notes: params.notes ?? null,
+        _stock_id: params.stock_id,
+      }),
+      method: 'POST',
+      schema: 'commerce',
+    },
+  );
+
+  return {
+    health_status: String(
+      res?.health_status || (params.is_healthy ? 'healthy' : 'defective'),
+    ),
+    inspected_at: String(res?.inspected_at || new Date().toISOString()),
+    status: (res?.status ||
+      (params.is_healthy
+        ? COMMERCE_STOCK_STATUS.AVAILABLE
+        : COMMERCE_STOCK_STATUS.DEFECTIVE)) as CommerceStockStatus,
+    stock_id: String(res?.stock_id || params.stock_id),
+    success: Boolean(res?.success),
+    variant_id: String(res?.variant_id || ''),
+  };
+}
+
+/**
+ * [Platform Admin] Fetch serialized stock items for inspection & health checks.
+ */
+export async function getStockItemsAdminApi(params?: {
+  limit?: number;
+  status?: CommerceStockStatus;
+  variant_id?: string;
+}): Promise<CommerceStockItem[]> {
+  const queryParts: string[] = ['select=*', 'order=created_at.desc'];
+  if (params?.variant_id) {
+    queryParts.push(`variant_id=eq.${encodeURIComponent(params.variant_id)}`);
+  }
+  if (params?.status) {
+    queryParts.push(`status=eq.${encodeURIComponent(params.status)}`);
+  }
+  const limit = params?.limit ?? 100;
+  queryParts.push(`limit=${limit}`);
+
+  const rows = await supabaseRequest<any[]>(
+    `/rest/v1/stock_items?${queryParts.join('&')}`,
+    {
+      method: 'GET',
+      schema: 'commerce',
+    },
+  );
+
+  return Array.isArray(rows) ? rows.map((r) => mapRawStockItem(r)) : [];
 }
 
 /**
@@ -786,6 +927,22 @@ export function isVariantInStock(
   if (!variant || !variant.is_active) return false;
   if (variant.stock_mode === 'unlimited') return true;
   return variant.available_stock > 0;
+}
+
+/**
+ * Pure helper: Evaluate whether a delivered item is still eligible for a warranty claim.
+ */
+export function isDeliveryEligibleForWarranty(
+  delivery: CommerceOrderDeliveryItem | null | undefined,
+  warrantyHours = 24,
+): boolean {
+  if (!delivery?.created_at || delivery.delivered_payload?.warranty_claimed)
+    return false;
+  const deliveredAt = new Date(delivery.created_at).getTime();
+  return (
+    !Number.isNaN(deliveredAt) &&
+    Date.now() <= deliveredAt + warrantyHours * 36e5
+  );
 }
 
 /**

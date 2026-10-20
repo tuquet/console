@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  adminInspectStockItemApi,
+  claimOrderWarrantyApi,
   createCheckoutOrderApi,
   fulfillOrderAdminApi,
   getCommerceCategoriesApi,
   getCommerceProductsApi,
   getGuestOrderDeliveriesApi,
+  getStockItemsAdminApi,
   importStockBatchAdminApi,
   mapRawCommerceOrder,
   mapRawCommerceProduct,
@@ -465,6 +468,156 @@ describe('commerce core api (digital-commerce)', () => {
       ]);
 
       expect(text).toBe('UID1|PASS1|2FA1');
+    });
+  });
+
+  describe('claimOrderWarrantyApi, adminInspectStockItemApi & getStockItemsAdminApi', () => {
+    it('calls claim_order_warranty RPC and maps refund and wallet balance', async () => {
+      vi.mocked(supabaseRequest).mockResolvedValueOnce({
+        claimed_at: '2026-10-18T00:00:00Z',
+        delivery_id: 'deliv-1',
+        new_wallet_balance: '1250',
+        order_code: 'ORD-261018-DEFECT',
+        order_id: 'ord-defect-1',
+        refund_amount_credits: '50',
+        stock_item_id: 'stk-dead-1',
+        success: true,
+      });
+
+      const result = await claimOrderWarrantyApi({
+        delivery_id: 'deliv-1',
+        order_id: 'ord-defect-1',
+        reason: 'Proxy dead on arrival',
+      });
+
+      expect(supabaseRequest).toHaveBeenCalledWith(
+        '/rest/v1/rpc/claim_order_warranty',
+        {
+          body: JSON.stringify({
+            _delivery_id: 'deliv-1',
+            _order_id: 'ord-defect-1',
+            _reason: 'Proxy dead on arrival',
+          }),
+          method: 'POST',
+          schema: 'commerce',
+        },
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.refund_amount_credits).toBe(50);
+      expect(result.new_wallet_balance).toBe(1250);
+      expect(result.stock_item_id).toBe('stk-dead-1');
+    });
+
+    it('invokes admin_inspect_stock_item RPC to toggle health status', async () => {
+      vi.mocked(supabaseRequest).mockResolvedValueOnce({
+        health_status: 'defective',
+        inspected_at: '2026-10-18T00:05:00Z',
+        status: 'defective',
+        stock_id: 'stk-100',
+        success: true,
+        variant_id: 'var-1',
+      });
+
+      const res = await adminInspectStockItemApi({
+        is_healthy: false,
+        notes: 'Failed proxy handshake',
+        stock_id: 'stk-100',
+      });
+
+      expect(supabaseRequest).toHaveBeenCalledWith(
+        '/rest/v1/rpc/admin_inspect_stock_item',
+        {
+          body: JSON.stringify({
+            _is_healthy: false,
+            _notes: 'Failed proxy handshake',
+            _stock_id: 'stk-100',
+          }),
+          method: 'POST',
+          schema: 'commerce',
+        },
+      );
+
+      expect(res.success).toBe(true);
+      expect(res.status).toBe('defective');
+      expect(res.health_status).toBe('defective');
+    });
+
+    it('fetches stock items with status and variant filtering', async () => {
+      vi.mocked(supabaseRequest).mockResolvedValueOnce([
+        {
+          batch_code: 'BATCH-01',
+          created_at: '2026-10-18T00:00:00Z',
+          id: 'stk-1',
+          metadata: { health_status: 'healthy' },
+          order_item_id: null,
+          public_hint: 'user1',
+          reserved_until: null,
+          secret_payload: 'user1:pass1:host:port',
+          sold_at: null,
+          sold_to_tenant_id: null,
+          status: 'available',
+          updated_at: '2026-10-18T00:00:00Z',
+          variant_id: 'var-1',
+        },
+      ]);
+
+      const items = await getStockItemsAdminApi({
+        limit: 50,
+        status: 'available' as any,
+        variant_id: 'var-1',
+      });
+
+      expect(supabaseRequest).toHaveBeenCalledWith(
+        '/rest/v1/stock_items?select=*&order=created_at.desc&variant_id=eq.var-1&status=eq.available&limit=50',
+        {
+          method: 'GET',
+          schema: 'commerce',
+        },
+      );
+
+      expect(items).toHaveLength(1);
+      expect(items[0]?.batch_code).toBe('BATCH-01');
+      expect(items[0]?.status).toBe('available');
+    });
+
+    it('evaluates delivery warranty eligibility based on warranty_claimed and duration hours', async () => {
+      const { isDeliveryEligibleForWarranty } = await import('../commerce');
+
+      const now = new Date();
+      const past1Hour = new Date(
+        now.getTime() - 1 * 60 * 60 * 1000,
+      ).toISOString();
+      const past25Hours = new Date(
+        now.getTime() - 25 * 60 * 60 * 1000,
+      ).toISOString();
+
+      // 1. In-warranty delivery (delivered 1h ago, 24h warranty default)
+      const freshDelivery: any = {
+        created_at: past1Hour,
+        delivered_payload: { sku: 'TEST-SKU' },
+        id: 'deliv-fresh',
+      };
+      expect(isDeliveryEligibleForWarranty(freshDelivery, 24)).toBe(true);
+
+      // 2. Expired warranty delivery (delivered 25h ago, 24h warranty limit)
+      const expiredDelivery: any = {
+        created_at: past25Hours,
+        delivered_payload: { sku: 'TEST-SKU' },
+        id: 'deliv-expired',
+      };
+      expect(isDeliveryEligibleForWarranty(expiredDelivery, 24)).toBe(false);
+
+      // 3. Already claimed delivery
+      const claimedDelivery: any = {
+        created_at: past1Hour,
+        delivered_payload: { sku: 'TEST-SKU', warranty_claimed: true },
+        id: 'deliv-claimed',
+      };
+      expect(isDeliveryEligibleForWarranty(claimedDelivery, 24)).toBe(false);
+
+      // 4. Null / invalid delivery
+      expect(isDeliveryEligibleForWarranty(null)).toBe(false);
     });
   });
 });

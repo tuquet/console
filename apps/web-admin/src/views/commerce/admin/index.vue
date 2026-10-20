@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import type {
+  BankReceivingAccountItem,
   CommerceOrderRecord,
   CommerceOrderStatus,
   CommerceProductItem,
   CommerceProductType,
   CommerceProductVariantItem,
   CommerceProductVisibility,
+  CommerceStockItem,
   CommerceStockMode,
   PaymentGatewayItem,
   PaymentIntentItem,
@@ -14,18 +16,6 @@ import type {
 import { computed, ref, watch } from 'vue';
 
 import { usePreferences } from '@tuquet/preferences';
-
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Layers,
-  PackageCheck,
-  Play,
-  Plus,
-  RefreshCw,
-  SlidersHorizontal,
-  Upload,
-} from '@lucide/vue';
 import {
   Badge,
   Button,
@@ -48,17 +38,38 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
+import {
+  AlertTriangle,
+  Boxes,
+  CheckCircle2,
+  Landmark,
+  Layers,
+  PackageCheck,
+  Play,
+  Plus,
+  RefreshCw,
+  ShieldCheck,
+  SlidersHorizontal,
+  Upload,
+} from '@lucide/vue';
+
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
+  adminInspectStockItemApi,
   approveManualPaymentIntentAdminApi,
+  claimOrderWarrantyApi,
   filterCommerceOrders,
   filterCommerceProducts,
   fulfillOrderAdminApi,
   getAllOrdersAdminApi,
   getAllPaymentGatewaysAdminApi,
+  getBankReceivingAccountsApi,
   getCommerceProductsApi,
   getManualReviewIntentsAdminApi,
+  getStockItemsAdminApi,
   importStockBatchAdminApi,
+  toggleBankReceivingAccountApi,
+  upsertBankReceivingAccountApi,
   upsertCommerceProductAdminApi,
   upsertPaymentGatewayAdminApi,
   upsertProductVariantAdminApi,
@@ -78,13 +89,27 @@ defineOptions({ name: 'CommerceAdmin' });
 const { formatDate } = useDateFormat();
 const { isMobile } = usePreferences();
 
-type AdminTabMode = 'gateways' | 'manual_review' | 'orders' | 'products';
+type AdminTabMode =
+  | 'bank_pool'
+  | 'gateways'
+  | 'manual_review'
+  | 'orders'
+  | 'products'
+  | 'stock_items';
 const activeTab = ref<AdminTabMode>('products');
 
 const allProducts = ref<CommerceProductItem[]>([]);
 const allOrders = ref<CommerceOrderRecord[]>([]);
+const allStockItems = ref<CommerceStockItem[]>([]);
 const manualReviewIntents = ref<PaymentIntentItem[]>([]);
 const allGateways = ref<PaymentGatewayItem[]>([]);
+const allBankAccounts = ref<BankReceivingAccountItem[]>([]);
+
+// Warranty Claim Modal State
+const warrantyModalOpen = ref(false);
+const claimingWarranty = ref(false);
+const selectedOrderForWarranty = ref<CommerceOrderRecord | null>(null);
+const warrantyClaimReason = ref('Item defective/dead upon delivery');
 
 // Product + Variant Upsert Modal State
 const productModalOpen = ref(false);
@@ -594,11 +619,168 @@ const [GatewaysGrid, gatewaysGridApi] = useVbenVxeGrid<PaymentGatewayItem>({
   },
 });
 
+function getBankPoolColumns() {
+  return [
+    {
+      field: 'bank_name',
+      title: $t('page.commerce_view.col_bank_info'),
+      minWidth: 230,
+      slots: { default: 'bank-cell' },
+    },
+    {
+      field: 'account_no',
+      title: $t('page.commerce_view.col_account_no'),
+      minWidth: 165,
+      slots: { default: 'account-cell' },
+    },
+    {
+      field: 'daily_limit_vnd',
+      title: $t('page.commerce_view.col_daily_quota'),
+      minWidth: 220,
+      slots: { default: 'quota-cell' },
+    },
+    {
+      field: 'priority',
+      title: $t('page.commerce_view.col_priority'),
+      minWidth: 100,
+    },
+    {
+      field: 'status',
+      title: $t('common.status'),
+      minWidth: 135,
+      slots: { default: 'status-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('common.actions'),
+      minWidth: 165,
+      align: 'right' as const,
+      slots: { default: 'actions-cell' },
+    },
+  ];
+}
+
+// 5. Dynamic Bank Accounts Pool Grid
+const [BankPoolGrid, bankPoolGridApi] =
+  useVbenVxeGrid<BankReceivingAccountItem>({
+    separator: false,
+    detailSheetOptions: {
+      resource: 'billing.bank_receiving_accounts',
+      subtitleField: 'account_no',
+      titleField: 'bank_name',
+      onCreate: async ({ insertPayload }) => {
+        return await upsertBankReceivingAccountApi(insertPayload as any);
+      },
+      onSave: async ({ dirtyPayload, row }) => {
+        await upsertBankReceivingAccountApi({
+          ...row,
+          ...dirtyPayload,
+        } as any);
+      },
+    },
+    gridOptions: {
+      border: false,
+      round: true,
+      showOverflow: true,
+      cellConfig: { height: 56 },
+      rowConfig: { isHover: true, keyField: 'id' },
+      pagerConfig: { enabled: false },
+      proxyConfig: {
+        autoLoad: true,
+        ajax: {
+          query: async () => {
+            const data = await getBankReceivingAccountsApi();
+            allBankAccounts.value = data;
+            return { items: data, total: data.length };
+          },
+        },
+      },
+      columns: getBankPoolColumns(),
+    },
+  });
+
+function getStockItemsColumns() {
+  return [
+    {
+      field: 'batch_code',
+      title: $t('page.commerce_view.col_batch_code'),
+      minWidth: 140,
+    },
+    {
+      field: 'secret_payload',
+      title: $t('page.commerce_view.col_secret_payload'),
+      minWidth: 260,
+      slots: { default: 'payload-cell' },
+    },
+    {
+      field: 'status',
+      title: $t('page.commerce_view.col_stock_status'),
+      minWidth: 130,
+      slots: { default: 'status-cell' },
+    },
+    {
+      field: 'health_status',
+      title: $t('page.commerce_view.col_health_status'),
+      minWidth: 140,
+      slots: { default: 'health-cell' },
+    },
+    {
+      field: 'created_at',
+      title: $t('common.createdAt'),
+      minWidth: 160,
+      slots: { default: 'date-cell' },
+    },
+    {
+      field: 'actions',
+      title: $t('common.actions'),
+      minWidth: 150,
+      align: 'right' as const,
+      slots: { default: 'action-cell' },
+    },
+  ];
+}
+
+// 6. Serialized Stock Items Inspector Grid
+const [StockItemsGrid, stockItemsGridApi] = useVbenVxeGrid<CommerceStockItem>({
+  separator: false,
+  gridOptions: {
+    border: false,
+    round: true,
+    showOverflow: true,
+    cellConfig: { height: 56 },
+    rowConfig: { isHover: true, keyField: 'id' },
+    pagerConfig: { pageSize: 20, pageSizes: [15, 20, 50, 100] },
+    proxyConfig: {
+      autoLoad: true,
+      ajax: {
+        query: async ({
+          page,
+        }: {
+          page?: { currentPage?: number; pageSize?: number };
+        }) => {
+          const data = await getStockItemsAdminApi({ limit: 200 });
+          allStockItems.value = data;
+          const currentPage = page?.currentPage || 1;
+          const pageSize = page?.pageSize || 20;
+          const start = (currentPage - 1) * pageSize;
+          return {
+            items: data.slice(start, start + pageSize),
+            total: data.length,
+          };
+        },
+      },
+    },
+    columns: getStockItemsColumns(),
+  },
+});
+
 watch([() => $t('common.actions'), isMobile], () => {
   productsGridApi.setGridOptions({ columns: getProductColumns() });
   ordersGridApi.setGridOptions({ columns: getOrderColumns() });
   manualReviewGridApi.setGridOptions({ columns: getManualReviewColumns() });
   gatewaysGridApi.setGridOptions({ columns: getGatewayColumns() });
+  bankPoolGridApi.setGridOptions({ columns: getBankPoolColumns() });
+  stockItemsGridApi.setGridOptions({ columns: getStockItemsColumns() });
   const commonConfig = {
     componentProps: { class: 'w-full' },
     hideLabel: isMobile.value,
@@ -611,7 +793,30 @@ function reloadCurrentTab() {
   if (activeTab.value === 'products') productsGridApi.reload();
   else if (activeTab.value === 'orders') ordersGridApi.reload();
   else if (activeTab.value === 'manual_review') manualReviewGridApi.reload();
-  else gatewaysGridApi.reload();
+  else if (activeTab.value === 'gateways') gatewaysGridApi.reload();
+  else if (activeTab.value === 'stock_items') stockItemsGridApi.reload();
+  else bankPoolGridApi.reload();
+}
+
+async function handleToggleAccountStatus(
+  row: BankReceivingAccountItem,
+  newStatus: BankReceivingAccountItem['status'],
+) {
+  try {
+    await toggleBankReceivingAccountApi(
+      row.id,
+      newStatus,
+      newStatus === 'active',
+    );
+    toast.success($t('common.successful'));
+    await bankPoolGridApi.reload();
+  } catch (error: any) {
+    captureError(error, {
+      action: 'handleToggleAccountStatus',
+      view: 'CommerceAdmin',
+    });
+    toast.error(error?.message || $t('common.failed'));
+  }
 }
 
 function openCreateProductModal(existing?: CommerceProductItem) {
@@ -817,6 +1022,80 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
   if (status === 'manual_review') return 'secondary';
   return 'outline';
 }
+
+async function handleInspectStockItem(
+  stock: CommerceStockItem,
+  isHealthy: boolean,
+) {
+  try {
+    const res = await adminInspectStockItemApi({
+      is_healthy: isHealthy,
+      notes: isHealthy
+        ? 'Manually restored by admin'
+        : 'Marked defective by admin',
+      stock_id: stock.id,
+    });
+    if (res.success) {
+      toast.success(
+        isHealthy
+          ? $t('page.commerce_view.stock_inspect_healthy')
+          : $t('page.commerce_view.stock_inspect_defective'),
+      );
+      await stockItemsGridApi.reload();
+      await productsGridApi.reload();
+    }
+  } catch (error: any) {
+    captureError(error, {
+      action: 'handleInspectStockItem',
+      stockId: stock.id,
+      view: 'CommerceAdmin',
+    });
+    toast.error(error?.message || 'Inspection failed');
+  }
+}
+
+function openWarrantyClaimModal(order: CommerceOrderRecord) {
+  selectedOrderForWarranty.value = order;
+  warrantyClaimReason.value = 'Item defective/dead upon delivery';
+  warrantyModalOpen.value = true;
+}
+
+async function submitWarrantyClaim() {
+  if (!selectedOrderForWarranty.value) return;
+  claimingWarranty.value = true;
+  try {
+    const targetDeliveryId =
+      selectedOrderForWarranty.value.deliveries?.[0]?.id ||
+      selectedOrderForWarranty.value.id;
+
+    const res = await claimOrderWarrantyApi({
+      delivery_id: targetDeliveryId,
+      order_id: selectedOrderForWarranty.value.id,
+      reason: warrantyClaimReason.value,
+    });
+
+    if (res.success) {
+      toast.success(
+        $t('page.commerce_view.warranty_claimed_success', {
+          amount: res.refund_amount_credits,
+        }),
+      );
+      warrantyModalOpen.value = false;
+      await ordersGridApi.reload();
+      await stockItemsGridApi.reload();
+      await productsGridApi.reload();
+    }
+  } catch (error: any) {
+    captureError(error, {
+      action: 'submitWarrantyClaim',
+      orderId: selectedOrderForWarranty.value.id,
+      view: 'CommerceAdmin',
+    });
+    toast.error(error?.message || 'Warranty claim failed');
+  } finally {
+    claimingWarranty.value = false;
+  }
+}
 </script>
 
 <template>
@@ -855,6 +1134,16 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
         >
           <Plus class="size-3.5" />
           <span>{{ $t('common.createRecord') }}</span>
+        </Button>
+
+        <Button
+          v-else-if="activeTab === 'bank_pool'"
+          size="sm"
+          class="gap-1.5"
+          @click="() => bankPoolGridApi.openCreateSheet()"
+        >
+          <Plus class="size-3.5" />
+          <span>{{ $t('page.commerce_view.add_bank_account_btn') }}</span>
         </Button>
 
         <Button
@@ -932,6 +1221,30 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             {{
               $t('page.commerce_view.tab_gateways', {
                 count: allGateways.length,
+              })
+            }}
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="bank_pool"
+            class="h-7 shrink-0 gap-1.5 px-3 whitespace-nowrap text-xs"
+          >
+            <Landmark class="size-3.5" />
+            {{
+              $t('page.commerce_view.tab_bank_pool', {
+                count: allBankAccounts.length,
+              })
+            }}
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="stock_items"
+            class="h-7 shrink-0 gap-1.5 px-3 whitespace-nowrap text-xs"
+          >
+            <Boxes class="size-3.5" />
+            {{
+              $t('page.commerce_view.tab_stock_items', {
+                count: allStockItems.length,
               })
             }}
           </TabsTrigger>
@@ -1061,15 +1374,27 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
         </template>
 
         <template #action-cell="{ row }">
-          <Button
-            size="sm"
-            variant="outline"
-            class="h-7 gap-1 px-2 text-xs"
-            @click="handleManualFulfillOrder(row)"
-          >
-            <Play class="size-3" />
-            {{ $t('page.commerce_view.redeliver_btn') }}
-          </Button>
+          <div class="flex items-center justify-end gap-1.5">
+            <Button
+              v-if="row.status === 'completed'"
+              size="sm"
+              variant="outline"
+              class="h-7 gap-1 px-2 text-xs text-warning hover:bg-warning/10"
+              @click="openWarrantyClaimModal(row)"
+            >
+              <ShieldCheck class="size-3" />
+              {{ $t('page.commerce_view.warranty_claim_btn') }}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              class="h-7 gap-1 px-2 text-xs"
+              @click="handleManualFulfillOrder(row)"
+            >
+              <Play class="size-3" />
+              {{ $t('page.commerce_view.redeliver_btn') }}
+            </Button>
+          </div>
         </template>
       </OrdersGrid>
     </div>
@@ -1152,6 +1477,177 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
           </Badge>
         </template>
       </GatewaysGrid>
+    </div>
+
+    <!-- Tab 5: Dynamic Bank Receiving Accounts Pool Grid -->
+    <div
+      v-show="activeTab === 'bank_pool'"
+      class="overflow-hidden rounded-none border-0 border-border/60 bg-card p-0 shadow-none sm:rounded-xl sm:border sm:p-5 sm:shadow-xs"
+    >
+      <BankPoolGrid>
+        <template #bank-cell="{ row }">
+          <div class="flex flex-col py-1 text-left">
+            <span class="font-medium text-foreground">{{ row.bank_name }}</span>
+            <span class="text-2xs text-muted-foreground">
+              BIN: {{ row.bank_bin }} · {{ row.account_name }}
+            </span>
+          </div>
+        </template>
+
+        <template #account-cell="{ row }">
+          <span class="font-mono text-xs font-semibold text-foreground">
+            {{ row.account_no }}
+          </span>
+        </template>
+
+        <template #quota-cell="{ row }">
+          <div class="flex flex-col gap-1 py-1">
+            <div class="flex items-center justify-between text-2xs">
+              <span class="font-medium text-foreground">
+                {{ row.current_daily_total.toLocaleString('en-US') }} đ
+              </span>
+              <span class="text-muted-foreground">
+                / {{ row.daily_limit_vnd.toLocaleString('en-US') }} đ
+              </span>
+            </div>
+            <div class="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                class="h-full rounded-full transition-all"
+                :class="
+                  row.current_daily_total >= row.daily_limit_vnd
+                    ? 'bg-destructive'
+                    : row.current_daily_total >= row.daily_limit_vnd * 0.8
+                      ? 'bg-warning'
+                      : 'bg-primary'
+                "
+                :style="{
+                  width: `${Math.min(100, Math.round((row.current_daily_total / (row.daily_limit_vnd || 1)) * 100))}%`,
+                }"
+              ></div>
+            </div>
+          </div>
+        </template>
+
+        <template #status-cell="{ row }">
+          <Badge
+            :variant="
+              row.status === 'active'
+                ? 'default'
+                : row.status === 'cooling'
+                  ? 'secondary'
+                  : 'destructive'
+            "
+            class="text-2xs"
+          >
+            {{ row.status }}
+          </Badge>
+        </template>
+
+        <template #actions-cell="{ row }">
+          <div class="flex items-center gap-1.5">
+            <Button
+              v-if="row.status === 'active'"
+              size="sm"
+              variant="outline"
+              class="h-7 px-2 text-2xs text-warning hover:bg-warning/10"
+              @click="handleToggleAccountStatus(row, 'cooling')"
+            >
+              {{ $t('page.commerce_view.pool_action_cool') }}
+            </Button>
+            <Button
+              v-else
+              size="sm"
+              variant="outline"
+              class="h-7 px-2 text-2xs text-primary hover:bg-primary/10"
+              @click="handleToggleAccountStatus(row, 'active')"
+            >
+              {{ $t('page.commerce_view.pool_action_activate') }}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              class="h-7 px-2 text-2xs"
+              @click="() => bankPoolGridApi.openDetailSheet(row)"
+            >
+              {{ $t('common.edit') }}
+            </Button>
+          </div>
+        </template>
+      </BankPoolGrid>
+    </div>
+
+    <!-- Tab 6: Serialized Stock Items Inspector Grid -->
+    <div
+      v-show="activeTab === 'stock_items'"
+      class="overflow-hidden rounded-none border-0 border-border/60 bg-card p-0 shadow-none sm:rounded-xl sm:border sm:p-5 sm:shadow-xs"
+    >
+      <StockItemsGrid>
+        <template #payload-cell="{ row }">
+          <span class="font-mono text-xs text-foreground">
+            {{ row.secret_payload }}
+          </span>
+        </template>
+
+        <template #status-cell="{ row }">
+          <Badge
+            :variant="
+              row.status === 'available'
+                ? 'default'
+                : row.status === 'sold'
+                  ? 'secondary'
+                  : 'destructive'
+            "
+            class="text-2xs"
+          >
+            {{ row.status }}
+          </Badge>
+        </template>
+
+        <template #health-cell="{ row }">
+          <Badge
+            :variant="
+              row.metadata?.health_status === 'defective'
+                ? 'destructive'
+                : 'outline'
+            "
+            class="text-2xs"
+          >
+            {{ row.metadata?.health_status || 'healthy' }}
+          </Badge>
+        </template>
+
+        <template #date-cell="{ row }">
+          <span class="text-xs text-muted-foreground">
+            {{ formatDate(row.created_at) }}
+          </span>
+        </template>
+
+        <template #action-cell="{ row }">
+          <div class="flex items-center justify-end gap-1.5">
+            <Button
+              v-if="
+                row.status === 'defective' ||
+                row.metadata?.health_status === 'defective'
+              "
+              size="sm"
+              variant="outline"
+              class="h-7 px-2 text-2xs text-primary hover:bg-primary/10"
+              @click="handleInspectStockItem(row, true)"
+            >
+              {{ $t('page.commerce_view.action_mark_healthy') }}
+            </Button>
+            <Button
+              v-else
+              size="sm"
+              variant="outline"
+              class="h-7 px-2 text-2xs text-destructive hover:bg-destructive/10"
+              @click="handleInspectStockItem(row, false)"
+            >
+              {{ $t('page.commerce_view.action_mark_defective') }}
+            </Button>
+          </div>
+        </template>
+      </StockItemsGrid>
     </div>
 
     <!-- Modal 1: Upsert Product & SKU Variant -->
@@ -1379,6 +1875,68 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
             @click="handleBulkImportStock"
           >
             {{ $t('page.commerce_view.submit_import_stock_btn') }}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Modal 3: Warranty Claim & Refund Dialog -->
+    <Dialog v-model:open="warrantyModalOpen">
+      <DialogContent class="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle class="text-base font-semibold">
+            {{ $t('page.commerce_view.warranty_claim_title') }}
+          </DialogTitle>
+          <DialogDescription class="text-xs text-muted-foreground">
+            {{ $t('page.commerce_view.warranty_claim_desc') }}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div class="space-y-3 py-2">
+          <div
+            class="rounded-lg border border-border/60 bg-muted/30 p-2.5 text-xs"
+          >
+            <div class="flex justify-between py-0.5">
+              <span class="text-muted-foreground">Mã đơn:</span>
+              <span class="font-semibold text-foreground">{{
+                selectedOrderForWarranty?.order_code
+              }}</span>
+            </div>
+            <div class="flex justify-between py-0.5">
+              <span class="text-muted-foreground">Tổng tiền:</span>
+              <span class="font-bold text-foreground"
+                >{{ selectedOrderForWarranty?.total_credits }} Xu</span
+              >
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <Label class="text-xs font-medium text-foreground">
+              {{ $t('page.commerce_view.warranty_reason_label') }}
+            </Label>
+            <Input
+              v-model="warrantyClaimReason"
+              type="text"
+              class="h-8 text-xs"
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            @click="warrantyModalOpen = false"
+          >
+            {{ $t('common.cancel') }}
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            :disabled="claimingWarranty"
+            @click="submitWarrantyClaim"
+          >
+            {{ $t('page.commerce_view.submit_warranty_claim') }}
           </Button>
         </div>
       </DialogContent>

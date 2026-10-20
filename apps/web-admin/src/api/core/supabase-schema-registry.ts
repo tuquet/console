@@ -32,6 +32,7 @@ import { getActiveTenantId } from './tenant';
 export type SupabaseResourceKey =
   | 'automa.campaign_runs'
   | 'automa.workflows'
+  | 'billing.bank_receiving_accounts'
   | 'billing.payment_gateways'
   | 'billing.payment_intents'
   | 'billing.plans'
@@ -1047,6 +1048,112 @@ export const SUPABASE_TABLE_REGISTRY: Record<
           allowed: false,
           policyName: 'rls_append_only_ledger',
           reasonKey: 'common.rlsAppendOnlyLedger',
+        },
+      };
+    },
+  },
+
+  'billing.bank_receiving_accounts': {
+    resource: 'billing.bank_receiving_accounts',
+    schema: SUPABASE_SCHEMA.BILLING,
+    table: 'bank_receiving_accounts',
+    primaryKey: 'id',
+    titleField: 'account_no',
+    columns: {
+      id: {
+        field: 'id',
+        insertable: true,
+        labelKey: 'common.id',
+        required: true,
+        type: 'text',
+      },
+      bank_name: {
+        editable: true,
+        field: 'bank_name',
+        labelKey: 'page.commerce_view.col_bank_info',
+        required: true,
+        type: 'text',
+      },
+      bank_bin: {
+        editable: true,
+        field: 'bank_bin',
+        labelKey: 'common.code',
+        required: true,
+        type: 'text',
+      },
+      account_no: {
+        editable: true,
+        field: 'account_no',
+        labelKey: 'page.commerce_view.col_account_no',
+        required: true,
+        type: 'text',
+      },
+      account_name: {
+        editable: true,
+        field: 'account_name',
+        labelKey: 'common.name',
+        required: true,
+        type: 'text',
+      },
+      daily_limit_vnd: {
+        defaultValue: 300_000_000,
+        editable: true,
+        field: 'daily_limit_vnd',
+        labelKey: 'page.commerce_view.col_daily_quota',
+        min: 0,
+        type: 'number',
+      },
+      current_daily_total: {
+        defaultValue: 0,
+        field: 'current_daily_total',
+        labelKey: 'page.commerce_view.total_topped_up_kpi',
+        type: 'number',
+      },
+      priority: {
+        defaultValue: 10,
+        editable: true,
+        field: 'priority',
+        labelKey: 'page.commerce_view.col_priority',
+        type: 'number',
+      },
+      status: {
+        defaultValue: 'active',
+        editable: true,
+        field: 'status',
+        labelKey: 'common.status',
+        type: 'text',
+      },
+      is_active: {
+        defaultValue: true,
+        editable: true,
+        field: 'is_active',
+        labelKey: 'common.status',
+        type: 'boolean',
+      },
+      updated_at: {
+        field: 'updated_at',
+        labelKey: 'common.updatedAt',
+        type: 'datetime',
+      },
+    },
+    evaluateRls: (_row, access) => {
+      const allowed = !access || access.isSuperadmin;
+      return {
+        canInsert: {
+          allowed,
+          policyName: 'bank_accounts_admin_full_policy',
+          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+        },
+        canSelect: { allowed: true, policyName: 'bank_accounts_select_policy' },
+        canUpdate: {
+          allowed,
+          policyName: 'bank_accounts_admin_full_policy',
+          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
+        },
+        canDelete: {
+          allowed,
+          policyName: 'bank_accounts_admin_full_policy',
+          reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
         },
       };
     },

@@ -38,9 +38,9 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     mockSupabaseRequest.mockReset();
   });
 
-  it('registers all 18 canonical Supabase tables across 5 PostgREST schemas', () => {
+  it('registers all 19 canonical Supabase tables across 5 PostgREST schemas', () => {
     const keys = Object.keys(SUPABASE_TABLE_REGISTRY);
-    expect(keys).toHaveLength(18);
+    expect(keys).toHaveLength(19);
     expect(keys).toEqual(
       expect.arrayContaining([
         'public.tenants',
@@ -54,6 +54,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
         'billing.wallet_transactions',
         'billing.payment_intents',
         'billing.payment_gateways',
+        'billing.bank_receiving_accounts',
         'billing.plans',
         'billing.subscriptions',
         'public.system_plugins',
