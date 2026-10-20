@@ -1,6 +1,6 @@
-# Tuquet Admin Contributing Guide
+# Admin Contributing Guide
 
-Hi! We're really excited that you are interested in contributing to Tuquet Admin. Before submitting your contribution, please make sure to take a moment and read through the following guidelines:
+Hi! We're really excited that you are interested in contributing to Admin. Before submitting your contribution, please make sure to take a moment and read through the following guidelines:
 
 - [Pull Request Guidelines](#pull-request-guidelines)
 

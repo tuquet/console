@@ -119,7 +119,7 @@ function createSuperadminJwt() {
       exp: Math.floor(Date.now() / 1000) + 3600,
       role: 'authenticated',
       sub: '00000000-0000-0000-0000-000000000001',
-      user_metadata: { full_name: 'Tuquet Superadmin' },
+      user_metadata: { full_name: 'Superadmin' },
     }),
   ).toString('base64url');
   return `${header}.${payload}.signature`;
@@ -319,7 +319,7 @@ async function runConsoleGate() {
             app_metadata: { platform_role: 'superadmin' },
             email: 'admin@tuquet.com',
             id: '00000000-0000-0000-0000-000000000001',
-            user_metadata: { full_name: 'Tuquet Superadmin' },
+            user_metadata: { full_name: 'Superadmin' },
           }),
           contentType: 'application/json',
           status: 200,

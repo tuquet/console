@@ -97,7 +97,7 @@
   "desktopRequestingDevice": "Thiết bị:",
   "desktopLocalWorkstation": "Máy trạm cục bộ",
   "desktopConsentTitle": "Ủy quyền thiết bị",
-  "desktopConsentDesc": "Cấp quyền kết nối và đồng bộ với Tuquet Cloud.",
+  "desktopConsentDesc": "Cấp quyền kết nối và đồng bộ với Cloud.",
   "desktopAccountLabel": "Tài khoản",
   "desktopSecurityNoteTitle": "Lưu ý:",
   "desktopSecurityNoteDesc": "Thiết bị sẽ được phép chạy tác vụ runner và quản lý hồ sơ trình duyệt trong workspace đã chọn.",

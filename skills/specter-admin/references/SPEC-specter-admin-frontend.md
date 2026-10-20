@@ -2,7 +2,7 @@
 
 ## Objective
 
-Nâng cấp và hoàn thiện toàn diện kỹ năng `specter-admin` (`skills/specter-admin/SKILL.md`) trở thành **Cẩm nang Tăng tốc Phát triển Frontend** (Frontend Accelerator Runbook) cho Tuquet Admin Dashboard (`apps/web-admin` và `packages/`).
+Nâng cấp và hoàn thiện toàn diện kỹ năng `specter-admin` (`skills/specter-admin/SKILL.md`) trở thành **Cẩm nang Tăng tốc Phát triển Frontend** (Frontend Accelerator Runbook) cho Admin Dashboard (`apps/web-admin` và `packages/`).
 
 Kỹ năng được trang bị đầy đủ các khuôn mẫu thành phần (Component Blueprints), hướng dẫn import UI chuẩn (`@tuquet/vue-ui`, `@lucide/vue`), mẫu kết nối API chuẩn qua BFF (`@vben/request`), quy chuẩn Tailwind v4, giải pháp cho các lỗi UI kinh điển (như modal không căn giữa trên mobile), cùng quy trình build & test cục bộ siêu tốc (Zero-Push).
 
@@ -37,7 +37,7 @@ pnpm test:unit packages/@core/preferences/__tests__/preferences.test.ts
 # 4. Biên dịch và nạp trực tiếp vào Nginx trên Tailscale (Không push git)
 pnpm run build:local
 
-# 5. So sánh diff với code gốc Tuquet Admin
+# 5. So sánh diff với code gốc Admin
 git diff upstream/main HEAD -- <đường_dẫn_tệp>
 
 # 6. Kiểm tra phản hồi header từ Nginx cục bộ

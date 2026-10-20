@@ -42,7 +42,7 @@ export interface RealAnalyticsData {
 }
 
 /**
- * Thu thập và tổng hợp số liệu đo đếm thực tế từ Tuquet Cloud
+ * Thu thập và tổng hợp số liệu đo đếm thực tế từ Cloud
  */
 export async function getRealAnalyticsDataApi(): Promise<RealAnalyticsData> {
   const startTime = performance.now();

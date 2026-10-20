@@ -72,7 +72,7 @@ onUnmounted(() => {
         class="font-semibold text-xs tracking-tight text-foreground"
         data-tauri-drag-region
       >
-        Tuquet Admin
+        Admin
       </span>
       <span
         class="rounded-sm bg-muted px-1.5 py-0.5 text-2xs text-muted-foreground font-medium"

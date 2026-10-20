@@ -16,7 +16,7 @@
     "url": "git+https://github.com/tuquet/admin.git"
   },
   "license": "MIT",
-  "author": "Tuquet <dev@tuquet.com>",
+  "author": "tuquet",
   "type": "module",
   "scripts": {
     "bootstrap": "pnpm install",

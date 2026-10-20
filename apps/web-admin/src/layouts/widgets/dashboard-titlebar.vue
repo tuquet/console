@@ -84,7 +84,7 @@ onUnmounted(() => {
         class="font-semibold text-xs tracking-tight text-foreground"
         data-tauri-drag-region
       >
-        Tuquet Admin
+        Admin
       </span>
 
       <template v-if="currentTitle">

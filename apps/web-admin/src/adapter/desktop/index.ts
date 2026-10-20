@@ -1,5 +1,5 @@
 /**
- * Tuquet Admin Desktop Native Adapter
+ * Admin Desktop Native Adapter
  * Safe abstractions over Tauri v2 APIs with zero-crash web browser fallbacks.
  */
 

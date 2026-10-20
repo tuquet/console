@@ -1,4 +1,4 @@
-# Tuquet Ecosystem — Phase Documentation Index
+# Ecosystem — Phase Documentation Index
 
 > **Thư viện Tài liệu 5 Giai đoạn Chiến lược (Strategic Phase Documents)**  
 > Dành cho Ban Lãnh đạo, Nhà Đầu tư, Đối tác Chiến lược và Kỹ sư Trưởng (Stakeholders, Sponsors & Leads).

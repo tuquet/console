@@ -1,4 +1,4 @@
-# Tuquet Admin — Strategic Execution Timeline
+# Admin — Strategic Execution Timeline
 
 > **Tài liệu Kế hoạch Triển khai Chiến lược (Executive Master Timeline)**  
 > **Dành cho:** Ban Giám Đốc, Nhà Đầu Tư & Các Trưởng Bộ Phận (Stakeholders & Sponsors)  
@@ -79,7 +79,7 @@ IAM & SSO     Payment Rails & HealthCheck Metered SaaS  Sandbox Market
 
 - **Thời gian:** 05/01/2027 – 15/02/2027
 - **Mục tiêu Doanh nghiệp:**  
-  Đưa năng lực kỹ thuật đỉnh cao của Tuquet ra thị trường dưới dạng dịch vụ thuê bao đám mây (SaaS / IaaS), đo cước linh hoạt theo thời gian sử dụng thực tế (Metered Billing).
+  Đưa năng lực kỹ thuật đỉnh cao của ra thị trường dưới dạng dịch vụ thuê bao đám mây (SaaS / IaaS), đo cước linh hoạt theo thời gian sử dụng thực tế (Metered Billing).
 - **Gói nghiệm thu bàn giao (Deliverables):**
   1. Các gói dịch vụ tự động hóa đóng gói sẵn (Nuôi tài khoản, Cào dữ liệu, Quản trị mạng xã hội) mua là chạy ngay trên đám mây.
   2. **Động cơ Đo Cước Tài Nguyên Động (Metered Billing Engine):** Tự động tính cước theo block giờ chạy bot hoặc dung lượng proxy tiêu thụ với độ chính xác $100\%$.
@@ -92,7 +92,7 @@ IAM & SSO     Payment Rails & HealthCheck Metered SaaS  Sandbox Market
 
 - **Thời gian:** 01/03/2027 – 30/04/2027
 - **Mục tiêu Doanh nghiệp:**  
-  Biến Tuquet thành một nền tảng mở quy mô lớn (Platform Play). Tận dụng sức mạnh của mạng lưới đại lý và cộng đồng nhà phát triển có cơ chế hộp cát bảo mật kiểm duyệt mã độc.
+  Biến thành một nền tảng mở quy mô lớn (Platform Play). Tận dụng sức mạnh của mạng lưới đại lý và cộng đồng nhà phát triển có cơ chế hộp cát bảo mật kiểm duyệt mã độc.
 - **Gói nghiệm thu bàn giao (Deliverables):**
   1. Nền tảng nhượng quyền White-Label: Khách hàng doanh nghiệp triển khai giải pháp với thương hiệu và tên miền riêng.
   2. **Hộp Cát Bảo Mật Kiểm Duyệt Kịch Bản (Automated Security Sandbox):** Tự động quét mã độc và kiểm duyệt kịch bản cộng đồng trước khi cho phép niêm yết lên sàn.

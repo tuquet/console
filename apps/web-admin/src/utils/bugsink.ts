@@ -11,7 +11,7 @@ export interface BugsinkConfig {
 }
 
 /**
- * Default Bugsink DSN provided for the Tuquet project
+ * Default Bugsink DSN provided for the project
  */
 export const DEFAULT_BUGSINK_DSN =
   'https://9691efe9e0064c9f828dd7463dc3d414@tuquet.bugsink.com/1';

@@ -1,4 +1,4 @@
-# Tuquet Admin — GitHub Copilot & Agent Instructions
+# Admin — GitHub Copilot & Agent Instructions
 
 This repository enforces strict pre-push verification to save GitHub Actions runner minutes and maintain zero CI failures.
 

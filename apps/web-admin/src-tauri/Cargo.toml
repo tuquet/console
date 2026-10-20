@@ -1,12 +1,12 @@
 [package]
-name = "tuquet-admin"
+name = "admin"
 version = "0.1.0"
-description = "Tuquet Admin - Unified Management & Operations Console"
-authors = ["Tuquet <dev@tuquet.com>"]
+description = "Admin - Unified Management & Operations Console"
+authors = ["tuquet"]
 edition = "2021"
 
 [lib]
-name = "tuquet_admin_lib"
+name = "admin_lib"
 crate-type = ["staticlib", "rlib"]
 
 [build-dependencies]

@@ -1,8 +1,8 @@
-# Spec: Tuquet Admin Tauri Desktop Application (`SPEC-tauri-desktop`)
+# Spec: Admin Tauri Desktop Application (`SPEC-tauri-desktop`)
 
 ## 1. Objective
 
-Xây dựng phiên bản Native Desktop cho **Tuquet Admin Console** (`@tuquet/admin`) dựa trên công nghệ **Tauri v2**, mang lại trải nghiệm phần mềm quản trị doanh nghiệp chuẩn Enterprise:
+Xây dựng phiên bản Native Desktop cho **Admin Console** (`@tuquet/admin`) dựa trên công nghệ **Tauri v2**, mang lại trải nghiệm phần mềm quản trị doanh nghiệp chuẩn Enterprise:
 
 - **Tốc độ & Tài nguyên tối ưu:** Khởi động dưới $500\text{ms}$, chiếm dụng RAM ban đầu $\le 40\text{MB}$ (so với $\ge 400\text{MB}$ của Electron).
 - **Trải nghiệm Native mượt mà:** Cửa sổ không bị giật/nhấp nháy trắng (zero white-flash), tự động ghi nhớ kích thước và tọa độ vị trí giữa các phiên làm việc (`window-state`), khay hệ thống (System Tray) tiện dụng, và chống chạy nhiều cửa sổ xung đột (`single-instance`).

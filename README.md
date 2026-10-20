@@ -1,4 +1,4 @@
-# Tuquet Admin Console & Desktop (`admin.tuquet.com`)
+# Admin Console & Desktop (`admin.tuquet.com`)
 
 [![CI Quality Gates](https://github.com/tuquet/admin/actions/workflows/ci.yml/badge.svg)](https://github.com/tuquet/admin/actions/workflows/ci.yml) [![Release Desktop](https://github.com/tuquet/admin/actions/workflows/release.yml/badge.svg)](https://github.com/tuquet/admin/actions/workflows/release.yml) [![Latest Release](https://img.shields.io/github/v/release/tuquet/admin?color=0284c7&label=Release)](https://github.com/tuquet/admin/releases/latest) [![Platform: Windows](https://img.shields.io/badge/Platform-Windows%20x64-blue?logo=windows)](https://github.com/tuquet/admin/releases/latest) [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE) [![Security Policy](https://img.shields.io/badge/Security-Policy-red.svg)](SECURITY.md)
 
@@ -8,7 +8,7 @@ Bảng điều khiển tập trung, quản lý danh tính đa tổ chức (Multi
 
 ## 1. Tải Về Bản Cài Đặt Desktop Windows (Download Desktop App)
 
-Tuquet Admin cung cấp ứng dụng Native Desktop chạy trên Windows x64 với hiệu năng cao, tích hợp System Tray, hỗ trợ Deep-link SSO (`tuquet://`) và cơ chế Tự động cập nhật không gián đoạn (OTA Auto-Updater):
+Admin cung cấp ứng dụng Native Desktop chạy trên Windows x64 với hiệu năng cao, tích hợp System Tray, hỗ trợ Deep-link SSO (`tuquet://`) và cơ chế Tự động cập nhật không gián đoạn (OTA Auto-Updater):
 
 | Phiên Bản / Định Dạng | Tải Về Trực Tiếp | Mô Tả |
 | :-- | :-- | :-- |
@@ -28,7 +28,7 @@ Tuquet Admin cung cấp ứng dụng Native Desktop chạy trên Windows x64 v�
 
 ## 3. Kiến Trúc & Tài Liệu Kỹ Thuật (Architecture)
 
-Hệ thống được thiết kế theo nguyên tắc **KISS**, **YAGNI**, **Mobile-First Dual View** và kết nối trực tiếp với các schema chuyên biệt của Tuquet Cloud (`public`, `runners`, `automa`, `billing`):
+Hệ thống được thiết kế theo nguyên tắc **KISS**, **YAGNI**, **Mobile-First Dual View** và kết nối trực tiếp với các schema chuyên biệt của Cloud (`public`, `runners`, `automa`, `billing`):
 
 - **[Trung Tâm Tài Liệu Toàn Diện (Master Docs Index)](docs/README.md)**: Chỉ mục toàn bộ kiến trúc, quyết định, tuyến đường, giai đoạn và đặc tả module.
 - **[Đặc Tả CI/CD & Public Release](docs/specs/SPEC-cicd-public-release.md)**: Bản đặc tả kỹ thuật chi tiết quy trình CI 5-Gate và CD Windows Release.

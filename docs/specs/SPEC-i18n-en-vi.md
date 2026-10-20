@@ -9,7 +9,7 @@
 
 ## 1. Objective (Mục Tiêu & Phạm Vi)
 
-Đạt độ phủ quốc tế hóa **100% (`0` chuỗi văn bản tĩnh hardcode)** cho toàn bộ Tuquet Admin (`@tuquet/admin-web`, `@vben/locales`, `@vben/plugins`) trên cả 2 ngôn ngữ **`en-US`** và **`vi-VN`**, bao gồm toàn bộ tiêu đề trang, cột bảng `VxeGrid`, bộ lọc `VbenForm`, hộp thoại Modal, tab chi tiết, biểu đồ Analytics, trang xác thực/hồ sơ, trạng thái rỗng (Empty state) và thông báo `toast`:
+Đạt độ phủ quốc tế hóa **100% (`0` chuỗi văn bản tĩnh hardcode)** cho toàn bộ Admin (`@tuquet/admin-web`, `@vben/locales`, `@vben/plugins`) trên cả 2 ngôn ngữ **`en-US`** và **`vi-VN`**, bao gồm toàn bộ tiêu đề trang, cột bảng `VxeGrid`, bộ lọc `VbenForm`, hộp thoại Modal, tab chi tiết, biểu đồ Analytics, trang xác thực/hồ sơ, trạng thái rỗng (Empty state) và thông báo `toast`:
 
 1. **Loại Bỏ Triệt Để 100% Chuỗi Hardcode (46 Tệp / 992 Dòng Hiện Còn Tồn Đọng):**
    - Chuyển đổi toàn bộ văn bản tĩnh tiếng Việt/tiếng Anh còn nằm trong 46 tệp `.vue` và `.ts` tại `apps/web-admin/src/` sang sử dụng hệ thống từ điển 3 tầng (`$t('common.*')`, `$t('term.*')`, `$t('page.*')`).

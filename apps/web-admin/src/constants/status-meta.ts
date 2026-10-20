@@ -213,7 +213,7 @@ export const COMMERCE_PRODUCT_TYPE_META: Record<
   },
   [COMMERCE_PRODUCT_TYPE.SPECTER_RESOURCE]: {
     fallbackLabel: 'Specter resource',
-    labelKey: 'page.commerce_view.type_tuquet_resource',
+    labelKey: 'page.commerce_view.type_resource',
     tone: STATUS_TONE.INFO,
   },
   [COMMERCE_PRODUCT_TYPE.DIGITAL_FILE]: {

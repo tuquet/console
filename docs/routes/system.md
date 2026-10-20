@@ -96,7 +96,7 @@
 
 ### 2.1. Quản Lý Plugins: `/system/plugins`
 
-- **Mục Đích:** Kiểm soát và hiển thị tình trạng các plugin vi dịch vụ (Microservice Pillars) đã cài đặt vào Tuquet Cloud qua bảng `useVbenVxeGrid`.
+- **Mục Đích:** Kiểm soát và hiển thị tình trạng các plugin vi dịch vụ (Microservice Pillars) đã cài đặt vào Cloud qua bảng `useVbenVxeGrid`.
 - **Nguồn Dữ Liệu:** Bảng `public.system_plugins`.
 - **API Client:** [`getSystemPluginsApi()`](../../apps/web-admin/src/api/core/system.ts).
 - **Quy Tắc Nhận Diện 6 Core Kernel Plugins:**
@@ -118,7 +118,7 @@
 
 ### 2.3. Người Dùng Nền Tảng: `/system/users` (Superadmin Only)
 
-- **Mục Đích:** Quản lý danh bạ tài khoản người dùng đăng ký trên toàn nền tảng Tuquet Cloud theo chuẩn **Enterprise User Directory** (`useVbenVxeGrid`), hỗ trợ tìm kiếm đa trường (Họ tên, Email, UUID, Tên/Slug Workspace), lọc theo trạng thái tổ chức và vai trò, sao chép UUID 1 chạm, và hộp thoại **User Inspector Dialog** hiển thị danh sách Workspace tham gia kèm điều hướng trực tiếp tới `/tenants/:id`.
+- **Mục Đích:** Quản lý danh bạ tài khoản người dùng đăng ký trên toàn nền tảng Cloud theo chuẩn **Enterprise User Directory** (`useVbenVxeGrid`), hỗ trợ tìm kiếm đa trường (Họ tên, Email, UUID, Tên/Slug Workspace), lọc theo trạng thái tổ chức và vai trò, sao chép UUID 1 chạm, và hộp thoại **User Inspector Dialog** hiển thị danh sách Workspace tham gia kèm điều hướng trực tiếp tới `/tenants/:id`.
 - **Nguồn Dữ Liệu:** Bảng `public.profiles` kết hợp liên kết `public.tenant_members` (`tenants`, `member_roles(roles)`).
 - **API Client & Helpers:** [`getPlatformUsersApi()`](../../apps/web-admin/src/api/core/system.ts) và [`filterPlatformUsers()`](../../apps/web-admin/src/api/core/system.ts).
 - **Quyền Hạn Yêu Cầu:** `authority: ['superadmin']`.

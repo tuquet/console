@@ -1,10 +1,10 @@
-# Tài Liệu Kỹ Thuật Tuquet Admin (`@tuquet/admin-web`)
+# Tài Liệu Kỹ Thuật Admin (`@tuquet/admin-web`)
 
 > **Mã tài liệu:** `DOCS-INDEX`  
 > **Áp dụng cho:** `tuquet/admin` (`apps/web-admin`)  
 > **Trạng thái:** **ACTIVE & ACCEPTED**
 
-Chào mừng đến với trung tâm tài liệu kỹ thuật chính thức (Single Source of Truth — SSOT) của ứng dụng **Tuquet Admin** (`admin.tuquet.com`). Toàn bộ kiến trúc, quyết định thiết kế, đặc tả tuyến đường và 15 bản đặc tả module chuẩn hóa được tổ chức thành 4 trụ cột dưới đây.
+Chào mừng đến với trung tâm tài liệu kỹ thuật chính thức (Single Source of Truth — SSOT) của ứng dụng **Admin** (`admin.tuquet.com`). Toàn bộ kiến trúc, quyết định thiết kế, đặc tả tuyến đường và 15 bản đặc tả module chuẩn hóa được tổ chức thành 4 trụ cột dưới đây.
 
 ---
 

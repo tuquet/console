@@ -9,10 +9,10 @@
 
 ## 1. Objective (Mục Tiêu & Phạm Vi)
 
-Thiết lập tầng truy cập dữ liệu trung tâm (Single Source of Truth — SSOT) cho `@tuquet/admin-web` kết nối trực tiếp tới Tuquet Cloud PostgREST & GoTrue mà không phụ thuộc vào SDK `@supabase/supabase-js`:
+Thiết lập tầng truy cập dữ liệu trung tâm (Single Source of Truth — SSOT) cho `@tuquet/admin-web` kết nối trực tiếp tới Cloud PostgREST & GoTrue mà không phụ thuộc vào SDK `@supabase/supabase-js`:
 
 1. **Giao Tiếp Đa Schema PostgREST (`supabaseRequest`):**
-   - Hỗ trợ đọc/ghi trên toàn bộ **7 schema chuyên biệt** của Tuquet Cloud: `public`, `runners`, `automa`, `billing`, `commerce`, `media`, và `events`.
+   - Hỗ trợ đọc/ghi trên toàn bộ **7 schema chuyên biệt** của Cloud: `public`, `runners`, `automa`, `billing`, `commerce`, `media`, và `events`.
    - Tự động đính kèm header `Accept-Profile: <schema>` cho các truy vấn đọc (`GET`, `HEAD`) và `Content-Profile: <schema>` cho các truy vấn ghi/RPC (`POST`, `PUT`, `PATCH`, `DELETE`).
    - Hỗ trợ cờ `skipAuth: true` cho các truy vấn công khai (như `/store` Guest Checkout) chỉ gửi `apikey` (`anon` key) mà không đính kèm JWT phiên đăng nhập, cùng cơ chế tự động làm mới token (`refreshSession`) khi gặp `401 Unauthorized`.
 2. **Động Hóa Quyền Hạn Từ Cơ Sở Dữ Liệu (`getEffectiveAccessApi`):**
@@ -120,7 +120,7 @@ export async function getInstalledPluginsApi(): Promise<string[]>;
 ## 7. Boundaries (Ranh Giới Kỹ Thuật)
 
 - **Always:**
-  - Mọi truy vấn HTTP tới Tuquet Cloud trong `apps/web-admin` bắt buộc đi qua `supabaseRequest<T>()`.
+  - Mọi truy vấn HTTP tới Cloud trong `apps/web-admin` bắt buộc đi qua `supabaseRequest<T>()`.
   - Xóa bộ nhớ đệm quyền hạn (`clearAccessCache()`) ngay khi người dùng đăng xuất hoặc làm mới phiên thất bại.
   - Sử dụng `encodeURIComponent` khi truyền tham số động vào chuỗi truy vấn PostgREST.
 - **Ask first:**

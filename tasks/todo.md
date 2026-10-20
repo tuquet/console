@@ -1,4 +1,4 @@
-# Task List: Tuquet Admin Public Repo, CI Quality Gates & CD Desktop Release (`INITIATIVE-CICD-PUBLIC-RELEASE`)
+# Task List: Admin Public Repo, CI Quality Gates & CD Desktop Release (`INITIATIVE-CICD-PUBLIC-RELEASE`)
 
 ## Phase 1: Public Repo Sanitization & OSS Compliance
 
@@ -99,7 +99,7 @@
 
 ### Task 3.2: Tinh Chỉnh & Đồng Bộ Hóa Cấu Hình Đóng Gói Tauri Bundler
 
-**Description:** Kiểm tra `apps/web-admin/src-tauri/tauri.conf.json` phần `bundle.targets`: đảm bảo hỗ trợ đầy đủ `["nsis", "msi"]` khi build trên Windows runner. Đồng thời chuẩn hóa tên file xuất xưởng `productName: "Tuquet Admin"` để người dùng tải về file có tên thân thiện: `Tuquet-Admin_<version>_x64-setup.exe`.  
+**Description:** Kiểm tra `apps/web-admin/src-tauri/tauri.conf.json` phần `bundle.targets`: đảm bảo hỗ trợ đầy đủ `["nsis", "msi"]` khi build trên Windows runner. Đồng thời chuẩn hóa tên file xuất xưởng `productName: "Admin"` để người dùng tải về file có tên thân thiện: `Tuquet-Admin_<version>_x64-setup.exe`.  
 **Acceptance criteria:**
 
 - [x] Cấu hình bundle trong `tauri.conf.json` tương thích hoàn hảo với Windows CI/CD runner.

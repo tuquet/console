@@ -67,11 +67,11 @@ jobs:
         with:
           projectPath: ./apps/web-admin
           tagName: ${{ env.TAG_NAME }}
-          releaseName: 'Tuquet Admin Desktop ${{ env.TAG_NAME }}'
+          releaseName: 'Admin Desktop ${{ env.TAG_NAME }}'
           releaseBody: |
-            ### Tuquet Admin Desktop Windows Production Release
+            ### Admin Desktop Windows Production Release
 
-            Bản phát hành chính thức ứng dụng **Tuquet Admin Desktop** dành cho hệ điều hành Windows x64.
+            Bản phát hành chính thức ứng dụng **Admin Desktop** dành cho hệ điều hành Windows x64.
 
             #### 📦 Tệp Cài Đặt (Release Downloads):
             - **Windows NSIS Installer (`.exe`)**: [Tuquet-Admin-Setup.exe](https://github.com/tuquet/admin/releases/download/${{ env.TAG_NAME }}/Tuquet-Admin-Setup.exe) (Khuyên dùng, hỗ trợ tự động cập nhật OTA)

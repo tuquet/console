@@ -1,4 +1,4 @@
-﻿# Kiến Trúc Hệ Thống Tuquet Admin (Tuquet Admin Architecture)
+﻿# Kiến Trúc Hệ Thống Admin (Admin Architecture)
 
 > **Mã tài liệu:** `ARCH-ADMIN-OVERVIEW`  
 > **Áp dụng cho:** `tuquet/admin` (`apps/web-admin`)  
@@ -18,7 +18,7 @@
 3. **Automa Engine Telemetry:** Giám sát kịch bản quy trình tự động hóa (Workflows), tiến độ các đợt chạy (Campaign Runs) và nhật ký thực thi (Execution Logs).
 4. **Digital Commerce & Multi-Channel Payment:** Cửa hàng sản phẩm số nội bộ (`/commerce/*`) và công khai (`/store`), Ví trả trước đơn vị `Xu` (`BIGINT`), cổng thanh toán đa kênh (VietQR, MoMo, Stripe, Crypto USDT) và tự động bàn giao tài nguyên (Auto-Fulfillment).
 
-Hệ thống kết nối trực tiếp đến **Tuquet Cloud** (`tuquet/cloud/supabase`), tương tác với 7 schema chuyên biệt qua chuẩn PostgREST và tuân thủ nghiêm ngặt bảo mật Row Level Security (RLS).
+Hệ thống kết nối trực tiếp đến **Cloud** (`tuquet/cloud/supabase`), tương tác với 7 schema chuyên biệt qua chuẩn PostgREST và tuân thủ nghiêm ngặt bảo mật Row Level Security (RLS).
 
 ---
 
@@ -44,7 +44,7 @@ Hệ thống kết nối trực tiếp đến **Tuquet Cloud** (`tuquet/cloud/su
 
 ## 3. Kiến Trúc Đa Schema PostgREST (Multi-Schema Protocol)
 
-Tuquet Cloud phân tách dữ liệu thành **7 schema chuyên biệt** nhằm đảm bảo tính toàn vẹn và cô lập dữ liệu:
+Cloud phân tách dữ liệu thành **7 schema chuyên biệt** nhằm đảm bảo tính toàn vẹn và cô lập dữ liệu:
 
 | Tên Schema | Phạm Vi Chức Năng | Bảng Dữ Liệu Tiêu Biểu | Header PostgREST Bắt Buộc |
 | :-- | :-- | :-- | :-- |
@@ -179,4 +179,4 @@ Core, Auth & Public Storefront (core.ts — 8 routes):
 Khi Admin Console thực hiện thăm dò hoặc chuyển giao phiên đăng nhập SSO xuống daemon máy trạm Specter Desk (`http://127.0.0.1:8765`):
 
 1. **Lệnh Probe Analytics:** Gửi qua `fetch` với `mode: 'no-cors'` và `AbortController` timeout tối đa $1200\text{ms}$. Lỗi mạng được xử lý ngầm (non-blocking) để đảm bảo trang web vẫn render bình thường ngay cả khi daemon chưa khởi động.
-2. **Desktop SSO Bridge (`/auth/desktop`):** Nhận `redirect_uri=http://127.0.0.1:8765/sso/callback`, xác thực phiên với Tuquet Cloud và POST token về loopback port cục bộ.
+2. **Desktop SSO Bridge (`/auth/desktop`):** Nhận `redirect_uri=http://127.0.0.1:8765/sso/callback`, xác thực phiên với Cloud và POST token về loopback port cục bộ.

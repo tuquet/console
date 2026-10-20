@@ -19,7 +19,7 @@ export default defineConfig(async () => {
             manifest: {
               background_color: '#09090b',
               description:
-                'Tuquet Admin - Unified Management & Operations Console (admin.tuquet.com)',
+                'Admin - Unified Management & Operations Console (admin.tuquet.com)',
               display: 'standalone',
               icons: [
                 {
@@ -39,8 +39,8 @@ export default defineConfig(async () => {
                   type: 'image/png',
                 },
               ],
-              name: 'Tuquet Admin',
-              short_name: 'Tuquet Admin',
+              name: 'Admin',
+              short_name: 'Admin',
               theme_color: '#09090b',
             },
           },

@@ -12,7 +12,7 @@
 Xây dựng phân hệ giao diện Web **`admin-commerce-portal`** dưới nhóm định tuyến cấp 1 `/commerce` trong `@tuquet/admin-web`, kết nối trực tiếp với tầng API `src/api/core/billing.ts` và `src/api/core/commerce.ts` nhằm cung cấp trọn vẹn trải nghiệm thương mại điện tử nội bộ cho cả **Tenant Workspace** và **Platform Superadmin**:
 
 1. **Cửa Hàng Tài Nguyên Số (`/commerce/store`):** Duyệt danh mục sản phẩm số, chọn biến thể SKU, thanh toán 1 chạm bằng Ví Xu (`internal_wallet`) hoặc qua cổng ngoại vi (VietQR, MoMo, Stripe, Crypto USDT) kèm cơ chế tự động kiểm tra trạng thái đơn hàng mỗi 3 giây.
-2. **Lịch Sử Đơn Hàng & Nhận Tài Nguyên (`/commerce/orders`):** Tra cứu đơn hàng của Workspace bằng `useVbenVxeGrid`, mở hộp thoại nhận bàn giao tài nguyên (`serial_stock` sao chép 1 chạm / tải tệp `.txt`, `tuquet_resource`, `digital_file`, `wallet_credit`).
+2. **Lịch Sử Đơn Hàng & Nhận Tài Nguyên (`/commerce/orders`):** Tra cứu đơn hàng của Workspace bằng `useVbenVxeGrid`, mở hộp thoại nhận bàn giao tài nguyên (`serial_stock` sao chép 1 chạm / tải tệp `.txt`, `resource`, `digital_file`, `wallet_credit`).
 3. **Ví Xu & Sổ Cái Giao Dịch (`/commerce/wallet`):** Theo dõi số dư `Xu` khả dụng, tổng nạp, tổng chi tiêu; tạo lệnh nạp Xu đa kênh và tra cứu sổ cái biến động số dư (`wallet_transactions`) qua `useVbenVxeGrid`.
 4. **Quản Trị Cửa Hàng & Cổng Thanh Toán (`/commerce/admin`):** Trung tâm quản trị dành riêng cho Platform Superadmin gồm 4 phân khu: (1) Quản lý Sản phẩm & SKU + Nạp kho hàng loạt (`importStockBatchAdminApi`), (2) Giám sát đơn hàng toàn hệ thống & Giao hàng lại (`fulfillOrderAdminApi`), (3) Duyệt lệnh thanh toán `manual_review` (`approveManualPaymentIntentAdminApi`), và (4) Cấu hình cổng thanh toán (`upsertPaymentGatewayAdminApi`).
 
@@ -173,7 +173,7 @@ const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrderRecord>({
 
 - [x] Menu `/commerce` hiển thị đầy đủ 4 route con (`/commerce/store`, `/commerce/orders`, `/commerce/wallet`, `/commerce/admin`) và lọc chính xác theo `meta.plugin` + `meta.authority`.
 - [x] Người dùng Tenant có thể mua sản phẩm số bằng Ví Xu (`internal_wallet`) nhận bàn giao tức thì hoặc thanh toán qua cổng ngoại vi kèm polling trạng thái 3 giây.
-- [x] Hộp thoại nhận tài nguyên hỗ trợ sao chép 1 chạm và xuất tệp `.txt` cho `serial_stock`, hiển thị thông tin cấp phát cho `tuquet_resource`, `digital_file`, và `wallet_credit`.
+- [x] Hộp thoại nhận tài nguyên hỗ trợ sao chép 1 chạm và xuất tệp `.txt` cho `serial_stock`, hiển thị thông tin cấp phát cho `resource`, `digital_file`, và `wallet_credit`.
 - [x] Platform Superadmin quản trị trọn vẹn vòng đời sản phẩm, nạp kho hàng loạt (`importStockBatchAdminApi`), giao hàng lại (`fulfillOrderAdminApi`), duyệt lệnh `manual_review` và cấu hình cổng thanh toán trên `/commerce/admin`.
 - [x] Vượt qua 100% `vitest`, `vue-tsc` (`0 errors`) và `oxlint` (`0 warnings/errors`).
 

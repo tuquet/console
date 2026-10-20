@@ -9,7 +9,7 @@
 
 ## 1. Objective (Mục Tiêu & Phạm Vi)
 
-Xây dựng phân hệ Quản trị Danh mục Hệ thống (**System Catalog**) bao gồm 2 màn hình nghiệp vụ sử dụng bảng `useVbenVxeGrid` và biểu mẫu `VxeForm` với **100% dữ liệu thực tế** từ Tuquet Cloud:
+Xây dựng phân hệ Quản trị Danh mục Hệ thống (**System Catalog**) bao gồm 2 màn hình nghiệp vụ sử dụng bảng `useVbenVxeGrid` và biểu mẫu `VxeForm` với **100% dữ liệu thực tế** từ Cloud:
 
 1. **Quản Trị Plugins Hệ Thống (`/system/plugins`):**
    - Truy vấn trực tiếp bảng `public.system_plugins` (`id`, `name`, `description`, `version`, `status`, `schema_name`, `manifest`, `installed_at`).

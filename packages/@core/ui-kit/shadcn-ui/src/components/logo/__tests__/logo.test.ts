@@ -20,7 +20,7 @@ describe('VbenLogo — Built-in Theme Inline SVG & Fallback', () => {
   it('renders an inline theme-reactive SVG when src is default /logo.svg or empty', () => {
     const { container, unmount } = mountLogo({
       src: '/logo.svg',
-      text: 'Tuquet Admin',
+      text: 'Admin',
       logoSize: 32,
     });
 
@@ -34,14 +34,14 @@ describe('VbenLogo — Built-in Theme Inline SVG & Fallback', () => {
     expect(html).toContain('hsl(var(--chart-1, var(--primary)))');
     expect(html).toContain('hsl(var(--chart-3, var(--primary)))');
     expect(html).toContain('hsl(var(--primary) / 0.22)');
-    expect(container.textContent).toContain('Tuquet Admin');
+    expect(container.textContent).toContain('Admin');
     unmount();
   });
 
   it('renders crisp white porcelain gradient stops when theme is dark', () => {
     const { container, unmount } = mountLogo({
       src: '/logo.svg',
-      text: 'Tuquet Admin',
+      text: 'Admin',
       theme: 'dark',
     });
 
@@ -80,14 +80,14 @@ describe('VbenLogo — Built-in Theme Inline SVG & Fallback', () => {
   it('hides logo text when collapsed is true', () => {
     const { container, unmount } = mountLogo({
       src: '/logo.svg',
-      text: 'Tuquet Admin',
+      text: 'Admin',
       collapsed: true,
     });
 
     expect(
       container.querySelector('svg[data-specter-logo="true"]'),
     ).not.toBeNull();
-    expect(container.textContent).not.toContain('Tuquet Admin');
+    expect(container.textContent).not.toContain('Admin');
     unmount();
   });
 });

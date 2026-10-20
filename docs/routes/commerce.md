@@ -95,7 +95,7 @@ Phân hệ thương mại điện tử gồm **4 tuyến đường nội bộ** 
 - **Nguồn Dữ Liệu:** `commerce.categories`, `commerce.products`, `commerce.product_variants`, `billing.wallets`, `billing.payment_gateways`
 - **Chức Năng Cốt Lõi:**
   - Chọn Workspace thao tác, hiển thị số dư Ví `Xu` thời gian thực và nút mở nhanh cửa hàng công khai `/store`.
-  - Lọc sản phẩm theo danh mục, loại tài nguyên (`serial_stock`, `tuquet_resource`, `digital_file`, `wallet_credit`) và từ khóa.
+  - Lọc sản phẩm theo danh mục, loại tài nguyên (`serial_stock`, `resource`, `digital_file`, `wallet_credit`) và từ khóa.
   - Đặt mua biến thể SKU bằng **Ví Xu (`internal_wallet`)** nhận bàn giao tức thì (< 100ms) hoặc thanh toán qua cổng ngoại vi (VietQR, MoMo, Stripe, Crypto USDT) kèm cơ chế tự động kiểm tra trạng thái đơn hàng mỗi 3 giây.
 
 ### 2.2. Lịch Sử Đơn Hàng & Nhận Tài Nguyên (`/commerce/orders`)
@@ -104,7 +104,7 @@ Phân hệ thương mại điện tử gồm **4 tuyến đường nội bộ** 
 - **Nguồn Dữ Liệu:** `commerce.orders`, `commerce.order_items`, `commerce.order_deliveries`
 - **Chức Năng Cốt Lõi:**
   - Hiển thị 3 thẻ KPI (Tổng đơn hàng, Đơn hoàn tất, Tổng Xu đã chi) và bảng `useVbenVxeGrid<CommerceOrderRecord>` tích hợp bộ lọc trạng thái và từ khóa.
-  - Hộp thoại **Nhận Tài Nguyên (`OrderDeliveriesDialog`)**: Sao chép 1 chạm hoặc tải tệp `.txt` cho danh sách tài khoản/key (`serial_stock`), xem thông tin cấp phát tự động cho `tuquet_resource` (`automa.workflows`, `runners.proxies`, `billing.subscriptions`), hoặc tải tệp `digital_file`.
+  - Hộp thoại **Nhận Tài Nguyên (`OrderDeliveriesDialog`)**: Sao chép 1 chạm hoặc tải tệp `.txt` cho danh sách tài khoản/key (`serial_stock`), xem thông tin cấp phát tự động cho `resource` (`automa.workflows`, `runners.proxies`, `billing.subscriptions`), hoặc tải tệp `digital_file`.
 
 ### 2.3. Ví Xu & Sổ Cái Giao Dịch (`/commerce/wallet`)
 

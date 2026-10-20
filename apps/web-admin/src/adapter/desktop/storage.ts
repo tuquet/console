@@ -6,7 +6,7 @@ async function getDesktopStore() {
   if (!storeInstance && isTauriEnvironment()) {
     try {
       const { Store } = await import('@tauri-apps/plugin-store');
-      storeInstance = await Store.load('tuquet-desktop-storage.json');
+      storeInstance = await Store.load('desktop-storage.json');
     } catch (error) {
       console.warn('[Desktop Storage] Store load failed:', error);
     }

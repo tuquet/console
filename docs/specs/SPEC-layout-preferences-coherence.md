@@ -9,7 +9,7 @@
 
 ## 1. Objective (Mục Tiêu & Phạm Vi)
 
-Đảm bảo tính nhất quán tuyệt đối, khả năng đáp ứng đa thiết bị (Mobile/Tablet/Desktop), đồng bộ hóa dải màu biểu đồ (`Chart Palette`), **Logo thương hiệu SVG** và **hệ thống biểu tượng Lucide (`@lucide/vue` / `VbenIcon`)** theo chủ đề Built-in và an toàn vận hành trong hệ thống Layout & Preferences của Tuquet Admin (`@tuquet/admin-web`, `@vben/preferences`, `@vben-core/shadcn-ui`, `@vben-core/menu-ui`, `@vben-core/tabs-ui`, `@vben/layouts`, `@vben-core/layout-ui`):
+Đảm bảo tính nhất quán tuyệt đối, khả năng đáp ứng đa thiết bị (Mobile/Tablet/Desktop), đồng bộ hóa dải màu biểu đồ (`Chart Palette`), **Logo thương hiệu SVG** và **hệ thống biểu tượng Lucide (`@lucide/vue` / `VbenIcon`)** theo chủ đề Built-in và an toàn vận hành trong hệ thống Layout & Preferences của Admin (`@tuquet/admin-web`, `@vben/preferences`, `@vben-core/shadcn-ui`, `@vben-core/menu-ui`, `@vben-core/tabs-ui`, `@vben/layouts`, `@vben-core/layout-ui`):
 
 1. **Chống Khóa Cứng Giao Diện (Anti-Lockout Invariant):** Khi người dùng thay đổi bất kỳ cài đặt nào trong Preferences Drawer (tắt Header, tắt Sidebar, đổi vị trí nút Settings), hệ thống luôn bảo toàn khả năng mở lại Preferences Drawer, điều hướng trang và Đăng xuất.
 2. **Bảo Toàn Khả Năng Đáp Ứng Đa Thiết Bị (Zero Horizontal Overflow & Viewport Preservation):** Khắc phục tràn ngang ở chế độ `compact` (`width: min(100%, 1200px)`), cố định thanh Footer chuẩn lề, và bảo toàn trạng thái runtime `app.isMobile` khi nhấn `resetPreferences()`.

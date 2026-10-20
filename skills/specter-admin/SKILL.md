@@ -1,14 +1,14 @@
 ---
 name: specter-admin
 description: >
-  Master engineering runbook and domain skill for Tuquet Admin Dashboard (Vue 3, Vite, Vben 5, Shadcn UI). Architectural navigation of preferences engine, 22 routes, Supabase SSOT data access, Shadcn Slate design tokens, local Tailscale preview, and pre-push gates. Trigger: /specter-admin, "specter admin", "preferences bug", "admin preferences", "diff upstream admin", "admin layout", "admin widgets", "admin build", "admin routes", "supabase client", "admin quality gate". Do NOT use for backend runner daemon (use /specter-runner) or cloud database migrations (use /specter-cloud).
+  Master engineering runbook and domain skill for Admin Dashboard (Vue 3, Vite, Vben 5, Shadcn UI). Architectural navigation of preferences engine, 22 routes, Supabase SSOT data access, Shadcn Slate design tokens, local Tailscale preview, and pre-push gates. Trigger: /specter-admin, "specter admin", "preferences bug", "admin preferences", "diff upstream admin", "admin layout", "admin widgets", "admin build", "admin routes", "supabase client", "admin quality gate". Do NOT use for backend runner daemon (use /specter-runner) or cloud database migrations (use /specter-cloud).
 argument-hint: '[preferences|routes|api|tokens|gate|test|build] [--upstream <ref>]'
 license: MIT
 ---
 
-# Tuquet Admin Dashboard — Master Engineering Runbook (`specter-admin`)
+# Admin Dashboard — Master Engineering Runbook (`specter-admin`)
 
-Master engineering runbook for Tuquet Admin Dashboard (`/root/tuquet/admin` / `admin.tuquet.com`). Staccato cadence. Direct architecture maps, SSOT API protocols, 5 core preferences invariants, quality gates, and rapid diagnostic recipes.
+Master engineering runbook for Admin Dashboard (`/root/tuquet/admin` / `admin.tuquet.com`). Staccato cadence. Direct architecture maps, SSOT API protocols, 5 core preferences invariants, quality gates, and rapid diagnostic recipes.
 
 ---
 
@@ -214,7 +214,7 @@ Follow global enterprise standards (Stripe, GitHub Primer, Vercel, Linear, Apple
 
 ### 4.5. VxeTable & Component Adapter Architecture
 
-The VxeTable ecosystem in Tuquet Admin operates across 4 coordinated tiers:
+The VxeTable ecosystem in Admin operates across 4 coordinated tiers:
 
 1. **Global Configuration (`apps/web-admin/src/adapter/vxe-table.ts`):**
    - Initialized via `setupVbenVxeTable({ configVxeTable, useVbenForm })`.
@@ -374,7 +374,7 @@ pnpm run build:local
 
 ## 9. Upstream Tracking & Triage
 
-Tuquet Admin repository baseline:
+Admin repository baseline:
 
 ```bash
 # Check diff against upstream for a specific component:

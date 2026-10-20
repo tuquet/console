@@ -1,6 +1,6 @@
 # Security Policy
 
-Tuquet Admin takes the security of our unified management and operations platform seriously. We appreciate the responsible disclosure of security issues by the community and our customers.
+Admin takes the security of our unified management and operations platform seriously. We appreciate the responsible disclosure of security issues by the community and our customers.
 
 ## Supported Versions
 
@@ -13,7 +13,7 @@ Only the latest active major releases receive security updates and vulnerability
 
 ## Reporting a Vulnerability
 
-If you discover a vulnerability or security flaw in Tuquet Admin or any associated packages:
+If you discover a vulnerability or security flaw in Admin or any associated packages:
 
 1. **Do not disclose publicly:** Please do not file public GitHub issues or discussions for vulnerabilities.
 2. **Private Reporting:**
@@ -32,4 +32,4 @@ If you discover a vulnerability or security flaw in Tuquet Admin or any associat
 - **Initial Assessment:** Within 3 business days.
 - **Remediation & Patch Release:** Priority critical CVEs will be expedited and released with hotfix versions.
 
-Thank you for helping keep Tuquet and its community secure.
+Thank you for helping keep and its community secure.

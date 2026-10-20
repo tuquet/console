@@ -9,7 +9,7 @@
 
 ## 1. Objective (Mục Tiêu & Phạm Vi)
 
-Xây dựng phân hệ Quản trị Kịch bản Tự động hóa (**Automa Engine** — plugin `automa`) thuộc nhánh điều hướng `/automation/*`, kết nối **100% dữ liệu đo đếm thực tế** từ schema `automa` của Tuquet Cloud qua header `Accept-Profile: automa`:
+Xây dựng phân hệ Quản trị Kịch bản Tự động hóa (**Automa Engine** — plugin `automa`) thuộc nhánh điều hướng `/automation/*`, kết nối **100% dữ liệu đo đếm thực tế** từ schema `automa` của Cloud qua header `Accept-Profile: automa`:
 
 1. **Quản Trị Quy Trình Tự Động Hóa (`/automation/workflows`):**
    - Hiển thị danh mục kịch bản từ `automa.workflows` (`id`, `tenant_id`, `name`, `description`, `version`, `status`, `created_at`, `updated_at`) qua bảng `useVbenVxeGrid`.

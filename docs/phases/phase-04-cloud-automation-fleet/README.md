@@ -51,7 +51,7 @@ Sau khi Chợ sản phẩm số và hệ thống thanh toán đã vận hành tr
 | **Độ sẵn sàng hệ thống (Uptime SLA)** | **99.9%** | Giám sát liên tục trạng thái cụm máy chủ VPS 24/7/365 |
 | **Độ chính xác đo cước tài nguyên** | **Tuyệt đối 100%** | Kiểm toán đối soát thời gian chạy thực tế và số tiền trừ ví qua Sổ cái kép |
 | **Tỷ lệ triệt tiêu tiến trình mồ côi** | **100% (Zero-Zombie)** | Kiểm toán RAM/CPU của VPS sau 10.000 phiên chạy kịch bản liên tục |
-| **Tiết kiệm chi phí hạ tầng máy chủ** | $\ge 40\%$ | So sánh chi phí VPS của kiến trúc Tuquet Runner với Selenium/Puppeteer thông thường |
+| **Tiết kiệm chi phí hạ tầng máy chủ** | $\ge 40\%$ | So sánh chi phí VPS của kiến trúc Runner với Selenium/Puppeteer thông thường |
 | **Khả năng mở rộng quy mô cụm** | $\ge 1.000$ VPS Nodes | Thử nghiệm kết nối và điều phối cụm 1.000 máy chủ phân tán |
 
 ---

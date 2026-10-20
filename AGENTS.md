@@ -1,4 +1,4 @@
-# Specter — Engineering Standards & Agent Guidelines
+# Admin — Engineering Standards & Agent Guidelines
 
 Tài liệu này xác lập các tiêu chuẩn kỹ thuật, thiết kế và quy trình phát triển bắt buộc áp dụng cho toàn bộ AI Agents và Kỹ sư phát triển trên kho lưu trữ `tuquet/admin`.
 
@@ -6,7 +6,7 @@ Tài liệu này xác lập các tiêu chuẩn kỹ thuật, thiết kế và qu
 
 ## 1. Triết lý Cốt Lõi: KISS & YAGNI
 
-Hệ thống quản trị `admin.tuquet.com` kết nối trực tiếp đến **Tuquet Cloud** (`tuquet/cloud`) và quản lý kiến trúc **Multi-Tenant**. Giao diện và kiến trúc mã nguồn phải tuân thủ nghiêm ngặt hai nguyên tắc:
+Hệ thống quản trị `admin.tuquet.com` kết nối trực tiếp đến **Cloud** (`tuquet/cloud`) và quản lý kiến trúc **Multi-Tenant**. Giao diện và kiến trúc mã nguồn phải tuân thủ nghiêm ngặt hai nguyên tắc:
 
 - **KISS (Keep It Simple, Stupid)**: Giữ mọi thứ đơn giản, trực diện, dễ bảo trì. Loại bỏ các tầng trừu tượng không cần thiết.
 - **YAGNI (You Aren't Gonna Need It)**: Chỉ xây dựng những gì thực sự cần cho người quản trị hệ thống. Tuyệt đối không nhồi nhét "Feature Bloat" từ các template ERP cũ.
@@ -81,10 +81,10 @@ Mọi màn hình, bảng dữ liệu và cửa sổ tương tác (Modal/Drawer) 
 ## 5. Dữ Liệu Đo Đếm Thực Tế (100% Real Telemetry — Không Mock Data)
 
 - **Tuyệt đối không sử dụng Mock Data, số ảo hoặc văn bản tiếng nước ngoài không liên quan (tiếng Trung)**.
-- Mọi chỉ số trên các trang **Workspace**, **Commerce** và **Analytics** phải được truy vấn và tính toán trực tiếp từ **Tuquet Cloud**:
+- Mọi chỉ số trên các trang **Workspace**, **Commerce** và **Analytics** phải được truy vấn và tính toán trực tiếp từ **Cloud**:
   - `public.tenants`: Số lượng Workspace, phân bổ gói thuê bao (Pro / Free / Enterprise), mốc thời gian tăng trưởng.
   - `public.system_plugins`: Trạng thái và schema của các Core Kernel Plugins (`core-iam`, `runners`, `automa`, `storage`, `subscriptions`, `webhooks`) và Extension Plugins (`commerce`, v.v.).
-  - `Specter Fleet Bridge`: Trạng thái lắng nghe cổng SSO Desktop loopback (`127.0.0.1:8765`).
+  - `Fleet Bridge`: Trạng thái lắng nghe cổng SSO Desktop loopback (`127.0.0.1:8765`).
   - Độ trễ mạng thực tế (Latency Ms) giữa trình duyệt và Supabase REST API / Cloudflare Edge.
 
 ---

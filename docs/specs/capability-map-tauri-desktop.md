@@ -1,8 +1,8 @@
-# Capability Map: Tuquet Admin Tauri Desktop Application (`INITIATIVE-TAURI-DESKTOP`)
+# Capability Map: Admin Tauri Desktop Application (`INITIATIVE-TAURI-DESKTOP`)
 
 ## 1. Executive Summary
 
-Xây dựng phiên bản Native Desktop Application cho Tuquet Admin Console (`admin.tuquet.com`) trên nền tảng **Tauri v2 (Stable 2.x)**, tích hợp liền mạch vào hệ thống pnpm workspace và Turborepo hiện có, đảm bảo hiệu năng cao nhất, dung lượng RAM siêu nhẹ ($\le 40\text{MB}$ khi khởi động), bảo mật ACL chuẩn enterprise, và giao tiếp native với hệ điều hành (Windows, macOS, Linux).
+Xây dựng phiên bản Native Desktop Application cho Admin Console (`admin.tuquet.com`) trên nền tảng **Tauri v2 (Stable 2.x)**, tích hợp liền mạch vào hệ thống pnpm workspace và Turborepo hiện có, đảm bảo hiệu năng cao nhất, dung lượng RAM siêu nhẹ ($\le 40\text{MB}$ khi khởi động), bảo mật ACL chuẩn enterprise, và giao tiếp native với hệ điều hành (Windows, macOS, Linux).
 
 ---
 

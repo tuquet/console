@@ -1,8 +1,8 @@
-# Implementation Plan: Tuquet Admin Tauri Desktop Application (`INITIATIVE-TAURI-DESKTOP`)
+# Implementation Plan: Admin Tauri Desktop Application (`INITIATIVE-TAURI-DESKTOP`)
 
 ## 1. Overview
 
-Xây dựng phiên bản Native Desktop Application hoàn chỉnh cho **Tuquet Admin Console** (`admin.tuquet.com`) trên nền tảng **Tauri v2 (Stable 2.x)**:
+Xây dựng phiên bản Native Desktop Application hoàn chỉnh cho **Admin Console** (`admin.tuquet.com`) trên nền tảng **Tauri v2 (Stable 2.x)**:
 
 - **Kiến trúc:** 1 Codebase duy nhất (`apps/web-admin/src-tauri`), dùng chung $100\%$ 22 routes, layout và stores.
 - **Giao diện:** Thanh tiêu đề tùy biến không viền (Frameless Custom Titlebar) chuẩn Shadcn Slate tokens, vùng kéo cửa sổ mượt mà (`data-tauri-drag-region`).

@@ -6,8 +6,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 const getDefaultPwaOptions = (name: string): Partial<PwaPluginOptions> => ({
   manifest: {
-    description:
-      'Tuquet Admin is the unified administration portal for Tuquet Platform.',
+    description: 'Admin is the unified administration portal for Platform.',
     icons: [
       {
         sizes: '192x192',

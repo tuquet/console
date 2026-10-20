@@ -1,8 +1,8 @@
-# Implementation Plan: Tuquet Admin Public Repo, CI Quality Gates & CD Desktop Release (`INITIATIVE-CICD-PUBLIC-RELEASE`)
+# Implementation Plan: Admin Public Repo, CI Quality Gates & CD Desktop Release (`INITIATIVE-CICD-PUBLIC-RELEASE`)
 
 ## 1. Overview
 
-Thiết lập toàn bộ hạ tầng tự động hóa CI/CD và chuẩn hóa Public Repository cho **Tuquet Admin Console** (`admin.tuquet.com`) trên nền tảng GitHub Actions:
+Thiết lập toàn bộ hạ tầng tự động hóa CI/CD và chuẩn hóa Public Repository cho **Admin Console** (`admin.tuquet.com`) trên nền tảng GitHub Actions:
 
 - **Public Repository Readiness:** Dọn dẹp triệt để mã nguồn thừa từ upstream (`tuquet/admin`), rà soát bảo mật không để lộ secrets, bổ sung `SECURITY.md`, xác nhận `LICENSE` MIT, đính kèm badges CI & Download links trên `README.md`.
 - **Continuous Integration (CI):** Pipeline kiểm định chất lượng đa tầng (`.github/workflows/ci.yml`) bắt buộc vượt qua 5 cổng kiểm tra: Lint & Format, Typecheck 38 packages, Vitest Suite (105 files), Headless Chrome Console Gate (22 routes), và Rust Backend `cargo check`.

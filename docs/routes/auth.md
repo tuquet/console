@@ -99,7 +99,7 @@ Sử dụng container giao diện chuyên dụng `AuthPageLayout` ([`src/layouts
 sequenceDiagram
     participant Desk as Specter Desk (Native App)
     participant Browser as Web Browser (admin.tuquet.com)
-    participant Cloud as Tuquet Cloud (Supabase)
+    participant Cloud as Cloud (Supabase)
 
     Desk->>Browser: Mở URL /auth/desktop?redirect_uri=http://127.0.0.1:8765/sso/callback
     Browser->>Cloud: Xác thực phiên đăng nhập hiện tại

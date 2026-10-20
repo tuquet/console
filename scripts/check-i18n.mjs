@@ -179,7 +179,7 @@ function main() {
   }
 
   console.log('============================================================');
-  console.log('  Tuquet Admin i18n Integrity Report (en-US <-> vi-VN)');
+  console.log('  Admin i18n Integrity Report (en-US <-> vi-VN)');
   console.log('============================================================');
   console.log(`  - Total en-US dictionary keys : ${enKeys.size}`);
   console.log(`  - Total vi-VN dictionary keys : ${viKeys.size}`);

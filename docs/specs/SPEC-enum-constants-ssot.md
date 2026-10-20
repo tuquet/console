@@ -9,7 +9,7 @@
 
 ## 1. Objective (Mục Tiêu & Phạm Vi)
 
-Thiết lập hệ thống **Enum & Constants Single Source of Truth (SSOT)** chuẩn công nghiệp cho toàn bộ Tuquet Admin (`@vben/constants` và `@tuquet/admin-web`), chấm dứt tình trạng phân mảnh kiểu union (`'published' | 'draft'`) và chuỗi tĩnh rời rạc (_magic strings_) trong các tầng API, Store, Form Filter và Bảng dữ liệu (`VxeGrid`):
+Thiết lập hệ thống **Enum & Constants Single Source of Truth (SSOT)** chuẩn công nghiệp cho toàn bộ Admin (`@vben/constants` và `@tuquet/admin-web`), chấm dứt tình trạng phân mảnh kiểu union (`'published' | 'draft'`) và chuỗi tĩnh rời rạc (_magic strings_) trong các tầng API, Store, Form Filter và Bảng dữ liệu (`VxeGrid`):
 
 1. **Chuẩn Hóa Pattern `as const` Object + Derived Union Type (Zero Runtime Overhead):**
    - Thay thế toàn bộ kiểu union rời rạc và chuỗi literal lặp lại bằng cặp **Const Object (`UPPER_SNAKE_CASE`)** + **Derived Type (`PascalCase`)** có khả năng tự suy diễn kiểu tuyệt đối, tương thích 100% với `isolatedDeclarations`, `vue-tsc`, `oxlint` và trình đóng gói `Rolldown`.

@@ -9,7 +9,7 @@
 
 ## 1. Objective (Mục Tiêu & Phạm Vi)
 
-Xây dựng phân hệ Quản trị Hạ tầng Thực thi (**Runners Fleet** — plugin `runners`) thuộc nhánh điều hướng `/automation/*`, kết nối **100% dữ liệu đo đếm thực tế** từ schema `runners` của Tuquet Cloud qua header `Accept-Profile: runners` và thăm dò cổng loopback cục bộ (`127.0.0.1:8765`):
+Xây dựng phân hệ Quản trị Hạ tầng Thực thi (**Runners Fleet** — plugin `runners`) thuộc nhánh điều hướng `/automation/*`, kết nối **100% dữ liệu đo đếm thực tế** từ schema `runners` của Cloud qua header `Accept-Profile: runners` và thăm dò cổng loopback cục bộ (`127.0.0.1:8765`):
 
 1. **Quản Trị Thiết Bị & Máy Trạm (`/automation/devices`):**
    - Hiển thị danh mục thiết bị từ `runners.devices` (`id`, `tenant_id`, `name`, `machine_fingerprint`, `status`, `version`, `os_info`, `cpu_cores`, `ram_mb`, `capabilities`, `active_jobs`, `last_heartbeat_at`) qua bảng `useVbenVxeGrid`.

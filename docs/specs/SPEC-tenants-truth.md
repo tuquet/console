@@ -9,7 +9,7 @@
 
 ## 1. Objective (Mục Tiêu & Phạm Vi)
 
-Xây dựng phân hệ Quản trị Workspace (`/tenants` và `/tenants/:id`) kết nối **100% dữ liệu đo đếm thực tế (Real Telemetry)** từ 3 schema `public`, `billing`, và `runners` của Tuquet Cloud, sử dụng chuẩn bảng dữ liệu `useVbenVxeGrid` (`VxeTable`) và biểu mẫu `VxeForm`:
+Xây dựng phân hệ Quản trị Workspace (`/tenants` và `/tenants/:id`) kết nối **100% dữ liệu đo đếm thực tế (Real Telemetry)** từ 3 schema `public`, `billing`, và `runners` của Cloud, sử dụng chuẩn bảng dữ liệu `useVbenVxeGrid` (`VxeTable`) và biểu mẫu `VxeForm`:
 
 1. **Danh Sách Workspace (`/tenants`):**
    - Hiển thị danh mục toàn bộ Workspace mà người dùng có quyền truy cập (hoặc toàn bộ nền tảng đối với Superadmin) qua bảng `useVbenVxeGrid`.

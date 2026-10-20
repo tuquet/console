@@ -113,7 +113,7 @@ describe('enum & Constants SSOT (@vben/constants + #/constants)', () => {
     expect(COMMERCE_PRODUCT_TYPE_VALUES).toEqual([
       'digital_file',
       'serial_stock',
-      'tuquet_resource',
+      'resource',
       'wallet_credit',
     ]);
     expect(COMMERCE_ORDER_STATUS_VALUES).toEqual([

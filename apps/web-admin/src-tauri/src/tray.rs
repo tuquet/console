@@ -5,7 +5,7 @@ use tauri::{
 };
 
 pub fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
-    let show_item = MenuItem::with_id(app, "show", "Mở Tuquet Admin", true, None::<&str>)?;
+    let show_item = MenuItem::with_id(app, "show", "Mở Admin", true, None::<&str>)?;
     let check_update_item =
         MenuItem::with_id(app, "check_update", "Kiểm tra Cập nhật...", true, None::<&str>)?;
     let quit_item = MenuItem::with_id(app, "quit", "Thoát", true, None::<&str>)?;
@@ -17,7 +17,7 @@ pub fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
             .icon(icon.clone())
             .menu(&menu)
             .show_menu_on_left_click(false)
-            .tooltip("Tuquet Admin Console")
+            .tooltip("Admin Console")
             .on_menu_event(|app, event| match event.id.as_ref() {
                 "show" => {
                     if let Some(window) = app.get_webview_window("main") {

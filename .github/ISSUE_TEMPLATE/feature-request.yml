@@ -1,5 +1,5 @@
 name: ✨ New Feature Proposal
-description: Propose a new feature to be added to Tuquet Admin
+description: Propose a new feature to be added to Admin
 title: 'FEATURE: '
 labels: ['enhancement: pending triage']
 body:
@@ -13,8 +13,8 @@ body:
       label: Version
       description: What version of our software are you running?
       options:
-        - Tuquet Admin V5
-        - Tuquet Admin V2
+        - Admin V5
+        - Admin V2
       default: 0
     validations:
       required: true

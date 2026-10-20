@@ -10,7 +10,7 @@
 
 Một sản phẩm phần mềm dù tốt đến đâu cũng sẽ bị giới hạn tốc độ tăng trưởng nếu chỉ dựa vào đội ngũ bán hàng nội bộ.
 
-Phase 05 nâng tầm Tuquet từ một "Sản phẩm Phần mềm" thành một **"Nền Tảng Kinh Doanh Mở (Open Platform Ecosystem)"**:
+Phase 05 nâng tầm từ một "Sản phẩm Phần mềm" thành một **"Nền Tảng Kinh Doanh Mở (Open Platform Ecosystem)"**:
 
 1. **Mô hình Nhượng quyền Đại lý (White-Label Franchise):** Các doanh nghiệp đối tác có thể mua bản quyền để kinh doanh dịch vụ tự động hóa và proxy dưới thương hiệu, tên miền và bảng giá riêng của họ mà không cần xây dựng lại công nghệ.
 2. **Mô hình Kinh tế Sáng tạo (Creator Economy Marketplace):** Mở sàn cho hàng nghìn lập trình viên bên ngoài đăng tải và bán các kịch bản tự động hóa, tạo ra hiệu ứng mạng lưới (Network Effect) tự mở rộng không tốn chi phí R&D.
@@ -27,7 +27,7 @@ Mở sàn cộng đồng đồng nghĩa với nguy cơ bị kẻ xấu tải lê
      - Tên miền riêng (Custom Domain, ví dụ: `automation.doitac.com` kèm chứng chỉ SSL tự động).
      - Bộ nhận diện thương hiệu: Logo, Favicon, Tiêu đề trang, Bảng màu giao diện (Brand Color Tokens).
      - Cấu hình cổng thanh toán ngân hàng riêng của đại lý.
-   - Toàn bộ hạ tầng kỹ thuật máy chủ và bot vẫn vận hành an toàn trên nền tảng Tuquet Cloud.
+   - Toàn bộ hạ tầng kỹ thuật máy chủ và bot vẫn vận hành an toàn trên nền tảng Cloud.
 2. **Hộp Cát Bảo Mật Kiểm Duyệt Kịch Bản Tự Động (Automated Security Sandbox):**
    - Môi trường cô lập phân tích kịch bản trước khi duyệt:
      - Quét mã độc, regex kiểm tra việc gửi trộm dữ liệu nhạy cảm ra webhook lạ.

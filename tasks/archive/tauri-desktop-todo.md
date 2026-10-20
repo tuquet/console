@@ -1,4 +1,4 @@
-# Task List: Tuquet Admin Tauri Desktop Application (`INITIATIVE-TAURI-DESKTOP`)
+# Task List: Admin Tauri Desktop Application (`INITIATIVE-TAURI-DESKTOP`)
 
 ## Phase 1: Foundation Scaffold & Workspace Integration
 
@@ -18,7 +18,7 @@
 
 ### Task 1.2: Thiết lập `tauri.conf.json` Master Configuration
 
-**Description:** Khởi tạo và tinh chỉnh file `tauri.conf.json` cho Tauri v2: identifier `com.tuquet.admin`, tên sản phẩm `Tuquet Admin`, cấu hình lệnh dev kết nối tới `http://localhost:5320` và build output `../dist`. **Acceptance criteria:**
+**Description:** Khởi tạo và tinh chỉnh file `tauri.conf.json` cho Tauri v2: identifier `com.tuquet.admin`, tên sản phẩm `Admin`, cấu hình lệnh dev kết nối tới `http://localhost:5320` và build output `../dist`. **Acceptance criteria:**
 
 - [x] File `tauri.conf.json` khớp 100% schema của Tauri v2.
 - [x] Cấu hình `beforeDevCommand: "pnpm run dev"`, `devUrl: "http://localhost:5320"`, `beforeBuildCommand: "pnpm run build"`, `frontendDist: "../dist"`. **Verification:**
@@ -66,7 +66,7 @@
 
 ### Task 2.2: Cấu hình Content Security Policy (CSP) Tăng Cường
 
-**Description:** Thiết lập CSP trong `tauri.conf.json` khóa chặt tài nguyên, chỉ cho phép kết nối đến Supabase backend, local loopback `127.0.0.1:*`, và các domain Tuquet được định danh. **Acceptance criteria:**
+**Description:** Thiết lập CSP trong `tauri.conf.json` khóa chặt tài nguyên, chỉ cho phép kết nối đến Supabase backend, local loopback `127.0.0.1:*`, và các domain được định danh. **Acceptance criteria:**
 
 - [x] Chuỗi CSP hợp lệ, chặn thực thi mã script bên ngoài trái phép. **Verification:**
 - [x] Manual check: Kiểm tra CSP header trong cấu hình `tauri.conf.json`. **Dependencies:** Task 2.1 **Files likely touched:**
@@ -113,10 +113,10 @@
 
 ### Task 3.3: Tích hợp System Tray (Khay Hệ Thống)
 
-**Description:** Cấu hình icon và menu ngữ cảnh cho System Tray trong Rust (`src-tauri/src/tray.rs` hoặc `lib.rs`): "Mở Tuquet Admin", "Kiểm tra Cập nhật", và "Thoát". Hỗ trợ thu nhỏ ứng dụng xuống khay hệ thống khi bấm nút đóng hoặc nút thu nhỏ. **Acceptance criteria:**
+**Description:** Cấu hình icon và menu ngữ cảnh cho System Tray trong Rust (`src-tauri/src/tray.rs` hoặc `lib.rs`): "Mở Admin", "Kiểm tra Cập nhật", và "Thoát". Hỗ trợ thu nhỏ ứng dụng xuống khay hệ thống khi bấm nút đóng hoặc nút thu nhỏ. **Acceptance criteria:**
 
-- [x] Icon Tuquet xuất hiện ở khay hệ thống Windows.
-- [x] Nhấp đúp vào tray icon hoặc chọn "Mở Tuquet Admin" sẽ đưa cửa sổ lên màn hình. **Verification:**
+- [x] Icon xuất hiện ở khay hệ thống Windows.
+- [x] Nhấp đúp vào tray icon hoặc chọn "Mở Admin" sẽ đưa cửa sổ lên màn hình. **Verification:**
 - [x] Build succeeds: `cd apps/web-admin/src-tauri && cargo check` **Dependencies:** Task 3.1 **Files likely touched:**
 - `apps/web-admin/src-tauri/src/tray.rs`
 - `apps/web-admin/src-tauri/src/lib.rs`
@@ -190,7 +190,7 @@
 **Description:** Thực hiện kiểm thử toàn diện toàn bộ 4 bước chất lượng (`check:type`, `lint`, `check:console`, `test:unit`). Tiến hành đóng gói ứng dụng desktop bản release bằng `pnpm run tauri:build --debug` để nghiệm thu file cài đặt Windows, đo đạc RAM và thời gian khởi động. **Acceptance criteria:**
 
 - [x] Cả 4 bước kiểm thử Pre-Push Gate đều vượt qua (0 errors, 0 warnings).
-- [x] Bản dựng executable `.exe` được xuất xưởng thành công tại `src-tauri/target/x86_64-pc-windows-gnu/debug/tuquet-admin.exe` (sẵn sàng cho GitHub Actions release bundle).
+- [x] Bản dựng executable `.exe` được xuất xưởng thành công tại `src-tauri/target/x86_64-pc-windows-gnu/debug/admin.exe` (sẵn sàng cho GitHub Actions release bundle).
 - [x] Thời gian khởi động ứng dụng $\le 800\text{ms}$, dung lượng RAM ban đầu $\le 45\text{MB}$. **Verification:**
 - [x] Quality gate: `pnpm run check:type && pnpm run lint && pnpm run test:unit && pnpm run check:console`
 - [x] Build succeeds: `pnpm run tauri:build:exe` **Dependencies:** Task 5.1 **Files likely touched:**

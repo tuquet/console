@@ -10,11 +10,11 @@
 
 ## Bối Cảnh (Context)
 
-Trong kiến trúc Multi-Tenant của Tuquet Cloud, mỗi tổ chức (Workspace/Tenant) được cách ly nghiêm ngặt thông qua Row Level Security (RLS). Người dùng thông thường chỉ có thể thấy các thành viên, thiết bị, quy trình và nhật ký thuộc về những workspace mà họ được cấp quyền (`get_user_tenant_ids()`).
+Trong kiến trúc Multi-Tenant của Cloud, mỗi tổ chức (Workspace/Tenant) được cách ly nghiêm ngặt thông qua Row Level Security (RLS). Người dùng thông thường chỉ có thể thấy các thành viên, thiết bị, quy trình và nhật ký thuộc về những workspace mà họ được cấp quyền (`get_user_tenant_ids()`).
 
 Tuy nhiên, đội ngũ vận hành hệ thống (**Platform Superadmin**) cần có khả năng giám sát toàn diện ở cấp độ hạ tầng trên toàn bộ nền tảng:
 
-1. **Quản lý người dùng toàn hệ sinh thái:** Xem danh bạ tất cả các tài khoản đã đăng ký trên Tuquet Cloud (`public.profiles`), theo dõi số lượng workspace mà mỗi người dùng tham gia.
+1. **Quản lý người dùng toàn hệ sinh thái:** Xem danh bạ tất cả các tài khoản đã đăng ký trên Cloud (`public.profiles`), theo dõi số lượng workspace mà mỗi người dùng tham gia.
 2. **Nhật ký an ninh toàn cầu (Global Audit Trail):** Giám sát các sự kiện an ninh, phân quyền, xóa workspace hoặc đổi mật khẩu trên phạm vi toàn hệ thống (`public.audit_logs`) mà không bị giới hạn theo từng tenant.
 3. **Quản lý hợp đồng thuê bao SaaS (Platform Subscriptions):** Theo dõi toàn bộ các gói cước đang hoạt động, doanh thu định kỳ hàng tháng (MRR) và thời hạn gia hạn từ `billing.subscriptions` (schema `billing`).
 4. **Ma trận vai trò & quyền hạn (RBAC Catalog):** Trực quan hóa 4 System Roles và danh mục 36 quyền hạn vi hạt từ `public.permissions` trên 6 module dịch vụ (`runners`, `automa`, `core-iam`, `subscriptions`, `storage`, `webhooks`).

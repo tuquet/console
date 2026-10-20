@@ -73,7 +73,7 @@ const notifications = ref<NotificationItem[]>([
     avatar: 'https://avatar.vercel.sh/satori',
     date: '1 day ago',
     isRead: false,
-    message: 'Explore Tuquet documentation and operational guides.',
+    message: 'Explore documentation and operational guides.',
     title: 'Documentation',
     link: 'https://docs.tuquet.com',
   },

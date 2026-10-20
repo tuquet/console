@@ -10,7 +10,7 @@
 
 ## Bối Cảnh (Context)
 
-Hệ thống quản trị `admin.tuquet.com` (`apps/web-admin`) kết nối trực tiếp đến **Tuquet Cloud** (`tuquet/cloud/supabase`) và quản trị mô hình Multi-Tenant. Để đảm bảo an toàn dữ liệu, tính toàn vẹn thông tin và trải nghiệm người dùng tối ưu trên mọi kích cỡ màn hình, kiến trúc định tuyến và truy cập dữ liệu cần thỏa mãn các đặc thù kỹ thuật của hạ tầng backend:
+Hệ thống quản trị `admin.tuquet.com` (`apps/web-admin`) kết nối trực tiếp đến **Cloud** (`tuquet/cloud/supabase`) và quản trị mô hình Multi-Tenant. Để đảm bảo an toàn dữ liệu, tính toàn vẹn thông tin và trải nghiệm người dùng tối ưu trên mọi kích cỡ màn hình, kiến trúc định tuyến và truy cập dữ liệu cần thỏa mãn các đặc thù kỹ thuật của hạ tầng backend:
 
 1. **Phân rã đa Schema (Multi-Schema PostgREST):** Cơ sở dữ liệu phân tách thành các schema độc lập (`public`, `runners`, `automa`, `billing`, `media`, `events`). PostgREST bắt buộc client phải gửi header `Accept-Profile` (đối với GET/HEAD) hoặc `Content-Profile` (đối với POST/PATCH/DELETE) để định tuyến truy vấn đến đúng schema đích ngoài `public`.
 2. **Giới hạn số lượng Permissions trong JWT Claim:** Supabase hook `custom_access_token_hook` bị giới hạn tối đa 25 permissions và chỉ sinh cho primary workspace. Trong khi đó, chủ sở hữu (Owner) có tới 36 quyền trên toàn hệ thống. Việc suy diễn quyền hạn từ JWT claim sẽ gây hiện tượng mất quyền ngẫu nhiên trên giao diện.
@@ -38,7 +38,7 @@ Hệ thống quản trị `admin.tuquet.com` (`apps/web-admin`) kết nối tr�
 
 ### D4: Lược Bỏ Tính Năng Khi Chưa Có Backend SSOT
 
-- **Quyết định:** Tạm thời không đưa tab "API Keys" vào giao diện chi tiết Workspace cho đến khi Tuquet Cloud phát hành bảng quản lý API key độc lập; không lưu trữ token giả lập vào `tenants.metadata`.
+- **Quyết định:** Tạm thời không đưa tab "API Keys" vào giao diện chi tiết Workspace cho đến khi Cloud phát hành bảng quản lý API key độc lập; không lưu trữ token giả lập vào `tenants.metadata`.
 
 ### D5: Tuân Thủ Triết Lý Giao Diện Tối Giản (KISS & YAGNI)
 
@@ -71,7 +71,7 @@ Hệ thống quản trị `admin.tuquet.com` (`apps/web-admin`) kết nối tr�
 
 ### Tích cực:
 
-- **100% Real Telemetry:** Toàn bộ số liệu trên console phản ánh chính xác trạng thái thực tế từ Tuquet Cloud.
+- **100% Real Telemetry:** Toàn bộ số liệu trên console phản ánh chính xác trạng thái thực tế từ Cloud.
 - **Bảo mật chuẩn:** RLS tại DB là chốt chặn cuối cùng; `meta.authority` trên frontend định hướng hiển thị menu hợp lý.
 - **Trải nghiệm đồng nhất:** Console hiển thị mượt mà trên cả điện thoại (iPhone, Android) và màn hình desktop độ phân giải cao.
 

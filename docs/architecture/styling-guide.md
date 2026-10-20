@@ -5,7 +5,7 @@
 > **Tài liệu kiến trúc tổng thể:** [`docs/architecture/overview.md`](overview.md)  
 > **Quy chuẩn Typography:** [`docs/decisions/0002-typography-and-font-system.md`](../decisions/0002-typography-and-font-system.md)
 
-Tài liệu này là **Quy chuẩn Thiết kế Giao diện (SSOT)** áp dụng cho toàn bộ các màn hình, components và views trong hệ thống **Tuquet Admin**.
+Tài liệu này là **Quy chuẩn Thiết kế Giao diện (SSOT)** áp dụng cho toàn bộ các màn hình, components và views trong hệ thống **Admin**.
 
 Mục tiêu cốt lõi: Đảm bảo mọi màn hình khi lập trình viên hoặc AI Agent xây dựng đều **tự động tương thích 100%** với:
 
@@ -17,7 +17,7 @@ Mục tiêu cốt lõi: Đảm bảo mọi màn hình khi lập trình viên ho�
 
 ## 1. Cơ Chế Hoạt Động Của Chế Độ Màu Sắc Built-in
 
-Hệ thống màu của Tuquet Admin sử dụng kiến trúc CSS Variables (HSL) động được quản lý bởi `@vben/preferences` và `@vben-core/shared/color`:
+Hệ thống màu của Admin sử dụng kiến trúc CSS Variables (HSL) động được quản lý bởi `@vben/preferences` và `@vben-core/shared/color`:
 
 1. **Preset Nguồn:** Được định nghĩa tại `packages/@core/preferences/src/constants.ts` với 14 bộ màu cơ bản (`default`, `violet`, `pink`, `yellow`, `sky-blue`, `green`, `zinc`, `deep-green`, `deep-blue`, `orange`, `rose`, `neutral`, `slate`, `gray`).
 2. **Bộ sinh màu động (Color Generator):** Khi người dùng chọn một Preset hoặc nhập mã Hex tùy chọn, hàm `generatorColorVariables` (`packages/@core/base/shared/src/color/generator.ts`) phân tích màu qua thư viện `theme-colors` để sinh ra toàn bộ dải sắc thái:

@@ -2,7 +2,7 @@
 
 ## Objective
 
-Establish complete, multi-layered error catching, contextual metadata enrichment, and telemetry resilience across the Tuquet Web Admin (`apps/web-admin`) application.
+Establish complete, multi-layered error catching, contextual metadata enrichment, and telemetry resilience across the Web Admin (`apps/web-admin`) application.
 
 Currently, error tracking through Bugsink (Sentry-compatible endpoint `https://9691efe9e0064c9f828dd7463dc3d414@tuquet.bugsink.com/1`) catches Vue component lifecycle errors, explicit manual `captureError` calls, and Vue Router navigation failures. However, significant telemetry blind spots exist in the browser runtime:
 

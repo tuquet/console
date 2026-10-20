@@ -1,4 +1,4 @@
-# Tuquet Admin — Product Strategy & Executive Roadmap
+# Admin — Product Strategy & Executive Roadmap
 
 > **Tài liệu Chiến lược Sản phẩm Dành cho Ban Lãnh đạo & Nhà Tài Trợ**  
 > **Sứ mệnh:** Xây dựng Trung tâm Điều hành Doanh nghiệp (Enterprise Command Center) điều phối tập trung toàn bộ Định danh, Hạ tầng Thanh toán Đa kênh Toàn cầu, Thương mại Điện tử và Hạ tầng Tự động hóa của Hệ sinh thái Tuquet.
@@ -85,7 +85,7 @@ _Thời gian:_ 01/12/2026 – 22/12/2026 | _Tình trạng:_ **Kế hoạch Thán
 _Thời gian:_ 05/01/2027 – 15/02/2027 | _Tình trạng:_ **Kế hoạch Q1/2027**
 
 - **Giá trị Doanh nghiệp:**  
-  Thương mại hóa chính các công nghệ tự động hóa cốt lõi của Tuquet thành dịch vụ thuê bao đám mây (SaaS), mang lại dòng doanh thu định kỳ bền vững với mô hình đo cước tài nguyên động (Metered Billing).
+  Thương mại hóa chính các công nghệ tự động hóa cốt lõi của thành dịch vụ thuê bao đám mây (SaaS), mang lại dòng doanh thu định kỳ bền vững với mô hình đo cước tài nguyên động (Metered Billing).
 - **Gói bàn giao nghiệm thu:**
   - Các gói dịch vụ tự động hóa mua trực tiếp trên Shop (Tool cào dữ liệu, Bot kiểm thử, Dịch vụ nuôi tài khoản).
   - **Động cơ Đo Cước Tài Nguyên Động (Metered Billing Engine):** Tính cước linh hoạt theo block giờ chạy bot, dung lượng proxy tiêu thụ hoặc thuê bao tháng.

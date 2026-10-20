@@ -36,7 +36,7 @@ Hệ thống quản trị Web Admin (`apps/web-admin`) cần đảm bảo tối 
 
 ### D3: Thiết Lập Chuẩn Typography SSOT Tại `skills/rules/TYPOGRAPHY.md`
 
-- **Quyết định:** Soạn thảo `skills/rules/TYPOGRAPHY.md` làm tiêu chuẩn tham chiếu duy nhất cho toàn bộ hệ sinh thái Tuquet (Web Admin, Tauri Desktop, Extension).
+- **Quyết định:** Soạn thảo `skills/rules/TYPOGRAPHY.md` làm tiêu chuẩn tham chiếu duy nhất cho toàn bộ hệ sinh thái (Web Admin, Tauri Desktop, Extension).
 - Quy định các điều khoản bắt buộc:
   - Thang đo font-size 7 cấp (`text-2xs` đến `text-2xl`).
   - Ma trận kiểu chữ cho từng component: Table Headers (`text-xs font-semibold uppercase tracking-wider`), Table Cells (`text-sm font-normal`), KPI Values (`text-2xl font-bold tracking-tight`), Badges/IDs (`text-xs`).

@@ -53,7 +53,7 @@ describe('system core api & helpers', () => {
         description: 'Multi-Tenant IAM Kernel',
         id: 'core-iam',
         installed_at: '2026-10-11T00:00:00Z',
-        manifest: { author: 'Tuquet' },
+        manifest: { author: 'tuquet' },
         name: 'Core IAM',
         schema_name: 'public',
         status: 'installed',
@@ -69,7 +69,7 @@ describe('system core api & helpers', () => {
         installed_at: '2026-10-11T00:00:00Z',
         is_core: true,
         is_system: true,
-        manifest: { author: 'Tuquet' },
+        manifest: { author: 'tuquet' },
         metadata: {},
         name: 'Core IAM',
         schema_name: 'public',
@@ -420,13 +420,13 @@ describe('system core api & helpers', () => {
               member_roles: [{ roles: { name: 'owner' } }],
               status: 'active',
               tenant_id: 't-1',
-              tenants: { id: 't-1', name: 'Tuquet HQ', slug: 'tuquet-hq' },
+              tenants: { id: 't-1', name: 'HQ', slug: 'hq' },
             },
             {
               member_roles: [{ roles: { name: 'member' } }],
               status: 'active',
               tenant_id: 't-2',
-              tenants: { id: 't-2', name: 'Tuquet Labs', slug: 'tuquet-labs' },
+              tenants: { id: 't-2', name: 'Labs', slug: 'labs' },
             },
           ],
         }),
@@ -464,9 +464,7 @@ describe('system core api & helpers', () => {
         filterPlatformUsers(users, { search: 'founder@tuquet.com' }),
       ).toHaveLength(1);
       // Search by Workspace slug/name
-      expect(filterPlatformUsers(users, { search: 'tuquet-hq' })).toHaveLength(
-        1,
-      );
+      expect(filterPlatformUsers(users, { search: 'hq' })).toHaveLength(1);
     });
 
     it('should filter system roles by role_type, module, and keyword', () => {

@@ -140,8 +140,8 @@ const productTypeMap = computed<
     label: $t('page.commerce_view.type_serial_stock'),
     variant: 'default',
   },
-  tuquet_resource: {
-    label: $t('page.commerce_view.type_tuquet_resource'),
+  resource: {
+    label: $t('page.commerce_view.type_resource'),
     variant: 'secondary',
   },
   wallet_credit: {
@@ -569,8 +569,8 @@ onBeforeUnmount(() => {
             <SelectItem value="serial_stock">
               {{ $t('page.commerce_view.type_serial_stock') }}
             </SelectItem>
-            <SelectItem value="tuquet_resource">
-              {{ $t('page.commerce_view.type_tuquet_resource') }}
+            <SelectItem value="resource">
+              {{ $t('page.commerce_view.type_resource') }}
             </SelectItem>
             <SelectItem value="digital_file">
               {{ $t('page.commerce_view.type_digital_file') }}
@@ -1135,7 +1135,7 @@ onBeforeUnmount(() => {
                 class="flex items-center gap-1.5 font-semibold text-foreground"
               >
                 <Server
-                  v-if="item.delivery_type === 'tuquet_resource'"
+                  v-if="item.delivery_type === 'resource'"
                   class="size-3.5 text-primary"
                 />
                 <FileDown

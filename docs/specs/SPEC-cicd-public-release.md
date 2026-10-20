@@ -1,4 +1,4 @@
-# Spec: Tuquet Admin Public Repository, CI Quality Gates & CD Desktop Release (`INITIATIVE-CICD-PUBLIC-RELEASE`)
+# Spec: Admin Public Repository, CI Quality Gates & CD Desktop Release (`INITIATIVE-CICD-PUBLIC-RELEASE`)
 
 ## 1. Capability Map
 
@@ -95,11 +95,11 @@ README.md                      # Bổ sung Badges trạng thái CI & Release Dow
    - Quét và thay thế toàn bộ chuỗi `tuquet/admin` thành `tuquet/admin` trong `.github/workflows/`, `.github/config.yml`, `.github/dependabot.yml`, và `.github/release-drafter.yml`.
 2. **Bảo mật & Open Source Hygiene:**
    - Tạo file `SECURITY.md` định rõ địa chỉ nhận thông báo lỗ hổng (`security@tuquet.com`) và phạm vi hỗ trợ phiên bản.
-   - Xác nhận file `LICENSE` chuẩn MIT License mang tên sở hữu `Tuquet Team`.
+   - Xác nhận file `LICENSE` chuẩn MIT License mang tên sở hữu `Team`.
    - Bổ sung Badges trên `README.md`:
      - GitHub CI Status: `[![CI](https://github.com/tuquet/admin/actions/workflows/ci.yml/badge.svg)](https://github.com/tuquet/admin/actions/workflows/ci.yml)`
      - GitHub Latest Release: `[![Release](https://img.shields.io/github/v/release/tuquet/admin?display_name=tag)](https://github.com/tuquet/admin/releases)`
-     - Direct Download EXE: `[Tải Tuquet Admin cho Windows (.exe)](https://github.com/tuquet/admin/releases/latest/download/tuquet-admin-setup.exe)`
+     - Direct Download EXE: `[Tải Admin cho Windows (.exe)](https://github.com/tuquet/admin/releases/latest/download/admin-setup.exe)`
 
 ### 7.2. Module `ci-pipeline`: Cải Tiến CI Workflow (`.github/workflows/ci.yml`)
 
@@ -135,7 +135,7 @@ Các bước chi tiết trên runner `windows-latest`:
 4. Sử dụng action chính thức `tauri-apps/tauri-action@v0`:
    - `projectPath: './apps/web-admin'`
    - `tagName: ${{ github.ref_name }}`
-   - `releaseName: 'Tuquet Admin ${{ github.ref_name }}'`
+   - `releaseName: 'Admin ${{ github.ref_name }}'`
    - `releaseBody: 'Xem chi tiết các thay đổi trong phiên bản ${{ github.ref_name }}.'`
    - `releaseDraft: false`
    - `prerelease: false`
@@ -144,8 +144,8 @@ Các bước chi tiết trên runner `windows-latest`:
      - `TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}`
      - `TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}`
 5. Action sẽ tự động upload:
-   - `Tuquet Admin_<version>_x64-setup.exe` (NSIS Installer)
-   - `Tuquet Admin_<version>_x64_en-US.msi` (MSI Installer)
+   - `Admin_<version>_x64-setup.exe` (NSIS Installer)
+   - `Admin_<version>_x64_en-US.msi` (MSI Installer)
    - `latest.json` (phục vụ tự động cập nhật OTA cho app người dùng đang mở)
    - Chữ ký xác thực `.sig`.
 

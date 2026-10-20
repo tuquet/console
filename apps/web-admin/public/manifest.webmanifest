@@ -1,7 +1,7 @@
 {
-  "name": "Tuquet Admin",
-  "short_name": "Tuquet Admin",
-  "description": "Tuquet Admin - Unified Management & Operations Console (admin.tuquet.com)",
+  "name": "Admin",
+  "short_name": "Admin",
+  "description": "Admin - Unified Management & Operations Console (admin.tuquet.com)",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#09090b",

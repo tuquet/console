@@ -62,7 +62,7 @@ pub fn run() {
                 "main",
                 WebviewUrl::App("index.html".into()),
             )
-            .title("Tuquet Admin")
+            .title("Admin")
             .inner_size(1440.0, 900.0)
             .min_inner_size(1024.0, 700.0)
             .resizable(true)

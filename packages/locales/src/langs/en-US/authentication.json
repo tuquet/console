@@ -97,7 +97,7 @@
   "desktopRequestingDevice": "Device:",
   "desktopLocalWorkstation": "Local workstation",
   "desktopConsentTitle": "Authorize device",
-  "desktopConsentDesc": "Grant connection and sync access with Tuquet Cloud.",
+  "desktopConsentDesc": "Grant connection and sync access with Cloud.",
   "desktopAccountLabel": "Account",
   "desktopSecurityNoteTitle": "Note:",
   "desktopSecurityNoteDesc": "This device will be allowed to run tasks and manage browser profiles in the selected workspace.",

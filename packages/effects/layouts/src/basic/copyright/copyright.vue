@@ -12,7 +12,7 @@ defineOptions({
 });
 
 withDefaults(defineProps<Props>(), {
-  companyName: 'Tuquet Admin',
+  companyName: 'Admin',
   companySiteLink: '',
   date: '2024',
   icp: '',

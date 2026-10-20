@@ -208,7 +208,7 @@ export function computeWorkspaceQuota(params: {
 }
 
 /**
- * Fetch full workspace detail data with real telemetry from Tuquet Cloud.
+ * Fetch full workspace detail data with real telemetry from Cloud.
  */
 export async function getWorkspaceDetailApi(
   tenantId: string,

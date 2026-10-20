@@ -19,7 +19,7 @@ export const SUPABASE_SCHEMA_VALUES = Object.values(
 ) as readonly SupabaseSchema[];
 
 /**
- * Canonical Browser LocalStorage Keys for Tuquet Admin
+ * Canonical Browser LocalStorage Keys for Admin
  */
 export const STORAGE_KEYS = {
   ACTIVE_TENANT_ID: 'TUQUET_ACTIVE_TENANT_ID',
