@@ -27,7 +27,7 @@ Hệ thống quản trị Web Admin (`apps/web-admin`) cần đảm bảo tối 
 
 ### D2: Tích Hợp Chuyển Đổi Phông Chữ Qua Preferences Extension
 
-- **Quyết định:** Tận dụng hệ thống `PreferencesExtension` của `@vben/preferences` để mở rộng trường cài đặt kiểu chữ (`fontFamily`) trong Preferences Drawer, ưu tiên **`Inter`** làm mặc định (`defaultValue: 'inter'`).
+- **Quyết định:** Tận dụng hệ thống `PreferencesExtension` của `@tuquet/preferences` để mở rộng trường cài đặt kiểu chữ (`fontFamily`) trong Preferences Drawer, ưu tiên **`Inter`** làm mặc định (`defaultValue: 'inter'`).
 - Hỗ trợ 3 tùy chọn:
   1. `inter`: Inter (Mặc định / Khuyến nghị — Chuẩn quốc tế & bảng dữ liệu mật độ cao)
   2. `roboto`: Roboto (Google Classic)

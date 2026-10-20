@@ -205,7 +205,7 @@ export async function removeWorkspaceMemberApi(memberId: string): Promise<void>;
 
 ## 9. Resolved Decisions (Các Quyết Định Đã Chốt)
 
-1. **Tập trung 4 Tabs chuẩn mực (`overview`, `members`, `usage`, `audit`):** Không sử dụng tab API Keys tĩnh tại cấp Workspace vì toàn bộ kết nối từ máy trạm Specter Desk và Headless Runner được xác thực định danh theo từng thiết bị qua `runners.devices.device_token_hash` và cổng Desktop Loopback SSO (`/auth/desktop`).
+1. **Tập trung 4 Tabs chuẩn mực (`overview`, `members`, `usage`, `audit`):** Không sử dụng tab API Keys tĩnh tại cấp Workspace vì toàn bộ kết nối từ máy trạm Desk và Headless Runner được xác thực định danh theo từng thiết bị qua `runners.devices.device_token_hash` và cổng Desktop Loopback SSO (`/auth/desktop`).
 2. **Fallback hạn mức tự động về gói `free`:** Khi một Workspace mới khởi tạo chưa có bản ghi trong `billing.subscriptions`, tầng API tự động đối chiếu định nghĩa gói `free` trong `billing.plans` để luôn hiển thị đầy đủ thanh đo lường hạn mức.
 3. **Tinh gọn nút thao tác & Chuyên biệt hóa Danger Zone (Phương án A):** Giữ các nút thao tác nhanh (`Set Primary`, `Pair CLI`, `Settings`, `Refresh`) trên thanh `WorkspaceHero` ở đầu trang; thẻ phía dưới trong Tab `Overview` chỉ đóng vai trò khu vực **Quản lý vòng đời / Danger zone** (`Archive or delete`) để loại bỏ sự trùng lặp 3 nút giống hệt nhau trên cùng màn hình.
 

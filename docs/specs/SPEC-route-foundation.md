@@ -28,8 +28,8 @@ Thiết lập kiến trúc định tuyến phân rã theo module và ranh giới
 
 ## 2. Tech Stack
 
-- **Router & Access Control:** Vue Router 4, `@vben/access` (`accessMode: 'frontend'`), `@vben/preferences`.
-- **Layout & Scroll Hooks:** `@vben/layouts` (`useLayoutHook`, `useLayoutScroll`), `@vben/stores` (`getTabKey`).
+- **Router & Access Control:** Vue Router 4, `@tuquet/access` (`accessMode: 'frontend'`), `@tuquet/preferences`.
+- **Layout & Scroll Hooks:** `@tuquet/layouts` (`useLayoutHook`, `useLayoutScroll`), `@tuquet/stores` (`getTabKey`).
 - **Icons:** `@lucide/vue` (`lucide:layout-dashboard`, `lucide:building-2`, `lucide:workflow`, `lucide:shopping-bag`, `lucide:shield-check`).
 
 ---

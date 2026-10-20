@@ -15,7 +15,7 @@ Xây dựng phân hệ thương mại sản phẩm số đa năng (`schema: comm
 1. **Tài khoản / License Key / Serial Text (`serial_stock`):**
    - Quản trị kho hàng dạng dòng văn bản (`uid|pass|2fa|recovery_mail`, mã kích hoạt phần mềm, voucher).
    - **Chống bán trùng tuyệt đối (Zero Double-Selling):** Sử dụng khóa dòng `FOR UPDATE SKIP LOCKED` để tạm giữ (`reserved`) khi tạo đơn và xuất kho (`sold`) nguyên tử ngay khi thanh toán thành công.
-2. **Tài nguyên Hệ sinh thái Specter (`resource`):**
+2. **Tài nguyên Hệ sinh thái (`resource`):**
    - Tự động cấp phát tài nguyên thẳng vào Workspace (`buyer_tenant_id`) của người mua ngay khi đơn hàng hoàn tất:
      - `proxy_pool`: Xuất proxy từ kho và nạp thẳng vào bảng `runners.proxies` của Tenant.
      - `automa_workflow`: Nhân bản (clone) kịch bản tự động hóa mẫu vào bảng `automa.workflows` của Tenant.

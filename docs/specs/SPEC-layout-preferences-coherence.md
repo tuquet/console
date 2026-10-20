@@ -9,17 +9,17 @@
 
 ## 1. Objective (Mục Tiêu & Phạm Vi)
 
-Đảm bảo tính nhất quán tuyệt đối, khả năng đáp ứng đa thiết bị (Mobile/Tablet/Desktop), đồng bộ hóa dải màu biểu đồ (`Chart Palette`), **Logo thương hiệu SVG** và **hệ thống biểu tượng Lucide (`@lucide/vue` / `VbenIcon`)** theo chủ đề Built-in và an toàn vận hành trong hệ thống Layout & Preferences của Admin (`@tuquet/admin-web`, `@vben/preferences`, `@vben-core/shadcn-ui`, `@vben-core/menu-ui`, `@vben-core/tabs-ui`, `@vben/layouts`, `@vben-core/layout-ui`):
+Đảm bảo tính nhất quán tuyệt đối, khả năng đáp ứng đa thiết bị (Mobile/Tablet/Desktop), đồng bộ hóa dải màu biểu đồ (`Chart Palette`), **Logo thương hiệu SVG** và **hệ thống biểu tượng Lucide (`@lucide/vue` / `VbenIcon`)** theo chủ đề Built-in và an toàn vận hành trong hệ thống Layout & Preferences của Admin (`@tuquet/admin-web`, `@tuquet/preferences`, `@tuquet-core/shadcn-ui`, `@tuquet-core/menu-ui`, `@tuquet-core/tabs-ui`, `@tuquet/layouts`, `@tuquet-core/layout-ui`):
 
 1. **Chống Khóa Cứng Giao Diện (Anti-Lockout Invariant):** Khi người dùng thay đổi bất kỳ cài đặt nào trong Preferences Drawer (tắt Header, tắt Sidebar, đổi vị trí nút Settings), hệ thống luôn bảo toàn khả năng mở lại Preferences Drawer, điều hướng trang và Đăng xuất.
 2. **Bảo Toàn Khả Năng Đáp Ứng Đa Thiết Bị (Zero Horizontal Overflow & Viewport Preservation):** Khắc phục tràn ngang ở chế độ `compact` (`width: min(100%, 1200px)`), cố định thanh Footer chuẩn lề, và bảo toàn trạng thái runtime `app.isMobile` khi nhấn `resetPreferences()`.
 3. **Đồng Bộ 100% Giữa Preferences Control UI và Runtime Layout:** Mọi công tắc trong Preferences Drawer phản ánh đúng trạng thái thực tế ở runtime (vô hiệu hóa kèm tooltip các tùy chọn không áp dụng cho chế độ layout hiện tại như `sidebar.enable` trong `sidebar-nav` hoặc `navigationSplit` ngoài `mixed-nav`).
 4. **Đồng Bộ Hóa Màu Sắc Biểu Đồ Theo Chủ Đề Built-in (`Built-in Theme Chart Palette Sync`):**
-   - Loại bỏ toàn bộ mã màu Hex gán cứng (`#38bdf8`, `#10b981`, `#a855f7`, `#94a3b8`, `#0284c7`) trong `defaultColors()` (`@vben-core/shadcn-ui`) và các biểu đồ trên trang `/dashboard/analytics` (`GrowthChart`, `PlansChart`, `PluginsChart`).
+   - Loại bỏ toàn bộ mã màu Hex gán cứng (`#38bdf8`, `#10b981`, `#a855f7`, `#94a3b8`, `#0284c7`) trong `defaultColors()` (`@tuquet-core/shadcn-ui`) và các biểu đồ trên trang `/dashboard/analytics` (`GrowthChart`, `PlansChart`, `PluginsChart`).
    - Tự động tính toán và cập nhật 5 biến CSS ngữ nghĩa `--chart-1` .. `--chart-5` trên `:root` mỗi khi người dùng thay đổi `theme.builtinType` (14 chủ đề có sẵn hoặc `custom`) hoặc chuyển đổi `Light / Dark Mode` trong `updateCSSVariables()`.
 5. **Đồng Bộ Hóa Màu Sắc Logo SVG & Hệ Thống Icon Lucide Theo Chủ Đề Built-in (`Brand SVG Logo & Lucide Icon Theme Sync`):**
-   - **Logo thương hiệu SVG (`VbenLogo` & `AuthPageLayout`):** Chuyển đổi từ thẻ `<img src="/logo.svg">` tĩnh (vốn dùng dải màu xám cứng `#FAFAFA -> #A1A1AA` và bị trình duyệt cô lập khỏi các biến CSS trên `:root`) sang **Inline Specter SVG Logo** liên kết trực tiếp với các biến CSS chủ đề (`hsl(var(--chart-4))`, `hsl(var(--chart-1))`, `hsl(var(--chart-3))`, `hsl(var(--primary))`), giúp logo trên Sidebar, Header và trang Đăng nhập đổi màu tức thì theo Built-in Theme đang chọn.
-   - **Hệ thống biểu tượng Lucide trên Thanh Điều Hướng (`Sidebar / Header / Mixed Menu`) và Thanh Tab (`Tabbar`):** Đồng bộ các biến `--menu-item-active-color: hsl(var(--primary))`, `--menu-item-active-background-color: hsl(var(--primary) / 15%)` ở cả Light và Dark mode trong `@vben-core/menu-ui` và `@vben-core/tabs-ui` (loại bỏ các quy tắc `.is-dark` / `dark:text-accent-foreground` / `dark:bg-accent` đang triệt tiêu màu Built-in Theme khi ở chế độ tối).
+   - **Logo thương hiệu SVG (`VbenLogo` & `AuthPageLayout`):** Chuyển đổi từ thẻ `<img src="/logo.svg">` tĩnh (vốn dùng dải màu xám cứng `#FAFAFA -> #A1A1AA` và bị trình duyệt cô lập khỏi các biến CSS trên `:root`) sang **Inline SVG Logo** liên kết trực tiếp với các biến CSS chủ đề (`hsl(var(--chart-4))`, `hsl(var(--chart-1))`, `hsl(var(--chart-3))`, `hsl(var(--primary))`), giúp logo trên Sidebar, Header và trang Đăng nhập đổi màu tức thì theo Built-in Theme đang chọn.
+   - **Hệ thống biểu tượng Lucide trên Thanh Điều Hướng (`Sidebar / Header / Mixed Menu`) và Thanh Tab (`Tabbar`):** Đồng bộ các biến `--menu-item-active-color: hsl(var(--primary))`, `--menu-item-active-background-color: hsl(var(--primary) / 15%)` ở cả Light và Dark mode trong `@tuquet-core/menu-ui` và `@tuquet-core/tabs-ui` (loại bỏ các quy tắc `.is-dark` / `dark:text-accent-foreground` / `dark:bg-accent` đang triệt tiêu màu Built-in Theme khi ở chế độ tối).
    - **Hệ thống biểu tượng Lucide trên toàn bộ các trang Nghiệp Vụ (`apps/web-admin/src/views/**`):** Chuẩn hóa khung chứa icon trên thẻ KPI Metric Cards, thanh chỉ số `Stats Bar`, huy hiệu icon đầu dòng trong bảng `VxeGrid`, icon tiêu đề Modal và icon trạng thái rỗng (`#empty`) từ màu xám tĩnh (`bg-muted text-foreground`, `text-muted-foreground`) sang token chủ đề `bg-primary/10 text-primary` và `text-primary` / `text-primary/60`.
 
 ---
@@ -27,8 +27,8 @@
 ## 2. Tech Stack
 
 - **Framework:** Vue 3.5 (`<script setup lang="ts">`), Vue Router 4, Pinia.
-- **Design System, Icons & Charts:** `@vben-core/shadcn-ui` (`VbenLogo`, `VbenIcon`, `AreaChart`, `DonutChart`, `BarChart`), `@vben-core/menu-ui`, `@vben-core/tabs-ui`, `@vben-core/layout-ui`, Tailwind CSS v4, Lucide Icons (`@lucide/vue`).
-- **State & Color Engine:** `@vben/preferences` (`PreferenceManager` singleton, `usePreferences`, `updateCSSVariables`), `@vben-core/shared/color` (`generatorColorVariables`, `TinyColor`, `convertToHslCssVar`).
+- **Design System, Icons & Charts:** `@tuquet-core/shadcn-ui` (`VbenLogo`, `VbenIcon`, `AreaChart`, `DonutChart`, `BarChart`), `@tuquet-core/menu-ui`, `@tuquet-core/tabs-ui`, `@tuquet-core/layout-ui`, Tailwind CSS v4, Lucide Icons (`@lucide/vue`).
+- **State & Color Engine:** `@tuquet/preferences` (`PreferenceManager` singleton, `usePreferences`, `updateCSSVariables`), `@tuquet-core/shared/color` (`generatorColorVariables`, `TinyColor`, `convertToHslCssVar`).
 
 ---
 
@@ -80,7 +80,7 @@ packages/
 │       │   └── tabs-chrome/tabs.vue             # Đồng bộ active chrome tab icon & nền theo text-primary / bg-primary/15
 │       └── shadcn-ui/src/
 │           ├── components/logo/
-│           │   ├── logo.vue                     # VbenLogo: dựng Inline Specter SVG theo biến CSS chủ đề (--chart-1..4, --primary)
+│           │   ├── logo.vue                     # VbenLogo: dựng Inline SVG theo biến CSS chủ đề (--chart-1..4, --primary)
 │           │   └── __tests__/logo.test.ts       # Unit tests kiểm chứng VbenLogo render SVG động theo chủ đề
 │           └── ui/
 │               ├── chart/index.ts               # defaultColors() trả về hsl(var(--chart-1..5))
@@ -88,10 +88,10 @@ packages/
 │               ├── chart-bar/BarChart.vue       # Đồng bộ reactive legendItems
 │               └── chart-donut/DonutChart.vue   # Sử dụng defaultColors() theo biến --chart-1..5
 ├── effects/layouts/src/authentication/
-│   └── authentication.vue                       # Sử dụng VbenLogo / Inline Specter SVG trên trang Đăng nhập
+│   └── authentication.vue                       # Sử dụng VbenLogo / Inline SVG trên trang Đăng nhập
 apps/web-admin/
 ├── public/
-│   ├── logo.svg                                 # Cập nhật mã SVG thương hiệu Specter chuẩn biến CSS / fallback
+│   ├── logo.svg                                 # Cập nhật mã SVG thương hiệu chuẩn biến CSS / fallback
 │   └── logo-app.svg                             # Đồng bộ cùng logo.svg
 └── src/views/
     ├── dashboard/analytics/                     # index.vue (KPI icons bg-primary/10 text-primary) & 3 chart components
@@ -119,7 +119,7 @@ apps/web-admin/
 | **8. Footer (`footer`)** | Bật `footer.enable = true` nhưng tắt `copyright.enable` làm thanh chân trang rỗng 0px hoặc lệch lề. | Áp dụng `right-0 border-t border-border bg-card/90 backdrop-blur-sm` và nhãn bản quyền mặc định `Copyright © 2026 Tuquet`. |
 | **9. Runtime Viewport (`app.isMobile`)** | Nhấn `resetPreferences()` trên điện thoại ghi đè `isMobile = false`, làm sập Drawer di động. | Bảo toàn giá trị runtime `currentIsMobile = this.state.app.isMobile` qua thao tác reset và loại trừ `isMobile` khỏi `diffPreference`. |
 | **10. Chart Theme Palette (`--chart-1..5`)** | Biểu đồ dùng màu Hex cố định (`#38bdf8`, `#10b981`) bị lệch tông khi đổi sang `violet`, `rose`, `green`, `neutral`, `zinc`... | Tự động sinh `--chart-1..5` trong `update-css-variables.ts` từ chủ đề Built-in đang chọn và dùng `hsl(var(--chart-1..5))` trong `defaultColors()`. |
-| **11. Brand SVG Logo (`VbenLogo`)** | Thẻ `<img src="/logo.svg">` bị trình duyệt cô lập khỏi biến CSS `:root` và dùng mã màu xám cố định (`#FAFAFA -> #A1A1AA`). | Dựng Inline Specter SVG trong `VbenLogo` & `AuthPageLayout` với `<linearGradient>` dùng `hsl(var(--chart-4))`, `hsl(var(--chart-1))`, `hsl(var(--chart-3))`. |
+| **11. Brand SVG Logo (`VbenLogo`)** | Thẻ `<img src="/logo.svg">` bị trình duyệt cô lập khỏi biến CSS `:root` và dùng mã màu xám cố định (`#FAFAFA -> #A1A1AA`). | Dựng Inline SVG trong `VbenLogo` & `AuthPageLayout` với `<linearGradient>` dùng `hsl(var(--chart-4))`, `hsl(var(--chart-1))`, `hsl(var(--chart-3))`. |
 | **12. Lucide Icons (`Menu`, `Tabs`, `theme.css`)** | Quy tắc `.is-dark` trong `menu.vue` / `tabs.vue` và class `bg-muted text-foreground` trong các trang nghiệp vụ làm icon Lucide luôn có màu xám/trắng tĩnh. | Đồng bộ `--menu-item-active-color: hsl(var(--primary))` ở cả Light/Dark mode và dùng quy tắc CSS tập trung (SSOT) trong `internal/tailwind-config/src/theme.css` (`:has(> svg.lucide:only-child)` & `svg.lucide`) — **0 file view cần sửa thủ công**. |
 
 ### 5.2. Thuật Toán Sinh Dải Màu Biểu Đồ Động (`update-css-variables.ts` & `chart/index.ts`)
@@ -140,7 +140,7 @@ apps/web-admin/
 
 ### 5.3. Kiến Trúc SSOT Cho Logo SVG Động & Đồng Bộ Màu Icon Lucide Tập Trung
 
-1. **Inline Specter SVG Logo (`packages/@core/ui-kit/shadcn-ui/src/components/logo/logo.vue` & `authentication.vue`):**
+1. **Inline SVG Logo (`packages/@core/ui-kit/shadcn-ui/src/components/logo/logo.vue` & `authentication.vue`):**
    - Khi `logoSrc` là đường dẫn logo mặc định (`/logo.svg`, `/logo-app.svg`, hoặc rỗng), `VbenLogo` dựng trực tiếp thẻ `<svg>` inline thay vì `<img>`, sử dụng `useId()` để định danh duy nhất cho `<linearGradient>` và `<filter>`:
      - **Ở Dark Mode (`theme === 'dark'` / `isDark`):** Dựng dải màu **Trắng sứ (Porcelain White)** nguyên bản (`#FAFAFA` $\rightarrow$ `#E4E4E7` $\rightarrow$ `#A1A1AA`, quầng sáng `rgb(228 228 231 / 0.15)`) cho `VbenLogo` và (`white` $\rightarrow$ `#F4F4F5` $\rightarrow$ `#E4E4E7` $\rightarrow$ `#CBD5E1`) cho linh vật trên trang Đăng nhập để nổi bật sắc nét trên nền tối và tuyệt đối không bị pha màu cầu vồng.
      - **Ở Light Mode (`theme !== 'dark'`):** Liên kết trực tiếp với các biến chủ đề (`hsl(var(--chart-4, var(--primary)))` $\rightarrow$ `hsl(var(--chart-1, var(--primary)))` $\rightarrow$ `hsl(var(--chart-3, var(--primary)))`, quầng sáng `hsl(var(--primary) / 0.22)`).
@@ -177,7 +177,7 @@ apps/web-admin/
   - Giữ tương thích ngược cho `VbenLogo` khi truyền `src` là ảnh tùy chỉnh bên ngoài.
   - Bảo toàn màu ngữ nghĩa trạng thái (`text-success`, `text-warning`, `text-destructive`) cho các icon cảnh báo/trạng thái.
 - **Ask first:**
-  - Thay đổi hình dáng hình học (path geometry) của linh vật Specter Ghost hoặc thay đổi danh sách 14 `BUILT_IN_THEME_PRESETS`.
+  - Thay đổi hình dáng hình học (path geometry) của linh vật Ghost hoặc thay đổi danh sách 14 `BUILT_IN_THEME_PRESETS`.
 - **Never:**
   - Không dùng `<img src="/logo.svg">` tĩnh với mã Hex xám cố định cho logo thương hiệu chính khiến logo không thể đổi màu theo Built-in Theme.
   - Không dùng `dark:text-accent-foreground` hoặc `dark:bg-accent` ghi đè mất màu `text-primary` / `bg-primary/15` của mục menu/tab đang chọn ở chế độ Dark Mode.
@@ -190,7 +190,7 @@ apps/web-admin/
 - [x] **SC2 — Responsive Compact & Mobile Reset Safety:** Chế độ `compact` không gây cuộn ngang; `resetPreferences()` bảo toàn `isMobile` và xóa sạch cache.
 - [x] **SC3 — Dynamic `--chart-1..5` Generation:** Khi đổi bất kỳ chủ đề nào trong 14 Built-in Themes hoặc `custom`, 5 biến `--chart-1` .. `--chart-5` trên `:root` lập tức cập nhật theo tông màu chủ đề đó (cả Light & Dark mode).
 - [x] **SC4 — Zero Hardcoded Chart Hex in Analytics:** `growth-chart.vue`, `plans-chart.vue`, `plugins-chart.vue` và `defaultColors()` hoàn toàn không còn mã Hex tĩnh.
-- [x] **SC5 — Dynamic Built-in Theme Brand SVG Logo:** Logo Specter trên Sidebar, Header và trang Đăng nhập (`VbenLogo` & `AuthPageLayout`) tự động chuyển đổi dải màu gradient & quầng sáng theo đúng Built-in Theme đang chọn ở cả Light và Dark mode.
+- [x] **SC5 — Dynamic Built-in Theme Brand SVG Logo:** Logo trên Sidebar, Header và trang Đăng nhập (`VbenLogo` & `AuthPageLayout`) tự động chuyển đổi dải màu gradient & quầng sáng theo đúng Built-in Theme đang chọn ở cả Light và Dark mode.
 - [x] **SC6 — SSOT Built-in Theme Lucide Icons Coherence:**
   - Menu Sidebar/Header và Tabbar đang active hiển thị icon & chữ theo màu `hsl(var(--primary))` + nền `hsl(var(--primary) / 15%)` đồng nhất trên cả Light & Dark mode.
   - Quy tắc CSS tập trung trong `internal/tailwind-config/src/theme.css` tự động chuyển toàn bộ hộp icon KPI Card, Stats Bar, huy hiệu icon đầu dòng bảng `VxeGrid`, Modal Header và Empty State sang tông màu `--primary` mà không cần sửa thủ công các file `views/**`.
@@ -203,8 +203,8 @@ apps/web-admin/
 1. **Khóa công tắc Enable Sidebar trong chế độ `sidebar-nav`:** Khi đang ở bố cục `sidebar-nav`, công tắc `sidebar.enable` được khóa (`:disabled="true"`) để ngăn người dùng vô tình tắt mất thanh điều hướng duy nhất của ứng dụng.
 2. **Breakpoint hiển thị Breadcrumb (`lg:block`):** Giữ Breadcrumb hiển thị từ màn hình Desktop ($\ge 1024\text{px}$) trở lên để giữ thanh Header gọn gàng trên điện thoại và máy tính bảng.
 3. **Chiến lược phối màu biểu đồ theo Built-in Theme (Phương án A — Monochromatic Tonal Ramp):** Toàn bộ `--chart-1..5` sử dụng 5 sắc độ sáng/tối đồng nhất của chính màu Built-in Theme đang chọn (`--primary-500`, `--primary-400`, `--primary-600`, `--primary-300`, `--primary-700` cho nhóm chủ đề có màu sắc; và thang độ sáng 5 bậc phân tách rõ từ `preset.color` cho nhóm chủ đề trung tính `neutral / zinc / slate / gray`).
-4. **Kiến trúc SSOT cho Specter SVG Logo & Hệ thống Icon Lucide:**
-   - **Specter SVG Logo:** Dựng `<svg>` inline trong `VbenLogo` (`logo.vue`) và `AuthPageLayout` (`authentication.vue`) với dải chuyển sắc 3 điểm (`--chart-4` $\rightarrow$ `--chart-1` $\rightarrow$ `--chart-3`) và hào quang `hsl(var(--primary) / 0.22)`.
+4. **Kiến trúc SSOT cho SVG Logo & Hệ thống Icon Lucide:**
+   - **SVG Logo:** Dựng `<svg>` inline trong `VbenLogo` (`logo.vue`) và `AuthPageLayout` (`authentication.vue`) với dải chuyển sắc 3 điểm (`--chart-4` $\rightarrow$ `--chart-1` $\rightarrow$ `--chart-3`) và hào quang `hsl(var(--primary) / 0.22)`.
    - **Lucide Icons (Zero Manual View Edits):** Đồng bộ tại tầng Core CSS (`internal/tailwind-config/src/theme.css`) thông qua `:has(> svg.lucide:only-child)` và `svg.lucide`, kết hợp sửa `.is-dark` trong `menu.vue`, `normal-menu.vue`, `tabs.vue`, `tabs-chrome/tabs.vue` để đạt hiệu lực trên toàn bộ 22+ trang mà không cần sửa thủ công từng trang.
 
 ---

@@ -38,7 +38,7 @@ Enforce an enterprise-grade **"One Fact, One Place per Viewport" (Zero-Redundanc
 ## 2. Tech Stack
 
 - **Framework**: Vue 3.5 (`<script setup lang="ts">`)
-- **UI Primitives**: `@tuquet/vue-ui` (`Badge`, `Button`, `Tabs`), `@vben-core/shadcn-ui` (`DonutChart`)
+- **UI Primitives**: `@tuquet/vue-ui` (`Badge`, `Button`, `Tabs`), `@tuquet-core/shadcn-ui` (`DonutChart`)
 - **I18n**: `vue-i18n` (`apps/web-admin/src/locales/langs/{en-US,vi-VN}/page.json`)
 - **Testing**: Vitest (`vitest run`)
 

@@ -14,7 +14,7 @@ Module `platform-foundation` thiết lập và chuẩn hóa toàn bộ nền t�
 ### Trong phạm vi:
 
 1. **Kiến Trúc Monorepo & Phân Tầng Package:**
-   - Chuẩn hóa ranh giới 39 packages theo cấu trúc 4 tầng: Base Primitives (`@vben-core/*`), State & Composables, UI-Kit Primitives, và Effects/Domain Integrations (`@vben/*`).
+   - Chuẩn hóa ranh giới 39 packages theo cấu trúc 4 tầng: Base Primitives (`@tuquet-core/*`), State & Composables, UI-Kit Primitives, và Effects/Domain Integrations (`@tuquet/*`).
    - Quản lý phiên bản tập trung qua `pnpm-workspace.yaml` bằng catalog (`catalog:`), loại bỏ hardcode version số lẻ tại package con.
 2. **Hạ Tầng Build Cục Bộ (`build:local`):**
    - Tự động hóa kiểm tra tài nguyên đĩa cứng ($\le 85\%$), dọn cache `.turbo` khi cần thiết.
@@ -96,33 +96,33 @@ Hệ thống monorepo gồm 39 packages được phân cấp theo 4 tầng phụ
 ```mermaid
 graph TD
   subgraph Tier 1: Base Primitives
-    CORE_TYPINGS["@vben-core/typings"]
-    CORE_SHARED["@vben-core/shared"]
-    CORE_DESIGN["@vben-core/design"]
-    CORE_ICONS["@vben-core/icons"]
+    CORE_TYPINGS["@tuquet-core/typings"]
+    CORE_SHARED["@tuquet-core/shared"]
+    CORE_DESIGN["@tuquet-core/design"]
+    CORE_ICONS["@tuquet-core/icons"]
   end
 
   subgraph Tier 2: State & Composables
-    CORE_COMPOSABLES["@vben-core/composables"]
-    CORE_PREF["@vben-core/preferences"]
+    CORE_COMPOSABLES["@tuquet-core/composables"]
+    CORE_PREF["@tuquet-core/preferences"]
   end
 
   subgraph Tier 3: UI-Kit Primitives
-    UI_SHADCN["@vben-core/shadcn-ui"]
-    UI_LAYOUT["@vben-core/layout-ui"]
-    UI_FORM["@vben-core/form-ui"]
-    UI_MENU["@vben-core/menu-ui"]
-    UI_POPUP["@vben-core/popup-ui"]
-    UI_TABS["@vben-core/tabs-ui"]
+    UI_SHADCN["@tuquet-core/shadcn-ui"]
+    UI_LAYOUT["@tuquet-core/layout-ui"]
+    UI_FORM["@tuquet-core/form-ui"]
+    UI_MENU["@tuquet-core/menu-ui"]
+    UI_POPUP["@tuquet-core/popup-ui"]
+    UI_TABS["@tuquet-core/tabs-ui"]
   end
 
   subgraph Tier 4: Effects & Domain Integrations
-    VBEN_PREF["@vben/preferences"]
-    VBEN_STORES["@vben/stores"]
-    VBEN_LOCALES["@vben/locales"]
-    VBEN_HOOKS["@vben/hooks"]
-    VBEN_ACCESS["@vben/access"]
-    VBEN_LAYOUTS["@vben/layouts"]
+    VBEN_PREF["@tuquet/preferences"]
+    VBEN_STORES["@tuquet/stores"]
+    VBEN_LOCALES["@tuquet/locales"]
+    VBEN_HOOKS["@tuquet/hooks"]
+    VBEN_ACCESS["@tuquet/access"]
+    VBEN_LAYOUTS["@tuquet/layouts"]
   end
 
   subgraph Application
@@ -141,7 +141,7 @@ graph TD
 ```
 
 - **Zero Domain Clutter in Core:** Toàn bộ business logic và các views nghiệp vụ chỉ tồn tại trong `apps/web-admin/src/views/`, không đưa vào `packages/`.
-- **Defu Array Duplication Defense:** Sử dụng `mergeWithArrayOverride` từ `@vben-core/shared` thay cho hàm merge gốc của `defu` nhằm tránh hiện tượng nhân đôi mảng cấu hình.
+- **Defu Array Duplication Defense:** Sử dụng `mergeWithArrayOverride` từ `@tuquet-core/shared` thay cho hàm merge gốc của `defu` nhằm tránh hiện tượng nhân đôi mảng cấu hình.
 - **Strict Order-Sensitive Diffing:** Cung cấp hàm `diffStrict` so sánh thứ tự mảng (`arraysStrictEqual`) để phát hiện chính xác việc sắp xếp lại các widget trên Header.
 
 ### 5.2. Cấu Hình Nginx & Header Chống Cache Cho PWA
@@ -232,5 +232,5 @@ export async function getFleetDevicesApi(status?: string) {
 
 ## 9. Resolved Decisions (Các Quyết Định Đã Chốt)
 
-1. **Quản lý phiên bản tập trung qua PNPM Catalog:** Toàn bộ 39 packages trong workspace tham chiếu phiên bản thư viện qua `"catalog:"` trong `pnpm-workspace.yaml`, triệt tiêu xung đột phiên bản lệch giữa các gói `@vben-core/*` và `apps/web-admin`.
+1. **Quản lý phiên bản tập trung qua PNPM Catalog:** Toàn bộ 39 packages trong workspace tham chiếu phiên bản thư viện qua `"catalog:"` trong `pnpm-workspace.yaml`, triệt tiêu xung đột phiên bản lệch giữa các gói `@tuquet-core/*` và `apps/web-admin`.
 2. **Cơ chế tự động cập nhật PWA tức thì (`autoUpdate` + `no-cache`):** Kết hợp `skipWaiting: true` trong Workbox và header `Cache-Control: no-cache, no-store` trên Nginx cho `sw.js` / `_app-config-*.js` để trình duyệt luôn nhận bản build mới ngay khi tải lại trang.

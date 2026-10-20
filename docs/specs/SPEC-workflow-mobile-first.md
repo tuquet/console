@@ -52,8 +52,8 @@ Giải quyết triệt để tình trạng tràn chiều ngang (`minWidth: 850px
 
 ## 3. Tech Stack
 
-- **Framework:** Vue 3.5 (`<script setup lang="ts">`), Vue Router 4, TypeScript 5, `vue-i18n` (`@vben/locales`).
-- **Responsive State:** `usePreferences()` (`isMobile` reactive computed từ `@vben/preferences`).
+- **Framework:** Vue 3.5 (`<script setup lang="ts">`), Vue Router 4, TypeScript 5, `vue-i18n` (`@tuquet/locales`).
+- **Responsive State:** `usePreferences()` (`isMobile` reactive computed từ `@tuquet/preferences`).
 - **Data Grid & Form Engine:** `useVbenVxeGrid`, `VxeForm`, `VxeFormItem` từ [`src/adapter/vxe-table.ts`](../../apps/web-admin/src/adapter/vxe-table.ts).
 - **SSOT Constants & Status Metadata:** `WORKFLOW_STATUS_META`, `CAMPAIGN_STATUS_META`, `getStatusMeta`, `buildEnumFilterOptions` từ [`src/constants/index.ts`](../../apps/web-admin/src/constants/index.ts).
 - **UI Components & Icons:** `@tuquet/vue-ui` (`Badge`, `Button`, `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`), `@lucide/vue`.
@@ -104,7 +104,7 @@ apps/web-admin/src/
 ### 6.1. Cấu Hình Cột `VxeGrid` Thích Ứng Theo `isMobile` (`workflows/index.vue`)
 
 ```ts
-import { usePreferences } from '@vben/preferences';
+import { usePreferences } from '@tuquet/preferences';
 
 const { isMobile } = usePreferences();
 

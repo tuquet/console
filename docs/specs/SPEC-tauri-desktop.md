@@ -201,7 +201,7 @@ export async function sendDesktopNotification(
 ### 5.3. Điều chế Vite Configuration (`apps/web-admin/vite.config.ts`)
 
 ```typescript
-import { defineConfig } from '@vben/vite-config';
+import { defineConfig } from '@tuquet/vite-config';
 
 const isTauri = Boolean(process.env.TAURI_ENV_PLATFORM);
 

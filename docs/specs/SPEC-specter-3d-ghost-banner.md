@@ -1,4 +1,4 @@
-﻿# Spec: Banner 3D Tương Tác Linh Vật Specter Trên Trang Xác Thực (`specter-3d-ghost-banner`)
+﻿# Spec: Banner 3D Tương Tác Linh Vật Trên Trang Xác Thực (`specter-3d-ghost-banner`)
 
 > **Mã đặc tả:** `SPEC-specter-3d-ghost-banner`  
 > **Module id:** `specter-3d-ghost-banner` (xem [`capability-map.md`](capability-map.md))  
@@ -9,9 +9,9 @@
 
 ## 1. Objective (Mục Tiêu & Phạm Vi)
 
-Xây dựng bộ sưu tập 3 banner tương tác kèm tuỳ chọn **`ghost 3d`** (`SpecterGhostBanner`) cho khung giao diện Xác thực (`AuthPageLayout` trong `@tuquet/admin-web`), tái hiện linh vật thương hiệu **Specter Waving Ghost** ([`specter-waving.svg`](../../public/illustrations/specter-waving.svg)) dưới dạng mô hình **3D WebGL / Three.js thời gian thực**:
+Xây dựng bộ sưu tập 3 banner tương tác kèm tuỳ chọn **`ghost 3d`** (`SpecterGhostBanner`) cho khung giao diện Xác thực (`AuthPageLayout` trong `@tuquet/admin-web`), tái hiện linh vật thương hiệu **Waving Ghost** ([`specter-waving.svg`](../../public/illustrations/specter-waving.svg)) dưới dạng mô hình **3D WebGL / Three.js thời gian thực**:
 
-1. **Tạo Hình 3D Chuẩn Linh Vật Specter Gốc:**
+1. **Tạo Hình 3D Chuẩn Linh Vật Gốc:**
    - Thân ma 3D liền khối dạng vòm thuôn mềm mại với vật liệu **Matte / Frosted Ceramic** (sứ mờ cao cấp phản xạ ánh sáng rim-light dịu mắt ở cả Dark mode `#0a0a0a` và Light mode `#fafafa`).
    - Phần đuôi/tà áo dưới đáy biến dạng sóng 3D mượt mà theo thời gian thực (harmonic cloth-wave vertex displacement).
    - **Ba đặc trưng nhận diện từ `specter-waving.svg`:**
@@ -28,7 +28,7 @@ Xây dựng bộ sưu tập 3 banner tương tác kèm tuỳ chọn **`ghost 3d`
 
 - **Framework:** Vue 3.5 (`<script lang="ts" setup>`) + TypeScript 5.x.
 - **3D Engine:** `three` (`Three.js` ESM `0.174.0` tải động theo yêu cầu qua CDN `esm.sh` / `jsdelivr`, giữ kích thước bundle chính của `web-admin` bằng `0 KB` khi chưa kích hoạt).
-- **Theme & Persistence:** `@vben/preferences` (`usePreferences().isDark`) + `window.localStorage` (`specter:auth-banner-mode`).
+- **Theme & Persistence:** `@tuquet/preferences` (`usePreferences().isDark`) + `window.localStorage` (`specter:auth-banner-mode`).
 
 ---
 
@@ -62,7 +62,7 @@ apps/web-admin/
     ├── components/common/
     │   ├── hairline-phone-banner.vue                          # Tuỳ chọn 1: Hairline Isometric Phone
     │   ├── spline-robot-banner.vue                            # Tuỳ chọn 2: Spline 3D Robot
-    │   ├── specter-ghost-banner.vue                           # Tuỳ chọn 3: Three.js 3D Specter Ghost
+    │   ├── specter-ghost-banner.vue                           # Tuỳ chọn 3: Three.js 3D Ghost
     │   └── __tests__/
     │       └── specter-ghost-banner.test.ts                   # Unit test toán học sóng, giảm chấn & vòng đời WebGL
     └── layouts/
@@ -113,7 +113,7 @@ export function stepGhostPointer(state: GhostPointerState, dt: number) {
   - Chạy `typecheck` và `vitest` trước khi hoàn tất.
 - **Ask first:**
   - Thêm dependency 3D mới vào `package.json` (mặc định dùng dynamic ESM import để giữ `package.json` gọn nhẹ và bundle size bằng `0` khi không dùng).
-  - Thay đổi cấu trúc layout `authentication.vue` trong `@vben/layouts`.
+  - Thay đổi cấu trúc layout `authentication.vue` trong `@tuquet/layouts`.
 - **Never:**
   - Để rò rỉ vòng lặp `requestAnimationFrame` khi chuyển sang tab banner khác (`phone` hoặc `robot 3d`).
   - Sử dụng nền màu loang lổ làm lệch tông monochrome của trang đăng nhập.
@@ -122,7 +122,7 @@ export function stepGhostPointer(state: GhostPointerState, dt: number) {
 
 ## 8. Success Criteria (Tiêu Chí Nghiệm Thu)
 
-- [x] **SC1 — Tạo hình linh vật Specter 3D chuẩn xác:** Con ma 3D có thân vòm sứ mờ mượt mà, tà áo lượn sóng 3D, mắt đen bầu dục đính ngôi sao 4 cánh trắng lấp lánh, má ửng dịu, miệng cười và cánh tay vẫy chào sống động.
+- [x] **SC1 — Tạo hình linh vật 3D chuẩn xác:** Con ma 3D có thân vòm sứ mờ mượt mà, tà áo lượn sóng 3D, mắt đen bầu dục đính ngôi sao 4 cánh trắng lấp lánh, má ửng dịu, miệng cười và cánh tay vẫy chào sống động.
 - [x] **SC2 — Phản hồi chuột mượt 60fps:** Khi di chuyển chuột trên vùng banner, đầu/thân và tròng mắt (kèm ngôi sao 4 cánh) liếc theo hướng chuột; khi click vào con ma, con ma nảy nhẹ và vẫy tay nhanh chào người dùng.
 - [x] **SC3 — Bộ chọn 4 chế độ trên Banner ([`auth.vue`](../../apps/web-admin/src/layouts/auth.vue)):** Thanh chọn ở góc dưới bên trái hiển thị `phone` · `robot 3d` · `ghost 3d` · `random`; chế độ `random` xoay vòng ngẫu nhiên giữa cả 3 mô hình (`phone`, `robot`, `ghost`).
 - [x] **SC4 — Tương thích Light & Dark Mode:** Nổi bật với ánh sáng rim-light bạc trên nền `#0a0a0a` (Dark mode) và bóng đổ studio thanh lịch trên nền `#fafafa` (Light mode).

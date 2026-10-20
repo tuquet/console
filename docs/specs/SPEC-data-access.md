@@ -26,7 +26,7 @@ Thiết lập tầng truy cập dữ liệu trung tâm (Single Source of Truth �
 
 ## 2. Tech Stack
 
-- **Framework & Stores:** Vue 3.5, Pinia (`@vben/stores`), `@vben/access` (chế độ `'frontend'`).
+- **Framework & Stores:** Vue 3.5, Pinia (`@tuquet/stores`), `@tuquet/access` (chế độ `'frontend'`).
 - **HTTP & Auth Protocol:** Native `fetch` API chuẩn hóa qua [`supabase-client.ts`](../../apps/web-admin/src/api/core/supabase-client.ts), Supabase PostgREST v12 + GoTrue REST API.
 - **Testing:** Vitest (`happy-dom`).
 
@@ -125,7 +125,7 @@ export async function getInstalledPluginsApi(): Promise<string[]>;
   - Sử dụng `encodeURIComponent` khi truyền tham số động vào chuỗi truy vấn PostgREST.
 - **Ask first:**
   - Thêm schema PostgreSQL mới vào kiểu `SupabaseSchema`.
-  - Thay đổi cơ chế `accessMode` của `@vben/access`.
+  - Thay đổi cơ chế `accessMode` của `@tuquet/access`.
 - **Never:**
   - Không bao giờ đọc quyền `superadmin` từ `user_metadata` (do người dùng cuối có thể tự chỉnh sửa `user_metadata`; chỉ tin cậy `app_metadata.platform_role`).
   - Không đọc danh sách quyền từ JWT claim (do giới hạn cắt 25 quyền của JWT hook).

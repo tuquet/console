@@ -9,7 +9,7 @@
 
 ## 1. Objective (Mục Tiêu & Phạm Vi)
 
-Thiết lập hệ thống **Enum & Constants Single Source of Truth (SSOT)** chuẩn công nghiệp cho toàn bộ Admin (`@vben/constants` và `@tuquet/admin-web`), chấm dứt tình trạng phân mảnh kiểu union (`'published' | 'draft'`) và chuỗi tĩnh rời rạc (_magic strings_) trong các tầng API, Store, Form Filter và Bảng dữ liệu (`VxeGrid`):
+Thiết lập hệ thống **Enum & Constants Single Source of Truth (SSOT)** chuẩn công nghiệp cho toàn bộ Admin (`@tuquet/constants` và `@tuquet/admin-web`), chấm dứt tình trạng phân mảnh kiểu union (`'published' | 'draft'`) và chuỗi tĩnh rời rạc (_magic strings_) trong các tầng API, Store, Form Filter và Bảng dữ liệu (`VxeGrid`):
 
 1. **Chuẩn Hóa Pattern `as const` Object + Derived Union Type (Zero Runtime Overhead):**
    - Thay thế toàn bộ kiểu union rời rạc và chuỗi literal lặp lại bằng cặp **Const Object (`UPPER_SNAKE_CASE`)** + **Derived Type (`PascalCase`)** có khả năng tự suy diễn kiểu tuyệt đối, tương thích 100% với `isolatedDeclarations`, `vue-tsc`, `oxlint` và trình đóng gói `Rolldown`.
@@ -30,10 +30,10 @@ Thiết lập hệ thống **Enum & Constants Single Source of Truth (SSOT)** ch
 
 - **Ngôn ngữ & Trình kiểm tra kiểu:** TypeScript 5.x (`strict: true`, `vue-tsc`).
 - **Bundler & Linter:** Vite / Rolldown, `oxlint`, ESLint, Prettier.
-- **Tầng Gói Chia Sẻ (`Shared Package`):** `@vben/constants` (`packages/constants/src/`).
+- **Tầng Gói Chia Sẻ (`Shared Package`):** `@tuquet/constants` (`packages/constants/src/`).
 - **Tầng Ứng Dụng (`App Layer`):** `@tuquet/admin-web` (`apps/web-admin/src/constants/`, `apps/web-admin/src/api/core/`, `apps/web-admin/src/views/`).
 - **Tầng Đa Ngôn Ngữ (`i18n`):** `vue-i18n` (`$t('common.*')`, `$t('term.*')`, `$t('page.*')`).
-- **Kiểm Thử (`Unit Test`):** `Vitest` (`pnpm --filter @vben/constants test`, `pnpm --filter @tuquet/admin-web test:unit`).
+- **Kiểm Thử (`Unit Test`):** `Vitest` (`pnpm --filter @tuquet/constants test`, `pnpm --filter @tuquet/admin-web test:unit`).
 
 ---
 
@@ -76,16 +76,16 @@ admin/
 │           └── system.ts                       # SYSTEM_PLUGIN_STATUS
 └── apps/web-admin/src/
     ├── constants/                              # [MỚI] Tầng cầu nối Enum UI Metadata (Badge Tones & i18n Option Builders)
-    │   ├── index.ts                            # Re-export @vben/constants + UI helpers
+    │   ├── index.ts                            # Re-export @tuquet/constants + UI helpers
     │   ├── enum-helper.ts                      # StatusTone, getStatusToneMeta(), buildEnumOptions(), buildEnumFilterOptions()
     │   └── status-meta.ts                      # Bảng ánh xạ Status -> { tone, labelKey } cho từng miền
     ├── api/core/
-    │   ├── supabase-client.ts                  # Import SupabaseSchema từ @vben/constants
-    │   ├── tenant.ts                           # Import TenantStatus, TenantPlan, STORAGE_KEYS từ @vben/constants
-    │   ├── automation.ts                       # Import & re-export WorkflowStatus, CampaignStatus, DeviceStatus... từ @vben/constants
-    │   ├── commerce.ts                         # Import & re-export CommerceProductType, CommerceOrderStatus... từ @vben/constants
-    │   ├── billing.ts                          # Import & re-export PaymentChannelType, PaymentIntentStatusType... từ @vben/constants
-    │   └── system.ts                           # Import & re-export SystemPluginStatus, SubscriptionStatus từ @vben/constants
+    │   ├── supabase-client.ts                  # Import SupabaseSchema từ @tuquet/constants
+    │   ├── tenant.ts                           # Import TenantStatus, TenantPlan, STORAGE_KEYS từ @tuquet/constants
+    │   ├── automation.ts                       # Import & re-export WorkflowStatus, CampaignStatus, DeviceStatus... từ @tuquet/constants
+    │   ├── commerce.ts                         # Import & re-export CommerceProductType, CommerceOrderStatus... từ @tuquet/constants
+    │   ├── billing.ts                          # Import & re-export PaymentChannelType, PaymentIntentStatusType... từ @tuquet/constants
+    │   └── system.ts                           # Import & re-export SystemPluginStatus, SubscriptionStatus từ @tuquet/constants
     └── views/
         ├── tenants/index.vue                   # Thay magic strings bằng TENANT_STATUS, TENANT_PLAN & helper
         ├── automation/
@@ -102,7 +102,7 @@ admin/
 
 ## 5. Code Style & Kiến Trúc Chi Tiết
 
-### 5.1. Chuẩn Khai Báo `as const` Object & Derived Type (`@vben/constants`)
+### 5.1. Chuẩn Khai Báo `as const` Object & Derived Type (`@tuquet/constants`)
 
 Mỗi Enum miền bao gồm 3 phần: (1) Đối tượng hằng số đóng băng `as const`, (2) Kiểu Union dẫn xuất tự động, và (3) Mảng giá trị hợp lệ `VALUES` phục vụ kiểm tra runtime (type guard) hoặc khởi tạo vòng lặp:
 
@@ -244,7 +244,7 @@ export function buildEnumFilterOptions<T extends string>(
 
 ```typescript
 import { computed } from 'vue';
-import { FILTER_ALL, WORKFLOW_STATUS } from '@vben/constants';
+import { FILTER_ALL, WORKFLOW_STATUS } from '@tuquet/constants';
 import {
   buildEnumFilterOptions,
   getWorkflowStatusMeta,
@@ -273,7 +273,7 @@ if (formValues.status && formValues.status !== FILTER_ALL) {
 
 ## 6. Testing Strategy (Chiến Lược Kiểm Thử)
 
-1. **Unit Tests cho `@vben/constants` và `apps/web-admin/src/constants` (`Vitest`):**
+1. **Unit Tests cho `@tuquet/constants` và `apps/web-admin/src/constants` (`Vitest`):**
    - Kiểm tra mọi hằng số miền (`WORKFLOW_STATUS`, `CAMPAIGN_STATUS`, `DEVICE_STATUS`, `BROWSER_STATUS`, `PROXY_STATUS`, `TENANT_STATUS`, `COMMERCE_PRODUCT_TYPE`, `COMMERCE_ORDER_STATUS`, `PAYMENT_CHANNEL`, `PAYMENT_INTENT_STATUS`, `WALLET_TX_TYPE`, `SUPABASE_SCHEMA`) có giá trị chuỗi khớp 100% với ràng buộc `CHECK` trong cơ sở dữ liệu PostgreSQL/Supabase (`tuquet/cloud`).
    - Kiểm tra `buildEnumFilterOptions` sinh đúng phần tử đầu tiên `FILTER_ALL` (`'all'`) và dịch nhãn động khi đổi ngôn ngữ `en-US` $\leftrightarrow$ `vi-VN`.
    - Kiểm tra `getStatusToneMeta` luôn trả về cấu hình fallback an toàn (`neutral`) nếu gặp giá trị chuỗi lạ từ DB.
@@ -303,8 +303,8 @@ if (formValues.status && formValues.status !== FILTER_ALL) {
 
 ## 8. Success Criteria (Tiêu Chí Nghiệm Thu)
 
-- [x] **SC1 — Đơn Nguồn Sự Thật Tại `@vben/constants`:** Toàn bộ 18+ bộ Enum/Constants thuộc 5 miền (`schema/storage`, `tenant`, `automation/fleet`, `commerce`, `billing/system`) được định nghĩa chuẩn hóa theo mẫu `as const` tại `packages/constants/src/domains/` và xuất qua `@vben/constants`.
-- [x] **SC2 — Đồng Bộ 100% Tầng API (`src/api/core/*.ts`):** Các tệp `supabase-client.ts`, `tenant.ts`, `automation.ts`, `commerce.ts`, `billing.ts`, `system.ts` chuyển sang dùng hằng số và kiểu từ `@vben/constants` (kèm re-export giữ tương thích ngược).
+- [x] **SC1 — Đơn Nguồn Sự Thật Tại `@tuquet/constants`:** Toàn bộ 18+ bộ Enum/Constants thuộc 5 miền (`schema/storage`, `tenant`, `automation/fleet`, `commerce`, `billing/system`) được định nghĩa chuẩn hóa theo mẫu `as const` tại `packages/constants/src/domains/` và xuất qua `@tuquet/constants`.
+- [x] **SC2 — Đồng Bộ 100% Tầng API (`src/api/core/*.ts`):** Các tệp `supabase-client.ts`, `tenant.ts`, `automation.ts`, `commerce.ts`, `billing.ts`, `system.ts` chuyển sang dùng hằng số và kiểu từ `@tuquet/constants` (kèm re-export giữ tương thích ngược).
 - [x] **SC3 — Helper Giao Diện & Đa Ngôn Ngữ (`src/constants/`):** Cung cấp `STATUS_TONE`, `buildEnumFilterOptions` và bảng metadata trạng thái giúp loại bỏ mã lặp `if/else` tạo class màu sắc và mảng select options thủ công.
 - [x] **SC4 — Refactor Sạch Magic Strings Trên Các Màn Hình Quản Trị:** Toàn bộ các trang sử dụng `useVbenVxeGrid` (`/tenants`, `/automation/workflows`, `/automation/runs`, `/automation/devices`, `/automation/browsers`, `/automation/proxies`, `/commerce/*`, `/system/*`) sử dụng hằng số chuẩn (`WORKFLOW_STATUS`, `FILTER_ALL`, v.v.) thay cho chuỗi literal.
 - [x] **SC5 — Kiểm Định Tự Động & Build Local Xanh 100%:** Có bộ Unit Test (`Vitest`) bảo vệ toàn bộ Enum & Helpers; `pnpm run check:i18n`, `pnpm --filter @tuquet/admin-web run typecheck`, `pnpm run lint`, và `pnpm run build:local` hoàn tất với `0 errors`.
@@ -313,5 +313,5 @@ if (formValues.status && formValues.status !== FILTER_ALL) {
 
 ## 9. Resolved Decisions (Các Quyết Định Đã Chốt)
 
-1. **Kiến trúc phân tách 2 tầng (`@vben/constants` vs `#/constants`):** Toàn bộ định nghĩa hằng số miền thuần túy (`as const` object + derived union type + mảng `*_VALUES`) được đặt tại `packages/constants/src/domains/` và xuất qua `@vben/constants`; các helper gắn với giao diện và đa ngôn ngữ (`STATUS_TONE`, `getStatusToneMeta`, `buildEnumFilterOptions`, `status-meta.ts`) được đặt tại `apps/web-admin/src/constants/` (`#/constants`).
+1. **Kiến trúc phân tách 2 tầng (`@tuquet/constants` vs `#/constants`):** Toàn bộ định nghĩa hằng số miền thuần túy (`as const` object + derived union type + mảng `*_VALUES`) được đặt tại `packages/constants/src/domains/` và xuất qua `@tuquet/constants`; các helper gắn với giao diện và đa ngôn ngữ (`STATUS_TONE`, `getStatusToneMeta`, `buildEnumFilterOptions`, `status-meta.ts`) được đặt tại `apps/web-admin/src/constants/` (`#/constants`).
 2. **Triển khai đồng bộ toàn bộ 4 phân hệ nghiệp vụ theo lát cắt dọc (Vertical Slices):** Thực hiện tuần tự từ nền tảng Core/Tenant $\rightarrow$ UI Helpers & Unit Tests $\rightarrow$ Automation & Fleet $\rightarrow$ Commerce & Billing $\rightarrow$ System Governance, đảm bảo 100% tương thích ngược tại `src/api/core/*.ts`.

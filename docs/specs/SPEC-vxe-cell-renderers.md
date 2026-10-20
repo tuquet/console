@@ -13,8 +13,8 @@ Mục tiêu chính:
 ## Tech Stack
 
 - Vue 3 + TypeScript
-- `@vben/plugins/vxe-table` + `vxe-pc-ui` renderer API (`vxeUI.renderer.add`)
-- `@tuquet/vue-ui` (Badge, Button, Tooltip) + `@vben/icons` (Lucide)
+- `@tuquet/plugins/vxe-table` + `vxe-pc-ui` renderer API (`vxeUI.renderer.add`)
+- `@tuquet/vue-ui` (Badge, Button, Tooltip) + `@tuquet/icons` (Lucide)
 - Vitest cho Unit Tests
 
 ## Commands

@@ -4,7 +4,7 @@
 
 Nâng cấp và hoàn thiện toàn diện kỹ năng `specter-admin` (`skills/specter-admin/SKILL.md`) trở thành **Cẩm nang Tăng tốc Phát triển Frontend** (Frontend Accelerator Runbook) cho Admin Dashboard (`apps/web-admin` và `packages/`).
 
-Kỹ năng được trang bị đầy đủ các khuôn mẫu thành phần (Component Blueprints), hướng dẫn import UI chuẩn (`@tuquet/vue-ui`, `@lucide/vue`), mẫu kết nối API chuẩn qua BFF (`@vben/request`), quy chuẩn Tailwind v4, giải pháp cho các lỗi UI kinh điển (như modal không căn giữa trên mobile), cùng quy trình build & test cục bộ siêu tốc (Zero-Push).
+Kỹ năng được trang bị đầy đủ các khuôn mẫu thành phần (Component Blueprints), hướng dẫn import UI chuẩn (`@tuquet/vue-ui`, `@lucide/vue`), mẫu kết nối API chuẩn qua BFF (`@tuquet/request`), quy chuẩn Tailwind v4, giải pháp cho các lỗi UI kinh điển (như modal không căn giữa trên mobile), cùng quy trình build & test cục bộ siêu tốc (Zero-Push).
 
 Mục tiêu cốt lõi: Giảm thời gian khởi tạo tính năng mới từ hàng giờ xuống còn vài phút, triệt tiêu hoàn toàn tình trạng mò mẫm code, tra cứu sai thư viện hoặc gây lỗi ô nhiễm bộ nhớ.
 
@@ -15,9 +15,9 @@ Mục tiêu cốt lõi: Giảm thời gian khởi tạo tính năng mới từ h
 - **Framework:** Vue 3.5+ (Composition API, `<script setup lang="ts">`, `defineModel`, `defineProps`, `defineEmits`).
 - **UI Component Primitives:** `@tuquet/vue-ui` (Shadcn-Vue based: `Button`, `Dialog`, `DialogContent`, `DialogHeader`, `DialogFooter`, `DialogTitle`, `Input`, `Badge`, `Table`, `TableCell`, `TableHeader`, `TableRow`, `Tabs`, `toast`), `@lucide/vue`.
 - **Styling Engine:** Tailwind CSS v4 (`@tailwindcss/vite`), biến HSL theme tokens (`bg-background`, `text-foreground`, `border-border/40`, `text-muted-foreground`, `bg-accent`).
-- **State Management:** Pinia (`@vben/stores`, `@vben/preferences`).
-- **HTTP Client:** `@vben/request` (`RequestClient`, tự động chèn token từ `useAccessStore` và baseURL qua `useAppConfig`).
-- **Build & Monorepo:** Vite 6 / `@vben/vite-config`, Turborepo, `pnpm` workspaces.
+- **State Management:** Pinia (`@tuquet/stores`, `@tuquet/preferences`).
+- **HTTP Client:** `@tuquet/request` (`RequestClient`, tự động chèn token từ `useAccessStore` và baseURL qua `useAppConfig`).
+- **Build & Monorepo:** Vite 6 / `@tuquet/vite-config`, Turborepo, `pnpm` workspaces.
 - **Web Server:** Nginx trên mạng Tailscale Mesh (`http://100.68.217.61:80`, `127.0.0.1:80`).
 
 ---

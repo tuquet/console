@@ -5,159 +5,159 @@
       "path": "apps/web-admin"
     },
     {
-      "name": "@vben/docs",
+      "name": "@tuquet/docs",
       "path": "docs"
     },
     {
-      "name": "@vben/commitlint-config",
+      "name": "@tuquet/commitlint-config",
       "path": "internal/lint-configs/commitlint-config"
     },
     {
-      "name": "@vben/eslint-config",
+      "name": "@tuquet/eslint-config",
       "path": "internal/lint-configs/eslint-config"
     },
     {
-      "name": "@vben/oxfmt-config",
+      "name": "@tuquet/oxfmt-config",
       "path": "internal/lint-configs/oxfmt-config"
     },
     {
-      "name": "@vben/oxlint-config",
+      "name": "@tuquet/oxlint-config",
       "path": "internal/lint-configs/oxlint-config"
     },
     {
-      "name": "@vben/stylelint-config",
+      "name": "@tuquet/stylelint-config",
       "path": "internal/lint-configs/stylelint-config"
     },
     {
-      "name": "@vben/node-utils",
+      "name": "@tuquet/node-utils",
       "path": "internal/node-utils"
     },
     {
-      "name": "@vben/tailwind-config",
+      "name": "@tuquet/tailwind-config",
       "path": "internal/tailwind-config"
     },
     {
-      "name": "@vben/tsconfig",
+      "name": "@tuquet/tsconfig",
       "path": "internal/tsconfig"
     },
     {
-      "name": "@vben/vite-config",
+      "name": "@tuquet/vite-config",
       "path": "internal/vite-config"
     },
     {
-      "name": "@vben-core/design",
+      "name": "@tuquet-core/design",
       "path": "packages/@core/base/design"
     },
     {
-      "name": "@vben-core/icons",
+      "name": "@tuquet-core/icons",
       "path": "packages/@core/base/icons"
     },
     {
-      "name": "@vben-core/shared",
+      "name": "@tuquet-core/shared",
       "path": "packages/@core/base/shared"
     },
     {
-      "name": "@vben-core/typings",
+      "name": "@tuquet-core/typings",
       "path": "packages/@core/base/typings"
     },
     {
-      "name": "@vben-core/composables",
+      "name": "@tuquet-core/composables",
       "path": "packages/@core/composables"
     },
     {
-      "name": "@vben-core/preferences",
+      "name": "@tuquet-core/preferences",
       "path": "packages/@core/preferences"
     },
     {
-      "name": "@vben-core/form-ui",
+      "name": "@tuquet-core/form-ui",
       "path": "packages/@core/ui-kit/form-ui"
     },
     {
-      "name": "@vben-core/layout-ui",
+      "name": "@tuquet-core/layout-ui",
       "path": "packages/@core/ui-kit/layout-ui"
     },
     {
-      "name": "@vben-core/menu-ui",
+      "name": "@tuquet-core/menu-ui",
       "path": "packages/@core/ui-kit/menu-ui"
     },
     {
-      "name": "@vben-core/popup-ui",
+      "name": "@tuquet-core/popup-ui",
       "path": "packages/@core/ui-kit/popup-ui"
     },
     {
-      "name": "@vben-core/shadcn-ui",
+      "name": "@tuquet-core/shadcn-ui",
       "path": "packages/@core/ui-kit/shadcn-ui"
     },
     {
-      "name": "@vben-core/tabs-ui",
+      "name": "@tuquet-core/tabs-ui",
       "path": "packages/@core/ui-kit/tabs-ui"
     },
     {
-      "name": "@vben/constants",
+      "name": "@tuquet/constants",
       "path": "packages/constants"
     },
     {
-      "name": "@vben/access",
+      "name": "@tuquet/access",
       "path": "packages/effects/access"
     },
     {
-      "name": "@vben/common-ui",
+      "name": "@tuquet/common-ui",
       "path": "packages/effects/common-ui"
     },
     {
-      "name": "@vben/hooks",
+      "name": "@tuquet/hooks",
       "path": "packages/effects/hooks"
     },
     {
-      "name": "@vben/layouts",
+      "name": "@tuquet/layouts",
       "path": "packages/effects/layouts"
     },
     {
-      "name": "@vben/plugins",
+      "name": "@tuquet/plugins",
       "path": "packages/effects/plugins"
     },
     {
-      "name": "@vben/request",
+      "name": "@tuquet/request",
       "path": "packages/effects/request"
     },
     {
-      "name": "@vben/icons",
+      "name": "@tuquet/icons",
       "path": "packages/icons"
     },
     {
-      "name": "@vben/locales",
+      "name": "@tuquet/locales",
       "path": "packages/locales"
     },
     {
-      "name": "@vben/preferences",
+      "name": "@tuquet/preferences",
       "path": "packages/preferences"
     },
     {
-      "name": "@vben/stores",
+      "name": "@tuquet/stores",
       "path": "packages/stores"
     },
     {
-      "name": "@vben/styles",
+      "name": "@tuquet/styles",
       "path": "packages/styles"
     },
     {
-      "name": "@vben/types",
+      "name": "@tuquet/types",
       "path": "packages/types"
     },
     {
-      "name": "@vben/utils",
+      "name": "@tuquet/utils",
       "path": "packages/utils"
     },
     {
-      "name": "@vben/playground",
+      "name": "@tuquet/playground",
       "path": "playground"
     },
     {
-      "name": "@vben/turbo-run",
+      "name": "@tuquet/turbo-run",
       "path": "scripts/turbo-run"
     },
     {
-      "name": "@vben/vsh",
+      "name": "@tuquet/vsh",
       "path": "scripts/vsh"
     }
   ]

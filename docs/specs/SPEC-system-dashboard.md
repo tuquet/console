@@ -52,8 +52,8 @@ Tách biệt rõ **tầng giám sát quản trị hệ thống (`System Overview
 
 ## 3. Tech Stack
 
-- **Framework:** Vue 3.5 (`<script setup lang="ts">`), Vue Router 4, TypeScript 5, `vue-i18n` (`@vben/locales`).
-- **Responsive State:** `usePreferences().isMobile` (`@vben/preferences`).
+- **Framework:** Vue 3.5 (`<script setup lang="ts">`), Vue Router 4, TypeScript 5, `vue-i18n` (`@tuquet/locales`).
+- **Responsive State:** `usePreferences().isMobile` (`@tuquet/preferences`).
 - **Data Grid & Form Engine:** `useVbenVxeGrid` từ [`src/adapter/vxe-table.ts`](../../apps/web-admin/src/adapter/vxe-table.ts).
 - **Data Access Layer:** [`src/api/core/system.ts`](../../apps/web-admin/src/api/core/system.ts) (`calculateSystemOverviewSummary`, `getSystemOverviewApi`).
 - **UI Components & Icons:** `@tuquet/vue-ui` (`Avatar`, `Badge`, `Button`, `Dialog`, `toast`), `@lucide/vue`.

@@ -51,7 +51,7 @@ Trang Analytics không sử dụng bất kỳ số liệu giả hay mock data n�
 | **Phân bổ gói cước** | `public.tenants.metadata.plan` | Phân tích tỉ lệ các gói Free, Pro, Enterprise |
 | **Trạng thái Plugins** | `public.system_plugins` | Đếm số lượng Core Kernel Plugins và Plugins mở rộng |
 | **Độ trễ Edge Network** | Supabase REST Edge | Đo thời gian phản hồi thực tế (`performance.now()`) giữa trình duyệt và Cloudflare/Supabase |
-| **Specter Loopback Bridge** | `http://127.0.0.1:8765` | Thăm dò ngầm trạng thái daemon máy trạm Specter Desk |
+| **Loopback Bridge** | `http://127.0.0.1:8765` | Thăm dò ngầm trạng thái daemon máy trạm Desk |
 
 ---
 

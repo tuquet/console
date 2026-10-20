@@ -44,7 +44,7 @@ Tách biệt rõ **tầng giám sát thống kê (`Overview Dashboard`)** và **
 
 ## 3. Tech Stack
 
-- **Framework:** Vue 3.5 (`<script setup lang="ts">`), Vue Router 4, TypeScript 5, `vue-i18n` (`@vben/locales`).
+- **Framework:** Vue 3.5 (`<script setup lang="ts">`), Vue Router 4, TypeScript 5, `vue-i18n` (`@tuquet/locales`).
 - **Data Grid & Form Engine:** `useVbenVxeGrid` (`VxeTable`) và `useVbenForm` từ [`src/adapter/vxe-table.ts`](../../apps/web-admin/src/adapter/vxe-table.ts).
 - **UI Components & Icons:** `@tuquet/vue-ui` (`Badge`, `Button`, `toast`), `@lucide/vue`.
 - **Data Access Layer:** [`src/api/core/automation.ts`](../../apps/web-admin/src/api/core/automation.ts) (kết hợp `schema: 'automa'`, `schema: 'runners'`, và `probeLocalDaemonApi`).

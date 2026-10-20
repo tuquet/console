@@ -102,7 +102,7 @@
 - **Quy Tắc Nhận Diện 6 Core Kernel Plugins:**
   - Hệ thống áp dụng hàm thuần khiết `isCorePlugin(id)` để phân định 6 module nhân cốt lõi:
     1. `core-iam` (Multi-Tenant IAM & Auth)
-    2. `runners` (Specter Runner Mesh & Hardware Telemetry)
+    2. `runners` (Runner Mesh & Hardware Telemetry)
     3. `automa` (Automa Automation Engine)
     4. `storage` (Media & Cloud Object Storage)
     5. `subscriptions` (SaaS Billing & Quotas Engine)

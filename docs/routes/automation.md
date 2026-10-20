@@ -125,14 +125,14 @@
 
 ### 2.4. Thiết Bị & Máy Trạm: `/automation/devices` (`runners`)
 
-- **Mục Đích:** Giám sát toàn bộ các worker nodes (máy trạm Specter Desk chạy macOS, Windows, Linux hoặc headless cloud VPS runners).
+- **Mục Đích:** Giám sát toàn bộ các worker nodes (máy trạm Desk chạy macOS, Windows, Linux hoặc headless cloud VPS runners).
 - **Nguồn Dữ Liệu:** Bảng `runners.devices`.
 - **API Client:** [`getFleetDevicesApi(filter)`](../../apps/web-admin/src/api/core/automation.ts) với `{ schema: 'runners' }`.
 - **Các Thành Phần Giao Diện:**
   - **Metric Cards ([`fleet-metrics.vue`](../../apps/web-admin/src/views/automation/devices/components/fleet-metrics.vue)):** 4 thẻ đo đếm (Tổng số máy trạm, Thiết bị trực tuyến, Tác vụ đang chạy, trạng thái Loopback Daemon `:8765`).
   - **Bảng `useVbenVxeGrid`:** Hiển thị chi tiết phần cứng (OS, RAM, CPU, Fingerprint, Heartbeat cuối) kèm bộ lọc trạng thái (`idle`, `busy`, `offline`, `maintenance`).
   - **Modals:**
-    - [`connect-fleet-modal.vue`](../../apps/web-admin/src/views/automation/devices/components/modals/connect-fleet-modal.vue): Hướng dẫn ghép nối thiết bị qua Specter CLI hoặc cầu nối SSO.
+    - [`connect-fleet-modal.vue`](../../apps/web-admin/src/views/automation/devices/components/modals/connect-fleet-modal.vue): Hướng dẫn ghép nối thiết bị qua CLI hoặc cầu nối SSO.
     - [`node-detail-modal.vue`](../../apps/web-admin/src/views/automation/devices/components/modals/node-detail-modal.vue): Chi tiết telemetry phần cứng của thiết bị hiển thị qua `VxeForm`.
 
 ### 2.5. Hồ Sơ Trình Duyệt: `/automation/browsers` (`runners`)

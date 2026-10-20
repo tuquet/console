@@ -14,7 +14,7 @@
 `admin.tuquet.com` là bảng điều khiển quản trị tập trung (Unified Management Console) của **Hệ sinh thái Tuquet**, đảm nhiệm 4 trụ cột cốt lõi:
 
 1. **Multi-Tenant IAM:** Quản lý danh tính, phân quyền thành viên và tổ chức không gian làm việc (Workspaces / Tenants).
-2. **Runners Fleet Control:** Điều phối và giám sát hạ tầng máy trạm phân tán (Specter Desk, Headless Runners, Chromium automation profiles, Proxy pool).
+2. **Runners Fleet Control:** Điều phối và giám sát hạ tầng máy trạm phân tán (Desk, Headless Runners, Chromium automation profiles, Proxy pool).
 3. **Automa Engine Telemetry:** Giám sát kịch bản quy trình tự động hóa (Workflows), tiến độ các đợt chạy (Campaign Runs) và nhật ký thực thi (Execution Logs).
 4. **Digital Commerce & Multi-Channel Payment:** Cửa hàng sản phẩm số nội bộ (`/commerce/*`) và công khai (`/store`), Ví trả trước đơn vị `Xu` (`BIGINT`), cổng thanh toán đa kênh (VietQR, MoMo, Stripe, Crypto USDT) và tự động bàn giao tài nguyên (Auto-Fulfillment).
 
@@ -152,7 +152,7 @@ Hệ thống quản trị bao gồm **27 tuyến đường** chuẩn mực phân
 │   ├── /automation/workflows       [automa]                  Sơ đồ kịch bản Canvas Workflows
 │   ├── /automation/runs            [automa]                  Lịch sử các đợt chạy chiến dịch
 │   ├── /automation/runs/:id        [automa]                  Chi tiết lần chạy & Terminal Logs Viewer (Polling 3s)
-│   ├── /automation/devices         [runners]                 Thiết bị & Nodes Specter Desk / Cloud VPS
+│   ├── /automation/devices         [runners]                 Thiết bị & Nodes Desk / Cloud VPS
 │   ├── /automation/browsers        [runners]                 Hồ sơ trình duyệt Chromium tự động hóa
 │   └── /automation/proxies         [runners]                 Pool Proxy mạng phân tán
 ├── /commerce                       [commerce|subscriptions]  lucide:shopping-bag
@@ -176,7 +176,7 @@ Core, Auth & Public Storefront (core.ts — 8 routes):
 
 ## 8. Tiêu Chuẩn Giao Tiếp Mạng Cục Bộ (Private Network Access - PNA)
 
-Khi Admin Console thực hiện thăm dò hoặc chuyển giao phiên đăng nhập SSO xuống daemon máy trạm Specter Desk (`http://127.0.0.1:8765`):
+Khi Admin Console thực hiện thăm dò hoặc chuyển giao phiên đăng nhập SSO xuống daemon máy trạm Desk (`http://127.0.0.1:8765`):
 
 1. **Lệnh Probe Analytics:** Gửi qua `fetch` với `mode: 'no-cors'` và `AbortController` timeout tối đa $1200\text{ms}$. Lỗi mạng được xử lý ngầm (non-blocking) để đảm bảo trang web vẫn render bình thường ngay cả khi daemon chưa khởi động.
 2. **Desktop SSO Bridge (`/auth/desktop`):** Nhận `redirect_uri=http://127.0.0.1:8765/sso/callback`, xác thực phiên với Cloud và POST token về loopback port cục bộ.

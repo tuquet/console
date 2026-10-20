@@ -13,7 +13,7 @@ Xây dựng phân hệ Quản trị Hạ tầng Thực thi (**Runners Fleet** �
 
 1. **Quản Trị Thiết Bị & Máy Trạm (`/automation/devices`):**
    - Hiển thị danh mục thiết bị từ `runners.devices` (`id`, `tenant_id`, `name`, `machine_fingerprint`, `status`, `version`, `os_info`, `cpu_cores`, `ram_mb`, `capabilities`, `active_jobs`, `last_heartbeat_at`) qua bảng `useVbenVxeGrid`.
-   - Hiển thị 4 thẻ chỉ số KPI thời gian thực: Tổng số máy trạm (`total_nodes`), Thiết bị trực tuyến (`online_nodes`: `idle` + `busy`), Tác vụ đang chạy (`active_jobs`), và Trạng thái kết nối Specter Loopback Daemon (`127.0.0.1:8765`).
+   - Hiển thị 4 thẻ chỉ số KPI thời gian thực: Tổng số máy trạm (`total_nodes`), Thiết bị trực tuyến (`online_nodes`: `idle` + `busy`), Tác vụ đang chạy (`active_jobs`), và Trạng thái kết nối Loopback Daemon (`127.0.0.1:8765`).
    - Hỗ trợ xem chi tiết cấu hình phần cứng (`NodeDetailModal` với `VxeForm`), hướng dẫn ghép nối máy trạm (`ConnectFleetModal`), và thu hồi quyền thiết bị (`revokeFleetDeviceApi`).
 2. **Quản Trị Hồ Sơ Trình Duyệt Anti-Detect (`/automation/browsers`):**
    - Hiển thị danh mục hồ sơ trình duyệt từ `runners.browsers` liên kết `locked_by_device:locked_by_device_id(name)` và `proxy:proxy_id(host,port,protocol)` qua bảng `useVbenVxeGrid`.
@@ -69,7 +69,7 @@ apps/web-admin/src/
     ├── devices/
     │   ├── index.vue                             # Bảng thiết bị Runner (useVbenVxeGrid) & 4 thẻ KPI
     │   └── components/
-    │       ├── connect-fleet-modal.vue           # Hộp thoại hướng dẫn ghép nối Specter CLI Daemon
+    │       ├── connect-fleet-modal.vue           # Hộp thoại hướng dẫn ghép nối CLI Daemon
     │       └── node-detail-modal.vue             # Hộp thoại chi tiết phần cứng & thu hồi thiết bị (VxeForm)
     ├── browsers/
     │   └── index.vue                             # Bảng hồ sơ trình duyệt Chromium (useVbenVxeGrid)
@@ -209,4 +209,4 @@ export async function probeLocalDaemonApi(port = 8765) {
 ## 9. Resolved Decisions (Các Quyết Định Đã Chốt)
 
 1. **Hợp nhất điều hướng dưới `/automation/*` với ranh giới `plugin: 'runners'` độc lập:** Người vận hành theo dõi thiết bị, trình duyệt và proxy ngay trong cùng nhóm menu `/automation` với quy trình và phiên chạy, nhưng hệ thống vẫn kiểm tra quyền `runners:*:read` và trạng thái cài đặt plugin `runners` tách biệt với `automa`.
-2. **Provisioning hạ tầng qua Specter CLI & Commerce:** Việc khởi tạo hồ sơ trình duyệt vật lý được thực hiện trực tiếp từ Specter Desk / CLI daemon hoặc cấp phát tự động qua Cửa hàng Tài nguyên Số (`/commerce/store`), giữ cho giao diện quản trị tập trung vào giám sát telemetry và điều phối.
+2. **Provisioning hạ tầng qua CLI & Commerce:** Việc khởi tạo hồ sơ trình duyệt vật lý được thực hiện trực tiếp từ Desk / CLI daemon hoặc cấp phát tự động qua Cửa hàng Tài nguyên Số (`/commerce/store`), giữ cho giao diện quản trị tập trung vào giám sát telemetry và điều phối.

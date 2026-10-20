@@ -353,7 +353,7 @@ pnpm run build:local
 ### Recipe 4: Circular Dependency Detected
 
 - **Cause:** Cyclic import across `@core/*` and `effects/*`.
-- **Fix:** Run `pnpm run check:circular`. Trace imports and extract common interfaces into `@vben-core/typings` or `@vben-core/shared`.
+- **Fix:** Run `pnpm run check:circular`. Trace imports and extract common interfaces into `@tuquet-core/typings` or `@tuquet-core/shared`.
 
 ### Recipe 5: Stale PWA Service Worker Cache Lock
 

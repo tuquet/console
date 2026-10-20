@@ -22,7 +22,7 @@ This specification establishes an infallible, multi-tier browser observability p
 - **Framework:** Vue 3 (Composition API, `<script setup>`)
 - **Error Tracking Client:** `@sentry/vue` (^11.8.0) targeting self-hosted / cloud Bugsink (Sentry-compatible API)
 - **Router:** Vue Router 4
-- **State:** Pinia (`@vben/stores`, `#src/store/auth.ts`, `#src/store/workspace.ts`)
+- **State:** Pinia (`@tuquet/stores`, `#src/store/auth.ts`, `#src/store/workspace.ts`)
 - **Build & Dev Tool:** Vite 8, TypeScript 5.8+, pnpm workspace
 
 ---
