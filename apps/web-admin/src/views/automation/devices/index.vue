@@ -5,8 +5,6 @@ import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { usePreferences } from '@tuquet/preferences';
-
-import { Cpu, HardDrive, Laptop, Plus, RefreshCw } from '@lucide/vue';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +19,8 @@ import {
   Button,
   toast,
 } from '@tuquet/vue-ui';
+
+import { Cpu, HardDrive, Laptop, Plus, RefreshCw } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {

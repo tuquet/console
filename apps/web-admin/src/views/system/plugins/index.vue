@@ -9,6 +9,7 @@ import {
   SYSTEM_PLUGIN_STATUS,
 } from '@tuquet/constants';
 import { usePreferences } from '@tuquet/preferences';
+import { Badge, Button } from '@tuquet/vue-ui';
 
 import {
   CreditCard,
@@ -21,7 +22,6 @@ import {
   Workflow,
   Zap,
 } from '@lucide/vue';
-import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getSystemPluginsApi } from '#/api';

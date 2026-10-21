@@ -5,6 +5,15 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import {
+  Badge,
+  Button,
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  toast,
+} from '@tuquet/vue-ui';
+
+import {
   ArrowRight,
   Cpu,
   FileText,
@@ -17,14 +26,6 @@ import {
   RefreshCw,
   Terminal,
 } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  toast,
-} from '@tuquet/vue-ui';
 
 import { calculateProgressPercentage, getAutomationOverviewApi } from '#/api';
 import { $t } from '#/locales';

@@ -30,8 +30,8 @@ import { supabaseRequest } from './supabase-client';
 import { getActiveTenantId } from './tenant';
 
 export type SupabaseResourceKey =
-  | 'automation.jobs'
   | 'automa.workflows'
+  | 'automation.jobs'
   | 'billing.bank_receiving_accounts'
   | 'billing.payment_gateways'
   | 'billing.payment_intents'
@@ -1946,7 +1946,11 @@ export function inferResourceFromRouteAndRow(
     if ('is_core' in row && 'version' in row) {
       return 'public.system_plugins';
     }
-    if ('machine_id' in row || 'runner_version' in row || 'worker_version' in row) {
+    if (
+      'machine_id' in row ||
+      'runner_version' in row ||
+      'worker_version' in row
+    ) {
       return 'workers.devices';
     }
     if ('browser_version' in row || 'os_platform' in row) {

@@ -247,20 +247,17 @@ export async function getExecutionLogsApi(
  * Hủy một job đang thực thi
  */
 export async function cancelJobApi(runId: string): Promise<void> {
-  await supabaseRequest(
-    `/rest/v1/jobs?id=eq.${encodeURIComponent(runId)}`,
-    {
-      body: JSON.stringify({
-        ended_at: new Date().toISOString(),
-        status: JOB_STATUS.CANCELLED,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'PATCH',
-      schema: SUPABASE_SCHEMA.AUTOMA,
+  await supabaseRequest(`/rest/v1/jobs?id=eq.${encodeURIComponent(runId)}`, {
+    body: JSON.stringify({
+      ended_at: new Date().toISOString(),
+      status: JOB_STATUS.CANCELLED,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
     },
-  );
+    method: 'PATCH',
+    schema: SUPABASE_SCHEMA.AUTOMA,
+  });
 }
 
 // ============================================================================
@@ -613,8 +610,7 @@ export function calculateAutomationOverviewSummary(input: {
   };
 
   const runsSummary = {
-    completed: runs.filter((r) => r.status === JOB_STATUS.COMPLETED)
-      .length,
+    completed: runs.filter((r) => r.status === JOB_STATUS.COMPLETED).length,
     failed: runs.filter((r) => r.status === JOB_STATUS.FAILED).length,
     running: runs.filter((r) => isRunActive(r.status)).length,
     total: runs.length,

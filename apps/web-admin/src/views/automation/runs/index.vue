@@ -5,9 +5,9 @@ import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { usePreferences } from '@tuquet/preferences';
+import { Badge, Button } from '@tuquet/vue-ui';
 
 import { Eye, Laptop, PlayCircle, RefreshCw } from '@lucide/vue';
-import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { calculateProgressPercentage, getJobsApi } from '#/api';

@@ -1,20 +1,9 @@
 <script lang="ts" setup>
-import type { AutomationJobItem, AutomaExecutionLogItem } from '#/api';
+import type { AutomaExecutionLogItem, AutomationJobItem } from '#/api';
 
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import {
-  AlertCircle,
-  ArrowLeft,
-  Clock,
-  GitBranch,
-  Laptop,
-  PlayCircle,
-  RefreshCw,
-  Terminal,
-  XCircle,
-} from '@lucide/vue';
 import {
   Alert,
   AlertDescription,
@@ -38,10 +27,22 @@ import {
 } from '@tuquet/vue-ui';
 
 import {
+  AlertCircle,
+  ArrowLeft,
+  Clock,
+  GitBranch,
+  Laptop,
+  PlayCircle,
+  RefreshCw,
+  Terminal,
+  XCircle,
+} from '@lucide/vue';
+
+import {
   calculateProgressPercentage,
   cancelJobApi,
-  getJobDetailApi,
   getExecutionLogsApi,
+  getJobDetailApi,
   isRunActive,
 } from '#/api';
 import { useDateFormat } from '#/composables';

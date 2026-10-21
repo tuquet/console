@@ -4,6 +4,14 @@ import type { SystemPermissionItem, SystemRoleItem } from '#/api';
 import { computed, ref, watch } from 'vue';
 
 import { usePreferences } from '@tuquet/preferences';
+import {
+  Badge,
+  Button,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  toast,
+} from '@tuquet/vue-ui';
 
 import {
   Check,
@@ -15,14 +23,6 @@ import {
   RefreshCw,
   ShieldCheck,
 } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  toast,
-} from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {

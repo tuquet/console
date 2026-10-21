@@ -5,7 +5,6 @@ import type {
 
 import { generateAccessible } from '@tuquet/access';
 import { preferences } from '@tuquet/preferences';
-
 import { toast } from '@tuquet/vue-ui';
 
 import { getAllMenusApi } from '#/api';

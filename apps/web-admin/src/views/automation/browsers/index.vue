@@ -5,6 +5,7 @@ import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { usePreferences } from '@tuquet/preferences';
+import { Badge, Button } from '@tuquet/vue-ui';
 
 import {
   Copy,
@@ -15,7 +16,6 @@ import {
   Shield,
   Unlock,
 } from '@lucide/vue';
-import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getFleetBrowsersApi } from '#/api';
