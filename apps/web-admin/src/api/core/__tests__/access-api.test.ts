@@ -51,7 +51,7 @@ describe('getEffectiveAccessApi & session caching', () => {
       .spyOn(supabaseClient, 'supabaseRequest')
       .mockResolvedValueOnce([
         { id: 'tenants:read' },
-        { id: 'runners:devices:read' },
+        { id: 'workers:devices:read' },
         { id: 'billing:read' },
       ]);
 
@@ -60,8 +60,8 @@ describe('getEffectiveAccessApi & session caching', () => {
     expect(result1.isSuperadmin).toBe(true);
     expect(result1.permissions).toEqual([
       'billing:read',
-      'runners:devices:read',
       'tenants:read',
+      'workers:devices:read',
     ]);
     expect(requestSpy).toHaveBeenCalledTimes(1);
     expect(requestSpy).toHaveBeenCalledWith('/rest/v1/permissions?select=id');
@@ -126,11 +126,11 @@ describe('getInstalledPluginsApi', () => {
   it('should return installed plugin IDs from system_plugins table', async () => {
     vi.spyOn(supabaseClient, 'supabaseRequest').mockResolvedValueOnce([
       { id: 'core-iam' },
-      { id: 'runners' },
+      { id: 'workers' },
       { id: 'automa' },
     ]);
 
     const plugins = await getInstalledPluginsApi();
-    expect(plugins).toEqual(['core-iam', 'runners', 'automa']);
+    expect(plugins).toEqual(['core-iam', 'workers', 'automa']);
   });
 });

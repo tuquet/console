@@ -27,7 +27,10 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
 
   let installedPlugins: string[] = ['core-iam'];
   try {
-    installedPlugins = await getInstalledPluginsApi();
+    const fetched = await getInstalledPluginsApi();
+    if (fetched && fetched.length > 0) {
+      installedPlugins = fetched;
+    }
   } catch (error) {
     console.warn(
       'Failed to load installed plugins, defaulting to core-iam:',

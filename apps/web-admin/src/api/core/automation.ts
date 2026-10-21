@@ -1,7 +1,7 @@
 import type {
   BrowserStatus,
-  CampaignStatus,
   DeviceStatus,
+  JobStatus,
   LogLevel,
   ProxyProtocol,
   ProxyStatus,
@@ -10,9 +10,9 @@ import type {
 
 import {
   BROWSER_STATUS,
-  CAMPAIGN_STATUS,
   DEVICE_STATUS,
   FILTER_ALL,
+  JOB_STATUS,
   LOG_LEVEL,
   PROXY_PROTOCOL,
   PROXY_STATUS,
@@ -23,13 +23,13 @@ import {
 import { supabaseRequest } from './supabase-client';
 
 // ============================================================================
-// PART 1: WORKFLOW ORCHESTRATION & CAMPAIGN RUNS (PostgreSQL schema: 'automa')
+// PART 1: WORKFLOW ORCHESTRATION & JOBS (PostgreSQL schema: 'automation')
 // ============================================================================
 
 export {
   BROWSER_STATUS,
-  CAMPAIGN_STATUS,
   DEVICE_STATUS,
+  JOB_STATUS,
   LOG_LEVEL,
   PROXY_PROTOCOL,
   PROXY_STATUS,
@@ -37,8 +37,8 @@ export {
 };
 export type {
   BrowserStatus,
-  CampaignStatus,
   DeviceStatus,
+  JobStatus,
   LogLevel,
   ProxyProtocol,
   ProxyStatus,
@@ -56,7 +56,7 @@ export interface AutomaWorkflowItem {
   version: string;
 }
 
-export interface AutomaCampaignRunItem {
+export interface AutomationJobItem {
   completed_tasks: number;
   created_at: string;
   ended_at: null | string;
@@ -66,13 +66,13 @@ export interface AutomaCampaignRunItem {
   name: string;
   parameters?: Record<string, any>;
   result_summary?: Record<string, any>;
-  runner?: null | {
+  worker?: null | {
     id?: string;
     name: string;
   };
-  runner_id: null | string;
+  worker_id: null | string;
   started_at: null | string;
-  status: CampaignStatus;
+  status: JobStatus;
   tenant_id: string;
   total_tasks: number;
   workflow?: null | {
@@ -83,7 +83,7 @@ export interface AutomaCampaignRunItem {
 }
 
 export interface AutomaExecutionLogItem {
-  campaign_run_id: string;
+  job_id: string;
   id: number;
   level: LogLevel;
   logged_at: string;
@@ -95,18 +95,18 @@ export interface AutomaExecutionLogItem {
 }
 
 /**
- * Pure function: Kiểm tra xem phiên chạy có đang trong trạng thái cần live polling hay không
+ * Pure function: Kiểm tra xem job có đang trong trạng thái cần live polling hay không
  */
-export function isRunActive(status: CampaignStatus): boolean {
+export function isRunActive(status: JobStatus): boolean {
   return (
-    status === CAMPAIGN_STATUS.PENDING ||
-    status === CAMPAIGN_STATUS.QUEUED ||
-    status === CAMPAIGN_STATUS.RUNNING
+    status === JOB_STATUS.PENDING ||
+    status === JOB_STATUS.QUEUED ||
+    status === JOB_STATUS.RUNNING
   );
 }
 
 /**
- * Pure function: Tính toán phần trăm tiến độ của một campaign run
+ * Pure function: Tính toán phần trăm tiến độ của một job
  */
 export function calculateProgressPercentage(
   completed: number,
@@ -159,10 +159,11 @@ export async function getWorkflowsApi(params?: {
     );
     const data = await supabaseRequest<AutomaWorkflowItem[]>(query, {
       schema: SUPABASE_SCHEMA.AUTOMA,
+      suppressErrorCapture: true,
     });
     return Array.isArray(data) ? data : [];
   } catch (error: any) {
-    if (!error?.isAuthError) {
+    if (!error?.isAuthError && !error?.message?.includes('Invalid schema')) {
       console.error('[Automa] Failed to load workflows:', error);
     }
     return [];
@@ -170,59 +171,60 @@ export async function getWorkflowsApi(params?: {
 }
 
 /**
- * Lấy danh sách các phiên chạy chiến dịch từ schema automa.campaign_runs
+ * Lấy danh sách các jobs từ schema automation.jobs
  */
-export async function getCampaignRunsApi(params?: {
+export async function getJobsApi(params?: {
   status?: string;
   tenantId?: string;
   workflowId?: string;
-}): Promise<AutomaCampaignRunItem[]> {
+}): Promise<AutomationJobItem[]> {
   try {
     const query = buildAutomationFilterQuery(
-      '/rest/v1/campaign_runs?select=id,tenant_id,workflow_id,runner_id,name,status,total_tasks,completed_tasks,failed_tasks,started_at,ended_at,created_at,error_message,workflow:workflow_id(name),runner:runner_id(name)&order=created_at.desc',
+      '/rest/v1/jobs?select=id,tenant_id,workflow_id,worker_id,name,status,total_tasks,completed_tasks,failed_tasks,started_at,ended_at,created_at,error_message,workflow:workflow_id(name),worker:worker_id(name)&order=created_at.desc',
       params,
     );
-    const data = await supabaseRequest<AutomaCampaignRunItem[]>(query, {
+    const data = await supabaseRequest<AutomationJobItem[]>(query, {
       schema: SUPABASE_SCHEMA.AUTOMA,
+      suppressErrorCapture: true,
     });
     return Array.isArray(data) ? data : [];
   } catch (error: any) {
-    if (!error?.isAuthError) {
-      console.error('[Automa] Failed to load campaign runs:', error);
+    if (!error?.isAuthError && !error?.message?.includes('Invalid schema')) {
+      console.error('[Automation] Failed to load jobs:', error);
     }
     return [];
   }
 }
 
 /**
- * Lấy chi tiết của một phiên chạy chiến dịch cụ thể
+ * Lấy chi tiết của một job cụ thể
  */
-export async function getCampaignRunDetailApi(
+export async function getJobDetailApi(
   runId: string,
-): Promise<AutomaCampaignRunItem | null> {
+): Promise<AutomationJobItem | null> {
   try {
-    const query = `/rest/v1/campaign_runs?id=eq.${encodeURIComponent(runId)}&select=id,tenant_id,workflow_id,runner_id,name,status,total_tasks,completed_tasks,failed_tasks,started_at,ended_at,created_at,error_message,result_summary,parameters,workflow:workflow_id(name),runner:runner_id(name)`;
-    const data = await supabaseRequest<AutomaCampaignRunItem[]>(query, {
+    const query = `/rest/v1/jobs?id=eq.${encodeURIComponent(runId)}&select=id,tenant_id,workflow_id,worker_id,name,status,total_tasks,completed_tasks,failed_tasks,started_at,ended_at,created_at,error_message,result_summary,parameters,workflow:workflow_id(name),worker:worker_id(name)`;
+    const data = await supabaseRequest<AutomationJobItem[]>(query, {
       schema: SUPABASE_SCHEMA.AUTOMA,
     });
     return Array.isArray(data) && data.length > 0 ? (data[0] ?? null) : null;
   } catch (error: any) {
     if (!error?.isAuthError) {
-      console.error('[Automa] Failed to load campaign run detail:', error);
+      console.error('[Automation] Failed to load job detail:', error);
     }
     return null;
   }
 }
 
 /**
- * Lấy nhật ký thực thi của một phiên chạy từ schema automa.execution_logs
+ * Lấy nhật ký thực thi của một job từ schema automation.execution_logs
  */
 export async function getExecutionLogsApi(
   runId: string,
   params?: { limit?: number; sinceId?: number },
 ): Promise<AutomaExecutionLogItem[]> {
   try {
-    let query = `/rest/v1/execution_logs?campaign_run_id=eq.${encodeURIComponent(runId)}`;
+    let query = `/rest/v1/execution_logs?job_id=eq.${encodeURIComponent(runId)}`;
     if (params?.sinceId) {
       query += `&id=gt.${params.sinceId}`;
     }
@@ -235,22 +237,22 @@ export async function getExecutionLogsApi(
     return Array.isArray(data) ? data : [];
   } catch (error: any) {
     if (!error?.isAuthError) {
-      console.error('[Automa] Failed to load execution logs:', error);
+      console.error('[Automation] Failed to load execution logs:', error);
     }
     return [];
   }
 }
 
 /**
- * Hủy một phiên chạy đang thực thi
+ * Hủy một job đang thực thi
  */
-export async function cancelCampaignRunApi(runId: string): Promise<void> {
+export async function cancelJobApi(runId: string): Promise<void> {
   await supabaseRequest(
-    `/rest/v1/campaign_runs?id=eq.${encodeURIComponent(runId)}`,
+    `/rest/v1/jobs?id=eq.${encodeURIComponent(runId)}`,
     {
       body: JSON.stringify({
         ended_at: new Date().toISOString(),
-        status: CAMPAIGN_STATUS.CANCELLED,
+        status: JOB_STATUS.CANCELLED,
       }),
       headers: {
         'Content-Type': 'application/json',
@@ -262,7 +264,7 @@ export async function cancelCampaignRunApi(runId: string): Promise<void> {
 }
 
 // ============================================================================
-// PART 2: COMPUTE DEVICES, BROWSERS & PROXIES (PostgreSQL schema: 'runners')
+// PART 2: COMPUTE DEVICES, BROWSERS & PROXIES (PostgreSQL schema: 'workers')
 // ============================================================================
 
 export interface FleetDeviceItem {
@@ -341,7 +343,7 @@ export interface FleetMetricsData {
 }
 
 /**
- * Pure function: Map raw runners.devices row to FleetDeviceItem
+ * Pure function: Map raw workers.devices row to FleetDeviceItem
  */
 export function mapRawDeviceToFleetNode(raw: any): FleetDeviceItem {
   const ramMb =
@@ -464,7 +466,7 @@ export async function probeLocalDaemonApi(port = 8765): Promise<{
 }
 
 /**
- * Lấy danh sách máy trạm từ schema runners.devices
+ * Lấy danh sách máy trạm từ schema workers.devices
  */
 export async function getFleetDevicesApi(params?: {
   status?: string;
@@ -476,31 +478,34 @@ export async function getFleetDevicesApi(params?: {
       params,
     );
     const data = await supabaseRequest<any[]>(query, {
-      schema: SUPABASE_SCHEMA.RUNNERS,
+      schema: SUPABASE_SCHEMA.WORKERS,
+      suppressErrorCapture: true,
     });
     if (!Array.isArray(data)) return [];
     return data.map((row) => mapRawDeviceToFleetNode(row));
-  } catch (error) {
-    console.error('[Automation] Failed to load devices:', error);
+  } catch (error: any) {
+    if (!error?.message?.includes('Invalid schema')) {
+      console.error('[Automation] Failed to load devices:', error);
+    }
     return [];
   }
 }
 
 /**
- * Thu hồi quyền truy cập của một máy trạm trong schema runners.devices
+ * Thu hồi quyền truy cập của một máy trạm trong schema workers.devices
  */
 export async function revokeFleetDeviceApi(deviceId: string): Promise<void> {
   await supabaseRequest(
     `/rest/v1/devices?id=eq.${encodeURIComponent(deviceId)}`,
     {
       method: 'DELETE',
-      schema: SUPABASE_SCHEMA.RUNNERS,
+      schema: SUPABASE_SCHEMA.WORKERS,
     },
   );
 }
 
 /**
- * Lấy danh sách browser profiles từ schema runners.browsers
+ * Lấy danh sách browser profiles từ schema workers.browsers
  */
 export async function getFleetBrowsersApi(params?: {
   status?: string;
@@ -512,17 +517,20 @@ export async function getFleetBrowsersApi(params?: {
       params,
     );
     const data = await supabaseRequest<FleetBrowserItem[]>(query, {
-      schema: SUPABASE_SCHEMA.RUNNERS,
+      schema: SUPABASE_SCHEMA.WORKERS,
+      suppressErrorCapture: true,
     });
     return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error('[Automation] Failed to load browsers:', error);
+  } catch (error: any) {
+    if (!error?.message?.includes('Invalid schema')) {
+      console.error('[Automation] Failed to load browsers:', error);
+    }
     return [];
   }
 }
 
 /**
- * Lấy danh sách proxy pool từ schema runners.proxies
+ * Lấy danh sách proxy pool từ schema workers.proxies
  */
 export async function getFleetProxiesApi(params?: {
   status?: string;
@@ -534,11 +542,14 @@ export async function getFleetProxiesApi(params?: {
       params,
     );
     const data = await supabaseRequest<FleetProxyItem[]>(query, {
-      schema: SUPABASE_SCHEMA.RUNNERS,
+      schema: SUPABASE_SCHEMA.WORKERS,
+      suppressErrorCapture: true,
     });
     return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error('[Automation] Failed to load proxies:', error);
+  } catch (error: any) {
+    if (!error?.message?.includes('Invalid schema')) {
+      console.error('[Automation] Failed to load proxies:', error);
+    }
     return [];
   }
 }
@@ -602,9 +613,9 @@ export function calculateAutomationOverviewSummary(input: {
   };
 
   const runsSummary = {
-    completed: runs.filter((r) => r.status === CAMPAIGN_STATUS.COMPLETED)
+    completed: runs.filter((r) => r.status === JOB_STATUS.COMPLETED)
       .length,
-    failed: runs.filter((r) => r.status === CAMPAIGN_STATUS.FAILED).length,
+    failed: runs.filter((r) => r.status === JOB_STATUS.FAILED).length,
     running: runs.filter((r) => isRunActive(r.status)).length,
     total: runs.length,
   };

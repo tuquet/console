@@ -118,7 +118,7 @@ export interface SystemRoleItem {
 const CORE_PLUGIN_IDS = new Set([
   'automa',
   'core-iam',
-  'runners',
+  'workers',
   'storage',
   'subscriptions',
   'webhooks',

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { AutomaCampaignRunItem } from '#/api';
+import type { AutomationJobItem } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -10,14 +10,14 @@ import { Eye, Laptop, PlayCircle, RefreshCw } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { calculateProgressPercentage, getCampaignRunsApi } from '#/api';
+import { calculateProgressPercentage, getJobsApi } from '#/api';
 import { useDateFormat } from '#/composables';
 import {
   buildEnumFilterOptions,
-  CAMPAIGN_STATUS,
-  CAMPAIGN_STATUS_META,
   FILTER_ALL,
   getStatusToneMeta,
+  JOB_STATUS,
+  JOB_STATUS_META,
 } from '#/constants';
 import { $t } from '#/locales';
 
@@ -28,19 +28,19 @@ const router = useRouter();
 const { isMobile } = usePreferences();
 const { formatDate } = useDateFormat();
 
-const allRuns = ref<AutomaCampaignRunItem[]>([]);
+const allRuns = ref<AutomationJobItem[]>([]);
 
 function handleViewDetail(id: string) {
   router.push(`/automation/runs/${id}`);
 }
 
 function getRunStatusDotClass(status: string): string {
-  const meta = getStatusToneMeta(status, CAMPAIGN_STATUS_META);
+  const meta = getStatusToneMeta(status, JOB_STATUS_META);
   return `${meta.dotClass}${meta.pulse ? ' animate-pulse' : ''}`;
 }
 
 function getRunStatusBarClass(status: string): string {
-  const meta = getStatusToneMeta(status, CAMPAIGN_STATUS_META);
+  const meta = getStatusToneMeta(status, JOB_STATUS_META);
   if (meta.tone === 'info') return 'bg-primary';
   if (meta.tone === 'success') return 'bg-success';
   if (meta.tone === 'danger') return 'bg-destructive';
@@ -48,7 +48,7 @@ function getRunStatusBarClass(status: string): string {
 }
 
 function getRunStatusLabel(status: string): string {
-  const meta = getStatusToneMeta(status, CAMPAIGN_STATUS_META);
+  const meta = getStatusToneMeta(status, JOB_STATUS_META);
   return meta.labelKey ? $t(meta.labelKey) : (meta.fallbackLabel ?? status);
 }
 
@@ -61,10 +61,10 @@ function getColumns() {
       slots: { default: 'name-cell' },
     },
     {
-      field: 'runner',
+      field: 'device',
       title: $t('page.runs_view.col_runner'),
       minWidth: 170,
-      slots: { default: 'runner-cell' },
+      slots: { default: 'device-cell' },
     },
     {
       field: 'progress',
@@ -95,11 +95,11 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<AutomaCampaignRunItem>({
+const [Grid, gridApi] = useVbenVxeGrid<AutomationJobItem>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
-    resource: 'automa.campaign_runs',
+    resource: 'automation.jobs',
     subtitleField: 'status',
     titleField: 'name',
   },
@@ -119,14 +119,14 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomaCampaignRunItem>({
         defaultValue: (route.query.status as string) || FILTER_ALL,
         componentProps: () => ({
           placeholder: $t('page.runs_view.status_all'),
-          options: buildEnumFilterOptions(CAMPAIGN_STATUS_META, $t, {
+          options: buildEnumFilterOptions(JOB_STATUS_META, $t, {
             allLabelKey: 'page.runs_view.status_all',
             order: [
-              CAMPAIGN_STATUS.RUNNING,
-              CAMPAIGN_STATUS.COMPLETED,
-              CAMPAIGN_STATUS.FAILED,
-              CAMPAIGN_STATUS.PENDING,
-              CAMPAIGN_STATUS.CANCELLED,
+              JOB_STATUS.RUNNING,
+              JOB_STATUS.COMPLETED,
+              JOB_STATUS.FAILED,
+              JOB_STATUS.PENDING,
+              JOB_STATUS.CANCELLED,
             ],
           }),
         }),
@@ -174,17 +174,17 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomaCampaignRunItem>({
         ) => {
           const tenantId = (route.query.tenant as string) || undefined;
           const workflowId = (route.query.workflow as string) || undefined;
-          const data = await getCampaignRunsApi({ tenantId, workflowId });
+          const data = await getJobsApi({ tenantId, workflowId });
           allRuns.value = data;
 
           let filtered = data;
           if (formValues?.status && formValues.status !== FILTER_ALL) {
             filtered =
-              formValues.status === CAMPAIGN_STATUS.PENDING
+              formValues.status === JOB_STATUS.PENDING
                 ? filtered.filter(
                     (r) =>
-                      r.status === CAMPAIGN_STATUS.PENDING ||
-                      r.status === CAMPAIGN_STATUS.QUEUED,
+                      r.status === JOB_STATUS.PENDING ||
+                      r.status === JOB_STATUS.QUEUED,
                   )
                 : filtered.filter((r) => r.status === formValues.status);
           }
@@ -293,13 +293,13 @@ watch(
           </div>
         </template>
 
-        <template #runner-cell="{ row }">
+        <template #device-cell="{ row }">
           <div
-            v-if="row.runner"
+            v-if="row.device"
             class="inline-flex items-center gap-1.5 text-xs font-medium text-foreground"
           >
             <Laptop class="size-3.5 shrink-0 text-muted-foreground" />
-            <span>{{ row.runner.name }}</span>
+            <span>{{ row.device.name }}</span>
           </div>
           <span v-else class="text-xs text-muted-foreground">
             {{ $t('page.runs_view.auto_dispatch') }}

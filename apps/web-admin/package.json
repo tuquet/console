@@ -36,7 +36,6 @@
     "@tauri-apps/plugin-store": "catalog:",
     "@tauri-apps/plugin-updater": "catalog:",
     "@tauri-apps/plugin-window-state": "catalog:",
-    "@tuquet/vue-table": "catalog:",
     "@tuquet/vue-ui": "catalog:",
     "@tuquet-core/shadcn-ui": "workspace:*",
     "@tuquet/access": "workspace:*",

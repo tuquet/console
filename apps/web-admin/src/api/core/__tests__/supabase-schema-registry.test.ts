@@ -24,7 +24,7 @@ vi.mock('../supabase-client', () => ({
     EVENTS: 'events',
     MEDIA: 'media',
     PUBLIC: 'public',
-    RUNNERS: 'runners',
+    WORKERS: 'workers',
   },
   supabaseRequest: (...args: any[]) => mockSupabaseRequest(...args),
 }));
@@ -45,10 +45,10 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
       expect.arrayContaining([
         'public.tenants',
         'automa.workflows',
-        'automa.campaign_runs',
-        'runners.devices',
-        'runners.browsers',
-        'runners.proxies',
+        'automation.jobs',
+        'workers.devices',
+        'workers.browsers',
+        'workers.proxies',
         'commerce.orders',
         'commerce.products',
         'billing.wallet_transactions',
@@ -319,7 +319,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
       is_system: false,
       name: 'devops',
       permission_count: 4,
-      permissions: ['runners:devices:view', 'runners:devices:manage'],
+      permissions: ['workers:devices:view', 'workers:devices:manage'],
     };
 
     const roleSchema = buildDynamicVxeFormSchema({

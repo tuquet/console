@@ -43,7 +43,7 @@ describe('filterRoutesByPlugins', () => {
       {
         path: '/automation',
         name: 'Automation',
-        meta: { plugin: 'runners' },
+        meta: { plugin: 'workers' },
         children: [
           {
             path: 'devices',
@@ -53,7 +53,7 @@ describe('filterRoutesByPlugins', () => {
       } as unknown as RouteRecordRaw,
     ];
 
-    const result = filterRoutesByPlugins(routes, ['core-iam', 'runners']);
+    const result = filterRoutesByPlugins(routes, ['core-iam', 'workers']);
     expect(result).toHaveLength(1);
     expect(result[0]?.name).toBe('Automation');
     expect(result[0]?.children).toHaveLength(1);
@@ -74,7 +74,7 @@ describe('filterRoutesByPlugins', () => {
       } as unknown as RouteRecordRaw,
     ];
 
-    const result = filterRoutesByPlugins(routes, ['core-iam', 'runners']);
+    const result = filterRoutesByPlugins(routes, ['core-iam', 'workers']);
     expect(result).toHaveLength(0);
   });
 
@@ -157,7 +157,7 @@ describe('filterRoutesByPlugins', () => {
     expect(result[0]?.children).toHaveLength(0);
   });
 
-  it('should gate automa and runners child routes independently inside consolidated /automation module', () => {
+  it('should gate automa and workers child routes independently inside consolidated /automation module', () => {
     const onlyAutoma = filterRoutesByPlugins(automationRoutes, [
       'core-iam',
       'automa',
@@ -170,12 +170,12 @@ describe('filterRoutesByPlugins', () => {
       'AutomationRunDetail',
     ]);
 
-    const onlyRunners = filterRoutesByPlugins(automationRoutes, [
+    const onlyWorkers = filterRoutesByPlugins(automationRoutes, [
       'core-iam',
-      'runners',
+      'workers',
     ]);
-    expect(onlyRunners).toHaveLength(1);
-    expect(onlyRunners[0]?.children?.map((c) => c.name)).toEqual([
+    expect(onlyWorkers).toHaveLength(1);
+    expect(onlyWorkers[0]?.children?.map((c) => c.name)).toEqual([
       'AutomationOverview',
       'AutomationDevices',
       'AutomationBrowsers',

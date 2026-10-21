@@ -28,8 +28,8 @@ describe('buildSupabaseProfileHeaders', () => {
   });
 
   it('should set Accept-Profile for GET and HEAD operations on isolated schemas', () => {
-    expect(buildSupabaseProfileHeaders('runners', 'GET')).toEqual({
-      'Accept-Profile': 'runners',
+    expect(buildSupabaseProfileHeaders('workers', 'GET')).toEqual({
+      'Accept-Profile': 'workers',
     });
     expect(buildSupabaseProfileHeaders('automa', 'head')).toEqual({
       'Accept-Profile': 'automa',
@@ -40,8 +40,8 @@ describe('buildSupabaseProfileHeaders', () => {
   });
 
   it('should set Content-Profile for mutating operations (POST, PATCH, DELETE, PUT)', () => {
-    expect(buildSupabaseProfileHeaders('runners', 'POST')).toEqual({
-      'Content-Profile': 'runners',
+    expect(buildSupabaseProfileHeaders('workers', 'POST')).toEqual({
+      'Content-Profile': 'workers',
     });
     expect(buildSupabaseProfileHeaders('automa', 'PATCH')).toEqual({
       'Content-Profile': 'automa',
@@ -121,7 +121,7 @@ describe('flattenMemberships', () => {
           {
             roles: {
               role_permissions: [
-                { permission_id: 'runners:devices:read' },
+                { permission_id: 'workers:devices:read' },
                 { permission_id: 'tenants:read' }, // duplicate in tenant-1
               ],
             },
@@ -152,12 +152,12 @@ describe('flattenMemberships', () => {
     expect(result.permissions).toEqual([
       'automa:workflows:read',
       'members:read',
-      'runners:devices:read',
       'tenants:read',
+      'workers:devices:read',
     ]);
 
     expect(result.tenantPermissions).toEqual({
-      'tenant-1': ['members:read', 'runners:devices:read', 'tenants:read'],
+      'tenant-1': ['members:read', 'tenants:read', 'workers:devices:read'],
       'tenant-2': ['automa:workflows:read', 'members:read'],
       'tenant-empty': [],
     });

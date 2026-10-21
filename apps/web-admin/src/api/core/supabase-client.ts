@@ -14,6 +14,7 @@ export interface SupabaseRequestOptions extends RequestInit {
   preferRepresentation?: boolean;
   schema?: SupabaseSchema;
   skipAuth?: boolean;
+  suppressErrorCapture?: boolean;
 }
 
 export interface SupabaseAuthError extends Error {
@@ -280,6 +281,7 @@ export async function supabaseRequest<T = any>(
     preferRepresentation,
     schema,
     skipAuth,
+    suppressErrorCapture,
     ...fetchInit
   } = options;
 
@@ -324,12 +326,14 @@ export async function supabaseRequest<T = any>(
       status: 0,
       url,
     });
-    captureError(error, {
-      method: fetchInit.method || 'GET',
-      path,
-      phase: 'supabase_network',
-      schema: schema || 'public',
-    });
+    if (!suppressErrorCapture) {
+      captureError(error, {
+        method: fetchInit.method || 'GET',
+        path,
+        phase: 'supabase_network',
+        schema: schema || 'public',
+      });
+    }
     throw error;
   }
 
@@ -374,15 +378,17 @@ export async function supabaseRequest<T = any>(
         errorJson.error_description ||
         $t('authentication.supabaseRequestFailed', { status: response.status }),
     );
-    captureError(apiError, {
-      errorCode: errorJson.code || errorJson.error_code,
-      errorDetails: errorJson.details || errorJson.hint,
-      method: fetchInit.method || 'GET',
-      path,
-      phase: 'supabase_rest',
-      schema: schema || 'public',
-      status: response.status,
-    });
+    if (!suppressErrorCapture) {
+      captureError(apiError, {
+        errorCode: errorJson.code || errorJson.error_code,
+        errorDetails: errorJson.details || errorJson.hint,
+        method: fetchInit.method || 'GET',
+        path,
+        phase: 'supabase_rest',
+        schema: schema || 'public',
+        status: response.status,
+      });
+    }
     throw apiError;
   }
 

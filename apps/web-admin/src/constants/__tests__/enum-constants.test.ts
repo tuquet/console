@@ -4,8 +4,6 @@ import {
   BROWSER_STATUS,
   BROWSER_STATUS_VALUES,
   buildEnumFilterOptions,
-  CAMPAIGN_STATUS,
-  CAMPAIGN_STATUS_VALUES,
   COMMERCE_ORDER_STATUS,
   COMMERCE_ORDER_STATUS_VALUES,
   COMMERCE_PRODUCT_TYPE,
@@ -16,6 +14,8 @@ import {
   FILTER_ALL,
   getStatusToneMeta,
   INVITATION_STATUS_VALUES,
+  JOB_STATUS,
+  JOB_STATUS_VALUES,
   LOG_LEVEL_VALUES,
   PAYMENT_CHANNEL,
   PAYMENT_CHANNEL_VALUES,
@@ -48,10 +48,11 @@ describe('enum & Constants SSOT (@tuquet/constants + #/constants)', () => {
       'events',
       'media',
       'public',
-      'runners',
+      'workers',
     ]);
     expect(SUPABASE_SCHEMA.AUTOMA).toBe('automa');
     expect(SUPABASE_SCHEMA.COMMERCE).toBe('commerce');
+    expect(SUPABASE_SCHEMA.WORKERS).toBe('workers');
     expect(STORAGE_KEYS.ACTIVE_TENANT_ID).toBe('TUQUET_ACTIVE_TENANT_ID');
   });
 
@@ -65,7 +66,7 @@ describe('enum & Constants SSOT (@tuquet/constants + #/constants)', () => {
       'revoked',
     ]);
     expect(WORKFLOW_STATUS_VALUES).toEqual(['archived', 'draft', 'published']);
-    expect(CAMPAIGN_STATUS_VALUES).toEqual([
+    expect(JOB_STATUS_VALUES).toEqual([
       'cancelled',
       'completed',
       'failed',
@@ -214,7 +215,7 @@ describe('enum & Constants SSOT (@tuquet/constants + #/constants)', () => {
 
   it('exposes domain constants with exact string values', () => {
     expect(TENANT_STATUS.ACTIVE).toBe('active');
-    expect(CAMPAIGN_STATUS.RUNNING).toBe('running');
+    expect(JOB_STATUS.RUNNING).toBe('running');
     expect(DEVICE_STATUS.IDLE).toBe('idle');
     expect(BROWSER_STATUS.IDLE).toBe('idle');
     expect(PROXY_STATUS.ACTIVE).toBe('active');

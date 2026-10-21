@@ -7,7 +7,7 @@ import type { RouteRecordRaw } from 'vue-router';
  * - If a parent route has no own component and all its children were filtered out, it is pruned.
  *
  * @param routes - List of RouteRecordRaw objects
- * @param installedPlugins - Array of plugin IDs that are currently installed (e.g. ['core-iam', 'runners'])
+ * @param installedPlugins - Array of plugin IDs that are currently installed (e.g. ['core-iam', 'workers'])
  */
 export function filterRoutesByPlugins(
   routes: RouteRecordRaw[],

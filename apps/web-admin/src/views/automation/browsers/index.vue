@@ -92,7 +92,7 @@ const [Grid, gridApi] = useVbenVxeGrid<FleetBrowserItem>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
-    resource: 'runners.browsers',
+    resource: 'workers.browsers',
     subtitleField: 'engine_version',
     titleField: 'name',
   },

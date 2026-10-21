@@ -8,13 +8,13 @@ import {
   calculateAutomationOverviewSummary,
   calculateFleetMetrics,
   calculateProgressPercentage,
-  cancelCampaignRunApi,
-  getCampaignRunDetailApi,
-  getCampaignRunsApi,
+  cancelJobApi,
   getExecutionLogsApi,
   getFleetBrowsersApi,
   getFleetDevicesApi,
   getFleetProxiesApi,
+  getJobDetailApi,
+  getJobsApi,
   getWorkflowsApi,
   isRunActive,
   mapRawDeviceToFleetNode,
@@ -26,7 +26,7 @@ vi.mock('../supabase-client', () => ({
   supabaseRequest: vi.fn(),
 }));
 
-describe('automation core api & helpers (automa & runners schemas)', () => {
+describe('automation core api & helpers (automa & workers schemas)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -112,13 +112,13 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/workflows?select='),
-        { schema: 'automa' },
+        { schema: 'automa', suppressErrorCapture: true },
       );
       expect(result).toHaveLength(1);
       expect(result[0]?.name).toBe('Scraper Workflow');
     });
 
-    it('should call getCampaignRunsApi with schema automa', async () => {
+    it('should call getJobsApi with schema automa', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           completed_tasks: 10,
@@ -128,7 +128,7 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
           failed_tasks: 0,
           id: 'run-1',
           name: 'Morning Batch Run',
-          runner_id: 'runner-1',
+          worker_id: 'worker-1',
           started_at: '2026-10-13T00:01:00Z',
           status: 'running',
           tenant_id: 't1',
@@ -137,17 +137,17 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
         },
       ]);
 
-      const runs = await getCampaignRunsApi({ status: 'running' });
+      const runs = await getJobsApi({ status: 'running' });
 
       expect(supabaseRequest).toHaveBeenCalledWith(
-        expect.stringContaining('/rest/v1/campaign_runs?select='),
-        { schema: 'automa' },
+        expect.stringContaining('/rest/v1/jobs?select='),
+        { schema: 'automa', suppressErrorCapture: true },
       );
       expect(runs).toHaveLength(1);
       expect(runs[0]?.name).toBe('Morning Batch Run');
     });
 
-    it('should call getCampaignRunDetailApi and return single run', async () => {
+    it('should call getJobDetailApi and return single run', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           completed_tasks: 50,
@@ -157,7 +157,7 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
           failed_tasks: 0,
           id: 'run-99',
           name: 'Done Run',
-          runner_id: 'runner-1',
+          worker_id: 'worker-1',
           started_at: '2026-10-13T00:01:00Z',
           status: 'completed',
           tenant_id: 't1',
@@ -166,10 +166,10 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
         },
       ]);
 
-      const run = await getCampaignRunDetailApi('run-99');
+      const run = await getJobDetailApi('run-99');
 
       expect(supabaseRequest).toHaveBeenCalledWith(
-        expect.stringContaining('/rest/v1/campaign_runs?id=eq.run-99'),
+        expect.stringContaining('/rest/v1/jobs?id=eq.run-99'),
         { schema: 'automa' },
       );
       expect(run?.id).toBe('run-99');
@@ -178,7 +178,7 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
     it('should call getExecutionLogsApi with sinceId pagination', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
-          campaign_run_id: 'run-1',
+          job_id: 'run-1',
           id: 15,
           level: 'info',
           logged_at: '2026-10-13T00:02:00Z',
@@ -203,13 +203,13 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
       expect(logs[0]?.id).toBe(15);
     });
 
-    it('should call cancelCampaignRunApi with PATCH method and cancelled status', async () => {
+    it('should call cancelJobApi with PATCH method and cancelled status', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce(undefined);
 
-      await cancelCampaignRunApi('run-active-1');
+      await cancelJobApi('run-active-1');
 
       expect(supabaseRequest).toHaveBeenCalledWith(
-        '/rest/v1/campaign_runs?id=eq.run-active-1',
+        '/rest/v1/jobs?id=eq.run-active-1',
         expect.objectContaining({
           body: expect.stringContaining('"status":"cancelled"'),
           method: 'PATCH',
@@ -380,8 +380,8 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
     });
   });
 
-  describe('api functions with schema runners header', () => {
-    it('should query getFleetDevicesApi with runners schema', async () => {
+  describe('api functions with schema workers header', () => {
+    it('should query getFleetDevicesApi with workers schema', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           cpu_cores: 4,
@@ -396,13 +396,13 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/devices?select='),
-        { schema: 'runners' },
+        { schema: 'workers', suppressErrorCapture: true },
       );
       expect(devices).toHaveLength(1);
       expect(devices[0]?.name).toBe('Device 1');
     });
 
-    it('should call revokeFleetDeviceApi with runners schema DELETE', async () => {
+    it('should call revokeFleetDeviceApi with workers schema DELETE', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce(undefined);
 
       await revokeFleetDeviceApi('dev-999');
@@ -411,12 +411,12 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
         '/rest/v1/devices?id=eq.dev-999',
         {
           method: 'DELETE',
-          schema: 'runners',
+          schema: 'workers',
         },
       );
     });
 
-    it('should query getFleetBrowsersApi with runners schema', async () => {
+    it('should query getFleetBrowsersApi with workers schema', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           browser_type: 'chromium',
@@ -430,12 +430,12 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/browsers?select='),
-        { schema: 'runners' },
+        { schema: 'workers', suppressErrorCapture: true },
       );
       expect(browsers).toHaveLength(1);
     });
 
-    it('should query getFleetProxiesApi with runners schema', async () => {
+    it('should query getFleetProxiesApi with workers schema', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           host: '1.2.3.4',
@@ -450,7 +450,7 @@ describe('automation core api & helpers (automa & runners schemas)', () => {
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/proxies?select=*'),
-        { schema: 'runners' },
+        { schema: 'workers', suppressErrorCapture: true },
       );
       expect(proxies).toHaveLength(1);
     });

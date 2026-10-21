@@ -80,9 +80,9 @@ Monorepo of **39 packages** orchestrated via `turbo@2.10.13` and `pnpm@11.16.0` 
 | 1 | `/dashboard/analytics` | `Analytics` | `core-iam` | Authenticated | `BasicLayout` | [`views/dashboard/analytics/index.vue`](../../apps/web-admin/src/views/dashboard/analytics/index.vue) | `public.tenants`, `system_plugins` |
 | 2 | `/tenants` | `Tenants` | `core-iam` | `['superadmin', 'tenants:read']` | `BasicLayout` | [`views/tenants/index.vue`](../../apps/web-admin/src/views/tenants/index.vue) | `public.tenants` |
 | 3 | `/tenants/:id` | `TenantDetail` | `core-iam` | `['superadmin', 'tenants:read']` | `BasicLayout` | [`views/tenants/detail.vue`](../../apps/web-admin/src/views/tenants/detail.vue) | `public.tenants`, `tenant_members` |
-| 4 | `/fleet/devices` | `FleetDevices` | `runners` | `['superadmin', 'runners:devices:read']` | `BasicLayout` | [`views/fleet/devices/index.vue`](../../apps/web-admin/src/views/fleet/devices/index.vue) | `runners.devices` |
-| 5 | `/fleet/browsers` | `FleetBrowsers` | `runners` | `['superadmin', 'runners:browsers:read']` | `BasicLayout` | [`views/fleet/browsers/index.vue`](../../apps/web-admin/src/views/fleet/browsers/index.vue) | `runners.browsers` |
-| 6 | `/fleet/proxies` | `FleetProxies` | `runners` | `['superadmin', 'runners:proxies:read']` | `BasicLayout` | [`views/fleet/proxies/index.vue`](../../apps/web-admin/src/views/fleet/proxies/index.vue) | `runners.proxies` |
+| 4 | `/fleet/devices` | `FleetDevices` | `workers` | `['superadmin', 'workers:devices:read']` | `BasicLayout` | [`views/fleet/devices/index.vue`](../../apps/web-admin/src/views/fleet/devices/index.vue) | `workers.devices` |
+| 5 | `/fleet/browsers` | `FleetBrowsers` | `workers` | `['superadmin', 'workers:browsers:read']` | `BasicLayout` | [`views/fleet/browsers/index.vue`](../../apps/web-admin/src/views/fleet/browsers/index.vue) | `workers.browsers` |
+| 6 | `/fleet/proxies` | `FleetProxies` | `workers` | `['superadmin', 'workers:proxies:read']` | `BasicLayout` | [`views/fleet/proxies/index.vue`](../../apps/web-admin/src/views/fleet/proxies/index.vue) | `workers.proxies` |
 | 7 | `/automation/workflows` | `AutomationWorkflows` | `automa` | `['superadmin', 'automa:workflows:read']` | `BasicLayout` | [`views/automation/workflows/index.vue`](../../apps/web-admin/src/views/automation/workflows/index.vue) | `automa.workflows` |
 | 8 | `/automation/runs` | `AutomationRuns` | `automa` | `['superadmin', 'automa:campaigns:read']` | `BasicLayout` | [`views/automation/runs/index.vue`](../../apps/web-admin/src/views/automation/runs/index.vue) | `automa.campaign_runs` |
 | 9 | `/automation/runs/:id` | `AutomationRunDetail` | `automa` | `['superadmin', 'automa:logs:read']` | `BasicLayout` | [`views/automation/runs/detail.vue`](../../apps/web-admin/src/views/automation/runs/detail.vue) | `automa.execution_logs` (3s poll) |
@@ -123,7 +123,7 @@ When navigating between routes:
 - **PostgREST Schema Profile Switching:**
   - GET / HEAD: Injects `Accept-Profile: <schema>`.
   - POST / PUT / PATCH / DELETE: Injects `Content-Profile: <schema>`.
-  - Valid schemas: `'automa' | 'billing' | 'events' | 'media' | 'public' | 'runners'`.
+  - Valid schemas: `'automa' | 'billing' | 'commerce' | 'events' | 'media' | 'public' | 'workers'`.
 
 ```typescript
 import { supabaseRequest } from '#/api/core/supabase-client';
@@ -140,7 +140,7 @@ export async function getFleetDevicesApi(status?: string) {
     path: `/rest/v1/devices?${query.toString()}`,
     options: {
       method: 'GET',
-      schema: 'runners', // BẮT BUỘC: tự động gửi Accept-Profile: runners
+      schema: 'workers', // BẮT BUỘC: tự động gửi Accept-Profile: workers
     },
   });
 }

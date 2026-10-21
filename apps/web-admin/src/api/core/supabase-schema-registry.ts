@@ -9,11 +9,11 @@ import { SUPABASE_SCHEMA } from '@tuquet/constants';
 import {
   BROWSER_STATUS_META,
   buildEnumFilterOptions,
-  CAMPAIGN_STATUS_META,
   COMMERCE_ORDER_STATUS_META,
   COMMERCE_PRODUCT_TYPE_META,
   DEVICE_STATUS_META,
   getStatusToneMeta,
+  JOB_STATUS_META,
   PAYMENT_CHANNEL_META,
   PAYMENT_INTENT_STATUS_META,
   PROXY_STATUS_META,
@@ -30,7 +30,7 @@ import { supabaseRequest } from './supabase-client';
 import { getActiveTenantId } from './tenant';
 
 export type SupabaseResourceKey =
-  | 'automa.campaign_runs'
+  | 'automation.jobs'
   | 'automa.workflows'
   | 'billing.bank_receiving_accounts'
   | 'billing.payment_gateways'
@@ -46,9 +46,9 @@ export type SupabaseResourceKey =
   | 'public.roles'
   | 'public.system_plugins'
   | 'public.tenants'
-  | 'runners.browsers'
-  | 'runners.devices'
-  | 'runners.proxies';
+  | 'workers.browsers'
+  | 'workers.devices'
+  | 'workers.proxies';
 
 export type DynamicFieldType =
   | 'boolean'
@@ -408,10 +408,10 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     },
   },
 
-  'automa.campaign_runs': {
-    resource: 'automa.campaign_runs',
+  'automation.jobs': {
+    resource: 'automation.jobs',
     schema: SUPABASE_SCHEMA.AUTOMA,
-    table: 'campaign_runs',
+    table: 'jobs',
     primaryKey: 'id',
     titleField: 'name',
     columns: {
@@ -425,7 +425,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
       },
       status: {
         editable: true,
-        enumMeta: CAMPAIGN_STATUS_META,
+        enumMeta: JOB_STATUS_META,
         field: 'status',
         labelKey: 'common.status',
         type: 'enum',
@@ -435,7 +435,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'term.workflow',
         type: 'uuid',
       },
-      device_id: { field: 'device_id', labelKey: 'term.device', type: 'uuid' },
+      worker_id: { field: 'worker_id', labelKey: 'term.device', type: 'uuid' },
       total_tasks: {
         field: 'total_tasks',
         labelKey: 'page.runs_view.col_progress',
@@ -456,8 +456,8 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.createdAt',
         type: 'datetime',
       },
-      completed_at: {
-        field: 'completed_at',
+      ended_at: {
+        field: 'ended_at',
         labelKey: 'common.updatedAt',
         type: 'datetime',
       },
@@ -465,33 +465,33 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
         access,
-        'automa.campaigns.run',
+        'automation:jobs:run',
         row?.tenant_id,
       );
       return {
         canInsert: {
           allowed: false,
-          policyName: 'campaigns_run',
+          policyName: 'jobs_run',
           reasonKey: 'common.rlsReadOnlyReason',
         },
-        canSelect: { allowed: true, policyName: 'campaigns_select' },
+        canSelect: { allowed: true, policyName: 'jobs_select' },
         canUpdate: {
           allowed,
-          policyName: 'campaigns_run',
+          policyName: 'jobs_run',
           reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
         },
         canDelete: {
           allowed,
-          policyName: 'campaigns_run',
+          policyName: 'jobs_run',
           reasonKey: allowed ? undefined : 'common.rlsReadOnlyReason',
         },
       };
     },
   },
 
-  'runners.devices': {
-    resource: 'runners.devices',
-    schema: SUPABASE_SCHEMA.RUNNERS,
+  'workers.devices': {
+    resource: 'workers.devices',
+    schema: SUPABASE_SCHEMA.WORKERS,
     table: 'devices',
     primaryKey: 'id',
     titleField: 'name',
@@ -523,18 +523,33 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'common.ipAddress',
         type: 'text',
       },
-      machine_id: {
-        field: 'machine_id',
+      machine_fingerprint: {
+        field: 'machine_fingerprint',
         labelKey: 'common.id',
         type: 'text',
       },
-      runner_version: {
-        field: 'runner_version',
+      version: {
+        field: 'version',
         labelKey: 'common.version',
         type: 'text',
       },
-      last_seen_at: {
-        field: 'last_seen_at',
+      cpu_cores: {
+        field: 'cpu_cores',
+        labelKey: 'page.runs_view.col_progress',
+        type: 'number',
+      },
+      ram_mb: {
+        field: 'ram_mb',
+        labelKey: 'page.runs_view.col_progress',
+        type: 'number',
+      },
+      active_jobs: {
+        field: 'active_jobs',
+        labelKey: 'page.runs_view.col_progress',
+        type: 'number',
+      },
+      last_heartbeat_at: {
+        field: 'last_heartbeat_at',
         labelKey: 'common.updatedAt',
         type: 'datetime',
       },
@@ -542,7 +557,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
         access,
-        'runners.manage',
+        'workers.manage',
         row?.tenant_id,
       );
       return {
@@ -566,9 +581,9 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     },
   },
 
-  'runners.browsers': {
-    resource: 'runners.browsers',
-    schema: SUPABASE_SCHEMA.RUNNERS,
+  'workers.browsers': {
+    resource: 'workers.browsers',
+    schema: SUPABASE_SCHEMA.WORKERS,
     table: 'browsers',
     primaryKey: 'id',
     titleField: 'name',
@@ -596,12 +611,22 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         labelKey: 'page.automation_view.col_os',
         type: 'text',
       },
-      browser_version: {
-        defaultValue: '134.0',
+      engine_version: {
+        defaultValue: '148.0.7778.215',
         editable: true,
-        field: 'browser_version',
+        field: 'engine_version',
         labelKey: 'common.version',
         type: 'text',
+      },
+      storage_size_bytes: {
+        field: 'storage_size_bytes',
+        labelKey: 'page.runs_view.col_progress',
+        type: 'number',
+      },
+      cookies_count: {
+        field: 'cookies_count',
+        labelKey: 'page.runs_view.col_progress',
+        type: 'number',
       },
       proxy_id: {
         editable: true,
@@ -619,7 +644,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
         access,
-        'runners.manage',
+        'workers.manage',
         row?.tenant_id,
       );
       return {
@@ -643,9 +668,9 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     },
   },
 
-  'runners.proxies': {
-    resource: 'runners.proxies',
-    schema: SUPABASE_SCHEMA.RUNNERS,
+  'workers.proxies': {
+    resource: 'workers.proxies',
+    schema: SUPABASE_SCHEMA.WORKERS,
     table: 'proxies',
     primaryKey: 'id',
     titleField: 'host',
@@ -713,7 +738,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
         access,
-        'runners.manage',
+        'workers.manage',
         row?.tenant_id,
       );
       return {
@@ -1854,10 +1879,10 @@ const ROUTE_RESOURCE_MAP: Array<{
 }> = [
   { pattern: /^\/tenants(\/|$)/, resource: 'public.tenants' },
   { pattern: /^\/automation\/workflows/, resource: 'automa.workflows' },
-  { pattern: /^\/automation\/runs/, resource: 'automa.campaign_runs' },
-  { pattern: /^\/automation\/devices/, resource: 'runners.devices' },
-  { pattern: /^\/automation\/browsers/, resource: 'runners.browsers' },
-  { pattern: /^\/automation\/proxies/, resource: 'runners.proxies' },
+  { pattern: /^\/automation\/runs/, resource: 'automation.jobs' },
+  { pattern: /^\/automation\/devices/, resource: 'workers.devices' },
+  { pattern: /^\/automation\/browsers/, resource: 'workers.browsers' },
+  { pattern: /^\/automation\/proxies/, resource: 'workers.proxies' },
   { pattern: /^\/commerce\/orders/, resource: 'commerce.orders' },
   { pattern: /^\/commerce\/wallet/, resource: 'billing.wallet_transactions' },
   { pattern: /^\/system\/plugins/, resource: 'public.system_plugins' },
@@ -1921,17 +1946,17 @@ export function inferResourceFromRouteAndRow(
     if ('is_core' in row && 'version' in row) {
       return 'public.system_plugins';
     }
-    if ('machine_id' in row || 'runner_version' in row) {
-      return 'runners.devices';
+    if ('machine_id' in row || 'runner_version' in row || 'worker_version' in row) {
+      return 'workers.devices';
     }
     if ('browser_version' in row || 'os_platform' in row) {
-      return 'runners.browsers';
+      return 'workers.browsers';
     }
     if ('host' in row && 'port' in row && 'protocol' in row) {
-      return 'runners.proxies';
+      return 'workers.proxies';
     }
     if ('total_tasks' in row && 'workflow_id' in row) {
-      return 'automa.campaign_runs';
+      return 'automation.jobs';
     }
     if ('triggerSummary' in row || 'nodeCount' in row) {
       return 'automa.workflows';

@@ -17,7 +17,7 @@ const TARGET_URL = process.env.TARGET_URL || `http://${HOST}:${PORT}`;
 
 /**
  * Resolve standard Chrome/Chromium/Edge binary across Windows & Linux.
- * Note: Intentionally avoids anti-detect stealth browsers (~/.specter/browser/runtimes)
+ * Note: Intentionally avoids anti-detect stealth browsers (~/.tq/browser/runtimes)
  * because stealth builds suppress CDP Runtime.consoleAPICalled events at the Blink C++ layer.
  */
 function resolveStandardBrowserPath() {
@@ -337,9 +337,9 @@ async function runConsoleGate() {
               version: '1.0.0',
             },
             {
-              id: 'runners',
-              is_core: false,
-              name: 'Fleet Runners',
+              id: 'workers',
+              is_core: true,
+              name: 'Workers & Fleet Engine',
               status: 'installed',
               version: '1.0.0',
             },
@@ -373,18 +373,18 @@ async function runConsoleGate() {
             },
             {
               description: 'Read devices',
-              id: 'runners:devices:read',
-              module: 'runners',
+              id: 'workers:devices:read',
+              module: 'workers',
             },
             {
               description: 'Read browsers',
-              id: 'runners:browsers:read',
-              module: 'runners',
+              id: 'workers:browsers:read',
+              module: 'workers',
             },
             {
               description: 'Read proxies',
-              id: 'runners:proxies:read',
-              module: 'runners',
+              id: 'workers:proxies:read',
+              module: 'workers',
             },
             {
               description: 'Read workflows',
@@ -392,9 +392,9 @@ async function runConsoleGate() {
               module: 'automa',
             },
             {
-              description: 'Read campaigns',
-              id: 'automa:campaigns:read',
-              module: 'automa',
+              description: 'Read jobs',
+              id: 'automation:jobs:read',
+              module: 'automation',
             },
             {
               description: 'Read logs',

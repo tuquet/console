@@ -49,22 +49,22 @@
     transition: all 0.6s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
-  .specter-stage {
+  .tq-stage {
     position: relative;
     width: 240px;
     height: 196px;
   }
 
-  .specter-stage svg {
+  .tq-stage svg {
     width: 100%;
     height: 100%;
     display: block;
     overflow: visible;
   }
 
-  .specter-stage path,
-  .specter-stage ellipse,
-  .specter-stage line {
+  .tq-stage path,
+  .tq-stage ellipse,
+  .tq-stage line {
     fill: var(--hl-plate);
     stroke: var(--hl-mid);
     stroke-width: 1.05;
@@ -73,50 +73,50 @@
     vector-effect: non-scaling-stroke;
   }
 
-  .specter-stage .nf {
+  .tq-stage .nf {
     fill: none;
   }
 
-  .specter-stage .sil {
+  .tq-stage .sil {
     stroke: var(--hl-edge);
   }
 
-  .specter-stage .hi {
+  .tq-stage .hi {
     stroke: var(--hl-hi);
   }
 
-  .specter-stage .lo {
+  .tq-stage .lo {
     stroke: var(--hl-lo);
   }
 
-  .specter-stage .dash {
+  .tq-stage .dash {
     fill: none;
     stroke: var(--hl-lo);
     stroke-dasharray: 1.5 3.5;
   }
 
-  .specter-stage .dot {
+  .tq-stage .dot {
     stroke: none;
     fill: var(--hl-hi);
   }
 
-  .specter-stage .dot-m {
+  .tq-stage .dot-m {
     stroke: none;
     fill: var(--hl-edge);
   }
 
-  .specter-stage .dot-off {
+  .tq-stage .dot-off {
     stroke: none;
     fill: var(--hl-lo);
   }
 
-  .specter-ghost-group {
-    animation: specter-levitate 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  .tq-ghost-group {
+    animation: tq-levitate 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
     transform-origin: 120px 86px;
   }
 
-  .specter-shadow-ring {
-    animation: specter-pulse 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  .tq-shadow-ring {
+    animation: tq-pulse 2.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
     transform-origin: 120px 146px;
   }
 
@@ -140,7 +140,7 @@
     animation-delay: 1.4s;
   }
 
-  .specter-meta {
+  .tq-meta {
     margin-top: 10px;
     display: flex;
     flex-direction: column;
@@ -183,10 +183,10 @@
     width: 44%;
     height: 100%;
     background: var(--hl-hi);
-    animation: specter-scan 1.6s cubic-bezier(0.32, 0.72, 0, 1) infinite;
+    animation: tq-scan 1.6s cubic-bezier(0.32, 0.72, 0, 1) infinite;
   }
 
-  @keyframes specter-levitate {
+  @keyframes tq-levitate {
     0%,
     100% {
       transform: translateY(0px);
@@ -196,7 +196,7 @@
     }
   }
 
-  @keyframes specter-pulse {
+  @keyframes tq-pulse {
     0%,
     100% {
       transform: scale(1);
@@ -221,7 +221,7 @@
     }
   }
 
-  @keyframes specter-scan {
+  @keyframes tq-scan {
     0% {
       transform: translateX(-110%);
     }
@@ -231,7 +231,7 @@
   }
 </style>
 <div class="loading" id="__app-loading__">
-  <div class="specter-stage" aria-hidden="true">
+  <div class="tq-stage" aria-hidden="true">
     <svg viewBox="0 0 240 196">
       <!-- Fading reflection under the isometric plinth -->
       <path
@@ -264,7 +264,7 @@
       <ellipse class="pillar-dot p5" cx="139" cy="164" rx="2.2" ry="1.1" />
 
       <!-- Isometric levitation target ring & vertical dashed guides -->
-      <g class="specter-shadow-ring">
+      <g class="tq-shadow-ring">
         <ellipse class="dash" cx="120" cy="146" rx="28" ry="14" />
         <ellipse class="nf lo" cx="120" cy="146" rx="14" ry="7" />
         <ellipse class="dot-m" cx="120" cy="146" rx="2.2" ry="1.1" />
@@ -274,7 +274,7 @@
       <line class="dash" x1="120" y1="160" x2="120" y2="115" />
 
       <!-- Hovering 3D Hairline Ghost -->
-      <g class="specter-ghost-group">
+      <g class="tq-ghost-group">
         <!-- 3D extruded back rim of the Ghost -->
         <path
           class="lo"
@@ -302,9 +302,9 @@
     </svg>
   </div>
 
-  <div class="specter-meta">
+  <div class="tq-meta">
     <div class="title">%VITE_APP_TITLE%</div>
-    <div class="sub-readout">specter · console</div>
+    <div class="sub-readout">tq · console</div>
     <div class="scan-track">
       <div class="scan-bar"></div>
     </div>

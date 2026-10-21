@@ -236,7 +236,7 @@ export async function getWorkspaceDetailApi(
     ),
     supabaseRequest<any[]>(
       `/rest/v1/devices?tenant_id=eq.${encodedId}&select=id,status`,
-      { schema: 'runners' },
+      { schema: 'workers' },
     ),
     supabaseRequest<any[]>(
       `/rest/v1/subscriptions?tenant_id=eq.${encodedId}&select=id,tenant_id,plan_id,status,current_period_start,current_period_end,cancel_at_period_end,plans:plan_id(*)`,

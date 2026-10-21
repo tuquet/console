@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { AutomaCampaignRunItem, AutomaExecutionLogItem } from '#/api';
+import type { AutomationJobItem, AutomaExecutionLogItem } from '#/api';
 
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -39,13 +39,13 @@ import {
 
 import {
   calculateProgressPercentage,
-  cancelCampaignRunApi,
-  getCampaignRunDetailApi,
+  cancelJobApi,
+  getJobDetailApi,
   getExecutionLogsApi,
   isRunActive,
 } from '#/api';
 import { useDateFormat } from '#/composables';
-import { CAMPAIGN_STATUS_META, getStatusToneMeta } from '#/constants';
+import { getStatusToneMeta, JOB_STATUS_META } from '#/constants';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
 
@@ -58,7 +58,7 @@ const { formatDate } = useDateFormat();
 const runId = computed(() => route.params.id as string);
 const loading = ref(true);
 const canceling = ref(false);
-const run = ref<AutomaCampaignRunItem | null>(null);
+const run = ref<AutomationJobItem | null>(null);
 const logs = ref<AutomaExecutionLogItem[]>([]);
 const consoleRef = ref<HTMLElement | null>(null);
 
@@ -77,12 +77,12 @@ const progressPct = computed(() => {
 });
 
 function getRunStatusDotClass(status: string): string {
-  const meta = getStatusToneMeta(status, CAMPAIGN_STATUS_META);
+  const meta = getStatusToneMeta(status, JOB_STATUS_META);
   return `${meta.dotClass}${meta.pulse ? ' animate-pulse' : ''}`;
 }
 
 function getRunStatusLabel(status: string): string {
-  const meta = getStatusToneMeta(status, CAMPAIGN_STATUS_META);
+  const meta = getStatusToneMeta(status, JOB_STATUS_META);
   return meta.labelKey ? $t(meta.labelKey) : (meta.fallbackLabel ?? status);
 }
 
@@ -119,7 +119,7 @@ function stopPolling() {
 async function fetchRunAndLogs() {
   if (!runId.value) return;
   try {
-    const detail = await getCampaignRunDetailApi(runId.value);
+    const detail = await getJobDetailApi(runId.value);
     if (detail) {
       run.value = detail;
     }
@@ -161,7 +161,7 @@ async function handleCancelRun() {
   if (!runId.value) return;
   canceling.value = true;
   try {
-    await cancelCampaignRunApi(runId.value);
+    await cancelJobApi(runId.value);
     toast.success($t('page.automation_view.cancel_run_success'));
     await fetchRunAndLogs();
   } catch (error: any) {
@@ -327,7 +327,7 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- 2. Runner Device -->
+        <!-- 2. Worker Device -->
         <div
           class="space-y-1.5 rounded-lg border border-border/50 bg-muted/20 p-3"
         >
@@ -338,8 +338,8 @@ onUnmounted(() => {
             <Laptop class="size-4 shrink-0 text-muted-foreground" />
             <span class="truncate font-medium text-foreground">
               {{
-                run.runner
-                  ? run.runner.name
+                run.device
+                  ? run.device.name
                   : $t('page.runs_view.auto_dispatch')
               }}
             </span>

@@ -202,7 +202,7 @@ function getPluginIcon(pluginId: string) {
     case 'core-iam': {
       return ShieldCheck;
     }
-    case 'runners': {
+    case 'workers': {
       return Zap;
     }
     case 'storage': {

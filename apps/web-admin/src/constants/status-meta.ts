@@ -1,9 +1,9 @@
 import type {
   BrowserStatus,
-  CampaignStatus,
   CommerceOrderStatus,
   CommerceProductType,
   DeviceStatus,
+  JobStatus,
   PaymentChannelType,
   PaymentIntentStatusType,
   ProxyStatus,
@@ -19,10 +19,10 @@ import type { EnumItemMeta } from './enum-helper';
 
 import {
   BROWSER_STATUS,
-  CAMPAIGN_STATUS,
   COMMERCE_ORDER_STATUS,
   COMMERCE_PRODUCT_TYPE,
   DEVICE_STATUS,
+  JOB_STATUS,
   PAYMENT_CHANNEL,
   PAYMENT_INTENT_STATUS,
   PROXY_STATUS,
@@ -90,38 +90,38 @@ export const WORKFLOW_STATUS_META: Record<WorkflowStatus, EnumItemMeta> = {
   },
 };
 
-export const CAMPAIGN_STATUS_META: Record<CampaignStatus, EnumItemMeta> = {
-  [CAMPAIGN_STATUS.RUNNING]: {
+export const JOB_STATUS_META: Record<JobStatus, EnumItemMeta> = {
+  [JOB_STATUS.RUNNING]: {
     fallbackLabel: 'Running',
     labelKey: 'page.runs_view.status_running',
     tone: STATUS_TONE.INFO,
   },
-  [CAMPAIGN_STATUS.COMPLETED]: {
+  [JOB_STATUS.COMPLETED]: {
     fallbackLabel: 'Completed',
     labelKey: 'page.runs_view.status_completed',
     tone: STATUS_TONE.SUCCESS,
   },
-  [CAMPAIGN_STATUS.FAILED]: {
+  [JOB_STATUS.FAILED]: {
     fallbackLabel: 'Failed',
     labelKey: 'page.runs_view.status_failed',
     tone: STATUS_TONE.DANGER,
   },
-  [CAMPAIGN_STATUS.PENDING]: {
+  [JOB_STATUS.PENDING]: {
     fallbackLabel: 'Pending',
     labelKey: 'page.runs_view.status_pending',
     tone: STATUS_TONE.WARNING,
   },
-  [CAMPAIGN_STATUS.QUEUED]: {
+  [JOB_STATUS.QUEUED]: {
     fallbackLabel: 'Pending',
     labelKey: 'page.runs_view.status_pending',
     tone: STATUS_TONE.WARNING,
   },
-  [CAMPAIGN_STATUS.PAUSED]: {
+  [JOB_STATUS.PAUSED]: {
     fallbackLabel: 'Paused',
     labelKey: 'page.system_view.status_paused',
     tone: STATUS_TONE.WARNING,
   },
-  [CAMPAIGN_STATUS.CANCELLED]: {
+  [JOB_STATUS.CANCELLED]: {
     fallbackLabel: 'Cancelled',
     labelKey: 'page.runs_view.status_cancelled',
     tone: STATUS_TONE.NEUTRAL,

@@ -128,7 +128,7 @@ describe('supabase-client auth interceptor & JWT lifecycle', () => {
       vi.stubGlobal('fetch', fetchMock);
 
       const result = await supabaseRequest('/rest/v1/devices?select=*', {
-        schema: 'runners',
+        schema: 'workers',
       });
 
       expect(result).toEqual([{ id: 'dev-1', name: 'Node A' }]);
@@ -178,7 +178,7 @@ describe('supabase-client auth interceptor & JWT lifecycle', () => {
       vi.stubGlobal('fetch', fetchMock);
 
       const data = await supabaseRequest('/rest/v1/devices?select=*', {
-        schema: 'runners',
+        schema: 'workers',
       });
 
       expect(data).toEqual([{ id: 'dev-2' }]);
@@ -200,7 +200,7 @@ describe('supabase-client auth interceptor & JWT lifecycle', () => {
       vi.stubGlobal('fetch', fetchMock);
 
       await expect(
-        supabaseRequest('/rest/v1/devices?select=*', { schema: 'runners' }),
+        supabaseRequest('/rest/v1/devices?select=*', { schema: 'workers' }),
       ).rejects.toMatchObject({
         isAuthError: true,
         message: 'JWT expired',
@@ -250,7 +250,7 @@ describe('supabase-client auth interceptor & JWT lifecycle', () => {
       vi.stubGlobal('fetch', fetchMock);
 
       await expect(
-        supabaseRequest('/rest/v1/devices?select=*', { schema: 'runners' }),
+        supabaseRequest('/rest/v1/devices?select=*', { schema: 'workers' }),
       ).rejects.toMatchObject({
         isAuthError: true,
         message: 'JWT expired',
@@ -309,6 +309,26 @@ describe('supabase-client auth interceptor & JWT lifecycle', () => {
       expect(res1).toEqual([{ ok: true }]);
       expect(res2).toEqual([{ ok: true }]);
       expect(refreshCalls).toBe(1);
+    });
+
+    it('skips captureError when suppressErrorCapture is true on rest error', async () => {
+      const fetchMock = vi.fn().mockResolvedValueOnce({
+        json: async () => ({
+          code: 'PGRST106',
+          hint: 'Only the following schemas are exposed: public, graphql_public',
+          message: 'Invalid schema: runners',
+        }),
+        ok: false,
+        status: 406,
+      });
+      vi.stubGlobal('fetch', fetchMock);
+
+      await expect(
+        supabaseRequest('/rest/v1/devices?select=*', {
+          schema: 'workers',
+          suppressErrorCapture: true,
+        }),
+      ).rejects.toThrow('Invalid schema: runners');
     });
   });
 });

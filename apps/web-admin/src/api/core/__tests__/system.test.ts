@@ -34,7 +34,7 @@ describe('system core api & helpers', () => {
   describe('isCorePlugin', () => {
     it('should return true for all 6 core kernel plugins', () => {
       expect(isCorePlugin('core-iam')).toBe(true);
-      expect(isCorePlugin('runners')).toBe(true);
+      expect(isCorePlugin('workers')).toBe(true);
       expect(isCorePlugin('automa')).toBe(true);
       expect(isCorePlugin('storage')).toBe(true);
       expect(isCorePlugin('subscriptions')).toBe(true);
@@ -174,11 +174,11 @@ describe('system core api & helpers', () => {
         description: 'Standard member',
         id: 'r-mem',
         name: 'member',
-        role_permissions: [{ permission_id: 'runners:devices:read' }],
+        role_permissions: [{ permission_id: 'workers:devices:read' }],
       };
       const result = mapRawSystemRole(raw);
       expect(result.name).toBe('member');
-      expect(result.permissions).toEqual(['runners:devices:read']);
+      expect(result.permissions).toEqual(['workers:devices:read']);
     });
   });
 
@@ -328,7 +328,7 @@ describe('system core api & helpers', () => {
           name: 'owner',
           role_permissions: [
             { permission_id: 'tenants:manage' },
-            { permission_id: 'runners:devices:manage' },
+            { permission_id: 'workers:devices:manage' },
           ],
         },
       ]);
@@ -342,7 +342,7 @@ describe('system core api & helpers', () => {
       expect(roles[0]?.name).toBe('owner');
       expect(roles[0]?.permissions).toEqual([
         'tenants:manage',
-        'runners:devices:manage',
+        'workers:devices:manage',
       ]);
     });
 
@@ -350,13 +350,13 @@ describe('system core api & helpers', () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           description: 'Read devices',
-          id: 'runners:devices:read',
-          module: 'runners',
+          id: 'workers:devices:read',
+          module: 'workers',
         },
         {
           description: 'Manage devices',
-          id: 'runners:devices:manage',
-          module: 'runners',
+          id: 'workers:devices:manage',
+          module: 'workers',
         },
         {
           description: 'Read workflows',
@@ -369,8 +369,8 @@ describe('system core api & helpers', () => {
 
       expect(perms).toHaveLength(3);
       const grouped = groupPermissionsByModule(perms);
-      expect(Object.keys(grouped)).toEqual(['runners', 'automa']);
-      expect(grouped.runners).toHaveLength(2);
+      expect(Object.keys(grouped)).toEqual(['workers', 'automa']);
+      expect(grouped.workers).toHaveLength(2);
       expect(grouped.automa).toHaveLength(1);
     });
   });
@@ -476,8 +476,8 @@ describe('system core api & helpers', () => {
         },
         {
           description: 'Manage devices',
-          id: 'runners:devices:manage',
-          module: 'runners',
+          id: 'workers:devices:manage',
+          module: 'workers',
         },
       ];
       const roles = [
@@ -487,15 +487,15 @@ describe('system core api & helpers', () => {
           id: 'r-owner',
           is_system: true,
           name: 'owner',
-          permissions: ['tenants:manage', 'runners:devices:manage'],
+          permissions: ['tenants:manage', 'workers:devices:manage'],
         },
         {
           created_at: '2026-10-02T00:00:00Z',
-          description: 'Custom runner operator',
+          description: 'Custom worker operator',
           id: 'r-custom',
           is_system: false,
-          name: 'runner_ops',
-          permissions: ['runners:devices:manage'],
+          name: 'worker_ops',
+          permissions: ['workers:devices:manage'],
         },
       ];
 
@@ -509,7 +509,7 @@ describe('system core api & helpers', () => {
         filterSystemRoles(roles, { module: 'core-iam' }, permsCatalog),
       ).toHaveLength(1);
       expect(
-        filterSystemRoles(roles, { search: 'runner_ops' }, permsCatalog),
+        filterSystemRoles(roles, { search: 'worker_ops' }, permsCatalog),
       ).toHaveLength(1);
     });
 
@@ -522,8 +522,8 @@ describe('system core api & helpers', () => {
         },
         {
           description: 'Read devices',
-          id: 'runners:devices:read',
-          module: 'runners',
+          id: 'workers:devices:read',
+          module: 'workers',
         },
       ];
       const roles = [
@@ -533,7 +533,7 @@ describe('system core api & helpers', () => {
           id: 'r-owner',
           is_system: true,
           name: 'owner',
-          permissions: ['tenants:manage', 'runners:devices:read'],
+          permissions: ['tenants:manage', 'workers:devices:read'],
         },
         {
           created_at: '2026-10-01T00:00:00Z',
@@ -541,7 +541,7 @@ describe('system core api & helpers', () => {
           id: 'r-viewer',
           is_system: true,
           name: 'viewer',
-          permissions: ['runners:devices:read'],
+          permissions: ['workers:devices:read'],
         },
       ];
 

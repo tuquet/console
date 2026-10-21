@@ -8,16 +8,10 @@ const dynamicRouteFiles = import.meta.glob('./modules/**/*.ts', {
   eager: true,
 });
 
-// Uncomment and create directory when needed
-// const externalRouteFiles = import.meta.glob('./external/**/*.ts', { eager: true });
-// const staticRouteFiles = import.meta.glob('./static/**/*.ts', { eager: true });
-
 /** Dynamic routes */
 const dynamicRoutes: RouteRecordRaw[] = mergeRouteModules(dynamicRouteFiles);
 
 /** External routes list; standalone pages without Layout, e.g. for embedding (hidden from menu) */
-// const externalRoutes: RouteRecordRaw[] = mergeRouteModules(externalRouteFiles);
-// const staticRoutes: RouteRecordRaw[] = mergeRouteModules(staticRouteFiles);
 const staticRoutes: RouteRecordRaw[] = [];
 const externalRoutes: RouteRecordRaw[] = [];
 

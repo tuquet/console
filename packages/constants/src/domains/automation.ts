@@ -15,9 +15,9 @@ export const WORKFLOW_STATUS_VALUES = Object.values(
 ) as readonly WorkflowStatus[];
 
 /**
- * Campaign Run Execution Status (`automa.campaign_runs.status`)
+ * Automation Job Execution Status (`automation.jobs.status`)
  */
-export const CAMPAIGN_STATUS = {
+export const JOB_STATUS = {
   CANCELLED: 'cancelled',
   COMPLETED: 'completed',
   FAILED: 'failed',
@@ -27,12 +27,12 @@ export const CAMPAIGN_STATUS = {
   RUNNING: 'running',
 } as const;
 
-export type CampaignStatus =
-  (typeof CAMPAIGN_STATUS)[keyof typeof CAMPAIGN_STATUS];
+export type JobStatus =
+  (typeof JOB_STATUS)[keyof typeof JOB_STATUS];
 
-export const CAMPAIGN_STATUS_VALUES = Object.values(
-  CAMPAIGN_STATUS,
-) as readonly CampaignStatus[];
+export const JOB_STATUS_VALUES = Object.values(
+  JOB_STATUS,
+) as readonly JobStatus[];
 
 /**
  * Execution Log Severity Level (`automa.execution_logs.level`)
@@ -51,7 +51,7 @@ export type LogLevel = (typeof LOG_LEVEL)[keyof typeof LOG_LEVEL];
 export const LOG_LEVEL_VALUES = Object.values(LOG_LEVEL) as readonly LogLevel[];
 
 /**
- * Runner Device Operational Status (`runners.devices.status`)
+ * Worker Device Operational Status (`workers.devices.status`)
  */
 export const DEVICE_STATUS = {
   BUSY: 'busy',
@@ -68,7 +68,7 @@ export const DEVICE_STATUS_VALUES = Object.values(
 ) as readonly DeviceStatus[];
 
 /**
- * Antidetect Browser Profile Status (`runners.browsers.status`)
+ * Antidetect Browser Profile Status (`workers.browsers.status`)
  */
 export const BROWSER_STATUS = {
   ERROR: 'error',
@@ -85,7 +85,7 @@ export const BROWSER_STATUS_VALUES = Object.values(
 ) as readonly BrowserStatus[];
 
 /**
- * Proxy Node Health Status (`runners.proxies.status`)
+ * Proxy Node Health Status (`workers.proxies.status`)
  */
 export const PROXY_STATUS = {
   ACTIVE: 'active',
@@ -101,7 +101,7 @@ export const PROXY_STATUS_VALUES = Object.values(
 ) as readonly ProxyStatus[];
 
 /**
- * Proxy Transport Protocol (`runners.proxies.protocol`)
+ * Proxy Transport Protocol (`workers.proxies.protocol`)
  */
 export const PROXY_PROTOCOL = {
   HTTP: 'http',

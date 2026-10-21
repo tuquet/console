@@ -145,7 +145,7 @@ const [Grid, gridApi] = useVbenVxeGrid<FleetDeviceItem>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
-    resource: 'runners.devices',
+    resource: 'workers.devices',
     subtitleField: 'hostname',
     titleField: 'name',
   },

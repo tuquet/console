@@ -8,7 +8,7 @@ export const SUPABASE_SCHEMA = {
   EVENTS: 'events',
   MEDIA: 'media',
   PUBLIC: 'public',
-  RUNNERS: 'runners',
+  WORKERS: 'workers',
 } as const;
 
 export type SupabaseSchema =
@@ -23,7 +23,7 @@ export const SUPABASE_SCHEMA_VALUES = Object.values(
  */
 export const STORAGE_KEYS = {
   ACTIVE_TENANT_ID: 'TUQUET_ACTIVE_TENANT_ID',
-  AUTH_BANNER_MODE: 'specter:auth-banner-mode',
+  AUTH_BANNER_MODE: 'tuquet:auth-banner-mode',
   GUEST_ORDERS: 'TUQUET_GUEST_ORDERS',
 } as const;
 

@@ -108,7 +108,7 @@ function getModuleOptions() {
   return [
     { label: $t('page.system_view.roles_module_all'), value: 'all' },
     { label: $t('page.system_view.roles_module_core_iam'), value: 'core-iam' },
-    { label: $t('page.system_view.roles_module_runners'), value: 'runners' },
+    { label: $t('page.system_view.roles_module_workers'), value: 'workers' },
     { label: $t('page.system_view.roles_module_automa'), value: 'automa' },
     {
       label: $t('page.system_view.roles_module_subscriptions'),

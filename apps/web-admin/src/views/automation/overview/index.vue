@@ -288,7 +288,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 3. Recent Campaign Runs & Runner Devices -->
+    <!-- 3. Recent Jobs & Worker Devices -->
     <div class="grid grid-cols-1 gap-3.5 sm:gap-4 lg:grid-cols-2">
       <!-- Recent Runs -->
       <div

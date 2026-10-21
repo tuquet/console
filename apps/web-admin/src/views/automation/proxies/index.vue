@@ -83,7 +83,7 @@ const [Grid, gridApi] = useVbenVxeGrid<FleetProxyItem>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
-    resource: 'runners.proxies',
+    resource: 'workers.proxies',
     subtitleField: 'country_code',
     titleField: 'host',
   },
