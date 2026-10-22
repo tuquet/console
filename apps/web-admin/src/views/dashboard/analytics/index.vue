@@ -1,15 +1,17 @@
 <script lang="ts" setup>
 import type { RealAnalyticsData } from '#/api';
 
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
-import { Badge, Button, Spinner, toast } from '@tuquet/vue-ui';
+import { Badge, Button, Progress, Spinner, toast } from '@tuquet/vue-ui';
 
 import {
   Activity,
+  ArrowUpRight,
   Building2,
-  CheckCircle2,
+  Cpu,
   Layers,
+  Puzzle,
   RefreshCw,
   Terminal,
 } from '@lucide/vue';
@@ -17,10 +19,6 @@ import {
 import { getRealAnalyticsData } from '#/api';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
-
-import GrowthChart from './growth-chart.vue';
-import PlansChart from './plans-chart.vue';
-import PluginsChart from './plugins-chart.vue';
 
 defineOptions({ name: 'Analytics' });
 
@@ -41,6 +39,45 @@ const analyticsData = ref<RealAnalyticsData>({
     total: 0,
   },
 });
+
+const totalPlans = computed(() => {
+  const { enterprise, free, pro } = analyticsData.value.tenants.planBreakdown;
+  return enterprise + free + pro || 1;
+});
+
+const proPlanPercent = computed(() =>
+  Math.round(
+    (analyticsData.value.tenants.planBreakdown.pro / totalPlans.value) * 100,
+  ),
+);
+const freePlanPercent = computed(() =>
+  Math.round(
+    (analyticsData.value.tenants.planBreakdown.free / totalPlans.value) * 100,
+  ),
+);
+const entPlanPercent = computed(() =>
+  Math.round(
+    (analyticsData.value.tenants.planBreakdown.enterprise / totalPlans.value) *
+      100,
+  ),
+);
+
+const totalPlugins = computed(
+  () =>
+    analyticsData.value.plugins.coreCount +
+      analyticsData.value.plugins.moduleCount || 1,
+);
+
+const corePluginPercent = computed(() =>
+  Math.round(
+    (analyticsData.value.plugins.coreCount / totalPlugins.value) * 100,
+  ),
+);
+const modulePluginPercent = computed(() =>
+  Math.round(
+    (analyticsData.value.plugins.moduleCount / totalPlugins.value) * 100,
+  ),
+);
 
 async function loadAnalytics() {
   loading.value = true;
@@ -70,254 +107,392 @@ onMounted(() => {
         >
           {{ $t('page.analytics.title') }}
         </h1>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.analytics.badge') }}
+        <p class="truncate text-xs text-muted-foreground sm:text-sm">
+          {{ $t('page.analytics.description') }}
         </p>
       </div>
 
-      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
-        <Button
-          :disabled="loading"
+      <div class="flex items-center gap-2">
+        <Badge
           variant="outline"
-          size="icon"
-          class="size-8 shrink-0"
-          :title="$t('common.refresh')"
+          class="hidden border-border/80 bg-background/50 px-2 py-0.5 text-xs text-muted-foreground sm:inline-flex"
+        >
+          <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
+          {{ $t('page.analytics.badge') }}
+        </Badge>
+
+        <Button
+          variant="outline"
+          size="sm"
+          class="h-8 gap-1.5 px-2.5 text-xs shadow-none"
+          :disabled="loading"
           @click="loadAnalytics"
         >
           <RefreshCw class="size-3.5" :class="{ 'animate-spin': loading }" />
+          <span>{{ $t('common.refresh') }}</span>
         </Button>
       </div>
     </div>
 
     <!-- 4 Platform Metric Cards: Clean 2-Row Executive KPI Strip -->
-    <div class="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
-      <!-- Metric 1: Workspaces -->
+    <div class="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+      <!-- 1. Workspaces / Tenants Metric -->
       <div
         data-testid="kpi-card-workspaces"
         class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-4 shadow-xs transition-all hover:border-border"
       >
-        <div class="flex items-center justify-between gap-2">
-          <span
-            class="truncate text-xs sm:text-sm font-medium text-muted-foreground"
-          >
-            {{ $t('page.analytics.total_workspaces') }}
+        <div
+          class="flex items-center justify-between gap-1 text-muted-foreground"
+        >
+          <span class="truncate text-xs font-medium uppercase tracking-wider">
+            {{ $t('page.analytics.metric_workspaces') }}
           </span>
-          <span
-            class="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
+          <div
+            class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
           >
-            <Building2 class="size-4" />
-          </span>
+            <Building2 class="size-3.5" />
+          </div>
         </div>
+
         <div class="mt-2.5 flex items-baseline justify-between gap-2">
-          <span
+          <div
             data-testid="kpi-workspaces-total"
-            class="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+            class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
           >
-            {{ analyticsData.tenants.total }}
-          </span>
+            <span v-if="loading">--</span>
+            <span v-else>{{ analyticsData.tenants.total }}</span>
+          </div>
           <Badge
-            variant="outline"
             data-testid="kpi-workspaces-status"
-            class="inline-flex items-center gap-1.5 truncate rounded-full border-border/60 bg-muted/30 px-2 py-0.5 text-2xs font-medium text-muted-foreground"
+            variant="secondary"
+            class="shrink-0 bg-primary/10 text-primary hover:bg-primary/15 text-2xs"
           >
-            <span class="size-1.5 shrink-0 rounded-full bg-success"></span>
-            <span class="truncate">{{
-              analyticsData.tenants.activeCount === analyticsData.tenants.total
-                ? $t('page.analytics.active_workspaces')
-                : `${analyticsData.tenants.activeCount}/${analyticsData.tenants.total} ${$t('page.analytics.active_workspaces')}`
-            }}</span>
+            <span
+              v-if="
+                analyticsData.tenants.activeCount ===
+                analyticsData.tenants.total
+              "
+            >
+              {{ $t('page.analytics.active_workspaces') }}
+            </span>
+            <span v-else>
+              {{ analyticsData.tenants.activeCount }}
+              {{ $t('page.analytics.active') }}
+            </span>
           </Badge>
         </div>
       </div>
 
-      <!-- Metric 2: System Plugins -->
+      <!-- 2. Registered Plugins Metric -->
       <div
         data-testid="kpi-card-plugins"
         class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-4 shadow-xs transition-all hover:border-border"
       >
-        <div class="flex items-center justify-between gap-2">
-          <span
-            class="truncate text-xs sm:text-sm font-medium text-muted-foreground"
-          >
-            {{ $t('page.analytics.system_plugins') }}
+        <div
+          class="flex items-center justify-between gap-1 text-muted-foreground"
+        >
+          <span class="truncate text-xs font-medium uppercase tracking-wider">
+            {{ $t('page.analytics.metric_plugins') }}
           </span>
-          <span
-            class="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
+          <div
+            class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground"
           >
-            <Layers class="size-4" />
-          </span>
+            <Layers class="size-3.5" />
+          </div>
         </div>
+
         <div class="mt-2.5 flex items-baseline justify-between gap-2">
-          <span
-            data-testid="kpi-plugins-total"
-            class="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+          <div
+            class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
           >
-            {{ analyticsData.plugins.total }}
-          </span>
+            <span v-if="loading">--</span>
+            <span v-else>{{ analyticsData.plugins.total }}</span>
+          </div>
           <Badge
             variant="outline"
-            class="inline-flex items-center gap-1.5 truncate rounded-full border-border/60 bg-muted/30 px-2 py-0.5 text-2xs font-medium text-muted-foreground"
+            class="shrink-0 text-muted-foreground text-2xs"
           >
-            <span class="size-1.5 shrink-0 rounded-full bg-primary"></span>
-            <span class="truncate">{{ $t('page.analytics.ready') }}</span>
+            {{ analyticsData.plugins.coreCount }}
+            {{ $t('page.analytics.core_suffix') }}
           </Badge>
         </div>
       </div>
 
-      <!-- Metric 3: Fleet CLI Daemon -->
+      <!-- 3. Local Fleet Port / Status Metric -->
       <div
         data-testid="kpi-card-fleet"
         class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-4 shadow-xs transition-all hover:border-border"
       >
-        <div class="flex items-center justify-between gap-2">
-          <span
-            class="truncate text-xs sm:text-sm font-medium text-muted-foreground"
-          >
-            {{ $t('page.analytics.fleet_bridge') }}
+        <div
+          class="flex items-center justify-between gap-1 text-muted-foreground"
+        >
+          <span class="truncate text-xs font-medium uppercase tracking-wider">
+            {{ $t('page.analytics.metric_fleet') }}
           </span>
-          <span
-            class="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
+          <div
+            class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground"
           >
-            <Terminal class="size-4" />
-          </span>
+            <Terminal class="size-3.5" />
+          </div>
         </div>
+
         <div class="mt-2.5 flex items-baseline justify-between gap-2">
-          <span
+          <div
             data-testid="kpi-fleet-port"
-            class="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+            class="truncate font-mono text-base font-bold tracking-tight text-foreground sm:text-lg"
           >
             :{{ analyticsData.fleet.loopbackPort }}
-          </span>
+          </div>
           <Badge
-            variant="outline"
-            class="inline-flex items-center gap-1.5 truncate rounded-full border-border/60 bg-muted/30 px-2 py-0.5 text-2xs font-medium text-muted-foreground"
+            variant="secondary"
+            class="shrink-0 text-emerald-600 dark:text-emerald-400 text-2xs"
           >
-            <span
-              class="size-1.5 shrink-0 animate-pulse rounded-full bg-success"
-            ></span>
-            <span class="truncate">{{ $t('page.analytics.online') }}</span>
+            {{ analyticsData.fleet.status }}
           </Badge>
         </div>
       </div>
 
-      <!-- Metric 4: API Edge Latency -->
+      <!-- 4. System Latency & Edge Provider Metric -->
       <div
         data-testid="kpi-card-latency"
         class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-4 shadow-xs transition-all hover:border-border"
       >
-        <div class="flex items-center justify-between gap-2">
-          <span
-            class="truncate text-xs sm:text-sm font-medium text-muted-foreground"
-          >
-            {{ $t('page.analytics.api_latency') }}
+        <div
+          class="flex items-center justify-between gap-1 text-muted-foreground"
+        >
+          <span class="truncate text-xs font-medium uppercase tracking-wider">
+            {{ $t('page.analytics.metric_latency') }}
           </span>
-          <span
-            class="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
+          <div
+            class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
           >
-            <Activity class="size-4" />
-          </span>
+            <Activity class="size-3.5" />
+          </div>
         </div>
+
         <div class="mt-2.5 flex items-baseline justify-between gap-2">
-          <span
-            data-testid="kpi-latency-ms"
-            class="text-xl sm:text-2xl font-bold tracking-tight text-foreground"
+          <div
+            class="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
           >
-            {{ analyticsData.system.latencyMs
-            }}<span
-              class="ml-0.5 font-sans text-xs font-medium text-muted-foreground"
-              >ms</span
-            >
-          </span>
+            {{ analyticsData.system.latencyMs }}ms
+          </div>
           <Badge
-            variant="outline"
-            class="inline-flex items-center gap-1 truncate rounded-full border-border/60 bg-muted/30 px-2 py-0.5 text-2xs font-medium text-muted-foreground"
+            variant="secondary"
+            class="shrink-0 text-emerald-600 dark:text-emerald-400 text-2xs"
           >
-            <CheckCircle2 class="size-3 shrink-0 text-success" />
-            <span class="truncate">{{ $t('page.analytics.operational') }}</span>
+            {{ analyticsData.system.status }}
           </Badge>
         </div>
       </div>
     </div>
 
-    <!-- Charts Row 1: Growth Timeline & Plans Breakdown -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <!-- Growth Timeline (2 cols on lg) -->
-      <div
-        class="overflow-hidden rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm lg:col-span-2"
-      >
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-base font-semibold text-foreground">
-            {{ $t('page.analytics.growth_timeline') }}
-          </h2>
-          <span class="text-xs text-muted-foreground">
-            {{ $t('page.analytics.weekly_updates') }}
-          </span>
-        </div>
-        <div
-          v-if="loading"
-          class="flex h-[260px] items-center justify-center text-sm text-muted-foreground"
-        >
-          <div class="flex items-center gap-2">
-            <Spinner class="size-5 text-primary" />
-            <span>{{ $t('common.loading') }}</span>
-          </div>
-        </div>
-        <GrowthChart v-else :data="analyticsData.tenants.growth" />
-      </div>
-
-      <!-- Plan Distribution Donut Chart -->
-      <div
-        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
-      >
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-base font-semibold text-foreground">
-            {{ $t('page.analytics.plans_structure') }}
-          </h2>
-          <span class="text-xs text-muted-foreground">
-            {{ $t('page.analytics.actual') }}
-          </span>
-        </div>
-        <div
-          v-if="loading"
-          class="flex h-[260px] items-center justify-center text-sm text-muted-foreground"
-        >
-          <div class="flex items-center gap-2">
-            <Spinner class="size-5 text-primary" />
-            <span>{{ $t('common.loading') }}</span>
-          </div>
-        </div>
-        <PlansChart v-else :data="analyticsData.tenants.planBreakdown" />
-      </div>
-    </div>
-
-    <!-- Charts Row 2: Plugins Core vs Module Chart & Infrastructure Status -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <!-- Plugins Breakdown (2 cols on lg) -->
+    <!-- Analytics Insights Row 1: Workspace Growth & Plan Structure -->
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <!-- Growth Summary Card (2 cols on lg) -->
       <div
         class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm lg:col-span-2"
       >
         <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-base font-semibold text-foreground">
-            {{ $t('page.analytics.plugins_distribution') }}
-          </h2>
-          <span class="text-xs text-muted-foreground">
-            {{ $t('page.analytics.actual') }}
-          </span>
+          <div>
+            <h2 class="text-base font-semibold text-foreground">
+              {{ $t('page.analytics.growth_timeline') }}
+            </h2>
+            <p class="text-xs text-muted-foreground">
+              {{ $t('page.analytics.weekly_updates') }}
+            </p>
+          </div>
+          <Badge variant="outline" class="text-xs">
+            <ArrowUpRight class="mr-1 size-3 text-emerald-500" />
+            +{{ analyticsData.tenants.growth.length }} records
+          </Badge>
         </div>
+
         <div
           v-if="loading"
-          class="flex h-[220px] items-center justify-center text-sm text-muted-foreground"
+          class="flex h-52 items-center justify-center text-sm text-muted-foreground"
         >
           <div class="flex items-center gap-2">
             <Spinner class="size-5 text-primary" />
             <span>{{ $t('common.loading') }}</span>
           </div>
         </div>
-        <PluginsChart
-          v-else
-          :core-count="analyticsData.plugins.coreCount"
-          :module-count="analyticsData.plugins.moduleCount"
-        />
+
+        <div v-else class="space-y-4">
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div
+              v-for="point in analyticsData.tenants.growth.slice(-4)"
+              :key="point.date"
+              class="rounded-lg border border-border/50 bg-muted/20 p-3"
+            >
+              <div class="text-xs text-muted-foreground">{{ point.date }}</div>
+              <div class="mt-1 text-lg font-bold text-foreground">
+                {{ point.count }}
+              </div>
+              <div
+                class="mt-1 text-2xs text-emerald-600 dark:text-emerald-400 font-medium"
+              >
+                Active Tenant Node
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-border/40 bg-muted/10 p-3.5">
+            <div
+              class="flex items-center justify-between text-xs text-muted-foreground"
+            >
+              <span>Tenant Fleet Capacity</span>
+              <span class="font-medium text-foreground">
+                {{ analyticsData.tenants.activeCount }} /
+                {{ analyticsData.tenants.total }} active
+              </span>
+            </div>
+            <Progress
+              :model-value="
+                analyticsData.tenants.total > 0
+                  ? (analyticsData.tenants.activeCount /
+                      analyticsData.tenants.total) *
+                    100
+                  : 0
+              "
+              class="mt-2 h-2"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan Distribution Breakdown -->
+      <div
+        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
+      >
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-semibold text-foreground">
+              {{ $t('page.analytics.plans_structure') }}
+            </h2>
+            <p class="text-xs text-muted-foreground">
+              {{ $t('page.analytics.actual') }}
+            </p>
+          </div>
+        </div>
+
+        <div
+          v-if="loading"
+          class="flex h-52 items-center justify-center text-sm text-muted-foreground"
+        >
+          <div class="flex items-center gap-2">
+            <Spinner class="size-5 text-primary" />
+            <span>{{ $t('common.loading') }}</span>
+          </div>
+        </div>
+
+        <div v-else class="space-y-4 pt-1">
+          <!-- Pro Plan -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-medium text-foreground">
+                {{ $t('page.analytics.plan_pro') }}
+              </span>
+              <span class="text-muted-foreground">
+                {{ analyticsData.tenants.planBreakdown.pro }} ({{
+                  proPlanPercent
+                }}%)
+              </span>
+            </div>
+            <Progress :model-value="proPlanPercent" class="h-2 bg-muted" />
+          </div>
+
+          <!-- Free Plan -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-medium text-foreground">
+                {{ $t('page.analytics.plan_free') }}
+              </span>
+              <span class="text-muted-foreground">
+                {{ analyticsData.tenants.planBreakdown.free }} ({{
+                  freePlanPercent
+                }}%)
+              </span>
+            </div>
+            <Progress :model-value="freePlanPercent" class="h-2 bg-muted" />
+          </div>
+
+          <!-- Enterprise Plan -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-medium text-foreground">
+                {{ $t('page.analytics.plan_enterprise') }}
+              </span>
+              <span class="text-muted-foreground">
+                {{ analyticsData.tenants.planBreakdown.enterprise }} ({{
+                  entPlanPercent
+                }}%)
+              </span>
+            </div>
+            <Progress :model-value="entPlanPercent" class="h-2 bg-muted" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Insights Row 2: Plugins Core vs Module & Infrastructure Status -->
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <!-- Plugins Breakdown Card (2 cols on lg) -->
+      <div
+        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm lg:col-span-2"
+      >
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-semibold text-foreground">
+              {{ $t('page.analytics.plugins_distribution') }}
+            </h2>
+            <p class="text-xs text-muted-foreground">
+              {{ $t('page.analytics.actual') }}
+            </p>
+          </div>
+          <Badge variant="outline" class="text-xs">
+            Total: {{ analyticsData.plugins.total }}
+          </Badge>
+        </div>
+
+        <div
+          v-if="loading"
+          class="flex h-44 items-center justify-center text-sm text-muted-foreground"
+        >
+          <div class="flex items-center gap-2">
+            <Spinner class="size-5 text-primary" />
+            <span>{{ $t('common.loading') }}</span>
+          </div>
+        </div>
+
+        <div v-else class="space-y-4 pt-1">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div class="rounded-lg border border-border/50 bg-muted/20 p-3.5">
+              <div class="flex items-center gap-2">
+                <Cpu class="size-4 text-primary" />
+                <span class="text-xs font-medium text-foreground">
+                  {{ $t('page.analytics.core_kernel') }}
+                </span>
+              </div>
+              <div class="mt-2 text-xl font-bold text-foreground">
+                {{ analyticsData.plugins.coreCount }}
+              </div>
+              <Progress :model-value="corePluginPercent" class="mt-2 h-1.5" />
+            </div>
+
+            <div class="rounded-lg border border-border/50 bg-muted/20 p-3.5">
+              <div class="flex items-center gap-2">
+                <Puzzle class="size-4 text-accent-foreground" />
+                <span class="text-xs font-medium text-foreground">
+                  {{ $t('page.analytics.service_modules') }}
+                </span>
+              </div>
+              <div class="mt-2 text-xl font-bold text-foreground">
+                {{ analyticsData.plugins.moduleCount }}
+              </div>
+              <Progress :model-value="modulePluginPercent" class="mt-2 h-1.5" />
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Infrastructure Status List -->
@@ -328,50 +503,51 @@ onMounted(() => {
           <h2 class="text-base font-semibold text-foreground">
             {{ $t('page.analytics.services_title') }}
           </h2>
+          <p class="text-xs text-muted-foreground">System Core Invariants</p>
         </div>
 
-        <div class="divide-y divide-border/40">
-          <div class="flex items-center justify-between py-3">
+        <div class="divide-y divide-border/40 text-xs">
+          <div class="flex items-center justify-between py-2.5">
             <div>
               <div class="font-medium text-foreground">
                 {{ $t('page.analytics.service_database') }}
               </div>
-              <div class="text-xs text-muted-foreground">
+              <div class="text-2xs text-muted-foreground">
                 {{ $t('page.analytics.service_database_desc') }}
               </div>
             </div>
-            <Badge variant="secondary" class="text-xs font-normal">
-              <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
+            <Badge variant="secondary" class="font-normal text-2xs">
+              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
               {{ $t('page.analytics.operational') }}
             </Badge>
           </div>
 
-          <div class="flex items-center justify-between py-3">
+          <div class="flex items-center justify-between py-2.5">
             <div>
               <div class="font-medium text-foreground">
                 {{ $t('page.analytics.edge_delivery') }}
               </div>
-              <div class="text-xs text-muted-foreground">
+              <div class="text-2xs text-muted-foreground">
                 {{ analyticsData.system.edgeProvider }}
               </div>
             </div>
-            <Badge variant="secondary" class="text-xs font-normal">
-              <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
+            <Badge variant="secondary" class="font-normal text-2xs">
+              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
               {{ $t('page.analytics.online') }}
             </Badge>
           </div>
 
-          <div class="flex items-center justify-between py-3">
+          <div class="flex items-center justify-between py-2.5">
             <div>
               <div class="font-medium text-foreground">
                 {{ $t('page.analytics.service_gateway') }}
               </div>
-              <div class="text-xs text-muted-foreground">
+              <div class="text-2xs text-muted-foreground">
                 {{ $t('page.analytics.service_gateway_desc') }}
               </div>
             </div>
-            <Badge variant="secondary" class="text-xs font-normal">
-              <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
+            <Badge variant="secondary" class="font-normal text-2xs">
+              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
               {{ $t('page.analytics.operational') }}
             </Badge>
           </div>

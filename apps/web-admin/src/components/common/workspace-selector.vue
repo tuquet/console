@@ -17,13 +17,10 @@ import {
   EmptyHeader,
   Input,
   Label,
-} from '@tuquet/vue-ui';
-
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@tuquet-core/shadcn-ui';
+} from '@tuquet/vue-ui';
 
 import {
   Building2,

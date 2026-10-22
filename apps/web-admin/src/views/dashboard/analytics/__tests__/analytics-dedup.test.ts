@@ -93,6 +93,7 @@ vi.mock('@tuquet/vue-ui', () => {
     AvatarFallback: Stub('AvatarFallback'),
     Badge: Stub('Badge'),
     Button: Stub('Button'),
+    Progress: Stub('Progress'),
     Spinner: Stub('Spinner'),
     toast: {
       error: vi.fn(),

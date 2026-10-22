@@ -153,9 +153,6 @@ catalogs:
     '@tsdown/css':
       specifier: ^0.22.14
       version: 0.22.14
-    '@tuquet/vue-table':
-      specifier: 0.2.2
-      version: 0.2.2
     '@tuquet/vue-ui':
       specifier: 0.3.0
       version: 0.3.0
@@ -528,10 +525,6 @@ overrides:
 importers:
 
   .:
-    dependencies:
-      sortablejs:
-        specifier: 'catalog:'
-        version: 1.15.7
     devDependencies:
       '@changesets/changelog-github':
         specifier: 'catalog:'
@@ -542,9 +535,6 @@ importers:
       '@tsdown/css':
         specifier: 'catalog:'
         version: 0.22.14(jiti@2.7.0)(postcss@8.5.28)(sass-embedded@1.103.1)(sass@1.103.1)(tsdown@0.22.14)(yaml@2.9.1)
-      '@types/node':
-        specifier: 'catalog:'
-        version: 25.9.7
       '@tuquet/commitlint-config':
         specifier: workspace:*
         version: link:internal/lint-configs/commitlint-config
@@ -575,6 +565,9 @@ importers:
       '@tuquet/vsh':
         specifier: workspace:*
         version: link:scripts/vsh
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.9.7
       '@vitejs/plugin-vue':
         specifier: 'catalog:'
         version: 6.0.9(vite@8.3.0(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0(supports-color@10.2.2))(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.50.0)(yaml@2.9.1))(vue@3.5.41(typescript@6.0.3))
@@ -677,15 +670,6 @@ importers:
       '@tauri-apps/plugin-window-state':
         specifier: 'catalog:'
         version: 2.5.0
-      '@tuquet/vue-table':
-        specifier: 'catalog:'
-        version: 0.2.2(@nuxt/kit@4.5.2(magic-string@1.2.2)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.13)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.13)(rollup@4.62.5)(vite@8.3.4(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0(supports-color@10.2.2))(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.50.0)(yaml@2.9.1))))(supports-color@10.2.2)(vue@3.5.41(typescript@6.0.3))
-      '@tuquet/vue-ui':
-        specifier: 'catalog:'
-        version: 0.3.0(@nuxt/kit@4.5.2(magic-string@1.2.2)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.13)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.13)(rollup@4.62.5)(vite@8.3.4(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0(supports-color@10.2.2))(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.50.0)(yaml@2.9.1))))(supports-color@10.2.2)(vue@3.5.41(typescript@6.0.3))
-      '@tuquet-core/shadcn-ui':
-        specifier: workspace:*
-        version: link:../../packages/@core/ui-kit/shadcn-ui
       '@tuquet/access':
         specifier: workspace:*
         version: link:../../packages/effects/access
@@ -728,6 +712,9 @@ importers:
       '@tuquet/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@tuquet/vue-ui':
+        specifier: 'catalog:'
+        version: 0.3.0(@nuxt/kit@4.5.2(magic-string@1.2.2)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.13)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.13)(rollup@4.62.5)(vite@8.3.4(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0(supports-color@10.2.2))(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.50.0)(yaml@2.9.1))))(supports-color@10.2.2)(vue@3.5.41(typescript@6.0.3))
       '@vueuse/core':
         specifier: 'catalog:'
         version: 14.4.0(vue@3.5.41(typescript@6.0.3))
@@ -780,12 +767,12 @@ importers:
       '@eslint/js':
         specifier: 'catalog:'
         version: 10.0.1(eslint@10.12.0(jiti@2.7.0)(supports-color@10.2.2))
-      '@typescript-eslint/parser':
-        specifier: 'catalog:'
-        version: 8.68.0(eslint@10.12.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
       '@tuquet/oxlint-config':
         specifier: workspace:*
         version: link:../oxlint-config
+      '@typescript-eslint/parser':
+        specifier: 'catalog:'
+        version: 8.68.0(eslint@10.12.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
       eslint:
         specifier: 'catalog:'
         version: 10.12.0(jiti@2.7.0)(supports-color@10.2.2)
@@ -1280,12 +1267,6 @@ importers:
       '@lucide/vue':
         specifier: 'catalog:'
         version: 1.34.0(vue@3.5.41(typescript@6.0.3))
-      '@unovis/ts':
-        specifier: 'catalog:'
-        version: 1.7.1(supports-color@10.2.2)
-      '@unovis/vue':
-        specifier: 'catalog:'
-        version: 1.7.1(@unovis/ts@1.7.1(supports-color@10.2.2))(vue@3.5.41(typescript@6.0.3))
       '@tuquet-core/composables':
         specifier: workspace:*
         version: link:../../composables
@@ -1301,6 +1282,12 @@ importers:
       '@tuquet-core/typings':
         specifier: workspace:*
         version: link:../../base/typings
+      '@unovis/ts':
+        specifier: 'catalog:'
+        version: 1.7.1(supports-color@10.2.2)
+      '@unovis/vue':
+        specifier: 'catalog:'
+        version: 1.7.1(@unovis/ts@1.7.1(supports-color@10.2.2))(vue@3.5.41(typescript@6.0.3))
       '@vueuse/core':
         specifier: 'catalog:'
         version: 14.4.0(vue@3.5.41(typescript@6.0.3))
@@ -1474,9 +1461,6 @@ importers:
 
   packages/effects/layouts:
     dependencies:
-      '@types/sortablejs':
-        specifier: 'catalog:'
-        version: 1.15.9
       '@tuquet-core/composables':
         specifier: workspace:*
         version: link:../../@core/composables
@@ -1531,6 +1515,9 @@ importers:
       '@tuquet/utils':
         specifier: workspace:*
         version: link:../../utils
+      '@types/sortablejs':
+        specifier: 'catalog:'
+        version: 1.15.9
       '@vueuse/core':
         specifier: 'catalog:'
         version: 14.4.0(vue@3.5.41(typescript@6.0.3))
@@ -4970,15 +4957,8 @@ packages:
   '@tanstack/store@0.11.1':
     resolution: {integrity: sha512-mzTOBhypOuDJAy/D8n2MfUZ1HFkXnmSETviRyhqEC8LUE7/IZQExOTxMANj3KjTofYTkFNpBY67qaVrT41YccA==}
 
-  '@tanstack/table-core@8.21.3':
-    resolution: {integrity: sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==}
-    engines: {node: '>=12'}
-
   '@tanstack/virtual-core@3.17.8':
     resolution: {integrity: sha512-BfEvehNpOT75r5Ksc5xW6NZuXujTfb7nlSEyVu4XHG3gdxNg1KqXruWbDewXOUaUYIo4oRbSfkjIajz4MAT8tA==}
-
-  '@tanstack/virtual-core@3.18.0':
-    resolution: {integrity: sha512-8frWsyfyBwLGoDQ6wN6Lq3CoT8j4BPJUzE6nH4P9mruLhxPOamk82prC3JxRMLJzYnNa9ISaZ8NtfxEiOGkHEQ==}
 
   '@tanstack/vue-form@1.33.5':
     resolution: {integrity: sha512-IvNlJ1LGFqt2pkwwCM+ltMWeBpF/qUeP9vlQwknMJphrIjJtZfmVr+VaN4BsOEbZQVK2vDkglqT+u64LTTjyoA==}
@@ -4994,19 +4974,8 @@ packages:
       '@vue/composition-api':
         optional: true
 
-  '@tanstack/vue-table@8.21.3':
-    resolution: {integrity: sha512-rusRyd77c5tDPloPskctMyPLFEQUeBzxdQ+2Eow4F7gDPlPOB1UnnhzfpdvqZ8ZyX2rRNGmqNnQWm87OI2OQPw==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      vue: 3.5.41
-
   '@tanstack/vue-virtual@3.13.36':
     resolution: {integrity: sha512-gKpExv4RbB9luVG+SucTXoqPZv/gzu/Yvz6BNO+8kpNxJ2x+I/ulryzl5W9BRciahZGp5Tls3Dp5XP1ztVGbMw==}
-    peerDependencies:
-      vue: 3.5.41
-
-  '@tanstack/vue-virtual@3.13.40':
-    resolution: {integrity: sha512-Cw7qcJx2EMFR8uBnqJPQFYNCXK4eNW7gEdXdkoL47adKK9V4AWYvbIKwVk4h7bPTO9IWZjzotSTkaaukzvve3Q==}
     peerDependencies:
       vue: 3.5.41
 
@@ -5311,12 +5280,6 @@ packages:
         optional: true
       sass-embedded:
         optional: true
-
-  '@tuquet/vue-table@0.2.2':
-    resolution: {integrity: sha512-pIAGrp+Yx+0hHyU0IdguCa0z/gyE/3+ObOS1uWQ73n2UB+SJfRRH4u440z6oo5N8o8mCa5CCyTCvLK6leczoEw==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      vue: 3.5.41
 
   '@tuquet/vue-ui@0.3.0':
     resolution: {integrity: sha512-LT17AArQOqO6cBUCQD4lMVlKfnqazK46v3CffX08cNUtDO1m3R4D8jOyhDwgCKmOnom5FH86KiXRXGikmslwZw==}
@@ -11127,10 +11090,6 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  write-excel-file@4.1.1:
-    resolution: {integrity: sha512-MUnCnNtQrcZek832ZcU24uU0rSphFmKPD1DvIjXOlygVb93CV7Tme6H3jUTkxsMmjB2W7HIzERzjqTi5kui71A==}
-    engines: {node: '>=18'}
-
   write-file-atomic@7.0.1:
     resolution: {integrity: sha512-OTIk8iR8/aCRWBqvxrzxR0hgxWpnYBblY1S5hDWBQfk/VFmJwzmJgQFN3WsoUKHISv2eAwe+PpbUzyL1CKTLXg==}
     engines: {node: ^20.17.0 || >=22.9.0}
@@ -14131,11 +14090,7 @@ snapshots:
 
   '@tanstack/store@0.11.1': {}
 
-  '@tanstack/table-core@8.21.3': {}
-
   '@tanstack/virtual-core@3.17.8': {}
-
-  '@tanstack/virtual-core@3.18.0': {}
 
   '@tanstack/vue-form@1.33.5(vue@3.5.41(typescript@6.0.3))':
     dependencies:
@@ -14151,19 +14106,9 @@ snapshots:
       vue: 3.5.41(typescript@6.0.3)
       vue-demi: 0.14.10(vue@3.5.41(typescript@6.0.3))
 
-  '@tanstack/vue-table@8.21.3(vue@3.5.41(typescript@6.0.3))':
-    dependencies:
-      '@tanstack/table-core': 8.21.3
-      vue: 3.5.41(typescript@6.0.3)
-
   '@tanstack/vue-virtual@3.13.36(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@tanstack/virtual-core': 3.17.8
-      vue: 3.5.41(typescript@6.0.3)
-
-  '@tanstack/vue-virtual@3.13.40(vue@3.5.41(typescript@6.0.3))':
-    dependencies:
-      '@tanstack/virtual-core': 3.18.0
       vue: 3.5.41(typescript@6.0.3)
 
   '@tauri-apps/api@2.12.4': {}
@@ -14454,23 +14399,6 @@ snapshots:
       - jiti
       - tsx
       - yaml
-
-  '@tuquet/vue-table@0.2.2(@nuxt/kit@4.5.2(magic-string@1.2.2)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.13)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.13)(rollup@4.62.5)(vite@8.3.4(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0(supports-color@10.2.2))(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.50.0)(yaml@2.9.1))))(supports-color@10.2.2)(vue@3.5.41(typescript@6.0.3))':
-    dependencies:
-      '@internationalized/date': 3.12.4
-      '@tanstack/vue-table': 8.21.3(vue@3.5.41(typescript@6.0.3))
-      '@tanstack/vue-virtual': 3.13.40(vue@3.5.41(typescript@6.0.3))
-      '@tuquet/vue-ui': 0.3.0(@nuxt/kit@4.5.2(magic-string@1.2.2)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.13)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.13)(rollup@4.62.5)(vite@8.3.4(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0(supports-color@10.2.2))(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.50.0)(yaml@2.9.1))))(supports-color@10.2.2)(vue@3.5.41(typescript@6.0.3))
-      '@vueuse/core': 15.0.0(vue@3.5.41(typescript@6.0.3))
-      lucide-vue-next: 1.0.0(vue@3.5.41(typescript@6.0.3))
-      vue: 3.5.41(typescript@6.0.3)
-      write-excel-file: 4.1.1
-    transitivePeerDependencies:
-      - '@nuxt/kit'
-      - '@nuxt/schema'
-      - '@vue/composition-api'
-      - nuxt
-      - supports-color
 
   '@tuquet/vue-ui@0.3.0(@nuxt/kit@4.5.2(magic-string@1.2.2)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.13)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.13)(rollup@4.62.5)(vite@8.3.4(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0(supports-color@10.2.2))(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.50.0)(yaml@2.9.1))))(supports-color@10.2.2)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
@@ -21036,10 +20964,6 @@ snapshots:
       strip-ansi: 7.2.0
 
   wrappy@1.0.2: {}
-
-  write-excel-file@4.1.1:
-    dependencies:
-      fflate: 0.8.3
 
   write-file-atomic@7.0.1:
     dependencies:

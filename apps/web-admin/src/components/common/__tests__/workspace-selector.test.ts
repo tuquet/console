@@ -145,13 +145,6 @@ vi.mock('@tuquet/vue-ui', () => ({
       return () => h('label', { class: 'label-stub' }, slots.default?.());
     },
   }),
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-  },
-}));
-
-vi.mock('@tuquet-core/shadcn-ui', () => ({
   Popover: defineComponent({
     name: 'Popover',
     setup(_props, { slots }) {
@@ -172,6 +165,10 @@ vi.mock('@tuquet-core/shadcn-ui', () => ({
         h('div', { class: 'popover-trigger-stub' }, slots.default?.());
     },
   }),
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
 }));
 
 describe('workspace selector component', () => {
