@@ -648,7 +648,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         editable: true,
         field: 'proxy_id',
         labelKey: 'term.proxy',
-        options: [{ label: 'None (Direct Egress)', value: '' }],
+        options: [{ label: 'None (Direct Egress)', value: '__none__' }],
         type: 'enum',
       },
       tenant_id: { field: 'tenant_id', labelKey: 'term.tenant', type: 'uuid' },

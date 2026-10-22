@@ -103,7 +103,7 @@ const [Grid, gridApi] = useVbenVxeGrid<BrowserProfile>({
       ]);
 
       const proxyOptions = [
-        { label: 'None (Direct Egress)', value: '' },
+        { label: 'None (Direct Egress)', value: '__none__' },
         ...proxies.map((p) => ({
           label: `${p.protocol.toUpperCase()}://${p.host}:${p.port}${p.country_code ? ` [${p.country_code}]` : ''}`,
           value: p.id,

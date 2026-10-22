@@ -545,9 +545,12 @@ async function handleSave() {
                     (dynamicOptionsMap[field.field]?.length ||
                       field.options?.length)
                   "
-                  :model-value="String(formData[field.field] ?? '')"
+                  :model-value="String(formData[field.field] || '__none__')"
                   @update:model-value="
-                    (val) => (formData[field.field] = String(val ?? ''))
+                    (val) => {
+                      const next = String(val ?? '');
+                      formData[field.field] = next === '__none__' ? '' : next;
+                    }
                   "
                 >
                   <SelectTrigger
@@ -561,8 +564,8 @@ async function handleSave() {
                       v-for="opt in dynamicOptionsMap[field.field] ||
                       field.options ||
                       []"
-                      :key="String(opt.value)"
-                      :value="String(opt.value)"
+                      :key="String(opt.value || '__none__')"
+                      :value="String(opt.value || '__none__')"
                     >
                       {{ opt.label }}
                     </SelectItem>
