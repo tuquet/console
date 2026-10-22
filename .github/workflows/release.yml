@@ -3,13 +3,13 @@ name: Release Desktop Windows
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
   workflow_dispatch:
     inputs:
-      tagName:
-        description: 'Tag name to release (e.g. v0.1.0)'
-        required: false
-        default: ''
+      tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
 
 concurrency:
   group: release-${{ github.ref }}
@@ -54,7 +54,7 @@ jobs:
         id: tag
         shell: bash
         run: |
-          RAW_TAG="${{ github.event.inputs.tagName || github.ref_name }}"
+          RAW_TAG="${{ github.event.inputs.tag || github.ref_name }}"
           echo "TAG_NAME=$RAW_TAG" >> $GITHUB_ENV
           echo "tag=$RAW_TAG" >> $GITHUB_OUTPUT
 
