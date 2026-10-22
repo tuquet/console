@@ -667,6 +667,9 @@ importers:
       '@tauri-apps/plugin-window-state':
         specifier: 'catalog:'
         version: 2.5.0
+      '@tuquet-core/shadcn-ui':
+        specifier: workspace:*
+        version: link:../../packages/@core/ui-kit/shadcn-ui
       '@tuquet/access':
         specifier: workspace:*
         version: link:../../packages/effects/access
