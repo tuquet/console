@@ -570,7 +570,7 @@ export interface AutomationOverviewSummary {
     total: number;
   };
   recentDevices: FleetDeviceItem[];
-  recentRuns: AutomaCampaignRunItem[];
+  recentRuns: AutomationJobItem[];
   runs: {
     completed: number;
     failed: number;
@@ -593,7 +593,7 @@ export function calculateAutomationOverviewSummary(input: {
   devices: FleetDeviceItem[];
   loopbackOnline: boolean;
   proxies: FleetProxyItem[];
-  runs: AutomaCampaignRunItem[];
+  runs: AutomationJobItem[];
   workflows: AutomaWorkflowItem[];
 }): AutomationOverviewSummary {
   const { browsers, devices, loopbackOnline, proxies, runs, workflows } = input;
@@ -666,7 +666,7 @@ export async function getAutomationOverviewApi(params?: {
   const [workflows, runs, devices, browsers, proxies, daemonProbe] =
     await Promise.all([
       getWorkflowsApi({ tenantId }),
-      getCampaignRunsApi({ tenantId }),
+      getJobsApi({ tenantId }),
       getFleetDevicesApi({ tenantId }),
       getFleetBrowsersApi({ tenantId }),
       getFleetProxiesApi({ tenantId }),

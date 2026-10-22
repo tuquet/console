@@ -149,6 +149,19 @@ const PROXY_PROTOCOL_OPTIONS: Array<{ label: string; value: string }> = [
   { label: 'SOCKS5', value: 'socks5' },
 ];
 
+const BROWSER_OS_PLATFORM_OPTIONS: Array<{ label: string; value: string }> = [
+  { label: 'Windows (x86_64)', value: 'windows' },
+  { label: 'Linux (x86_64)', value: 'linux' },
+  { label: 'macOS (Apple Silicon / Intel)', value: 'macos' },
+];
+
+const BROWSER_ENGINE_VERSION_OPTIONS: Array<{ label: string; value: string }> =
+  [
+    { label: '148.0.7778.215 (Golden LTS)', value: '148.0.7778.215' },
+    { label: '146.0.7550.150 (Stable)', value: '146.0.7550.150' },
+    { label: '144.0.7300.120 (Legacy)', value: '144.0.7300.120' },
+  ];
+
 const PRODUCT_VISIBILITY_META: Record<string, EnumItemMeta> = {
   both: {
     fallbackLabel: 'Public & internal',
@@ -609,14 +622,16 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         editable: true,
         field: 'os_platform',
         labelKey: 'page.automation_view.col_os',
-        type: 'text',
+        options: BROWSER_OS_PLATFORM_OPTIONS,
+        type: 'enum',
       },
       engine_version: {
         defaultValue: '148.0.7778.215',
         editable: true,
         field: 'engine_version',
         labelKey: 'common.version',
-        type: 'text',
+        options: BROWSER_ENGINE_VERSION_OPTIONS,
+        type: 'enum',
       },
       storage_size_bytes: {
         field: 'storage_size_bytes',

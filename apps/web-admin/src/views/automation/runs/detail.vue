@@ -339,8 +339,8 @@ onUnmounted(() => {
             <Laptop class="size-4 shrink-0 text-muted-foreground" />
             <span class="truncate font-medium text-foreground">
               {{
-                run.device
-                  ? run.device.name
+                run.worker
+                  ? run.worker.name
                   : $t('page.runs_view.auto_dispatch')
               }}
             </span>

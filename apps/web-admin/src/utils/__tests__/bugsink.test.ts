@@ -131,5 +131,12 @@ describe('bugsink telemetry utility', () => {
       );
       expect(isBugsinkReady()).toBe(true);
     });
+
+    it('does not initialize Sentry when explicitly disabled', () => {
+      const dummyApp = { config: {}, use: vi.fn() } as any;
+      initBugsink(dummyApp, undefined, { enabled: false });
+
+      expect(Sentry.init).not.toHaveBeenCalled();
+    });
   });
 });

@@ -31,6 +31,18 @@ let earlyInterceptionSetup = false;
 const earlyBuffer: BufferedEvent[] = [];
 
 /**
+ * Check whether Bugsink / Sentry error tracking is disabled for current environment
+ */
+export function isTelemetryDisabled(customConfig?: BugsinkConfig): boolean {
+  if (customConfig?.enabled === false) return true;
+  if (customConfig?.enabled === true) return false;
+  if (import.meta.env.VITE_BUGSINK_ENABLED === 'false') return true;
+  if (import.meta.env.VITE_BUGSINK_ENABLED === 'true') return false;
+  // Automatically disable in development environment
+  return Boolean(import.meta.env.DEV && import.meta.env.MODE === 'development');
+}
+
+/**
  * Check if Bugsink/Sentry has finished initializing
  */
 export function isBugsinkReady(): boolean {
@@ -78,6 +90,9 @@ export function sanitizeUrl(rawUrl: string): string {
  */
 export function initEarlyErrorInterception() {
   if (typeof window === 'undefined' || earlyInterceptionSetup) {
+    return;
+  }
+  if (isTelemetryDisabled()) {
     return;
   }
   earlyInterceptionSetup = true;
@@ -137,16 +152,16 @@ export function initBugsink(
   router?: Router,
   customConfig?: BugsinkConfig,
 ) {
+  if (isTelemetryDisabled(customConfig)) {
+    return;
+  }
+
   const dsn =
     customConfig?.dsn ||
     import.meta.env.VITE_BUGSINK_DSN ||
     DEFAULT_BUGSINK_DSN;
 
-  const isExplicitlyDisabled =
-    customConfig?.enabled === false ||
-    import.meta.env.VITE_BUGSINK_ENABLED === 'false';
-
-  if (!dsn || isExplicitlyDisabled) {
+  if (!dsn) {
     return;
   }
 
@@ -258,6 +273,10 @@ export function initBugsink(
  */
 export function captureError(error: unknown, context?: Record<string, any>) {
   try {
+    if (isTelemetryDisabled()) {
+      return;
+    }
+
     if (error && typeof error === 'object') {
       if (capturedErrors.has(error)) {
         return;
@@ -287,6 +306,10 @@ export function captureMessage(
   context?: Record<string, any>,
 ) {
   try {
+    if (isTelemetryDisabled()) {
+      return;
+    }
+
     if (!isInitialized) {
       earlyBuffer.push({ context, level, message, type: 'message' });
       return;
