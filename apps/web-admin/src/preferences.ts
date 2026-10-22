@@ -25,6 +25,7 @@ export const overridesPreferences = defineOverridesPreferences({
   },
   breadcrumb: {
     enable: true,
+    showIcon: false,
   },
   copyright: {
     companyName: 'tuquet',

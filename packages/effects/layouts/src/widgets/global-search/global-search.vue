@@ -121,7 +121,7 @@ defineExpose({
             ref="searchInputRef"
             v-model="keyword"
             :placeholder="$t('ui.widgets.search.searchNavigate')"
-            class="h-8 w-[80%] border-none bg-transparent p-2 pl-0 text-sm font-normal shadow-none outline-hidden focus-visible:ring-0 focus-visible:ring-transparent"
+            class="h-8 w-[80%] border-none bg-transparent px-2.5 py-1 text-sm font-normal shadow-none outline-hidden focus-visible:ring-0 focus-visible:ring-transparent"
           />
         </div>
       </template>

@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { filterRoutesByPlugins } from '../plugin-gate';
 import automationRoutes from '../routes/modules/automation';
 import commerceRoutes from '../routes/modules/commerce';
+import walletRoutes from '../routes/modules/wallet';
 
 vi.mock('#/locales', () => ({
   $t: (key: string) => key,
@@ -188,32 +189,31 @@ describe('filterRoutesByPlugins', () => {
     expect(neitherInstalled).toHaveLength(0);
   });
 
-  it('should gate commerce and subscriptions child routes inside /commerce module', () => {
+  it('should gate commerce child routes inside /commerce module', () => {
     const bothInstalled = filterRoutesByPlugins(commerceRoutes, [
       'core-iam',
       'commerce',
-      'subscriptions',
     ]);
     expect(bothInstalled).toHaveLength(1);
     expect(bothInstalled[0]?.children?.map((c) => c.name)).toEqual([
       'CommerceStore',
       'CommerceOrders',
-      'CommerceWallet',
       'CommerceAdmin',
     ]);
 
-    const onlySubscriptions = filterRoutesByPlugins(commerceRoutes, [
+    const notInstalled = filterRoutesByPlugins(commerceRoutes, ['core-iam']);
+    expect(notInstalled).toHaveLength(0);
+  });
+
+  it('should gate subscriptions for wallet module', () => {
+    const installed = filterRoutesByPlugins(walletRoutes, [
       'core-iam',
       'subscriptions',
     ]);
-    expect(onlySubscriptions).toHaveLength(1);
-    expect(onlySubscriptions[0]?.children?.map((c) => c.name)).toEqual([
-      'CommerceWallet',
-    ]);
+    expect(installed).toHaveLength(1);
+    expect(installed[0]?.name).toBe('WalletRoot');
 
-    const neitherInstalled = filterRoutesByPlugins(commerceRoutes, [
-      'core-iam',
-    ]);
-    expect(neitherInstalled).toHaveLength(0);
+    const notInstalled = filterRoutesByPlugins(walletRoutes, ['core-iam']);
+    expect(notInstalled).toHaveLength(0);
   });
 });

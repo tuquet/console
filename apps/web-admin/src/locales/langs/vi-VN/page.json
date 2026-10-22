@@ -29,10 +29,10 @@
     "proxies_desc": "Quản lý proxy xoay vòng và định tuyến mạng"
   },
   "commerce": {
-    "title": "Cửa hàng & ví Xu",
+    "title": "Cửa hàng",
     "store": "Cửa hàng số",
     "store_desc": "Mua tài khoản, license key, proxy, quy trình và tệp số",
-    "orders": "Đơn hàng & bàn giao",
+    "orders": "Đơn hàng",
     "orders_desc": "Theo dõi đơn hàng và nhận tài nguyên đã mua",
     "wallet": "Ví Xu",
     "wallet_desc": "Quản lý số dư, nạp Xu và lịch sử giao dịch",

@@ -29,12 +29,12 @@
     "proxies_desc": "Manage rotating proxies and network routing"
   },
   "commerce": {
-    "title": "Commerce & wallet",
+    "title": "Commerce",
     "store": "Digital store",
     "store_desc": "Purchase accounts, license keys, proxies, workflows, and files",
-    "orders": "Orders & deliverables",
+    "orders": "Orders",
     "orders_desc": "Track orders and retrieve fulfilled resources",
-    "wallet": "Xu wallet",
+    "wallet": "Wallet",
     "wallet_desc": "Manage prepaid Xu balance, top-ups, and transactions",
     "admin": "Store admin",
     "admin_desc": "Manage products, stock imports, manual reviews, and gateways",

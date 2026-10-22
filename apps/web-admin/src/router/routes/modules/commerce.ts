@@ -36,17 +36,6 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        name: 'CommerceWallet',
-        path: 'wallet',
-        component: () => import('#/views/commerce/wallet/index.vue'),
-        meta: {
-          authority: ['superadmin', 'subscriptions:read', 'commerce:read'],
-          icon: 'lucide:wallet',
-          plugin: 'subscriptions',
-          title: $t('page.commerce.wallet'),
-        },
-      },
-      {
         name: 'CommerceAdmin',
         path: 'admin',
         component: () => import('#/views/commerce/admin/index.vue'),

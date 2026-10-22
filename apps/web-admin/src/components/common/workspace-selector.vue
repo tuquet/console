@@ -4,16 +4,6 @@ import type { TenantItem } from '#/api/core/tenant';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { Popover, PopoverContent, PopoverTrigger } from '@tuquet-core/shadcn-ui';
-
-import {
-  Building2,
-  Check,
-  ChevronsUpDown,
-  Plus,
-  Search,
-  Settings,
-} from '@lucide/vue';
 import {
   Badge,
   Button,
@@ -28,6 +18,21 @@ import {
   Input,
   Label,
 } from '@tuquet/vue-ui';
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@tuquet-core/shadcn-ui';
+
+import {
+  Building2,
+  Check,
+  ChevronsUpDown,
+  Plus,
+  Search,
+  Settings,
+} from '@lucide/vue';
 
 import { TENANT_PLAN } from '#/api/core/tenant';
 import { $t } from '#/locales';
@@ -208,7 +213,7 @@ async function handleCreateWorkspace() {
             type="text"
             data-testid="workspace-search-input"
             :placeholder="$t('page.workspace.selector_search')"
-            class="h-6 w-full border-0 bg-transparent px-0 py-0 text-xs shadow-none focus-visible:ring-0 placeholder:text-muted-foreground text-foreground"
+            class="h-6 w-full border-0 bg-transparent px-2.5 py-1 text-xs shadow-none focus-visible:ring-0 placeholder:text-muted-foreground text-foreground"
           />
         </div>
 
