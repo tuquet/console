@@ -7,7 +7,8 @@ import { computed, ref } from 'vue';
 
 import { cn } from '@tuquet-core/shared/utils';
 
-import { DialogContent, useForwardPropsEmits } from 'reka-ui';
+import { X } from '@lucide/vue';
+import { DialogClose, DialogContent, useForwardPropsEmits } from 'reka-ui';
 
 import { useDialogStateEvents } from '../dialog/use-dialog-state-events';
 import { sheetVariants } from './sheet';
@@ -96,11 +97,11 @@ const { handleAnimationEvent } = useDialogStateEvents({
     >
       <slot></slot>
 
-      <!-- <DialogClose
-        class="data-[state=open]:bg-secondary absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-hidden disabled:pointer-events-none"
+      <DialogClose
+        class="data-[state=open]:bg-secondary absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-hidden disabled:pointer-events-none"
       >
-        <Cross2Icon class="h-5 w-" />
-      </DialogClose> -->
+        <X class="size-4 text-muted-foreground" />
+      </DialogClose>
     </DialogContent>
   </Teleport>
 </template>

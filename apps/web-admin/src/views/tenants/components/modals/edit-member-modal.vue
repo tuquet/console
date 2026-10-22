@@ -16,7 +16,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
 import { $t } from '#/locales';

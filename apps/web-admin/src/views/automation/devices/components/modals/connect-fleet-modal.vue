@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
 
-import { ExternalLink, RefreshCw, Terminal } from '@lucide/vue';
 import {
   Alert,
   AlertDescription,
@@ -12,7 +11,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
+
+import { ExternalLink, RefreshCw, Terminal } from '@lucide/vue';
 
 import CliSnippetCard from '#/components/common/cli-snippet-card.vue';
 import { $t } from '#/locales';

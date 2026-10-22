@@ -77,7 +77,7 @@ vi.mock('../plugins-chart.vue', () => ({
   }),
 }));
 
-vi.mock('@tuquet/vue-ui', () => {
+vi.mock('@tuquet-core/shadcn-ui', () => {
   const Stub = (name: string) =>
     defineComponent({
       name,

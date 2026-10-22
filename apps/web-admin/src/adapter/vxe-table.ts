@@ -25,7 +25,7 @@ import {
   useVbenVxeGrid as useGrid,
 } from '@tuquet/plugins/vxe-table';
 
-import { Badge, Button } from '@tuquet/vue-ui';
+import { Badge, Button } from '@tuquet-core/shadcn-ui';
 
 import {
   isInteractiveCellClick,

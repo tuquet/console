@@ -11,7 +11,8 @@ import {
   useTabbarStore,
   useUserStore,
 } from '@tuquet/stores';
-import { toast } from '@tuquet/vue-ui';
+
+import { toast } from '@tuquet-core/shadcn-ui';
 
 import { defineStore } from 'pinia';
 

@@ -111,7 +111,7 @@ export async function initDesktopAuthHandling(): Promise<() => void> {
     try {
       const { useAccessStore, useUserStore } = await import('@tuquet/stores');
       const { preferences } = await import('@tuquet/preferences');
-      const { toast } = await import('@tuquet/vue-ui');
+      const { toast } = await import('@tuquet-core/shadcn-ui');
       const { $t } = await import('@tuquet/locales');
       const { getAccessCodes } = await import('#/api');
       const { useAuthStore } = await import('#/store');

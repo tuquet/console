@@ -12,7 +12,7 @@ import { $t } from '@tuquet/locales';
 async function initSetupVbenForm() {
   setupVbenForm<ComponentType>({
     config: {
-      // @tuquet/vue-ui components follow Vue 3 standard v-model (modelValue / onUpdate:modelValue)
+      // @tuquet-core/shadcn-ui components follow Vue 3 standard v-model (modelValue / onUpdate:modelValue)
       baseModelPropName: 'modelValue',
       modelPropNameMap: {
         Upload: 'fileList',

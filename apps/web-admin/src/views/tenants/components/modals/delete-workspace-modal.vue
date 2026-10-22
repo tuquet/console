@@ -13,7 +13,7 @@ import {
   Input,
   Label,
   toast,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import { $t } from '#/locales';
 

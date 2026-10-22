@@ -5,7 +5,8 @@ import { useRouter } from 'vue-router';
 import { $t } from '@tuquet/locales';
 import { preferences } from '@tuquet/preferences';
 import { useAccessStore, useUserStore } from '@tuquet/stores';
-import { Button, Card, Spinner, toast } from '@tuquet/vue-ui';
+
+import { Button, Card, Spinner, toast } from '@tuquet-core/shadcn-ui';
 
 import { Copy, ExternalLink, Laptop } from '@lucide/vue';
 

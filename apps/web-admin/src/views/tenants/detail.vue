@@ -10,6 +10,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { useUserStore } from '@tuquet/stores';
+
 import {
   Button,
   Tabs,
@@ -17,7 +18,7 @@ import {
   TabsList,
   TabsTrigger,
   toast,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import { ArrowLeft, Gauge, History, LayoutDashboard, Users } from '@lucide/vue';
 

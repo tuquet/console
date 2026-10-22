@@ -6,7 +6,8 @@ import { computed, ref } from 'vue';
 
 import { AuthenticationForgetPassword, z } from '@tuquet/common-ui';
 import { $t } from '@tuquet/locales';
-import { toast } from '@tuquet/vue-ui';
+
+import { toast } from '@tuquet-core/shadcn-ui';
 
 import { resetPassword } from '#/api/core/auth';
 import { captureError } from '#/utils/bugsink';

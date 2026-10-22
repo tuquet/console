@@ -33,7 +33,7 @@ vi.mock('@tuquet/plugins/vxe-table', () => ({
   }),
 }));
 
-vi.mock('@tuquet/vue-ui', () => ({
+vi.mock('@tuquet-core/shadcn-ui', () => ({
   Badge: defineComponent({
     setup(_, { slots }) {
       return () => h('span', { class: 'badge-stub' }, slots.default?.());

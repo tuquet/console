@@ -3,8 +3,9 @@ import { computed } from 'vue';
 
 import { $t } from '@tuquet/locales';
 
+import { Button, Label } from '@tuquet-core/shadcn-ui';
+
 import { Check, Copy, Terminal } from '@lucide/vue';
-import { Button, Label } from '@tuquet/vue-ui';
 
 import { useClipboard } from '#/composables';
 
@@ -16,9 +17,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const resolvedLabel = computed(
-  () => props.label || $t('common.tqCliCommand'),
-);
+const resolvedLabel = computed(() => props.label || $t('common.tqCliCommand'));
 const resolvedCopiedLabel = computed(
   () => props.copiedLabel || $t('common.cliCommand'),
 );

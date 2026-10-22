@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { WorkspaceMember } from '#/api';
 
-import { Edit3, UserPlus } from '@lucide/vue';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +22,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
+
+import { Edit3, UserPlus } from '@lucide/vue';
 
 import RoleBadge from '#/components/iam/role-badge.vue';
 import { useDateFormat } from '#/composables';

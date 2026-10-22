@@ -5,7 +5,8 @@ import type {
 
 import { generateAccessible } from '@tuquet/access';
 import { preferences } from '@tuquet/preferences';
-import { toast } from '@tuquet/vue-ui';
+
+import { toast } from '@tuquet-core/shadcn-ui';
 
 import { getAllMenusApi } from '#/api';
 import { listInstalledPlugins } from '#/api/core/access';

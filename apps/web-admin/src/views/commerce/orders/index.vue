@@ -10,6 +10,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { usePreferences } from '@tuquet/preferences';
+
 import {
   Badge,
   Button,
@@ -29,7 +30,7 @@ import {
   Spinner,
   Textarea,
   toast,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import {
   Building2,

@@ -8,7 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import { Check, Copy, GitBranch } from '@lucide/vue';
 

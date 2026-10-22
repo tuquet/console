@@ -4,13 +4,14 @@ import type { PlatformUser } from '#/api';
 import { computed, ref, watch } from 'vue';
 
 import { usePreferences } from '@tuquet/preferences';
+
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   Badge,
   Button,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import { Building2, RefreshCw, Users } from '@lucide/vue';
 

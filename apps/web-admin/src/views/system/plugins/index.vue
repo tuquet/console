@@ -9,7 +9,8 @@ import {
   SYSTEM_PLUGIN_STATUS,
 } from '@tuquet/constants';
 import { usePreferences } from '@tuquet/preferences';
-import { Badge, Button } from '@tuquet/vue-ui';
+
+import { Badge, Button } from '@tuquet-core/shadcn-ui';
 
 import {
   CreditCard,

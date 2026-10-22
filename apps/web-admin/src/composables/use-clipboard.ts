@@ -2,7 +2,7 @@ import { ref } from 'vue';
 
 import { $t } from '@tuquet/locales';
 
-import { toast } from '@tuquet/vue-ui';
+import { toast } from '@tuquet-core/shadcn-ui';
 
 export function useClipboard() {
   const copiedField = ref<null | string>(null);

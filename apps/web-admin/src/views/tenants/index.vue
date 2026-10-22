@@ -5,7 +5,8 @@ import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { usePreferences } from '@tuquet/preferences';
-import { Badge, Button, toast } from '@tuquet/vue-ui';
+
+import { Badge, Button, toast } from '@tuquet-core/shadcn-ui';
 
 import { Building2, Check, Eye, Plus, RefreshCw, Terminal } from '@lucide/vue';
 

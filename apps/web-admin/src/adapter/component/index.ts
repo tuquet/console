@@ -1,6 +1,6 @@
 /**
  * Universal component adapter for Vben Form / Common UI
- * Powered by @tuquet/vue-ui
+ * Powered by @tuquet-core/shadcn-ui
  */
 
 /* eslint-disable vue/one-component-per-file */
@@ -27,7 +27,7 @@ import {
   Switch,
   Textarea,
   toast,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 const withDefaultPlaceholder = (
   component: Component,

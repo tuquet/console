@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
   toast,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import { History, RefreshCw, ShieldCheck, User } from '@lucide/vue';
 

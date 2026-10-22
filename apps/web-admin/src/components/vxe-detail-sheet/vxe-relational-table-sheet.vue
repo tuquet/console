@@ -8,7 +8,6 @@ import { computed, ref, watch } from 'vue';
 
 import { usePreferences } from '@tuquet/preferences';
 
-import { ArrowRight, Check, Copy, Database, Search, Table2 } from '@lucide/vue';
 import {
   Badge,
   Button,
@@ -30,7 +29,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
+
+import { ArrowRight, Check, Copy, Database, Search, Table2 } from '@lucide/vue';
 
 import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';

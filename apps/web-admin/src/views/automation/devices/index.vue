@@ -5,6 +5,7 @@ import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { usePreferences } from '@tuquet/preferences';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +19,7 @@ import {
   Badge,
   Button,
   toast,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import { Cpu, HardDrive, Laptop, Plus, RefreshCw } from '@lucide/vue';
 

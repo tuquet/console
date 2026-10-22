@@ -5,7 +5,8 @@ import { computed, ref, watch } from 'vue';
 
 import { FILTER_ALL, SUBSCRIPTION_STATUS } from '@tuquet/constants';
 import { usePreferences } from '@tuquet/preferences';
-import { Badge, Button } from '@tuquet/vue-ui';
+
+import { Badge, Button } from '@tuquet-core/shadcn-ui';
 
 import { Plus, RefreshCw } from '@lucide/vue';
 

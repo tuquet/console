@@ -12,7 +12,8 @@ import {
   RequestClient,
 } from '@tuquet/request';
 import { useAccessStore } from '@tuquet/stores';
-import { toast } from '@tuquet/vue-ui';
+
+import { toast } from '@tuquet-core/shadcn-ui';
 
 import { useAuthStore } from '#/store';
 import { addNetworkBreadcrumb, captureError } from '#/utils/bugsink';

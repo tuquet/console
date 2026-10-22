@@ -20,7 +20,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import {
   Building2,

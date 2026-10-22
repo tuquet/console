@@ -3,7 +3,13 @@ import type { RealAnalyticsData } from '#/api';
 
 import { computed, onMounted, ref } from 'vue';
 
-import { Badge, Button, Progress, Spinner, toast } from '@tuquet/vue-ui';
+import {
+  Badge,
+  Button,
+  Progress,
+  Spinner,
+  toast,
+} from '@tuquet-core/shadcn-ui';
 
 import {
   Activity,

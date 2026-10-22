@@ -2,7 +2,7 @@ import type { Tenant } from '#/api/core/tenant';
 
 import { computed, ref } from 'vue';
 
-import { toast } from '@tuquet/vue-ui';
+import { toast } from '@tuquet-core/shadcn-ui';
 
 import { defineStore } from 'pinia';
 

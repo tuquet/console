@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 
 import { $t } from '@tuquet/locales';
 import { useUserStore } from '@tuquet/stores';
+
 import {
   Avatar,
   AvatarFallback,
@@ -25,7 +26,7 @@ import {
   TabsTrigger,
   Textarea,
   toast,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import {
   ArrowLeft,

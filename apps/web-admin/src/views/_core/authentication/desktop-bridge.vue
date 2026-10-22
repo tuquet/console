@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { $t } from '@tuquet/locales';
 import { useAccessStore, useUserStore } from '@tuquet/stores';
+
 import {
   Alert,
   AlertDescription,
@@ -19,7 +20,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import { CheckCircle2, Laptop } from '@lucide/vue';
 

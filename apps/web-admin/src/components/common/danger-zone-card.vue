@@ -3,8 +3,14 @@ import { computed } from 'vue';
 
 import { $t } from '@tuquet/locales';
 
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
+} from '@tuquet-core/shadcn-ui';
+
 import { ShieldAlert, Trash2 } from '@lucide/vue';
-import { Alert, AlertDescription, AlertTitle, Button } from '@tuquet/vue-ui';
 
 interface Props {
   buttonText: string;

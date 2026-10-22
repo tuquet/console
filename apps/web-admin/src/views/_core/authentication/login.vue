@@ -7,7 +7,8 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { AuthenticationLogin, z } from '@tuquet/common-ui';
 import { SvgGithubIcon } from '@tuquet/icons';
 import { $t } from '@tuquet/locales';
-import { Button } from '@tuquet/vue-ui';
+
+import { Button } from '@tuquet-core/shadcn-ui';
 
 import { loginWithGitHub } from '#/api/core/auth';
 import { useAuthStore } from '#/store';

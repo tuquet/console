@@ -3,7 +3,7 @@ import { computed } from 'vue';
 
 import { $t } from '@tuquet/locales';
 
-import { Badge } from '@tuquet/vue-ui';
+import { Badge } from '@tuquet-core/shadcn-ui';
 
 interface RoleConfig {
   class: string;

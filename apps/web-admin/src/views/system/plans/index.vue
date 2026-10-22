@@ -4,7 +4,8 @@ import type { BillingPlan } from '#/api';
 import { computed, ref, watch } from 'vue';
 
 import { usePreferences } from '@tuquet/preferences';
-import { Badge, Button } from '@tuquet/vue-ui';
+
+import { Badge, Button } from '@tuquet-core/shadcn-ui';
 
 import {
   Cpu,

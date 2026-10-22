@@ -4,6 +4,7 @@ import type { SystemPermission, SystemRole } from '#/api';
 import { computed, ref, watch } from 'vue';
 
 import { usePreferences } from '@tuquet/preferences';
+
 import {
   Badge,
   Button,
@@ -11,7 +12,7 @@ import {
   TabsList,
   TabsTrigger,
   toast,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import {
   Check,

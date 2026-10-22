@@ -11,7 +11,7 @@ import {
   EmptyDescription,
   EmptyHeader,
   toast,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import {
   ArrowRight,

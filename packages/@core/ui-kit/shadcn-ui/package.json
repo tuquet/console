@@ -38,16 +38,17 @@
   },
   "dependencies": {
     "@lucide/vue": "catalog:",
-    "@unovis/ts": "catalog:",
-    "@unovis/vue": "catalog:",
     "@tuquet-core/composables": "workspace:*",
     "@tuquet-core/design": "workspace:*",
     "@tuquet-core/icons": "workspace:*",
     "@tuquet-core/shared": "workspace:*",
     "@tuquet-core/typings": "workspace:*",
+    "@unovis/ts": "catalog:",
+    "@unovis/vue": "catalog:",
     "@vueuse/core": "catalog:",
     "class-variance-authority": "catalog:",
     "reka-ui": "catalog:",
-    "vue": "catalog:"
+    "vue": "catalog:",
+    "vue-sonner": "^2.0.9"
   }
 }

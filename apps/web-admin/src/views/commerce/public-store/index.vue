@@ -45,7 +45,7 @@ import {
   toast,
   ToggleGroup,
   ToggleGroupItem,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import {
   ArrowRight,

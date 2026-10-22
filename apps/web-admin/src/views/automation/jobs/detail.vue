@@ -24,7 +24,7 @@ import {
   EmptyMedia,
   Progress,
   toast,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import {
   AlertCircle,

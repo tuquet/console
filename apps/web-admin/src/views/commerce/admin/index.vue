@@ -16,6 +16,7 @@ import type {
 import { computed, ref, watch } from 'vue';
 
 import { usePreferences } from '@tuquet/preferences';
+
 import {
   Badge,
   Button,
@@ -36,7 +37,7 @@ import {
   TabsTrigger,
   Textarea,
   toast,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import {
   AlertTriangle,

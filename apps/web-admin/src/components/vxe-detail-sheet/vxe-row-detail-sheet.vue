@@ -12,6 +12,7 @@ import { computed, reactive, ref, watch } from 'vue';
 
 import { VxeForm, VxeFormItem } from '@tuquet/plugins/vxe-table';
 import { usePreferences } from '@tuquet/preferences';
+
 import {
   Badge,
   Button,
@@ -34,7 +35,7 @@ import {
   Switch,
   Textarea,
   toast,
-} from '@tuquet/vue-ui';
+} from '@tuquet-core/shadcn-ui';
 
 import {
   ArrowUpRight,

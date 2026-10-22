@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted } from 'vue';
 
-import { Toaster } from '@tuquet/vue-ui';
+import { Toaster } from '@tuquet-core/shadcn-ui';
 
 import {
   initDesktopAuthHandling,
