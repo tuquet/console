@@ -146,9 +146,9 @@ const [Grid, gridApi] = useVbenVxeGrid<BrowserProfile>({
         label: () => $t('common.status'),
         defaultValue: (route.query.status as string) || 'all',
         componentProps: () => ({
-          placeholder: $t('page.runs_view.status_all'),
+          placeholder: $t('common.all'),
           options: [
-            { label: $t('page.runs_view.status_all'), value: 'all' },
+            { label: $t('common.all'), value: 'all' },
             {
               label: $t('page.automation_view.device_status_idle'),
               value: 'idle',

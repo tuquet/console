@@ -21,7 +21,7 @@ import {
 } from '#/constants';
 import { $t } from '#/locales';
 
-defineOptions({ name: 'AutomationRuns' });
+defineOptions({ name: 'AutomationJobs' });
 
 const route = useRoute();
 const router = useRouter();
@@ -56,37 +56,37 @@ function getColumns() {
   return [
     {
       field: 'name',
-      title: $t('page.runs_view.col_name'),
+      title: $t('page.jobs_view.col_name'),
       minWidth: 260,
       slots: { default: 'name-cell' },
     },
     {
       field: 'device',
-      title: $t('page.runs_view.col_runner'),
+      title: $t('page.jobs_view.col_runner'),
       minWidth: 170,
       slots: { default: 'device-cell' },
     },
     {
       field: 'progress',
-      title: $t('page.runs_view.col_progress'),
+      title: $t('page.jobs_view.col_progress'),
       minWidth: 190,
       slots: { default: 'progress-cell' },
     },
     {
       field: 'status',
-      title: $t('page.runs_view.col_status'),
+      title: $t('page.jobs_view.col_status'),
       minWidth: 140,
       slots: { default: 'status-cell' },
     },
     {
       field: 'created_at',
-      title: $t('page.runs_view.col_created_at'),
+      title: $t('page.jobs_view.col_created_at'),
       minWidth: 160,
       slots: { default: 'created-cell' },
     },
     {
       field: 'actions',
-      title: $t('page.runs_view.col_actions'),
+      title: $t('page.jobs_view.col_actions'),
       minWidth: 110,
       align: 'right' as const,
       showOverflow: false,
@@ -115,12 +115,12 @@ const [Grid, gridApi] = useVbenVxeGrid<Job>({
         component: 'Select',
         fieldName: 'status',
         formItemClass: 'col-span-2 sm:col-span-1',
-        label: () => $t('page.runs_view.filter_status'),
+        label: () => $t('page.jobs_view.filter_status'),
         defaultValue: (route.query.status as string) || FILTER_ALL,
         componentProps: () => ({
-          placeholder: $t('page.runs_view.status_all'),
+          placeholder: $t('page.jobs_view.status_all'),
           options: buildEnumFilterOptions(JOB_STATUS_META, $t, {
-            allLabelKey: 'page.runs_view.status_all',
+            allLabelKey: 'page.jobs_view.status_all',
             order: [
               JOB_STATUS.RUNNING,
               JOB_STATUS.COMPLETED,
@@ -135,9 +135,9 @@ const [Grid, gridApi] = useVbenVxeGrid<Job>({
         component: 'Input',
         fieldName: 'search',
         formItemClass: 'col-span-2 sm:col-span-1',
-        label: () => $t('page.runs_view.filter_search'),
+        label: () => $t('page.jobs_view.filter_search'),
         componentProps: () => ({
-          placeholder: $t('page.runs_view.search_placeholder'),
+          placeholder: $t('page.jobs_view.search_placeholder'),
           clearable: true,
         }),
       },
@@ -214,7 +214,7 @@ const [Grid, gridApi] = useVbenVxeGrid<Job>({
   },
 });
 
-watch([() => $t('page.runs_view.col_name'), isMobile], () => {
+watch([() => $t('page.jobs_view.col_name'), isMobile], () => {
   gridApi.setGridOptions({ columns: getColumns() });
   gridApi.formApi?.setState({
     commonConfig: {
@@ -241,14 +241,14 @@ watch(
           <h1
             class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
           >
-            {{ $t('page.automation.runs') }}
+            {{ $t('page.automation.jobs') }}
           </h1>
           <Badge variant="secondary" class="shrink-0 text-2xs">
             {{ allRuns.length }}
           </Badge>
         </div>
         <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.automation.runs_desc') }}
+          {{ $t('page.automation.jobs_desc') }}
         </p>
       </div>
 
@@ -286,7 +286,7 @@ watch(
                 {{
                   row.workflow
                     ? row.workflow.name
-                    : $t('page.runs_view.unassigned_workflow')
+                    : $t('page.jobs_view.unassigned_workflow')
                 }}
               </div>
             </div>
@@ -302,7 +302,7 @@ watch(
             <span>{{ row.device.name }}</span>
           </div>
           <span v-else class="text-xs text-muted-foreground">
-            {{ $t('page.runs_view.auto_dispatch') }}
+            {{ $t('page.jobs_view.auto_dispatch') }}
           </span>
         </template>
 
@@ -370,10 +370,10 @@ watch(
               class="mb-3 size-10 stroke-[1.5] text-muted-foreground/60"
             />
             <p class="text-sm font-medium text-foreground">
-              {{ $t('page.runs_view.empty_title') }}
+              {{ $t('page.jobs_view.empty_title') }}
             </p>
             <p class="mt-1 max-w-md text-xs text-muted-foreground">
-              {{ $t('page.runs_view.empty_desc') }}
+              {{ $t('page.jobs_view.empty_desc') }}
             </p>
           </div>
         </template>

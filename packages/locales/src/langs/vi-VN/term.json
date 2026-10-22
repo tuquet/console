@@ -63,5 +63,7 @@
   "serials": "Mã thẻ",
   "invoice": "Hóa đơn",
   "invoices": "Hóa đơn",
-  "balance": "Số dư"
+  "balance": "Số dư",
+  "xu": "Xu",
+  "currencyVnd": "đ"
 }

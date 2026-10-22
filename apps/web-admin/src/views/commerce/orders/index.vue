@@ -215,9 +215,9 @@ const [Grid, gridApi] = useVbenVxeGrid<CommerceOrder>({
         label: () => $t('page.commerce_view.order_status_label'),
         defaultValue: FILTER_ALL,
         componentProps: () => ({
-          placeholder: $t('page.runs_view.status_all'),
+          placeholder: $t('common.all'),
           options: buildEnumFilterOptions(COMMERCE_ORDER_STATUS_META, $t, {
-            allLabelText: $t('page.runs_view.status_all'),
+            allLabelText: $t('common.all'),
             order: [
               COMMERCE_ORDER_STATUS.COMPLETED,
               COMMERCE_ORDER_STATUS.PENDING_PAYMENT,

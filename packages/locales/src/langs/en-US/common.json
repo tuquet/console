@@ -138,5 +138,14 @@
   "createRecord": "New record",
   "createSheetDescription": "Fill in required fields to create a record",
   "createdSuccessfully": "Created successfully",
-  "requiredFieldsMissing": "Please fill in required fields"
+  "requiredFieldsMissing": "Please fill in required fields",
+  "code": "Code",
+  "successful": "Operation completed successfully",
+  "tqCliCommand": "Tuquet CLI command",
+  "windowMinimize": "Minimize",
+  "windowMaximize": "Maximize",
+  "windowRestore": "Restore",
+  "windowClose": "Close",
+  "orderCode": "Order code",
+  "totalAmount": "Total amount"
 }

@@ -138,5 +138,14 @@
   "createRecord": "Thêm mới",
   "createSheetDescription": "Điền thông tin để thêm bản ghi",
   "createdSuccessfully": "Đã thêm",
-  "requiredFieldsMissing": "Vui lòng điền đủ mục bắt buộc"
+  "requiredFieldsMissing": "Vui lòng điền đủ mục bắt buộc",
+  "code": "Mã",
+  "successful": "Thao tác thành công",
+  "tqCliCommand": "Lệnh Tuquet CLI",
+  "windowMinimize": "Thu nhỏ",
+  "windowMaximize": "Phóng to",
+  "windowRestore": "Khôi phục",
+  "windowClose": "Đóng",
+  "orderCode": "Mã đơn",
+  "totalAmount": "Tổng tiền"
 }

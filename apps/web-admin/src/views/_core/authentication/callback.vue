@@ -258,7 +258,7 @@ onMounted(async () => {
             class="text-xs text-muted-foreground hover:text-foreground"
             @click="handleContinueOnWeb"
           >
-            Tiếp tục đăng nhập trên trình duyệt này &rarr;
+            {{ $t('authentication.continueOnWeb') }} &rarr;
           </Button>
         </div>
       </Card>

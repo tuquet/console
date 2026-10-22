@@ -399,7 +399,7 @@ const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrder>({
         defaultValue: 'all',
         componentProps: () => ({
           options: [
-            { label: $t('page.runs_view.status_all'), value: 'all' },
+            { label: $t('common.all'), value: 'all' },
             { label: 'completed', value: 'completed' },
             { label: 'pending_payment', value: 'pending_payment' },
             { label: 'manual_review', value: 'manual_review' },
@@ -1497,10 +1497,12 @@ async function submitWarrantyClaim() {
           <div class="flex flex-col gap-1 py-1">
             <div class="flex items-center justify-between text-2xs">
               <span class="font-medium text-foreground">
-                {{ row.current_daily_total.toLocaleString('en-US') }} đ
+                {{ row.current_daily_total.toLocaleString('en-US') }}
+                {{ $t('term.currencyVnd') }}
               </span>
               <span class="text-muted-foreground">
-                / {{ row.daily_limit_vnd.toLocaleString('en-US') }} đ
+                / {{ row.daily_limit_vnd.toLocaleString('en-US') }}
+                {{ $t('term.currencyVnd') }}
               </span>
             </div>
             <div class="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -1890,15 +1892,20 @@ async function submitWarrantyClaim() {
             class="rounded-lg border border-border/60 bg-muted/30 p-2.5 text-xs"
           >
             <div class="flex justify-between py-0.5">
-              <span class="text-muted-foreground">Mã đơn:</span>
+              <span class="text-muted-foreground"
+                >{{ $t('common.orderCode') }}:</span
+              >
               <span class="font-semibold text-foreground">{{
                 selectedOrderForWarranty?.order_code
               }}</span>
             </div>
             <div class="flex justify-between py-0.5">
-              <span class="text-muted-foreground">Tổng tiền:</span>
+              <span class="text-muted-foreground"
+                >{{ $t('common.totalAmount') }}:</span
+              >
               <span class="font-bold text-foreground"
-                >{{ selectedOrderForWarranty?.total_credits }} Xu</span
+                >{{ selectedOrderForWarranty?.total_credits }}
+                {{ $t('term.xu') }}</span
               >
             </div>
           </div>

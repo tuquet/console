@@ -90,7 +90,7 @@ onUnmounted(() => {
       <button
         type="button"
         class="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none"
-        title="Thu nhỏ"
+        :title="$t('common.windowMinimize')"
         @click="handleMinimize"
       >
         <Minus class="size-3.5" />
@@ -99,7 +99,9 @@ onUnmounted(() => {
       <button
         type="button"
         class="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none"
-        :title="isMaximized ? 'Khôi phục' : 'Phóng to'"
+        :title="
+          isMaximized ? $t('common.windowRestore') : $t('common.windowMaximize')
+        "
         @click="handleToggleMaximize"
       >
         <Copy v-if="isMaximized" class="size-3 -rotate-90" />
@@ -109,7 +111,7 @@ onUnmounted(() => {
       <button
         type="button"
         class="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive hover:text-destructive-foreground focus:outline-none"
-        title="Đóng"
+        :title="$t('common.windowClose')"
         @click="handleClose"
       >
         <X class="size-3.5" />

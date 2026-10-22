@@ -101,9 +101,9 @@ const [Grid, gridApi] = useVbenVxeGrid<ProxyServer>({
         label: () => $t('common.status'),
         defaultValue: (route.query.status as string) || 'all',
         componentProps: () => ({
-          placeholder: $t('page.runs_view.status_all'),
+          placeholder: $t('common.all'),
           options: [
-            { label: $t('page.runs_view.status_all'), value: 'all' },
+            { label: $t('common.all'), value: 'all' },
             { label: $t('common.active'), value: 'active' },
             {
               label: $t('page.automation_view.proxy_status_failing'),

@@ -93,27 +93,27 @@ export const WORKFLOW_STATUS_META: Record<WorkflowStatus, EnumItemMeta> = {
 export const JOB_STATUS_META: Record<JobStatus, EnumItemMeta> = {
   [JOB_STATUS.RUNNING]: {
     fallbackLabel: 'Running',
-    labelKey: 'page.runs_view.status_running',
+    labelKey: 'page.jobs_view.status_running',
     tone: STATUS_TONE.INFO,
   },
   [JOB_STATUS.COMPLETED]: {
     fallbackLabel: 'Completed',
-    labelKey: 'page.runs_view.status_completed',
+    labelKey: 'page.jobs_view.status_completed',
     tone: STATUS_TONE.SUCCESS,
   },
   [JOB_STATUS.FAILED]: {
     fallbackLabel: 'Failed',
-    labelKey: 'page.runs_view.status_failed',
+    labelKey: 'page.jobs_view.status_failed',
     tone: STATUS_TONE.DANGER,
   },
   [JOB_STATUS.PENDING]: {
     fallbackLabel: 'Pending',
-    labelKey: 'page.runs_view.status_pending',
+    labelKey: 'page.jobs_view.status_pending',
     tone: STATUS_TONE.WARNING,
   },
   [JOB_STATUS.QUEUED]: {
     fallbackLabel: 'Pending',
-    labelKey: 'page.runs_view.status_pending',
+    labelKey: 'page.jobs_view.status_pending',
     tone: STATUS_TONE.WARNING,
   },
   [JOB_STATUS.PAUSED]: {
@@ -123,7 +123,7 @@ export const JOB_STATUS_META: Record<JobStatus, EnumItemMeta> = {
   },
   [JOB_STATUS.CANCELLED]: {
     fallbackLabel: 'Cancelled',
-    labelKey: 'page.runs_view.status_cancelled',
+    labelKey: 'page.jobs_view.status_cancelled',
     tone: STATUS_TONE.NEUTRAL,
   },
 };
@@ -264,12 +264,12 @@ export const COMMERCE_ORDER_STATUS_META: Record<
   },
   [COMMERCE_ORDER_STATUS.FAILED]: {
     fallbackLabel: 'Failed',
-    labelKey: 'page.runs_view.status_failed',
+    labelKey: 'page.jobs_view.status_failed',
     tone: STATUS_TONE.DANGER,
   },
   [COMMERCE_ORDER_STATUS.CANCELLED]: {
     fallbackLabel: 'Cancelled',
-    labelKey: 'page.runs_view.status_cancelled',
+    labelKey: 'page.jobs_view.status_cancelled',
     tone: STATUS_TONE.NEUTRAL,
   },
 };
@@ -338,7 +338,7 @@ export const PAYMENT_INTENT_STATUS_META: Record<
   },
   [PAYMENT_INTENT_STATUS.FAILED]: {
     fallbackLabel: 'Failed',
-    labelKey: 'page.runs_view.status_failed',
+    labelKey: 'page.jobs_view.status_failed',
     tone: STATUS_TONE.DANGER,
   },
 };
@@ -397,7 +397,7 @@ export const SUBSCRIPTION_STATUS_META: Record<
   },
   [SUBSCRIPTION_STATUS.CANCELED]: {
     fallbackLabel: 'Cancelled',
-    labelKey: 'page.runs_view.status_cancelled',
+    labelKey: 'page.jobs_view.status_cancelled',
     tone: STATUS_TONE.NEUTRAL,
   },
   [SUBSCRIPTION_STATUS.UNPAID]: {
@@ -423,7 +423,7 @@ export const SYSTEM_PLUGIN_STATUS_META: Record<
   },
   [SYSTEM_PLUGIN_STATUS.PENDING]: {
     fallbackLabel: 'Pending',
-    labelKey: 'page.runs_view.status_pending',
+    labelKey: 'page.jobs_view.status_pending',
     tone: STATUS_TONE.WARNING,
   },
 };

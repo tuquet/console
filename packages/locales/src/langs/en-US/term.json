@@ -63,5 +63,7 @@
   "serials": "Serials",
   "invoice": "Invoice",
   "invoices": "Invoices",
-  "balance": "Balance"
+  "balance": "Balance",
+  "xu": "Xu",
+  "currencyVnd": "VND"
 }

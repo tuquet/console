@@ -50,7 +50,7 @@ import { getStatusToneMeta, JOB_STATUS_META } from '#/constants';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
 
-defineOptions({ name: 'AutomationRunDetail' });
+defineOptions({ name: 'AutomationJobDetail' });
 
 const route = useRoute();
 const router = useRouter();
@@ -178,7 +178,7 @@ async function handleCancelRun() {
 }
 
 function handleGoBack() {
-  router.push('/automation/runs');
+  router.push('/automation/jobs');
 }
 
 onMounted(async () => {
@@ -224,7 +224,7 @@ onUnmounted(() => {
             <h1
               class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
             >
-              {{ run?.name || $t('page.automation.runDetail') }}
+              {{ run?.name || $t('page.automation.jobDetail') }}
             </h1>
             <Badge
               v-if="run"
@@ -322,7 +322,7 @@ onUnmounted(() => {
               {{
                 run.workflow
                   ? run.workflow.name
-                  : $t('page.runs_view.unassigned_workflow')
+                  : $t('page.jobs_view.unassigned_workflow')
               }}
             </span>
           </div>
@@ -333,7 +333,7 @@ onUnmounted(() => {
           class="space-y-1.5 rounded-lg border border-border/50 bg-muted/20 p-3"
         >
           <div class="text-xs text-muted-foreground">
-            {{ $t('page.runs_view.col_runner') }}
+            {{ $t('page.jobs_view.col_runner') }}
           </div>
           <div class="flex items-center gap-2 text-sm">
             <Laptop class="size-4 shrink-0 text-muted-foreground" />
@@ -341,7 +341,7 @@ onUnmounted(() => {
               {{
                 run.worker
                   ? run.worker.name
-                  : $t('page.runs_view.auto_dispatch')
+                  : $t('page.jobs_view.auto_dispatch')
               }}
             </span>
           </div>
@@ -352,7 +352,7 @@ onUnmounted(() => {
           class="space-y-1.5 rounded-lg border border-border/50 bg-muted/20 p-3"
         >
           <div class="text-xs text-muted-foreground">
-            {{ $t('page.runs_view.duration') }}
+            {{ $t('page.jobs_view.duration') }}
           </div>
           <div class="flex flex-wrap items-center gap-1.5 text-sm">
             <Clock class="size-4 shrink-0 text-muted-foreground" />

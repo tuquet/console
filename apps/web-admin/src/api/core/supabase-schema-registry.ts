@@ -451,7 +451,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
       worker_id: { field: 'worker_id', labelKey: 'term.device', type: 'uuid' },
       total_tasks: {
         field: 'total_tasks',
-        labelKey: 'page.runs_view.col_progress',
+        labelKey: 'page.jobs_view.col_progress',
         type: 'number',
       },
       completed_tasks: {
@@ -548,17 +548,17 @@ export const SUPABASE_TABLE_REGISTRY: Record<
       },
       cpu_cores: {
         field: 'cpu_cores',
-        labelKey: 'page.runs_view.col_progress',
+        labelKey: 'page.jobs_view.col_progress',
         type: 'number',
       },
       ram_mb: {
         field: 'ram_mb',
-        labelKey: 'page.runs_view.col_progress',
+        labelKey: 'page.jobs_view.col_progress',
         type: 'number',
       },
       active_jobs: {
         field: 'active_jobs',
-        labelKey: 'page.runs_view.col_progress',
+        labelKey: 'page.jobs_view.col_progress',
         type: 'number',
       },
       last_heartbeat_at: {
@@ -635,12 +635,12 @@ export const SUPABASE_TABLE_REGISTRY: Record<
       },
       storage_size_bytes: {
         field: 'storage_size_bytes',
-        labelKey: 'page.runs_view.col_progress',
+        labelKey: 'page.jobs_view.col_progress',
         type: 'number',
       },
       cookies_count: {
         field: 'cookies_count',
-        labelKey: 'page.runs_view.col_progress',
+        labelKey: 'page.jobs_view.col_progress',
         type: 'number',
       },
       proxy_id: {

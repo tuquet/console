@@ -119,5 +119,6 @@
     "center": "Align center",
     "alignLeft": "Align left",
     "alignRight": "Align right"
-  }
+  },
+  "continueOnWeb": "Continue sign-in on this browser"
 }

@@ -138,22 +138,22 @@ function navigateTo(path: string) {
 function getRunStatusLabel(status: string) {
   switch (status) {
     case 'cancelled': {
-      return $t('page.runs_view.status_cancelled');
+      return $t('page.jobs_view.status_cancelled');
     }
     case 'completed': {
-      return $t('page.runs_view.status_completed');
+      return $t('page.jobs_view.status_completed');
     }
     case 'failed': {
-      return $t('page.runs_view.status_failed');
+      return $t('page.jobs_view.status_failed');
     }
     case 'queued': {
-      return $t('page.runs_view.status_queued');
+      return $t('page.jobs_view.status_queued');
     }
     case 'running': {
-      return $t('page.runs_view.status_running');
+      return $t('page.jobs_view.status_running');
     }
     default: {
-      return $t('page.runs_view.status_pending');
+      return $t('page.jobs_view.status_pending');
     }
   }
 }
@@ -351,7 +351,7 @@ onMounted(() => {
                 <span class="truncate">
                   {{
                     run.workflow?.name ||
-                    $t('page.runs_view.unassigned_workflow')
+                    $t('page.jobs_view.unassigned_workflow')
                   }}
                 </span>
                 <span>&bull;</span>
@@ -374,7 +374,7 @@ onMounted(() => {
             >
               <FileText class="size-3.5" />
               <span class="hidden sm:inline">{{
-                $t('page.runs_view.logs_btn')
+                $t('page.jobs_view.logs_btn')
               }}</span>
             </Button>
           </div>
@@ -382,7 +382,7 @@ onMounted(() => {
         <Empty v-else class="border-none py-6">
           <EmptyHeader>
             <EmptyDescription class="text-xs">
-              {{ $t('page.runs_view.empty_title') }}
+              {{ $t('page.jobs_view.empty_title') }}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
