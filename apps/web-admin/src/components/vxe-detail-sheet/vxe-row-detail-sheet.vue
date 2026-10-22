@@ -12,18 +12,6 @@ import { computed, reactive, ref, watch } from 'vue';
 
 import { VxeForm, VxeFormItem } from '@tuquet/plugins/vxe-table';
 import { usePreferences } from '@tuquet/preferences';
-
-import {
-  ArrowUpRight,
-  Check,
-  Copy,
-  Database,
-  Lock,
-  Plus,
-  Save,
-  ShieldCheck,
-  Table2,
-} from '@lucide/vue';
 import {
   Badge,
   Button,
@@ -48,7 +36,19 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
-import { getEffectiveAccessApi } from '#/api/core/access';
+import {
+  ArrowUpRight,
+  Check,
+  Copy,
+  Database,
+  Lock,
+  Plus,
+  Save,
+  ShieldCheck,
+  Table2,
+} from '@lucide/vue';
+
+import { getEffectiveAccess } from '#/api/core/access';
 import {
   buildDynamicVxeCreateSchema,
   buildDynamicVxeFormSchema,
@@ -114,7 +114,7 @@ async function ensureEffectiveAccess() {
     return;
   }
   try {
-    effectiveAccess.value = await getEffectiveAccessApi();
+    effectiveAccess.value = await getEffectiveAccess();
   } catch {
     // Fallback to null (optimistic UI; backend RLS enforces policy)
     effectiveAccess.value = null;
@@ -238,6 +238,29 @@ function handleTextInput(fieldKey: string) {
   }
 }
 
+const dynamicOptionsMap = ref<
+  Record<string, Array<{ label: string; value: number | string }>>
+>({});
+
+async function refreshDynamicOptions() {
+  if (!props.options?.dynamicFieldOptions || !props.open) {
+    return;
+  }
+  try {
+    const loaded = await props.options.dynamicFieldOptions({
+      formData,
+      mode: isCreateMode.value ? 'create' : 'edit',
+      resource: resolvedResource.value,
+      row: props.row,
+    });
+    if (loaded && typeof loaded === 'object') {
+      dynamicOptionsMap.value = { ...dynamicOptionsMap.value, ...loaded };
+    }
+  } catch (error) {
+    console.error('[VxeDetailSheet] Failed to load dynamic options:', error);
+  }
+}
+
 watch(
   () => [props.open, props.mode, props.row, props.initialValues] as const,
   ([isOpen, currentMode, currentRow]) => {
@@ -248,9 +271,11 @@ watch(
     if (currentMode === 'create') {
       syncFormDataForCreate();
       void ensureEffectiveAccess();
+      void refreshDynamicOptions();
     } else if (currentRow) {
       syncFormDataFromRow(currentRow);
       void ensureEffectiveAccess();
+      void refreshDynamicOptions();
     }
   },
   { immediate: true },
@@ -514,7 +539,11 @@ async function handleSave() {
               <template v-if="field.editable">
                 <!-- Enum Select -->
                 <Select
-                  v-if="field.type === 'enum' && field.options?.length"
+                  v-if="
+                    field.type === 'enum' &&
+                    (dynamicOptionsMap[field.field]?.length ||
+                      field.options?.length)
+                  "
                   :model-value="String(formData[field.field] ?? '')"
                   @update:model-value="
                     (val) => (formData[field.field] = String(val ?? ''))
@@ -528,7 +557,9 @@ async function handleSave() {
                   </SelectTrigger>
                   <SelectContent class="z-[1090]">
                     <SelectItem
-                      v-for="opt in field.options"
+                      v-for="opt in dynamicOptionsMap[field.field] ||
+                      field.options ||
+                      []"
                       :key="String(opt.value)"
                       :value="String(opt.value)"
                     >

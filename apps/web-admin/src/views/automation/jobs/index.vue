@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { AutomationJobItem } from '#/api';
+import type { Job } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -10,7 +10,7 @@ import { Badge, Button } from '@tuquet/vue-ui';
 import { Eye, Laptop, PlayCircle, RefreshCw } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { calculateProgressPercentage, getJobsApi } from '#/api';
+import { calculateProgressPercentage, listJobs } from '#/api';
 import { useDateFormat } from '#/composables';
 import {
   buildEnumFilterOptions,
@@ -28,7 +28,7 @@ const router = useRouter();
 const { isMobile } = usePreferences();
 const { formatDate } = useDateFormat();
 
-const allRuns = ref<AutomationJobItem[]>([]);
+const allRuns = ref<Job[]>([]);
 
 function handleViewDetail(id: string) {
   router.push(`/automation/runs/${id}`);
@@ -95,7 +95,7 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<AutomationJobItem>({
+const [Grid, gridApi] = useVbenVxeGrid<Job>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
@@ -174,7 +174,7 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomationJobItem>({
         ) => {
           const tenantId = (route.query.tenant as string) || undefined;
           const workflowId = (route.query.workflow as string) || undefined;
-          const data = await getJobsApi({ tenantId, workflowId });
+          const data = await listJobs({ tenantId, workflowId });
           allRuns.value = data;
 
           let filtered = data;

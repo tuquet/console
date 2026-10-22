@@ -4,8 +4,6 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { $t } from '@tuquet/locales';
 import { useAccessStore, useUserStore } from '@tuquet/stores';
-
-import { CheckCircle2, Laptop } from '@lucide/vue';
 import {
   Alert,
   AlertDescription,
@@ -23,7 +21,9 @@ import {
   SelectValue,
 } from '@tuquet/vue-ui';
 
-import { getTenantsApi } from '#/api';
+import { CheckCircle2, Laptop } from '@lucide/vue';
+
+import { listTenants } from '#/api';
 import { useClipboard } from '#/composables';
 import { captureError } from '#/utils/bugsink';
 import { validateDesktopBridgePort } from '#/utils/security';
@@ -65,7 +65,7 @@ const tenantOptions = ref<{ label: string; value: string }[]>([]);
 async function loadTenants() {
   if (!accessStore.accessToken) return;
   try {
-    const list = await getTenantsApi();
+    const list = await listTenants();
     if (list && list.length > 0) {
       tenantOptions.value = list.map((t) => ({
         label: `${t.name} · ${t.slug}`,

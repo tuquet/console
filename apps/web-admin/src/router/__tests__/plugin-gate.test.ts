@@ -65,7 +65,7 @@ describe('filterRoutesByPlugins', () => {
       {
         path: '/automation',
         name: 'Automation',
-        meta: { plugin: 'automa' },
+        meta: { plugin: 'automation' },
         children: [
           {
             path: 'workflows',
@@ -158,17 +158,17 @@ describe('filterRoutesByPlugins', () => {
     expect(result[0]?.children).toHaveLength(0);
   });
 
-  it('should gate automa and workers child routes independently inside consolidated /automation module', () => {
-    const onlyAutoma = filterRoutesByPlugins(automationRoutes, [
+  it('should gate automation and workers child routes independently inside consolidated /automation module', () => {
+    const onlyAutomation = filterRoutesByPlugins(automationRoutes, [
       'core-iam',
-      'automa',
+      'automation',
     ]);
-    expect(onlyAutoma).toHaveLength(1);
-    expect(onlyAutoma[0]?.children?.map((c) => c.name)).toEqual([
+    expect(onlyAutomation).toHaveLength(1);
+    expect(onlyAutomation[0]?.children?.map((c) => c.name)).toEqual([
       'AutomationOverview',
       'AutomationWorkflows',
-      'AutomationRuns',
-      'AutomationRunDetail',
+      'AutomationJobs',
+      'AutomationJobDetail',
     ]);
 
     const onlyWorkers = filterRoutesByPlugins(automationRoutes, [

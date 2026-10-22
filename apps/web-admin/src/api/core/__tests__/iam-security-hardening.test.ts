@@ -7,7 +7,7 @@ import {
 } from '#/utils/security';
 
 import * as supabaseClientModule from '../supabase-client';
-import { updateWorkspaceMemberRoleApi } from '../workspace-detail';
+import { updateWorkspaceMemberRole } from '../workspace-detail';
 
 describe('validateDesktopBridgePort', () => {
   it('should default to 8765 when undefined, null, or empty string', () => {
@@ -108,7 +108,7 @@ describe('sanitizeRedirectPath & isSafeRedirectPath', () => {
   });
 });
 
-describe('updateWorkspaceMemberRoleApi hardening', () => {
+describe('updateWorkspaceMemberRole hardening', () => {
   it('should upsert new role first before deleting old roles and preserve errors', async () => {
     const mockCalls: { url: string; options?: any }[] = [];
     vi.spyOn(supabaseClientModule, 'supabaseRequest').mockImplementation(
@@ -118,7 +118,7 @@ describe('updateWorkspaceMemberRoleApi hardening', () => {
       },
     );
 
-    await updateWorkspaceMemberRoleApi({
+    await updateWorkspaceMemberRole({
       memberId: 'member-123',
       roleId: 'role-admin-456',
       tenantId: 'tenant-789',
@@ -159,7 +159,7 @@ describe('updateWorkspaceMemberRoleApi hardening', () => {
     );
 
     await expect(
-      updateWorkspaceMemberRoleApi({
+      updateWorkspaceMemberRole({
         memberId: 'member-owner',
         roleId: 'role-viewer',
         tenantId: 'tenant-1',

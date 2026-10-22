@@ -5,11 +5,11 @@ import { useRouter } from 'vue-router';
 import { $t } from '@tuquet/locales';
 import { preferences } from '@tuquet/preferences';
 import { useAccessStore, useUserStore } from '@tuquet/stores';
-
-import { Copy, ExternalLink, Laptop } from '@lucide/vue';
 import { Button, Card, Spinner, toast } from '@tuquet/vue-ui';
 
-import { getAccessCodesApi } from '#/api';
+import { Copy, ExternalLink, Laptop } from '@lucide/vue';
+
+import { getAccessCodes } from '#/api';
 import { useClipboard } from '#/composables';
 import { useAuthStore } from '#/store';
 import { captureError, captureMessage } from '#/utils/bugsink';
@@ -56,7 +56,7 @@ async function handleContinueOnWeb() {
 
     const [userInfo, accessCodes] = await Promise.all([
       authStore.fetchUserInfo(),
-      getAccessCodesApi(),
+      getAccessCodes(),
     ]);
 
     if (userInfo) {
@@ -156,7 +156,7 @@ onMounted(async () => {
       // Load user profile & access codes
       const [userInfo, accessCodes] = await Promise.all([
         authStore.fetchUserInfo(),
-        getAccessCodesApi(),
+        getAccessCodes(),
       ]);
 
       if (userInfo) {

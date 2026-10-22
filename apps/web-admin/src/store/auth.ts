@@ -11,17 +11,11 @@ import {
   useTabbarStore,
   useUserStore,
 } from '@tuquet/stores';
-
 import { toast } from '@tuquet/vue-ui';
+
 import { defineStore } from 'pinia';
 
-import {
-  clearAccessCache,
-  getAccessCodesApi,
-  getUserInfoApi,
-  loginApi,
-  logoutApi,
-} from '#/api';
+import { clearAccessCache, getAccessCodes, getCurrentUser, login } from '#/api';
 import { $t } from '#/locales';
 import { router as appRouter } from '#/router';
 import { captureError, setBugsinkUser } from '#/utils/bugsink';
@@ -47,7 +41,7 @@ export const useAuthStore = defineStore('auth', () => {
     let userInfo: null | UserInfo = null;
     try {
       loginLoading.value = true;
-      const { accessToken, refreshToken } = await loginApi(params);
+      const { accessToken, refreshToken } = await login(params);
 
       // On successful accessToken retrieval
       if (accessToken) {
@@ -59,7 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
         // Fetch user info and store into accessStore
         const [fetchUserInfoResult, accessCodes] = await Promise.all([
           fetchUserInfo(),
-          getAccessCodesApi(),
+          getAccessCodes(),
         ]);
 
         userInfo = fetchUserInfoResult;
@@ -118,7 +112,7 @@ export const useAuthStore = defineStore('auth', () => {
     clearAccessCache();
     setBugsinkUser(null);
     try {
-      await logoutApi();
+      await logout();
     } catch {
       // Ignore network errors on logout
     }
@@ -168,7 +162,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function fetchUserInfo() {
-    const userInfo = await getUserInfoApi();
+    const userInfo = await getCurrentUser();
     userStore.setUserInfo(userInfo);
     setBugsinkUser(userInfo);
     return userInfo;

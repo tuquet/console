@@ -12,13 +12,12 @@ import {
   RequestClient,
 } from '@tuquet/request';
 import { useAccessStore } from '@tuquet/stores';
-
 import { toast } from '@tuquet/vue-ui';
 
 import { useAuthStore } from '#/store';
 import { addNetworkBreadcrumb, captureError } from '#/utils/bugsink';
 
-import { refreshTokenApi } from './core';
+import { refreshToken } from './core';
 
 const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
@@ -42,7 +41,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
    */
   async function doRefreshToken() {
     const accessStore = useAccessStore();
-    const resp = await refreshTokenApi();
+    const resp = await refreshToken();
     const newToken = resp.data;
     accessStore.setAccessToken(newToken);
     return newToken;

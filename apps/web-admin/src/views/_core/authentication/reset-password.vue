@@ -3,10 +3,9 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { $t } from '@tuquet/locales';
-
 import { Button, Input, Label, toast } from '@tuquet/vue-ui';
 
-import { updatePasswordApi } from '#/api/core/auth';
+import { updatePassword } from '#/api/core/auth';
 import { captureError } from '#/utils/bugsink';
 
 defineOptions({ name: 'ResetPassword' });
@@ -41,7 +40,7 @@ async function handleSubmit() {
 
   try {
     loading.value = true;
-    await updatePasswordApi(password.value, recoveryToken.value);
+    await updatePassword(password.value, recoveryToken.value);
     toast.success($t('authentication.passwordResetSuccess'));
     router.push('/auth/login');
   } catch (error: any) {

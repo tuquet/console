@@ -5,6 +5,15 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
+  Badge,
+  Button,
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  toast,
+} from '@tuquet/vue-ui';
+
+import {
   ArrowRight,
   CreditCard,
   KeyRound,
@@ -14,16 +23,8 @@ import {
   ShieldCheck,
   Users,
 } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  toast,
-} from '@tuquet/vue-ui';
 
-import { getSystemOverviewApi } from '#/api';
+import { getSystemOverview } from '#/api';
 import { VxeRowDetailSheet } from '#/components/vxe-detail-sheet';
 import { useDateFormat } from '#/composables';
 import {
@@ -134,7 +135,7 @@ const moduleCards = computed(() => [
 async function loadOverview() {
   loading.value = true;
   try {
-    overview.value = await getSystemOverviewApi();
+    overview.value = await getSystemOverview();
   } catch (error: any) {
     captureError(error, { action: 'loadOverview', view: 'SystemOverview' });
     toast.error(error?.message || $t('page.system_view.overview_load_failed'));

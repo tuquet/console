@@ -1,39 +1,20 @@
 <script lang="ts" setup>
 import type {
-  CommerceCategoryItem,
-  CommerceOrderDeliveryItem,
-  CommerceProductItem,
+  CommerceCategory,
+  CommerceOrderDelivery,
+  CommerceProduct,
   CommerceProductType,
-  CommerceProductVariantItem,
+  CommerceProductVariant,
   PaymentChannelType,
-  PaymentGatewayItem,
-  PaymentIntentItem,
-  TenantItem,
-  TenantWalletItem,
+  PaymentGateway,
+  PaymentIntent,
+  Tenant,
+  TenantWallet,
 } from '#/api';
 
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
-import {
-  Building2,
-  Check,
-  Coins,
-  Copy,
-  CreditCard,
-  Download,
-  ExternalLink,
-  FileDown,
-  KeyRound,
-  PackageCheck,
-  QrCode,
-  RefreshCw,
-  Search,
-  Server,
-  ShoppingBag,
-  Sparkles,
-  Wallet,
-} from '@lucide/vue';
 import {
   Badge,
   Button,
@@ -64,19 +45,39 @@ import {
 } from '@tuquet/vue-ui';
 
 import {
-  createCheckoutOrderApi,
+  Building2,
+  Check,
+  Coins,
+  Copy,
+  CreditCard,
+  Download,
+  ExternalLink,
+  FileDown,
+  KeyRound,
+  PackageCheck,
+  QrCode,
+  RefreshCw,
+  Search,
+  Server,
+  ShoppingBag,
+  Sparkles,
+  Wallet,
+} from '@lucide/vue';
+
+import {
+  createCheckoutOrder,
   downloadTextFile,
   filterCommerceProducts,
   formatSerialDeliveriesText,
-  getActivePaymentGatewaysApi,
   getActiveTenantId,
-  getCommerceCategoriesApi,
-  getCommerceProductsApi,
-  getOrderDeliveriesApi,
-  getPaymentIntentStatusApi,
-  getTenantsApi,
-  getTenantWalletApi,
+  getPaymentIntentStatus,
+  getTenantWallet,
   isVariantInStock,
+  listActivePaymentGateways,
+  listCommerceCategories,
+  listCommerceProducts,
+  listOrderDeliveries,
+  listTenants,
   setActiveTenantId,
 } from '#/api';
 import { useClipboard } from '#/composables';
@@ -89,12 +90,12 @@ const router = useRouter();
 const { copyToClipboard } = useClipboard();
 
 const loading = ref(false);
-const tenants = ref<TenantItem[]>([]);
+const tenants = ref<Tenant[]>([]);
 const selectedTenantId = ref<string>(getActiveTenantId());
-const wallet = ref<null | TenantWalletItem>(null);
-const categories = ref<CommerceCategoryItem[]>([]);
-const products = ref<CommerceProductItem[]>([]);
-const gateways = ref<PaymentGatewayItem[]>([]);
+const wallet = ref<null | TenantWallet>(null);
+const categories = ref<CommerceCategory[]>([]);
+const products = ref<CommerceProduct[]>([]);
+const gateways = ref<PaymentGateway[]>([]);
 
 const selectedCategoryId = ref<string>('all');
 const selectedProductType = ref<string>('all');
@@ -105,14 +106,14 @@ const selectedVariantByProduct = ref<Record<string, string>>({});
 
 // Checkout Dialog state
 const checkoutOpen = ref(false);
-const activeProduct = ref<CommerceProductItem | null>(null);
-const activeVariant = ref<CommerceProductVariantItem | null>(null);
+const activeProduct = ref<CommerceProduct | null>(null);
+const activeVariant = ref<CommerceProductVariant | null>(null);
 const checkoutQty = ref<number>(1);
 const selectedGatewayId = ref<string>('internal_wallet');
 const submittingOrder = ref(false);
 
 // Active external payment intent waiting for payment
-const pendingIntent = ref<null | PaymentIntentItem>(null);
+const pendingIntent = ref<null | PaymentIntent>(null);
 const pendingOrderId = ref<null | string>(null);
 const pendingOrderCode = ref<string>('');
 const checkingStatus = ref(false);
@@ -121,7 +122,7 @@ let pollTimer: null | ReturnType<typeof setInterval> = null;
 // Instant Deliverables Dialog state
 const deliveryOpen = ref(false);
 const deliveredOrderCode = ref<string>('');
-const deliveredItems = ref<CommerceOrderDeliveryItem[]>([]);
+const deliveredItems = ref<CommerceOrderDelivery[]>([]);
 
 const productTypeMap = computed<
   Record<
@@ -162,7 +163,7 @@ const externalGateways = computed(() =>
   gateways.value.filter((g) => g.is_active && g.channel !== 'internal_wallet'),
 );
 
-const currentGateway = computed<null | PaymentGatewayItem>(() => {
+const currentGateway = computed<null | PaymentGateway>(() => {
   if (selectedGatewayId.value === 'internal_wallet') {
     return null;
   }
@@ -194,8 +195,8 @@ function getProductTypeBadge(type: CommerceProductType) {
 }
 
 function getSelectedVariant(
-  product: CommerceProductItem,
-): CommerceProductVariantItem | null {
+  product: CommerceProduct,
+): CommerceProductVariant | null {
   const variants = product.variants || [];
   if (variants.length === 0) return null;
   const chosenId = selectedVariantByProduct.value[product.id];
@@ -214,10 +215,10 @@ async function loadStoreData() {
   try {
     const [tenantRows, categoryRows, productRows, gatewayRows] =
       await Promise.all([
-        getTenantsApi().catch(() => [] as TenantItem[]),
-        getCommerceCategoriesApi().catch(() => [] as CommerceCategoryItem[]),
-        getCommerceProductsApi().catch(() => [] as CommerceProductItem[]),
-        getActivePaymentGatewaysApi().catch(() => [] as PaymentGatewayItem[]),
+        listTenants().catch(() => [] as Tenant[]),
+        listCommerceCategories().catch(() => [] as CommerceCategory[]),
+        listCommerceProducts().catch(() => [] as CommerceProduct[]),
+        listActivePaymentGateways().catch(() => [] as PaymentGateway[]),
       ]);
 
     tenants.value = tenantRows;
@@ -244,7 +245,7 @@ async function loadStoreData() {
     }
 
     if (selectedTenantId.value) {
-      wallet.value = await getTenantWalletApi(selectedTenantId.value).catch(
+      wallet.value = await getTenantWallet(selectedTenantId.value).catch(
         () => null,
       );
     }
@@ -258,10 +259,10 @@ async function handleTenantChange(value: unknown) {
   if (!nextId) return;
   selectedTenantId.value = nextId;
   setActiveTenantId(nextId);
-  wallet.value = await getTenantWalletApi(nextId).catch(() => null);
+  wallet.value = await getTenantWallet(nextId).catch(() => null);
 }
 
-function openCheckoutModal(product: CommerceProductItem) {
+function openCheckoutModal(product: CommerceProduct) {
   const variant = getSelectedVariant(product);
   if (!variant) {
     toast.error($t('page.commerce_view.no_sku_available'));
@@ -300,14 +301,14 @@ async function checkPendingPaymentStatus(
   if (checkingStatus.value) return;
   checkingStatus.value = true;
   try {
-    const updated = await getPaymentIntentStatusApi(intentId);
+    const updated = await getPaymentIntentStatus(intentId);
     if (!updated) return;
     pendingIntent.value = updated;
 
     if (updated.status === 'succeeded') {
       stopPolling();
       toast.success($t('page.commerce_view.payment_success_opening'));
-      const deliveries = await getOrderDeliveriesApi(orderId).catch(() => []);
+      const deliveries = await listOrderDeliveries(orderId).catch(() => []);
       deliveredOrderCode.value = pendingOrderCode.value;
       deliveredItems.value = deliveries;
       checkoutOpen.value = false;
@@ -343,7 +344,7 @@ async function handleCreateOrder() {
 
   submittingOrder.value = true;
   try {
-    const res = await createCheckoutOrderApi({
+    const res = await createCheckoutOrder({
       buyer_tenant_id: selectedTenantId.value,
       gateway_code: isInternalWallet ? 'internal_wallet' : chosenGw?.id || null,
       items: [

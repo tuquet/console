@@ -1,16 +1,16 @@
 <script lang="ts" setup>
-import type { PlatformSubscriptionItem } from '#/api';
+import type { PlatformSubscription } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 
 import { FILTER_ALL, SUBSCRIPTION_STATUS } from '@tuquet/constants';
 import { usePreferences } from '@tuquet/preferences';
-
-import { Plus, RefreshCw } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
 
+import { Plus, RefreshCw } from '@lucide/vue';
+
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getPlatformSubscriptionsApi } from '#/api';
+import { listPlatformSubscriptions } from '#/api';
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
@@ -19,7 +19,7 @@ defineOptions({ name: 'SystemSubscriptions' });
 const { formatDate } = useDateFormat();
 const { isMobile } = usePreferences();
 
-const allSubscriptions = ref<PlatformSubscriptionItem[]>([]);
+const allSubscriptions = ref<PlatformSubscription[]>([]);
 
 function getStatusBadge(status: string): {
   label: string;
@@ -92,7 +92,7 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscriptionItem>({
+const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscription>({
   detailSheetOptions: {
     resource: 'billing.subscriptions',
     subtitleField: 'plan_name',
@@ -171,7 +171,7 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscriptionItem>({
           { page }: { page?: { currentPage?: number; pageSize?: number } },
           formValues: Record<string, any>,
         ) => {
-          const data = await getPlatformSubscriptionsApi();
+          const data = await listPlatformSubscriptions();
           allSubscriptions.value = data;
 
           const filterStatus = formValues?.status;

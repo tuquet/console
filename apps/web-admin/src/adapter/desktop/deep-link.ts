@@ -113,7 +113,7 @@ export async function initDesktopAuthHandling(): Promise<() => void> {
       const { preferences } = await import('@tuquet/preferences');
       const { toast } = await import('@tuquet/vue-ui');
       const { $t } = await import('@tuquet/locales');
-      const { getAccessCodesApi } = await import('#/api');
+      const { getAccessCodes } = await import('#/api');
       const { useAuthStore } = await import('#/store');
       const { router } = await import('#/router');
 
@@ -129,7 +129,7 @@ export async function initDesktopAuthHandling(): Promise<() => void> {
       // Fetch user profile and permissions
       const [userInfo, accessCodes] = await Promise.all([
         authStore.fetchUserInfo(),
-        getAccessCodesApi(),
+        getAccessCodes(),
       ]);
 
       if (userInfo) {

@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import type { TenantItem, WorkspaceSubscription } from '#/api';
+import type { Tenant, WorkspaceSubscription } from '#/api';
 
 import { useRouter } from 'vue-router';
 
-import { Check, Copy, ExternalLink, Layers } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
+
+import { Check, Copy, ExternalLink, Layers } from '@lucide/vue';
 
 import DangerZoneCard from '#/components/common/danger-zone-card.vue';
 import { useClipboard } from '#/composables';
@@ -15,7 +16,7 @@ interface Props {
   isCurrentActive: boolean;
   membersCount: number;
   subscription: null | WorkspaceSubscription;
-  tenant: TenantItem;
+  tenant: Tenant;
   totalDevicesCount: number;
 }
 

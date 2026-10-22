@@ -31,8 +31,8 @@ describe('buildSupabaseProfileHeaders', () => {
     expect(buildSupabaseProfileHeaders('workers', 'GET')).toEqual({
       'Accept-Profile': 'workers',
     });
-    expect(buildSupabaseProfileHeaders('automa', 'head')).toEqual({
-      'Accept-Profile': 'automa',
+    expect(buildSupabaseProfileHeaders('automation', 'head')).toEqual({
+      'Accept-Profile': 'automation',
     });
     expect(buildSupabaseProfileHeaders('billing')).toEqual({
       'Accept-Profile': 'billing',
@@ -43,8 +43,8 @@ describe('buildSupabaseProfileHeaders', () => {
     expect(buildSupabaseProfileHeaders('workers', 'POST')).toEqual({
       'Content-Profile': 'workers',
     });
-    expect(buildSupabaseProfileHeaders('automa', 'PATCH')).toEqual({
-      'Content-Profile': 'automa',
+    expect(buildSupabaseProfileHeaders('automation', 'PATCH')).toEqual({
+      'Content-Profile': 'automation',
     });
     expect(buildSupabaseProfileHeaders('billing', 'DELETE')).toEqual({
       'Content-Profile': 'billing',
@@ -134,7 +134,7 @@ describe('flattenMemberships', () => {
           {
             roles: {
               role_permissions: [
-                { permission_id: 'automa:workflows:read' },
+                { permission_id: 'automation:workflows:read' },
                 { permission_id: 'members:read' }, // duplicate cross-tenant
               ],
             },
@@ -150,7 +150,7 @@ describe('flattenMemberships', () => {
     const result = flattenMemberships(mockRows);
 
     expect(result.permissions).toEqual([
-      'automa:workflows:read',
+      'automation:workflows:read',
       'members:read',
       'tenants:read',
       'workers:devices:read',
@@ -158,7 +158,7 @@ describe('flattenMemberships', () => {
 
     expect(result.tenantPermissions).toEqual({
       'tenant-1': ['members:read', 'tenants:read', 'workers:devices:read'],
-      'tenant-2': ['automa:workflows:read', 'members:read'],
+      'tenant-2': ['automation:workflows:read', 'members:read'],
       'tenant-empty': [],
     });
   });

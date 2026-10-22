@@ -3,6 +3,8 @@ import type { RealAnalyticsData } from '#/api';
 
 import { onMounted, ref } from 'vue';
 
+import { Badge, Button, Spinner, toast } from '@tuquet/vue-ui';
+
 import {
   Activity,
   Building2,
@@ -11,9 +13,8 @@ import {
   RefreshCw,
   Terminal,
 } from '@lucide/vue';
-import { Badge, Button, Spinner, toast } from '@tuquet/vue-ui';
 
-import { getRealAnalyticsDataApi } from '#/api';
+import { getRealAnalyticsData } from '#/api';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
 
@@ -44,7 +45,7 @@ const analyticsData = ref<RealAnalyticsData>({
 async function loadAnalytics() {
   loading.value = true;
   try {
-    const data = await getRealAnalyticsDataApi();
+    const data = await getRealAnalyticsData();
     analyticsData.value = data;
   } catch (error: any) {
     captureError(error, { action: 'loadAnalytics', view: 'Analytics' });

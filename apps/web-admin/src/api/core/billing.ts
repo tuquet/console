@@ -29,7 +29,7 @@ export type {
   WalletTxType,
 };
 
-export interface PaymentGatewayItem {
+export interface PaymentGateway {
   channel: PaymentChannelType;
   currency: 'CREDITS' | 'USD' | 'USDT' | 'VND' | string;
   driver: string;
@@ -47,7 +47,7 @@ export type BankAccountStatus =
   | 'maintenance'
   | 'suspended';
 
-export interface BankReceivingAccountItem {
+export interface BankReceivingAccount {
   account_name: string;
   account_no: string;
   bank_bin: string;
@@ -64,7 +64,7 @@ export interface BankReceivingAccountItem {
   updated_at: string;
 }
 
-export interface TenantWalletItem {
+export interface TenantWallet {
   balance_credits: number;
   id: string;
   tenant_id: string;
@@ -73,7 +73,7 @@ export interface TenantWalletItem {
   updated_at: string;
 }
 
-export interface WalletTransactionItem {
+export interface WalletTransaction {
   amount_credits: number;
   balance_after_credits: number;
   created_at: string;
@@ -87,7 +87,7 @@ export interface WalletTransactionItem {
   wallet_id: string;
 }
 
-export interface PaymentIntentItem {
+export interface PaymentIntent {
   amount_credits: number;
   buyer_email: null | string;
   checkout_payload: Record<string, any>;
@@ -104,6 +104,14 @@ export interface PaymentIntentItem {
   target_type: PaymentTargetType;
   tenant_id: null | string;
   transfer_code: string;
+}
+
+export interface ListActivePaymentGatewaysParams {
+  skipAuth?: boolean;
+}
+
+export interface ListWalletTransactionsParams {
+  limit?: number;
 }
 
 export interface CreatePaymentIntentParams {
@@ -125,7 +133,7 @@ export interface SettlePaymentIntentResult {
   target_type?: PaymentTargetType;
 }
 
-export function mapRawBankReceivingAccount(raw: any): BankReceivingAccountItem {
+export function mapRawBankReceivingAccount(raw: any): BankReceivingAccount {
   return {
     account_name: String(raw?.account_name || ''),
     account_no: String(raw?.account_no || ''),
@@ -145,7 +153,7 @@ export function mapRawBankReceivingAccount(raw: any): BankReceivingAccountItem {
   };
 }
 
-export function mapRawPaymentGateway(raw: any): PaymentGatewayItem {
+export function mapRawPaymentGateway(raw: any): PaymentGateway {
   return {
     channel: (raw?.channel ||
       PAYMENT_CHANNEL.BANK_TRANSFER) as PaymentChannelType,
@@ -163,7 +171,7 @@ export function mapRawPaymentGateway(raw: any): PaymentGatewayItem {
   };
 }
 
-export function mapRawTenantWallet(raw: any): TenantWalletItem {
+export function mapRawTenantWallet(raw: any): TenantWallet {
   return {
     balance_credits: Math.trunc(Number(raw?.balance_credits ?? 0)),
     id: String(raw?.id || ''),
@@ -176,7 +184,7 @@ export function mapRawTenantWallet(raw: any): TenantWalletItem {
   };
 }
 
-export function mapRawWalletTransaction(raw: any): WalletTransactionItem {
+export function mapRawWalletTransaction(raw: any): WalletTransaction {
   return {
     amount_credits: Math.trunc(Number(raw?.amount_credits ?? 0)),
     balance_after_credits: Math.trunc(Number(raw?.balance_after_credits ?? 0)),
@@ -192,7 +200,7 @@ export function mapRawWalletTransaction(raw: any): WalletTransactionItem {
   };
 }
 
-export function mapRawPaymentIntent(raw: any): PaymentIntentItem {
+export function mapRawPaymentIntent(raw: any): PaymentIntent {
   return {
     amount_credits: Math.trunc(Number(raw?.amount_credits ?? 0)),
     buyer_email: raw?.buyer_email ?? null,
@@ -221,16 +229,16 @@ export function mapRawPaymentIntent(raw: any): PaymentIntentItem {
 /**
  * Fetch active public payment gateways (safe for both Authenticated Tenants & Public Storefront)
  */
-export async function getActivePaymentGatewaysApi(options?: {
-  skipAuth?: boolean;
-}): Promise<PaymentGatewayItem[]> {
+export async function listActivePaymentGateways(
+  params?: ListActivePaymentGatewaysParams,
+): Promise<PaymentGateway[]> {
   const rows = await supabaseRequest<any[]>(
     '/rest/v1/rpc/get_active_gateways',
     {
       body: JSON.stringify({}),
       method: 'POST',
       schema: SUPABASE_SCHEMA.BILLING,
-      skipAuth: options?.skipAuth,
+      skipAuth: params?.skipAuth,
     },
   );
   return Array.isArray(rows)
@@ -241,9 +249,7 @@ export async function getActivePaymentGatewaysApi(options?: {
 /**
  * Fetch all payment gateways (including inactive ones) for Platform Admin
  */
-export async function getAllPaymentGatewaysAdminApi(): Promise<
-  PaymentGatewayItem[]
-> {
+export async function listAllPaymentGateways(): Promise<PaymentGateway[]> {
   const rows = await supabaseRequest<any[]>(
     '/rest/v1/payment_gateways?select=*&order=sort_order.asc,id.asc',
     { schema: SUPABASE_SCHEMA.BILLING },
@@ -256,9 +262,7 @@ export async function getAllPaymentGatewaysAdminApi(): Promise<
 /**
  * Fetch Tenant Xu wallet balance (returns 0 Xu fallback if wallet row not yet initialized)
  */
-export async function getTenantWalletApi(
-  tenantId: string,
-): Promise<TenantWalletItem> {
+export async function getTenantWallet(tenantId: string): Promise<TenantWallet> {
   const rows = await supabaseRequest<any[]>(
     `/rest/v1/wallets?tenant_id=eq.${encodeURIComponent(tenantId)}&select=*&limit=1`,
     { schema: SUPABASE_SCHEMA.BILLING },
@@ -279,10 +283,11 @@ export async function getTenantWalletApi(
 /**
  * Fetch Tenant Xu wallet append-only transaction history
  */
-export async function getWalletTransactionsApi(
+export async function listWalletTransactions(
   tenantId: string,
-  limit = 50,
-): Promise<WalletTransactionItem[]> {
+  params?: ListWalletTransactionsParams,
+): Promise<WalletTransaction[]> {
+  const limit = params?.limit ?? 50;
   const rows = await supabaseRequest<any[]>(
     `/rest/v1/wallet_transactions?tenant_id=eq.${encodeURIComponent(tenantId)}&select=*&order=created_at.desc&limit=${limit}`,
     { schema: SUPABASE_SCHEMA.BILLING },
@@ -295,9 +300,9 @@ export async function getWalletTransactionsApi(
 /**
  * Create a new multi-channel payment intent (Bank Transfer, MoMo, Stripe, Crypto, or Instant Xu Wallet)
  */
-export async function createPaymentIntentApi(
+export async function createPaymentIntent(
   params: CreatePaymentIntentParams,
-): Promise<PaymentIntentItem> {
+): Promise<PaymentIntent> {
   const raw = await supabaseRequest<any>('/rest/v1/rpc/create_payment_intent', {
     body: JSON.stringify({
       _amount_credits: Math.trunc(params.amount_credits),
@@ -316,9 +321,9 @@ export async function createPaymentIntentApi(
 /**
  * Poll or inspect a single payment intent status
  */
-export async function getPaymentIntentStatusApi(
+export async function getPaymentIntentStatus(
   intentId: string,
-): Promise<null | PaymentIntentItem> {
+): Promise<null | PaymentIntent> {
   const rows = await supabaseRequest<any[]>(
     `/rest/v1/payment_intents?id=eq.${encodeURIComponent(intentId)}&select=*&limit=1`,
     { schema: SUPABASE_SCHEMA.BILLING },
@@ -332,9 +337,7 @@ export async function getPaymentIntentStatusApi(
 /**
  * Platform Admin: List payment intents held in manual_review (late transfer > 30m or underpaid)
  */
-export async function getManualReviewIntentsAdminApi(): Promise<
-  PaymentIntentItem[]
-> {
+export async function listManualReviewIntents(): Promise<PaymentIntent[]> {
   const rows = await supabaseRequest<any[]>(
     `/rest/v1/payment_intents?status=eq.${PAYMENT_INTENT_STATUS.MANUAL_REVIEW}&select=*&order=updated_at.desc`,
     { schema: SUPABASE_SCHEMA.BILLING },
@@ -345,7 +348,7 @@ export async function getManualReviewIntentsAdminApi(): Promise<
 /**
  * Platform Admin: Force-approve a manual_review payment intent
  */
-export async function approveManualPaymentIntentAdminApi(
+export async function approveManualPaymentIntent(
   intentId: string,
   adminNote = 'Approved manually by Platform Admin',
 ): Promise<SettlePaymentIntentResult> {
@@ -369,8 +372,8 @@ export async function approveManualPaymentIntentAdminApi(
 /**
  * Platform Admin: Fetch all bank receiving accounts in pool (active & inactive)
  */
-export async function getBankReceivingAccountsApi(): Promise<
-  BankReceivingAccountItem[]
+export async function listBankReceivingAccounts(): Promise<
+  BankReceivingAccount[]
 > {
   const rows = await supabaseRequest<any[]>(
     '/rest/v1/bank_receiving_accounts?select=*&order=priority.asc,created_at.asc',
@@ -384,9 +387,9 @@ export async function getBankReceivingAccountsApi(): Promise<
 /**
  * Platform Admin: Upsert a bank receiving account in pool (rotate number, adjust daily limit)
  */
-export async function upsertBankReceivingAccountApi(
-  payload: Partial<BankReceivingAccountItem> & { id: string },
-): Promise<BankReceivingAccountItem> {
+export async function upsertBankReceivingAccount(
+  payload: Partial<BankReceivingAccount> & { id: string },
+): Promise<BankReceivingAccount> {
   const rows = await supabaseRequest<any[]>(
     '/rest/v1/bank_receiving_accounts?on_conflict=id',
     {
@@ -405,7 +408,7 @@ export async function upsertBankReceivingAccountApi(
 /**
  * Platform Admin: Fast toggle status of receiving account (active / cooling / suspended)
  */
-export async function toggleBankReceivingAccountApi(
+export async function toggleBankReceivingAccount(
   id: string,
   status: BankAccountStatus,
   isActive?: boolean,
@@ -427,9 +430,9 @@ export async function toggleBankReceivingAccountApi(
 /**
  * Platform Admin: Upsert a payment gateway configuration (toggle active status, rate_per_credit, public_config).
  */
-export async function upsertPaymentGatewayAdminApi(
-  payload: Partial<PaymentGatewayItem> & { id: string },
-): Promise<PaymentGatewayItem> {
+export async function upsertPaymentGateway(
+  payload: Partial<PaymentGateway> & { id: string },
+): Promise<PaymentGateway> {
   const rows = await supabaseRequest<any[]>(
     '/rest/v1/payment_gateways?on_conflict=id',
     {
@@ -449,9 +452,9 @@ export async function upsertPaymentGatewayAdminApi(
  * Pure helper to filter wallet transactions for VXE Grid
  */
 export function filterWalletTransactions(
-  items: WalletTransactionItem[],
+  items: WalletTransaction[],
   filters?: { search?: string; tx_type?: string },
-): WalletTransactionItem[] {
+): WalletTransaction[] {
   if (!Array.isArray(items) || items.length === 0) {
     return [];
   }
@@ -476,3 +479,18 @@ export function filterWalletTransactions(
 
   return result;
 }
+
+export const billingApi = {
+  approveManualPaymentIntent,
+  createPaymentIntent,
+  getPaymentIntentStatus,
+  getTenantWallet,
+  listActivePaymentGateways,
+  listAllPaymentGateways,
+  listBankReceivingAccounts,
+  listManualReviewIntents,
+  listWalletTransactions,
+  toggleBankReceivingAccount,
+  upsertBankReceivingAccount,
+  upsertPaymentGateway,
+};

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { FleetDeviceItem } from '#/api';
+import type { Device } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -23,11 +23,7 @@ import {
 import { Cpu, HardDrive, Laptop, Plus, RefreshCw } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import {
-  getFleetDevicesApi,
-  probeLocalDaemonApi,
-  revokeFleetDeviceApi,
-} from '#/api';
+import { listDevices, probeLocalDaemon, revokeDevice } from '#/api';
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
@@ -41,7 +37,7 @@ const { formatDate } = useDateFormat();
 const { isMobile } = usePreferences();
 
 const probingDaemon = ref(false);
-const nodes = ref<FleetDeviceItem[]>([]);
+const nodes = ref<Device[]>([]);
 const loopbackOnline = ref(false);
 
 // Modals
@@ -58,7 +54,7 @@ function getOsBadgeVariant(os?: string): 'default' | 'outline' | 'secondary' {
 async function checkDaemonHealth() {
   probingDaemon.value = true;
   try {
-    const res = await probeLocalDaemonApi(8765);
+    const res = await probeLocalDaemon(8765);
     loopbackOnline.value = res.online;
   } catch {
     loopbackOnline.value = false;
@@ -67,9 +63,9 @@ async function checkDaemonHealth() {
   }
 }
 
-async function handleRevokeNode(node: FleetDeviceItem) {
+async function handleRevokeNode(node: Device) {
   try {
-    await revokeFleetDeviceApi(node.id);
+    await revokeDevice(node.id);
     toast.success(
       $t('page.automation_view.device_revoke_success', { name: node.name }),
     );
@@ -141,7 +137,7 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<FleetDeviceItem>({
+const [Grid, gridApi] = useVbenVxeGrid<Device>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
@@ -227,7 +223,7 @@ const [Grid, gridApi] = useVbenVxeGrid<FleetDeviceItem>({
         ) => {
           await checkDaemonHealth();
           const tenantId = (route.query.tenant as string) || undefined;
-          const data = await getFleetDevicesApi({ tenantId });
+          const data = await listDevices({ tenantId });
           nodes.value = data;
 
           let filtered = data;

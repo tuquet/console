@@ -10,8 +10,6 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { useUserStore } from '@tuquet/stores';
-
-import { ArrowLeft, Gauge, History, LayoutDashboard, Users } from '@lucide/vue';
 import {
   Button,
   Tabs,
@@ -21,16 +19,18 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
+import { ArrowLeft, Gauge, History, LayoutDashboard, Users } from '@lucide/vue';
+
 import {
-  deleteWorkspaceApi,
+  deleteWorkspace,
   getActiveTenantId,
-  getAvailableRolesApi,
-  getWorkspaceDetailApi,
-  inviteWorkspaceMemberApi,
-  removeWorkspaceMemberApi,
+  getWorkspaceDetail,
+  inviteWorkspaceMember,
+  listAvailableRoles,
+  removeWorkspaceMember,
   setActiveTenantId,
-  updateWorkspaceInfoApi,
-  updateWorkspaceMemberRoleApi,
+  updateWorkspaceInfo,
+  updateWorkspaceMemberRole,
 } from '#/api';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
@@ -103,8 +103,8 @@ async function loadData() {
   loading.value = true;
   try {
     const [detail, roles] = await Promise.all([
-      getWorkspaceDetailApi(tenantId.value),
-      getAvailableRolesApi().catch(() => []),
+      getWorkspaceDetail(tenantId.value),
+      listAvailableRoles().catch(() => []),
     ]);
     detailData.value = detail;
     availableRoles.value = roles;
@@ -145,7 +145,7 @@ async function handleInviteMemberSubmit(payload: {
   try {
     const invitedBy =
       userStore.userInfo?.userId || detailData.value.tenant.created_by || '';
-    await inviteWorkspaceMemberApi({
+    await inviteWorkspaceMember({
       email: payload.email,
       invitedBy,
       roleId: payload.roleId,
@@ -174,7 +174,7 @@ async function handleEditMemberSubmit(payload: {
   if (!editingMember.value || !detailData.value) return;
   updatingMember.value = true;
   try {
-    await updateWorkspaceMemberRoleApi({
+    await updateWorkspaceMemberRole({
       memberId: editingMember.value.id,
       roleId: payload.roleId,
       tenantId: detailData.value.tenant.id,
@@ -195,7 +195,7 @@ async function handleEditMemberSubmit(payload: {
 
 async function handleRemoveMember(member: WorkspaceMember) {
   try {
-    await removeWorkspaceMemberApi(member.id);
+    await removeWorkspaceMember(member.id);
     toast.success(
       $t('page.tenants_view.member_removed_success', {
         name: member.full_name || member.email,
@@ -215,7 +215,7 @@ async function handleEditWorkspaceSubmit(payload: {
   if (!detailData.value) return;
   updatingWorkspace.value = true;
   try {
-    await updateWorkspaceInfoApi(detailData.value.tenant.id, {
+    await updateWorkspaceInfo(detailData.value.tenant.id, {
       name: payload.name,
       slug: payload.slug,
     });
@@ -238,7 +238,7 @@ async function handleEditWorkspaceSubmit(payload: {
 async function handleDeleteWorkspaceSubmit() {
   deletingWorkspace.value = true;
   try {
-    await deleteWorkspaceApi(tenantId.value);
+    await deleteWorkspace(tenantId.value);
     toast.success($t('page.tenants_view.workspace_deleted_success'));
     isDeleteWorkspaceModalVisible.value = false;
     router.push('/tenants');

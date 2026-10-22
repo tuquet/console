@@ -1,19 +1,19 @@
 <script lang="ts" setup>
-import type { TenantItem } from '#/api';
+import type { Tenant } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { usePreferences } from '@tuquet/preferences';
+import { Badge, Button, toast } from '@tuquet/vue-ui';
 
 import { Building2, Check, Eye, Plus, RefreshCw, Terminal } from '@lucide/vue';
-import { Badge, Button, toast } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  createTenantApi,
+  createTenant,
   getActiveTenantId,
-  getTenantsApi,
+  listTenants,
   setActiveTenantId,
 } from '#/api';
 import { useDateFormat } from '#/composables';
@@ -27,7 +27,7 @@ const { formatDate } = useDateFormat();
 const { isMobile } = usePreferences();
 
 // Data
-const tenants = ref<TenantItem[]>([]);
+const tenants = ref<Tenant[]>([]);
 const activeTenantId = ref(getActiveTenantId());
 
 const activeTenant = computed(() => {
@@ -106,7 +106,7 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
+const [Grid, gridApi] = useVbenVxeGrid<Tenant>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
@@ -114,7 +114,7 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
     subtitleField: 'slug',
     titleField: 'name',
     onCreate: async ({ formData }) => {
-      return await createTenantApi({
+      return await createTenant({
         name: String(formData.name || '').trim(),
         plan: String(formData.plan || 'starter'),
         slug: String(formData.slug || '').trim(),
@@ -205,7 +205,7 @@ const [Grid, gridApi] = useVbenVxeGrid<TenantItem>({
           { page }: { page?: { currentPage?: number; pageSize?: number } },
           formValues: Record<string, any>,
         ) => {
-          const list = await getTenantsApi();
+          const list = await listTenants();
           tenants.value = list;
           if (list.length > 0 && !activeTenantId.value) {
             activeTenantId.value = list[0]?.id || '';

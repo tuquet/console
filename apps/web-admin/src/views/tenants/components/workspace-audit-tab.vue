@@ -3,7 +3,6 @@ import type { TenantAuditLog } from '#/api';
 
 import { onMounted, ref, watch } from 'vue';
 
-import { History, RefreshCw, ShieldCheck, User } from '@lucide/vue';
 import {
   Badge,
   Button,
@@ -16,7 +15,9 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
-import { getTenantAuditLogsApi } from '#/api';
+import { History, RefreshCw, ShieldCheck, User } from '@lucide/vue';
+
+import { listTenantAuditLogs } from '#/api';
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
@@ -35,7 +36,7 @@ async function loadAuditLogs() {
   if (!props.tenantId) return;
   loading.value = true;
   try {
-    logs.value = await getTenantAuditLogsApi(props.tenantId);
+    logs.value = await listTenantAuditLogs(props.tenantId);
   } catch (error: any) {
     captureError(error, { action: 'loadAuditLogs', view: 'WorkspaceAuditTab' });
     toast.error(error.message || $t('page.tenants_view.audit_load_failed'));

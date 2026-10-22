@@ -1,25 +1,26 @@
-import type { TenantItem } from '#/api/core/tenant';
+import type { Tenant } from '#/api/core/tenant';
 
 import { computed, ref } from 'vue';
 
 import { toast } from '@tuquet/vue-ui';
+
 import { defineStore } from 'pinia';
 
 import {
-  createTenantApi,
+  createTenant,
   getActiveTenantId,
-  getTenantsApi,
+  listTenants,
   setActiveTenantId,
 } from '#/api/core/tenant';
 import { $t } from '#/locales';
 import { captureError, setBugsinkTag } from '#/utils/bugsink';
 
 export const useWorkspaceStore = defineStore('workspace', () => {
-  const workspaces = ref<TenantItem[]>([]);
+  const workspaces = ref<Tenant[]>([]);
   const activeWorkspaceId = ref<string>(getActiveTenantId());
   const isLoading = ref<boolean>(false);
 
-  const activeWorkspace = computed<null | TenantItem>(() => {
+  const activeWorkspace = computed<null | Tenant>(() => {
     if (workspaces.value.length === 0) return null;
     return (
       workspaces.value.find((w) => w.id === activeWorkspaceId.value) ||
@@ -34,7 +35,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     }
     try {
       isLoading.value = true;
-      const list = await getTenantsApi();
+      const list = await listTenants();
       workspaces.value = Array.isArray(list) ? list : [];
 
       // If active workspace is not set or not in current list, pick first
@@ -87,7 +88,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   }) {
     try {
       isLoading.value = true;
-      const created = await createTenantApi(data);
+      const created = await createTenant(data);
       if (created?.id) {
         workspaces.value = [created, ...workspaces.value];
         setWorkspace(created.id, true);

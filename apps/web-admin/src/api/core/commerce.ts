@@ -7,7 +7,7 @@ import type {
   PaymentChannelType,
 } from '@tuquet/constants';
 
-import type { PaymentIntentItem } from './billing';
+import type { PaymentIntent } from './billing';
 
 import {
   COMMERCE_ORDER_STATUS,
@@ -38,7 +38,7 @@ export type {
   CommerceStockStatus,
 };
 
-export interface CommerceCategoryItem {
+export interface CommerceCategory {
   created_at: string;
   description: null | string;
   icon: null | string;
@@ -50,7 +50,7 @@ export interface CommerceCategoryItem {
   updated_at: string;
 }
 
-export interface CommerceProductVariantItem {
+export interface CommerceProductVariant {
   available_stock: number;
   compare_at_credits: null | number;
   created_at: string;
@@ -69,7 +69,7 @@ export interface CommerceProductVariantItem {
   updated_at: string;
 }
 
-export interface CommerceProductItem {
+export interface CommerceProduct {
   category_id: null | string;
   created_at: string;
   description: null | string;
@@ -84,11 +84,11 @@ export interface CommerceProductItem {
   tags: string[];
   thumbnail_url: null | string;
   updated_at: string;
-  variants?: CommerceProductVariantItem[];
+  variants?: CommerceProductVariant[];
   visibility: CommerceProductVisibility;
 }
 
-export interface CommerceStockItem {
+export interface CommerceStock {
   batch_code: null | string;
   created_at: string;
   id: string;
@@ -119,7 +119,7 @@ export interface CommerceOrderItem {
   variant_name: string;
 }
 
-export interface CommerceOrderDeliveryItem {
+export interface CommerceOrderDelivery {
   buyer_tenant_id: null | string;
   created_at: string;
   delivered_payload: Record<string, any>;
@@ -133,13 +133,13 @@ export interface CommerceOrderDeliveryItem {
   stock_item_id: null | string;
 }
 
-export interface CommerceOrderRecord {
+export interface CommerceOrder {
   buyer_email: null | string;
   buyer_tenant_id: null | string;
   buyer_user_id: null | string;
   cancelled_at: null | string;
   created_at: string;
-  deliveries?: CommerceOrderDeliveryItem[];
+  deliveries?: CommerceOrderDelivery[];
   discount_credits: number;
   fulfilled_at: null | string;
   id: string;
@@ -172,14 +172,14 @@ export interface CreateCheckoutOrderParams {
 export interface CreateCheckoutOrderResult {
   claim_token: null | string;
   fulfillment: null | {
-    deliveries: CommerceOrderDeliveryItem[];
+    deliveries: CommerceOrderDelivery[];
     fulfilled: boolean;
     idempotent: boolean;
     order_code: string;
     order_id: string;
   };
-  order: CommerceOrderRecord;
-  payment_intent: PaymentIntentItem;
+  order: CommerceOrder;
+  payment_intent: PaymentIntent;
 }
 
 export interface ImportStockBatchResult {
@@ -191,9 +191,9 @@ export interface ImportStockBatchResult {
 }
 
 export interface GuestOrderLookupResult {
-  deliveries: CommerceOrderDeliveryItem[];
+  deliveries: CommerceOrderDelivery[];
   items: CommerceOrderItem[];
-  order: CommerceOrderRecord;
+  order: CommerceOrder;
 }
 
 export interface ClaimOrderWarrantyResult {
@@ -216,7 +216,29 @@ export interface AdminInspectStockItemResult {
   variant_id: string;
 }
 
-export function mapRawCommerceCategory(raw: any): CommerceCategoryItem {
+export interface ListCommerceCategoriesParams {
+  includeInactive?: boolean;
+  skipAuth?: boolean;
+}
+
+export interface ListCommerceProductsParams {
+  categoryId?: string;
+  includeInactive?: boolean;
+  productType?: CommerceProductType;
+  skipAuth?: boolean;
+}
+
+export interface ListTenantOrdersParams {
+  limit?: number;
+}
+
+export interface ListStockItemsParams {
+  limit?: number;
+  status?: CommerceStockStatus;
+  variant_id?: string;
+}
+
+export function mapRawCommerceCategory(raw: any): CommerceCategory {
   return {
     created_at: String(raw?.created_at || ''),
     description: raw?.description ? String(raw.description) : null,
@@ -230,7 +252,7 @@ export function mapRawCommerceCategory(raw: any): CommerceCategoryItem {
   };
 }
 
-export function mapRawProductVariant(raw: any): CommerceProductVariantItem {
+export function mapRawProductVariant(raw: any): CommerceProductVariant {
   return {
     available_stock: Math.trunc(Number(raw?.available_stock ?? 0)),
     compare_at_credits:
@@ -258,7 +280,7 @@ export function mapRawProductVariant(raw: any): CommerceProductVariantItem {
   };
 }
 
-export function mapRawCommerceProduct(raw: any): CommerceProductItem {
+export function mapRawCommerceProduct(raw: any): CommerceProduct {
   return {
     category_id: raw?.category_id ? String(raw.category_id) : null,
     created_at: String(raw?.created_at || ''),
@@ -290,7 +312,7 @@ export function mapRawCommerceProduct(raw: any): CommerceProductItem {
   };
 }
 
-export function mapRawCommerceOrder(raw: any): CommerceOrderRecord {
+export function mapRawCommerceOrder(raw: any): CommerceOrder {
   return {
     buyer_email: raw?.buyer_email ? String(raw.buyer_email) : null,
     buyer_tenant_id: raw?.buyer_tenant_id ? String(raw.buyer_tenant_id) : null,
@@ -318,7 +340,7 @@ export function mapRawCommerceOrder(raw: any): CommerceOrderRecord {
   };
 }
 
-export function mapRawOrderDelivery(raw: any): CommerceOrderDeliveryItem {
+export function mapRawOrderDelivery(raw: any): CommerceOrderDelivery {
   return {
     buyer_tenant_id: raw?.buyer_tenant_id ? String(raw.buyer_tenant_id) : null,
     created_at: String(raw?.created_at || ''),
@@ -344,17 +366,16 @@ export function mapRawOrderDelivery(raw: any): CommerceOrderDeliveryItem {
 /**
  * Fetch active product categories ordered by sort_order.
  */
-export async function getCommerceCategoriesApi(options?: {
-  includeInactive?: boolean;
-  skipAuth?: boolean;
-}): Promise<CommerceCategoryItem[]> {
-  const filter = options?.includeInactive ? '' : 'is_active=eq.true&';
+export async function listCommerceCategories(
+  params?: ListCommerceCategoriesParams,
+): Promise<CommerceCategory[]> {
+  const filter = params?.includeInactive ? '' : 'is_active=eq.true&';
   const rows = await supabaseRequest<any[]>(
     `/rest/v1/categories?${filter}select=*&order=sort_order.asc,name.asc`,
     {
       method: 'GET',
       schema: 'commerce',
-      skipAuth: options?.skipAuth,
+      skipAuth: params?.skipAuth,
     },
   );
   return Array.isArray(rows)
@@ -365,21 +386,18 @@ export async function getCommerceCategoriesApi(options?: {
 /**
  * Fetch digital products with embedded product_variants.
  */
-export async function getCommerceProductsApi(options?: {
-  categoryId?: string;
-  includeInactive?: boolean;
-  productType?: CommerceProductType;
-  skipAuth?: boolean;
-}): Promise<CommerceProductItem[]> {
+export async function listCommerceProducts(
+  params?: ListCommerceProductsParams,
+): Promise<CommerceProduct[]> {
   const filters: string[] = [];
-  if (!options?.includeInactive) {
+  if (!params?.includeInactive) {
     filters.push('is_active=eq.true');
   }
-  if (options?.categoryId) {
-    filters.push(`category_id=eq.${encodeURIComponent(options.categoryId)}`);
+  if (params?.categoryId) {
+    filters.push(`category_id=eq.${encodeURIComponent(params.categoryId)}`);
   }
-  if (options?.productType) {
-    filters.push(`product_type=eq.${encodeURIComponent(options.productType)}`);
+  if (params?.productType) {
+    filters.push(`product_type=eq.${encodeURIComponent(params.productType)}`);
   }
   const queryPrefix = filters.length > 0 ? `${filters.join('&')}&` : '';
   const rows = await supabaseRequest<any[]>(
@@ -387,7 +405,7 @@ export async function getCommerceProductsApi(options?: {
     {
       method: 'GET',
       schema: 'commerce',
-      skipAuth: options?.skipAuth,
+      skipAuth: params?.skipAuth,
     },
   );
   return Array.isArray(rows)
@@ -398,9 +416,9 @@ export async function getCommerceProductsApi(options?: {
 /**
  * Fetch variants for a specific product or all products.
  */
-export async function getCommerceProductVariantsApi(
+export async function listCommerceProductVariants(
   productId?: string,
-): Promise<CommerceProductVariantItem[]> {
+): Promise<CommerceProductVariant[]> {
   const filter = productId
     ? `product_id=eq.${encodeURIComponent(productId)}&`
     : '';
@@ -419,7 +437,7 @@ export async function getCommerceProductVariantsApi(
 /**
  * Create a digital checkout order (supports Tenant Instant Xu Wallet, External Gateways, and Guest Checkout).
  */
-export async function createCheckoutOrderApi(
+export async function createCheckoutOrder(
   params: CreateCheckoutOrderParams,
   options?: { skipAuth?: boolean },
 ): Promise<CreateCheckoutOrderResult> {
@@ -458,10 +476,11 @@ export async function createCheckoutOrderApi(
 /**
  * Fetch orders for a specific Tenant workspace.
  */
-export async function getTenantOrdersApi(
+export async function listTenantOrders(
   tenantId: string,
-  limit = 50,
-): Promise<CommerceOrderRecord[]> {
+  params?: ListTenantOrdersParams,
+): Promise<CommerceOrder[]> {
+  const limit = params?.limit ?? 50;
   const rows = await supabaseRequest<any[]>(
     `/rest/v1/orders?buyer_tenant_id=eq.${encodeURIComponent(tenantId)}&select=*&order=created_at.desc&limit=${limit}`,
     {
@@ -475,9 +494,9 @@ export async function getTenantOrdersApi(
 /**
  * Fetch fulfilled digital deliverables for an order.
  */
-export async function getOrderDeliveriesApi(
+export async function listOrderDeliveries(
   orderId: string,
-): Promise<CommerceOrderDeliveryItem[]> {
+): Promise<CommerceOrderDelivery[]> {
   const rows = await supabaseRequest<any[]>(
     `/rest/v1/order_deliveries?order_id=eq.${encodeURIComponent(orderId)}&select=*&order=created_at.asc`,
     {
@@ -491,7 +510,7 @@ export async function getOrderDeliveriesApi(
 /**
  * Retrieve guest order status and fulfilled deliverables using order_code + claim_token.
  */
-export async function getGuestOrderDeliveriesApi(
+export async function getGuestOrderDeliveries(
   orderCode: string,
   claimToken: string,
 ): Promise<GuestOrderLookupResult> {
@@ -520,9 +539,9 @@ export async function getGuestOrderDeliveriesApi(
 /**
  * [Platform Admin] Upsert a product category.
  */
-export async function upsertCommerceCategoryAdminApi(
-  payload: Partial<CommerceCategoryItem> & { name: string; slug: string },
-): Promise<CommerceCategoryItem> {
+export async function upsertCommerceCategory(
+  payload: Partial<CommerceCategory> & { name: string; slug: string },
+): Promise<CommerceCategory> {
   const rows = await supabaseRequest<any[]>(
     '/rest/v1/categories?on_conflict=slug',
     {
@@ -541,13 +560,13 @@ export async function upsertCommerceCategoryAdminApi(
 /**
  * [Platform Admin] Upsert a digital product.
  */
-export async function upsertCommerceProductAdminApi(
-  payload: Partial<CommerceProductItem> & {
+export async function upsertCommerceProduct(
+  payload: Partial<CommerceProduct> & {
     name: string;
     product_type: CommerceProductType;
     slug: string;
   },
-): Promise<CommerceProductItem> {
+): Promise<CommerceProduct> {
   const rows = await supabaseRequest<any[]>(
     '/rest/v1/products?on_conflict=slug',
     {
@@ -566,14 +585,14 @@ export async function upsertCommerceProductAdminApi(
 /**
  * [Platform Admin] Upsert a product variant (SKU).
  */
-export async function upsertProductVariantAdminApi(
-  payload: Partial<CommerceProductVariantItem> & {
+export async function upsertProductVariant(
+  payload: Partial<CommerceProductVariant> & {
     name: string;
     price_credits: number;
     product_id: string;
     sku: string;
   },
-): Promise<CommerceProductVariantItem> {
+): Promise<CommerceProductVariant> {
   const rows = await supabaseRequest<any[]>(
     '/rest/v1/product_variants?on_conflict=sku',
     {
@@ -592,7 +611,7 @@ export async function upsertProductVariantAdminApi(
 /**
  * [Platform Admin] Bulk import serialized stock lines (uid|pass|2fa, keys, proxies) with deduplication.
  */
-export async function importStockBatchAdminApi(params: {
+export async function importStockBatch(params: {
   batch_code?: null | string;
   lines: string[];
   variant_id: string;
@@ -619,10 +638,10 @@ export async function importStockBatchAdminApi(params: {
 /**
  * [Platform Admin] List all orders across all tenants and guests.
  */
-export async function getAllOrdersAdminApi(
+export async function listAllOrders(
   status?: CommerceOrderStatus,
   limit = 100,
-): Promise<CommerceOrderRecord[]> {
+): Promise<CommerceOrder[]> {
   const filter = status ? `status=eq.${encodeURIComponent(status)}&` : '';
   const rows = await supabaseRequest<any[]>(
     `/rest/v1/orders?${filter}select=*&order=created_at.desc&limit=${limit}`,
@@ -634,7 +653,7 @@ export async function getAllOrdersAdminApi(
   return Array.isArray(rows) ? rows.map((row) => mapRawCommerceOrder(row)) : [];
 }
 
-export function mapRawStockItem(raw: any): CommerceStockItem {
+export function mapRawStockItem(raw: any): CommerceStock {
   return {
     batch_code: raw?.batch_code ? String(raw.batch_code) : null,
     created_at: String(raw?.created_at || ''),
@@ -659,8 +678,8 @@ export function mapRawStockItem(raw: any): CommerceStockItem {
 /**
  * [Platform Admin] Manually trigger or retry atomic fulfillment for an order.
  */
-export async function fulfillOrderAdminApi(orderId: string): Promise<{
-  deliveries: CommerceOrderDeliveryItem[];
+export async function fulfillOrder(orderId: string): Promise<{
+  deliveries: CommerceOrderDelivery[];
   fulfilled: boolean;
   idempotent: boolean;
   order_code: string;
@@ -688,7 +707,7 @@ export async function fulfillOrderAdminApi(orderId: string): Promise<{
 /**
  * [Buyer/Tenant/Admin] Submit a warranty claim for a delivered item (within warranty period) with automatic Xu refund.
  */
-export async function claimOrderWarrantyApi(params: {
+export async function claimOrderWarranty(params: {
   delivery_id: string;
   order_id: string;
   reason?: string;
@@ -721,7 +740,7 @@ export async function claimOrderWarrantyApi(params: {
 /**
  * [Platform Admin] Live stock health inspection & defect marker / recovery switcher.
  */
-export async function adminInspectStockItemApi(params: {
+export async function inspectStockItem(params: {
   is_healthy: boolean;
   notes?: string;
   stock_id: string;
@@ -757,11 +776,9 @@ export async function adminInspectStockItemApi(params: {
 /**
  * [Platform Admin] Fetch serialized stock items for inspection & health checks.
  */
-export async function getStockItemsAdminApi(params?: {
-  limit?: number;
-  status?: CommerceStockStatus;
-  variant_id?: string;
-}): Promise<CommerceStockItem[]> {
+export async function listStockItems(
+  params?: ListStockItemsParams,
+): Promise<CommerceStock[]> {
   const queryParts: string[] = ['select=*', 'order=created_at.desc'];
   if (params?.variant_id) {
     queryParts.push(`variant_id=eq.${encodeURIComponent(params.variant_id)}`);
@@ -787,14 +804,14 @@ export async function getStockItemsAdminApi(params?: {
  * Pure helper to filter commerce products for Store and Admin VXE Grid
  */
 export function filterCommerceProducts(
-  items: CommerceProductItem[],
+  items: CommerceProduct[],
   filters?: {
     category_id?: string;
     product_type?: string;
     search?: string;
     visibility?: string;
   },
-): CommerceProductItem[] {
+): CommerceProduct[] {
   if (!Array.isArray(items) || items.length === 0) {
     return [];
   }
@@ -834,13 +851,13 @@ export function filterCommerceProducts(
  * Pure helper to filter commerce orders for Tenant Orders & Admin Orders VXE Grid
  */
 export function filterCommerceOrders(
-  items: CommerceOrderRecord[],
+  items: CommerceOrder[],
   filters?: {
     payment_method?: string;
     search?: string;
     status?: string;
   },
-): CommerceOrderRecord[] {
+): CommerceOrder[] {
   if (!Array.isArray(items) || items.length === 0) {
     return [];
   }
@@ -922,7 +939,7 @@ export function saveGuestOrderLocal(
  * Pure helper: Check whether a commerce product variant is currently in stock and active.
  */
 export function isVariantInStock(
-  variant: CommerceProductVariantItem | null | undefined,
+  variant: CommerceProductVariant | null | undefined,
 ): boolean {
   if (!variant || !variant.is_active) return false;
   if (variant.stock_mode === 'unlimited') return true;
@@ -933,7 +950,7 @@ export function isVariantInStock(
  * Pure helper: Evaluate whether a delivered item is still eligible for a warranty claim.
  */
 export function isDeliveryEligibleForWarranty(
-  delivery: CommerceOrderDeliveryItem | null | undefined,
+  delivery: CommerceOrderDelivery | null | undefined,
   warrantyHours = 24,
 ): boolean {
   if (!delivery?.created_at || delivery.delivered_payload?.warranty_claimed)
@@ -949,7 +966,7 @@ export function isDeliveryEligibleForWarranty(
  * Pure helper: Extract newline-delimited serial / secret lines from order delivery items.
  */
 export function formatSerialDeliveriesText(
-  deliveries: CommerceOrderDeliveryItem[],
+  deliveries: CommerceOrderDelivery[],
 ): string {
   if (!Array.isArray(deliveries) || deliveries.length === 0) return '';
   return deliveries
@@ -978,3 +995,22 @@ export function downloadTextFile(filename: string, content: string): void {
   link.click();
   URL.revokeObjectURL(url);
 }
+
+export const commerceApi = {
+  claimOrderWarranty,
+  createCheckoutOrder,
+  fulfillOrder,
+  getGuestOrderDeliveries,
+  importStockBatch,
+  inspectStockItem,
+  listAllOrders,
+  listCommerceCategories,
+  listCommerceProductVariants,
+  listCommerceProducts,
+  listOrderDeliveries,
+  listStockItems,
+  listTenantOrders,
+  upsertCommerceCategory,
+  upsertCommerceProduct,
+  upsertProductVariant,
+};

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { AutomaExecutionLogItem, AutomationJobItem } from '#/api';
+import type { ExecutionLog, Job } from '#/api';
 
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -40,10 +40,10 @@ import {
 
 import {
   calculateProgressPercentage,
-  cancelJobApi,
-  getExecutionLogsApi,
-  getJobDetailApi,
+  cancelJob,
+  getJob,
   isRunActive,
+  listExecutionLogs,
 } from '#/api';
 import { useDateFormat } from '#/composables';
 import { getStatusToneMeta, JOB_STATUS_META } from '#/constants';
@@ -59,8 +59,8 @@ const { formatDate } = useDateFormat();
 const runId = computed(() => route.params.id as string);
 const loading = ref(true);
 const canceling = ref(false);
-const run = ref<AutomationJobItem | null>(null);
-const logs = ref<AutomaExecutionLogItem[]>([]);
+const run = ref<Job | null>(null);
+const logs = ref<ExecutionLog[]>([]);
 const consoleRef = ref<HTMLElement | null>(null);
 
 let pollTimer: null | ReturnType<typeof setInterval> = null;
@@ -120,14 +120,14 @@ function stopPolling() {
 async function fetchRunAndLogs() {
   if (!runId.value) return;
   try {
-    const detail = await getJobDetailApi(runId.value);
+    const detail = await getJob(runId.value);
     if (detail) {
       run.value = detail;
     }
 
     const latestId =
       logs.value.length > 0 ? logs.value[logs.value.length - 1]?.id : undefined;
-    const newLogs = await getExecutionLogsApi(runId.value, {
+    const newLogs = await listExecutionLogs(runId.value, {
       limit: 200,
       sinceId: latestId,
     });
@@ -162,7 +162,7 @@ async function handleCancelRun() {
   if (!runId.value) return;
   canceling.value = true;
   try {
-    await cancelJobApi(runId.value);
+    await cancelJob(runId.value);
     toast.success($t('page.automation_view.cancel_run_success'));
     await fetchRunAndLogs();
   } catch (error: any) {

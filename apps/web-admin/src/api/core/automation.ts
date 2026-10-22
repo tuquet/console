@@ -45,7 +45,7 @@ export type {
   WorkflowStatus,
 };
 
-export interface AutomaWorkflowItem {
+export interface Workflow {
   created_at: string;
   description: null | string;
   id: string;
@@ -56,7 +56,7 @@ export interface AutomaWorkflowItem {
   version: string;
 }
 
-export interface AutomationJobItem {
+export interface Job {
   completed_tasks: number;
   created_at: string;
   ended_at: null | string;
@@ -82,7 +82,7 @@ export interface AutomationJobItem {
   workflow_id: null | string;
 }
 
-export interface AutomaExecutionLogItem {
+export interface ExecutionLog {
   job_id: string;
   id: number;
   level: LogLevel;
@@ -92,6 +92,22 @@ export interface AutomaExecutionLogItem {
   payload: Record<string, any>;
   step_name: null | string;
   tenant_id: string;
+}
+
+export interface ListWorkflowsParams {
+  status?: string;
+  tenantId?: string;
+}
+
+export interface ListJobsParams {
+  status?: string;
+  tenantId?: string;
+  workflowId?: string;
+}
+
+export interface ListExecutionLogsParams {
+  limit?: number;
+  sinceId?: number;
 }
 
 /**
@@ -148,17 +164,16 @@ export function buildAutomationFilterQuery(
 /**
  * Lấy danh sách quy trình tự động từ schema automa.workflows
  */
-export async function getWorkflowsApi(params?: {
-  status?: string;
-  tenantId?: string;
-}): Promise<AutomaWorkflowItem[]> {
+export async function listWorkflows(
+  params?: ListWorkflowsParams,
+): Promise<Workflow[]> {
   try {
     const query = buildAutomationFilterQuery(
       '/rest/v1/workflows?select=id,tenant_id,name,description,version,status,created_at,updated_at&order=created_at.desc',
       params,
     );
-    const data = await supabaseRequest<AutomaWorkflowItem[]>(query, {
-      schema: SUPABASE_SCHEMA.AUTOMA,
+    const data = await supabaseRequest<Workflow[]>(query, {
+      schema: SUPABASE_SCHEMA.AUTOMATION,
       suppressErrorCapture: true,
     });
     return Array.isArray(data) ? data : [];
@@ -171,20 +186,16 @@ export async function getWorkflowsApi(params?: {
 }
 
 /**
- * Lấy danh sách các jobs từ schema automation.jobs
+ * Lấy danh sách các jobs từ schema automa.jobs
  */
-export async function getJobsApi(params?: {
-  status?: string;
-  tenantId?: string;
-  workflowId?: string;
-}): Promise<AutomationJobItem[]> {
+export async function listJobs(params?: ListJobsParams): Promise<Job[]> {
   try {
     const query = buildAutomationFilterQuery(
       '/rest/v1/jobs?select=id,tenant_id,workflow_id,worker_id,name,status,total_tasks,completed_tasks,failed_tasks,started_at,ended_at,created_at,error_message,workflow:workflow_id(name),worker:worker_id(name)&order=created_at.desc',
       params,
     );
-    const data = await supabaseRequest<AutomationJobItem[]>(query, {
-      schema: SUPABASE_SCHEMA.AUTOMA,
+    const data = await supabaseRequest<Job[]>(query, {
+      schema: SUPABASE_SCHEMA.AUTOMATION,
       suppressErrorCapture: true,
     });
     return Array.isArray(data) ? data : [];
@@ -199,13 +210,11 @@ export async function getJobsApi(params?: {
 /**
  * Lấy chi tiết của một job cụ thể
  */
-export async function getJobDetailApi(
-  runId: string,
-): Promise<AutomationJobItem | null> {
+export async function getJob(runId: string): Promise<Job | null> {
   try {
     const query = `/rest/v1/jobs?id=eq.${encodeURIComponent(runId)}&select=id,tenant_id,workflow_id,worker_id,name,status,total_tasks,completed_tasks,failed_tasks,started_at,ended_at,created_at,error_message,result_summary,parameters,workflow:workflow_id(name),worker:worker_id(name)`;
-    const data = await supabaseRequest<AutomationJobItem[]>(query, {
-      schema: SUPABASE_SCHEMA.AUTOMA,
+    const data = await supabaseRequest<Job[]>(query, {
+      schema: SUPABASE_SCHEMA.AUTOMATION,
     });
     return Array.isArray(data) && data.length > 0 ? (data[0] ?? null) : null;
   } catch (error: any) {
@@ -217,12 +226,12 @@ export async function getJobDetailApi(
 }
 
 /**
- * Lấy nhật ký thực thi của một job từ schema automation.execution_logs
+ * Lấy nhật ký thực thi của một job từ schema automa.execution_logs
  */
-export async function getExecutionLogsApi(
+export async function listExecutionLogs(
   runId: string,
-  params?: { limit?: number; sinceId?: number },
-): Promise<AutomaExecutionLogItem[]> {
+  params?: ListExecutionLogsParams,
+): Promise<ExecutionLog[]> {
   try {
     let query = `/rest/v1/execution_logs?job_id=eq.${encodeURIComponent(runId)}`;
     if (params?.sinceId) {
@@ -231,8 +240,8 @@ export async function getExecutionLogsApi(
     const limit = params?.limit ?? 200;
     query += `&order=id.asc&limit=${limit}`;
 
-    const data = await supabaseRequest<AutomaExecutionLogItem[]>(query, {
-      schema: SUPABASE_SCHEMA.AUTOMA,
+    const data = await supabaseRequest<ExecutionLog[]>(query, {
+      schema: SUPABASE_SCHEMA.AUTOMATION,
     });
     return Array.isArray(data) ? data : [];
   } catch (error: any) {
@@ -246,7 +255,7 @@ export async function getExecutionLogsApi(
 /**
  * Hủy một job đang thực thi
  */
-export async function cancelJobApi(runId: string): Promise<void> {
+export async function cancelJob(runId: string): Promise<void> {
   await supabaseRequest(`/rest/v1/jobs?id=eq.${encodeURIComponent(runId)}`, {
     body: JSON.stringify({
       ended_at: new Date().toISOString(),
@@ -256,7 +265,7 @@ export async function cancelJobApi(runId: string): Promise<void> {
       'Content-Type': 'application/json',
     },
     method: 'PATCH',
-    schema: SUPABASE_SCHEMA.AUTOMA,
+    schema: SUPABASE_SCHEMA.AUTOMATION,
   });
 }
 
@@ -264,7 +273,7 @@ export async function cancelJobApi(runId: string): Promise<void> {
 // PART 2: COMPUTE DEVICES, BROWSERS & PROXIES (PostgreSQL schema: 'workers')
 // ============================================================================
 
-export interface FleetDeviceItem {
+export interface Device {
   active_jobs: number;
   capabilities: any[] | Record<string, any>;
   cpu_cores: number;
@@ -286,7 +295,7 @@ export interface FleetDeviceItem {
   version: string;
 }
 
-export interface FleetBrowserItem {
+export interface BrowserProfile {
   browser_type: string;
   cookies_count: number;
   cpu_cores: number;
@@ -312,7 +321,7 @@ export interface FleetBrowserItem {
   tenant_id: string;
 }
 
-export interface FleetProxyItem {
+export interface ProxyServer {
   city: null | string;
   country_code: null | string;
   created_at: string;
@@ -331,6 +340,27 @@ export interface FleetProxyItem {
   username?: null | string;
 }
 
+export interface ListDevicesParams {
+  status?: string;
+  tenantId?: string;
+}
+
+export interface ListBrowsersParams {
+  status?: string;
+  tenantId?: string;
+}
+
+export interface ListProxiesParams {
+  status?: string;
+  tenantId?: string;
+}
+
+export interface ListBrowserReleasesParams {
+  channel?: string;
+  osPlatform?: string;
+  status?: string;
+}
+
 export interface FleetMetricsData {
   active_jobs: number;
   loopback_online: boolean;
@@ -340,9 +370,9 @@ export interface FleetMetricsData {
 }
 
 /**
- * Pure function: Map raw workers.devices row to FleetDeviceItem
+ * Pure function: Map raw workers.devices row to Device
  */
-export function mapRawDeviceToFleetNode(raw: any): FleetDeviceItem {
+export function mapRawDeviceToFleetNode(raw: any): Device {
   const ramMb =
     typeof raw.ram_mb === 'number' && raw.ram_mb > 0 ? raw.ram_mb : 1024;
   const ramGb = Number((ramMb / 1024).toFixed(1));
@@ -384,7 +414,7 @@ export function mapRawDeviceToFleetNode(raw: any): FleetDeviceItem {
  * Pure function: Calculate fleet aggregate telemetry
  */
 export function calculateFleetMetrics(
-  nodes: FleetDeviceItem[],
+  nodes: Device[],
   loopbackOnline: boolean,
 ): FleetMetricsData {
   const total_nodes = nodes.length;
@@ -431,7 +461,7 @@ export function buildFleetFilterQuery(
  * Thăm dò trực tiếp cổng loopback SSO của CLI Daemon (:8765)
  * Non-blocking, timeout <= 1200ms theo AGENTS.md §9
  */
-export async function probeLocalDaemonApi(port = 8765): Promise<{
+export async function probeLocalDaemon(port = 8765): Promise<{
   latencyMs?: number;
   online: boolean;
   port: number;
@@ -465,10 +495,9 @@ export async function probeLocalDaemonApi(port = 8765): Promise<{
 /**
  * Lấy danh sách máy trạm từ schema workers.devices
  */
-export async function getFleetDevicesApi(params?: {
-  status?: string;
-  tenantId?: string;
-}): Promise<FleetDeviceItem[]> {
+export async function listDevices(
+  params?: ListDevicesParams,
+): Promise<Device[]> {
   try {
     const query = buildFleetFilterQuery(
       '/rest/v1/devices?select=*&order=last_heartbeat_at.desc.nullslast',
@@ -491,7 +520,7 @@ export async function getFleetDevicesApi(params?: {
 /**
  * Thu hồi quyền truy cập của một máy trạm trong schema workers.devices
  */
-export async function revokeFleetDeviceApi(deviceId: string): Promise<void> {
+export async function revokeDevice(deviceId: string): Promise<void> {
   await supabaseRequest(
     `/rest/v1/devices?id=eq.${encodeURIComponent(deviceId)}`,
     {
@@ -504,16 +533,15 @@ export async function revokeFleetDeviceApi(deviceId: string): Promise<void> {
 /**
  * Lấy danh sách browser profiles từ schema workers.browsers
  */
-export async function getFleetBrowsersApi(params?: {
-  status?: string;
-  tenantId?: string;
-}): Promise<FleetBrowserItem[]> {
+export async function listBrowsers(
+  params?: ListBrowsersParams,
+): Promise<BrowserProfile[]> {
   try {
     const query = buildFleetFilterQuery(
       '/rest/v1/browsers?select=id,tenant_id,name,browser_type,engine_version,os_platform,os_version,cpu_cores,ram_gb,status,storage_size_bytes,cookies_count,created_at,last_synced_at,locked_by_device:locked_by_device_id(name),proxy:proxy_id(host,port,protocol)&order=created_at.desc',
       params,
     );
-    const data = await supabaseRequest<FleetBrowserItem[]>(query, {
+    const data = await supabaseRequest<BrowserProfile[]>(query, {
       schema: SUPABASE_SCHEMA.WORKERS,
       suppressErrorCapture: true,
     });
@@ -529,16 +557,15 @@ export async function getFleetBrowsersApi(params?: {
 /**
  * Lấy danh sách proxy pool từ schema workers.proxies
  */
-export async function getFleetProxiesApi(params?: {
-  status?: string;
-  tenantId?: string;
-}): Promise<FleetProxyItem[]> {
+export async function listProxies(
+  params?: ListProxiesParams,
+): Promise<ProxyServer[]> {
   try {
     const query = buildFleetFilterQuery(
       '/rest/v1/proxies?select=*&order=created_at.desc',
       params,
     );
-    const data = await supabaseRequest<FleetProxyItem[]>(query, {
+    const data = await supabaseRequest<ProxyServer[]>(query, {
       schema: SUPABASE_SCHEMA.WORKERS,
       suppressErrorCapture: true,
     });
@@ -546,6 +573,60 @@ export async function getFleetProxiesApi(params?: {
   } catch (error: any) {
     if (!error?.message?.includes('Invalid schema')) {
       console.error('[Automation] Failed to load proxies:', error);
+    }
+    return [];
+  }
+}
+
+export interface BrowserRelease {
+  arch: string;
+  asset_name: string;
+  channel: string;
+  download_url: string;
+  file_size_bytes: number;
+  id: string;
+  is_recommended: boolean;
+  notes: null | string;
+  os_platform: string;
+  published_at: null | string;
+  status: string;
+  tag: string;
+  version: string;
+}
+
+/**
+ * Lấy danh sách các bản build ungoogled/fingerprint-chromium đã compile từ schema browsers.releases
+ */
+export async function listBrowserReleases(
+  params?: ListBrowserReleasesParams,
+): Promise<BrowserRelease[]> {
+  try {
+    const searchParams = new URLSearchParams();
+    searchParams.set(
+      'select',
+      'id,version,tag,channel,status,os_platform,arch,asset_name,download_url,file_size_bytes,is_recommended,notes,published_at',
+    );
+    searchParams.set('order', 'is_recommended.desc,created_at.desc');
+
+    if (params?.osPlatform && params.osPlatform !== FILTER_ALL) {
+      searchParams.set('os_platform', `eq.${params.osPlatform}`);
+    }
+    if (params?.channel && params.channel !== FILTER_ALL) {
+      searchParams.set('channel', `eq.${params.channel}`);
+    }
+    if (params?.status && params.status !== FILTER_ALL) {
+      searchParams.set('status', `eq.${params.status}`);
+    }
+
+    const query = `/rest/v1/releases?${searchParams.toString()}`;
+    const data = await supabaseRequest<BrowserRelease[]>(query, {
+      schema: SUPABASE_SCHEMA.BROWSERS,
+      suppressErrorCapture: true,
+    });
+    return Array.isArray(data) ? data : [];
+  } catch (error: any) {
+    if (!error?.message?.includes('Invalid schema')) {
+      console.error('[Browsers] Failed to load releases catalog:', error);
     }
     return [];
   }
@@ -569,8 +650,8 @@ export interface AutomationOverviewSummary {
     failing: number;
     total: number;
   };
-  recentDevices: FleetDeviceItem[];
-  recentRuns: AutomationJobItem[];
+  recentDevices: Device[];
+  recentRuns: Job[];
   runs: {
     completed: number;
     failed: number;
@@ -589,12 +670,12 @@ export interface AutomationOverviewSummary {
  * Pure function: Aggregate unified telemetry across workflows, runs, devices, browsers, and proxies
  */
 export function calculateAutomationOverviewSummary(input: {
-  browsers: FleetBrowserItem[];
-  devices: FleetDeviceItem[];
+  browsers: BrowserProfile[];
+  devices: Device[];
   loopbackOnline: boolean;
-  proxies: FleetProxyItem[];
-  runs: AutomationJobItem[];
-  workflows: AutomaWorkflowItem[];
+  proxies: ProxyServer[];
+  runs: Job[];
+  workflows: Workflow[];
 }): AutomationOverviewSummary {
   const { browsers, devices, loopbackOnline, proxies, runs, workflows } = input;
 
@@ -659,18 +740,18 @@ export function calculateAutomationOverviewSummary(input: {
 /**
  * Fetch and aggregate all Automation & Fleet metrics for /automation/overview
  */
-export async function getAutomationOverviewApi(params?: {
+export async function getAutomationOverview(params?: {
   tenantId?: string;
 }): Promise<AutomationOverviewSummary> {
   const tenantId = params?.tenantId;
   const [workflows, runs, devices, browsers, proxies, daemonProbe] =
     await Promise.all([
-      getWorkflowsApi({ tenantId }),
-      getJobsApi({ tenantId }),
-      getFleetDevicesApi({ tenantId }),
-      getFleetBrowsersApi({ tenantId }),
-      getFleetProxiesApi({ tenantId }),
-      probeLocalDaemonApi(),
+      listWorkflows({ tenantId }),
+      listJobs({ tenantId }),
+      listDevices({ tenantId }),
+      listBrowsers({ tenantId }),
+      listProxies({ tenantId }),
+      probeLocalDaemon(),
     ]);
 
   return calculateAutomationOverviewSummary({
@@ -682,3 +763,33 @@ export async function getAutomationOverviewApi(params?: {
     workflows,
   });
 }
+
+// ============================================================================
+// PART 4: RESOURCE-ORIENTED SDK API OBJECTS
+// ============================================================================
+
+export const workflowsApi = {
+  list: listWorkflows,
+};
+
+export const jobsApi = {
+  cancel: cancelJob,
+  get: getJob,
+  list: listJobs,
+  listLogs: listExecutionLogs,
+};
+
+export const devicesApi = {
+  list: listDevices,
+  probeDaemon: probeLocalDaemon,
+  revoke: revokeDevice,
+};
+
+export const browsersApi = {
+  list: listBrowsers,
+  listReleases: listBrowserReleases,
+};
+
+export const proxiesApi = {
+  list: listProxies,
+};

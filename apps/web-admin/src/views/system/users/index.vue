@@ -1,11 +1,9 @@
 <script lang="ts" setup>
-import type { PlatformUserItem } from '#/api';
+import type { PlatformUser } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 
 import { usePreferences } from '@tuquet/preferences';
-
-import { Building2, RefreshCw, Users } from '@lucide/vue';
 import {
   Avatar,
   AvatarFallback,
@@ -14,8 +12,10 @@ import {
   Button,
 } from '@tuquet/vue-ui';
 
+import { Building2, RefreshCw, Users } from '@lucide/vue';
+
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { filterPlatformUsers, getPlatformUsersApi } from '#/api';
+import { filterPlatformUsers, listPlatformUsers } from '#/api';
 import RoleBadge from '#/components/iam/role-badge.vue';
 import { $t } from '#/locales';
 
@@ -23,7 +23,7 @@ defineOptions({ name: 'SystemUsers' });
 
 const { isMobile } = usePreferences();
 
-const allUsers = ref<PlatformUserItem[]>([]);
+const allUsers = ref<PlatformUser[]>([]);
 const usersLoaded = ref(false);
 const loadingUsers = ref(false);
 
@@ -40,7 +40,7 @@ async function ensureUsersLoaded(force = false): Promise<void> {
   loadingUsers.value = true;
   loadUsersPromise = (async () => {
     try {
-      allUsers.value = await getPlatformUsersApi();
+      allUsers.value = await listPlatformUsers();
       usersLoaded.value = true;
     } finally {
       loadingUsers.value = false;
@@ -102,7 +102,7 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<PlatformUserItem>({
+const [Grid, gridApi] = useVbenVxeGrid<PlatformUser>({
   separator: false,
   detailSheetOptions: {
     resource: 'public.profiles',

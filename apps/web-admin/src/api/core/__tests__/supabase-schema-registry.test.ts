@@ -44,7 +44,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     expect(keys).toEqual(
       expect.arrayContaining([
         'public.tenants',
-        'automa.workflows',
+        'automation.workflows',
         'automation.jobs',
         'workers.devices',
         'workers.browsers',
@@ -69,7 +69,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
   it('infers resource accurately from route paths and multi-grid row shapes', () => {
     expect(inferResourceFromRouteAndRow('/tenants', {})).toBe('public.tenants');
     expect(inferResourceFromRouteAndRow('/automation/workflows', {})).toBe(
-      'automa.workflows',
+      'automation.workflows',
     );
     expect(
       inferResourceFromRouteAndRow('/commerce/admin', {
@@ -100,7 +100,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     expect(
       inferResourceFromRouteAndRow('/system/roles', {
         description: 'Manage workflows',
-        id: 'automa.workflows.manage',
+        id: 'automation.workflows.manage',
         module: 'automa',
       }),
     ).toBe('public.permissions');
@@ -114,16 +114,16 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     };
     const viewerAccess = {
       isSuperadmin: false,
-      permissions: ['automa.workflows.view'],
+      permissions: ['automation.workflows.view'],
       tenantPermissions: {
-        t_1: ['automa.workflows.view'],
+        t_1: ['automation.workflows.view'],
       },
     };
     const managerAccess = {
       isSuperadmin: false,
-      permissions: ['automa.workflows.manage'],
+      permissions: ['automation.workflows.manage'],
       tenantPermissions: {
-        t_1: ['automa.workflows.manage'],
+        t_1: ['automation.workflows.manage'],
       },
     };
 
@@ -160,16 +160,16 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     );
     expect(customRoleRls.canUpdate.allowed).toBe(true);
 
-    // 3. Tenant RBAC enforcement on automa.workflows
+    // 3. Tenant RBAC enforcement on automation.workflows
     const viewerWorkflowRls = evaluateRowRlsPolicy(
-      'automa.workflows',
+      'automation.workflows',
       { id: 'wf_1', tenant_id: 't_1' },
       viewerAccess,
     );
     expect(viewerWorkflowRls.canUpdate.allowed).toBe(false);
 
     const managerWorkflowRls = evaluateRowRlsPolicy(
-      'automa.workflows',
+      'automation.workflows',
       { id: 'wf_1', tenant_id: 't_1' },
       managerAccess,
     );
@@ -197,7 +197,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
 
     const schema = buildDynamicVxeFormSchema({
       gridColumns: mobileGridColumns,
-      resource: 'automa.workflows',
+      resource: 'automation.workflows',
       row,
       translate: (k) => k,
     });
@@ -269,7 +269,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     const dirty = computeDirtyMutablePayload(
       originalRow,
       formData,
-      'automa.workflows',
+      'automation.workflows',
     );
     expect(dirty).toEqual({
       name: 'New Name',
@@ -286,7 +286,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     ]);
 
     const result = await executeDynamicSupabasePatch(
-      'automa.workflows',
+      'automation.workflows',
       originalRow,
       formData,
     );
@@ -300,7 +300,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
         body: JSON.stringify({ name: 'New Name', status: 'published' }),
         method: 'PATCH',
         preferRepresentation: true,
-        schema: 'automa',
+        schema: 'automation',
       }),
     );
   });
@@ -438,7 +438,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
 
   it('builds Supabase Studio Create Mode schema (hiding uuid/system fields while keeping text PKs with insertable: true)', () => {
     const workflowCreate = buildDynamicVxeCreateSchema({
-      resource: 'automa.workflows',
+      resource: 'automation.workflows',
       translate: (k) => k,
     });
 
@@ -476,12 +476,12 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
   });
 
   it('validates required fields, auto-attaches tenant_id, and executes PostgREST POST in executeDynamicSupabaseInsert', async () => {
-    expect(validateRequiredInsertFields({}, 'automa.workflows')).toEqual([
+    expect(validateRequiredInsertFields({}, 'automation.workflows')).toEqual([
       'name',
     ]);
 
     await expect(
-      executeDynamicSupabaseInsert('automa.workflows', { name: '   ' }),
+      executeDynamicSupabaseInsert('automation.workflows', { name: '   ' }),
     ).rejects.toThrow(/Missing required fields: name/);
 
     const payload = computeInsertPayload(
@@ -491,7 +491,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
         status: 'draft',
         version: '1.0.0',
       },
-      'automa.workflows',
+      'automation.workflows',
     );
     expect(payload).toEqual({
       description: 'Auto sync orders',
@@ -508,7 +508,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
       },
     ]);
 
-    const res = await executeDynamicSupabaseInsert('automa.workflows', {
+    const res = await executeDynamicSupabaseInsert('automation.workflows', {
       description: 'Auto sync orders',
       name: 'TikTok Order Sync',
       status: 'draft',
@@ -523,7 +523,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
         body: JSON.stringify(payload),
         method: 'POST',
         preferRepresentation: true,
-        schema: 'automa',
+        schema: 'automation',
       }),
     );
   });

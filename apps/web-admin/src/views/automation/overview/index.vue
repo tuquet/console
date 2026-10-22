@@ -27,7 +27,7 @@ import {
   Terminal,
 } from '@lucide/vue';
 
-import { calculateProgressPercentage, getAutomationOverviewApi } from '#/api';
+import { calculateProgressPercentage, getAutomationOverview } from '#/api';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
 
@@ -72,7 +72,7 @@ const moduleCards = computed(() => [
   {
     icon: PlayCircle,
     key: 'runs',
-    path: '/automation/runs',
+    path: '/automation/jobs',
     subtext: $t('page.automation_view.overview_running_completed', [
       overview.value.runs.running,
       overview.value.runs.completed,
@@ -119,7 +119,7 @@ async function loadOverview() {
   loading.value = true;
   try {
     const tenantId = (route.query.tenant as string) || undefined;
-    overview.value = await getAutomationOverviewApi({ tenantId });
+    overview.value = await getAutomationOverview({ tenantId });
   } catch (error: any) {
     captureError(error, { action: 'loadOverview', view: 'AutomationOverview' });
     toast.error(
@@ -306,7 +306,7 @@ onMounted(() => {
             variant="ghost"
             size="sm"
             class="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
-            @click="navigateTo('/automation/runs')"
+            @click="navigateTo('/automation/jobs')"
           >
             <span>{{ $t('page.automation_view.overview_view_all') }}</span>
             <ArrowRight class="size-3" />
@@ -370,7 +370,7 @@ onMounted(() => {
               variant="ghost"
               size="sm"
               class="h-7 shrink-0 gap-1 px-2 text-xs"
-              @click="router.push(`/automation/runs/${run.id}`)"
+              @click="router.push(`/automation/jobs/${run.id}`)"
             >
               <FileText class="size-3.5" />
               <span class="hidden sm:inline">{{

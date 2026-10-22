@@ -1,16 +1,6 @@
 <script lang="ts" setup>
-import type { FleetDeviceItem } from '#/api';
+import type { Device } from '#/api';
 
-import {
-  Check,
-  CheckCircle2,
-  Copy,
-  Cpu,
-  Globe,
-  HardDrive,
-  Laptop,
-  ShieldAlert,
-} from '@lucide/vue';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,19 +19,30 @@ import {
   DialogTitle,
 } from '@tuquet/vue-ui';
 
+import {
+  Check,
+  CheckCircle2,
+  Copy,
+  Cpu,
+  Globe,
+  HardDrive,
+  Laptop,
+  ShieldAlert,
+} from '@lucide/vue';
+
 import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
 import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
 interface Props {
-  node: FleetDeviceItem | null;
+  node: Device | null;
   open: boolean;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: 'revoke', node: FleetDeviceItem): void;
+  (e: 'revoke', node: Device): void;
   (e: 'update:open', val: boolean): void;
 }>();
 

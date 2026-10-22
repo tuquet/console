@@ -1,27 +1,15 @@
 <script lang="ts" setup>
 import type {
-  CommerceOrderDeliveryItem,
-  CommerceOrderRecord,
+  CommerceOrder,
+  CommerceOrderDelivery,
   CommerceOrderStatus,
-  TenantItem,
+  Tenant,
 } from '#/api';
 
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { usePreferences } from '@tuquet/preferences';
-
-import {
-  Building2,
-  Copy,
-  Download,
-  ExternalLink,
-  Eye,
-  KeyRound,
-  PackageCheck,
-  RefreshCw,
-  ShoppingBag,
-} from '@lucide/vue';
 import {
   Badge,
   Button,
@@ -43,15 +31,27 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
+import {
+  Building2,
+  Copy,
+  Download,
+  ExternalLink,
+  Eye,
+  KeyRound,
+  PackageCheck,
+  RefreshCw,
+  ShoppingBag,
+} from '@lucide/vue';
+
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
   downloadTextFile,
   filterCommerceOrders,
   formatSerialDeliveriesText,
   getActiveTenantId,
-  getOrderDeliveriesApi,
-  getTenantOrdersApi,
-  getTenantsApi,
+  listOrderDeliveries,
+  listTenantOrders,
+  listTenants,
   setActiveTenantId,
 } from '#/api';
 import { useClipboard, useDateFormat } from '#/composables';
@@ -73,15 +73,15 @@ const { formatDate } = useDateFormat();
 const { copyToClipboard } = useClipboard();
 const { isMobile } = usePreferences();
 
-const tenants = ref<TenantItem[]>([]);
+const tenants = ref<Tenant[]>([]);
 const selectedTenantId = ref<string>(getActiveTenantId());
-const allOrders = ref<CommerceOrderRecord[]>([]);
+const allOrders = ref<CommerceOrder[]>([]);
 
 // Deliverables Inspector Dialog
 const deliveryOpen = ref(false);
 const loadingDeliveries = ref(false);
-const selectedOrder = ref<CommerceOrderRecord | null>(null);
-const orderDeliveries = ref<CommerceOrderDeliveryItem[]>([]);
+const selectedOrder = ref<CommerceOrder | null>(null);
+const orderDeliveries = ref<CommerceOrderDelivery[]>([]);
 
 const orderStatusMap = computed<
   Record<
@@ -194,7 +194,7 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<CommerceOrderRecord>({
+const [Grid, gridApi] = useVbenVxeGrid<CommerceOrder>({
   separator: false,
   detailSheetOptions: {
     resource: 'commerce.orders',
@@ -296,7 +296,7 @@ const [Grid, gridApi] = useVbenVxeGrid<CommerceOrderRecord>({
           if (!selectedTenantId.value) {
             return { items: [], total: 0 };
           }
-          const data = await getTenantOrdersApi(selectedTenantId.value);
+          const data = await listTenantOrders(selectedTenantId.value);
           allOrders.value = data;
 
           const filtered = filterCommerceOrders(data, {
@@ -331,7 +331,7 @@ watch([() => $t('page.commerce_view.col_order_code'), isMobile], () => {
 });
 
 async function initTenantsAndLoad() {
-  const tenantRows = await getTenantsApi().catch(() => [] as TenantItem[]);
+  const tenantRows = await listTenants().catch(() => [] as Tenant[]);
   tenants.value = tenantRows;
   if (
     (!selectedTenantId.value ||
@@ -353,16 +353,16 @@ async function handleTenantChange(value: unknown) {
   await gridApi.reload();
 }
 
-async function openDeliveriesModal(order: CommerceOrderRecord) {
+async function openDeliveriesModal(order: CommerceOrder) {
   selectedOrder.value = order;
   orderDeliveries.value = [];
   deliveryOpen.value = true;
   loadingDeliveries.value = true;
   try {
-    orderDeliveries.value = await getOrderDeliveriesApi(order.id);
+    orderDeliveries.value = await listOrderDeliveries(order.id);
   } catch (error: any) {
     captureError(error, {
-      action: 'getOrderDeliveriesApi',
+      action: 'listOrderDeliveries',
       orderId: order.id,
       view: 'CommerceOrders',
     });

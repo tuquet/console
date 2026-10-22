@@ -1,8 +1,8 @@
-import type { SystemPluginItem } from './system';
-import type { TenantItem } from './tenant';
+import type { SystemPlugin } from './system';
+import type { Tenant } from './tenant';
 
-import { getSystemPluginsApi } from './system';
-import { getTenantsApi } from './tenant';
+import { listSystemPlugins } from './system';
+import { listTenants } from './tenant';
 
 export interface PlanBreakdown {
   enterprise: number;
@@ -23,7 +23,7 @@ export interface RealAnalyticsData {
   };
   plugins: {
     coreCount: number;
-    items: SystemPluginItem[];
+    items: SystemPlugin[];
     moduleCount: number;
     total: number;
   };
@@ -35,7 +35,7 @@ export interface RealAnalyticsData {
   tenants: {
     activeCount: number;
     growth: GrowthPoint[];
-    items: TenantItem[];
+    items: Tenant[];
     planBreakdown: PlanBreakdown;
     total: number;
   };
@@ -44,19 +44,19 @@ export interface RealAnalyticsData {
 /**
  * Thu thập và tổng hợp số liệu đo đếm thực tế từ Cloud
  */
-export async function getRealAnalyticsDataApi(): Promise<RealAnalyticsData> {
+export async function getRealAnalyticsData(): Promise<RealAnalyticsData> {
   const startTime = performance.now();
 
   const [tenantsResult, pluginsResult] = await Promise.allSettled([
-    getTenantsApi(),
-    getSystemPluginsApi(),
+    listTenants(),
+    listSystemPlugins(),
   ]);
 
   const latencyMs = Math.round(performance.now() - startTime);
 
-  const tenants: TenantItem[] =
+  const tenants: Tenant[] =
     tenantsResult.status === 'fulfilled' ? tenantsResult.value : [];
-  const plugins: SystemPluginItem[] =
+  const plugins: SystemPlugin[] =
     pluginsResult.status === 'fulfilled' ? pluginsResult.value : [];
 
   // Plan breakdown

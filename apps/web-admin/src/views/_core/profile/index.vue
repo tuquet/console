@@ -4,21 +4,6 @@ import { useRouter } from 'vue-router';
 
 import { $t } from '@tuquet/locales';
 import { useUserStore } from '@tuquet/stores';
-
-import {
-  ArrowLeft,
-  Building2,
-  Check,
-  CheckCircle2,
-  Copy,
-  KeyRound,
-  Lock,
-  Mail,
-  RefreshCw,
-  Save,
-  ShieldCheck,
-  User,
-} from '@lucide/vue';
 import {
   Avatar,
   AvatarFallback,
@@ -42,12 +27,27 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
+import {
+  ArrowLeft,
+  Building2,
+  Check,
+  CheckCircle2,
+  Copy,
+  KeyRound,
+  Lock,
+  Mail,
+  RefreshCw,
+  Save,
+  ShieldCheck,
+  User,
+} from '@lucide/vue';
+
 import { VxeForm, VxeFormItem } from '#/adapter/vxe-table';
 import {
   getActiveTenantId,
-  getUserInfoApi,
-  updateUserPasswordApi,
-  updateUserProfileApi,
+  getCurrentUser,
+  updateUserPassword,
+  updateUserProfile,
 } from '#/api';
 import CliSnippetCard from '#/components/common/cli-snippet-card.vue';
 import { useClipboard } from '#/composables';
@@ -93,7 +93,7 @@ const initials = computed(() => {
 async function fetchProfile() {
   try {
     loading.value = true;
-    const res = await getUserInfoApi();
+    const res = await getCurrentUser();
     if (res) {
       fullName.value = res.realName || '';
       avatarUrl.value = res.avatar || '';
@@ -113,7 +113,7 @@ async function handleSaveProfile() {
   if (!userId.value) return;
   try {
     savingProfile.value = true;
-    await updateUserProfileApi({
+    await updateUserProfile({
       avatar_url: avatarUrl.value,
       full_name: fullName.value,
       introduction: bio.value,
@@ -150,7 +150,7 @@ async function handleSavePassword() {
 
   try {
     savingPassword.value = true;
-    await updateUserPasswordApi(newPassword.value);
+    await updateUserPassword(newPassword.value);
     toast.success($t('profile.changePasswordSuccess'));
     newPassword.value = '';
     confirmPassword.value = '';

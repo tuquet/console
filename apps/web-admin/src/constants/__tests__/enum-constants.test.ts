@@ -40,17 +40,18 @@ import {
 } from '../index';
 
 describe('enum & Constants SSOT (@tuquet/constants + #/constants)', () => {
-  it('exposes all 7 canonical PostgREST schemas', () => {
+  it('exposes all canonical PostgREST schemas', () => {
     expect(SUPABASE_SCHEMA_VALUES).toEqual([
-      'automa',
+      'automation',
       'billing',
+      'browsers',
       'commerce',
       'events',
       'media',
       'public',
       'workers',
     ]);
-    expect(SUPABASE_SCHEMA.AUTOMA).toBe('automa');
+    expect(SUPABASE_SCHEMA.AUTOMATION).toBe('automation');
     expect(SUPABASE_SCHEMA.COMMERCE).toBe('commerce');
     expect(SUPABASE_SCHEMA.WORKERS).toBe('workers');
     expect(STORAGE_KEYS.ACTIVE_TENANT_ID).toBe('TUQUET_ACTIVE_TENANT_ID');

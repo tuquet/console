@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { FleetBrowserItem } from '#/api';
+import type { BrowserProfile } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -18,7 +18,7 @@ import {
 } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getFleetBrowsersApi } from '#/api';
+import { listBrowserReleases, listBrowsers, listProxies } from '#/api';
 import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
@@ -29,7 +29,7 @@ const { formatDate } = useDateFormat();
 const { copyToClipboard } = useClipboard();
 const { isMobile } = usePreferences();
 
-const allBrowsers = ref<FleetBrowserItem[]>([]);
+const allBrowsers = ref<BrowserProfile[]>([]);
 
 function formatBytes(bytes: number): string {
   if (!bytes || bytes <= 0) return '0 B';
@@ -88,10 +88,45 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<FleetBrowserItem>({
+const [Grid, gridApi] = useVbenVxeGrid<BrowserProfile>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
+    dynamicFieldOptions: async ({ formData }) => {
+      const tenantId = (route.query.tenant_id as string) || undefined;
+      const [proxies, releases] = await Promise.all([
+        listProxies({ tenantId }),
+        listBrowserReleases({
+          osPlatform: formData.os_platform || undefined,
+        }),
+      ]);
+
+      const proxyOptions = [
+        { label: 'None (Direct Egress)', value: '' },
+        ...proxies.map((p) => ({
+          label: `${p.protocol.toUpperCase()}://${p.host}:${p.port}${p.country_code ? ` [${p.country_code}]` : ''}`,
+          value: p.id,
+        })),
+      ];
+
+      const versionOptions =
+        releases.length > 0
+          ? releases.map((r) => ({
+              label: `${r.version} (${r.channel.toUpperCase()}${r.is_recommended ? ' - Verified' : ''})`,
+              value: r.version,
+            }))
+          : [
+              {
+                label: '148.0.7778.215 (Golden LTS - Verified)',
+                value: '148.0.7778.215',
+              },
+            ];
+
+      return {
+        engine_version: versionOptions,
+        proxy_id: proxyOptions,
+      };
+    },
     resource: 'workers.browsers',
     subtitleField: 'engine_version',
     titleField: 'name',
@@ -169,7 +204,7 @@ const [Grid, gridApi] = useVbenVxeGrid<FleetBrowserItem>({
           formValues: Record<string, any>,
         ) => {
           const tenantId = (route.query.tenant as string) || undefined;
-          const data = await getFleetBrowsersApi({ tenantId });
+          const data = await listBrowsers({ tenantId });
           allBrowsers.value = data;
 
           let filtered = data;

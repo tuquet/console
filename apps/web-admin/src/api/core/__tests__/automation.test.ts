@@ -1,24 +1,30 @@
-import type { FleetDeviceItem } from '../automation';
+import type { Device } from '../automation';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  browsersApi,
   buildAutomationFilterQuery,
   buildFleetFilterQuery,
   calculateAutomationOverviewSummary,
   calculateFleetMetrics,
   calculateProgressPercentage,
-  cancelJobApi,
-  getExecutionLogsApi,
-  getFleetBrowsersApi,
-  getFleetDevicesApi,
-  getFleetProxiesApi,
-  getJobDetailApi,
-  getJobsApi,
-  getWorkflowsApi,
+  cancelJob,
+  devicesApi,
+  getJob,
   isRunActive,
+  jobsApi,
+  listBrowserReleases,
+  listBrowsers,
+  listDevices,
+  listExecutionLogs,
+  listJobs,
+  listProxies,
+  listWorkflows,
   mapRawDeviceToFleetNode,
-  revokeFleetDeviceApi,
+  proxiesApi,
+  revokeDevice,
+  workflowsApi,
 } from '../automation';
 import { supabaseRequest } from '../supabase-client';
 
@@ -93,8 +99,8 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
     });
   });
 
-  describe('api functions with automa schema header', () => {
-    it('should call getWorkflowsApi with schema automa', async () => {
+  describe('api functions with automation schema header', () => {
+    it('should call listWorkflows with schema automation', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           created_at: '2026-10-13T00:00:00Z',
@@ -108,17 +114,17 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
         },
       ]);
 
-      const result = await getWorkflowsApi({ tenantId: 't1' });
+      const result = await listWorkflows({ tenantId: 't1' });
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/workflows?select='),
-        { schema: 'automa', suppressErrorCapture: true },
+        { schema: 'automation', suppressErrorCapture: true },
       );
       expect(result).toHaveLength(1);
       expect(result[0]?.name).toBe('Scraper Workflow');
     });
 
-    it('should call getJobsApi with schema automa', async () => {
+    it('should call listJobs with schema automation', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           completed_tasks: 10,
@@ -137,17 +143,17 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
         },
       ]);
 
-      const runs = await getJobsApi({ status: 'running' });
+      const runs = await listJobs({ status: 'running' });
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/jobs?select='),
-        { schema: 'automa', suppressErrorCapture: true },
+        { schema: 'automation', suppressErrorCapture: true },
       );
       expect(runs).toHaveLength(1);
       expect(runs[0]?.name).toBe('Morning Batch Run');
     });
 
-    it('should call getJobDetailApi and return single run', async () => {
+    it('should call getJob and return single run', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           completed_tasks: 50,
@@ -166,16 +172,16 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
         },
       ]);
 
-      const run = await getJobDetailApi('run-99');
+      const run = await getJob('run-99');
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/jobs?id=eq.run-99'),
-        { schema: 'automa' },
+        { schema: 'automation' },
       );
       expect(run?.id).toBe('run-99');
     });
 
-    it('should call getExecutionLogsApi with sinceId pagination', async () => {
+    it('should call listExecutionLogs with sinceId pagination', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           job_id: 'run-1',
@@ -190,37 +196,37 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
         },
       ]);
 
-      const logs = await getExecutionLogsApi('run-1', {
+      const logs = await listExecutionLogs('run-1', {
         limit: 100,
         sinceId: 10,
       });
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('&id=gt.10'),
-        { schema: 'automa' },
+        { schema: 'automation' },
       );
       expect(logs).toHaveLength(1);
       expect(logs[0]?.id).toBe(15);
     });
 
-    it('should call cancelJobApi with PATCH method and cancelled status', async () => {
+    it('should call cancelJob with PATCH method and cancelled status', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce(undefined);
 
-      await cancelJobApi('run-active-1');
+      await cancelJob('run-active-1');
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         '/rest/v1/jobs?id=eq.run-active-1',
         expect.objectContaining({
           body: expect.stringContaining('"status":"cancelled"'),
           method: 'PATCH',
-          schema: 'automa',
+          schema: 'automation',
         }),
       );
     });
   });
 
   describe('mapRawDeviceToFleetNode', () => {
-    it('should correctly map raw row to FleetDeviceItem with memory conversion', () => {
+    it('should correctly map raw row to Device with memory conversion', () => {
       const raw = {
         active_jobs: 2,
         capabilities: ['browser', 'automa'],
@@ -289,7 +295,7 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
 
   describe('calculateFleetMetrics', () => {
     it('should aggregate online count (idle and busy) and sum active jobs', () => {
-      const nodes: FleetDeviceItem[] = [
+      const nodes: Device[] = [
         {
           active_jobs: 0,
           capabilities: [],
@@ -381,7 +387,7 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
   });
 
   describe('api functions with schema workers header', () => {
-    it('should query getFleetDevicesApi with workers schema', async () => {
+    it('should query listDevices with workers schema', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           cpu_cores: 4,
@@ -392,7 +398,7 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
         },
       ]);
 
-      const devices = await getFleetDevicesApi({ tenantId: 't1' });
+      const devices = await listDevices({ tenantId: 't1' });
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/devices?select='),
@@ -402,10 +408,10 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
       expect(devices[0]?.name).toBe('Device 1');
     });
 
-    it('should call revokeFleetDeviceApi with workers schema DELETE', async () => {
+    it('should call revokeDevice with workers schema DELETE', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce(undefined);
 
-      await revokeFleetDeviceApi('dev-999');
+      await revokeDevice('dev-999');
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         '/rest/v1/devices?id=eq.dev-999',
@@ -416,7 +422,7 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
       );
     });
 
-    it('should query getFleetBrowsersApi with workers schema', async () => {
+    it('should query listBrowsers with workers schema', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           browser_type: 'chromium',
@@ -426,7 +432,7 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
         },
       ]);
 
-      const browsers = await getFleetBrowsersApi({ status: 'idle' });
+      const browsers = await listBrowsers({ status: 'idle' });
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/browsers?select='),
@@ -435,7 +441,7 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
       expect(browsers).toHaveLength(1);
     });
 
-    it('should query getFleetProxiesApi with workers schema', async () => {
+    it('should query listProxies with workers schema', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           host: '1.2.3.4',
@@ -446,13 +452,26 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
         },
       ]);
 
-      const proxies = await getFleetProxiesApi();
+      const proxies = await listProxies();
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/proxies?select=*'),
         { schema: 'workers', suppressErrorCapture: true },
       );
       expect(proxies).toHaveLength(1);
+    });
+
+    it('should expose resource-oriented API objects', () => {
+      expect(browsersApi.list).toBe(listBrowsers);
+      expect(browsersApi.listReleases).toBe(listBrowserReleases);
+      expect(devicesApi.list).toBe(listDevices);
+      expect(devicesApi.revoke).toBe(revokeDevice);
+      expect(jobsApi.list).toBe(listJobs);
+      expect(jobsApi.get).toBe(getJob);
+      expect(jobsApi.cancel).toBe(cancelJob);
+      expect(jobsApi.listLogs).toBe(listExecutionLogs);
+      expect(workflowsApi.list).toBe(listWorkflows);
+      expect(proxiesApi.list).toBe(listProxies);
     });
   });
 

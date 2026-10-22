@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { SystemPluginItem } from '#/api';
+import type { SystemPlugin } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 
@@ -24,14 +24,14 @@ import {
 } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getSystemPluginsApi } from '#/api';
+import { listSystemPlugins } from '#/api';
 import { $t } from '#/locales';
 
 defineOptions({ name: 'SystemPlugins' });
 
 const { isMobile } = usePreferences();
 
-const allPlugins = ref<SystemPluginItem[]>([]);
+const allPlugins = ref<SystemPlugin[]>([]);
 
 function getColumns() {
   return [
@@ -69,7 +69,7 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<SystemPluginItem>({
+const [Grid, gridApi] = useVbenVxeGrid<SystemPlugin>({
   detailSheetOptions: {
     resource: 'public.system_plugins',
     subtitleField: 'version',
@@ -147,7 +147,7 @@ const [Grid, gridApi] = useVbenVxeGrid<SystemPluginItem>({
           { page }: { page?: { currentPage?: number; pageSize?: number } },
           formValues: Record<string, any>,
         ) => {
-          const data = await getSystemPluginsApi();
+          const data = await listSystemPlugins();
           allPlugins.value = data;
 
           let filtered = data;
@@ -196,7 +196,7 @@ watch([() => $t('page.system_view.plugins_col_type'), isMobile], () => {
 
 function getPluginIcon(pluginId: string) {
   switch (pluginId?.toLowerCase()) {
-    case 'automa': {
+    case 'automation': {
       return Workflow;
     }
     case 'core-iam': {

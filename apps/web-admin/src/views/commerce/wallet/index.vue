@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import type {
-  PaymentGatewayItem,
-  PaymentIntentItem,
-  TenantItem,
-  TenantWalletItem,
-  WalletTransactionItem,
+  PaymentGateway,
+  PaymentIntent,
+  Tenant,
+  TenantWallet,
+  WalletTransaction,
   WalletTxType,
 } from '#/api';
 
@@ -12,17 +12,6 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { usePreferences } from '@tuquet/preferences';
-
-import {
-  Building2,
-  Coins,
-  Copy,
-  CreditCard,
-  Plus,
-  RefreshCw,
-  ShoppingBag,
-  Wallet,
-} from '@lucide/vue';
 import {
   Badge,
   Button,
@@ -41,16 +30,27 @@ import {
   toast,
 } from '@tuquet/vue-ui';
 
+import {
+  Building2,
+  Coins,
+  Copy,
+  CreditCard,
+  Plus,
+  RefreshCw,
+  ShoppingBag,
+  Wallet,
+} from '@lucide/vue';
+
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  createPaymentIntentApi,
+  createPaymentIntent,
   filterWalletTransactions,
-  getActivePaymentGatewaysApi,
   getActiveTenantId,
-  getPaymentIntentStatusApi,
-  getTenantsApi,
-  getTenantWalletApi,
-  getWalletTransactionsApi,
+  getPaymentIntentStatus,
+  getTenantWallet,
+  listActivePaymentGateways,
+  listTenants,
+  listWalletTransactions,
   setActiveTenantId,
 } from '#/api';
 import { useClipboard, useDateFormat } from '#/composables';
@@ -64,18 +64,18 @@ const { formatDate } = useDateFormat();
 const { copyToClipboard } = useClipboard();
 const { isMobile } = usePreferences();
 
-const tenants = ref<TenantItem[]>([]);
+const tenants = ref<Tenant[]>([]);
 const selectedTenantId = ref<string>(getActiveTenantId());
-const wallet = ref<null | TenantWalletItem>(null);
-const gateways = ref<PaymentGatewayItem[]>([]);
-const allTransactions = ref<WalletTransactionItem[]>([]);
+const wallet = ref<null | TenantWallet>(null);
+const gateways = ref<PaymentGateway[]>([]);
+const allTransactions = ref<WalletTransaction[]>([]);
 
 // Top-up Dialog State
 const topupOpen = ref(false);
 const topupCredits = ref<number>(100);
 const selectedGatewayId = ref<string>('');
 const creatingIntent = ref(false);
-const activeIntent = ref<null | PaymentIntentItem>(null);
+const activeIntent = ref<null | PaymentIntent>(null);
 const checkingIntent = ref(false);
 let pollTimer: null | ReturnType<typeof setInterval> = null;
 
@@ -114,7 +114,7 @@ const topupGateways = computed(() =>
   gateways.value.filter((g) => g.is_active && g.channel !== 'internal_wallet'),
 );
 
-const selectedGateway = computed<null | PaymentGatewayItem>(
+const selectedGateway = computed<null | PaymentGateway>(
   () =>
     topupGateways.value.find((g) => g.id === selectedGatewayId.value) ||
     topupGateways.value[0] ||
@@ -169,7 +169,7 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<WalletTransactionItem>({
+const [Grid, gridApi] = useVbenVxeGrid<WalletTransaction>({
   separator: false,
   detailSheetOptions: {
     resource: 'billing.wallet_transactions',
@@ -264,8 +264,8 @@ const [Grid, gridApi] = useVbenVxeGrid<WalletTransactionItem>({
             return { items: [], total: 0 };
           }
           const [walletData, txRows] = await Promise.all([
-            getTenantWalletApi(selectedTenantId.value),
-            getWalletTransactionsApi(selectedTenantId.value, 100),
+            getTenantWallet(selectedTenantId.value),
+            listWalletTransactions(selectedTenantId.value, { limit: 100 }),
           ]);
           wallet.value = walletData;
           allTransactions.value = txRows;
@@ -302,8 +302,8 @@ watch([() => $t('page.commerce_view.tx_type_label'), isMobile], () => {
 
 async function initData() {
   const [tenantRows, gatewayRows] = await Promise.all([
-    getTenantsApi().catch(() => [] as TenantItem[]),
-    getActivePaymentGatewaysApi().catch(() => [] as PaymentGatewayItem[]),
+    listTenants().catch(() => [] as Tenant[]),
+    listActivePaymentGateways().catch(() => [] as PaymentGateway[]),
   ]);
   tenants.value = tenantRows;
   gateways.value = gatewayRows;
@@ -363,7 +363,7 @@ async function checkTopupStatus(intentId: string, silent = false) {
   if (checkingIntent.value) return;
   checkingIntent.value = true;
   try {
-    const updated = await getPaymentIntentStatusApi(intentId);
+    const updated = await getPaymentIntentStatus(intentId);
     if (!updated) return;
     activeIntent.value = updated;
     if (updated.status === 'succeeded') {
@@ -402,7 +402,7 @@ async function handleCreateTopupIntent() {
 
   creatingIntent.value = true;
   try {
-    const intent = await createPaymentIntentApi({
+    const intent = await createPaymentIntent({
       amount_credits: Math.trunc(topupCredits.value),
       gateway_id: gw.id,
       target_id: selectedTenantId.value,

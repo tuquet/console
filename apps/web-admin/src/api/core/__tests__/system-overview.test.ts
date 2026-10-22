@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   calculateSystemOverviewSummary,
-  getSystemOverviewApi,
+  getSystemOverview,
   SUBSCRIPTION_STATUS,
   SYSTEM_PLUGIN_STATUS,
 } from '../system';
@@ -215,8 +215,8 @@ describe('system overview aggregation (SPEC-system-dashboard)', () => {
     expect(summary.recentUsers).toHaveLength(5);
   });
 
-  it('fetches system overview via getSystemOverviewApi cleanly', async () => {
-    const result = await getSystemOverviewApi();
+  it('fetches system overview via getSystemOverview cleanly', async () => {
+    const result = await getSystemOverview();
     expect(result.plugins.total).toBe(0);
     expect(result.subscriptions.mrrUsd).toBe(0);
   });

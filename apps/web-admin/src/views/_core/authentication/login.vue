@@ -7,10 +7,9 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { AuthenticationLogin, z } from '@tuquet/common-ui';
 import { SvgGithubIcon } from '@tuquet/icons';
 import { $t } from '@tuquet/locales';
-
 import { Button } from '@tuquet/vue-ui';
 
-import { loginWithGitHubApi } from '#/api/core/auth';
+import { loginWithGitHub } from '#/api/core/auth';
 import { useAuthStore } from '#/store';
 import { loadTurnstile, TURNSTILE_SITE_KEY } from '#/utils/turnstile';
 
@@ -102,7 +101,7 @@ onBeforeUnmount(() => {
 });
 
 function handleGitHubLogin() {
-  loginWithGitHubApi();
+  loginWithGitHub();
 }
 </script>
 

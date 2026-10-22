@@ -1,22 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  approveManualPaymentIntentAdminApi,
-  createPaymentIntentApi,
+  approveManualPaymentIntent,
+  createPaymentIntent,
   filterWalletTransactions,
-  getActivePaymentGatewaysApi,
-  getBankReceivingAccountsApi,
-  getManualReviewIntentsAdminApi,
-  getTenantWalletApi,
-  getWalletTransactionsApi,
+  getPaymentIntentStatus,
+  getTenantWallet,
+  listActivePaymentGateways,
+  listAllPaymentGateways,
+  listBankReceivingAccounts,
+  listManualReviewIntents,
+  listWalletTransactions,
   mapRawBankReceivingAccount,
   mapRawPaymentGateway,
   mapRawPaymentIntent,
   mapRawTenantWallet,
   mapRawWalletTransaction,
-  toggleBankReceivingAccountApi,
-  upsertBankReceivingAccountApi,
-  upsertPaymentGatewayAdminApi,
+  toggleBankReceivingAccount,
+  upsertBankReceivingAccount,
+  upsertPaymentGateway,
 } from '../billing';
 import { supabaseRequest } from '../supabase-client';
 
@@ -59,40 +61,40 @@ describe('billing & payment-gateway core api', () => {
   });
 
   describe('mapRawTenantWallet & mapRawWalletTransaction', () => {
-    it('normalizes integer Xu balance and transaction ledger rows', () => {
+    it('truncates floating values safely and extracts wallet balances', () => {
       const wallet = mapRawTenantWallet({
-        balance_credits: '450',
-        id: 'w-1',
-        tenant_id: 't-1',
-        total_spent_credits: '150',
-        total_topped_up_credits: '600',
-        updated_at: '2026-10-14T00:00:00Z',
+        balance_credits: '500.89',
+        id: 'wallet-1',
+        tenant_id: 'tenant-1',
+        total_spent_credits: 120.4,
+        total_topped_up_credits: 621.29,
       });
 
-      expect(wallet.balance_credits).toBe(450);
-      expect(wallet.total_topped_up_credits).toBe(600);
-      expect(wallet.total_spent_credits).toBe(150);
+      expect(wallet).toEqual({
+        balance_credits: 500,
+        id: 'wallet-1',
+        tenant_id: 'tenant-1',
+        total_spent_credits: 120,
+        total_topped_up_credits: 621,
+        updated_at: expect.any(String),
+      });
 
       const tx = mapRawWalletTransaction({
-        amount_credits: '-50',
-        balance_after_credits: '400',
-        created_at: '2026-10-14T01:00:00Z',
-        description: 'Purchase proxy',
+        amount_credits: -100.99,
+        balance_after_credits: '400.1',
         id: 'tx-1',
-        reference_id: 'ord-1',
-        reference_type: 'commerce_order',
-        tenant_id: 't-1',
+        tenant_id: 'tenant-1',
         tx_type: 'purchase',
-        wallet_id: 'w-1',
+        wallet_id: 'wallet-1',
       });
 
-      expect(tx.amount_credits).toBe(-50);
+      expect(tx.amount_credits).toBe(-100);
       expect(tx.balance_after_credits).toBe(400);
       expect(tx.tx_type).toBe('purchase');
     });
   });
 
-  describe('getActivePaymentGatewaysApi & getTenantWalletApi', () => {
+  describe('listActivePaymentGateways & getTenantWallet', () => {
     it('queries active payment gateways via billing RPC', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
@@ -107,7 +109,7 @@ describe('billing & payment-gateway core api', () => {
         },
       ]);
 
-      const gateways = await getActivePaymentGatewaysApi();
+      const gateways = await listActivePaymentGateways();
       expect(supabaseRequest).toHaveBeenCalledWith(
         '/rest/v1/rpc/get_active_gateways',
         expect.objectContaining({
@@ -119,9 +121,32 @@ describe('billing & payment-gateway core api', () => {
       expect(gateways[0]?.id).toBe('momo_ewallet');
     });
 
+    it('queries all payment gateways for admin', async () => {
+      vi.mocked(supabaseRequest).mockResolvedValueOnce([
+        {
+          channel: 'bank_transfer',
+          currency: 'VND',
+          driver: 'manual',
+          id: 'bank_vietqr',
+          is_active: false,
+          name: 'VietQR',
+          public_config: {},
+          rate_per_credit: 1000,
+          sort_order: 1,
+        },
+      ]);
+
+      const all = await listAllPaymentGateways();
+      expect(supabaseRequest).toHaveBeenCalledWith(
+        '/rest/v1/payment_gateways?select=*&order=sort_order.asc,id.asc',
+        { schema: 'billing' },
+      );
+      expect(all).toHaveLength(1);
+    });
+
     it('returns zero-balance fallback when tenant has no wallet row yet', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([]);
-      const wallet = await getTenantWalletApi('tenant-uuid-1');
+      const wallet = await getTenantWallet('tenant-uuid-1');
 
       expect(wallet.tenant_id).toBe('tenant-uuid-1');
       expect(wallet.balance_credits).toBe(0);
@@ -141,7 +166,7 @@ describe('billing & payment-gateway core api', () => {
         },
       ]);
 
-      const txs = await getWalletTransactionsApi('tenant-uuid-1');
+      const txs = await listWalletTransactions('tenant-uuid-1');
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining(
           '/rest/v1/wallet_transactions?tenant_id=eq.tenant-uuid-1',
@@ -152,7 +177,7 @@ describe('billing & payment-gateway core api', () => {
     });
   });
 
-  describe('createPaymentIntentApi & approveManualPaymentIntentAdminApi', () => {
+  describe('createPaymentIntent & approveManualPaymentIntent', () => {
     it('creates a payment intent in Xu and maps checkout_payload', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce({
         amount_credits: 200,
@@ -174,7 +199,7 @@ describe('billing & payment-gateway core api', () => {
         transfer_code: 'TQ12AB34',
       });
 
-      const intent = await createPaymentIntentApi({
+      const intent = await createPaymentIntent({
         amount_credits: 200,
         gateway_id: 'bank_vietqr',
         target_id: 'tenant-uuid-1',
@@ -201,6 +226,20 @@ describe('billing & payment-gateway core api', () => {
       expect(intent.pay_amount).toBe(200_000);
     });
 
+    it('inspects single payment intent status', async () => {
+      vi.mocked(supabaseRequest).mockResolvedValueOnce([
+        {
+          amount_credits: 100,
+          gateway_id: 'bank_vietqr',
+          id: 'intent-inspect-1',
+          status: 'succeeded',
+        },
+      ]);
+
+      const res = await getPaymentIntentStatus('intent-inspect-1');
+      expect(res?.status).toBe('succeeded');
+    });
+
     it('lists manual_review intents and force-approves via settle_payment_intent RPC', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         mapRawPaymentIntent({
@@ -216,7 +255,7 @@ describe('billing & payment-gateway core api', () => {
         }),
       ]);
 
-      const manualList = await getManualReviewIntentsAdminApi();
+      const manualList = await listManualReviewIntents();
       expect(manualList).toHaveLength(1);
       expect(manualList[0]?.status).toBe('manual_review');
 
@@ -227,7 +266,7 @@ describe('billing & payment-gateway core api', () => {
         settled: true,
       });
 
-      const approval = await approveManualPaymentIntentAdminApi(
+      const approval = await approveManualPaymentIntent(
         'intent-late-1',
         'Verified MoMo receipt manually',
       );
@@ -249,7 +288,7 @@ describe('billing & payment-gateway core api', () => {
       expect(approval.settled).toBe(true);
     });
 
-    it('upserts payment gateway configuration via upsertPaymentGatewayAdminApi and filters wallet transactions', async () => {
+    it('upserts payment gateway configuration via upsertPaymentGateway and filters wallet transactions', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           channel: 'bank_transfer',
@@ -264,7 +303,7 @@ describe('billing & payment-gateway core api', () => {
         },
       ]);
 
-      const gw = await upsertPaymentGatewayAdminApi({
+      const gw = await upsertPaymentGateway({
         id: 'bank_vietqr',
         is_active: true,
         rate_per_credit: 1000,
@@ -364,7 +403,7 @@ describe('billing & payment-gateway core api', () => {
         },
       ] as any);
 
-      const accounts = await getBankReceivingAccountsApi();
+      const accounts = await listBankReceivingAccounts();
       expect(supabaseRequest).toHaveBeenCalledWith(
         '/rest/v1/bank_receiving_accounts?select=*&order=priority.asc,created_at.asc',
         { schema: 'billing' },
@@ -384,7 +423,7 @@ describe('billing & payment-gateway core api', () => {
         },
       ] as any);
 
-      const upserted = await upsertBankReceivingAccountApi({
+      const upserted = await upsertBankReceivingAccount({
         account_name: 'VPBANK NEW',
         account_no: '9888777666',
         id: 'vpbank_secondary',
@@ -401,7 +440,7 @@ describe('billing & payment-gateway core api', () => {
 
       // Test toggle
       vi.mocked(supabaseRequest).mockResolvedValueOnce({} as any);
-      await toggleBankReceivingAccountApi('mbbank_primary', 'cooling', false);
+      await toggleBankReceivingAccount('mbbank_primary', 'cooling', false);
       expect(supabaseRequest).toHaveBeenCalledWith(
         '/rest/v1/bank_receiving_accounts?id=eq.mbbank_primary',
         {

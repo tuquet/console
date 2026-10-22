@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import type { BillingPlanItem } from '#/api';
+import type { BillingPlan } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 
 import { usePreferences } from '@tuquet/preferences';
+import { Badge, Button } from '@tuquet/vue-ui';
 
 import {
   Cpu,
@@ -13,10 +14,9 @@ import {
   RefreshCw,
   Users,
 } from '@lucide/vue';
-import { Badge, Button } from '@tuquet/vue-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getBillingPlansApi } from '#/api';
+import { listBillingPlans } from '#/api';
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
@@ -82,7 +82,7 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
+const [Grid, gridApi] = useVbenVxeGrid<BillingPlan>({
   detailSheetOptions: {
     resource: 'billing.plans',
     subtitleField: 'id',
@@ -154,7 +154,7 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlanItem>({
           { page }: { page?: { currentPage?: number; pageSize?: number } },
           formValues: Record<string, any>,
         ) => {
-          const data = await getBillingPlansApi();
+          const data = await listBillingPlans();
           plansCount.value = data.length;
 
           let filtered = data;

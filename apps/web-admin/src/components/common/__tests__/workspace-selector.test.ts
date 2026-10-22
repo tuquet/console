@@ -55,7 +55,7 @@ vi.mock('#/api/core/tenant', () => ({
     FREE: 'free',
     PRO: 'pro',
   },
-  createTenantApi: vi.fn(async (data) => ({
+  createTenant: vi.fn(async (data) => ({
     id: 'ws-new',
     name: data.name,
     slug: data.slug,
@@ -65,7 +65,7 @@ vi.mock('#/api/core/tenant', () => ({
     updated_at: new Date().toISOString(),
   })),
   getActiveTenantId: vi.fn(() => 'ws-1'),
-  getTenantsApi: vi.fn(async () => mockTenants),
+  listTenants: vi.fn(async () => mockTenants),
   setActiveTenantId: vi.fn(),
 }));
 

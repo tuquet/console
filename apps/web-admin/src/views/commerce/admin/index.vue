@@ -1,16 +1,16 @@
 <script lang="ts" setup>
 import type {
-  BankReceivingAccountItem,
-  CommerceOrderRecord,
+  BankReceivingAccount,
+  CommerceOrder,
   CommerceOrderStatus,
-  CommerceProductItem,
+  CommerceProduct,
   CommerceProductType,
-  CommerceProductVariantItem,
+  CommerceProductVariant,
   CommerceProductVisibility,
-  CommerceStockItem,
+  CommerceStock,
   CommerceStockMode,
-  PaymentGatewayItem,
-  PaymentIntentItem,
+  PaymentGateway,
+  PaymentIntent,
 } from '#/api';
 
 import { computed, ref, watch } from 'vue';
@@ -55,24 +55,24 @@ import {
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  adminInspectStockItemApi,
-  approveManualPaymentIntentAdminApi,
-  claimOrderWarrantyApi,
+  approveManualPaymentIntent,
+  claimOrderWarranty,
   filterCommerceOrders,
   filterCommerceProducts,
-  fulfillOrderAdminApi,
-  getAllOrdersAdminApi,
-  getAllPaymentGatewaysAdminApi,
-  getBankReceivingAccountsApi,
-  getCommerceProductsApi,
-  getManualReviewIntentsAdminApi,
-  getStockItemsAdminApi,
-  importStockBatchAdminApi,
-  toggleBankReceivingAccountApi,
-  upsertBankReceivingAccountApi,
-  upsertCommerceProductAdminApi,
-  upsertPaymentGatewayAdminApi,
-  upsertProductVariantAdminApi,
+  fulfillOrder,
+  importStockBatch,
+  inspectStockItem,
+  listAllOrders,
+  listAllPaymentGateways,
+  listBankReceivingAccounts,
+  listCommerceProducts,
+  listManualReviewIntents,
+  listStockItems,
+  toggleBankReceivingAccount,
+  upsertBankReceivingAccount,
+  upsertCommerceProduct,
+  upsertPaymentGateway,
+  upsertProductVariant,
 } from '#/api';
 import { useDateFormat } from '#/composables';
 import {
@@ -98,17 +98,17 @@ type AdminTabMode =
   | 'stock_items';
 const activeTab = ref<AdminTabMode>('products');
 
-const allProducts = ref<CommerceProductItem[]>([]);
-const allOrders = ref<CommerceOrderRecord[]>([]);
-const allStockItems = ref<CommerceStockItem[]>([]);
-const manualReviewIntents = ref<PaymentIntentItem[]>([]);
-const allGateways = ref<PaymentGatewayItem[]>([]);
-const allBankAccounts = ref<BankReceivingAccountItem[]>([]);
+const allProducts = ref<CommerceProduct[]>([]);
+const allOrders = ref<CommerceOrder[]>([]);
+const allStockItems = ref<CommerceStock[]>([]);
+const manualReviewIntents = ref<PaymentIntent[]>([]);
+const allGateways = ref<PaymentGateway[]>([]);
+const allBankAccounts = ref<BankReceivingAccount[]>([]);
 
 // Warranty Claim Modal State
 const warrantyModalOpen = ref(false);
 const claimingWarranty = ref(false);
-const selectedOrderForWarranty = ref<CommerceOrderRecord | null>(null);
+const selectedOrderForWarranty = ref<CommerceOrder | null>(null);
 const warrantyClaimReason = ref('Item defective/dead upon delivery');
 
 // Product + Variant Upsert Modal State
@@ -150,7 +150,7 @@ const stockLinesRaw = ref<string>('');
 const serializedVariants = computed(() => {
   const list: Array<{
     productName: string;
-    variant: CommerceProductVariantItem;
+    variant: CommerceProductVariant;
   }> = [];
   for (const p of allProducts.value) {
     for (const v of p.variants || []) {
@@ -199,7 +199,7 @@ function getProductColumns() {
 }
 
 // 1. Products Grid
-const [ProductsGrid, productsGridApi] = useVbenVxeGrid<CommerceProductItem>({
+const [ProductsGrid, productsGridApi] = useVbenVxeGrid<CommerceProduct>({
   separator: false,
   detailSheetOptions: {
     resource: 'commerce.products',
@@ -307,7 +307,7 @@ const [ProductsGrid, productsGridApi] = useVbenVxeGrid<CommerceProductItem>({
           { page }: { page?: { currentPage?: number; pageSize?: number } },
           formValues: Record<string, any>,
         ) => {
-          const data = await getCommerceProductsApi({ includeInactive: true });
+          const data = await listCommerceProducts({ includeInactive: true });
           allProducts.value = data;
           const filtered = filterCommerceProducts(data, {
             product_type: formValues?.product_type,
@@ -376,7 +376,7 @@ function getOrderColumns() {
 }
 
 // 2. All Orders Grid
-const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrderRecord>({
+const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrder>({
   separator: false,
   detailSheetOptions: {
     resource: 'commerce.orders',
@@ -442,7 +442,7 @@ const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrderRecord>({
           { page }: { page?: { currentPage?: number; pageSize?: number } },
           formValues: Record<string, any>,
         ) => {
-          const data = await getAllOrdersAdminApi();
+          const data = await listAllOrders();
           allOrders.value = data;
           const filtered = filterCommerceOrders(data, {
             search: formValues?.search,
@@ -509,44 +509,43 @@ function getManualReviewColumns() {
 }
 
 // 3. Manual Review Intents Grid
-const [ManualReviewGrid, manualReviewGridApi] =
-  useVbenVxeGrid<PaymentIntentItem>({
-    separator: false,
-    detailSheetOptions: {
-      resource: 'billing.payment_intents',
-      subtitleField: 'gateway_id',
-      titleField: 'transfer_code',
-    },
-    gridOptions: {
-      border: false,
-      round: true,
-      showOverflow: true,
-      cellConfig: { height: 56 },
-      rowConfig: { isHover: true, keyField: 'id' },
-      pagerConfig: { pageSize: 15, pageSizes: [10, 15, 30, 50] },
-      proxyConfig: {
-        autoLoad: true,
-        ajax: {
-          query: async ({
-            page,
-          }: {
-            page?: { currentPage?: number; pageSize?: number };
-          }) => {
-            const data = await getManualReviewIntentsAdminApi();
-            manualReviewIntents.value = data;
-            const currentPage = page?.currentPage || 1;
-            const pageSize = page?.pageSize || 15;
-            const start = (currentPage - 1) * pageSize;
-            return {
-              items: data.slice(start, start + pageSize),
-              total: data.length,
-            };
-          },
+const [ManualReviewGrid, manualReviewGridApi] = useVbenVxeGrid<PaymentIntent>({
+  separator: false,
+  detailSheetOptions: {
+    resource: 'billing.payment_intents',
+    subtitleField: 'gateway_id',
+    titleField: 'transfer_code',
+  },
+  gridOptions: {
+    border: false,
+    round: true,
+    showOverflow: true,
+    cellConfig: { height: 56 },
+    rowConfig: { isHover: true, keyField: 'id' },
+    pagerConfig: { pageSize: 15, pageSizes: [10, 15, 30, 50] },
+    proxyConfig: {
+      autoLoad: true,
+      ajax: {
+        query: async ({
+          page,
+        }: {
+          page?: { currentPage?: number; pageSize?: number };
+        }) => {
+          const data = await listManualReviewIntents();
+          manualReviewIntents.value = data;
+          const currentPage = page?.currentPage || 1;
+          const pageSize = page?.pageSize || 15;
+          const start = (currentPage - 1) * pageSize;
+          return {
+            items: data.slice(start, start + pageSize),
+            total: data.length,
+          };
         },
       },
-      columns: getManualReviewColumns(),
     },
-  });
+    columns: getManualReviewColumns(),
+  },
+});
 
 function getGatewayColumns() {
   return [
@@ -582,17 +581,17 @@ function getGatewayColumns() {
 }
 
 // 4. Payment Gateways Grid
-const [GatewaysGrid, gatewaysGridApi] = useVbenVxeGrid<PaymentGatewayItem>({
+const [GatewaysGrid, gatewaysGridApi] = useVbenVxeGrid<PaymentGateway>({
   separator: false,
   detailSheetOptions: {
     resource: 'billing.payment_gateways',
     subtitleField: 'channel',
     titleField: 'name',
     onCreate: async ({ insertPayload }) => {
-      return await upsertPaymentGatewayAdminApi(insertPayload as any);
+      return await upsertPaymentGateway(insertPayload as any);
     },
     onSave: async ({ dirtyPayload, row }) => {
-      await upsertPaymentGatewayAdminApi({
+      await upsertPaymentGateway({
         ...row,
         ...dirtyPayload,
       } as any);
@@ -609,7 +608,7 @@ const [GatewaysGrid, gatewaysGridApi] = useVbenVxeGrid<PaymentGatewayItem>({
       autoLoad: true,
       ajax: {
         query: async () => {
-          const data = await getAllPaymentGatewaysAdminApi();
+          const data = await listAllPaymentGateways();
           allGateways.value = data;
           return { items: data, total: data.length };
         },
@@ -661,43 +660,42 @@ function getBankPoolColumns() {
 }
 
 // 5. Dynamic Bank Accounts Pool Grid
-const [BankPoolGrid, bankPoolGridApi] =
-  useVbenVxeGrid<BankReceivingAccountItem>({
-    separator: false,
-    detailSheetOptions: {
-      resource: 'billing.bank_receiving_accounts',
-      subtitleField: 'account_no',
-      titleField: 'bank_name',
-      onCreate: async ({ insertPayload }) => {
-        return await upsertBankReceivingAccountApi(insertPayload as any);
-      },
-      onSave: async ({ dirtyPayload, row }) => {
-        await upsertBankReceivingAccountApi({
-          ...row,
-          ...dirtyPayload,
-        } as any);
-      },
+const [BankPoolGrid, bankPoolGridApi] = useVbenVxeGrid<BankReceivingAccount>({
+  separator: false,
+  detailSheetOptions: {
+    resource: 'billing.bank_receiving_accounts',
+    subtitleField: 'account_no',
+    titleField: 'bank_name',
+    onCreate: async ({ insertPayload }) => {
+      return await upsertBankReceivingAccount(insertPayload as any);
     },
-    gridOptions: {
-      border: false,
-      round: true,
-      showOverflow: true,
-      cellConfig: { height: 56 },
-      rowConfig: { isHover: true, keyField: 'id' },
-      pagerConfig: { enabled: false },
-      proxyConfig: {
-        autoLoad: true,
-        ajax: {
-          query: async () => {
-            const data = await getBankReceivingAccountsApi();
-            allBankAccounts.value = data;
-            return { items: data, total: data.length };
-          },
+    onSave: async ({ dirtyPayload, row }) => {
+      await upsertBankReceivingAccount({
+        ...row,
+        ...dirtyPayload,
+      } as any);
+    },
+  },
+  gridOptions: {
+    border: false,
+    round: true,
+    showOverflow: true,
+    cellConfig: { height: 56 },
+    rowConfig: { isHover: true, keyField: 'id' },
+    pagerConfig: { enabled: false },
+    proxyConfig: {
+      autoLoad: true,
+      ajax: {
+        query: async () => {
+          const data = await listBankReceivingAccounts();
+          allBankAccounts.value = data;
+          return { items: data, total: data.length };
         },
       },
-      columns: getBankPoolColumns(),
     },
-  });
+    columns: getBankPoolColumns(),
+  },
+});
 
 function getStockItemsColumns() {
   return [
@@ -741,7 +739,7 @@ function getStockItemsColumns() {
 }
 
 // 6. Serialized Stock Items Inspector Grid
-const [StockItemsGrid, stockItemsGridApi] = useVbenVxeGrid<CommerceStockItem>({
+const [StockItemsGrid, stockItemsGridApi] = useVbenVxeGrid<CommerceStock>({
   separator: false,
   gridOptions: {
     border: false,
@@ -758,7 +756,7 @@ const [StockItemsGrid, stockItemsGridApi] = useVbenVxeGrid<CommerceStockItem>({
         }: {
           page?: { currentPage?: number; pageSize?: number };
         }) => {
-          const data = await getStockItemsAdminApi({ limit: 200 });
+          const data = await listStockItems({ limit: 200 });
           allStockItems.value = data;
           const currentPage = page?.currentPage || 1;
           const pageSize = page?.pageSize || 20;
@@ -799,15 +797,11 @@ function reloadCurrentTab() {
 }
 
 async function handleToggleAccountStatus(
-  row: BankReceivingAccountItem,
-  newStatus: BankReceivingAccountItem['status'],
+  row: BankReceivingAccount,
+  newStatus: BankReceivingAccount['status'],
 ) {
   try {
-    await toggleBankReceivingAccountApi(
-      row.id,
-      newStatus,
-      newStatus === 'active',
-    );
+    await toggleBankReceivingAccount(row.id, newStatus, newStatus === 'active');
     toast.success($t('common.successful'));
     await bankPoolGridApi.reload();
   } catch (error: any) {
@@ -819,7 +813,7 @@ async function handleToggleAccountStatus(
   }
 }
 
-function openCreateProductModal(existing?: CommerceProductItem) {
+function openCreateProductModal(existing?: CommerceProduct) {
   if (existing) {
     const firstVar = existing.variants?.[0];
     productForm.value = {
@@ -862,7 +856,7 @@ async function handleSaveProductAndVariant() {
   }
   savingProduct.value = true;
   try {
-    const savedProduct = await upsertCommerceProductAdminApi({
+    const savedProduct = await upsertCommerceProduct({
       description: f.description.trim() || null,
       is_active: f.is_active,
       name: f.name.trim(),
@@ -872,7 +866,7 @@ async function handleSaveProductAndVariant() {
       visibility: f.visibility,
     });
 
-    await upsertProductVariantAdminApi({
+    await upsertProductVariant({
       is_active: true,
       name:
         f.variant_name.trim() || $t('page.commerce_view.default_variant_name'),
@@ -933,7 +927,7 @@ async function handleBulkImportStock() {
 
   importingStock.value = true;
   try {
-    const res = await importStockBatchAdminApi({
+    const res = await importStockBatch({
       batch_code: stockBatchCode.value.trim() || null,
       lines,
       variant_id: selectedStockVariantId.value,
@@ -958,9 +952,9 @@ async function handleBulkImportStock() {
   }
 }
 
-async function handleManualFulfillOrder(order: CommerceOrderRecord) {
+async function handleManualFulfillOrder(order: CommerceOrder) {
   try {
-    const res = await fulfillOrderAdminApi(order.id);
+    const res = await fulfillOrder(order.id);
     if (res.fulfilled) {
       toast.success(
         $t('page.commerce_view.order_fulfilled_toast', {
@@ -987,9 +981,9 @@ async function handleManualFulfillOrder(order: CommerceOrderRecord) {
   }
 }
 
-async function handleForceApproveIntent(intent: PaymentIntentItem) {
+async function handleForceApproveIntent(intent: PaymentIntent) {
   try {
-    const res = await approveManualPaymentIntentAdminApi(
+    const res = await approveManualPaymentIntent(
       intent.id,
       `Force approved by Superadmin for transfer ${intent.transfer_code}`,
     );
@@ -1024,11 +1018,11 @@ function getOrderStatusVariant(status: CommerceOrderStatus) {
 }
 
 async function handleInspectStockItem(
-  stock: CommerceStockItem,
+  stock: CommerceStock,
   isHealthy: boolean,
 ) {
   try {
-    const res = await adminInspectStockItemApi({
+    const res = await inspectStockItem({
       is_healthy: isHealthy,
       notes: isHealthy
         ? 'Manually restored by admin'
@@ -1054,7 +1048,7 @@ async function handleInspectStockItem(
   }
 }
 
-function openWarrantyClaimModal(order: CommerceOrderRecord) {
+function openWarrantyClaimModal(order: CommerceOrder) {
   selectedOrderForWarranty.value = order;
   warrantyClaimReason.value = 'Item defective/dead upon delivery';
   warrantyModalOpen.value = true;
@@ -1068,7 +1062,7 @@ async function submitWarrantyClaim() {
       selectedOrderForWarranty.value.deliveries?.[0]?.id ||
       selectedOrderForWarranty.value.id;
 
-    const res = await claimOrderWarrantyApi({
+    const res = await claimOrderWarranty({
       delivery_id: targetDeliveryId,
       order_id: selectedOrderForWarranty.value.id,
       reason: warrantyClaimReason.value,
@@ -1304,8 +1298,7 @@ async function submitWarrantyClaim() {
             <Button
               v-if="
                 row.variants?.some(
-                  (v: CommerceProductVariantItem) =>
-                    v.stock_mode === 'serialized',
+                  (v: CommerceProductVariant) => v.stock_mode === 'serialized',
                 )
               "
               size="sm"

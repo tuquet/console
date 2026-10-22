@@ -2,13 +2,19 @@ import type { UserInfo } from '@tuquet/types';
 
 import { useAccessStore } from '@tuquet/stores';
 
-import { getEffectiveAccessApi } from './access';
+import { getEffectiveAccess } from './access';
 import { supabaseRequest } from './supabase-client';
 
+export interface UpdateUserProfileInput {
+  avatar_url?: string;
+  full_name?: string;
+  introduction?: string;
+}
+
 /**
- * Get user info (Supabase GoTrue REST)
+ * Get current user info (Supabase GoTrue REST)
  */
-export async function getUserInfoApi(): Promise<UserInfo> {
+export async function getCurrentUser(): Promise<UserInfo> {
   const accessStore = useAccessStore();
   const token = accessStore.accessToken;
 
@@ -18,7 +24,7 @@ export async function getUserInfoApi(): Promise<UserInfo> {
 
   const [user, effectiveAccess] = await Promise.all([
     supabaseRequest<any>('/auth/v1/user'),
-    getEffectiveAccessApi(),
+    getEffectiveAccess(),
   ]);
 
   const meta = user.user_metadata || {};
@@ -48,11 +54,9 @@ export async function getUserInfoApi(): Promise<UserInfo> {
 /**
  * Update user profile (Supabase Auth metadata & public.profiles)
  */
-export async function updateUserProfileApi(data: {
-  avatar_url?: string;
-  full_name?: string;
-  introduction?: string;
-}): Promise<UserInfo> {
+export async function updateUserProfile(
+  data: UpdateUserProfileInput,
+): Promise<UserInfo> {
   const payload: { data: Record<string, any> } = { data: {} };
   if (data.full_name) payload.data.full_name = data.full_name;
   if (data.avatar_url) payload.data.avatar_url = data.avatar_url;
@@ -65,7 +69,7 @@ export async function updateUserProfileApi(data: {
   });
 
   // 2. Update public.profiles if exists
-  const userInfo = await getUserInfoApi();
+  const userInfo = await getCurrentUser();
   if (userInfo.userId) {
     await supabaseRequest(
       `/rest/v1/profiles?id=eq.${encodeURIComponent(userInfo.userId)}`,
@@ -85,11 +89,15 @@ export async function updateUserProfileApi(data: {
 /**
  * Update user password via Supabase Auth
  */
-export async function updateUserPasswordApi(
-  newPassword: string,
-): Promise<void> {
+export async function updateUserPassword(newPassword: string): Promise<void> {
   await supabaseRequest('/auth/v1/user', {
     body: JSON.stringify({ password: newPassword }),
     method: 'PUT',
   });
 }
+
+export const userApi = {
+  getCurrent: getCurrentUser,
+  updatePassword: updateUserPassword,
+  updateProfile: updateUserProfile,
+};

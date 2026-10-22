@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TenantItem } from '#/api/core/tenant';
+import type { Tenant } from '#/api/core/tenant';
 
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -76,7 +76,7 @@ const filteredWorkspaces = computed(() => {
   });
 });
 
-function handleSelectWorkspace(workspace: TenantItem) {
+function handleSelectWorkspace(workspace: Tenant) {
   workspaceStore.setWorkspace(workspace.id);
   isOpen.value = false;
   searchQuery.value = '';

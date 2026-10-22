@@ -4,7 +4,7 @@ import { useAccessStore } from '@tuquet/stores';
 import { isTauriEnvironment } from '#/adapter/desktop';
 
 import { captureError } from '../../utils/bugsink';
-import { getEffectiveAccessApi } from './access';
+import { getEffectiveAccess } from './access';
 import {
   getSupabaseConfig,
   isJwtTokenExpired,
@@ -34,7 +34,7 @@ export namespace AuthApi {
 /**
  * Login (Supabase GoTrue REST)
  */
-export async function loginApi(
+export async function login(
   data: AuthApi.LoginParams,
 ): Promise<AuthApi.LoginResult> {
   const { anonKey, supabaseUrl } = getSupabaseConfig();
@@ -92,7 +92,7 @@ export async function loginApi(
       $t('authentication.passwordErrorTip');
     const err = new Error(errorMsg);
     captureError(err, {
-      action: 'loginApi',
+      action: 'login',
       email,
       errorCode: resJson.error_code || resJson.code,
       status: response.status,
@@ -109,7 +109,7 @@ export async function loginApi(
 /**
  * Refresh accessToken (Supabase GoTrue REST)
  */
-export async function refreshTokenApi(): Promise<AuthApi.RefreshTokenResult> {
+export async function refreshToken(): Promise<AuthApi.RefreshTokenResult> {
   const newToken = await tryRefreshSupabaseToken();
   if (!newToken) {
     throw new Error('Session refresh failed');
@@ -123,7 +123,7 @@ export async function refreshTokenApi(): Promise<AuthApi.RefreshTokenResult> {
 /**
  * Logout (Supabase GoTrue REST)
  */
-export async function logoutApi() {
+export async function logout() {
   const { anonKey, supabaseUrl } = getSupabaseConfig();
   const accessStore = useAccessStore();
   const token = accessStore.accessToken;
@@ -147,15 +147,15 @@ export async function logoutApi() {
 /**
  * Get user permission codes (Supabase Admin Console RBAC)
  */
-export async function getAccessCodesApi(): Promise<string[]> {
-  const access = await getEffectiveAccessApi();
+export async function getAccessCodes(): Promise<string[]> {
+  const access = await getEffectiveAccess();
   return access.permissions;
 }
 
 /**
  * Recover password (Supabase GoTrue REST)
  */
-export async function resetPasswordApi(email: string): Promise<void> {
+export async function resetPassword(email: string): Promise<void> {
   const { anonKey, supabaseUrl } = getSupabaseConfig();
   const response = await fetch(`${supabaseUrl}/auth/v1/recover`, {
     method: 'POST',
@@ -179,7 +179,7 @@ export async function resetPasswordApi(email: string): Promise<void> {
       $t('authentication.resetLinkFailed');
     const err = new Error(errorMsg);
     captureError(err, {
-      action: 'resetPasswordApi',
+      action: 'resetPassword',
       email: email.trim(),
       status: response.status,
     });
@@ -190,7 +190,7 @@ export async function resetPasswordApi(email: string): Promise<void> {
 /**
  * Update password (Supabase GoTrue REST)
  */
-export async function updatePasswordApi(
+export async function updatePassword(
   password: string,
   customToken?: string,
 ): Promise<void> {
@@ -222,7 +222,7 @@ export async function updatePasswordApi(
       $t('authentication.passwordResetFailed');
     const err = new Error(errorMsg);
     captureError(err, {
-      action: 'updatePasswordApi',
+      action: 'updatePassword',
       status: response.status,
     });
     throw err;
@@ -236,14 +236,16 @@ export async function updatePasswordApi(
  * The web bridge then seamlessly hands the token back to the desktop application via `tuquet://auth/callback`.
  * On Web: redirects via standard window.location.href.
  */
-export async function loginWithGitHubApi(redirectTo?: string): Promise<void> {
+export async function loginWithGitHub(redirectTo?: string): Promise<void> {
   const { supabaseUrl } = getSupabaseConfig();
 
   if (isTauriEnvironment()) {
     const isDev = import.meta.env.DEV;
-    const baseCallback = isDev
-      ? 'http://localhost:5320/auth/callback'
-      : 'https://admin.tuquet.com/auth/callback';
+    const baseCallback =
+      import.meta.env.VITE_AUTH_CALLBACK_URL ||
+      (isDev
+        ? 'http://localhost:5320/auth/callback'
+        : `${window.location.origin}/auth/callback`);
     const target = redirectTo || `${baseCallback}?target=desktop`;
     const authUrl = `${supabaseUrl}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(target)}`;
     try {
@@ -259,3 +261,13 @@ export async function loginWithGitHubApi(redirectTo?: string): Promise<void> {
   const authUrl = `${supabaseUrl}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(target)}`;
   window.location.href = authUrl;
 }
+
+export const authApi = {
+  getAccessCodes,
+  login,
+  loginWithGitHub,
+  logout,
+  refreshToken,
+  resetPassword,
+  updatePassword,
+};

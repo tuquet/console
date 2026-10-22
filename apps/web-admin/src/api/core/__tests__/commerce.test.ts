@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  adminInspectStockItemApi,
-  claimOrderWarrantyApi,
-  createCheckoutOrderApi,
-  fulfillOrderAdminApi,
-  getCommerceCategoriesApi,
-  getCommerceProductsApi,
-  getGuestOrderDeliveriesApi,
-  getStockItemsAdminApi,
-  importStockBatchAdminApi,
+  claimOrderWarranty,
+  createCheckoutOrder,
+  fulfillOrder,
+  getGuestOrderDeliveries,
+  importStockBatch,
+  inspectStockItem,
+  listCommerceCategories,
+  listCommerceProducts,
+  listStockItems,
   mapRawCommerceOrder,
   mapRawCommerceProduct,
   mapRawProductVariant,
@@ -89,7 +89,7 @@ describe('commerce core api (digital-commerce)', () => {
     });
   });
 
-  describe('getCommerceCategoriesApi & getCommerceProductsApi', () => {
+  describe('listCommerceCategories & listCommerceProducts', () => {
     it('fetches active categories and products from schema commerce', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
@@ -105,7 +105,7 @@ describe('commerce core api (digital-commerce)', () => {
         },
       ]);
 
-      const categories = await getCommerceCategoriesApi({ skipAuth: true });
+      const categories = await listCommerceCategories({ skipAuth: true });
       expect(supabaseRequest).toHaveBeenCalledWith(
         '/rest/v1/categories?is_active=eq.true&select=*&order=sort_order.asc,name.asc',
         {
@@ -118,7 +118,7 @@ describe('commerce core api (digital-commerce)', () => {
       expect(categories[0]?.slug).toBe('accounts-keys');
 
       vi.mocked(supabaseRequest).mockResolvedValueOnce([]);
-      await getCommerceProductsApi({
+      await listCommerceProducts({
         categoryId: 'cat-1',
         productType: 'serial_stock',
       });
@@ -133,7 +133,7 @@ describe('commerce core api (digital-commerce)', () => {
     });
   });
 
-  describe('createCheckoutOrderApi', () => {
+  describe('createCheckoutOrder', () => {
     it('invokes create_checkout_order RPC for instant Tenant Xu wallet checkout', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce({
         claim_token: null,
@@ -193,7 +193,7 @@ describe('commerce core api (digital-commerce)', () => {
         },
       });
 
-      const result = await createCheckoutOrderApi({
+      const result = await createCheckoutOrder({
         buyer_email: 'owner@tuquet.com',
         buyer_tenant_id: 'tenant-1',
         gateway_code: 'internal_wallet',
@@ -228,7 +228,7 @@ describe('commerce core api (digital-commerce)', () => {
     });
   });
 
-  describe('importStockBatchAdminApi, getGuestOrderDeliveriesApi & fulfillOrderAdminApi', () => {
+  describe('importStockBatch, getGuestOrderDeliveries & fulfillOrder', () => {
     it('calls import_stock_batch RPC and normalizes deduplication counters', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce({
         available_stock: '15',
@@ -238,7 +238,7 @@ describe('commerce core api (digital-commerce)', () => {
         variant_id: 'var-1',
       });
 
-      const batchRes = await importStockBatchAdminApi({
+      const batchRes = await importStockBatch({
         batch_code: 'BATCH-OCT-14',
         lines: ['line1', 'line2', 'line1'],
         variant_id: 'var-1',
@@ -277,7 +277,7 @@ describe('commerce core api (digital-commerce)', () => {
         }),
       });
 
-      const guestRes = await getGuestOrderDeliveriesApi(
+      const guestRes = await getGuestOrderDeliveries(
         'ORD-261014-GUEST1',
         'CLM_SECRET_TOKEN',
       );
@@ -305,7 +305,7 @@ describe('commerce core api (digital-commerce)', () => {
         order_id: 'ord-guest-1',
       });
 
-      const fulfillRes = await fulfillOrderAdminApi('ord-guest-1');
+      const fulfillRes = await fulfillOrder('ord-guest-1');
       expect(fulfillRes.fulfilled).toBe(true);
       expect(fulfillRes.idempotent).toBe(true);
     });
@@ -471,7 +471,7 @@ describe('commerce core api (digital-commerce)', () => {
     });
   });
 
-  describe('claimOrderWarrantyApi, adminInspectStockItemApi & getStockItemsAdminApi', () => {
+  describe('claimOrderWarranty, inspectStockItem & listStockItems', () => {
     it('calls claim_order_warranty RPC and maps refund and wallet balance', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce({
         claimed_at: '2026-10-18T00:00:00Z',
@@ -484,7 +484,7 @@ describe('commerce core api (digital-commerce)', () => {
         success: true,
       });
 
-      const result = await claimOrderWarrantyApi({
+      const result = await claimOrderWarranty({
         delivery_id: 'deliv-1',
         order_id: 'ord-defect-1',
         reason: 'Proxy dead on arrival',
@@ -519,7 +519,7 @@ describe('commerce core api (digital-commerce)', () => {
         variant_id: 'var-1',
       });
 
-      const res = await adminInspectStockItemApi({
+      const res = await inspectStockItem({
         is_healthy: false,
         notes: 'Failed proxy handshake',
         stock_id: 'stk-100',
@@ -562,7 +562,7 @@ describe('commerce core api (digital-commerce)', () => {
         },
       ]);
 
-      const items = await getStockItemsAdminApi({
+      const items = await listStockItems({
         limit: 50,
         status: 'available' as any,
         variant_id: 'var-1',

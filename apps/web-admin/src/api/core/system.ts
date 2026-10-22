@@ -19,7 +19,7 @@ import { supabaseRequest } from './supabase-client';
 export { SUBSCRIPTION_STATUS, SYSTEM_PLUGIN_CATEGORY, SYSTEM_PLUGIN_STATUS };
 export type { SubscriptionStatus, SystemPluginCategory, SystemPluginStatus };
 
-export interface SystemPluginItem {
+export interface SystemPlugin {
   dependencies?: string[];
   description: null | string;
   id: string;
@@ -34,7 +34,7 @@ export interface SystemPluginItem {
   version: string;
 }
 
-export interface BillingPlanItem {
+export interface BillingPlan {
   created_at: string;
   description: null | string;
   id: string;
@@ -55,7 +55,7 @@ export interface PlatformUserWorkspaceSummary {
   tenant_slug: string;
 }
 
-export interface PlatformUserItem {
+export interface PlatformUser {
   avatar_url: null | string;
   created_at: string;
   email?: null | string;
@@ -67,7 +67,7 @@ export interface PlatformUserItem {
   workspaces?: PlatformUserWorkspaceSummary[];
 }
 
-export interface GlobalAuditLogItem {
+export interface GlobalAuditLog {
   action: string;
   actor_id: null | string;
   created_at: string;
@@ -81,7 +81,7 @@ export interface GlobalAuditLogItem {
   user_agent: null | string;
 }
 
-export interface PlatformSubscriptionItem {
+export interface PlatformSubscription {
   cancel_at_period_end: boolean;
   created_at: string;
   current_period_end: string;
@@ -96,7 +96,7 @@ export interface PlatformSubscriptionItem {
   tenant_slug: string;
 }
 
-export interface SystemPermissionItem {
+export interface SystemPermission {
   created_at?: string;
   description: null | string;
   id: string;
@@ -104,7 +104,7 @@ export interface SystemPermissionItem {
   roles?: string[];
 }
 
-export interface SystemRoleItem {
+export interface SystemRole {
   created_at: string;
   description: null | string;
   id: string;
@@ -115,8 +115,18 @@ export interface SystemRoleItem {
   tenant_id?: null | string;
 }
 
+export interface ListPlatformUsersParams {
+  search?: string;
+}
+
+export interface ListGlobalAuditLogsParams {
+  action?: string;
+  limit?: number;
+  tenantId?: string;
+}
+
 const CORE_PLUGIN_IDS = new Set([
-  'automa',
+  'automation',
   'core-iam',
   'storage',
   'subscriptions',
@@ -133,9 +143,9 @@ export function isCorePlugin(id: string): boolean {
 }
 
 /**
- * Pure function: Map bản ghi raw từ public.system_plugins sang SystemPluginItem
+ * Pure function: Map bản ghi raw từ public.system_plugins sang SystemPlugin
  */
-export function mapRawPlugin(raw: any): SystemPluginItem {
+export function mapRawPlugin(raw: any): SystemPlugin {
   const pluginId = String(raw.id ?? '');
   const core = isCorePlugin(pluginId);
   return {
@@ -157,9 +167,9 @@ export function mapRawPlugin(raw: any): SystemPluginItem {
 }
 
 /**
- * Pure function: Map bản ghi raw từ billing.plans sang BillingPlanItem
+ * Pure function: Map bản ghi raw từ billing.plans sang BillingPlan
  */
-export function mapRawBillingPlan(raw: any): BillingPlanItem {
+export function mapRawBillingPlan(raw: any): BillingPlan {
   const price =
     typeof raw.price_monthly_usd === 'number'
       ? raw.price_monthly_usd
@@ -185,7 +195,7 @@ export function mapRawBillingPlan(raw: any): BillingPlanItem {
 /**
  * Lấy danh sách các plugins hệ thống từ public.system_plugins
  */
-export async function getSystemPluginsApi(): Promise<SystemPluginItem[]> {
+export async function listSystemPlugins(): Promise<SystemPlugin[]> {
   try {
     const data = await supabaseRequest<any[]>(
       '/rest/v1/system_plugins?select=*&order=installed_at.asc',
@@ -203,7 +213,7 @@ export async function getSystemPluginsApi(): Promise<SystemPluginItem[]> {
 /**
  * Lấy danh sách các gói cước SaaS từ billing.plans (schema: billing)
  */
-export async function getBillingPlansApi(): Promise<BillingPlanItem[]> {
+export async function listBillingPlans(): Promise<BillingPlan[]> {
   try {
     const data = await supabaseRequest<any[]>(
       '/rest/v1/plans?select=*&order=price_monthly_usd.asc',
@@ -241,9 +251,9 @@ export function sortRoleNamesByPriority(roleNames: string[]): string[] {
 }
 
 /**
- * Pure function: Map bản ghi raw từ public.profiles sang PlatformUserItem
+ * Pure function: Map bản ghi raw từ public.profiles sang PlatformUser
  */
-export function mapRawPlatformUser(raw: any): PlatformUserItem {
+export function mapRawPlatformUser(raw: any): PlatformUser {
   let tenantCount = 0;
   const workspaces: PlatformUserWorkspaceSummary[] = [];
 
@@ -296,13 +306,13 @@ export function mapRawPlatformUser(raw: any): PlatformUserItem {
  * Pure function: Lọc danh sách người dùng nền tảng theo tổ chức, vai trò và từ khóa đa trường
  */
 export function filterPlatformUsers(
-  users: PlatformUserItem[],
+  users: PlatformUser[],
   filters?: {
     role_filter?: string;
     search?: string;
     tenant_filter?: string;
   },
-): PlatformUserItem[] {
+): PlatformUser[] {
   if (!Array.isArray(users)) return [];
   let result = users;
 
@@ -343,14 +353,14 @@ export function filterPlatformUsers(
  * Pure function: Lọc danh sách vai trò hệ thống theo phân loại, module quyền hạn và từ khóa
  */
 export function filterSystemRoles(
-  roles: SystemRoleItem[],
+  roles: SystemRole[],
   filters?: {
     module?: string;
     role_type?: string;
     search?: string;
   },
-  permissionsCatalog?: SystemPermissionItem[],
-): SystemRoleItem[] {
+  permissionsCatalog?: SystemPermission[],
+): SystemRole[] {
   if (!Array.isArray(roles)) return [];
   let result = roles;
 
@@ -394,14 +404,14 @@ export function filterSystemRoles(
  * Pure function: Lọc danh sách quyền hạn hệ thống theo module, vai trò sở hữu và từ khóa
  */
 export function filterSystemPermissions(
-  permissions: SystemPermissionItem[],
+  permissions: SystemPermission[],
   filters?: {
     module?: string;
     role?: string;
     search?: string;
   },
-  roles?: SystemRoleItem[],
-): SystemPermissionItem[] {
+  roles?: SystemRole[],
+): SystemPermission[] {
   if (!Array.isArray(permissions)) return [];
   let result = permissions;
 
@@ -439,9 +449,9 @@ export function filterSystemPermissions(
 }
 
 /**
- * Pure function: Map bản ghi raw từ public.audit_logs sang GlobalAuditLogItem
+ * Pure function: Map bản ghi raw từ public.audit_logs sang GlobalAuditLog
  */
-export function mapRawGlobalAuditLog(raw: any): GlobalAuditLogItem {
+export function mapRawGlobalAuditLog(raw: any): GlobalAuditLog {
   return {
     action: raw.action || 'unknown',
     actor_id: raw.actor_id ?? null,
@@ -464,9 +474,9 @@ export function mapRawGlobalAuditLog(raw: any): GlobalAuditLogItem {
 }
 
 /**
- * Pure function: Map bản ghi raw từ billing.subscriptions sang PlatformSubscriptionItem
+ * Pure function: Map bản ghi raw từ billing.subscriptions sang PlatformSubscription
  */
-export function mapRawPlatformSubscription(raw: any): PlatformSubscriptionItem {
+export function mapRawPlatformSubscription(raw: any): PlatformSubscription {
   const plan = raw.plans || {};
   const tenant = raw.tenants || {};
 
@@ -487,9 +497,9 @@ export function mapRawPlatformSubscription(raw: any): PlatformSubscriptionItem {
 }
 
 /**
- * Pure function: Map bản ghi raw từ public.roles sang SystemRoleItem
+ * Pure function: Map bản ghi raw từ public.roles sang SystemRole
  */
-export function mapRawSystemRole(raw: any): SystemRoleItem {
+export function mapRawSystemRole(raw: any): SystemRole {
   const permissions: string[] = Array.isArray(raw.role_permissions)
     ? raw.role_permissions.map((rp: any) => rp.permission_id).filter(Boolean)
     : [];
@@ -510,9 +520,9 @@ export function mapRawSystemRole(raw: any): SystemRoleItem {
  * Pure function: Gom nhóm permissions theo module
  */
 export function groupPermissionsByModule(
-  permissions: SystemPermissionItem[],
-): Record<string, SystemPermissionItem[]> {
-  const grouped: Record<string, SystemPermissionItem[]> = {};
+  permissions: SystemPermission[],
+): Record<string, SystemPermission[]> {
+  const grouped: Record<string, SystemPermission[]> = {};
   for (const perm of permissions) {
     const mod = perm.module || 'other';
     if (!grouped[mod]) {
@@ -526,9 +536,9 @@ export function groupPermissionsByModule(
 /**
  * Lấy danh sách toàn bộ người dùng trên nền tảng (Platform Users)
  */
-export async function getPlatformUsersApi(params?: {
-  search?: string;
-}): Promise<PlatformUserItem[]> {
+export async function listPlatformUsers(
+  params?: ListPlatformUsersParams,
+): Promise<PlatformUser[]> {
   const searchSuffix = params?.search
     ? `&full_name=ilike.${encodeURIComponent(`*${params.search}*`)}`
     : '';
@@ -558,11 +568,9 @@ export async function getPlatformUsersApi(params?: {
 /**
  * Lấy nhật ký kiểm toán an ninh toàn cầu (Global Audit Logs)
  */
-export async function getGlobalAuditLogsApi(filter?: {
-  action?: string;
-  limit?: number;
-  tenantId?: string;
-}): Promise<GlobalAuditLogItem[]> {
+export async function listGlobalAuditLogs(
+  filter?: ListGlobalAuditLogsParams,
+): Promise<GlobalAuditLog[]> {
   try {
     const limit = filter?.limit || 50;
     let url = `/rest/v1/audit_logs?select=*&order=created_at.desc&limit=${limit}`;
@@ -586,8 +594,8 @@ export async function getGlobalAuditLogsApi(filter?: {
 /**
  * Lấy danh sách hợp đồng thuê bao toàn hệ thống (Platform Subscriptions)
  */
-export async function getPlatformSubscriptionsApi(): Promise<
-  PlatformSubscriptionItem[]
+export async function listPlatformSubscriptions(): Promise<
+  PlatformSubscription[]
 > {
   try {
     const data = await supabaseRequest<any[]>(
@@ -607,7 +615,7 @@ export async function getPlatformSubscriptionsApi(): Promise<
 /**
  * Lấy danh mục các vai trò hệ thống và quyền tương ứng
  */
-export async function getSystemRolesApi(): Promise<SystemRoleItem[]> {
+export async function listSystemRoles(): Promise<SystemRole[]> {
   try {
     const data = await supabaseRequest<any[]>(
       '/rest/v1/roles?select=*,role_permissions(permission_id)&order=name.asc',
@@ -625,9 +633,7 @@ export async function getSystemRolesApi(): Promise<SystemRoleItem[]> {
 /**
  * Lấy danh mục 36 quyền hệ thống (System Permissions Catalog)
  */
-export async function getSystemPermissionsApi(): Promise<
-  SystemPermissionItem[]
-> {
+export async function listSystemPermissions(): Promise<SystemPermission[]> {
   try {
     const data = await supabaseRequest<any[]>(
       '/rest/v1/permissions?select=*&order=module.asc,id.asc',
@@ -662,9 +668,9 @@ export interface SystemOverviewSummary {
     installed: number;
     total: number;
   };
-  recentAuditLogs: GlobalAuditLogItem[];
-  recentSubscriptions: PlatformSubscriptionItem[];
-  recentUsers: PlatformUserItem[];
+  recentAuditLogs: GlobalAuditLog[];
+  recentSubscriptions: PlatformSubscription[];
+  recentUsers: PlatformUser[];
   roles: {
     custom: number;
     permissionsTotal: number;
@@ -689,13 +695,13 @@ export interface SystemOverviewSummary {
  * Pure function: Tổng hợp toàn bộ chỉ số KPI cho trang /system/overview
  */
 export function calculateSystemOverviewSummary(input: {
-  auditLogs?: GlobalAuditLogItem[];
-  permissions?: SystemPermissionItem[];
-  plans?: BillingPlanItem[];
-  plugins?: SystemPluginItem[];
-  roles?: SystemRoleItem[];
-  subscriptions?: PlatformSubscriptionItem[];
-  users?: PlatformUserItem[];
+  auditLogs?: GlobalAuditLog[];
+  permissions?: SystemPermission[];
+  plans?: BillingPlan[];
+  plugins?: SystemPlugin[];
+  roles?: SystemRole[];
+  subscriptions?: PlatformSubscription[];
+  users?: PlatformUser[];
 }): SystemOverviewSummary {
   const plugins = input.plugins ?? [];
   const plans = input.plans ?? [];
@@ -782,16 +788,16 @@ export function calculateSystemOverviewSummary(input: {
 /**
  * Nạp song song toàn bộ dữ liệu thống kê cho trang Tổng quan hệ thống (/system/overview)
  */
-export async function getSystemOverviewApi(): Promise<SystemOverviewSummary> {
+export async function getSystemOverview(): Promise<SystemOverviewSummary> {
   const [plugins, plans, users, roles, permissions, subscriptions, auditLogs] =
     await Promise.all([
-      getSystemPluginsApi(),
-      getBillingPlansApi(),
-      getPlatformUsersApi(),
-      getSystemRolesApi(),
-      getSystemPermissionsApi(),
-      getPlatformSubscriptionsApi(),
-      getGlobalAuditLogsApi({ limit: 50 }),
+      listSystemPlugins(),
+      listBillingPlans(),
+      listPlatformUsers(),
+      listSystemRoles(),
+      listSystemPermissions(),
+      listPlatformSubscriptions(),
+      listGlobalAuditLogs({ limit: 50 }),
     ]);
 
   return calculateSystemOverviewSummary({
@@ -804,3 +810,14 @@ export async function getSystemOverviewApi(): Promise<SystemOverviewSummary> {
     users,
   });
 }
+
+export const systemApi = {
+  getOverview: getSystemOverview,
+  listAuditLogs: listGlobalAuditLogs,
+  listBillingPlans,
+  listPermissions: listSystemPermissions,
+  listPlugins: listSystemPlugins,
+  listRoles: listSystemRoles,
+  listSubscriptions: listPlatformSubscriptions,
+  listUsers: listPlatformUsers,
+};

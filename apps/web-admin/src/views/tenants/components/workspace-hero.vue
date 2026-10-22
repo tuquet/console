@@ -1,7 +1,9 @@
 <script lang="ts" setup>
-import type { TenantItem } from '#/api';
+import type { Tenant } from '#/api';
 
 import { computed } from 'vue';
+
+import { Avatar, AvatarFallback, Badge, Button } from '@tuquet/vue-ui';
 
 import {
   Calendar,
@@ -10,7 +12,6 @@ import {
   Settings,
   Terminal,
 } from '@lucide/vue';
-import { Avatar, AvatarFallback, Badge, Button } from '@tuquet/vue-ui';
 
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
@@ -18,7 +19,7 @@ import { $t } from '#/locales';
 interface Props {
   isCurrentActive: boolean;
   loading?: boolean;
-  tenant: TenantItem;
+  tenant: Tenant;
 }
 
 const props = withDefaults(defineProps<Props>(), {

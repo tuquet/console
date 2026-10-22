@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { SystemPermissionItem, SystemRoleItem } from '#/api';
+import type { SystemPermission, SystemRole } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 
@@ -28,8 +28,8 @@ import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
   filterSystemPermissions,
   filterSystemRoles,
-  getSystemPermissionsApi,
-  getSystemRolesApi,
+  listSystemPermissions,
+  listSystemRoles,
   sortRoleNamesByPriority,
 } from '#/api';
 import RoleBadge from '#/components/iam/role-badge.vue';
@@ -44,8 +44,8 @@ const { copyToClipboard, isCopied } = useClipboard();
 const { isMobile } = usePreferences();
 
 const activeTab = ref<'permissions' | 'roles'>('roles');
-const allRoles = ref<SystemRoleItem[]>([]);
-const allPermissions = ref<SystemPermissionItem[]>([]);
+const allRoles = ref<SystemRole[]>([]);
+const allPermissions = ref<SystemPermission[]>([]);
 const catalogLoaded = ref(false);
 const loadingCatalog = ref(false);
 
@@ -63,8 +63,8 @@ async function ensureCatalogLoaded(force = false): Promise<void> {
   loadPromise = (async () => {
     try {
       const [rolesData, permsData] = await Promise.all([
-        getSystemRolesApi(),
-        getSystemPermissionsApi(),
+        listSystemRoles(),
+        listSystemPermissions(),
       ]);
       allRoles.value = rolesData;
       allPermissions.value = permsData;
@@ -109,7 +109,10 @@ function getModuleOptions() {
     { label: $t('page.system_view.roles_module_all'), value: 'all' },
     { label: $t('page.system_view.roles_module_core_iam'), value: 'core-iam' },
     { label: $t('page.system_view.roles_module_workers'), value: 'workers' },
-    { label: $t('page.system_view.roles_module_automa'), value: 'automa' },
+    {
+      label: $t('page.system_view.roles_module_automation'),
+      value: 'automation',
+    },
     {
       label: $t('page.system_view.roles_module_subscriptions'),
       value: 'subscriptions',
@@ -192,7 +195,7 @@ function getPermColumns() {
   ];
 }
 
-const [RolesGrid, rolesGridApi] = useVbenVxeGrid<SystemRoleItem>({
+const [RolesGrid, rolesGridApi] = useVbenVxeGrid<SystemRole>({
   separator: false,
   detailSheetOptions: {
     resource: 'public.roles',
@@ -316,7 +319,7 @@ const [RolesGrid, rolesGridApi] = useVbenVxeGrid<SystemRoleItem>({
   },
 });
 
-const [PermissionsGrid, permsGridApi] = useVbenVxeGrid<SystemPermissionItem>({
+const [PermissionsGrid, permsGridApi] = useVbenVxeGrid<SystemPermission>({
   separator: false,
   detailSheetOptions: {
     resource: 'public.permissions',

@@ -98,7 +98,7 @@ export function clearAccessCache(): void {
  * Retrieves the effective access permissions for the authenticated session.
  * Utilizes single-flight Promise caching to avoid duplicate queries.
  */
-export async function getEffectiveAccessApi(): Promise<EffectiveAccess> {
+export async function getEffectiveAccess(): Promise<EffectiveAccess> {
   const accessStore = useAccessStore();
   const token = accessStore.accessToken;
 
@@ -163,9 +163,15 @@ export async function getEffectiveAccessApi(): Promise<EffectiveAccess> {
 /**
  * Retrieves the list of currently installed system plugin IDs.
  */
-export async function getInstalledPluginsApi(): Promise<string[]> {
+export async function listInstalledPlugins(): Promise<string[]> {
   const plugins = await supabaseRequest<Array<{ id: string }>>(
     '/rest/v1/system_plugins?status=eq.installed&select=id',
   );
   return (plugins || []).map((p) => p.id);
 }
+
+export const accessApi = {
+  clearAccessCache,
+  getEffectiveAccess,
+  listInstalledPlugins,
+};

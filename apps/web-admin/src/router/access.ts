@@ -8,7 +8,7 @@ import { preferences } from '@tuquet/preferences';
 import { toast } from '@tuquet/vue-ui';
 
 import { getAllMenusApi } from '#/api';
-import { getInstalledPluginsApi } from '#/api/core/access';
+import { listInstalledPlugins } from '#/api/core/access';
 import { BasicLayout, IFrameView } from '#/layouts';
 import { $t } from '#/locales';
 
@@ -26,7 +26,7 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
 
   let installedPlugins: string[] = ['core-iam'];
   try {
-    const fetched = await getInstalledPluginsApi();
+    const fetched = await listInstalledPlugins();
     if (fetched && fetched.length > 0) {
       installedPlugins = fetched;
     }

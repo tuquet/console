@@ -7,7 +7,7 @@ import { supabaseRequest } from './supabase-client';
 export { TENANT_PLAN, TENANT_STATUS };
 export type { TenantPlan, TenantStatus };
 
-export interface TenantItem {
+export interface Tenant {
   avatar_url: null | string;
   created_at: string;
   created_by: null | string;
@@ -23,6 +23,12 @@ export interface TenantItem {
   updated_at: string;
 }
 
+export interface CreateTenantInput {
+  name: string;
+  plan?: string;
+  slug: string;
+}
+
 const ACTIVE_TENANT_KEY = STORAGE_KEYS.ACTIVE_TENANT_ID;
 
 export function getActiveTenantId(): string {
@@ -36,8 +42,8 @@ export function setActiveTenantId(tenantId: string) {
 /**
  * Fetch all tenants from Supabase Cloud
  */
-export async function getTenantsApi(): Promise<TenantItem[]> {
-  return supabaseRequest<TenantItem[]>(
+export async function listTenants(): Promise<Tenant[]> {
+  return supabaseRequest<Tenant[]>(
     '/rest/v1/tenants?select=*&order=created_at.desc',
   );
 }
@@ -45,11 +51,7 @@ export async function getTenantsApi(): Promise<TenantItem[]> {
 /**
  * Create a new workspace / tenant
  */
-export async function createTenantApi(data: {
-  name: string;
-  plan?: string;
-  slug: string;
-}): Promise<TenantItem> {
+export async function createTenant(data: CreateTenantInput): Promise<Tenant> {
   const payload = {
     metadata: {
       plan: data.plan || TENANT_PLAN.PRO,
@@ -60,14 +62,11 @@ export async function createTenantApi(data: {
     status: TENANT_STATUS.ACTIVE,
   };
 
-  const result = await supabaseRequest<TenantItem | TenantItem[]>(
-    '/rest/v1/tenants',
-    {
-      body: JSON.stringify(payload),
-      method: 'POST',
-      preferRepresentation: true,
-    },
-  );
+  const result = await supabaseRequest<Tenant | Tenant[]>('/rest/v1/tenants', {
+    body: JSON.stringify(payload),
+    method: 'POST',
+    preferRepresentation: true,
+  });
 
   const created = Array.isArray(result) ? result[0] : result;
   if (!created) {
@@ -76,3 +75,8 @@ export async function createTenantApi(data: {
 
   return created;
 }
+
+export const tenantsApi = {
+  create: createTenant,
+  list: listTenants,
+};

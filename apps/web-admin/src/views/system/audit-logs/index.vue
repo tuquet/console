@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-import type { GlobalAuditLogItem } from '#/api';
+import type { GlobalAuditLog } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 
 import { usePreferences } from '@tuquet/preferences';
-
-import { RefreshCw, User } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
 
+import { RefreshCw, User } from '@lucide/vue';
+
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getGlobalAuditLogsApi } from '#/api';
+import { listGlobalAuditLogs } from '#/api';
 import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
@@ -61,7 +61,7 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<GlobalAuditLogItem>({
+const [Grid, gridApi] = useVbenVxeGrid<GlobalAuditLog>({
   detailSheetOptions: {
     resource: 'public.audit_logs',
     subtitleField: 'entity_type',
@@ -132,7 +132,7 @@ const [Grid, gridApi] = useVbenVxeGrid<GlobalAuditLogItem>({
             ? String(formValues.tenantId).trim()
             : undefined;
 
-          const data = await getGlobalAuditLogsApi({
+          const data = await listGlobalAuditLogs({
             action: action || undefined,
             tenantId: tenantId || undefined,
             limit: 100,

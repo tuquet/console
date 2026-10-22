@@ -249,7 +249,7 @@ const mockEffectiveAccess = {
 };
 
 vi.mock('#/api/core/access', () => ({
-  getEffectiveAccessApi: vi.fn(() => Promise.resolve(mockEffectiveAccess)),
+  getEffectiveAccess: vi.fn(() => Promise.resolve(mockEffectiveAccess)),
 }));
 
 vi.mock('#/composables', () => ({

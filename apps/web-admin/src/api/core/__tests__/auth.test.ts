@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as desktopAdapter from '#/adapter/desktop';
 
-import { loginWithGitHubApi } from '../auth';
+import { loginWithGitHub } from '../auth';
 
 vi.mock('#/adapter/desktop', () => ({
   isTauriEnvironment: vi.fn(),
@@ -23,7 +23,7 @@ vi.mock('../supabase-client', () => ({
 }));
 
 vi.mock('../access', () => ({
-  getEffectiveAccessApi: vi.fn().mockResolvedValue({ permissions: [] }),
+  getEffectiveAccess: vi.fn().mockResolvedValue({ permissions: [] }),
 }));
 
 describe('auth api - github oauth desktop risk mitigation', () => {
@@ -42,7 +42,7 @@ describe('auth api - github oauth desktop risk mitigation', () => {
   it('standard web: navigates current window to Supabase authorize endpoint with web callback', async () => {
     vi.mocked(desktopAdapter.isTauriEnvironment).mockReturnValue(false);
 
-    await loginWithGitHubApi();
+    await loginWithGitHub();
 
     expect(window.location.href).toContain(
       'https://test-supabase.tuquet.com/auth/v1/authorize?provider=github&redirect_to=',
@@ -57,7 +57,7 @@ describe('auth api - github oauth desktop risk mitigation', () => {
     const { openUrl } = await import('@tauri-apps/plugin-opener');
 
     const initialHref = window.location.href;
-    await loginWithGitHubApi();
+    await loginWithGitHub();
 
     // The main window href MUST remain unchanged to prevent losing the frameless titlebar
     expect(window.location.href).toBe(initialHref);

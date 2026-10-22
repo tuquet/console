@@ -2,8 +2,9 @@
  * Canonical PostgREST / Supabase Database Schemas
  */
 export const SUPABASE_SCHEMA = {
-  AUTOMA: 'automa',
+  AUTOMATION: 'automation',
   BILLING: 'billing',
+  BROWSERS: 'browsers',
   COMMERCE: 'commerce',
   EVENTS: 'events',
   MEDIA: 'media',

@@ -32,7 +32,7 @@ vi.mock('#/composables', () => ({
 }));
 
 vi.mock('#/api', () => ({
-  getRealAnalyticsDataApi: vi.fn().mockResolvedValue({
+  getRealAnalyticsData: vi.fn().mockResolvedValue({
     fleet: { loopbackPort: 8765, status: 'ready' },
     plugins: { coreCount: 8, items: [], moduleCount: 4, total: 12 },
     system: {

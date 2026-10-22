@@ -1,39 +1,20 @@
 <script lang="ts" setup>
 import type {
-  CommerceCategoryItem,
-  CommerceOrderDeliveryItem,
-  CommerceOrderRecord,
-  CommerceProductItem,
+  CommerceCategory,
+  CommerceOrder,
+  CommerceOrderDelivery,
+  CommerceProduct,
   CommerceProductType,
-  CommerceProductVariantItem,
+  CommerceProductVariant,
   PaymentChannelType,
-  PaymentGatewayItem,
-  PaymentIntentItem,
+  PaymentGateway,
+  PaymentIntent,
   SavedGuestOrderItem,
 } from '#/api';
 
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import {
-  ArrowRight,
-  CheckCircle2,
-  Copy,
-  CreditCard,
-  Download,
-  ExternalLink,
-  History,
-  KeyRound,
-  Lock,
-  PackageSearch,
-  RefreshCw,
-  Search,
-  ShieldCheck,
-  ShoppingBag,
-  Sparkles,
-  Store,
-  Zap,
-} from '@lucide/vue';
 import {
   Badge,
   Button,
@@ -67,16 +48,36 @@ import {
 } from '@tuquet/vue-ui';
 
 import {
-  createCheckoutOrderApi,
+  ArrowRight,
+  CheckCircle2,
+  Copy,
+  CreditCard,
+  Download,
+  ExternalLink,
+  History,
+  KeyRound,
+  Lock,
+  PackageSearch,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+  Store,
+  Zap,
+} from '@lucide/vue';
+
+import {
+  createCheckoutOrder,
   downloadTextFile,
   filterCommerceProducts,
   formatSerialDeliveriesText,
-  getActivePaymentGatewaysApi,
-  getCommerceCategoriesApi,
-  getCommerceProductsApi,
-  getGuestOrderDeliveriesApi,
+  getGuestOrderDeliveries,
   getSavedGuestOrders,
   isVariantInStock,
+  listActivePaymentGateways,
+  listCommerceCategories,
+  listCommerceProducts,
   saveGuestOrderLocal,
 } from '#/api';
 import { useClipboard, useDateFormat } from '#/composables';
@@ -94,9 +95,9 @@ type StorefrontMode = 'catalog' | 'lookup';
 const activeMode = ref<StorefrontMode>('catalog');
 
 const loadingCatalog = ref(false);
-const categories = ref<CommerceCategoryItem[]>([]);
-const products = ref<CommerceProductItem[]>([]);
-const gateways = ref<PaymentGatewayItem[]>([]);
+const categories = ref<CommerceCategory[]>([]);
+const products = ref<CommerceProduct[]>([]);
+const gateways = ref<PaymentGateway[]>([]);
 
 const selectedCategoryId = ref<string>('all');
 const selectedProductType = ref<string>('all');
@@ -105,17 +106,17 @@ const selectedVariantByProduct = ref<Record<string, string>>({});
 
 // Guest Checkout Modal State
 const checkoutOpen = ref(false);
-const activeProduct = ref<CommerceProductItem | null>(null);
-const activeVariant = ref<CommerceProductVariantItem | null>(null);
+const activeProduct = ref<CommerceProduct | null>(null);
+const activeVariant = ref<CommerceProductVariant | null>(null);
 const checkoutQty = ref<number>(1);
 const buyerEmail = ref<string>('');
 const selectedGatewayId = ref<string>('');
 const submittingOrder = ref(false);
 
 // Active Guest Order & Payment Intent
-const createdOrder = ref<CommerceOrderRecord | null>(null);
+const createdOrder = ref<CommerceOrder | null>(null);
 const createdClaimToken = ref<string>('');
-const createdIntent = ref<null | PaymentIntentItem>(null);
+const createdIntent = ref<null | PaymentIntent>(null);
 const checkingPayment = ref(false);
 let pollTimer: null | ReturnType<typeof setInterval> = null;
 
@@ -124,14 +125,14 @@ const savedOrders = ref<SavedGuestOrderItem[]>([]);
 const lookupOrderCode = ref<string>('');
 const lookupClaimToken = ref<string>('');
 const lookingUp = ref(false);
-const lookedUpOrder = ref<CommerceOrderRecord | null>(null);
-const lookedUpDeliveries = ref<CommerceOrderDeliveryItem[]>([]);
+const lookedUpOrder = ref<CommerceOrder | null>(null);
+const lookedUpDeliveries = ref<CommerceOrderDelivery[]>([]);
 
 const publicGateways = computed(() =>
   gateways.value.filter((g) => g.is_active && g.channel !== 'internal_wallet'),
 );
 
-const currentGateway = computed<null | PaymentGatewayItem>(
+const currentGateway = computed<null | PaymentGateway>(
   () =>
     publicGateways.value.find((g) => g.id === selectedGatewayId.value) ||
     publicGateways.value[0] ||
@@ -170,7 +171,7 @@ function getProductTypeLabel(type: CommerceProductType): string {
   return $t('page.commerce_view.type_wallet_credit_workspace');
 }
 
-function isGuestPurchasableProduct(product: CommerceProductItem): boolean {
+function isGuestPurchasableProduct(product: CommerceProduct): boolean {
   return (
     product.product_type === 'serial_stock' ||
     product.product_type === 'digital_file'
@@ -178,8 +179,8 @@ function isGuestPurchasableProduct(product: CommerceProductItem): boolean {
 }
 
 function getSelectedVariant(
-  product: CommerceProductItem,
-): CommerceProductVariantItem | null {
+  product: CommerceProduct,
+): CommerceProductVariant | null {
   const variants = product.variants || [];
   if (variants.length === 0) return null;
   const chosenId = selectedVariantByProduct.value[product.id];
@@ -197,14 +198,14 @@ async function loadPublicCatalog() {
   loadingCatalog.value = true;
   try {
     const [catRows, prodRows, gwRows] = await Promise.all([
-      getCommerceCategoriesApi({ skipAuth: true }).catch(
-        () => [] as CommerceCategoryItem[],
+      listCommerceCategories({ skipAuth: true }).catch(
+        () => [] as CommerceCategory[],
       ),
-      getCommerceProductsApi({ skipAuth: true }).catch(
-        () => [] as CommerceProductItem[],
+      listCommerceProducts({ skipAuth: true }).catch(
+        () => [] as CommerceProduct[],
       ),
-      getActivePaymentGatewaysApi({ skipAuth: true }).catch(
-        () => [] as PaymentGatewayItem[],
+      listActivePaymentGateways({ skipAuth: true }).catch(
+        () => [] as PaymentGateway[],
       ),
     ]);
 
@@ -231,7 +232,7 @@ async function loadPublicCatalog() {
   }
 }
 
-function openGuestCheckout(product: CommerceProductItem) {
+function openGuestCheckout(product: CommerceProduct) {
   if (!isGuestPurchasableProduct(product)) {
     router.push('/commerce/store');
     return;
@@ -276,7 +277,7 @@ async function checkGuestOrderStatus(
   if (checkingPayment.value) return;
   checkingPayment.value = true;
   try {
-    const res = await getGuestOrderDeliveriesApi(orderCode, claimToken);
+    const res = await getGuestOrderDeliveries(orderCode, claimToken);
     createdOrder.value = res.order;
 
     if (res.order.status === 'completed') {
@@ -321,7 +322,7 @@ async function handleCreateGuestOrder() {
 
   submittingOrder.value = true;
   try {
-    const res = await createCheckoutOrderApi(
+    const res = await createCheckoutOrder(
       {
         buyer_email: buyerEmail.value.trim() || null,
         buyer_tenant_id: null,
@@ -384,7 +385,7 @@ async function handleLookupGuestOrder(
   lookupClaimToken.value = token;
   lookingUp.value = true;
   try {
-    const res = await getGuestOrderDeliveriesApi(code, token);
+    const res = await getGuestOrderDeliveries(code, token);
     lookedUpOrder.value = res.order;
     lookedUpDeliveries.value = res.deliveries;
     toast.success(

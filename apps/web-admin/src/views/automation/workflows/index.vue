@@ -1,16 +1,16 @@
 <script lang="ts" setup>
-import type { AutomaWorkflowItem } from '#/api';
+import type { Workflow } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { usePreferences } from '@tuquet/preferences';
-
-import { GitBranch, Plus, RefreshCw } from '@lucide/vue';
 import { Badge, Button } from '@tuquet/vue-ui';
 
+import { GitBranch, Plus, RefreshCw } from '@lucide/vue';
+
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getWorkflowsApi } from '#/api';
+import { listWorkflows } from '#/api';
 import { useDateFormat } from '#/composables';
 import {
   buildEnumFilterOptions,
@@ -27,7 +27,7 @@ const route = useRoute();
 const { isMobile } = usePreferences();
 const { formatDate } = useDateFormat();
 
-const allWorkflows = ref<AutomaWorkflowItem[]>([]);
+const allWorkflows = ref<Workflow[]>([]);
 
 function getStatusDotClass(status: string): string {
   return getStatusToneMeta(status, WORKFLOW_STATUS_META).dotClass;
@@ -73,11 +73,11 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<AutomaWorkflowItem>({
+const [Grid, gridApi] = useVbenVxeGrid<Workflow>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
-    resource: 'automa.workflows',
+    resource: 'automation.workflows',
     subtitleField: 'version',
     titleField: 'name',
   },
@@ -149,7 +149,7 @@ const [Grid, gridApi] = useVbenVxeGrid<AutomaWorkflowItem>({
           formValues: Record<string, any>,
         ) => {
           const tenantId = (route.query.tenant as string) || undefined;
-          const data = await getWorkflowsApi({ tenantId });
+          const data = await listWorkflows({ tenantId });
           allWorkflows.value = data;
 
           let filtered = data;

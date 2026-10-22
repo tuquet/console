@@ -28,6 +28,17 @@ export interface VxeDetailSheetOptions<T = Record<string, any>> {
    */
   createTitle?: string;
   /**
+   * Optional custom field options loader for relational selects (e.g. proxy_id, engine_version)
+   */
+  dynamicFieldOptions?: (params: {
+    formData: Record<string, any>;
+    mode: VxeDetailSheetMode;
+    resource: SupabaseResourceKey;
+    row?: T;
+  }) => Promise<
+    Record<string, Array<{ label: string; value: number | string }>>
+  >;
+  /**
    * Whether clicking a row opens the Detail Sheet (defaults to `true`)
    */
   enabled?: boolean;

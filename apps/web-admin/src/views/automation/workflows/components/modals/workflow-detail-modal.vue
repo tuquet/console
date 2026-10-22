@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import type { AutomaWorkflowItem } from '#/api';
+import type { Workflow } from '#/api';
 
-import { Check, Copy, GitBranch } from '@lucide/vue';
 import {
   Badge,
   Button,
@@ -11,13 +10,15 @@ import {
   DialogTitle,
 } from '@tuquet/vue-ui';
 
+import { Check, Copy, GitBranch } from '@lucide/vue';
+
 import { useClipboard, useDateFormat } from '#/composables';
 import { getStatusToneMeta, WORKFLOW_STATUS_META } from '#/constants';
 import { $t } from '#/locales';
 
 interface Props {
   open: boolean;
-  workflow: AutomaWorkflowItem | null;
+  workflow: null | Workflow;
 }
 
 const props = defineProps<Props>();

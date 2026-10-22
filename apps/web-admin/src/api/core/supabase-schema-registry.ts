@@ -30,8 +30,8 @@ import { supabaseRequest } from './supabase-client';
 import { getActiveTenantId } from './tenant';
 
 export type SupabaseResourceKey =
-  | 'automa.workflows'
   | 'automation.jobs'
+  | 'automation.workflows'
   | 'billing.bank_receiving_accounts'
   | 'billing.payment_gateways'
   | 'billing.payment_intents'
@@ -336,9 +336,9 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     },
   },
 
-  'automa.workflows': {
-    resource: 'automa.workflows',
-    schema: SUPABASE_SCHEMA.AUTOMA,
+  'automation.workflows': {
+    resource: 'automation.workflows',
+    schema: SUPABASE_SCHEMA.AUTOMATION,
     table: 'workflows',
     primaryKey: 'id',
     titleField: 'name',
@@ -397,7 +397,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
         access,
-        'automa.workflows.manage',
+        'automation.workflows.manage',
         row?.tenant_id,
       );
       return {
@@ -423,7 +423,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
 
   'automation.jobs': {
     resource: 'automation.jobs',
-    schema: SUPABASE_SCHEMA.AUTOMA,
+    schema: SUPABASE_SCHEMA.AUTOMATION,
     table: 'jobs',
     primaryKey: 'id',
     titleField: 'name',
@@ -644,10 +644,12 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'number',
       },
       proxy_id: {
+        defaultValue: '',
         editable: true,
         field: 'proxy_id',
         labelKey: 'term.proxy',
-        type: 'text',
+        options: [{ label: 'None (Direct Egress)', value: '' }],
+        type: 'enum',
       },
       tenant_id: { field: 'tenant_id', labelKey: 'term.tenant', type: 'uuid' },
       created_at: {
@@ -1893,7 +1895,7 @@ const ROUTE_RESOURCE_MAP: Array<{
   resource: SupabaseResourceKey;
 }> = [
   { pattern: /^\/tenants(\/|$)/, resource: 'public.tenants' },
-  { pattern: /^\/automation\/workflows/, resource: 'automa.workflows' },
+  { pattern: /^\/automation\/workflows/, resource: 'automation.workflows' },
   { pattern: /^\/automation\/runs/, resource: 'automation.jobs' },
   { pattern: /^\/automation\/devices/, resource: 'workers.devices' },
   { pattern: /^\/automation\/browsers/, resource: 'workers.browsers' },
@@ -1978,7 +1980,7 @@ export function inferResourceFromRouteAndRow(
       return 'automation.jobs';
     }
     if ('triggerSummary' in row || 'nodeCount' in row) {
-      return 'automa.workflows';
+      return 'automation.workflows';
     }
     if ('tenant_count' in row && ('email' in row || 'full_name' in row)) {
       return 'public.profiles';

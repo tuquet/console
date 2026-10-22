@@ -1,4 +1,4 @@
-import type { TenantItem } from './tenant';
+import type { Tenant } from './tenant';
 
 import { $t } from '@tuquet/locales';
 
@@ -72,8 +72,26 @@ export interface WorkspaceDetailData {
   members: WorkspaceMember[];
   quota: WorkspaceUsageQuota;
   subscription: null | WorkspaceSubscription;
-  tenant: TenantItem;
+  tenant: Tenant;
   total_devices_count: number;
+}
+
+export interface InviteWorkspaceMemberInput {
+  email: string;
+  invitedBy: string;
+  roleId: string;
+  tenantId: string;
+}
+
+export interface UpdateWorkspaceMemberRoleInput {
+  memberId: string;
+  roleId: string;
+  tenantId: string;
+}
+
+export interface UpdateWorkspaceInfoInput {
+  name?: string;
+  slug?: string;
 }
 
 function getDefaultOwnerRole(): WorkspaceMemberRole {
@@ -210,13 +228,13 @@ export function computeWorkspaceQuota(params: {
 /**
  * Fetch full workspace detail data with real telemetry from Cloud.
  */
-export async function getWorkspaceDetailApi(
+export async function getWorkspaceDetail(
   tenantId: string,
 ): Promise<WorkspaceDetailData> {
   const encodedId = encodeURIComponent(tenantId);
 
   // 1. Fetch Tenant record
-  const tenants = await supabaseRequest<TenantItem[]>(
+  const tenants = await supabaseRequest<Tenant[]>(
     `/rest/v1/tenants?id=eq.${encodedId}&select=*`,
   );
   const tenant = tenants[0];
@@ -335,7 +353,7 @@ export async function getWorkspaceDetailApi(
 /**
  * Fetch tenant audit logs from public.audit_logs.
  */
-export async function getTenantAuditLogsApi(
+export async function listTenantAuditLogs(
   tenantId: string,
   limit = 50,
 ): Promise<TenantAuditLog[]> {
@@ -363,7 +381,7 @@ export async function getTenantAuditLogsApi(
 /**
  * Fetch available system roles (owner, admin, member, viewer).
  */
-export async function getAvailableRolesApi(): Promise<WorkspaceMemberRole[]> {
+export async function listAvailableRoles(): Promise<WorkspaceMemberRole[]> {
   const rows = await supabaseRequest<WorkspaceMemberRole[]>(
     `/rest/v1/roles?select=id,name,display_name&is_system=eq.true&order=id.asc`,
   );
@@ -373,12 +391,9 @@ export async function getAvailableRolesApi(): Promise<WorkspaceMemberRole[]> {
 /**
  * Invite a member to Workspace via public.tenant_invitations.
  */
-export async function inviteWorkspaceMemberApi(params: {
-  email: string;
-  invitedBy: string;
-  roleId: string;
-  tenantId: string;
-}): Promise<void> {
+export async function inviteWorkspaceMember(
+  params: InviteWorkspaceMemberInput,
+): Promise<void> {
   const rawToken = crypto.randomUUID().replaceAll('-', '');
   const token_hash = await hashToken(rawToken);
 
@@ -404,11 +419,9 @@ export async function inviteWorkspaceMemberApi(params: {
  * Safely inserts the new role first (preventing 0-role orphaned state on network disruption)
  * and then purges obsolete roles, propagating database guard exceptions (e.g. last owner protection).
  */
-export async function updateWorkspaceMemberRoleApi(params: {
-  memberId: string;
-  roleId: string;
-  tenantId: string;
-}): Promise<void> {
+export async function updateWorkspaceMemberRole(
+  params: UpdateWorkspaceMemberRoleInput,
+): Promise<void> {
   const encodedMemberId = encodeURIComponent(params.memberId);
   const encodedRoleId = encodeURIComponent(params.roleId);
 
@@ -437,9 +450,7 @@ export async function updateWorkspaceMemberRoleApi(params: {
 /**
  * Remove a member from the workspace (public.tenant_members).
  */
-export async function removeWorkspaceMemberApi(
-  memberId: string,
-): Promise<void> {
+export async function removeWorkspaceMember(memberId: string): Promise<void> {
   await supabaseRequest(
     `/rest/v1/tenant_members?id=eq.${encodeURIComponent(memberId)}`,
     {
@@ -451,18 +462,15 @@ export async function removeWorkspaceMemberApi(
 /**
  * Update workspace info (Name, Slug).
  */
-export async function updateWorkspaceInfoApi(
+export async function updateWorkspaceInfo(
   tenantId: string,
-  data: {
-    name?: string;
-    slug?: string;
-  },
-): Promise<TenantItem> {
+  data: UpdateWorkspaceInfoInput,
+): Promise<Tenant> {
   const payload: Record<string, any> = {};
   if (data.name) payload.name = data.name;
   if (data.slug) payload.slug = data.slug;
 
-  const result = await supabaseRequest<TenantItem[]>(
+  const result = await supabaseRequest<Tenant[]>(
     `/rest/v1/tenants?id=eq.${encodeURIComponent(tenantId)}`,
     {
       body: JSON.stringify(payload),
@@ -481,7 +489,7 @@ export async function updateWorkspaceInfoApi(
 /**
  * Delete or archive workspace.
  */
-export async function deleteWorkspaceApi(tenantId: string): Promise<void> {
+export async function deleteWorkspace(tenantId: string): Promise<void> {
   try {
     await supabaseRequest(
       `/rest/v1/tenants?id=eq.${encodeURIComponent(tenantId)}`,
@@ -500,3 +508,14 @@ export async function deleteWorkspaceApi(tenantId: string): Promise<void> {
     );
   }
 }
+
+export const workspaceApi = {
+  delete: deleteWorkspace,
+  getDetail: getWorkspaceDetail,
+  inviteMember: inviteWorkspaceMember,
+  listAuditLogs: listTenantAuditLogs,
+  listRoles: listAvailableRoles,
+  removeMember: removeWorkspaceMember,
+  updateInfo: updateWorkspaceInfo,
+  updateMemberRole: updateWorkspaceMemberRole,
+};

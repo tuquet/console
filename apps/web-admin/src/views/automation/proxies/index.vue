@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { FleetProxyItem } from '#/api';
+import type { ProxyServer } from '#/api';
 
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -10,7 +10,7 @@ import { Badge, Button } from '@tuquet/vue-ui';
 import { Activity, Copy, Network, Plus, RefreshCw } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getFleetProxiesApi } from '#/api';
+import { listProxies } from '#/api';
 import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
@@ -21,7 +21,7 @@ const { formatDate } = useDateFormat();
 const { copyToClipboard } = useClipboard();
 const { isMobile } = usePreferences();
 
-const allProxies = ref<FleetProxyItem[]>([]);
+const allProxies = ref<ProxyServer[]>([]);
 
 function getLatencyBadgeClass(latency: null | number) {
   if (latency === null || latency === undefined) return 'text-muted-foreground';
@@ -79,7 +79,7 @@ function getColumns() {
   ];
 }
 
-const [Grid, gridApi] = useVbenVxeGrid<FleetProxyItem>({
+const [Grid, gridApi] = useVbenVxeGrid<ProxyServer>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
@@ -179,7 +179,7 @@ const [Grid, gridApi] = useVbenVxeGrid<FleetProxyItem>({
           formValues: Record<string, any>,
         ) => {
           const tenantId = (route.query.tenant as string) || undefined;
-          const data = await getFleetProxiesApi({ tenantId });
+          const data = await listProxies({ tenantId });
           allProxies.value = data;
 
           let filtered = data;

@@ -5,15 +5,15 @@ import {
   filterPlatformUsers,
   filterSystemPermissions,
   filterSystemRoles,
-  getBillingPlansApi,
-  getGlobalAuditLogsApi,
-  getPlatformSubscriptionsApi,
-  getPlatformUsersApi,
-  getSystemPermissionsApi,
-  getSystemPluginsApi,
-  getSystemRolesApi,
   groupPermissionsByModule,
   isCorePlugin,
+  listBillingPlans,
+  listGlobalAuditLogs,
+  listPlatformSubscriptions,
+  listPlatformUsers,
+  listSystemPermissions,
+  listSystemPlugins,
+  listSystemRoles,
   mapRawBillingPlan,
   mapRawGlobalAuditLog,
   mapRawPlatformSubscription,
@@ -35,7 +35,7 @@ describe('system core api & helpers', () => {
     it('should return true for all 6 core kernel plugins', () => {
       expect(isCorePlugin('core-iam')).toBe(true);
       expect(isCorePlugin('workers')).toBe(true);
-      expect(isCorePlugin('automa')).toBe(true);
+      expect(isCorePlugin('automation')).toBe(true);
       expect(isCorePlugin('storage')).toBe(true);
       expect(isCorePlugin('subscriptions')).toBe(true);
       expect(isCorePlugin('webhooks')).toBe(true);
@@ -183,7 +183,7 @@ describe('system core api & helpers', () => {
   });
 
   describe('api functions for system catalog', () => {
-    it('should query getSystemPluginsApi from public.system_plugins', async () => {
+    it('should query listSystemPlugins from public.system_plugins', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           id: 'core-iam',
@@ -192,7 +192,7 @@ describe('system core api & helpers', () => {
         },
       ]);
 
-      const plugins = await getSystemPluginsApi();
+      const plugins = await listSystemPlugins();
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/system_plugins?select='),
@@ -201,7 +201,7 @@ describe('system core api & helpers', () => {
       expect(plugins[0]?.is_core).toBe(true);
     });
 
-    it('should query getBillingPlansApi with schema billing', async () => {
+    it('should query listBillingPlans with schema billing', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           id: 'free',
@@ -211,7 +211,7 @@ describe('system core api & helpers', () => {
         },
       ]);
 
-      const plans = await getBillingPlansApi();
+      const plans = await listBillingPlans();
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/plans?select='),
@@ -221,7 +221,7 @@ describe('system core api & helpers', () => {
       expect(plans[0]?.name).toBe('Free Tier');
     });
 
-    it('should query getPlatformUsersApi from public.profiles with tenant count', async () => {
+    it('should query listPlatformUsers from public.profiles with tenant count', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           avatar_url: 'https://example.com/avatar.png',
@@ -233,7 +233,7 @@ describe('system core api & helpers', () => {
         },
       ]);
 
-      const users = await getPlatformUsersApi({ search: 'Admin' });
+      const users = await listPlatformUsers({ search: 'Admin' });
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/profiles?select='),
@@ -243,7 +243,7 @@ describe('system core api & helpers', () => {
       expect(users[0]?.tenant_count).toBe(3);
     });
 
-    it('should fallback to tenant_members(count) when rich relational query fails in getPlatformUsersApi', async () => {
+    it('should fallback to tenant_members(count) when rich relational query fails in listPlatformUsers', async () => {
       vi.mocked(supabaseRequest)
         .mockRejectedValueOnce(new Error('PGRST200: relation not found'))
         .mockResolvedValueOnce([
@@ -256,7 +256,7 @@ describe('system core api & helpers', () => {
           },
         ]);
 
-      const users = await getPlatformUsersApi();
+      const users = await listPlatformUsers();
 
       expect(supabaseRequest).toHaveBeenCalledTimes(2);
       expect(supabaseRequest).toHaveBeenLastCalledWith(
@@ -267,7 +267,7 @@ describe('system core api & helpers', () => {
       expect(users[0]?.tenant_count).toBe(2);
     });
 
-    it('should query getGlobalAuditLogsApi from public.audit_logs', async () => {
+    it('should query listGlobalAuditLogs from public.audit_logs', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           action: 'member:invited',
@@ -280,7 +280,7 @@ describe('system core api & helpers', () => {
         },
       ]);
 
-      const logs = await getGlobalAuditLogsApi({
+      const logs = await listGlobalAuditLogs({
         action: 'invited',
         tenantId: 't-1',
       });
@@ -293,7 +293,7 @@ describe('system core api & helpers', () => {
       expect(logs[0]?.id).toBe(101);
     });
 
-    it('should query getPlatformSubscriptionsApi with schema billing and join', async () => {
+    it('should query listPlatformSubscriptions with schema billing and join', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           cancel_at_period_end: false,
@@ -307,7 +307,7 @@ describe('system core api & helpers', () => {
         },
       ]);
 
-      const subs = await getPlatformSubscriptionsApi();
+      const subs = await listPlatformSubscriptions();
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/subscriptions?select='),
@@ -319,7 +319,7 @@ describe('system core api & helpers', () => {
       expect(subs[0]?.price_monthly_usd).toBe(49);
     });
 
-    it('should query getSystemRolesApi and map role_permissions', async () => {
+    it('should query listSystemRoles and map role_permissions', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           description: 'Tenant Owner',
@@ -333,7 +333,7 @@ describe('system core api & helpers', () => {
         },
       ]);
 
-      const roles = await getSystemRolesApi();
+      const roles = await listSystemRoles();
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/roles?select='),
@@ -346,7 +346,7 @@ describe('system core api & helpers', () => {
       ]);
     });
 
-    it('should query getSystemPermissionsApi and group permissions by module', async () => {
+    it('should query listSystemPermissions and group permissions by module', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           description: 'Read devices',
@@ -360,18 +360,18 @@ describe('system core api & helpers', () => {
         },
         {
           description: 'Read workflows',
-          id: 'automa:workflows:read',
-          module: 'automa',
+          id: 'automation:workflows:read',
+          module: 'automation',
         },
       ]);
 
-      const perms = await getSystemPermissionsApi();
+      const perms = await listSystemPermissions();
 
       expect(perms).toHaveLength(3);
       const grouped = groupPermissionsByModule(perms);
-      expect(Object.keys(grouped)).toEqual(['workers', 'automa']);
+      expect(Object.keys(grouped)).toEqual(['workers', 'automation']);
       expect(grouped.workers).toHaveLength(2);
-      expect(grouped.automa).toHaveLength(1);
+      expect(grouped.automation).toHaveLength(1);
     });
   });
 

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TenantItem } from '#/api';
+import type { Tenant } from '#/api';
 
 import { ref, watch } from 'vue';
 
@@ -20,7 +20,7 @@ import { $t } from '#/locales';
 interface Props {
   loading?: boolean;
   open: boolean;
-  tenant: null | TenantItem;
+  tenant: null | Tenant;
 }
 
 const props = withDefaults(defineProps<Props>(), {
