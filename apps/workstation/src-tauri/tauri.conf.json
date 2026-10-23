@@ -40,7 +40,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY2QzNBQTVGN0M5NzFENTQKUldSVUhaZDhYNnJEOWx5YmhUalcrREpPWjBhYURnSFYzak5odzljZWlaVFk5TE5NTXpnQmE0OW8K",
       "endpoints": [
-        "https://github.com/tuquet/admin/releases/latest/download/latest.json"
+        "https://github.com/tuquet/console/releases/latest/download/latest.json"
       ]
     }
   }

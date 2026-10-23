@@ -1,5 +1,5 @@
 {
-  "name": "@tuquet/admin",
+  "name": "@tuquet/console",
   "version": "0.1.0",
   "private": true,
   "keywords": [
@@ -10,10 +10,10 @@
     "shadcn"
   ],
   "homepage": "https://admin.tuquet.com",
-  "bugs": "https://github.com/tuquet/admin/issues",
+  "bugs": "https://github.com/tuquet/console/issues",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tuquet/admin.git"
+    "url": "git+https://github.com/tuquet/console.git"
   },
   "license": "MIT",
   "author": "tuquet",

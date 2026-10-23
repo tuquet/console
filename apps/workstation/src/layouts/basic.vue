@@ -109,7 +109,7 @@ const menus = computed(() => [
   },
   {
     handler: () => {
-      openWindow('https://github.com/tuquet/admin', {
+      openWindow('https://github.com/tuquet/console', {
         target: '_blank',
       });
     },

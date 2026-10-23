@@ -1,12 +1,12 @@
 /**
  * GitHub repository URL
  */
-export const VBEN_GITHUB_URL = 'https://github.com/tuquet/admin';
+export const VBEN_GITHUB_URL = 'https://github.com/tuquet/console';
 
 /**
  * Documentation URL
  */
-export const VBEN_DOC_URL = 'https://github.com/tuquet/admin#readme';
+export const VBEN_DOC_URL = 'https://github.com/tuquet/console#readme';
 
 /**
  * @zh_CN Vben Logo

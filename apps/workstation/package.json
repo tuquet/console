@@ -4,7 +4,7 @@
   "homepage": "https://tuquet.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tuquet/admin.git",
+    "url": "git+https://github.com/tuquet/console.git",
     "directory": "apps/workstation"
   },
   "license": "MIT",

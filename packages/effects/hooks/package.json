@@ -1,11 +1,11 @@
 {
   "name": "@tuquet/hooks",
   "version": "5.8.0",
-  "homepage": "https://github.com/tuquet/admin",
-  "bugs": "https://github.com/tuquet/admin/issues",
+  "homepage": "https://github.com/tuquet/console",
+  "bugs": "https://github.com/tuquet/console/issues",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tuquet/admin.git",
+    "url": "git+https://github.com/tuquet/console.git",
     "directory": "packages/effects/hooks"
   },
   "license": "MIT",
