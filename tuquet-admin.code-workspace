@@ -1,8 +1,8 @@
 {
   "folders": [
     {
-      "name": "@tuquet/admin-web",
-      "path": "apps/web-admin"
+      "name": "@tuquet/workstation",
+      "path": "apps/workstation"
     },
     {
       "name": "@tuquet/docs",
