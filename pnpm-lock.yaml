@@ -202,8 +202,8 @@ catalogs:
       specifier: ^2.4.11
       version: 2.4.11
     '@vueuse/core':
-      specifier: ^14.4.0
-      version: 14.4.0
+      specifier: ^15.0.0
+      version: 15.0.0
     '@vueuse/integrations':
       specifier: ^14.3.0
       version: 14.4.0
@@ -486,6 +486,9 @@ catalogs:
     vue-router:
       specifier: ^5.2.0
       version: 5.2.0
+    vue-sonner:
+      specifier: ^2.0.9
+      version: 2.0.9
     vue-tippy:
       specifier: ^6.7.1
       version: 6.7.1
@@ -714,7 +717,7 @@ importers:
         version: link:../../packages/utils
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       dayjs:
         specifier: 'catalog:'
         version: 1.11.23
@@ -1090,7 +1093,7 @@ importers:
         version: link:../base/typings
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       reka-ui:
         specifier: 'catalog:'
         version: 2.10.4(vue@3.5.41(typescript@6.0.3))
@@ -1115,7 +1118,7 @@ importers:
         version: link:../base/typings
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       vue:
         specifier: 3.5.41
         version: 3.5.41(typescript@6.0.3)
@@ -1145,7 +1148,7 @@ importers:
         version: link:../../base/typings
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       vue:
         specifier: 3.5.41
         version: 3.5.41(typescript@6.0.3)
@@ -1182,7 +1185,7 @@ importers:
         version: link:../../base/typings
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       vue:
         specifier: 3.5.41
         version: 3.5.41(typescript@6.0.3)
@@ -1213,7 +1216,7 @@ importers:
         version: link:../../base/typings
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       qs:
         specifier: 'catalog:'
         version: 6.15.3
@@ -1250,7 +1253,7 @@ importers:
         version: link:../../base/typings
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       vue:
         specifier: 3.5.41
         version: 3.5.41(typescript@6.0.3)
@@ -1287,7 +1290,7 @@ importers:
         version: 1.7.1(@unovis/ts@1.7.1(supports-color@10.2.2))(vue@3.5.41(typescript@6.0.3))
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -1298,7 +1301,7 @@ importers:
         specifier: 3.5.41
         version: 3.5.41(typescript@6.0.3)
       vue-sonner:
-        specifier: ^2.0.9
+        specifier: 'catalog:'
         version: 2.0.9(@nuxt/kit@4.5.2(magic-string@1.2.2)(magicast@0.5.4)(oxc-parser@0.143.0)(rolldown@1.2.13)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.13)(rollup@4.62.5)(vite@8.3.4(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(less@4.9.0(supports-color@10.2.2))(sass-embedded@1.103.1)(sass@1.103.1)(terser@5.50.0)(yaml@2.9.1))))
 
   packages/@core/ui-kit/tabs-ui:
@@ -1320,7 +1323,7 @@ importers:
         version: link:../../base/typings
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       vue:
         specifier: 3.5.41
         version: 3.5.41(typescript@6.0.3)
@@ -1393,7 +1396,7 @@ importers:
         version: link:../../types
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       '@vueuse/integrations':
         specifier: 'catalog:'
         version: 14.4.0(async-validator@4.2.5)(axios@1.19.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(focus-trap@8.2.2)(nprogress@0.2.0)(qrcode@1.5.4)(sortablejs@1.15.7)(vue@3.5.41(typescript@6.0.3))
@@ -1448,7 +1451,7 @@ importers:
         version: link:../../utils
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       vue:
         specifier: 3.5.41
         version: 3.5.41(typescript@6.0.3)
@@ -1520,7 +1523,7 @@ importers:
         version: 1.15.9
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       sortablejs:
         specifier: 'catalog:'
         version: 1.15.7
@@ -1607,7 +1610,7 @@ importers:
         version: link:../../utils
       '@vueuse/core':
         specifier: 'catalog:'
-        version: 14.4.0(vue@3.5.41(typescript@6.0.3))
+        version: 15.0.0(vue@3.5.41(typescript@6.0.3))
       '@vueuse/motion':
         specifier: 'catalog:'
         version: 3.0.3(magicast@0.5.4)(vue@3.5.41(typescript@6.0.3))
@@ -5806,6 +5809,12 @@ packages:
     peerDependencies:
       vue: 3.5.41
 
+  '@vueuse/core@15.0.0':
+    resolution: {integrity: sha512-Zv67h5mrk7YHDJsRObx+DXaCBz6RKBUpxqLesJ+3xZNPG6yuQs7ja7kg3veFrrouYLWAqydQ7CwGEbLVxB43Ng==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      vue: 3.5.41
+
   '@vueuse/integrations@14.4.0':
     resolution: {integrity: sha512-oJz9qTgczvA7L1nXQFRU7h8tQbOCoiceqvMMhT9XYMyOGTqLJ2rEa09PON+nD2t48sZUfeOmg4eaWJXV4sZb/w==}
     peerDependencies:
@@ -5854,6 +5863,10 @@ packages:
   '@vueuse/metadata@14.4.0':
     resolution: {integrity: sha512-swx/255R6JyHZFJhx845iz5CRWDZdCfvkZOpACWc5+c5WHcG24mv8gUT1WIdFQaHt6dq79rvILd9QnCWiyVm9g==}
 
+  '@vueuse/metadata@15.0.0':
+    resolution: {integrity: sha512-sfWE5LADAKJ0KnjtGliMdSN8Ij/L7uP6rXIZlgPloAI4zvvefbw6H5Lt7KJA6RqQOYgVqWF5Guj50HHMIzygBg==}
+    engines: {node: '>=22'}
+
   '@vueuse/motion@3.0.3':
     resolution: {integrity: sha512-4B+ITsxCI9cojikvrpaJcLXyq0spj3sdlzXjzesWdMRd99hhtFI6OJ/1JsqwtF73YooLe0hUn/xDR6qCtmn5GQ==}
     peerDependencies:
@@ -5866,6 +5879,12 @@ packages:
 
   '@vueuse/shared@14.4.0':
     resolution: {integrity: sha512-JRgY90Sz8DDtPMsaDflvPMp9xYk69JZAmbuDvAquUVXKr2gEjqtzGNTTthLfckH0BzBqvnu31gb4a8TGLRe79g==}
+    peerDependencies:
+      vue: 3.5.41
+
+  '@vueuse/shared@15.0.0':
+    resolution: {integrity: sha512-vbNXhGrbV53xPOMSyOzMHQRvhMgZf7oNDw2RChUetVxwTIEkInQ1joZ9JbT0G3z2n2AJNjvmCWeM9ySYrnvogA==}
+    engines: {node: '>=22'}
     peerDependencies:
       vue: 3.5.41
 
@@ -15069,6 +15088,13 @@ snapshots:
       '@vueuse/shared': 14.4.0(vue@3.5.41(typescript@6.0.3))
       vue: 3.5.41(typescript@6.0.3)
 
+  '@vueuse/core@15.0.0(vue@3.5.41(typescript@6.0.3))':
+    dependencies:
+      '@types/web-bluetooth': 0.0.21
+      '@vueuse/metadata': 15.0.0
+      '@vueuse/shared': 15.0.0(vue@3.5.41(typescript@6.0.3))
+      vue: 3.5.41(typescript@6.0.3)
+
   '@vueuse/integrations@14.4.0(async-validator@4.2.5)(axios@1.19.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2))(focus-trap@8.2.2)(nprogress@0.2.0)(qrcode@1.5.4)(sortablejs@1.15.7)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       '@vueuse/core': 14.4.0(vue@3.5.41(typescript@6.0.3))
@@ -15085,6 +15111,8 @@ snapshots:
   '@vueuse/metadata@13.9.0': {}
 
   '@vueuse/metadata@14.4.0': {}
+
+  '@vueuse/metadata@15.0.0': {}
 
   '@vueuse/motion@3.0.3(magicast@0.5.4)(vue@3.5.41(typescript@6.0.3))':
     dependencies:
@@ -15105,6 +15133,10 @@ snapshots:
       vue: 3.5.41(typescript@6.0.3)
 
   '@vueuse/shared@14.4.0(vue@3.5.41(typescript@6.0.3))':
+    dependencies:
+      vue: 3.5.41(typescript@6.0.3)
+
+  '@vueuse/shared@15.0.0(vue@3.5.41(typescript@6.0.3))':
     dependencies:
       vue: 3.5.41(typescript@6.0.3)
 
