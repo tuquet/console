@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { CredentialList, SecretRow, SecretStoreStatus } from '#/api';
+import type { CredentialRow, CredentialStatus } from '#/api';
 
 import { computed, onMounted, ref } from 'vue';
 
@@ -17,8 +17,7 @@ import {
 
 import {
   deleteCredential,
-  getSecretStatus,
-  listCredentials,
+  getCredentials,
   pullCredentials,
   pushCredentials,
   rotateTenantKeys,
@@ -28,8 +27,7 @@ import { $t } from '#/locales';
 
 defineOptions({ name: 'SecretsCredentials' });
 
-const status = ref<null | SecretStoreStatus>(null);
-const creds = ref<CredentialList | null>(null);
+const data = ref<CredentialStatus | null>(null);
 const loading = ref(false);
 const busy = ref(false);
 const message = ref('');
@@ -41,21 +39,17 @@ const newValue = ref('');
 const pendingDelete = ref<null | string>(null);
 
 const cloudNames = computed(
-  () => new Set((creds.value?.cloud ?? []).map((s) => s.name)),
+  () => new Set((data.value?.cloud ?? []).map((s) => s.name)),
 );
 
 async function load() {
   loading.value = true;
   errorMsg.value = '';
   try {
-    [status.value, creds.value] = await Promise.all([
-      getSecretStatus(),
-      listCredentials(),
-    ]);
+    data.value = await getCredentials();
   } catch (error: any) {
     errorMsg.value = error?.message ?? $t('page.secrets.daemon_offline');
-    status.value = null;
-    creds.value = null;
+    data.value = null;
   } finally {
     loading.value = false;
   }
@@ -84,7 +78,7 @@ async function onAdd() {
   newValue.value = '';
 }
 
-function onDelete(row: SecretRow) {
+function onDelete(row: CredentialRow) {
   // Two-step inline confirmation (browser confirm() is forbidden by lint rules).
   if (pendingDelete.value === row.name) {
     pendingDelete.value = null;
@@ -103,7 +97,7 @@ onMounted(load);
       <div>
         <h2 class="flex items-center gap-2 text-xl font-semibold">
           <KeyRound class="size-5" />
-          {{ $t('page.secrets.credentials') }}
+          {{ $t('page.secrets.title') }}
         </h2>
         <p class="text-muted-foreground mt-1 text-sm">
           {{ $t('page.secrets.credentials_desc') }}
@@ -185,14 +179,14 @@ onMounted(load);
 </Button>
     </div>
 
-    <!-- Schema-level status -->
-    <div v-if="status" class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+    <!-- Store status -->
+    <div v-if="data" class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
       <div class="rounded-lg border p-3">
         <div class="text-muted-foreground text-xs">
           {{ $t('page.secrets.store_path') }}
         </div>
-        <div class="mt-1 truncate font-mono text-xs" :title="status.store_path">
-          {{ status.store_path }}
+        <div class="mt-1 truncate font-mono text-xs" :title="data.store_path">
+          {{ data.store_path }}
         </div>
       </div>
       <div class="rounded-lg border p-3">
@@ -201,9 +195,9 @@ onMounted(load);
         </div>
         <div
           class="mt-1 truncate font-mono text-xs"
-          :title="status.device_public_key ?? ''"
+          :title="data.device_public_key ?? ''"
         >
-          {{ status.device_public_key ?? '—' }}
+          {{ data.device_public_key ?? '—' }}
         </div>
       </div>
       <div class="rounded-lg border p-3">
@@ -211,24 +205,24 @@ onMounted(load);
           {{ $t('page.secrets.cloud') }}
         </div>
         <div class="mt-1 text-sm">
-          <span v-if="status.enrolled" class="text-green-600">
+          <span v-if="data.enrolled" class="text-green-600">
             ● {{ $t('page.secrets.enrolled') }}
           </span>
           <span v-else class="text-red-500"
             >● {{ $t('page.secrets.not_enrolled') }}</span
           >
           <span class="text-muted-foreground ml-2">
-            {{ status.cloud_count }} {{ $t('page.secrets.remote_count') }}
+            {{ data.cloud_count }} {{ $t('page.secrets.remote_count') }}
           </span>
         </div>
       </div>
     </div>
 
     <!-- credentials table -->
-    <div v-if="creds" class="rounded-lg border">
+    <div v-if="data" class="rounded-lg border">
       <div class="flex items-center justify-between border-b px-4 py-2">
         <span class="text-sm font-medium">
-          {{ $t('page.secrets.local') }} ({{ creds.local.length }})
+          {{ $t('page.secrets.local') }} ({{ data.local.length }})
         </span>
       </div>
       <table class="w-full text-sm">
@@ -247,7 +241,7 @@ onMounted(load);
           </tr>
         </thead>
         <tbody>
-          <tr v-for="row in creds.local" :key="row.name" class="border-t">
+          <tr v-for="row in data.local" :key="row.name" class="border-t">
             <td class="px-4 py-2 font-mono">{{ row.name }}</td>
             <td class="px-4 py-2">********</td>
             <td class="px-4 py-2">
@@ -270,7 +264,7 @@ onMounted(load);
               </Button>
             </td>
           </tr>
-          <tr v-if="creds.local.length === 0">
+          <tr v-if="data.local.length === 0">
             <td class="text-muted-foreground px-4 py-6 text-center" colspan="4">
               {{ $t('page.secrets.empty') }}
             </td>

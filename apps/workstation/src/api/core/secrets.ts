@@ -1,28 +1,27 @@
 /**
  * Secret Store client — local CLI daemon (`127.0.0.1:8765/api/v1/secrets*`).
  *
- * Endpoint paths mirror the database schema/table names:
- *   schema `secrets` → `/secrets`, table `secrets.credentials` → `/secrets/credentials`,
- *   table `secrets.tenant_keys` → `/secrets/tenant-keys`.
+ * Endpoint paths mirror the database **schema → table** hierarchy, exactly like the
+ * console router: schema `secrets` → `/secrets`, table `secrets.credentials` →
+ * `/secrets/credentials`, table `secrets.tenant_keys` → `/secrets/tenant-keys`.
  *
- * Powers the workstation credential management UI. Values are never returned by the
- * API (names + metadata only) — see SPEC-secret-store.
+ * Values are never returned by the API (names + metadata only) — see SPEC-secret-store.
  */
 
 const DEFAULT_DAEMON_PORT = 8765;
 
-export interface SecretRow {
+export interface CredentialRow {
   key_version?: null | number;
   name: string;
 }
 
-export interface SecretOpResult {
+export interface CredentialOpResult {
   affected: number;
   message: string;
   ok: boolean;
 }
 
-/** Schema-level status (`secrets`). */
+/** Schema-level status of the Secret Store (`secrets`). */
 export interface SecretStoreStatus {
   cloud_count: number;
   cloud_error: null | string;
@@ -34,9 +33,15 @@ export interface SecretStoreStatus {
 
 /** Listing of the `secrets.credentials` resource. */
 export interface CredentialList {
-  cloud: SecretRow[];
+  cloud: CredentialRow[];
   cloud_error: null | string;
-  local: SecretRow[];
+  local: CredentialRow[];
+}
+
+/** Combined view-model used by the credentials page. */
+export interface CredentialStatus extends SecretStoreStatus {
+  cloud: CredentialRow[];
+  local: CredentialRow[];
 }
 
 function daemonBase(port = DEFAULT_DAEMON_PORT) {
@@ -67,12 +72,12 @@ async function daemonRequest<T>(
   }
 }
 
-/** GET /secrets — schema-level status. */
+/** GET /secrets — schema-level status only. */
 export function getSecretStatus(port?: number) {
   return daemonRequest<SecretStoreStatus>('/secrets', { method: 'GET' }, port);
 }
 
-/** GET /secrets/credentials — list local + cloud credential names. */
+/** GET /secrets/credentials — list `secrets.credentials` (local + cloud names). */
 export function listCredentials(port?: number) {
   return daemonRequest<CredentialList>(
     '/secrets/credentials',
@@ -81,9 +86,25 @@ export function listCredentials(port?: number) {
   );
 }
 
+/** Status + credentials in one call (schema status merged with the table listing). */
+export async function getCredentials(port?: number): Promise<CredentialStatus> {
+  const [status, list] = await Promise.all([
+    getSecretStatus(port),
+    listCredentials(port),
+  ]);
+  return {
+    ...status,
+    cloud: list.cloud,
+    local: list.local,
+    cloud_error: list.cloud_error ?? status.cloud_error,
+    cloud_count: list.cloud.length,
+    local_count: list.local.length,
+  };
+}
+
 /** POST /secrets/credentials — create/update a credential (stored locally, encrypted). */
 export function setCredential(name: string, value: string, port?: number) {
-  return daemonRequest<SecretOpResult>(
+  return daemonRequest<CredentialOpResult>(
     '/secrets/credentials',
     { body: JSON.stringify({ name, value }), method: 'POST' },
     port,
@@ -92,7 +113,7 @@ export function setCredential(name: string, value: string, port?: number) {
 
 /** DELETE /secrets/credentials/{name} */
 export function deleteCredential(name: string, port?: number) {
-  return daemonRequest<SecretOpResult>(
+  return daemonRequest<CredentialOpResult>(
     `/secrets/credentials/${encodeURIComponent(name)}`,
     { method: 'DELETE' },
     port,
@@ -101,7 +122,7 @@ export function deleteCredential(name: string, port?: number) {
 
 /** POST /secrets/credentials/push — upload credentials, client-side encrypted. */
 export function pushCredentials(port?: number) {
-  return daemonRequest<SecretOpResult>(
+  return daemonRequest<CredentialOpResult>(
     '/secrets/credentials/push',
     { method: 'POST' },
     port,
@@ -110,7 +131,7 @@ export function pushCredentials(port?: number) {
 
 /** POST /secrets/credentials/pull — receive the sealed DEK and decrypt locally. */
 export function pullCredentials(port?: number) {
-  return daemonRequest<SecretOpResult>(
+  return daemonRequest<CredentialOpResult>(
     '/secrets/credentials/pull',
     { method: 'POST' },
     port,
@@ -119,7 +140,7 @@ export function pullCredentials(port?: number) {
 
 /** POST /secrets/tenant-keys/rotate — rotate the tenant DEK (`secrets.tenant_keys`). */
 export function rotateTenantKeys(port?: number) {
-  return daemonRequest<SecretOpResult>(
+  return daemonRequest<CredentialOpResult>(
     '/secrets/tenant-keys/rotate',
     { method: 'POST' },
     port,
