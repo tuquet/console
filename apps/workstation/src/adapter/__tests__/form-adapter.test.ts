@@ -11,7 +11,7 @@ vi.mock('@tuquet/locales', () => ({
   $t: (key: string) => key,
 }));
 
-describe('web-admin form & component adapter', () => {
+describe('workstation form & component adapter', () => {
   it('allows typing in adapted Input component and triggers modelValue + onChange updates', async () => {
     await initComponentAdapter();
     const AdaptedInput = globalShareState.getComponents().Input;

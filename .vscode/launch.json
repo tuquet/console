@@ -18,7 +18,7 @@
       "url": "http://localhost:5666",
       "env": { "NODE_ENV": "development" },
       "sourceMaps": true,
-      "webRoot": "${workspaceFolder}/apps/web-admin"
+      "webRoot": "${workspaceFolder}/apps/workstation"
     },
     {
       "type": "chrome",

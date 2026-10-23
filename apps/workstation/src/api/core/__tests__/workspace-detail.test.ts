@@ -186,9 +186,9 @@ describe('computeWorkspaceQuota', () => {
 
 describe('workspace Detail Responsive & Typography Contract', () => {
   const tenantsDir = existsSync(
-    resolve(process.cwd(), 'apps/web-admin/src/views/tenants'),
+    resolve(process.cwd(), 'apps/workstation/src/views/tenants'),
   )
-    ? resolve(process.cwd(), 'apps/web-admin/src/views/tenants')
+    ? resolve(process.cwd(), 'apps/workstation/src/views/tenants')
     : resolve(process.cwd(), 'src/views/tenants');
 
   it('uses a responsive Description Grid in workspace-overview-tab.vue without VxeFormItem span="12"', () => {

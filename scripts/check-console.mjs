@@ -9,7 +9,7 @@ import { createServer } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
-const webAdminDir = path.join(repoRoot, 'apps', 'web-admin');
+const webAdminDir = path.join(repoRoot, 'apps', 'workstation');
 
 const PORT = Number(process.env.VITE_PORT || 5666);
 const HOST = '127.0.0.1';
@@ -183,7 +183,7 @@ async function runConsoleGate() {
   } else {
     cleanStaleViteTempDirs();
     console.log(
-      `🚀 Starting headless Vite dev server for @tuquet/admin-web on port ${PORT}...`,
+      `🚀 Starting headless Vite dev server for @tuquet/workstation on port ${PORT}...`,
     );
     process.chdir(webAdminDir);
     viteServer = await createServer({
