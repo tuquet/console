@@ -64,6 +64,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",
     "@changesets/cli": "catalog:",
+    "@eslint-community/eslint-plugin-eslint-comments": "catalog:",
     "@tsdown/css": "catalog:",
     "@tuquet/commitlint-config": "workspace:*",
     "@tuquet/eslint-config": "workspace:*",

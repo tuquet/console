@@ -68,7 +68,7 @@
     "refresh": "Refresh",
     "metric_workspaces": "Workspaces",
     "metric_plugins": "Active plugins",
-    "metric_fleet": "Fleet bridge",
+    "metric_fleet": "Fleet gateway",
     "metric_latency": "API latency",
     "core_suffix": "core / modules",
     "total_workspaces": "Total workspaces",

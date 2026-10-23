@@ -4,7 +4,7 @@
  */
 
 /**
- * Validates the loopback desktop bridge port.
+ * Validates the loopback desktop gateway port.
  * Restricts strictly to unprivileged loopback ports (1024..65535).
  * Defaults to 8765 if undefined/null/empty.
  * Returns null if invalid, privileged (<1024), out of range (>65535), or hostile string (e.g. '@evil.com:443').

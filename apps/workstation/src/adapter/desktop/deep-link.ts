@@ -10,7 +10,7 @@ export interface DeepLinkAuthPayload {
 
 /**
  * Parses deep link callback URL in the form:
- * tuquet://auth/callback?token=...&refresh_token=... (bridge format)
+ * tuquet://auth/callback?token=...&refresh_token=... (gateway format)
  * OR tuquet://auth/callback#access_token=...&refresh_token=... (Supabase OAuth format)
  */
 export function parseDeepLinkAuthUrl(url: string): DeepLinkAuthPayload | null {

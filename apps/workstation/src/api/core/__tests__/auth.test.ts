@@ -62,7 +62,7 @@ describe('auth api - github oauth desktop risk mitigation', () => {
     // The main window href MUST remain unchanged to prevent losing the frameless titlebar
     expect(window.location.href).toBe(initialHref);
 
-    // Instead, system browser must be opened with web bridge callback containing target=desktop
+    // Instead, system browser must be opened with web gateway callback containing target=desktop
     expect(openUrl).toHaveBeenCalledTimes(1);
     const calledUrl = vi.mocked(openUrl).mock.calls[0]?.[0];
     expect(calledUrl).toContain(
