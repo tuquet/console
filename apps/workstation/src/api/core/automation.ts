@@ -162,23 +162,32 @@ export function buildAutomationFilterQuery(
 }
 
 /**
- * Lấy danh sách quy trình tự động từ schema automation.workflows
+ * Lấy danh sách quy trình tự động từ `automation.workflows`.
+ *
+ * PostgREST của dự án chỉ expose schema `public` (probe: PGRST106), nên đường đọc
+ * chính thức là RPC `public.workflow_list` — `SECURITY INVOKER` nên RLS vẫn thi hành.
+ * Xem `cloud/supabase/plugins/automation/install.sql` §7.5.
  */
 export async function listWorkflows(
   params?: ListWorkflowsParams,
 ): Promise<Workflow[]> {
   try {
-    const query = buildAutomationFilterQuery(
-      '/rest/v1/workflows?select=id,tenant_id,name,description,version,status,created_at,updated_at&order=created_at.desc',
-      params,
+    const data = await supabaseRequest<Workflow[]>(
+      '/rest/v1/rpc/workflow_list',
+      {
+        body: JSON.stringify({ p_search: null }),
+        method: 'POST',
+        suppressErrorCapture: true,
+      },
     );
-    const data = await supabaseRequest<Workflow[]>(query, {
-      schema: SUPABASE_SCHEMA.AUTOMATION,
-      suppressErrorCapture: true,
-    });
-    return Array.isArray(data) ? data : [];
+    const rows = Array.isArray(data) ? data : [];
+    return rows.filter(
+      (w) =>
+        (!params?.status || w.status === params.status) &&
+        (!params?.tenantId || w.tenant_id === params.tenantId),
+    );
   } catch (error: any) {
-    if (!error?.isAuthError && !error?.message?.includes('Invalid schema')) {
+    if (!error?.isAuthError) {
       console.error('[Automa] Failed to load workflows:', error);
     }
     return [];
