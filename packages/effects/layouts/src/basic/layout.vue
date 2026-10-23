@@ -12,7 +12,11 @@ import {
   updatePreferences,
   usePreferences,
 } from '@tuquet/preferences';
-import { useAccessStore, useTabbarStore, useTimezoneStore } from '@tuquet/stores';
+import {
+  useAccessStore,
+  useTabbarStore,
+  useTimezoneStore,
+} from '@tuquet/stores';
 import { cloneDeep, mapTree } from '@tuquet/utils';
 
 import { VbenAdminLayout } from '@tuquet-core/layout-ui';

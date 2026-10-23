@@ -11,7 +11,7 @@ const routes: RouteRecordRaw[] = [
     },
     name: 'Automation',
     path: '/automation',
-    redirect: '/automation/overview',
+    redirect: '/automation/browsers',
     children: [
       {
         name: 'AutomationOverview',

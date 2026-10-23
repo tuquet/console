@@ -555,6 +555,99 @@ export async function listBrowsers(
 }
 
 /**
+ * Khởi chạy browser profile trên máy trạm local (Local daemon hoặc Cloud dispatch)
+ */
+export async function startBrowserProfile(
+  browserId: string,
+  options?: { headless?: boolean; port?: number },
+): Promise<{ message?: string; success: boolean }> {
+  const daemonPort = options?.port ?? 8765;
+  try {
+    const res = await fetch(
+      `http://127.0.0.1:${daemonPort}/api/v1/browsers/${browserId}/start`,
+      {
+        body: JSON.stringify({ headless: !!options?.headless }),
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      },
+    );
+    if (res.ok) {
+      return { success: true };
+    }
+    const err = await res.json().catch(() => ({}));
+    return {
+      message: err?.message || 'Failed to start browser via local daemon',
+      success: false,
+    };
+  } catch {
+    // Fallback: Ghi nhận trạng thái running lên Cloud cho Worker tự động kéo
+    try {
+      await supabaseRequest(`/rest/v1/browsers?id=eq.${browserId}`, {
+        body: JSON.stringify({
+          locked_at: new Date().toISOString(),
+          status: 'running',
+        }),
+        method: 'PATCH',
+        schema: SUPABASE_SCHEMA.WORKERS,
+      });
+      return { success: true };
+    } catch (error: any) {
+      return {
+        message: error?.message || 'Failed to dispatch start request',
+        success: false,
+      };
+    }
+  }
+}
+
+/**
+ * Dừng browser profile và kích hoạt nén/đồng bộ cookie
+ */
+export async function stopBrowserProfile(
+  browserId: string,
+  options?: { port?: number },
+): Promise<{ message?: string; success: boolean }> {
+  const daemonPort = options?.port ?? 8765;
+  try {
+    const res = await fetch(
+      `http://127.0.0.1:${daemonPort}/api/v1/browsers/${browserId}/stop`,
+      {
+        method: 'POST',
+      },
+    );
+    if (res.ok) {
+      return { success: true };
+    }
+  } catch {
+    // Ignore local network failure, proceed with cloud unbind
+  }
+
+  const ok = await unbindBrowser(browserId);
+  return { success: ok };
+}
+
+/**
+ * Hủy gán thiết bị / Giải phóng profile trình duyệt (Local-First unbind)
+ */
+export async function unbindBrowser(browserId: string): Promise<boolean> {
+  try {
+    await supabaseRequest(`/rest/v1/browsers?id=eq.${browserId}`, {
+      body: JSON.stringify({
+        locked_at: null,
+        locked_by_device_id: null,
+        status: 'idle',
+      }),
+      method: 'PATCH',
+      schema: SUPABASE_SCHEMA.WORKERS,
+    });
+    return true;
+  } catch (error) {
+    console.error('[Automation] Failed to unbind browser:', error);
+    return false;
+  }
+}
+
+/**
  * Lấy danh sách proxy pool từ schema workers.proxies
  */
 export async function listProxies(
@@ -788,6 +881,9 @@ export const devicesApi = {
 export const browsersApi = {
   list: listBrowsers,
   listReleases: listBrowserReleases,
+  start: startBrowserProfile,
+  stop: stopBrowserProfile,
+  unbind: unbindBrowser,
 };
 
 export const proxiesApi = {

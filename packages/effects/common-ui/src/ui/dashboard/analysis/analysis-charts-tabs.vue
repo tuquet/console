@@ -3,7 +3,12 @@ import type { TabOption } from '@tuquet/types';
 
 import { computed } from 'vue';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@tuquet-core/shadcn-ui';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@tuquet-core/shadcn-ui';
 
 interface Props {
   tabs?: TabOption[];

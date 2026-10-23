@@ -236,4 +236,23 @@
     padding-right: 0;
     padding-left: 0;
   }
+
+  /* Stack form label above control on narrow mobile screens to prevent overflow-x */
+  .vxe-form .vxe-form--item-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .vxe-form .vxe-form--item-title {
+    width: 100% !important;
+    max-width: none !important;
+    padding-right: 0 !important;
+    padding-bottom: 0.25rem !important;
+    text-align: left !important;
+  }
+
+  .vxe-form .vxe-form--item-content {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
 }

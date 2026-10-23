@@ -43,6 +43,8 @@ import {
   Copy,
   Database,
   Lock,
+  Maximize2,
+  Minimize2,
   Plus,
   Save,
   ShieldCheck,
@@ -104,6 +106,62 @@ const isCreateMode = computed<boolean>(() => props.mode === 'create');
 const isSuperadmin = computed<boolean>(() =>
   Boolean(effectiveAccess.value?.isSuperadmin),
 );
+
+// Antigravity dynamic smooth fluid drag sheet (iOS / Material style)
+const isBottomExpanded = ref(false);
+const isDragging = ref(false);
+// Dynamic height in dvh (null when not dragging so classes handle it)
+const sheetHeightDvh = ref<null | number>(null);
+
+let startY = 0;
+let initialHeightDvh = 60;
+
+function toggleBottomHeight() {
+  isBottomExpanded.value = !isBottomExpanded.value;
+  sheetHeightDvh.value = null;
+}
+
+function onGrabberTouchStart(e: TouchEvent) {
+  if (!e.touches[0]) return;
+  startY = e.touches[0].clientY;
+  initialHeightDvh = isBottomExpanded.value ? 92 : 60;
+  isDragging.value = true;
+  sheetHeightDvh.value = initialHeightDvh;
+}
+
+function onGrabberTouchMove(e: TouchEvent) {
+  if (!isDragging.value || !e.touches[0]) return;
+  const currentY = e.touches[0].clientY;
+  const deltaPx = startY - currentY; // Vuốt lên deltaPx > 0, vuốt xuống deltaPx < 0
+  const windowHeight = window.innerHeight || 1;
+  const deltaDvh = (deltaPx / windowHeight) * 100;
+
+  // Cho phép kéo mượt liên tục theo ngón tay, giới hạn từ 25dvh đến 95dvh kèm lực cản nhẹ (rubber-banding)
+  let nextDvh = initialHeightDvh + deltaDvh;
+  if (nextDvh > 92) {
+    nextDvh = 92 + (nextDvh - 92) * 0.2; // Damping khi kéo vượt đỉnh
+  }
+  sheetHeightDvh.value = Math.max(25, Math.min(95, nextDvh));
+}
+
+function onGrabberTouchEnd() {
+  if (!isDragging.value) return;
+  isDragging.value = false;
+  const currentDvh = sheetHeightDvh.value ?? (isBottomExpanded.value ? 92 : 60);
+
+  // Snap points tự nhiên: < 40dvh -> Dismiss/Close; 40-75dvh -> 60dvh; > 75dvh -> 92dvh
+  if (currentDvh < 38) {
+    emit('update:open', false);
+    sheetHeightDvh.value = null;
+    isBottomExpanded.value = false;
+  } else if (currentDvh > 75) {
+    isBottomExpanded.value = true;
+    sheetHeightDvh.value = null;
+  } else {
+    isBottomExpanded.value = false;
+    sheetHeightDvh.value = null;
+  }
+}
 
 function openRelationalTable(relation: SupabaseRelationalTableDescriptor) {
   activeRelation.value = relation;
@@ -423,85 +481,144 @@ async function handleSave() {
   <Sheet :open="props.open" @update:open="(val) => emit('update:open', val)">
     <SheetContent
       :side="isMobile ? 'bottom' : 'right'"
-      :style="{ zIndex: 1050 }"
-      :class="
+      :style="{
+        zIndex: 1050,
+        ...(isMobile && sheetHeightDvh !== null
+          ? {
+              height: `${sheetHeightDvh}dvh`,
+              maxHeight: `${sheetHeightDvh}dvh`,
+              transition: isDragging
+                ? 'none'
+                : 'height 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
+            }
+          : {}),
+      }"
+      class="vxe-detail-sheet-content z-[1050] flex flex-col p-0 overflow-x-hidden"
+      :class="[
+        !isDragging && 'transition-all duration-300',
         isMobile
-          ? 'vxe-detail-sheet-content z-[1050] flex max-h-[88vh] w-full flex-col rounded-t-2xl border-t border-border/80 p-0'
-          : 'vxe-detail-sheet-content inset-y-0 right-0 z-[1050] flex h-dvh w-full flex-col border-l border-border/80 p-0 sm:max-w-lg'
-      "
+          ? [
+              'w-full rounded-t-2xl border-t border-border/80',
+              sheetHeightDvh === null &&
+                (isBottomExpanded
+                  ? 'h-[92dvh] max-h-[92dvh]'
+                  : 'h-[60dvh] max-h-[60dvh]'),
+            ]
+          : 'inset-y-0 right-0 h-dvh w-full border-l border-border/80 sm:max-w-lg',
+      ]"
     >
+      <!-- Antigravity Zero-Padding Micro Grabber (Mobile Only) with Touch Swipe Support -->
+      <div
+        v-if="isMobile"
+        class="flex w-full cursor-grab touch-none select-none items-center justify-center pt-2.5 pb-1.5 active:cursor-grabbing"
+        @touchstart.passive="onGrabberTouchStart"
+        @touchmove.prevent="onGrabberTouchMove"
+        @touchend="onGrabberTouchEnd"
+        @touchcancel="onGrabberTouchEnd"
+      >
+        <button
+          type="button"
+          class="h-1.5 w-12 cursor-grab rounded-full bg-muted-foreground/30 transition-all hover:bg-muted-foreground/60 active:scale-110 active:bg-muted-foreground"
+          :title="
+            isBottomExpanded
+              ? 'Swipe down to collapse or tap'
+              : 'Swipe up to expand or tap'
+          "
+          @click="toggleBottomHeight"
+        ></button>
+      </div>
+
       <!-- Sheet Header: Clean Record Title + Superadmin-Only Schema/RLS Popover -->
       <SheetHeader
-        class="shrink-0 space-y-1.5 border-b border-border/60 bg-muted/20 px-4 py-3.5 text-left sm:px-5"
+        class="shrink-0 space-y-1 border-b border-border/60 bg-muted/20 px-3.5 py-2.5 text-left sm:px-5 sm:py-3"
       >
-        <div class="flex items-center gap-2 pr-6">
-          <SheetTitle class="truncate text-base font-semibold tracking-tight">
-            {{ dynamicSchema.title }}
-          </SheetTitle>
-
-          <!-- Superadmin-only Schema & RLS Inspector Popover -->
-          <Popover v-if="isSuperadmin">
-            <PopoverTrigger as-child>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                class="size-6 shrink-0 rounded-md border-border/60 bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
-                data-testid="vxe-superadmin-rls-trigger"
-                :title="$t('common.rlsWritable')"
-              >
-                <ShieldCheck
-                  v-if="isRlsWritable"
-                  class="size-3.5 text-emerald-500"
-                />
-                <Lock v-else class="size-3.5 text-amber-500" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              align="start"
-              class="z-[1080] w-72 space-y-2 p-3 text-xs"
-              :style="{ zIndex: 1080 }"
+        <div class="flex items-center justify-between gap-2 pr-6">
+          <div class="flex min-w-0 items-center gap-2">
+            <SheetTitle
+              class="truncate text-sm font-semibold tracking-tight sm:text-base"
             >
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-muted-foreground">Schema / Table</span>
-                <span
-                  class="inline-flex items-center gap-1 rounded border border-border/70 bg-muted/40 px-1.5 py-0.5 text-2xs text-foreground"
-                >
-                  <Database class="size-3 shrink-0 text-primary" />
-                  {{ dynamicSchema.rls.resource }}
-                </span>
-              </div>
+              {{ dynamicSchema.title }}
+            </SheetTitle>
 
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-muted-foreground">RLS Mode</span>
-                <Badge
-                  v-if="isRlsWritable"
+            <!-- Superadmin-only Schema & RLS Inspector Popover -->
+            <Popover v-if="isSuperadmin">
+              <PopoverTrigger as-child>
+                <Button
+                  type="button"
                   variant="outline"
-                  class="gap-1 border-success/30 bg-success/15 px-1.5 py-0.5 text-2xs font-medium text-success"
+                  size="icon"
+                  class="size-5 shrink-0 rounded-md border-border/60 bg-background text-muted-foreground hover:bg-muted hover:text-foreground sm:size-6"
+                  data-testid="vxe-superadmin-rls-trigger"
+                  :title="$t('common.rlsWritable')"
                 >
-                  <ShieldCheck class="size-3 shrink-0" />
-                  {{ $t('common.rlsWritable') }}
-                </Badge>
-                <Badge
-                  v-else
-                  variant="outline"
-                  class="gap-1 border-warning/30 bg-warning/15 px-1.5 py-0.5 text-2xs font-medium text-warning"
-                >
-                  <Lock class="size-3 shrink-0" />
-                  {{ $t('common.rlsReadOnly') }}
-                </Badge>
-              </div>
+                  <ShieldCheck
+                    v-if="isRlsWritable"
+                    class="size-3 text-emerald-500 sm:size-3.5"
+                  />
+                  <Lock v-else class="size-3 text-amber-500 sm:size-3.5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="start"
+                class="z-[1080] w-72 space-y-2 p-3 text-xs"
+                :style="{ zIndex: 1080 }"
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-muted-foreground">Schema / Table</span>
+                  <span
+                    class="inline-flex items-center gap-1 rounded border border-border/70 bg-muted/40 px-1.5 py-0.5 text-2xs text-foreground"
+                  >
+                    <Database class="size-3 shrink-0 text-primary" />
+                    {{ dynamicSchema.rls.resource }}
+                  </span>
+                </div>
 
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-muted-foreground">RLS Policy</span>
-                <code
-                  class="truncate rounded bg-muted px-1.5 py-0.5 text-2xs text-foreground"
-                >
-                  {{ activePolicyName }}
-                </code>
-              </div>
-            </PopoverContent>
-          </Popover>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-muted-foreground">RLS Mode</span>
+                  <Badge
+                    v-if="isRlsWritable"
+                    variant="outline"
+                    class="gap-1 border-success/30 bg-success/15 px-1.5 py-0.5 text-2xs font-medium text-success"
+                  >
+                    <ShieldCheck class="size-3 shrink-0" />
+                    {{ $t('common.rlsWritable') }}
+                  </Badge>
+                  <Badge
+                    v-else
+                    variant="outline"
+                    class="gap-1 border-warning/30 bg-warning/15 px-1.5 py-0.5 text-2xs font-medium text-warning"
+                  >
+                    <Lock class="size-3 shrink-0" />
+                    {{ $t('common.rlsReadOnly') }}
+                  </Badge>
+                </div>
+
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-muted-foreground">RLS Policy</span>
+                  <code
+                    class="truncate rounded bg-muted px-1.5 py-0.5 text-2xs text-foreground"
+                  >
+                    {{ activePolicyName }}
+                  </code>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <!-- Antigravity 1-Click Height Toggle (Mobile Only) -->
+          <div v-if="isMobile" class="flex shrink-0 items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              class="size-6 text-muted-foreground hover:bg-muted hover:text-foreground"
+              :title="isBottomExpanded ? 'Collapse' : 'Expand'"
+              @click="toggleBottomHeight"
+            >
+              <Minimize2 v-if="isBottomExpanded" class="size-3.5" />
+              <Maximize2 v-else class="size-3.5" />
+            </Button>
+          </div>
         </div>
 
         <SheetDescription class="text-xs text-muted-foreground">
@@ -516,12 +633,13 @@ async function handleSave() {
       <!-- Unified Flat VxeForm Body -->
       <div
         v-if="isCreateMode || props.row"
-        class="flex-1 overflow-y-auto px-4 py-4 sm:px-5"
+        class="flex-1 overflow-x-hidden overflow-y-auto px-4 py-4 sm:px-5"
       >
         <VxeForm
           :data="formData"
           custom-layout
           size="small"
+          :title-position="isMobile ? 'top' : 'left'"
           class="w-full space-y-3"
         >
           <VxeFormItem
@@ -786,7 +904,7 @@ async function handleSave() {
       <!-- Sheet Footer with Auto-Forwarded Business Row Actions + Save/Create/Close -->
       <SheetFooter
         v-if="isCreateMode || props.row"
-        class="shrink-0 flex-col gap-2.5 border-t border-border/60 bg-muted/20 px-4 py-3 sm:flex-col sm:space-x-0 sm:px-5"
+        class="shrink-0 flex-col gap-2.5 border-t border-border/60 bg-muted/20 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:flex-col sm:space-x-0 sm:px-5 sm:pb-3"
       >
         <!-- Row Actions Bar (Only shown in Edit Mode when genuine business actions exist) -->
         <div

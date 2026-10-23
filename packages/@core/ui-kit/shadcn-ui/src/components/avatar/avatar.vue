@@ -43,7 +43,19 @@ const imageStyle = computed<CSSProperties>(() => {
 });
 
 const text = computed(() => {
-  return props.alt.slice(-2).toUpperCase();
+  if (!props.alt) return '';
+  // Strip content inside parentheses, then remove any non-alphanumeric punctuation
+  const clean = props.alt
+    .replace(/\([^)]*\)/g, '')
+    .replace(/[^\p{L}\p{N}\s]/gu, '')
+    .trim();
+  const words = clean.split(/\s+/).filter(Boolean);
+  if (words.length >= 2) {
+    const first = words[0]?.[0] || '';
+    const last = words[words.length - 1]?.[0] || '';
+    return (first + last).toUpperCase();
+  }
+  return clean.slice(0, 2).toUpperCase() || 'U';
 });
 
 const rootStyle = computed(() => {

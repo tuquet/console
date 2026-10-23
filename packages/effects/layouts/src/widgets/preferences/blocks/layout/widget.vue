@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import type { PreferencesButtonPositionType, SelectOption } from '@tuquet/types';
+import type {
+  PreferencesButtonPositionType,
+  SelectOption,
+} from '@tuquet/types';
 
 import { computed } from 'vue';
 

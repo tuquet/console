@@ -12,14 +12,24 @@ import {
   Copy,
   Globe,
   Lock,
+  Pencil,
+  Play,
   Plus,
   RefreshCw,
   Shield,
+  Square,
   Unlock,
 } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { listBrowserReleases, listBrowsers, listProxies } from '#/api';
+import {
+  listBrowserReleases,
+  listBrowsers,
+  listProxies,
+  startBrowserProfile,
+  stopBrowserProfile,
+  unbindBrowser,
+} from '#/api';
 import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
@@ -31,6 +41,34 @@ const { copyToClipboard } = useClipboard();
 const { isMobile } = usePreferences();
 
 const allBrowsers = ref<BrowserProfile[]>([]);
+const isUnbinding = ref<Record<string, boolean>>({});
+const isToggling = ref<Record<string, boolean>>({});
+
+async function handleToggleRun(row: BrowserProfile) {
+  if (!row.id || isToggling.value[row.id]) return;
+  isToggling.value[row.id] = true;
+  try {
+    await (row.status === 'running'
+      ? stopBrowserProfile(row.id)
+      : startBrowserProfile(row.id));
+    await gridApi.reload();
+  } finally {
+    isToggling.value[row.id] = false;
+  }
+}
+
+async function handleUnbind(row: BrowserProfile) {
+  if (!row.id || isUnbinding.value[row.id]) return;
+  isUnbinding.value[row.id] = true;
+  try {
+    const ok = await unbindBrowser(row.id);
+    if (ok) {
+      await gridApi.reload();
+    }
+  } finally {
+    isUnbinding.value[row.id] = false;
+  }
+}
 
 function formatBytes(bytes: number): string {
   if (!bytes || bytes <= 0) return '0 B';
@@ -409,6 +447,55 @@ watch(
 
         <template #actions-cell="{ row }">
           <div class="flex items-center justify-end gap-1">
+            <Button
+              :variant="row.status === 'running' ? 'destructive' : 'default'"
+              size="sm"
+              class="h-7 gap-1 px-2 text-xs font-medium"
+              :class="{
+                'bg-success hover:bg-success/90 text-success-foreground':
+                  row.status !== 'running',
+              }"
+              :disabled="isToggling[row.id] || row.status === 'syncing'"
+              :title="
+                row.status === 'running' ? 'Stop Browser' : 'Launch Browser'
+              "
+              @click="handleToggleRun(row)"
+            >
+              <Square
+                v-if="row.status === 'running'"
+                class="size-3 fill-current shrink-0"
+              />
+              <Play v-else class="size-3 fill-current shrink-0" />
+              <span>{{ row.status === 'running' ? 'Stop' : 'Run' }}</span>
+            </Button>
+            <Button
+              v-if="
+                row.locked_by_device ||
+                row.status === 'running' ||
+                row.status === 'error'
+              "
+              variant="ghost"
+              size="sm"
+              class="h-7 gap-1 px-1.5 text-xs text-warning hover:text-warning"
+              :disabled="isUnbinding[row.id]"
+              :title="$t('page.automation_view.browser_unlocked')"
+              @click="handleUnbind(row)"
+            >
+              <Unlock class="size-3 shrink-0" />
+              <span class="hidden md:inline">{{
+                $t('page.automation_view.browser_unlocked')
+              }}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              class="h-7 gap-1 px-2 text-xs"
+              :title="$t('common.edit')"
+              @click="() => gridApi.openDetailSheet(row)"
+            >
+              <Pencil class="size-3 shrink-0" />
+              <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
+            </Button>
             <Button
               variant="outline"
               size="sm"

@@ -12,7 +12,11 @@ import { Check, ChevronDown, Eye } from '@tuquet/icons';
 import { $t } from '@tuquet/locales';
 
 import { useVbenModal } from '@tuquet-core/popup-ui';
-import { VbenButton, VbenIconButton, VbenPopover } from '@tuquet-core/shadcn-ui';
+import {
+  VbenButton,
+  VbenIconButton,
+  VbenPopover,
+} from '@tuquet-core/shadcn-ui';
 import { cn } from '@tuquet-core/shared/utils';
 
 import { EditorContent, useEditor } from '@tiptap/vue-3';

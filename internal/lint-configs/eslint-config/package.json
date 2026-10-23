@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "@eslint/js": "catalog:",
-    "@typescript-eslint/parser": "catalog:",
     "@tuquet/oxlint-config": "workspace:*",
+    "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
     "eslint-plugin-jsonc": "catalog:",
     "eslint-plugin-n": "catalog:",

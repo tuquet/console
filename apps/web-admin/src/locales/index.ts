@@ -1,6 +1,9 @@
 import type { App } from 'vue';
 
-import type { LocaleSetupOptions, SupportedLanguagesType } from '@tuquet/locales';
+import type {
+  LocaleSetupOptions,
+  SupportedLanguagesType,
+} from '@tuquet/locales';
 
 import {
   $t,

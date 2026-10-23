@@ -1,1 +1,1 @@
-export * from  \./vben\';
+export * from './vben';
