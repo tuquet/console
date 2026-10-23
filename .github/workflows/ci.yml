@@ -114,11 +114,11 @@ jobs:
       - name: Rust Cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: apps/web-admin/src-tauri -> target
+          workspaces: apps/workstation/src-tauri -> target
 
       - name: Tauri Cargo Check
         run: |
-          cd apps/web-admin/src-tauri
+          cd apps/workstation/src-tauri
           cargo check
 
   ci-ok:

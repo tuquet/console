@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Admin",
+  "productName": "Tuquet Workstation",
   "version": "0.1.0",
-  "identifier": "com.tuquet.admin",
+  "identifier": "com.tuquet.workstation",
   "build": {
     "beforeDevCommand": "pnpm run dev",
     "devUrl": "http://localhost:5320",

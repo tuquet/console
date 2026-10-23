@@ -1,12 +1,12 @@
 [package]
-name = "admin"
+name = "workstation"
 version = "0.1.0"
-description = "Admin - Unified Management & Operations Console"
+description = "Tuquet Workstation - Unified Management & Operations Console"
 authors = ["tuquet"]
 edition = "2021"
 
 [lib]
-name = "admin_lib"
+name = "workstation_lib"
 crate-type = ["staticlib", "rlib"]
 
 [build-dependencies]

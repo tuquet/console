@@ -6,7 +6,7 @@ const ROOT_DIR = process.cwd();
 
 const LOCALE_DIRS = [
   'packages/locales/src/langs',
-  'apps/web-admin/src/locales/langs',
+  'apps/workstation/src/locales/langs',
 ];
 
 const SUPPORTED_LOCALES = ['en-US', 'vi-VN'];
@@ -103,8 +103,8 @@ function main() {
   const missingInVi = [...enKeys].filter((k) => !viKeys.has(k));
   const missingInEn = [...viKeys].filter((k) => !enKeys.has(k));
 
-  // Extract used i18n keys across apps/web-admin/src
-  const appFiles = walkSourceFiles('apps/web-admin/src');
+  // Extract used i18n keys across apps/workstation/src
+  const appFiles = walkSourceFiles('apps/workstation/src');
   const keyPatterns = [
     /\$t\(\s*["'`]([a-zA-Z0-9_.-]+)["'`]/gs,
     /(?:labelKey|allLabelKey|titleKey|descKey|placeholderKey):\s*["'`]([a-zA-Z0-9_.-]+)["'`]/gs,
@@ -140,7 +140,7 @@ function main() {
     }
   }
 
-  // Scan for hardcoded Vietnamese lines in apps/web-admin/src
+  // Scan for hardcoded Vietnamese lines in apps/workstation/src
   const hardcodedVnLeaks = [];
   for (const file of appFiles) {
     const lines = fs.readFileSync(file, 'utf8').split('\n');
