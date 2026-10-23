@@ -32,7 +32,7 @@ vi.mock('../supabase-client', () => ({
   supabaseRequest: vi.fn(),
 }));
 
-describe('automation core api & helpers (automa & workers schemas)', () => {
+describe('automation core api & helpers (automation & workers schemas)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -229,7 +229,7 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
     it('should correctly map raw row to Device with memory conversion', () => {
       const raw = {
         active_jobs: 2,
-        capabilities: ['browser', 'automa'],
+        capabilities: ['browser', 'automation'],
         cpu_cores: 16,
         id: 'dev-123',
         last_heartbeat_at: '2026-10-13T10:00:00Z',
@@ -251,7 +251,7 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
 
       expect(result).toEqual({
         active_jobs: 2,
-        capabilities: ['browser', 'automa'],
+        capabilities: ['browser', 'automation'],
         cpu_cores: 16,
         driver_type: 'browser',
         hostname: 'fp-win32-xyz',
@@ -287,7 +287,7 @@ describe('automation core api & helpers (automa & workers schemas)', () => {
       expect(result.ram_gb).toBe(1);
       expect(result.active_jobs).toBe(0);
       expect(result.status).toBe('offline');
-      expect(result.driver_type).toBe('automa');
+      expect(result.driver_type).toBe('automation');
       expect(result.ip_address).toBe('—');
       expect(result.hostname).toBe('unknown-host');
     });

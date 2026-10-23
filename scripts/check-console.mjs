@@ -344,7 +344,7 @@ async function runConsoleGate() {
               version: '1.0.0',
             },
             {
-              id: 'automa',
+              id: 'automation',
               is_core: false,
               name: 'Automa Engine',
               status: 'installed',
@@ -388,8 +388,8 @@ async function runConsoleGate() {
             },
             {
               description: 'Read workflows',
-              id: 'automa:workflows:read',
-              module: 'automa',
+              id: 'automation:workflows:read',
+              module: 'automation',
             },
             {
               description: 'Read jobs',
@@ -398,8 +398,8 @@ async function runConsoleGate() {
             },
             {
               description: 'Read logs',
-              id: 'automa:logs:read',
-              module: 'automa',
+              id: 'automation:logs:read',
+              module: 'automation',
             },
             {
               description: 'Read plugins',

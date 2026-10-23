@@ -18,7 +18,7 @@ const mockGetActiveTenantId = vi.fn(() => 'tenant_active_01');
 
 vi.mock('../supabase-client', () => ({
   SUPABASE_SCHEMA: {
-    AUTOMA: 'automa',
+    AUTOMA: 'automation',
     BILLING: 'billing',
     COMMERCE: 'commerce',
     EVENTS: 'events',
@@ -101,7 +101,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
       inferResourceFromRouteAndRow('/system/roles', {
         description: 'Manage workflows',
         id: 'automation.workflows.manage',
-        module: 'automa',
+        module: 'automation',
       }),
     ).toBe('public.permissions');
   });

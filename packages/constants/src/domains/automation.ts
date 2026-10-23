@@ -1,5 +1,5 @@
 /**
- * Workflow Definition Lifecycle Status (`automa.workflows.status`)
+ * Workflow Definition Lifecycle Status (`automation.workflows.status`)
  */
 export const WORKFLOW_STATUS = {
   ARCHIVED: 'archived',
@@ -34,7 +34,7 @@ export const JOB_STATUS_VALUES = Object.values(
 ) as readonly JobStatus[];
 
 /**
- * Execution Log Severity Level (`automa.execution_logs.level`)
+ * Execution Log Severity Level (`automation.execution_logs.level`)
  */
 export const LOG_LEVEL = {
   DEBUG: 'debug',

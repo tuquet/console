@@ -162,7 +162,7 @@ export function buildAutomationFilterQuery(
 }
 
 /**
- * Lấy danh sách quy trình tự động từ schema automa.workflows
+ * Lấy danh sách quy trình tự động từ schema automation.workflows
  */
 export async function listWorkflows(
   params?: ListWorkflowsParams,
@@ -186,7 +186,7 @@ export async function listWorkflows(
 }
 
 /**
- * Lấy danh sách các jobs từ schema automa.jobs
+ * Lấy danh sách các jobs từ schema automation.jobs
  */
 export async function listJobs(params?: ListJobsParams): Promise<Job[]> {
   try {
@@ -226,7 +226,7 @@ export async function getJob(runId: string): Promise<Job | null> {
 }
 
 /**
- * Lấy nhật ký thực thi của một job từ schema automa.execution_logs
+ * Lấy nhật ký thực thi của một job từ schema automation.execution_logs
  */
 export async function listExecutionLogs(
   runId: string,
@@ -382,7 +382,7 @@ export function mapRawDeviceToFleetNode(raw: any): Device {
   const driverType =
     Array.isArray(raw.capabilities) && raw.capabilities.length > 0
       ? String(raw.capabilities[0])
-      : 'automa';
+      : 'automation';
 
   return {
     active_jobs: typeof raw.active_jobs === 'number' ? raw.active_jobs : 0,
