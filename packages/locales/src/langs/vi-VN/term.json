@@ -65,5 +65,10 @@
   "invoices": "Hóa đơn",
   "balance": "Số dư",
   "xu": "Xu",
-  "currencyVnd": "đ"
+  "currencyVnd": "đ",
+  "secretStore": "Kho bí mật",
+  "credential": "Thông tin xác thực",
+  "credentials": "Thông tin xác thực",
+  "secret": "Bí mật",
+  "secrets": "Bí mật"
 }

@@ -65,5 +65,10 @@
   "invoices": "Invoices",
   "balance": "Balance",
   "xu": "Xu",
-  "currencyVnd": "VND"
+  "currencyVnd": "VND",
+  "secretStore": "Secret store",
+  "credential": "Credential",
+  "credentials": "Credentials",
+  "secret": "Secret",
+  "secrets": "Secrets"
 }
