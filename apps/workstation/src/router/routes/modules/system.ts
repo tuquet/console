@@ -81,17 +81,6 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        name: 'SystemSecrets',
-        path: 'secrets',
-        component: () => import('#/views/system/secrets/index.vue'),
-        meta: {
-          authority: ['superadmin', 'secrets:credentials:read'],
-          icon: 'lucide:key-round',
-          plugin: 'secrets',
-          title: $t('page.system.secrets'),
-        },
-      },
-      {
         name: 'SystemRoles',
         path: 'roles',
         component: () => import('#/views/system/roles/index.vue'),

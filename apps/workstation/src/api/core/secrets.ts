@@ -1,9 +1,12 @@
 /**
- * Secret Store client — talks to the local CLI daemon (`127.0.0.1:8765/api/v1/secrets*`).
+ * Secret Store client — local CLI daemon (`127.0.0.1:8765/api/v1/secrets*`).
  *
- * Powers the workstation credential management UI. The daemon owns the local
- * encrypted store (~/.tq/system/secrets.json) and the cloud sync; values are
- * never returned by the API (only names + metadata) — see SPEC-secret-store.
+ * Endpoint paths mirror the database schema/table names:
+ *   schema `secrets` → `/secrets`, table `secrets.credentials` → `/secrets/credentials`,
+ *   table `secrets.tenant_keys` → `/secrets/tenant-keys`.
+ *
+ * Powers the workstation credential management UI. Values are never returned by the
+ * API (names + metadata only) — see SPEC-secret-store.
  */
 
 const DEFAULT_DAEMON_PORT = 8765;
@@ -19,14 +22,21 @@ export interface SecretOpResult {
   ok: boolean;
 }
 
+/** Schema-level status (`secrets`). */
 export interface SecretStoreStatus {
-  cloud: SecretRow[];
+  cloud_count: number;
   cloud_error: null | string;
   device_public_key: null | string;
   enrolled: boolean;
   local_count: number;
-  secrets: SecretRow[];
   store_path: string;
+}
+
+/** Listing of the `secrets.credentials` resource. */
+export interface CredentialList {
+  cloud: SecretRow[];
+  cloud_error: null | string;
+  local: SecretRow[];
 }
 
 function daemonBase(port = DEFAULT_DAEMON_PORT) {
@@ -57,51 +67,60 @@ async function daemonRequest<T>(
   }
 }
 
-/** GET /secrets — store status + secret names (local + cloud). */
+/** GET /secrets — schema-level status. */
 export function getSecretStatus(port?: number) {
   return daemonRequest<SecretStoreStatus>('/secrets', { method: 'GET' }, port);
 }
 
-/** POST /secrets — create/update a secret (stored locally, encrypted). */
-export function setSecret(name: string, value: string, port?: number) {
+/** GET /secrets/credentials — list local + cloud credential names. */
+export function listCredentials(port?: number) {
+  return daemonRequest<CredentialList>(
+    '/secrets/credentials',
+    { method: 'GET' },
+    port,
+  );
+}
+
+/** POST /secrets/credentials — create/update a credential (stored locally, encrypted). */
+export function setCredential(name: string, value: string, port?: number) {
   return daemonRequest<SecretOpResult>(
-    '/secrets',
+    '/secrets/credentials',
     { body: JSON.stringify({ name, value }), method: 'POST' },
     port,
   );
 }
 
-/** DELETE /secrets/{name} */
-export function deleteSecret(name: string, port?: number) {
+/** DELETE /secrets/credentials/{name} */
+export function deleteCredential(name: string, port?: number) {
   return daemonRequest<SecretOpResult>(
-    `/secrets/${encodeURIComponent(name)}`,
+    `/secrets/credentials/${encodeURIComponent(name)}`,
     { method: 'DELETE' },
     port,
   );
 }
 
-/** POST /secrets/push — upload local secrets, client-side encrypted. */
-export function pushSecrets(port?: number) {
+/** POST /secrets/credentials/push — upload credentials, client-side encrypted. */
+export function pushCredentials(port?: number) {
   return daemonRequest<SecretOpResult>(
-    '/secrets/push',
+    '/secrets/credentials/push',
     { method: 'POST' },
     port,
   );
 }
 
-/** POST /secrets/pull — fetch the sealed DEK and decrypt the tenant secrets locally. */
-export function pullSecrets(port?: number) {
+/** POST /secrets/credentials/pull — receive the sealed DEK and decrypt locally. */
+export function pullCredentials(port?: number) {
   return daemonRequest<SecretOpResult>(
-    '/secrets/pull',
+    '/secrets/credentials/pull',
     { method: 'POST' },
     port,
   );
 }
 
-/** POST /secrets/rotate — rotate the tenant DEK. */
-export function rotateSecrets(port?: number) {
+/** POST /secrets/tenant-keys/rotate — rotate the tenant DEK (`secrets.tenant_keys`). */
+export function rotateTenantKeys(port?: number) {
   return daemonRequest<SecretOpResult>(
-    '/secrets/rotate',
+    '/secrets/tenant-keys/rotate',
     { method: 'POST' },
     port,
   );

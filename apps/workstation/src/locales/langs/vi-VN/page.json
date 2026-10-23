@@ -59,25 +59,7 @@
     "subscriptions": "Đăng ký gói",
     "subscriptions_desc": "Theo dõi chu kỳ thanh toán và trạng thái thuê bao",
     "roles": "Vai trò & quyền hạn",
-    "roles_desc": "Mô hình kiểm soát truy cập và phân quyền hệ thống",
-    "secrets": "Kho bí mật",
-    "secrets_desc": "Quản lý credential mã hoá cho workflow (tham chiếu {{secrets.*}}). Giá trị không bao giờ hiển thị ở đây.",
-    "secrets_add": "Thêm bí mật",
-    "secrets_pull": "Tải về",
-    "secrets_push": "Đẩy lên",
-    "secrets_rotate": "Xoay khoá",
-    "secrets_name": "Tên",
-    "secrets_value": "Giá trị",
-    "secrets_local": "Bí mật trên máy này",
-    "secrets_cloud": "Cloud",
-    "secrets_store_path": "Đường dẫn kho",
-    "secrets_device_key": "Khoá thiết bị (X25519)",
-    "secrets_enrolled": "Đã kết nối Cloud",
-    "secrets_not_enrolled": "Chưa kết nối Cloud",
-    "secrets_remote_count": "trên cloud",
-    "secrets_empty": "Chưa có bí mật nào. Thêm mới hoặc Tải về từ Cloud.",
-    "secrets_confirm_delete": "Xoá bí mật '{name}'?",
-    "secrets_daemon_offline": "Không kết nối được CLI daemon (127.0.0.1:8765). Hãy chạy `tq worker start`."
+    "roles_desc": "Mô hình kiểm soát truy cập và phân quyền hệ thống"
   },
   "analytics": {
     "title": "Phân tích nền tảng",
@@ -901,5 +883,25 @@
     "auto_dispatch": "Điều phối tự động",
     "duration": "Thời lượng",
     "logs_btn": "Nhật ký"
+  },
+  "secrets": {
+    "title": "Kho bí mật",
+    "credentials": "Thông tin xác thực",
+    "credentials_desc": "Quản lý credential mã hoá cho workflow (tham chiếu {{secrets.<name>}} trong kết nối). Giá trị không bao giờ hiển thị ở đây.",
+    "add": "Thêm credential",
+    "pull": "Tải về",
+    "push": "Đẩy lên",
+    "rotate": "Xoay khoá DEK",
+    "name": "Tên",
+    "value": "Giá trị",
+    "local": "Credential trên máy này",
+    "cloud": "Cloud",
+    "store_path": "Đường dẫn kho",
+    "device_key": "Khoá thiết bị (X25519)",
+    "enrolled": "Đã kết nối Cloud",
+    "not_enrolled": "Chưa kết nối Cloud",
+    "remote_count": "trên cloud",
+    "empty": "Chưa có credential nào. Thêm mới hoặc Tải về từ Cloud.",
+    "daemon_offline": "Không kết nối được CLI daemon (127.0.0.1:8765). Hãy chạy `tq worker start`."
   }
 }

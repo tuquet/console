@@ -59,25 +59,7 @@
     "subscriptions": "Subscriptions",
     "subscriptions_desc": "Manage billing cycles and subscription status",
     "roles": "Roles & permissions",
-    "roles_desc": "Access control model and system permissions",
-    "secrets": "Secret store",
-    "secrets_desc": "Manage encrypted workflow credentials (referenced as {{secrets.*}}). Values are never displayed here.",
-    "secrets_add": "Add secret",
-    "secrets_pull": "Pull",
-    "secrets_push": "Push",
-    "secrets_rotate": "Rotate DEK",
-    "secrets_name": "Name",
-    "secrets_value": "Value",
-    "secrets_local": "Secrets on this device",
-    "secrets_cloud": "Cloud",
-    "secrets_store_path": "Store path",
-    "secrets_device_key": "Device key (X25519)",
-    "secrets_enrolled": "Cloud connected",
-    "secrets_not_enrolled": "Cloud not connected",
-    "secrets_remote_count": "on cloud",
-    "secrets_empty": "No secrets yet. Add one or Pull from Cloud.",
-    "secrets_confirm_delete": "Delete secret '{name}'?",
-    "secrets_daemon_offline": "Cannot reach the CLI daemon (127.0.0.1:8765). Start it with `tq worker start`."
+    "roles_desc": "Access control model and system permissions"
   },
   "analytics": {
     "title": "Platform analytics",
@@ -901,5 +883,25 @@
     "auto_dispatch": "Auto dispatch",
     "duration": "Duration",
     "logs_btn": "Logs"
+  },
+  "secrets": {
+    "title": "Secret store",
+    "credentials": "Credentials",
+    "credentials_desc": "Manage encrypted workflow credentials (referenced as {{secrets.<name>}}). Values are never displayed here.",
+    "add": "Add credential",
+    "pull": "Pull",
+    "push": "Push",
+    "rotate": "Rotate DEK",
+    "name": "Name",
+    "value": "Value",
+    "local": "Credentials on this device",
+    "cloud": "Cloud",
+    "store_path": "Store path",
+    "device_key": "Device key (X25519)",
+    "enrolled": "Cloud connected",
+    "not_enrolled": "Cloud not connected",
+    "remote_count": "on cloud",
+    "empty": "No credentials yet. Add one or Pull from Cloud.",
+    "daemon_offline": "Cannot reach the CLI daemon (127.0.0.1:8765). Start it with `tq worker start`."
   }
 }
