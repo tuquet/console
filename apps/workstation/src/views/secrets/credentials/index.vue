@@ -3,17 +3,9 @@ import type { CredentialRow, CredentialStatus } from '#/api';
 
 import { computed, onMounted, ref } from 'vue';
 
-import { Button, Input } from '@tuquet-core/shadcn-ui';
+import { Button } from '@tuquet-core/shadcn-ui';
 
-import {
-  DownloadCloud,
-  KeyRound,
-  Plus,
-  RefreshCw,
-  RotateCcw,
-  Trash2,
-  UploadCloud,
-} from '@lucide/vue';
+import { KeyRound, Plus, RefreshCw, Trash2 } from '@lucide/vue';
 
 import {
   deleteCredential,
@@ -112,21 +104,21 @@ onMounted(load);
           :disabled="busy"
           @click="run(pullCredentials)"
         >
-          <DownloadCloud class="mr-1 size-4" />{{ $t('page.secrets.pull') }}
+          {{ $t('page.secrets.pull') }}
         </Button>
         <Button
           variant="outline"
           :disabled="busy"
           @click="run(pushCredentials)"
         >
-          <UploadCloud class="mr-1 size-4" />{{ $t('page.secrets.push') }}
+          {{ $t('page.secrets.push') }}
         </Button>
         <Button
           variant="outline"
           :disabled="busy"
           @click="run(rotateTenantKeys)"
         >
-          <RotateCcw class="mr-1 size-4" />{{ $t('page.secrets.rotate') }}
+          {{ $t('page.secrets.rotate') }}
         </Button>
         <Button :disabled="busy" @click="showAdd = !showAdd">
           <Plus class="mr-1 size-4" />{{ $t('page.secrets.add') }}
@@ -156,7 +148,11 @@ onMounted(load);
         <label class="mb-1 block text-xs font-medium">{{
           $t('page.secrets.name')
         }}</label>
-        <Input v-model="newName" placeholder="hrms_password" class="w-64" />
+        <input
+          v-model="newName"
+          placeholder="hrms_password"
+          class="border-input bg-background flex h-9 w-64 rounded-md border px-3 py-1 text-sm"
+        />
       </div>
       <div>
         <label class="mb-1 block text-xs font-medium">{{
@@ -173,10 +169,8 @@ onMounted(load);
         {{ $t('common.save') }}
       </Button>
       <Button variant="ghost" @click="showAdd = false">
-{{
-        $t('common.cancel')
-      }}
-</Button>
+        {{ $t('common.cancel') }}
+      </Button>
     </div>
 
     <!-- Store status -->

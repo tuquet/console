@@ -887,7 +887,7 @@
   "secrets": {
     "title": "Kho bí mật",
     "credentials": "Thông tin xác thực",
-    "credentials_desc": "Quản lý credential mã hoá cho workflow (tham chiếu {{secrets.<name>}} trong kết nối). Giá trị không bao giờ hiển thị ở đây.",
+    "credentials_desc": "Quản lý credential mã hoá cho workflow — tham chiếu trong kết nối dạng secrets.<name>. Giá trị không bao giờ hiển thị ở đây.",
     "add": "Thêm credential",
     "pull": "Tải về",
     "push": "Đẩy lên",

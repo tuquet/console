@@ -887,7 +887,7 @@
   "secrets": {
     "title": "Secret store",
     "credentials": "Credentials",
-    "credentials_desc": "Manage encrypted workflow credentials (referenced as {{secrets.<name>}}). Values are never displayed here.",
+    "credentials_desc": "Manage encrypted workflow credentials — referenced in connections as secrets.<name>. Values are never displayed here.",
     "add": "Add credential",
     "pull": "Pull",
     "push": "Push",
