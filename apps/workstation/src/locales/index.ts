@@ -70,6 +70,12 @@ async function setupI18n(app: App, options: LocaleSetupOptions = {}) {
   // Report unresolved i18n keys to telemetry instead of only warning in the console:
   // a missing key renders an empty string, which looks like a UI bug with no signal.
   i18n.global.setMissingHandler((locale: string, key: string) => {
+    // Only namespaced keys (e.g. `page.secrets.title`) are real dictionary lookups.
+    // Bare labels passed through `$t` by third-party components (e.g. `Version`,
+    // `Total`) are NOT dictionary keys — reporting them floods telemetry with noise.
+    if (!key.includes('.')) {
+      return;
+    }
     if (!import.meta.env.PROD) {
       console.warn(
         `[intlify] Not found '${key}' key in '${locale}' locale messages.`,
