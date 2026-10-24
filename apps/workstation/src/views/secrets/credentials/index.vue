@@ -158,11 +158,11 @@ onMounted(load);
         <label class="mb-1 block text-xs font-medium">{{
           $t('page.secrets.value')
         }}</label>
-        <Input
+        <input
           v-model="newValue"
           type="password"
           placeholder="••••••••"
-          class="w-64"
+          class="border-input bg-background flex h-9 w-64 rounded-md border px-3 py-1 text-sm"
         />
       </div>
       <Button :disabled="busy || !newName.trim()" @click="onAdd">

@@ -8,11 +8,14 @@ import type {
 import {
   $t,
   setupI18n as coreSetup,
+  i18n,
   loadLocalesMapFromDir,
 } from '@tuquet/locales';
 import { preferences } from '@tuquet/preferences';
 
 import dayjs from 'dayjs';
+
+import { captureMessage } from '../utils/bugsink';
 
 const modules = import.meta.glob('./langs/**/*.json');
 
@@ -62,6 +65,17 @@ async function setupI18n(app: App, options: LocaleSetupOptions = {}) {
     loadMessages,
     missingWarn: !import.meta.env.PROD,
     ...options,
+  });
+
+  // Report unresolved i18n keys to telemetry instead of only warning in the console:
+  // a missing key renders an empty string, which looks like a UI bug with no signal.
+  i18n.global.setMissingHandler((locale: string, key: string) => {
+    if (!import.meta.env.PROD) {
+      console.warn(
+        `[intlify] Not found '${key}' key in '${locale}' locale messages.`,
+      );
+    }
+    captureMessage(`[i18n] missing key: ${key}`, 'warning', { key, locale });
   });
 }
 

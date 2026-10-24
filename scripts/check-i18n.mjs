@@ -178,6 +178,18 @@ function main() {
     });
   }
 
+  // Scan locale messages for raw `{{ }}` — vue-i18n treats it as interpolation and
+  // THROWS at render time, silently blanking the whole component (no console error,
+  // no Sentry event). Escape as {'{'} or reword the message instead.
+  const interpolationLeaks = [];
+  for (const locale of SUPPORTED_LOCALES) {
+    for (const [key, value] of Object.entries(flatMaps[locale])) {
+      if (typeof value === 'string' && /\{\{|\}\}/.test(value)) {
+        interpolationLeaks.push({ key, locale, value });
+      }
+    }
+  }
+
   console.log('============================================================');
   console.log('  Admin i18n Integrity Report (en-US <-> vi-VN)');
   console.log('============================================================');
@@ -188,6 +200,9 @@ function main() {
   console.log(`  - Missing keys in en-US       : ${missingInEn.length}`);
   console.log(`  - Unresolved $t(...) calls    : ${missingUsedKeys.length}`);
   console.log(`  - Hardcoded Vietnamese lines  : ${hardcodedVnLeaks.length}`);
+  console.log(
+    `  - Raw {{ }} interpolation leaks: ${interpolationLeaks.length}`,
+  );
   console.log('============================================================');
 
   let hasError = false;
@@ -220,6 +235,17 @@ function main() {
     for (const leak of hardcodedVnLeaks) {
       console.error(`  - ${leak.file}:${leak.line}: ${leak.text}`);
     }
+  }
+
+  if (interpolationLeaks.length > 0) {
+    hasError = true;
+    console.error(
+      '\n[ERROR] Locale messages contain raw `{{ }}` — vue-i18n will throw at render:',
+    );
+    for (const leak of interpolationLeaks) {
+      console.error(`  - ${leak.locale} · ${leak.key}: ${leak.value}`);
+    }
+    console.error("  Fix: reword the message or escape with {'{'} / {'}'}.");
   }
 
   if (hasError) {

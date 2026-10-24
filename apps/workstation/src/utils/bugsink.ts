@@ -1,4 +1,4 @@
-import type { App } from 'vue';
+import type { App, ComponentPublicInstance } from 'vue';
 import type { Router } from 'vue-router';
 
 import * as Sentry from '@sentry/vue';
@@ -47,6 +47,40 @@ export function isTelemetryDisabled(customConfig?: BugsinkConfig): boolean {
  */
 export function isBugsinkReady(): boolean {
   return isInitialized;
+}
+
+/**
+ * Guarantee Vue-level errors (render / setup / watcher / i18n throws) are never
+ * swallowed silently.
+ *
+ * Telemetry is intentionally disabled in some environments (e.g. development), and a
+ * dropped render error previously produced a blank page with **no** console output and
+ * **no** Sentry event — indistinguishable from an empty component. This handler always
+ * surfaces the error in the console and forwards it to telemetry when available,
+ * chaining any previously installed handler so events are never emitted twice.
+ */
+export function installVueErrorHandler(app: App) {
+  const previous = app.config.errorHandler;
+
+  app.config.errorHandler = (
+    err: unknown,
+    instance: ComponentPublicInstance | null,
+    info: string,
+  ) => {
+    const component =
+      (instance?.$options as undefined | { name?: string })?.name ?? 'unknown';
+
+    // Forward first: an installed integration (e.g. @sentry/vue) keeps ownership of
+    // the event, so we only capture ourselves when nothing else handles it.
+    if (previous) {
+      previous(err, instance, info);
+    } else if (isBugsinkReady()) {
+      captureError(err, { component, vue_info: String(info) });
+    }
+
+    // Always visible in the console — a swallowed render error must never be silent.
+    console.error(`[vue-error] ${info} (component: ${component})`, err);
+  };
 }
 
 /**
@@ -152,6 +186,10 @@ export function initBugsink(
   router?: Router,
   customConfig?: BugsinkConfig,
 ) {
+  // Install the Vue error handler BEFORE any early return: even with telemetry
+  // disabled we must never swallow render errors silently.
+  installVueErrorHandler(app);
+
   if (isTelemetryDisabled(customConfig)) {
     return;
   }
