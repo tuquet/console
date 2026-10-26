@@ -4,8 +4,15 @@ import type { RealAnalyticsData } from '#/api';
 import { computed, onMounted, ref } from 'vue';
 
 import {
+  AreaChart,
   Badge,
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  DonutChart,
   Progress,
   Spinner,
   toast,
@@ -17,6 +24,7 @@ import {
   Building2,
   Cpu,
   Layers,
+  PieChart,
   Puzzle,
   RefreshCw,
   Terminal,
@@ -67,6 +75,21 @@ const entPlanPercent = computed(() =>
       100,
   ),
 );
+
+const plansChartData = computed(() => [
+  {
+    count: analyticsData.value.tenants.planBreakdown.pro,
+    plan: $t('page.analytics.plan_pro') || 'Pro',
+  },
+  {
+    count: analyticsData.value.tenants.planBreakdown.free,
+    plan: $t('page.analytics.plan_free') || 'Free',
+  },
+  {
+    count: analyticsData.value.tenants.planBreakdown.enterprise,
+    plan: $t('page.analytics.plan_enterprise') || 'Enterprise',
+  },
+]);
 
 const totalPlugins = computed(
   () =>
@@ -123,7 +146,14 @@ onMounted(() => {
           variant="outline"
           class="hidden border-border/80 bg-background/50 px-2 py-0.5 text-xs text-muted-foreground sm:inline-flex"
         >
-          <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
+          <span class="relative mr-1.5 flex size-2">
+            <span
+              class="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75"
+            ></span>
+            <span
+              class="relative inline-flex size-2 rounded-full bg-emerald-500"
+            ></span>
+          </span>
           {{ $t('page.analytics.badge') }}
         </Badge>
 
@@ -143,9 +173,9 @@ onMounted(() => {
     <!-- 4 Platform Metric Cards: Clean 2-Row Executive KPI Strip -->
     <div class="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
       <!-- 1. Workspaces / Tenants Metric -->
-      <div
+      <Card
         data-testid="kpi-card-workspaces"
-        class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-4 shadow-xs transition-all hover:border-border"
+        class="border-border/60 bg-card p-3.5 sm:p-4 shadow-xs transition-all hover:border-border"
       >
         <div
           class="flex items-center justify-between gap-1 text-muted-foreground"
@@ -187,12 +217,12 @@ onMounted(() => {
             </span>
           </Badge>
         </div>
-      </div>
+      </Card>
 
       <!-- 2. Registered Plugins Metric -->
-      <div
+      <Card
         data-testid="kpi-card-plugins"
-        class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-4 shadow-xs transition-all hover:border-border"
+        class="border-border/60 bg-card p-3.5 sm:p-4 shadow-xs transition-all hover:border-border"
       >
         <div
           class="flex items-center justify-between gap-1 text-muted-foreground"
@@ -222,12 +252,12 @@ onMounted(() => {
             {{ $t('page.analytics.core_suffix') }}
           </Badge>
         </div>
-      </div>
+      </Card>
 
       <!-- 3. Local Fleet Port / Status Metric -->
-      <div
+      <Card
         data-testid="kpi-card-fleet"
-        class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-4 shadow-xs transition-all hover:border-border"
+        class="border-border/60 bg-card p-3.5 sm:p-4 shadow-xs transition-all hover:border-border"
       >
         <div
           class="flex items-center justify-between gap-1 text-muted-foreground"
@@ -256,12 +286,12 @@ onMounted(() => {
             {{ analyticsData.fleet.status }}
           </Badge>
         </div>
-      </div>
+      </Card>
 
       <!-- 4. System Latency & Edge Provider Metric -->
-      <div
+      <Card
         data-testid="kpi-card-latency"
-        class="rounded-xl border border-border/60 bg-card p-3.5 sm:p-4 shadow-xs transition-all hover:border-border"
+        class="border-border/60 bg-card p-3.5 sm:p-4 shadow-xs transition-all hover:border-border"
       >
         <div
           class="flex items-center justify-between gap-1 text-muted-foreground"
@@ -289,276 +319,320 @@ onMounted(() => {
             {{ analyticsData.system.status }}
           </Badge>
         </div>
-      </div>
+      </Card>
     </div>
 
     <!-- Analytics Insights Row 1: Workspace Growth & Plan Structure -->
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <!-- Growth Summary Card (2 cols on lg) -->
-      <div
-        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm lg:col-span-2"
-      >
-        <div class="mb-4 flex items-center justify-between">
+      <Card class="border-border/60 bg-card shadow-sm lg:col-span-2">
+        <CardHeader class="flex flex-row items-center justify-between pb-2">
           <div>
-            <h2 class="text-base font-semibold text-foreground">
+            <CardTitle class="text-base font-semibold text-foreground">
               {{ $t('page.analytics.growth_timeline') }}
-            </h2>
-            <p class="text-xs text-muted-foreground">
+            </CardTitle>
+            <CardDescription class="text-xs text-muted-foreground">
               {{ $t('page.analytics.weekly_updates') }}
-            </p>
+            </CardDescription>
           </div>
           <Badge variant="outline" class="text-xs">
             <ArrowUpRight class="mr-1 size-3 text-emerald-500" />
             +{{ analyticsData.tenants.growth.length }} records
           </Badge>
-        </div>
+        </CardHeader>
 
-        <div
-          v-if="loading"
-          class="flex h-52 items-center justify-center text-sm text-muted-foreground"
-        >
-          <div class="flex items-center gap-2">
-            <Spinner class="size-5 text-primary" />
-            <span>{{ $t('common.loading') }}</span>
+        <CardContent class="pt-2">
+          <div
+            v-if="loading"
+            class="flex h-52 items-center justify-center text-sm text-muted-foreground"
+          >
+            <div class="flex items-center gap-2">
+              <Spinner class="size-5 text-primary" />
+              <span>{{ $t('common.loading') }}</span>
+            </div>
           </div>
-        </div>
 
-        <div v-else class="space-y-4">
-          <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div v-else class="space-y-4">
+            <!-- AreaChart for growth trend if enough data points exist -->
             <div
-              v-for="point in analyticsData.tenants.growth.slice(-4)"
-              :key="point.date"
-              class="rounded-lg border border-border/50 bg-muted/20 p-3"
+              v-if="analyticsData.tenants.growth.length > 1"
+              class="h-44 w-full"
             >
-              <div class="text-xs text-muted-foreground">{{ point.date }}</div>
-              <div class="mt-1 text-lg font-bold text-foreground">
-                {{ point.count }}
-              </div>
+              <AreaChart
+                :data="analyticsData.tenants.growth"
+                index="date"
+                :categories="['count']"
+                :show-legend="false"
+                :show-grid-line="true"
+                class="h-44"
+              />
+            </div>
+
+            <!-- Fallback compact stat cards -->
+            <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div
-                class="mt-1 text-2xs text-emerald-600 dark:text-emerald-400 font-medium"
+                v-for="point in analyticsData.tenants.growth.slice(-4)"
+                :key="point.date"
+                class="rounded-lg border border-border/50 bg-muted/20 p-3"
               >
-                Active Tenant Node
+                <div class="text-xs text-muted-foreground">
+                  {{ point.date }}
+                </div>
+                <div class="mt-1 text-lg font-bold text-foreground">
+                  {{ point.count }}
+                </div>
+                <div
+                  class="mt-1 text-2xs text-emerald-600 dark:text-emerald-400 font-medium"
+                >
+                  Active Tenant Node
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="rounded-lg border border-border/40 bg-muted/10 p-3.5">
-            <div
-              class="flex items-center justify-between text-xs text-muted-foreground"
-            >
-              <span>Tenant Fleet Capacity</span>
-              <span class="font-medium text-foreground">
-                {{ analyticsData.tenants.activeCount }} /
-                {{ analyticsData.tenants.total }} active
-              </span>
+            <div class="rounded-lg border border-border/40 bg-muted/10 p-3.5">
+              <div
+                class="flex items-center justify-between text-xs text-muted-foreground"
+              >
+                <span>Tenant Fleet Capacity</span>
+                <span class="font-medium text-foreground">
+                  {{ analyticsData.tenants.activeCount }} /
+                  {{ analyticsData.tenants.total }} active
+                </span>
+              </div>
+              <Progress
+                :model-value="
+                  analyticsData.tenants.total > 0
+                    ? (analyticsData.tenants.activeCount /
+                        analyticsData.tenants.total) *
+                      100
+                    : 0
+                "
+                class="mt-2 h-2"
+              />
             </div>
-            <Progress
-              :model-value="
-                analyticsData.tenants.total > 0
-                  ? (analyticsData.tenants.activeCount /
-                      analyticsData.tenants.total) *
-                    100
-                  : 0
-              "
-              class="mt-2 h-2"
-            />
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <!-- Plan Distribution Breakdown -->
-      <div
-        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
-      >
-        <div class="mb-4 flex items-center justify-between">
+      <Card class="border-border/60 bg-card shadow-sm">
+        <CardHeader class="flex flex-row items-center justify-between pb-2">
           <div>
-            <h2 class="text-base font-semibold text-foreground">
+            <CardTitle class="text-base font-semibold text-foreground">
               {{ $t('page.analytics.plans_structure') }}
-            </h2>
-            <p class="text-xs text-muted-foreground">
+            </CardTitle>
+            <CardDescription class="text-xs text-muted-foreground">
               {{ $t('page.analytics.actual') }}
-            </p>
+            </CardDescription>
           </div>
-        </div>
+          <PieChart class="size-4 text-muted-foreground" />
+        </CardHeader>
 
-        <div
-          v-if="loading"
-          class="flex h-52 items-center justify-center text-sm text-muted-foreground"
-        >
-          <div class="flex items-center gap-2">
-            <Spinner class="size-5 text-primary" />
-            <span>{{ $t('common.loading') }}</span>
-          </div>
-        </div>
-
-        <div v-else class="space-y-4 pt-1">
-          <!-- Pro Plan -->
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-medium text-foreground">
-                {{ $t('page.analytics.plan_pro') }}
-              </span>
-              <span class="text-muted-foreground">
-                {{ analyticsData.tenants.planBreakdown.pro }} ({{
-                  proPlanPercent
-                }}%)
-              </span>
+        <CardContent class="pt-2">
+          <div
+            v-if="loading"
+            class="flex h-52 items-center justify-center text-sm text-muted-foreground"
+          >
+            <div class="flex items-center gap-2">
+              <Spinner class="size-5 text-primary" />
+              <span>{{ $t('common.loading') }}</span>
             </div>
-            <Progress :model-value="proPlanPercent" class="h-2 bg-muted" />
           </div>
 
-          <!-- Free Plan -->
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-medium text-foreground">
-                {{ $t('page.analytics.plan_free') }}
-              </span>
-              <span class="text-muted-foreground">
-                {{ analyticsData.tenants.planBreakdown.free }} ({{
-                  freePlanPercent
-                }}%)
-              </span>
+          <div v-else class="space-y-4">
+            <!-- Visual Donut Chart if non-zero subscriptions -->
+            <div
+              v-if="analyticsData.tenants.total > 0"
+              class="flex justify-center py-1"
+            >
+              <DonutChart
+                :data="plansChartData"
+                index="plan"
+                category="count"
+                :show-legend="false"
+                class="h-32 w-32"
+              />
             </div>
-            <Progress :model-value="freePlanPercent" class="h-2 bg-muted" />
-          </div>
 
-          <!-- Enterprise Plan -->
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-medium text-foreground">
-                {{ $t('page.analytics.plan_enterprise') }}
-              </span>
-              <span class="text-muted-foreground">
-                {{ analyticsData.tenants.planBreakdown.enterprise }} ({{
-                  entPlanPercent
-                }}%)
-              </span>
+            <!-- Pro Plan -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-medium text-foreground">
+                  {{ $t('page.analytics.plan_pro') }}
+                </span>
+                <span class="text-muted-foreground">
+                  {{ analyticsData.tenants.planBreakdown.pro }} ({{
+                    proPlanPercent
+                  }}%)
+                </span>
+              </div>
+              <Progress :model-value="proPlanPercent" class="h-2 bg-muted" />
             </div>
-            <Progress :model-value="entPlanPercent" class="h-2 bg-muted" />
+
+            <!-- Free Plan -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-medium text-foreground">
+                  {{ $t('page.analytics.plan_free') }}
+                </span>
+                <span class="text-muted-foreground">
+                  {{ analyticsData.tenants.planBreakdown.free }} ({{
+                    freePlanPercent
+                  }}%)
+                </span>
+              </div>
+              <Progress :model-value="freePlanPercent" class="h-2 bg-muted" />
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-medium text-foreground">
+                  {{ $t('page.analytics.plan_enterprise') }}
+                </span>
+                <span class="text-muted-foreground">
+                  {{ analyticsData.tenants.planBreakdown.enterprise }} ({{
+                    entPlanPercent
+                  }}%)
+                </span>
+              </div>
+              <Progress :model-value="entPlanPercent" class="h-2 bg-muted" />
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
 
     <!-- Analytics Insights Row 2: Plugins Core vs Module & Infrastructure Status -->
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <!-- Plugins Breakdown Card (2 cols on lg) -->
-      <div
-        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm lg:col-span-2"
-      >
-        <div class="mb-4 flex items-center justify-between">
+      <Card class="border-border/60 bg-card shadow-sm lg:col-span-2">
+        <CardHeader class="flex flex-row items-center justify-between pb-2">
           <div>
-            <h2 class="text-base font-semibold text-foreground">
+            <CardTitle class="text-base font-semibold text-foreground">
               {{ $t('page.analytics.plugins_distribution') }}
-            </h2>
-            <p class="text-xs text-muted-foreground">
+            </CardTitle>
+            <CardDescription class="text-xs text-muted-foreground">
               {{ $t('page.analytics.actual') }}
-            </p>
+            </CardDescription>
           </div>
           <Badge variant="outline" class="text-xs">
             Total: {{ analyticsData.plugins.total }}
           </Badge>
-        </div>
+        </CardHeader>
 
-        <div
-          v-if="loading"
-          class="flex h-44 items-center justify-center text-sm text-muted-foreground"
-        >
-          <div class="flex items-center gap-2">
-            <Spinner class="size-5 text-primary" />
-            <span>{{ $t('common.loading') }}</span>
-          </div>
-        </div>
-
-        <div v-else class="space-y-4 pt-1">
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div class="rounded-lg border border-border/50 bg-muted/20 p-3.5">
-              <div class="flex items-center gap-2">
-                <Cpu class="size-4 text-primary" />
-                <span class="text-xs font-medium text-foreground">
-                  {{ $t('page.analytics.core_kernel') }}
-                </span>
-              </div>
-              <div class="mt-2 text-xl font-bold text-foreground">
-                {{ analyticsData.plugins.coreCount }}
-              </div>
-              <Progress :model-value="corePluginPercent" class="mt-2 h-1.5" />
-            </div>
-
-            <div class="rounded-lg border border-border/50 bg-muted/20 p-3.5">
-              <div class="flex items-center gap-2">
-                <Puzzle class="size-4 text-accent-foreground" />
-                <span class="text-xs font-medium text-foreground">
-                  {{ $t('page.analytics.service_modules') }}
-                </span>
-              </div>
-              <div class="mt-2 text-xl font-bold text-foreground">
-                {{ analyticsData.plugins.moduleCount }}
-              </div>
-              <Progress :model-value="modulePluginPercent" class="mt-2 h-1.5" />
+        <CardContent class="pt-2">
+          <div
+            v-if="loading"
+            class="flex h-44 items-center justify-center text-sm text-muted-foreground"
+          >
+            <div class="flex items-center gap-2">
+              <Spinner class="size-5 text-primary" />
+              <span>{{ $t('common.loading') }}</span>
             </div>
           </div>
-        </div>
-      </div>
+
+          <div v-else class="space-y-4">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div class="rounded-lg border border-border/50 bg-muted/20 p-3.5">
+                <div class="flex items-center gap-2">
+                  <Cpu class="size-4 text-primary" />
+                  <span class="text-xs font-medium text-foreground">
+                    {{ $t('page.analytics.core_kernel') }}
+                  </span>
+                </div>
+                <div class="mt-2 text-xl font-bold text-foreground">
+                  {{ analyticsData.plugins.coreCount }}
+                </div>
+                <Progress :model-value="corePluginPercent" class="mt-2 h-1.5" />
+              </div>
+
+              <div class="rounded-lg border border-border/50 bg-muted/20 p-3.5">
+                <div class="flex items-center gap-2">
+                  <Puzzle class="size-4 text-accent-foreground" />
+                  <span class="text-xs font-medium text-foreground">
+                    {{ $t('page.analytics.service_modules') }}
+                  </span>
+                </div>
+                <div class="mt-2 text-xl font-bold text-foreground">
+                  {{ analyticsData.plugins.moduleCount }}
+                </div>
+                <Progress
+                  :model-value="modulePluginPercent"
+                  class="mt-2 h-1.5"
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <!-- Infrastructure Status List -->
-      <div
-        class="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm"
-      >
-        <div class="mb-4">
-          <h2 class="text-base font-semibold text-foreground">
+      <Card class="border-border/60 bg-card shadow-sm">
+        <CardHeader class="pb-2">
+          <CardTitle class="text-base font-semibold text-foreground">
             {{ $t('page.analytics.services_title') }}
-          </h2>
-          <p class="text-xs text-muted-foreground">System Core Invariants</p>
-        </div>
+          </CardTitle>
+          <CardDescription class="text-xs text-muted-foreground">
+            System Core Invariants
+          </CardDescription>
+        </CardHeader>
 
-        <div class="divide-y divide-border/40 text-xs">
-          <div class="flex items-center justify-between py-2.5">
-            <div>
-              <div class="font-medium text-foreground">
-                {{ $t('page.analytics.service_database') }}
+        <CardContent class="pt-2">
+          <div class="divide-y divide-border/40 text-xs">
+            <div class="flex items-center justify-between py-2.5">
+              <div>
+                <div class="font-medium text-foreground">
+                  {{ $t('page.analytics.service_database') }}
+                </div>
+                <div class="text-2xs text-muted-foreground">
+                  {{ $t('page.analytics.service_database_desc') }}
+                </div>
               </div>
-              <div class="text-2xs text-muted-foreground">
-                {{ $t('page.analytics.service_database_desc') }}
-              </div>
+              <Badge variant="secondary" class="font-normal text-2xs">
+                <span
+                  class="mr-1.5 size-1.5 rounded-full bg-emerald-500"
+                ></span>
+                {{ $t('page.analytics.operational') }}
+              </Badge>
             </div>
-            <Badge variant="secondary" class="font-normal text-2xs">
-              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
-              {{ $t('page.analytics.operational') }}
-            </Badge>
-          </div>
 
-          <div class="flex items-center justify-between py-2.5">
-            <div>
-              <div class="font-medium text-foreground">
-                {{ $t('page.analytics.edge_delivery') }}
+            <div class="flex items-center justify-between py-2.5">
+              <div>
+                <div class="font-medium text-foreground">
+                  {{ $t('page.analytics.edge_delivery') }}
+                </div>
+                <div class="text-2xs text-muted-foreground">
+                  {{ analyticsData.system.edgeProvider }}
+                </div>
               </div>
-              <div class="text-2xs text-muted-foreground">
-                {{ analyticsData.system.edgeProvider }}
-              </div>
+              <Badge variant="secondary" class="font-normal text-2xs">
+                <span
+                  class="mr-1.5 size-1.5 rounded-full bg-emerald-500"
+                ></span>
+                {{ $t('page.analytics.online') }}
+              </Badge>
             </div>
-            <Badge variant="secondary" class="font-normal text-2xs">
-              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
-              {{ $t('page.analytics.online') }}
-            </Badge>
-          </div>
 
-          <div class="flex items-center justify-between py-2.5">
-            <div>
-              <div class="font-medium text-foreground">
-                {{ $t('page.analytics.service_gateway') }}
+            <div class="flex items-center justify-between py-2.5">
+              <div>
+                <div class="font-medium text-foreground">
+                  {{ $t('page.analytics.service_gateway') }}
+                </div>
+                <div class="text-2xs text-muted-foreground">
+                  {{ $t('page.analytics.service_gateway_desc') }}
+                </div>
               </div>
-              <div class="text-2xs text-muted-foreground">
-                {{ $t('page.analytics.service_gateway_desc') }}
-              </div>
+              <Badge variant="secondary" class="font-normal text-2xs">
+                <span
+                  class="mr-1.5 size-1.5 rounded-full bg-emerald-500"
+                ></span>
+                {{ $t('page.analytics.operational') }}
+              </Badge>
             </div>
-            <Badge variant="secondary" class="font-normal text-2xs">
-              <span class="mr-1.5 size-1.5 rounded-full bg-emerald-500"></span>
-              {{ $t('page.analytics.operational') }}
-            </Badge>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   </div>
 </template>

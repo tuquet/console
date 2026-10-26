@@ -6,49 +6,28 @@ import type {
   Tenant,
 } from '#/api';
 
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { Page } from '@tuquet/common-ui';
 import { usePreferences } from '@tuquet/preferences';
 
 import {
   Badge,
   Button,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Spinner,
-  Textarea,
   toast,
 } from '@tuquet-core/shadcn-ui';
 
-import {
-  Building2,
-  Copy,
-  Download,
-  ExternalLink,
-  Eye,
-  KeyRound,
-  PackageCheck,
-  RefreshCw,
-  ShoppingBag,
-} from '@lucide/vue';
+import { Building2, Eye, RefreshCw, ShoppingBag } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  downloadTextFile,
   filterCommerceOrders,
-  formatSerialDeliveriesText,
   getActiveTenantId,
   listOrderDeliveries,
   listTenantOrders,
@@ -66,12 +45,15 @@ import {
 } from '#/constants';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
+import { paginateArray } from '#/utils/pagination';
+
+import OrderDeliveriesModal from '../components/order-deliveries-modal.vue';
 
 defineOptions({ name: 'CommerceOrders' });
 
 const router = useRouter();
 const { formatDate } = useDateFormat();
-const { copyToClipboard } = useClipboard();
+const { copyText } = useClipboard();
 const { isMobile } = usePreferences();
 
 const tenants = ref<Tenant[]>([]);
@@ -258,34 +240,14 @@ const [Grid, gridApi] = useVbenVxeGrid<CommerceOrder>({
         }),
       },
     ],
-    layout: 'vertical',
-    showCollapseButton: false,
-    submitOnChange: true,
-    submitOnEnter: true,
-    submitButtonOptions: {
-      content: computed(() => $t('common.filter')),
-    },
-    resetButtonOptions: {
-      content: computed(() => $t('common.reset')),
-    },
-    actionWrapperClass:
-      'hidden sm:flex sm:col-span-1 items-center justify-end gap-2 pt-1 sm:pt-6',
-    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
-    border: false,
-    round: true,
-    showOverflow: true,
     cellConfig: {
       height: 56,
     },
     rowConfig: {
       isHover: true,
       keyField: 'id',
-    },
-    pagerConfig: {
-      pageSize: 15,
-      pageSizes: [10, 15, 30, 50],
     },
     proxyConfig: {
       autoLoad: false,
@@ -306,29 +268,12 @@ const [Grid, gridApi] = useVbenVxeGrid<CommerceOrder>({
             status: formValues?.status,
           });
 
-          const currentPage = page?.currentPage || 1;
-          const pageSize = page?.pageSize || 15;
-          const start = (currentPage - 1) * pageSize;
-          const end = start + pageSize;
-          return {
-            items: filtered.slice(start, end),
-            total: filtered.length,
-          };
+          return paginateArray(filtered, page);
         },
       },
     },
-    columns: getColumns(),
+    columns: getColumns,
   },
-});
-
-watch([() => $t('page.commerce_view.col_order_code'), isMobile], () => {
-  gridApi.setGridOptions({ columns: getColumns() });
-  gridApi.formApi?.setState({
-    commonConfig: {
-      componentProps: { class: 'w-full' },
-      hideLabel: isMobile.value,
-    },
-  });
 });
 
 async function initTenantsAndLoad() {
@@ -375,50 +320,32 @@ async function openDeliveriesModal(order: CommerceOrder) {
   }
 }
 
-const serialLinesText = computed(() =>
-  formatSerialDeliveriesText(orderDeliveries.value),
-);
-
-async function copyText(
-  text: string,
-  label = $t('page.commerce_view.copy_default_label'),
-) {
-  await copyToClipboard(text, $t('page.commerce_view.copied_label', { label }));
-}
-
-function downloadSerialTxt() {
-  if (!serialLinesText.value) return;
-  downloadTextFile(
-    `${selectedOrder.value?.order_code || 'order'}.txt`,
-    serialLinesText.value,
-  );
-}
-
 onMounted(() => {
   initTenantsAndLoad();
 });
 </script>
 
 <template>
-  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
-    <!-- Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="min-w-0">
-        <div class="flex flex-wrap items-center gap-2">
-          <h1
-            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-          >
-            {{ $t('page.commerce.orders') }}
-          </h1>
-          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
-            {{ allOrders.length }}
-          </Badge>
-        </div>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.commerce.orders_desc') }}
-        </p>
+  <Page
+    :title="$t('page.commerce.orders')"
+    :description="$t('page.commerce.orders_desc')"
+    content-class="p-3 sm:p-5"
+    header-class="border-b border-border/60 bg-card/60 px-4 py-3 sm:px-6"
+  >
+    <template #title>
+      <div class="flex items-center gap-2">
+        <h1
+          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
+        >
+          {{ $t('page.commerce.orders') }}
+        </h1>
+        <Badge variant="secondary" class="shrink-0 text-2xs font-normal">
+          {{ allOrders.length }}
+        </Badge>
       </div>
+    </template>
 
+    <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <div class="flex items-center gap-1.5">
           <Select
@@ -465,7 +392,7 @@ onMounted(() => {
           <RefreshCw class="size-3.5 shrink-0" />
         </Button>
       </div>
-    </div>
+    </template>
 
     <!-- VXE Grid Container -->
     <div
@@ -533,132 +460,12 @@ onMounted(() => {
     </div>
 
     <!-- Deliverables Inspector Dialog -->
-    <Dialog v-model:open="deliveryOpen">
-      <DialogContent class="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle class="flex items-center gap-2 text-base font-semibold">
-            <PackageCheck class="size-4 text-primary" />
-            {{
-              $t('page.commerce_view.delivery_detail_title', {
-                code: selectedOrder?.order_code || '',
-              })
-            }}
-          </DialogTitle>
-          <DialogDescription class="text-xs text-muted-foreground">
-            {{ $t('page.commerce_view.delivery_detail_desc') }}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div
-          v-if="loadingDeliveries"
-          class="py-8 text-center text-xs text-muted-foreground"
-        >
-          <Spinner class="mx-auto mb-2 size-4 text-primary" />
-          {{ $t('page.commerce_view.loading_deliveries') }}
-        </div>
-
-        <Empty v-else-if="orderDeliveries.length === 0" class="py-8">
-          <EmptyHeader>
-            <EmptyDescription class="text-xs">
-              {{ $t('page.commerce_view.no_deliveries_yet') }} ({{
-                $t('page.commerce_view.current_status_label')
-              }}:
-              <span class="font-semibold text-foreground">{{
-                selectedOrder?.status
-              }}</span
-              >).
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-
-        <div v-else class="space-y-4 py-2">
-          <div v-if="serialLinesText" class="space-y-2">
-            <div class="flex items-center justify-between">
-              <span
-                class="flex items-center gap-1.5 text-xs font-semibold text-foreground"
-              >
-                <KeyRound class="size-3.5 text-primary" />
-                {{
-                  $t('page.commerce_view.serial_data_lines', {
-                    count: orderDeliveries.filter(
-                      (d) => d.delivery_type === 'serial_stock',
-                    ).length,
-                  })
-                }}
-              </span>
-              <div class="flex items-center gap-1.5">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  class="h-7 gap-1 text-xs"
-                  @click="
-                    copyText(
-                      serialLinesText,
-                      $t('page.commerce_view.account_list_label'),
-                    )
-                  "
-                >
-                  <Copy class="size-3" />
-                  {{ $t('page.commerce_view.copy_all') }}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="default"
-                  class="h-7 gap-1 text-xs"
-                  @click="downloadSerialTxt"
-                >
-                  <Download class="size-3" />
-                  {{ $t('page.commerce_view.download_txt') }}
-                </Button>
-              </div>
-            </div>
-            <Textarea
-              readonly
-              :model-value="serialLinesText"
-              :rows="6"
-              class="w-full rounded-lg border border-border bg-muted/40 p-3 text-xs text-foreground focus:outline-none"
-            />
-          </div>
-
-          <div
-            v-for="item in orderDeliveries.filter(
-              (d) => d.delivery_type !== 'serial_stock',
-            )"
-            :key="item.id"
-            class="rounded-lg border border-border/60 bg-muted/20 p-3.5 text-xs"
-          >
-            <div class="flex items-center justify-between">
-              <span class="font-semibold text-foreground">
-                {{
-                  $t('page.commerce_view.delivery_type_prefix', {
-                    type: item.delivery_type,
-                  })
-                }}
-              </span>
-              <Badge variant="default" class="text-2xs">
-                {{ $t('page.commerce_view.provisioned_badge') }}
-              </Badge>
-            </div>
-            <pre
-              class="mt-2 overflow-x-auto rounded bg-background p-2 text-2xs text-muted-foreground"
-              >{{ JSON.stringify(item.delivered_payload, null, 2) }}</pre>
-            <div
-              v-if="item.delivered_payload?.download_url"
-              class="mt-2 flex justify-end"
-            >
-              <a
-                :href="item.delivered_payload.download_url"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-              >
-                <ExternalLink class="size-3" />
-                {{ $t('page.commerce_view.download_file') }}
-              </a>
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  </div>
+    <OrderDeliveriesModal
+      v-model:open="deliveryOpen"
+      :deliveries="orderDeliveries"
+      :loading="loadingDeliveries"
+      :order-code="selectedOrder?.order_code || ''"
+      :order-status="selectedOrder?.status || ''"
+    />
+  </Page>
 </template>

@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import type { SystemPermission, SystemRole } from '#/api';
+import type { EffectiveAccess } from '#/api/core/access';
 
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
-import { usePreferences } from '@tuquet/preferences';
+import { Page } from '@tuquet/common-ui';
 
 import {
   Badge,
@@ -14,41 +15,31 @@ import {
   toast,
 } from '@tuquet-core/shadcn-ui';
 
-import {
-  Check,
-  Copy,
-  Folder,
-  KeyRound,
-  Lock,
-  Plus,
-  RefreshCw,
-  ShieldCheck,
-} from '@lucide/vue';
+import { RefreshCw } from '@lucide/vue';
 
-import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import {
-  filterSystemPermissions,
-  filterSystemRoles,
   listSystemPermissions,
   listSystemRoles,
   sortRoleNamesByPriority,
 } from '#/api';
-import RoleBadge from '#/components/iam/role-badge.vue';
-import { useClipboard, useDateFormat } from '#/composables';
+import { getEffectiveAccess } from '#/api/core/access';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
 
-defineOptions({ name: 'SystemRoles' });
+import PermissionsTab from './components/permissions-tab.vue';
+import RolesTab from './components/roles-tab.vue';
 
-const { formatDate } = useDateFormat();
-const { copyToClipboard, isCopied } = useClipboard();
-const { isMobile } = usePreferences();
+defineOptions({ name: 'SystemRoles' });
 
 const activeTab = ref<'permissions' | 'roles'>('roles');
 const allRoles = ref<SystemRole[]>([]);
 const allPermissions = ref<SystemPermission[]>([]);
+const effectiveAccess = ref<EffectiveAccess | null>(null);
 const catalogLoaded = ref(false);
 const loadingCatalog = ref(false);
+
+const rolesTabRef = ref<InstanceType<typeof RolesTab> | null>(null);
+const permsTabRef = ref<InstanceType<typeof PermissionsTab> | null>(null);
 
 let loadPromise: null | Promise<void> = null;
 
@@ -63,12 +54,14 @@ async function ensureCatalogLoaded(force = false): Promise<void> {
   loadingCatalog.value = true;
   loadPromise = (async () => {
     try {
-      const [rolesData, permsData] = await Promise.all([
+      const [rolesData, permsData, accessData] = await Promise.all([
         listSystemRoles(),
         listSystemPermissions(),
+        getEffectiveAccess().catch(() => null),
       ]);
       allRoles.value = rolesData;
       allPermissions.value = permsData;
+      effectiveAccess.value = accessData;
       catalogLoaded.value = true;
     } catch (error: any) {
       captureError(error, {
@@ -101,612 +94,102 @@ const rolesByPermissionMap = computed<Record<string, string[]>>(() => {
   return map;
 });
 
-function handleCopyKey(text: string) {
-  copyToClipboard(text, text);
-}
-
-function getModuleOptions() {
-  return [
-    { label: $t('page.system_view.roles_module_all'), value: 'all' },
-    { label: $t('page.system_view.roles_module_core_iam'), value: 'core-iam' },
-    { label: $t('page.system_view.roles_module_workers'), value: 'workers' },
-    {
-      label: $t('page.system_view.roles_module_automation'),
-      value: 'automation',
-    },
-    {
-      label: $t('page.system_view.roles_module_subscriptions'),
-      value: 'subscriptions',
-    },
-    { label: $t('page.system_view.roles_module_storage'), value: 'storage' },
-    { label: $t('page.system_view.roles_module_webhooks'), value: 'webhooks' },
-  ];
-}
-
-function getRoleColumns() {
-  return [
-    {
-      field: 'name',
-      title: $t('term.role'),
-      minWidth: 175,
-      align: 'left' as const,
-      slots: { default: 'role-name-cell' },
-    },
-    {
-      field: 'description',
-      title: $t('page.system_view.roles_col_policy_desc'),
-      minWidth: 250,
-      align: 'left' as const,
-      slots: { default: 'role-desc-cell' },
-    },
-    {
-      field: 'is_system',
-      title: $t('page.system_view.plugins_col_type'),
-      minWidth: 140,
-      align: 'left' as const,
-      slots: { default: 'role-type-cell' },
-    },
-    {
-      field: 'permissions',
-      title: $t('page.system_view.roles_col_assigned_perms'),
-      minWidth: 290,
-      align: 'left' as const,
-      slots: { default: 'role-perms-cell' },
-    },
-    {
-      field: 'created_at',
-      title: $t('common.createdAt'),
-      minWidth: 145,
-      align: 'left' as const,
-      slots: { default: 'role-date-cell' },
-    },
-  ];
-}
-
-function getPermColumns() {
-  return [
-    {
-      field: 'id',
-      title: $t('page.system_view.perms_col_id'),
-      minWidth: 230,
-      align: 'left' as const,
-      slots: { default: 'perm-id-cell' },
-    },
-    {
-      field: 'module',
-      title: $t('page.system_view.roles_col_module'),
-      minWidth: 155,
-      align: 'left' as const,
-      slots: { default: 'perm-module-cell' },
-    },
-    {
-      field: 'description',
-      title: $t('page.system_view.perms_col_desc'),
-      minWidth: 260,
-      align: 'left' as const,
-      slots: { default: 'perm-desc-cell' },
-    },
-    {
-      field: 'roles',
-      title: $t('page.system_view.roles_col_assigned_roles'),
-      minWidth: 260,
-      align: 'left' as const,
-      slots: { default: 'perm-roles-cell' },
-    },
-  ];
-}
-
-const [RolesGrid, rolesGridApi] = useVbenVxeGrid<SystemRole>({
-  separator: false,
-  detailSheetOptions: {
-    resource: 'public.roles',
-    subtitleField: 'id',
-    titleField: 'name',
-    onCreated: async () => {
-      await ensureCatalogLoaded(true);
-    },
-    onSaved: async () => {
-      await ensureCatalogLoaded(true);
-    },
-  },
-  formOptions: {
-    commonConfig: {
-      componentProps: {
-        class: 'w-full',
-      },
-      hideLabel: isMobile.value,
-    },
-    schema: [
-      {
-        component: 'Select',
-        fieldName: 'role_type',
-        label: () => $t('page.system_view.plugins_filter_type'),
-        defaultValue: 'all',
-        componentProps: () => ({
-          placeholder: $t('page.system_view.plugins_type_all'),
-          options: [
-            { label: $t('page.system_view.plugins_type_all'), value: 'all' },
-            {
-              label: $t('page.system_view.roles_type_system'),
-              value: 'system',
-            },
-            {
-              label: $t('page.system_view.roles_type_custom'),
-              value: 'custom',
-            },
-          ],
-        }),
-      },
-      {
-        component: 'Select',
-        fieldName: 'module',
-        label: () => $t('page.system_view.roles_filter_module'),
-        defaultValue: 'all',
-        componentProps: () => ({
-          placeholder: $t('page.system_view.roles_module_all'),
-          options: getModuleOptions(),
-        }),
-      },
-      {
-        component: 'Input',
-        fieldName: 'search',
-        formItemClass: 'col-span-2 sm:col-span-1',
-        label: () => $t('common.search'),
-        componentProps: () => ({
-          placeholder: $t('page.system_view.roles_search_placeholder'),
-          clearable: true,
-        }),
-      },
-    ],
-    layout: 'vertical',
-    showCollapseButton: false,
-    submitOnChange: true,
-    submitOnEnter: true,
-    submitButtonOptions: {
-      content: computed(() => $t('common.filter')),
-    },
-    resetButtonOptions: {
-      content: computed(() => $t('common.reset')),
-    },
-    actionWrapperClass:
-      'hidden sm:flex sm:col-span-1 items-center justify-end gap-2 pt-1 sm:pt-6',
-    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
-  },
-  gridOptions: {
-    border: false,
-    round: true,
-    showOverflow: true,
-    cellConfig: {
-      height: 56,
-    },
-    rowConfig: {
-      isHover: true,
-      keyField: 'id',
-    },
-    pagerConfig: {
-      pageSize: 15,
-      pageSizes: [10, 15, 30],
-    },
-    proxyConfig: {
-      autoLoad: true,
-      ajax: {
-        query: async (
-          { page }: { page?: { currentPage?: number; pageSize?: number } },
-          formValues: Record<string, any>,
-        ) => {
-          await ensureCatalogLoaded();
-          const filtered = filterSystemRoles(
-            allRoles.value,
-            {
-              module: formValues?.module,
-              role_type: formValues?.role_type,
-              search: formValues?.search,
-            },
-            allPermissions.value,
-          );
-
-          const currentPage = page?.currentPage || 1;
-          const pageSize = page?.pageSize || 15;
-          const start = (currentPage - 1) * pageSize;
-          const end = start + pageSize;
-          return {
-            items: filtered.slice(start, end),
-            total: filtered.length,
-          };
-        },
-      },
-    },
-    columns: getRoleColumns(),
-  },
-});
-
-const [PermissionsGrid, permsGridApi] = useVbenVxeGrid<SystemPermission>({
-  separator: false,
-  detailSheetOptions: {
-    resource: 'public.permissions',
-    subtitleField: 'module',
-    titleField: 'id',
-    onCreated: async () => {
-      await ensureCatalogLoaded(true);
-    },
-    onSaved: async () => {
-      await ensureCatalogLoaded(true);
-    },
-  },
-  formOptions: {
-    commonConfig: {
-      componentProps: {
-        class: 'w-full',
-      },
-      hideLabel: isMobile.value,
-    },
-    schema: [
-      {
-        component: 'Select',
-        fieldName: 'module',
-        label: () => $t('page.system_view.roles_col_module'),
-        defaultValue: 'all',
-        componentProps: () => ({
-          placeholder: $t('page.system_view.roles_module_all'),
-          options: getModuleOptions(),
-        }),
-      },
-      {
-        component: 'Select',
-        fieldName: 'role',
-        label: () => $t('page.system_view.roles_col_assigned_roles'),
-        defaultValue: 'all',
-        componentProps: () => ({
-          placeholder: $t('page.system_view.roles_all'),
-          options: [
-            { label: $t('page.system_view.roles_all'), value: 'all' },
-            { label: $t('page.system_view.role_owner'), value: 'owner' },
-            { label: $t('page.system_view.role_admin'), value: 'admin' },
-            { label: $t('page.system_view.role_member'), value: 'member' },
-            { label: $t('page.system_view.role_viewer'), value: 'viewer' },
-          ],
-        }),
-      },
-      {
-        component: 'Input',
-        fieldName: 'search',
-        formItemClass: 'col-span-2 sm:col-span-1',
-        label: () => $t('common.search'),
-        componentProps: () => ({
-          placeholder: $t('page.system_view.perms_search_placeholder'),
-          clearable: true,
-        }),
-      },
-    ],
-    layout: 'vertical',
-    showCollapseButton: false,
-    submitOnChange: true,
-    submitOnEnter: true,
-    submitButtonOptions: {
-      content: computed(() => $t('common.filter')),
-    },
-    resetButtonOptions: {
-      content: computed(() => $t('common.reset')),
-    },
-    actionWrapperClass:
-      'hidden sm:flex sm:col-span-1 items-center justify-end gap-2 pt-1 sm:pt-6',
-    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
-  },
-  gridOptions: {
-    border: false,
-    round: true,
-    showOverflow: true,
-    cellConfig: {
-      height: 52,
-    },
-    rowConfig: {
-      isHover: true,
-      keyField: 'id',
-    },
-    pagerConfig: {
-      pageSize: 15,
-      pageSizes: [10, 15, 30, 50],
-    },
-    proxyConfig: {
-      autoLoad: true,
-      ajax: {
-        query: async (
-          { page }: { page?: { currentPage?: number; pageSize?: number } },
-          formValues: Record<string, any>,
-        ) => {
-          await ensureCatalogLoaded();
-          const filtered = filterSystemPermissions(
-            allPermissions.value,
-            {
-              module: formValues?.module,
-              role: formValues?.role,
-              search: formValues?.search,
-            },
-            allRoles.value,
-          ).map((perm) => ({
-            ...perm,
-            roles: rolesByPermissionMap.value[perm.id] ?? [],
-          }));
-
-          const currentPage = page?.currentPage || 1;
-          const pageSize = page?.pageSize || 15;
-          const start = (currentPage - 1) * pageSize;
-          const end = start + pageSize;
-          return {
-            items: filtered.slice(start, end),
-            total: filtered.length,
-          };
-        },
-      },
-    },
-    columns: getPermColumns(),
-  },
-});
-
-watch([() => $t('page.system_view.roles_col_policy_desc'), isMobile], () => {
-  rolesGridApi.setGridOptions({ columns: getRoleColumns() });
-  permsGridApi.setGridOptions({ columns: getPermColumns() });
-  rolesGridApi.formApi?.setState({
-    commonConfig: {
-      componentProps: {
-        class: 'w-full',
-      },
-      hideLabel: isMobile.value,
-    },
-  });
-  permsGridApi.formApi?.setState({
-    commonConfig: {
-      componentProps: {
-        class: 'w-full',
-      },
-      hideLabel: isMobile.value,
-    },
-  });
-});
-
-async function handleRefresh() {
+async function reloadCurrentTab() {
   await ensureCatalogLoaded(true);
   if (activeTab.value === 'roles') {
-    rolesGridApi.reload();
+    rolesTabRef.value?.reload();
   } else {
-    permsGridApi.reload();
+    permsTabRef.value?.reload();
   }
 }
 
-function handleOpenCreate() {
+watch(activeTab, () => {
   if (activeTab.value === 'roles') {
-    rolesGridApi.openCreateSheet();
+    rolesTabRef.value?.reload();
   } else {
-    permsGridApi.openCreateSheet();
+    permsTabRef.value?.reload();
   }
-}
+});
+
+onMounted(() => {
+  ensureCatalogLoaded();
+});
 </script>
 
 <template>
-  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
-    <!-- Top Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="min-w-0">
+  <Page
+    :title="$t('page.system.roles')"
+    :description="$t('page.system_view.roles_page_desc')"
+    content-class="p-3 sm:p-5"
+    header-class="border-b border-border/60 bg-card/60 px-4 py-3 sm:px-6"
+  >
+    <template #title>
+      <div class="flex items-center gap-2">
         <h1
-          class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
         >
           {{ $t('page.system.roles') }}
         </h1>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.system.roles_desc') }}
-        </p>
+        <Badge variant="secondary" class="shrink-0 text-2xs font-normal">
+          {{ activeTab === 'roles' ? allRoles.length : allPermissions.length }}
+        </Badge>
       </div>
+    </template>
 
-      <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
+    <template #extra>
+      <div class="flex shrink-0 items-center gap-2">
+        <Tabs v-model="activeTab" class="w-auto">
+          <TabsList class="h-8 p-0.5">
+            <TabsTrigger value="roles" class="h-7 px-3 text-xs">
+              {{ $t('term.roles') }}
+              <Badge variant="secondary" class="ml-1.5 px-1 py-0 text-3xs">
+                {{ allRoles.length }}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="permissions" class="h-7 px-3 text-xs">
+              {{ $t('term.permissions') }}
+              <Badge variant="secondary" class="ml-1.5 px-1 py-0 text-3xs">
+                {{ allPermissions.length }}
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         <Button
           variant="outline"
           size="icon"
           class="size-8 shrink-0"
-          :disabled="loadingCatalog"
           :title="$t('common.refresh')"
-          @click="handleRefresh"
+          :disabled="loadingCatalog"
+          @click="reloadCurrentTab"
         >
           <RefreshCw
             class="size-3.5 shrink-0"
             :class="{ 'animate-spin': loadingCatalog }"
           />
         </Button>
-        <Button
-          size="sm"
-          class="h-8 gap-1.5 px-2.5 text-xs font-medium sm:px-3"
-          @click="handleOpenCreate"
-        >
-          <Plus class="size-3.5 shrink-0" />
-          <span>{{ $t('common.createRecord') }}</span>
-        </Button>
       </div>
-    </div>
+    </template>
 
-    <!-- Main Container: Mode Tabs + VXE Grid -->
+    <!-- Content Card -->
     <div
-      class="space-y-3 overflow-hidden rounded-xl border border-border/60 bg-card p-3 shadow-xs sm:p-5"
+      class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs"
     >
-      <!-- Mode Selector -->
-      <div class="border-b border-border/40 pb-2.5">
-        <Tabs v-model="activeTab">
-          <TabsList class="h-8">
-            <TabsTrigger value="roles" class="h-7 gap-1.5 px-3 text-xs">
-              <ShieldCheck class="size-3.5 text-primary" />
-              <span>{{
-                $t('page.system_view.roles_tab_roles', [allRoles.length])
-              }}</span>
-            </TabsTrigger>
-            <TabsTrigger value="permissions" class="h-7 gap-1.5 px-3 text-xs">
-              <KeyRound class="size-3.5 text-muted-foreground" />
-              <span>{{
-                $t('page.system_view.roles_tab_permissions', [
-                  allPermissions.length,
-                ])
-              }}</span>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+      <RolesTab
+        v-if="activeTab === 'roles'"
+        ref="rolesTabRef"
+        :all-roles="allRoles"
+        :effective-access="effectiveAccess"
+        @refresh="reloadCurrentTab"
+      />
 
-      <!-- Tab 1: System Roles VXE Grid -->
-      <div v-if="activeTab === 'roles'">
-        <RolesGrid class="roles-vxe-grid">
-          <template #role-name-cell="{ row }">
-            <div class="flex items-center gap-2">
-              <RoleBadge :role="row.name" :uppercase="true" />
-              <code class="text-2xs text-muted-foreground">
-                {{ row.name }}
-              </code>
-            </div>
-          </template>
-
-          <template #role-desc-cell="{ row }">
-            <span class="text-xs text-muted-foreground">
-              {{ row.description || $t('page.system_view.roles_default_desc') }}
-            </span>
-          </template>
-
-          <template #role-type-cell="{ row }">
-            <Badge
-              :variant="row.is_system ? 'default' : 'outline'"
-              class="gap-1 text-xs font-normal"
-            >
-              <Lock v-if="row.is_system" class="size-3 shrink-0" />
-              <span>{{
-                row.is_system
-                  ? $t('page.system_view.roles_type_system')
-                  : $t('page.system_view.roles_badge_custom')
-              }}</span>
-            </Badge>
-          </template>
-
-          <template #role-perms-cell="{ row }">
-            <div class="flex items-center gap-1.5 min-w-0">
-              <Badge variant="outline" class="shrink-0 text-xs font-semibold">
-                {{
-                  $t('page.system_view.roles_perms_count', [
-                    row.permissions.length,
-                  ])
-                }}
-              </Badge>
-              <code
-                v-for="perm in row.permissions.slice(0, 2)"
-                :key="perm"
-                class="inline-block max-w-36 truncate rounded bg-muted px-1.5 py-0.5 text-2xs text-muted-foreground"
-                :title="perm"
-              >
-                {{ perm }}
-              </code>
-              <Badge
-                v-if="row.permissions.length > 2"
-                variant="secondary"
-                class="inline-flex shrink-0 text-2xs font-normal"
-              >
-                {{
-                  $t('page.system_view.roles_more_perms', [
-                    row.permissions.length - 2,
-                  ])
-                }}
-              </Badge>
-            </div>
-          </template>
-
-          <template #role-date-cell="{ row }">
-            <span class="text-xs text-muted-foreground">
-              {{ formatDate(row.created_at) }}
-            </span>
-          </template>
-
-          <template #empty>
-            <div
-              class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground"
-            >
-              <ShieldCheck
-                class="size-10 stroke-[1.5] text-muted-foreground/60 mb-3"
-              />
-              <p class="text-sm font-medium text-foreground">
-                {{ $t('page.system_view.roles_empty_title') }}
-              </p>
-              <p class="text-xs text-muted-foreground max-w-sm mt-1">
-                {{ $t('page.system_view.roles_empty_desc') }}
-              </p>
-            </div>
-          </template>
-        </RolesGrid>
-      </div>
-
-      <!-- Tab 2: Permissions Catalog VXE Grid -->
-      <div v-else>
-        <PermissionsGrid class="permissions-vxe-grid">
-          <template #perm-id-cell="{ row }">
-            <div class="inline-flex items-center gap-1">
-              <code
-                class="rounded bg-muted px-2 py-0.5 text-xs font-semibold text-primary"
-              >
-                {{ row.id }}
-              </code>
-              <Button
-                variant="ghost"
-                size="icon"
-                class="size-6 shrink-0 text-muted-foreground hover:text-foreground"
-                :title="$t('page.system_view.perms_copy_key')"
-                @click.stop="handleCopyKey(row.id)"
-              >
-                <Check v-if="isCopied(row.id)" class="size-3.5 text-success" />
-                <Copy v-else class="size-3.5" />
-              </Button>
-            </div>
-          </template>
-
-          <template #perm-module-cell="{ row }">
-            <Badge variant="outline" class="gap-1.5 text-xs font-normal">
-              <Folder class="size-3 text-primary shrink-0" />
-              <span>{{ row.module }}</span>
-            </Badge>
-          </template>
-
-          <template #perm-desc-cell="{ row }">
-            <span class="text-xs text-muted-foreground">
-              {{
-                row.description ||
-                $t('page.system_view.perms_default_desc', [row.module])
-              }}
-            </span>
-          </template>
-
-          <template #perm-roles-cell="{ row }">
-            <div class="flex items-center gap-1.5">
-              <RoleBadge
-                v-for="roleName in rolesByPermissionMap[row.id] ?? []"
-                :key="roleName"
-                :role="roleName"
-              />
-              <span
-                v-if="(rolesByPermissionMap[row.id] ?? []).length === 0"
-                class="text-xs text-muted-foreground"
-              >
-                —
-              </span>
-            </div>
-          </template>
-
-          <template #empty>
-            <div
-              class="flex flex-col items-center justify-center p-8 text-center text-muted-foreground"
-            >
-              <KeyRound
-                class="size-10 stroke-[1.5] text-muted-foreground/60 mb-3"
-              />
-              <p class="text-sm font-medium text-foreground">
-                {{ $t('page.system_view.perms_empty_title') }}
-              </p>
-              <p class="text-xs text-muted-foreground max-w-sm mt-1">
-                {{ $t('page.system_view.perms_empty_desc') }}
-              </p>
-            </div>
-          </template>
-        </PermissionsGrid>
-      </div>
+      <PermissionsTab
+        v-else
+        ref="permsTabRef"
+        :all-permissions="allPermissions"
+        :roles-by-permission-map="rolesByPermissionMap"
+        @refresh="reloadCurrentTab"
+      />
     </div>
-  </div>
+  </Page>
 </template>

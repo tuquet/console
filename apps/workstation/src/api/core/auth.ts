@@ -240,12 +240,12 @@ export async function loginWithGitHub(redirectTo?: string): Promise<void> {
   const { supabaseUrl } = getSupabaseConfig();
 
   if (isTauriEnvironment()) {
-    const isDev = import.meta.env.DEV;
+    const defaultDevPort = import.meta.env.VITE_PORT || '5666';
     const baseCallback =
       import.meta.env.VITE_AUTH_CALLBACK_URL ||
-      (isDev
-        ? 'http://localhost:5320/auth/callback'
-        : `${window.location.origin}/auth/callback`);
+      (typeof window !== 'undefined' && window.location?.origin
+        ? `${window.location.origin}/auth/callback`
+        : `http://localhost:${defaultDevPort}/auth/callback`);
     const target = redirectTo || `${baseCallback}?target=desktop`;
     const authUrl = `${supabaseUrl}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(target)}`;
     try {

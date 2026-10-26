@@ -169,6 +169,18 @@ function isIgnoredBenignMessage(entry) {
     return true;
   }
 
+  // 5. Headless test synthetic token / offline backend probes (Supabase auth / mock JWT token exchange)
+  if (
+    url.includes('/auth/v1/user') ||
+    url.includes('/rest/v1/permissions') ||
+    url.includes('/auth/v1/token?grant_type=refresh_token') ||
+    text.includes('auth/v1/user') ||
+    text.includes('rest/v1/permissions') ||
+    text.includes('grant_type=refresh_token')
+  ) {
+    return true;
+  }
+
   return false;
 }
 

@@ -4,6 +4,8 @@ import type { SystemOverviewSummary } from '#/api';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { Page } from '@tuquet/common-ui';
+
 import {
   Badge,
   Button,
@@ -158,20 +160,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-3.5 p-3 sm:space-y-5 sm:p-5">
-    <!-- Compact Single-Row Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="min-w-0">
-        <h1
-          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.system.overview') }}
-        </h1>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.system.overview_desc') }}
-        </p>
-      </div>
-
+  <Page
+    :title="$t('page.system.overview')"
+    :description="$t('page.system.overview_desc')"
+    content-class="space-y-3.5 p-3 sm:space-y-5 sm:p-5"
+    header-class="border-b border-border/60 bg-card/60 px-4 py-3 sm:px-6"
+  >
+    <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
@@ -185,7 +180,7 @@ onMounted(() => {
           <span class="hidden sm:inline">{{ $t('common.refresh') }}</span>
         </Button>
       </div>
-    </div>
+    </template>
 
     <!-- 1. Unified Actionable System Governance KPI Grid (2 cols on Mobile, 3 on Tablet, 6 on Desktop) -->
     <div>
@@ -405,5 +400,5 @@ onMounted(() => {
       :row="detailRow"
       @saved="loadOverview"
     />
-  </div>
+  </Page>
 </template>

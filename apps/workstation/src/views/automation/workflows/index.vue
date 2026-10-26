@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import type { Workflow } from '#/api';
 
-import { computed, ref, watch } from 'vue';
+import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
+import { Page } from '@tuquet/common-ui';
 import { usePreferences } from '@tuquet/preferences';
 
 import { Badge, Button } from '@tuquet-core/shadcn-ui';
@@ -12,7 +13,6 @@ import { GitBranch, Plus, RefreshCw } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { listWorkflows } from '#/api';
-import { useDateFormat } from '#/composables';
 import {
   buildEnumFilterOptions,
   FILTER_ALL,
@@ -21,12 +21,12 @@ import {
   WORKFLOW_STATUS_META,
 } from '#/constants';
 import { $t } from '#/locales';
+import { paginateArray } from '#/utils/pagination';
 
 defineOptions({ name: 'AutomationWorkflows' });
 
 const route = useRoute();
 const { isMobile } = usePreferences();
-const { formatDate } = useDateFormat();
 
 const allWorkflows = ref<Workflow[]>([]);
 
@@ -63,13 +63,13 @@ function getColumns() {
       field: 'created_at',
       title: $t('page.workflows_view.col_created_at'),
       minWidth: 145,
-      slots: { default: 'created-cell' },
+      cellRender: { name: 'CellDate' },
     },
     {
       field: 'updated_at',
       title: $t('page.workflows_view.col_updated_at'),
       minWidth: 145,
-      slots: { default: 'updated-cell' },
+      cellRender: { name: 'CellDate' },
     },
   ];
 }
@@ -119,28 +119,12 @@ const [Grid, gridApi] = useVbenVxeGrid<Workflow>({
         }),
       },
     ],
-    layout: 'vertical',
-    showCollapseButton: false,
-    submitOnChange: true,
-    submitOnEnter: true,
-    submitButtonOptions: {
-      content: computed(() => $t('common.filter')),
-    },
-    resetButtonOptions: {
-      content: computed(() => $t('common.reset')),
-    },
     actionWrapperClass:
       'hidden sm:flex sm:col-span-2 lg:col-span-2 items-center justify-end gap-2 pt-0.5 sm:pt-6',
-    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
-    border: false,
-    round: true,
-    showOverflow: true,
     pagerConfig: {
       autoHidden: true,
-      pageSize: 15,
-      pageSizes: [10, 15, 30, 50],
     },
     proxyConfig: {
       autoLoad: true,
@@ -167,30 +151,12 @@ const [Grid, gridApi] = useVbenVxeGrid<Workflow>({
             );
           }
 
-          const currentPage = page?.currentPage || 1;
-          const pageSize = page?.pageSize || 15;
-          const start = (currentPage - 1) * pageSize;
-          const end = start + pageSize;
-
-          return {
-            items: filtered.slice(start, end),
-            total: filtered.length,
-          };
+          return paginateArray(filtered, page);
         },
       },
     },
-    columns: getColumns(),
+    columns: getColumns,
   },
-});
-
-watch([() => $t('page.workflows_view.col_name'), isMobile], () => {
-  gridApi.setGridOptions({ columns: getColumns() });
-  gridApi.formApi?.setState({
-    commonConfig: {
-      componentProps: { class: 'w-full' },
-      hideLabel: isMobile.value,
-    },
-  });
 });
 
 function refresh() {
@@ -199,25 +165,26 @@ function refresh() {
 </script>
 
 <template>
-  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
-    <!-- Compact Single-Row Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="min-w-0">
-        <div class="flex flex-wrap items-center gap-2">
-          <h1
-            class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
-          >
-            {{ $t('page.automation.workflows') }}
-          </h1>
-          <Badge variant="secondary" class="shrink-0 text-2xs">
-            {{ allWorkflows.length }}
-          </Badge>
-        </div>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.automation.workflows_desc') }}
-        </p>
+  <Page
+    :title="$t('page.automation.workflows')"
+    :description="$t('page.automation.workflows_desc')"
+    content-class="p-3 sm:p-5"
+    header-class="border-b border-border/60 bg-card/60 px-4 py-3 sm:px-6"
+  >
+    <template #title>
+      <div class="flex items-center gap-2">
+        <h1
+          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
+        >
+          {{ $t('page.automation.workflows') }}
+        </h1>
+        <Badge variant="secondary" class="shrink-0 text-2xs">
+          {{ allWorkflows.length }}
+        </Badge>
       </div>
+    </template>
 
+    <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
@@ -238,7 +205,7 @@ function refresh() {
           <span>{{ $t('common.createRecord') }}</span>
         </Button>
       </div>
-    </div>
+    </template>
 
     <!-- Main Container -->
     <div
@@ -280,18 +247,6 @@ function refresh() {
           </Badge>
         </template>
 
-        <template #created-cell="{ row }">
-          <span class="text-xs text-muted-foreground">
-            {{ formatDate(row.created_at) }}
-          </span>
-        </template>
-
-        <template #updated-cell="{ row }">
-          <span class="text-xs text-muted-foreground">
-            {{ formatDate(row.updated_at) }}
-          </span>
-        </template>
-
         <template #empty>
           <div
             class="flex flex-col items-center justify-center px-4 py-8 text-center text-muted-foreground"
@@ -309,5 +264,5 @@ function refresh() {
         </template>
       </Grid>
     </div>
-  </div>
+  </Page>
 </template>

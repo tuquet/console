@@ -27,8 +27,7 @@ declare global {
 let scriptLoadingPromise: null | Promise<void> = null;
 
 export const TURNSTILE_SITE_KEY =
-  (import.meta.env.VITE_TURNSTILE_SITE_KEY as string) ||
-  '0x4AAAAAAFTuc_JE91uiHjXp';
+  (import.meta.env.VITE_TURNSTILE_SITE_KEY as string) || '';
 
 /**
  * Dynamically load Cloudflare Turnstile SDK

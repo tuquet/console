@@ -33,6 +33,7 @@ import {
   updateWorkspaceInfo,
   updateWorkspaceMemberRole,
 } from '#/api';
+import { executeWithFeedback } from '#/composables';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
 
@@ -195,17 +196,15 @@ async function handleEditMemberSubmit(payload: {
 }
 
 async function handleRemoveMember(member: WorkspaceMember) {
-  try {
-    await removeWorkspaceMember(member.id);
-    toast.success(
-      $t('page.tenants_view.member_removed_success', {
-        name: member.full_name || member.email,
-      }),
-    );
+  const ok = await executeWithFeedback(() => removeWorkspaceMember(member.id), {
+    errorFallback: $t('page.tenants_view.member_remove_failed'),
+    success: $t('page.tenants_view.member_removed_success', {
+      name: member.full_name || member.email,
+    }),
+    tracking: { action: 'handleRemoveMember', view: 'TenantDetail' },
+  });
+  if (ok !== undefined) {
     await loadData();
-  } catch (error: any) {
-    captureError(error, { action: 'handleRemoveMember', view: 'TenantDetail' });
-    toast.error(error.message || $t('page.tenants_view.member_remove_failed'));
   }
 }
 
@@ -214,23 +213,28 @@ async function handleEditWorkspaceSubmit(payload: {
   slug: string;
 }) {
   if (!detailData.value) return;
+  const tenantId = detailData.value.tenant.id;
   updatingWorkspace.value = true;
   try {
-    await updateWorkspaceInfo(detailData.value.tenant.id, {
-      name: payload.name,
-      slug: payload.slug,
-    });
-    toast.success($t('page.tenants_view.workspace_updated_success'));
-    isEditWorkspaceModalVisible.value = false;
-    await loadData();
-  } catch (error: any) {
-    captureError(error, {
-      action: 'handleEditWorkspaceSubmit',
-      view: 'TenantDetail',
-    });
-    toast.error(
-      error.message || $t('page.tenants_view.workspace_update_failed'),
+    const ok = await executeWithFeedback(
+      () =>
+        updateWorkspaceInfo(tenantId, {
+          name: payload.name,
+          slug: payload.slug,
+        }),
+      {
+        errorFallback: $t('page.tenants_view.workspace_update_failed'),
+        success: $t('page.tenants_view.workspace_updated_success'),
+        tracking: {
+          action: 'handleEditWorkspaceSubmit',
+          view: 'TenantDetail',
+        },
+      },
     );
+    if (ok !== undefined) {
+      isEditWorkspaceModalVisible.value = false;
+      await loadData();
+    }
   } finally {
     updatingWorkspace.value = false;
   }
@@ -239,18 +243,21 @@ async function handleEditWorkspaceSubmit(payload: {
 async function handleDeleteWorkspaceSubmit() {
   deletingWorkspace.value = true;
   try {
-    await deleteWorkspace(tenantId.value);
-    toast.success($t('page.tenants_view.workspace_deleted_success'));
-    isDeleteWorkspaceModalVisible.value = false;
-    router.push('/tenants');
-  } catch (error: any) {
-    captureError(error, {
-      action: 'handleDeleteWorkspaceSubmit',
-      view: 'TenantDetail',
-    });
-    toast.error(
-      error.message || $t('page.tenants_view.workspace_delete_failed'),
+    const ok = await executeWithFeedback(
+      () => deleteWorkspace(tenantId.value),
+      {
+        errorFallback: $t('page.tenants_view.workspace_delete_failed'),
+        success: $t('page.tenants_view.workspace_deleted_success'),
+        tracking: {
+          action: 'handleDeleteWorkspaceSubmit',
+          view: 'TenantDetail',
+        },
+      },
     );
+    if (ok !== undefined) {
+      isDeleteWorkspaceModalVisible.value = false;
+      router.push('/tenants');
+    }
   } finally {
     deletingWorkspace.value = false;
   }

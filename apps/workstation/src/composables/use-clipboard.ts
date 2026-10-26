@@ -31,8 +31,19 @@ export function useClipboard() {
     return copiedField.value === label;
   }
 
+  async function copyText(
+    text: string,
+    label = $t('common.content'),
+  ): Promise<boolean> {
+    return copyToClipboard(
+      text,
+      $t('page.commerce_view.copied_label', { label }),
+    );
+  }
+
   return {
     copiedField,
+    copyText,
     copyToClipboard,
     isCopied,
   };

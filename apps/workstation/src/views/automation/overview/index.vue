@@ -4,6 +4,8 @@ import type { AutomationOverviewSummary } from '#/api';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import { Page } from '@tuquet/common-ui';
+
 import {
   Badge,
   Button,
@@ -188,20 +190,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-3.5 p-3 sm:space-y-5 sm:p-5">
-    <!-- Compact Single-Row Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="min-w-0">
-        <h1
-          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
-        >
-          {{ $t('page.automation.overview') }}
-        </h1>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.automation.overview_desc') }}
-        </p>
-      </div>
-
+  <Page
+    :title="$t('page.automation.overview')"
+    :description="$t('page.automation.overview_desc')"
+    content-class="space-y-3.5 p-3 sm:space-y-5 sm:p-5"
+    header-class="border-b border-border/60 bg-card/60 px-4 py-3 sm:px-6"
+  >
+    <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Badge
           variant="outline"
@@ -243,7 +238,7 @@ onMounted(() => {
           <span>{{ $t('common.connect') }}</span>
         </Button>
       </div>
-    </div>
+    </template>
 
     <!-- 1. Unified Actionable Automation & Fleet KPI Grid (2 cols on Mobile, 5 cols on Desktop) -->
     <div>
@@ -484,5 +479,5 @@ onMounted(() => {
       :probing="loading"
       @reprobe="loadOverview"
     />
-  </div>
+  </Page>
 </template>

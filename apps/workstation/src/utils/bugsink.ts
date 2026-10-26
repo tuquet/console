@@ -11,10 +11,10 @@ export interface BugsinkConfig {
 }
 
 /**
- * Default Bugsink DSN provided for the project
+ * Default Bugsink DSN resolved strictly from environment
  */
 export const DEFAULT_BUGSINK_DSN =
-  'https://tuquet@tuquet-error-relay.tunyk-93.workers.dev/1';
+  (import.meta.env.VITE_BUGSINK_DSN as string) || '';
 
 const capturedErrors = new WeakSet<object>();
 

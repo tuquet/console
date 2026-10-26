@@ -36,6 +36,10 @@ describe('qC Acceptance: Browser Instances & Local-First Unbind Contract', () =>
   });
 
   it('should handle unbind failures gracefully and return false without crashing', async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
     vi.mocked(supabaseRequest).mockRejectedValueOnce(
       new Error('Network error or RLS denied'),
     );
@@ -43,6 +47,11 @@ describe('qC Acceptance: Browser Instances & Local-First Unbind Contract', () =>
     const result = await unbindBrowser('browser-002');
 
     expect(result).toBe(false);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '[Automation] Failed to unbind browser:',
+      expect.any(Error),
+    );
+    consoleErrorSpy.mockRestore();
   });
 
   it('should expose unbind method via browsersApi facade', () => {

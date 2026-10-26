@@ -249,7 +249,7 @@ export async function listActivePaymentGateways(
 /**
  * Fetch all payment gateways (including inactive ones) for Platform Admin
  */
-export async function listAllPaymentGateways(): Promise<PaymentGateway[]> {
+export async function listPaymentGateways(): Promise<PaymentGateway[]> {
   const rows = await supabaseRequest<any[]>(
     '/rest/v1/payment_gateways?select=*&order=sort_order.asc,id.asc',
     { schema: SUPABASE_SCHEMA.BILLING },
@@ -258,6 +258,11 @@ export async function listAllPaymentGateways(): Promise<PaymentGateway[]> {
     ? rows.map((row) => mapRawPaymentGateway(row))
     : [];
 }
+
+/**
+ * @deprecated Use `listPaymentGateways` instead.
+ */
+export const listAllPaymentGateways = listPaymentGateways;
 
 /**
  * Fetch Tenant Xu wallet balance (returns 0 Xu fallback if wallet row not yet initialized)
@@ -489,6 +494,7 @@ export const billingApi = {
   listAllPaymentGateways,
   listBankReceivingAccounts,
   listManualReviewIntents,
+  listPaymentGateways,
   listWalletTransactions,
   toggleBankReceivingAccount,
   upsertBankReceivingAccount,

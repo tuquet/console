@@ -11,6 +11,7 @@ import type {
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { Page } from '@tuquet/common-ui';
 import { usePreferences } from '@tuquet/preferences';
 
 import {
@@ -57,12 +58,13 @@ import {
 import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
+import { paginateArray } from '#/utils/pagination';
 
 defineOptions({ name: 'CommerceWallet' });
 
 const router = useRouter();
 const { formatDate } = useDateFormat();
-const { copyToClipboard } = useClipboard();
+const { copyText, copyToClipboard } = useClipboard();
 const { isMobile } = usePreferences();
 
 const tenants = ref<Tenant[]>([]);
@@ -225,34 +227,16 @@ const [Grid, gridApi] = useVbenVxeGrid<WalletTransaction>({
         }),
       },
     ],
-    layout: 'vertical',
-    showCollapseButton: false,
-    submitOnChange: true,
-    submitOnEnter: true,
-    submitButtonOptions: {
-      content: computed(() => $t('common.filter')),
-    },
-    resetButtonOptions: {
-      content: computed(() => $t('common.reset')),
-    },
     actionWrapperClass:
       'hidden sm:flex sm:col-span-2 lg:col-span-2 items-center justify-end gap-2 pt-1 sm:pt-6',
-    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
-    border: false,
-    round: true,
-    showOverflow: true,
     cellConfig: {
       height: 54,
     },
     rowConfig: {
       isHover: true,
       keyField: 'id',
-    },
-    pagerConfig: {
-      pageSize: 15,
-      pageSizes: [10, 15, 30, 50],
     },
     proxyConfig: {
       autoLoad: false,
@@ -276,29 +260,12 @@ const [Grid, gridApi] = useVbenVxeGrid<WalletTransaction>({
             tx_type: formValues?.tx_type,
           });
 
-          const currentPage = page?.currentPage || 1;
-          const pageSize = page?.pageSize || 15;
-          const start = (currentPage - 1) * pageSize;
-          const end = start + pageSize;
-          return {
-            items: filtered.slice(start, end),
-            total: filtered.length,
-          };
+          return paginateArray(filtered, page);
         },
       },
     },
-    columns: getColumns(),
+    columns: getColumns,
   },
-});
-
-watch([() => $t('page.commerce_view.tx_type_label'), isMobile], () => {
-  gridApi.setGridOptions({ columns: getColumns() });
-  gridApi.formApi?.setState({
-    commonConfig: {
-      componentProps: { class: 'w-full' },
-      hideLabel: isMobile.value,
-    },
-  });
 });
 
 async function initData() {
@@ -428,13 +395,6 @@ async function handleCreateTopupIntent() {
   }
 }
 
-async function copyText(
-  text: string,
-  label = $t('page.commerce_view.copy_default_label'),
-) {
-  await copyToClipboard(text, $t('page.commerce_view.copied_label', { label }));
-}
-
 watch(topupOpen, (open) => {
   if (!open) {
     stopPolling();
@@ -451,25 +411,26 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
-    <!-- Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="min-w-0">
-        <div class="flex flex-wrap items-center gap-2">
-          <h1
-            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-          >
-            {{ $t('page.commerce.wallet') }}
-          </h1>
-          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
-            {{ allTransactions.length }}
-          </Badge>
-        </div>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.commerce.wallet_desc') }}
-        </p>
+  <Page
+    :title="$t('page.commerce.wallet')"
+    :description="$t('page.commerce.wallet_desc')"
+    content-class="space-y-3 p-3 sm:space-y-4 sm:p-5"
+    header-class="border-b border-border/60 bg-card/60 px-4 py-3 sm:px-6"
+  >
+    <template #title>
+      <div class="flex items-center gap-2">
+        <h1
+          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
+        >
+          {{ $t('page.commerce.wallet') }}
+        </h1>
+        <Badge variant="secondary" class="shrink-0 text-2xs font-normal">
+          {{ allTransactions.length }}
+        </Badge>
       </div>
+    </template>
 
+    <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <div class="flex items-center gap-1.5">
           <Select
@@ -513,7 +474,7 @@ onBeforeUnmount(() => {
           <RefreshCw class="size-3.5 shrink-0" />
         </Button>
       </div>
-    </div>
+    </template>
 
     <!-- Compact Wallet Balance Strip -->
     <div
@@ -837,5 +798,5 @@ onBeforeUnmount(() => {
         </div>
       </DialogContent>
     </Dialog>
-  </div>
+  </Page>
 </template>

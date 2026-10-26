@@ -8,7 +8,7 @@ import type {
   VxeDetailSheetOptions,
 } from '#/components/vxe-detail-sheet/types';
 
-import { computed, defineComponent, Fragment, h, ref } from 'vue';
+import { computed, defineComponent, Fragment, h, ref, watch } from 'vue';
 
 import { i18n } from '@tuquet/locales';
 import {
@@ -24,6 +24,7 @@ import {
   setupVbenVxeTable,
   useVbenVxeGrid as useGrid,
 } from '@tuquet/plugins/vxe-table';
+import { usePreferences } from '@tuquet/preferences';
 
 import { Badge, Button } from '@tuquet-core/shadcn-ui';
 
@@ -334,8 +335,19 @@ export type AdminVxeGridProps<
   T extends Record<string, any> = any,
   TFormValues extends FormValues = FormValues,
   TSubmitValues extends FormValues = TFormValues,
-> = BaseVbenVxeGridOptions<T, TFormValues, TSubmitValues> & {
+> = Omit<
+  BaseVbenVxeGridOptions<T, TFormValues, TSubmitValues>,
+  'gridOptions'
+> & {
   detailSheetOptions?: VxeDetailSheetOptions<T>;
+  gridOptions?: Omit<
+    NonNullable<
+      BaseVbenVxeGridOptions<T, TFormValues, TSubmitValues>['gridOptions']
+    >,
+    'columns'
+  > & {
+    columns?: (() => any[]) | any[];
+  };
 };
 
 export type AdminExtendedVxeGridApi<
@@ -388,14 +400,69 @@ export const useVbenVxeGrid = <
   };
 
   const originalCellClick = options.gridEvents?.cellClick;
-  const enhancedOptions: AdminVxeGridProps<T, TFormValues, TSubmitValues> = {
+  const initialColumns =
+    typeof options.gridOptions?.columns === 'function'
+      ? options.gridOptions.columns()
+      : options.gridOptions?.columns;
+
+  const defaultGridOptions = {
+    border: false,
+    round: true,
+    showOverflow: true,
+    pagerConfig: {
+      pageSize: 15,
+      pageSizes: [10, 15, 30, 50],
+    },
+  };
+
+  const defaultFormOptions = {
+    actionWrapperClass:
+      'hidden sm:flex sm:col-span-1 items-center justify-end gap-2 pt-1 sm:pt-6',
+    layout: 'vertical' as const,
+    resetButtonOptions: {
+      content: computed(() => i18n.global.t('common.reset')),
+    },
+    showCollapseButton: false,
+    submitButtonOptions: {
+      content: computed(() => i18n.global.t('common.filter')),
+    },
+    submitOnChange: true,
+    submitOnEnter: true,
+    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
+  };
+
+  const enhancedOptions: any = {
     ...options,
+    gridOptions: {
+      ...defaultGridOptions,
+      ...options.gridOptions,
+      columns: initialColumns,
+      pagerConfig: (() => {
+        if (options.gridOptions?.pagerConfig === undefined) {
+          return defaultGridOptions.pagerConfig;
+        }
+        if (typeof options.gridOptions.pagerConfig === 'object') {
+          return {
+            ...defaultGridOptions.pagerConfig,
+            ...options.gridOptions.pagerConfig,
+          };
+        }
+        return options.gridOptions.pagerConfig;
+      })(),
+    },
     ...(options.formOptions
       ? {
           formOptions: {
-            submitOnChange: true,
-            submitOnEnter: true,
+            ...defaultFormOptions,
             ...options.formOptions,
+            resetButtonOptions: {
+              ...defaultFormOptions.resetButtonOptions,
+              ...options.formOptions.resetButtonOptions,
+            },
+            submitButtonOptions: {
+              ...defaultFormOptions.submitButtonOptions,
+              ...options.formOptions.submitButtonOptions,
+            },
           },
         }
       : {}),
@@ -435,6 +502,33 @@ export const useVbenVxeGrid = <
   >;
   extendedGridApi.openDetailSheet = openDetailSheet;
   extendedGridApi.openCreateSheet = openCreateSheet;
+
+  // Auto-sync locale changes and responsive mobile label
+  const { isMobile } = usePreferences();
+  const columnGetter =
+    typeof options.gridOptions?.columns === 'function'
+      ? options.gridOptions.columns
+      : null;
+
+  watch(
+    () => [i18n.global.locale.value, isMobile.value],
+    ([, mobileVal]) => {
+      if (columnGetter) {
+        extendedGridApi.setGridOptions({ columns: columnGetter() });
+      }
+      if (options.formOptions && extendedGridApi.formApi) {
+        extendedGridApi.formApi.setState({
+          commonConfig: {
+            componentProps: {
+              class: 'w-full',
+            },
+            hideLabel: mobileVal as boolean,
+          },
+        });
+      }
+    },
+    { flush: 'post' },
+  );
 
   const gridStoreState = extendedGridApi.useStore();
 

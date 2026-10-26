@@ -65,6 +65,7 @@ import {
 import { useClipboard, useDateFormat } from '#/composables';
 import { $t } from '#/locales';
 
+import { useBottomSheetDrag } from './composables/use-bottom-sheet-drag';
 import VxeRelationalTableSheet from './vxe-relational-table-sheet.vue';
 
 interface Props {
@@ -107,61 +108,18 @@ const isSuperadmin = computed<boolean>(() =>
   Boolean(effectiveAccess.value?.isSuperadmin),
 );
 
-// Antigravity dynamic smooth fluid drag sheet (iOS / Material style)
-const isBottomExpanded = ref(false);
-const isDragging = ref(false);
-// Dynamic height in dvh (null when not dragging so classes handle it)
-const sheetHeightDvh = ref<null | number>(null);
-
-let startY = 0;
-let initialHeightDvh = 60;
-
-function toggleBottomHeight() {
-  isBottomExpanded.value = !isBottomExpanded.value;
-  sheetHeightDvh.value = null;
-}
-
-function onGrabberTouchStart(e: TouchEvent) {
-  if (!e.touches[0]) return;
-  startY = e.touches[0].clientY;
-  initialHeightDvh = isBottomExpanded.value ? 92 : 60;
-  isDragging.value = true;
-  sheetHeightDvh.value = initialHeightDvh;
-}
-
-function onGrabberTouchMove(e: TouchEvent) {
-  if (!isDragging.value || !e.touches[0]) return;
-  const currentY = e.touches[0].clientY;
-  const deltaPx = startY - currentY; // Vuốt lên deltaPx > 0, vuốt xuống deltaPx < 0
-  const windowHeight = window.innerHeight || 1;
-  const deltaDvh = (deltaPx / windowHeight) * 100;
-
-  // Cho phép kéo mượt liên tục theo ngón tay, giới hạn từ 25dvh đến 95dvh kèm lực cản nhẹ (rubber-banding)
-  let nextDvh = initialHeightDvh + deltaDvh;
-  if (nextDvh > 92) {
-    nextDvh = 92 + (nextDvh - 92) * 0.2; // Damping khi kéo vượt đỉnh
-  }
-  sheetHeightDvh.value = Math.max(25, Math.min(95, nextDvh));
-}
-
-function onGrabberTouchEnd() {
-  if (!isDragging.value) return;
-  isDragging.value = false;
-  const currentDvh = sheetHeightDvh.value ?? (isBottomExpanded.value ? 92 : 60);
-
-  // Snap points tự nhiên: < 40dvh -> Dismiss/Close; 40-75dvh -> 60dvh; > 75dvh -> 92dvh
-  if (currentDvh < 38) {
-    emit('update:open', false);
-    sheetHeightDvh.value = null;
-    isBottomExpanded.value = false;
-  } else if (currentDvh > 75) {
-    isBottomExpanded.value = true;
-    sheetHeightDvh.value = null;
-  } else {
-    isBottomExpanded.value = false;
-    sheetHeightDvh.value = null;
-  }
-}
+// Antigravity dynamic smooth fluid drag sheet (iOS / Vaul style)
+const {
+  isBottomExpanded,
+  isDragging,
+  onGrabberPointerDown,
+  onGrabberPointerMove,
+  onGrabberPointerUp,
+  sheetHeightDvh,
+  toggleBottomHeight,
+} = useBottomSheetDrag({
+  onDismiss: () => emit('update:open', false),
+});
 
 function openRelationalTable(relation: SupabaseRelationalTableDescriptor) {
   activeRelation.value = relation;
@@ -489,36 +447,36 @@ async function handleSave() {
               maxHeight: `${sheetHeightDvh}dvh`,
               transition: isDragging
                 ? 'none'
-                : 'height 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
+                : 'height 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
             }
           : {}),
       }"
-      class="vxe-detail-sheet-content z-[1050] flex flex-col p-0 overflow-x-hidden"
+      class="vxe-detail-sheet-content z-[1050] flex flex-col p-0 overflow-x-hidden shadow-2xl"
       :class="[
-        !isDragging && 'transition-all duration-300',
+        !isDragging && 'transition-all duration-350 ease-out',
         isMobile
           ? [
-              'w-full rounded-t-2xl border-t border-border/80',
+              'w-full rounded-t-[20px] border-t border-border/80 bg-background/95 backdrop-blur-md',
               sheetHeightDvh === null &&
                 (isBottomExpanded
-                  ? 'h-[92dvh] max-h-[92dvh]'
+                  ? 'h-[94dvh] max-h-[94dvh]'
                   : 'h-[60dvh] max-h-[60dvh]'),
             ]
-          : 'inset-y-0 right-0 h-dvh w-full border-l border-border/80 sm:max-w-lg',
+          : 'inset-y-0 right-0 h-dvh w-full border-l border-border/80 bg-background/95 backdrop-blur-md sm:max-w-xl lg:max-w-2xl',
       ]"
     >
-      <!-- Antigravity Zero-Padding Micro Grabber (Mobile Only) with Touch Swipe Support -->
+      <!-- Modern Grabber Zone (Mobile/Bottom Mode) with Pointer Capture & Native Touch Drag -->
       <div
         v-if="isMobile"
-        class="flex w-full cursor-grab touch-none select-none items-center justify-center pt-2.5 pb-1.5 active:cursor-grabbing"
-        @touchstart.passive="onGrabberTouchStart"
-        @touchmove.prevent="onGrabberTouchMove"
-        @touchend="onGrabberTouchEnd"
-        @touchcancel="onGrabberTouchEnd"
+        class="flex w-full cursor-grab touch-none select-none items-center justify-center pt-3 pb-2 active:cursor-grabbing hover:bg-muted/30 transition-colors"
+        @pointerdown="onGrabberPointerDown"
+        @pointermove="onGrabberPointerMove"
+        @pointerup="onGrabberPointerUp"
+        @pointercancel="onGrabberPointerUp"
       >
         <button
           type="button"
-          class="h-1.5 w-12 cursor-grab rounded-full bg-muted-foreground/30 transition-all hover:bg-muted-foreground/60 active:scale-110 active:bg-muted-foreground"
+          class="h-1.5 w-12 cursor-grab rounded-full bg-muted-foreground/35 transition-all hover:bg-muted-foreground/70 active:scale-105 active:bg-foreground"
           :title="
             isBottomExpanded
               ? 'Swipe down to collapse or tap'
@@ -530,12 +488,12 @@ async function handleSave() {
 
       <!-- Sheet Header: Clean Record Title + Superadmin-Only Schema/RLS Popover -->
       <SheetHeader
-        class="shrink-0 space-y-1 border-b border-border/60 bg-muted/20 px-3.5 py-2.5 text-left sm:px-5 sm:py-3"
+        class="shrink-0 space-y-1 border-b border-border/60 bg-muted/20 px-4 py-3 text-left sm:px-5 sm:py-3.5"
       >
         <div class="flex items-center justify-between gap-2 pr-6">
           <div class="flex min-w-0 items-center gap-2">
             <SheetTitle
-              class="truncate text-sm font-semibold tracking-tight sm:text-base"
+              class="truncate text-base font-semibold tracking-tight text-foreground"
             >
               {{ dynamicSchema.title }}
             </SheetTitle>
@@ -904,7 +862,7 @@ async function handleSave() {
       <!-- Sheet Footer with Auto-Forwarded Business Row Actions + Save/Create/Close -->
       <SheetFooter
         v-if="isCreateMode || props.row"
-        class="shrink-0 flex-col gap-2.5 border-t border-border/60 bg-muted/20 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:flex-col sm:space-x-0 sm:px-5 sm:pb-3"
+        class="shrink-0 flex-col gap-2.5 border-t border-border/60 bg-background/95 backdrop-blur-md px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:flex-col sm:space-x-0 sm:px-5 sm:pb-3"
       >
         <!-- Row Actions Bar (Only shown in Edit Mode when genuine business actions exist) -->
         <div
@@ -937,11 +895,11 @@ async function handleSave() {
         </div>
 
         <!-- Primary Form Submit / Close Buttons -->
-        <div class="flex w-full items-center justify-end gap-2">
+        <div class="flex w-full items-center justify-end gap-2.5">
           <Button
             variant="outline"
             size="sm"
-            class="h-9 px-3.5 text-xs"
+            class="h-9 px-4 text-xs font-normal"
             @click="emit('update:open', false)"
           >
             {{ $t('common.close') }}
@@ -953,7 +911,7 @@ async function handleSave() {
               dynamicSchema.rls.canInsert.allowed
             "
             size="sm"
-            class="h-9 gap-1.5 px-4 text-xs font-medium"
+            class="h-9 gap-1.5 px-4 text-xs font-medium shadow-xs"
             :disabled="saving"
             data-testid="vxe-detail-sheet-create"
             @click="handleCreate"
@@ -969,7 +927,7 @@ async function handleSave() {
               dynamicSchema.rls.canUpdate.allowed
             "
             size="sm"
-            class="h-9 gap-1.5 px-4 text-xs font-medium"
+            class="h-9 gap-1.5 px-4 text-xs font-medium shadow-xs"
             :disabled="saving"
             data-testid="vxe-detail-sheet-save"
             @click="handleSave"

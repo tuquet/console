@@ -119,7 +119,7 @@ function getRowCopyValue(row: Record<string, any>, index: number): string {
       :style="{ zIndex: 1070 }"
       :class="
         isMobile
-          ? 'vxe-relational-sheet-content z-[1070] flex max-h-[90vh] w-full flex-col rounded-t-2xl border-t border-border/80 p-0'
+          ? 'vxe-relational-sheet-content z-[1070] flex max-h-[92dvh] w-full flex-col rounded-t-[20px] border-t border-border/80 bg-background/95 backdrop-blur-md p-0 shadow-2xl'
           : 'vxe-relational-sheet-content inset-y-0 right-0 z-[1070] flex h-dvh w-full flex-col border-l border-border/80 p-0 sm:max-w-xl'
       "
     >

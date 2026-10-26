@@ -100,7 +100,7 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
   });
 
   describe('api functions with automation schema header', () => {
-    it('should call listWorkflows with schema automation', async () => {
+    it('should call listWorkflows via workflow_list RPC', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           created_at: '2026-10-13T00:00:00Z',
@@ -117,8 +117,12 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
       const result = await listWorkflows({ tenantId: 't1' });
 
       expect(supabaseRequest).toHaveBeenCalledWith(
-        expect.stringContaining('/rest/v1/workflows?select='),
-        { schema: 'automation', suppressErrorCapture: true },
+        '/rest/v1/rpc/workflow_list',
+        {
+          body: JSON.stringify({ p_search: null }),
+          method: 'POST',
+          suppressErrorCapture: true,
+        },
       );
       expect(result).toHaveLength(1);
       expect(result[0]?.name).toBe('Scraper Workflow');

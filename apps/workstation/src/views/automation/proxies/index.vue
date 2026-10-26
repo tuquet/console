@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import type { ProxyServer } from '#/api';
 
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
+import { Page } from '@tuquet/common-ui';
 import { usePreferences } from '@tuquet/preferences';
 
 import { Badge, Button } from '@tuquet-core/shadcn-ui';
@@ -12,13 +13,13 @@ import { Activity, Copy, Network, Plus, RefreshCw } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { listProxies } from '#/api';
-import { useClipboard, useDateFormat } from '#/composables';
+import { useClipboard } from '#/composables';
 import { $t } from '#/locales';
+import { paginateArray } from '#/utils/pagination';
 
 defineOptions({ name: 'AutomationProxies' });
 
 const route = useRoute();
-const { formatDate } = useDateFormat();
 const { copyToClipboard } = useClipboard();
 const { isMobile } = usePreferences();
 
@@ -67,7 +68,7 @@ function getColumns() {
       field: 'last_checked_at',
       title: $t('page.automation_view.col_last_checked'),
       minWidth: 160,
-      slots: { default: 'date-cell' },
+      cellRender: { name: 'CellDate' },
     },
     {
       field: 'actions',
@@ -149,28 +150,10 @@ const [Grid, gridApi] = useVbenVxeGrid<ProxyServer>({
         }),
       },
     ],
-    layout: 'vertical',
-    showCollapseButton: false,
-    submitOnChange: true,
-    submitOnEnter: true,
-    submitButtonOptions: {
-      content: computed(() => $t('common.filter')),
-    },
-    resetButtonOptions: {
-      content: computed(() => $t('common.reset')),
-    },
-    actionWrapperClass:
-      'hidden sm:flex sm:col-span-1 lg:col-span-1 items-center justify-end gap-2 pt-1 sm:pt-6',
-    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
-    border: false,
-    round: true,
-    showOverflow: true,
     pagerConfig: {
       autoHidden: true,
-      pageSize: 15,
-      pageSizes: [10, 15, 30, 50],
     },
     proxyConfig: {
       autoLoad: true,
@@ -207,30 +190,12 @@ const [Grid, gridApi] = useVbenVxeGrid<ProxyServer>({
             );
           }
 
-          const currentPage = page?.currentPage || 1;
-          const pageSize = page?.pageSize || 15;
-          const start = (currentPage - 1) * pageSize;
-          const end = start + pageSize;
-
-          return {
-            items: filtered.slice(start, end),
-            total: filtered.length,
-          };
+          return paginateArray(filtered, page);
         },
       },
     },
-    columns: getColumns(),
+    columns: getColumns,
   },
-});
-
-watch([() => $t('page.automation_view.col_proxy_address'), isMobile], () => {
-  gridApi.setGridOptions({ columns: getColumns() });
-  gridApi.formApi?.setState({
-    commonConfig: {
-      componentProps: { class: 'w-full' },
-      hideLabel: isMobile.value,
-    },
-  });
 });
 
 watch(
@@ -242,25 +207,26 @@ watch(
 </script>
 
 <template>
-  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
-    <!-- Compact Single-Row Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="min-w-0">
-        <div class="flex flex-wrap items-center gap-2">
-          <h1
-            class="truncate text-base font-semibold tracking-tight text-foreground sm:text-xl"
-          >
-            {{ $t('page.automation.proxies') }}
-          </h1>
-          <Badge variant="secondary" class="shrink-0 text-2xs">
-            {{ allProxies.length }}
-          </Badge>
-        </div>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.automation.proxies_desc') }}
-        </p>
+  <Page
+    :title="$t('page.automation.proxies')"
+    :description="$t('page.automation.proxies_desc')"
+    content-class="p-3 sm:p-5"
+    header-class="border-b border-border/60 bg-card/60 px-4 py-3 sm:px-6"
+  >
+    <template #title>
+      <div class="flex items-center gap-2">
+        <h1
+          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
+        >
+          {{ $t('page.automation.proxies') }}
+        </h1>
+        <Badge variant="secondary" class="shrink-0 text-2xs">
+          {{ allProxies.length }}
+        </Badge>
       </div>
+    </template>
 
+    <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
@@ -281,7 +247,7 @@ watch(
           <span>{{ $t('common.createRecord') }}</span>
         </Button>
       </div>
-    </div>
+    </template>
 
     <!-- Main Container -->
     <div
@@ -376,12 +342,6 @@ watch(
           </Badge>
         </template>
 
-        <template #date-cell="{ row }">
-          <span class="text-xs text-muted-foreground">
-            {{ formatDate(row.last_checked_at) }}
-          </span>
-        </template>
-
         <template #actions-cell="{ row }">
           <div class="flex items-center justify-end gap-1">
             <Button
@@ -419,5 +379,5 @@ watch(
         </template>
       </Grid>
     </div>
-  </div>
+  </Page>
 </template>

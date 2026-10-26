@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import type { PlatformUser } from '#/api';
 
-import { computed, ref, watch } from 'vue';
+import { ref } from 'vue';
 
+import { Page } from '@tuquet/common-ui';
 import { usePreferences } from '@tuquet/preferences';
 
 import {
@@ -19,6 +20,7 @@ import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { filterPlatformUsers, listPlatformUsers } from '#/api';
 import RoleBadge from '#/components/iam/role-badge.vue';
 import { $t } from '#/locales';
+import { paginateArray } from '#/utils/pagination';
 
 defineOptions({ name: 'SystemUsers' });
 
@@ -168,34 +170,14 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformUser>({
         }),
       },
     ],
-    layout: 'vertical',
-    showCollapseButton: false,
-    submitOnChange: true,
-    submitOnEnter: true,
-    submitButtonOptions: {
-      content: computed(() => $t('common.filter')),
-    },
-    resetButtonOptions: {
-      content: computed(() => $t('common.reset')),
-    },
-    actionWrapperClass:
-      'hidden sm:flex sm:col-span-1 items-center justify-end gap-2 pt-1 sm:pt-6',
-    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
-    border: false,
-    round: true,
-    showOverflow: true,
     cellConfig: {
       height: 58,
     },
     rowConfig: {
       isHover: true,
       keyField: 'id',
-    },
-    pagerConfig: {
-      pageSize: 15,
-      pageSizes: [10, 15, 30, 50],
     },
     proxyConfig: {
       autoLoad: true,
@@ -212,31 +194,12 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformUser>({
             tenant_filter: formValues?.tenant_filter,
           });
 
-          const currentPage = page?.currentPage || 1;
-          const pageSize = page?.pageSize || 15;
-          const start = (currentPage - 1) * pageSize;
-          const end = start + pageSize;
-          return {
-            items: filtered.slice(start, end),
-            total: filtered.length,
-          };
+          return paginateArray(filtered, page);
         },
       },
     },
-    columns: getColumns(),
+    columns: getColumns,
   },
-});
-
-watch([() => $t('page.system_view.users_col_primary_role'), isMobile], () => {
-  gridApi.setGridOptions({ columns: getColumns() });
-  gridApi.formApi?.setState({
-    commonConfig: {
-      componentProps: {
-        class: 'w-full',
-      },
-      hideLabel: isMobile.value,
-    },
-  });
 });
 
 async function handleRefresh() {
@@ -246,41 +209,40 @@ async function handleRefresh() {
 </script>
 
 <template>
-  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
-    <!-- Top Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="min-w-0">
-        <div class="flex flex-wrap items-center gap-2">
-          <h1
-            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-          >
-            {{ $t('page.system.users') }}
-          </h1>
-          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
-            {{ allUsers.length }}
-          </Badge>
-        </div>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.system.users_desc') }}
-        </p>
-      </div>
-
-      <div class="flex shrink-0 flex-wrap items-center gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          class="size-8 shrink-0"
-          :disabled="loadingUsers"
-          :title="$t('common.refresh')"
-          @click="handleRefresh"
+  <Page
+    :title="$t('page.system.users')"
+    :description="$t('page.system.users_desc')"
+    content-class="p-3 sm:p-5"
+    header-class="border-b border-border/60 bg-card/60 px-4 py-3 sm:px-6"
+  >
+    <template #title>
+      <div class="flex items-center gap-2">
+        <h1
+          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
         >
-          <RefreshCw
-            class="size-3.5 shrink-0"
-            :class="{ 'animate-spin': loadingUsers }"
-          />
-        </Button>
+          {{ $t('page.system.users') }}
+        </h1>
+        <Badge variant="secondary" class="shrink-0 text-2xs font-normal">
+          {{ allUsers.length }}
+        </Badge>
       </div>
-    </div>
+    </template>
+
+    <template #extra>
+      <Button
+        variant="outline"
+        size="icon"
+        class="size-8 shrink-0"
+        :disabled="loadingUsers"
+        :title="$t('common.refresh')"
+        @click="handleRefresh"
+      >
+        <RefreshCw
+          class="size-3.5 shrink-0"
+          :class="{ 'animate-spin': loadingUsers }"
+        />
+      </Button>
+    </template>
 
     <!-- Main Container: VXE Grid -->
     <div
@@ -366,5 +328,5 @@ async function handleRefresh() {
         </template>
       </Grid>
     </div>
-  </div>
+  </Page>
 </template>

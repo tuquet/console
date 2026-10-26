@@ -31,6 +31,7 @@ export * from './scroll-area';
 export * from './select';
 export * from './separator';
 export * from './sheet';
+export * from './skeleton';
 export * from './sonner';
 export * from './switch';
 export * from './table';

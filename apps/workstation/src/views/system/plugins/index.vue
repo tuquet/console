@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import type { SystemPlugin } from '#/api';
 
-import { computed, ref, watch } from 'vue';
+import { ref } from 'vue';
 
+import { Page } from '@tuquet/common-ui';
 import {
   FILTER_ALL,
   SYSTEM_PLUGIN_CATEGORY,
@@ -27,6 +28,7 @@ import {
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { listSystemPlugins } from '#/api';
 import { $t } from '#/locales';
+import { paginateArray } from '#/utils/pagination';
 
 defineOptions({ name: 'SystemPlugins' });
 
@@ -119,28 +121,10 @@ const [Grid, gridApi] = useVbenVxeGrid<SystemPlugin>({
         }),
       },
     ],
-    layout: 'vertical',
-    showCollapseButton: false,
-    submitOnChange: true,
-    submitOnEnter: true,
-    submitButtonOptions: {
-      content: computed(() => $t('common.filter')),
-    },
-    resetButtonOptions: {
-      content: computed(() => $t('common.reset')),
-    },
     actionWrapperClass:
       'hidden sm:flex sm:col-span-2 lg:col-span-2 items-center justify-end gap-2 pt-1 sm:pt-6',
-    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
-    border: false,
-    round: true,
-    showOverflow: true,
-    pagerConfig: {
-      pageSize: 15,
-      pageSizes: [10, 15, 30, 50],
-    },
     proxyConfig: {
       autoLoad: true,
       ajax: {
@@ -167,32 +151,12 @@ const [Grid, gridApi] = useVbenVxeGrid<SystemPlugin>({
             );
           }
 
-          const currentPage = page?.currentPage || 1;
-          const pageSize = page?.pageSize || 15;
-          const start = (currentPage - 1) * pageSize;
-          const end = start + pageSize;
-
-          return {
-            items: filtered.slice(start, end),
-            total: filtered.length,
-          };
+          return paginateArray(filtered, page);
         },
       },
     },
-    columns: getColumns(),
+    columns: getColumns,
   },
-});
-
-watch([() => $t('page.system_view.plugins_col_type'), isMobile], () => {
-  gridApi.setGridOptions({ columns: getColumns() });
-  gridApi.formApi?.setState({
-    commonConfig: {
-      componentProps: {
-        class: 'w-full',
-      },
-      hideLabel: isMobile.value,
-    },
-  });
 });
 
 function getPluginIcon(pluginId: string) {
@@ -227,25 +191,26 @@ function refresh() {
 </script>
 
 <template>
-  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
-    <!-- Top Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="min-w-0">
-        <div class="flex flex-wrap items-center gap-2">
-          <h1
-            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-          >
-            {{ $t('page.system.plugins') }}
-          </h1>
-          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
-            {{ allPlugins.length }}
-          </Badge>
-        </div>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.system.plugins_desc') }}
-        </p>
+  <Page
+    :title="$t('page.system.plugins')"
+    :description="$t('page.system.plugins_desc')"
+    content-class="p-3 sm:p-5"
+    header-class="border-b border-border/60 bg-card/60 px-4 py-3 sm:px-6"
+  >
+    <template #title>
+      <div class="flex items-center gap-2">
+        <h1
+          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
+        >
+          {{ $t('page.system.plugins') }}
+        </h1>
+        <Badge variant="secondary" class="shrink-0 text-2xs font-normal">
+          {{ allPlugins.length }}
+        </Badge>
       </div>
+    </template>
 
+    <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
@@ -265,7 +230,7 @@ function refresh() {
           <span>{{ $t('common.createRecord') }}</span>
         </Button>
       </div>
-    </div>
+    </template>
 
     <!-- Main Container -->
     <div
@@ -341,5 +306,5 @@ function refresh() {
         </template>
       </Grid>
     </div>
-  </div>
+  </Page>
 </template>

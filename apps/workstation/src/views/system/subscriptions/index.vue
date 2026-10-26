@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import type { PlatformSubscription } from '#/api';
 
-import { computed, ref, watch } from 'vue';
+import { ref } from 'vue';
 
+import { Page } from '@tuquet/common-ui';
 import { FILTER_ALL, SUBSCRIPTION_STATUS } from '@tuquet/constants';
 import { usePreferences } from '@tuquet/preferences';
 
@@ -12,12 +13,11 @@ import { Plus, RefreshCw } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { listPlatformSubscriptions } from '#/api';
-import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
+import { paginateArray } from '#/utils/pagination';
 
 defineOptions({ name: 'SystemSubscriptions' });
 
-const { formatDate } = useDateFormat();
 const { isMobile } = usePreferences();
 
 const allSubscriptions = ref<PlatformSubscription[]>([]);
@@ -81,7 +81,7 @@ function getColumns() {
       field: 'current_period_end',
       title: $t('page.system_view.subs_col_next_billing'),
       minWidth: 170,
-      slots: { default: 'period-cell' },
+      cellRender: { name: 'CellDate' },
     },
     {
       field: 'cancel_at_period_end',
@@ -143,28 +143,10 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscription>({
         }),
       },
     ],
-    layout: 'vertical',
-    showCollapseButton: false,
-    submitOnChange: true,
-    submitOnEnter: true,
-    submitButtonOptions: {
-      content: computed(() => $t('common.filter')),
-    },
-    resetButtonOptions: {
-      content: computed(() => $t('common.reset')),
-    },
     actionWrapperClass:
       'hidden sm:flex sm:col-span-2 lg:col-span-2 items-center justify-end gap-2 pt-1 sm:pt-6',
-    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
-    border: false,
-    round: true,
-    showOverflow: true,
-    pagerConfig: {
-      pageSize: 15,
-      pageSizes: [10, 15, 30, 50],
-    },
     proxyConfig: {
       autoLoad: true,
       ajax: {
@@ -191,55 +173,36 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscription>({
             );
           }
 
-          const currentPage = page?.currentPage || 1;
-          const pageSize = page?.pageSize || 15;
-          const start = (currentPage - 1) * pageSize;
-          const end = start + pageSize;
-
-          return {
-            items: filtered.slice(start, end),
-            total: filtered.length,
-          };
+          return paginateArray(filtered, page);
         },
       },
     },
-    columns: getColumns(),
+    columns: getColumns,
   },
-});
-
-watch([() => $t('page.system_view.subs_col_unit_price'), isMobile], () => {
-  gridApi.setGridOptions({ columns: getColumns() });
-  gridApi.formApi?.setState({
-    commonConfig: {
-      componentProps: {
-        class: 'w-full',
-      },
-      hideLabel: isMobile.value,
-    },
-  });
 });
 </script>
 
 <template>
-  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
-    <!-- Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="min-w-0">
-        <div class="flex flex-wrap items-center gap-2">
-          <h1
-            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-          >
-            {{ $t('page.system.subscriptions') }}
-          </h1>
-          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
-            {{ allSubscriptions.length }}
-          </Badge>
-        </div>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.system.subscriptions_desc') }}
-        </p>
+  <Page
+    :title="$t('page.system.subscriptions')"
+    :description="$t('page.system.subscriptions_desc')"
+    content-class="p-3 sm:p-5"
+    header-class="border-b border-border/60 bg-card/60 px-4 py-3 sm:px-6"
+  >
+    <template #title>
+      <div class="flex items-center gap-2">
+        <h1
+          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
+        >
+          {{ $t('page.system.subscriptions') }}
+        </h1>
+        <Badge variant="secondary" class="shrink-0 text-2xs font-normal">
+          {{ allSubscriptions.length }}
+        </Badge>
       </div>
+    </template>
 
+    <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
@@ -259,7 +222,7 @@ watch([() => $t('page.system_view.subs_col_unit_price'), isMobile], () => {
           <span>{{ $t('common.createRecord') }}</span>
         </Button>
       </div>
-    </div>
+    </template>
 
     <!-- Table Container with Integrated Form & Pager -->
     <div
@@ -300,12 +263,6 @@ watch([() => $t('page.system_view.subs_col_unit_price'), isMobile], () => {
           </Badge>
         </template>
 
-        <template #period-cell="{ row }">
-          <span class="text-xs text-muted-foreground">
-            {{ formatDate(row.current_period_end) }}
-          </span>
-        </template>
-
         <template #renewal-cell="{ row }">
           <Badge
             :variant="row.cancel_at_period_end ? 'outline' : 'secondary'"
@@ -320,5 +277,5 @@ watch([() => $t('page.system_view.subs_col_unit_price'), isMobile], () => {
         </template>
       </Grid>
     </div>
-  </div>
+  </Page>
 </template>

@@ -1,8 +1,33 @@
+import type { NotificationDriver } from './drivers';
+
+import { TauriNotificationDriver, WebNotificationDriver } from './drivers';
 import { isTauriEnvironment } from './index';
 
 export interface NotificationOptions {
   body?: string;
   title: string;
+}
+
+let activeNotificationDriver: NotificationDriver | null = null;
+
+/**
+ * Returns or initializes the current active notification driver based on runtime environment.
+ * Allows driver injection for testing or extending (DIP/OCP).
+ */
+export function getNotificationDriver(): NotificationDriver {
+  if (!activeNotificationDriver) {
+    activeNotificationDriver = isTauriEnvironment()
+      ? new TauriNotificationDriver()
+      : new WebNotificationDriver();
+  }
+  return activeNotificationDriver;
+}
+
+/**
+ * Injects a custom notification driver (DIP / testing).
+ */
+export function setNotificationDriver(driver: NotificationDriver | null): void {
+  activeNotificationDriver = driver;
 }
 
 /**
@@ -11,47 +36,5 @@ export interface NotificationOptions {
 export async function sendDesktopNotification(
   options: NotificationOptions,
 ): Promise<boolean> {
-  const { body, title } = options;
-
-  if (isTauriEnvironment()) {
-    try {
-      const { isPermissionGranted, requestPermission, sendNotification } =
-        await import('@tauri-apps/plugin-notification');
-
-      let granted = await isPermissionGranted();
-      if (!granted) {
-        const permission = await requestPermission();
-        granted = permission === 'granted';
-      }
-
-      if (granted) {
-        sendNotification({ body, title });
-        return true;
-      }
-    } catch {
-      // Ignored when native notification fails
-    }
-  }
-
-  // Web Browser fallback
-  if (typeof window !== 'undefined' && 'Notification' in window) {
-    try {
-      if (Notification.permission === 'granted') {
-        const _n = new Notification(title, { body });
-        void _n;
-        return true;
-      } else if (Notification.permission !== 'denied') {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          const _n = new Notification(title, { body });
-          void _n;
-          return true;
-        }
-      }
-    } catch {
-      // Ignored in non-secure or restricted contexts
-    }
-  }
-
-  return false;
+  return getNotificationDriver().send(options);
 }

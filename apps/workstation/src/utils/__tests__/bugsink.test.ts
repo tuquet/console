@@ -5,7 +5,6 @@ import {
   addNetworkBreadcrumb,
   captureError,
   captureMessage,
-  DEFAULT_BUGSINK_DSN,
   initBugsink,
   isBugsinkReady,
   sanitizeUrl,
@@ -96,7 +95,9 @@ describe('bugsink telemetry utility', () => {
   describe('captureError deduplication and early buffering', () => {
     it('deduplicates identical Error instances', () => {
       const dummyApp = { config: {}, use: vi.fn() } as any;
-      initBugsink(dummyApp);
+      initBugsink(dummyApp, undefined, {
+        dsn: 'https://tuquet@test-relay.example.com/1',
+      });
 
       const err = new Error('Test unique error');
       captureError(err, { test: 1 });
@@ -107,7 +108,9 @@ describe('bugsink telemetry utility', () => {
 
     it('captures informational message', () => {
       const dummyApp = { config: {}, use: vi.fn() } as any;
-      initBugsink(dummyApp);
+      initBugsink(dummyApp, undefined, {
+        dsn: 'https://tuquet@test-relay.example.com/1',
+      });
 
       captureMessage('Notice message', 'warning', { foo: 'bar' });
       expect(Sentry.captureMessage).toHaveBeenCalledWith('Notice message', {
@@ -118,14 +121,15 @@ describe('bugsink telemetry utility', () => {
   });
 
   describe('initBugsink', () => {
-    it('initializes Sentry with custom or default DSN', () => {
+    it('initializes Sentry when DSN is provided', () => {
       const dummyApp = { config: {}, use: vi.fn() } as any;
-      initBugsink(dummyApp);
+      const testDsn = 'https://tuquet@test-error-relay.example.com/1';
+      initBugsink(dummyApp, undefined, { dsn: testDsn });
 
       expect(Sentry.init).toHaveBeenCalledWith(
         expect.objectContaining({
           app: dummyApp,
-          dsn: DEFAULT_BUGSINK_DSN,
+          dsn: testDsn,
           sampleRate: 1,
         }),
       );

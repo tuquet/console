@@ -466,11 +466,15 @@ export function buildFleetFilterQuery(
   return `${baseQuery}${delimiter}${queryParts.join('&')}`;
 }
 
+export const DEFAULT_DAEMON_PORT = Number(
+  import.meta.env.VITE_DAEMON_PORT || 8765,
+);
+
 /**
- * Thăm dò trực tiếp cổng loopback SSO của CLI Daemon (:8765)
+ * Thăm dò trực tiếp cổng loopback SSO của CLI Daemon
  * Non-blocking, timeout <= 1200ms theo AGENTS.md §9
  */
-export async function probeLocalDaemon(port = 8765): Promise<{
+export async function probeLocalDaemon(port = DEFAULT_DAEMON_PORT): Promise<{
   latencyMs?: number;
   online: boolean;
   port: number;

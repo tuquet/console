@@ -38,7 +38,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Textarea,
   toast,
   ToggleGroup,
   ToggleGroupItem,
@@ -46,19 +45,13 @@ import {
 
 import {
   Building2,
-  Check,
   Coins,
   Copy,
   CreditCard,
-  Download,
   ExternalLink,
-  FileDown,
-  KeyRound,
   PackageCheck,
-  QrCode,
   RefreshCw,
   Search,
-  Server,
   ShoppingBag,
   Sparkles,
   Wallet,
@@ -66,13 +59,10 @@ import {
 
 import {
   createCheckoutOrder,
-  downloadTextFile,
   filterCommerceProducts,
-  formatSerialDeliveriesText,
   getActiveTenantId,
   getPaymentIntentStatus,
   getTenantWallet,
-  isVariantInStock,
   listActivePaymentGateways,
   listCommerceCategories,
   listCommerceProducts,
@@ -84,10 +74,13 @@ import { useClipboard } from '#/composables';
 import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
 
+import OrderDeliveriesModal from '../components/order-deliveries-modal.vue';
+import ProductCatalogCard from '../components/product-catalog-card.vue';
+
 defineOptions({ name: 'CommerceStore' });
 
 const router = useRouter();
-const { copyToClipboard } = useClipboard();
+const { copyText } = useClipboard();
 
 const loading = ref(false);
 const tenants = ref<Tenant[]>([]);
@@ -187,12 +180,6 @@ const estimatedFiatAmount = computed(() => {
   if (!currentGateway.value) return 0;
   return totalCheckoutCredits.value * currentGateway.value.rate_per_credit;
 });
-
-function getProductTypeBadge(type: CommerceProductType) {
-  return (
-    productTypeMap.value[type] || { label: type, variant: 'outline' as const }
-  );
-}
 
 function getSelectedVariant(
   product: CommerceProduct,
@@ -387,25 +374,6 @@ async function handleCreateOrder() {
   } finally {
     submittingOrder.value = false;
   }
-}
-
-const serialLinesText = computed(() =>
-  formatSerialDeliveriesText(deliveredItems.value),
-);
-
-async function copyText(
-  text: string,
-  label = $t('page.commerce_view.copy_default_label'),
-) {
-  await copyToClipboard(text, $t('page.commerce_view.copied_label', { label }));
-}
-
-function downloadSerialTxt() {
-  if (!serialLinesText.value) return;
-  downloadTextFile(
-    `${deliveredOrderCode.value || 'deliveries'}.txt`,
-    serialLinesText.value,
-  );
 }
 
 watch(checkoutOpen, (open) => {
@@ -618,140 +586,15 @@ onBeforeUnmount(() => {
 
     <!-- Product Grid -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-      <div
+      <ProductCatalogCard
         v-for="product in filteredProducts"
         :key="product.id"
-        class="flex flex-col justify-between rounded-xl border border-border/60 bg-card p-5 transition-all hover:border-primary/40 hover:shadow-sm"
-      >
-        <div class="space-y-3">
-          <!-- Type & Visibility Row -->
-          <div class="flex items-center justify-between gap-2">
-            <Badge
-              :variant="getProductTypeBadge(product.product_type).variant"
-              class="text-2xs"
-            >
-              {{ getProductTypeBadge(product.product_type).label }}
-            </Badge>
-            <span
-              v-if="getSelectedVariant(product)"
-              class="text-2xs text-muted-foreground"
-            >
-              SKU: {{ getSelectedVariant(product)?.sku }}
-            </span>
-          </div>
-
-          <!-- Product Title & Description -->
-          <div>
-            <h3 class="text-base font-semibold text-foreground">
-              {{ product.name }}
-            </h3>
-            <p class="mt-1 line-clamp-2 text-xs text-muted-foreground">
-              {{
-                product.short_description ||
-                product.description ||
-                $t('page.commerce_view.default_product_desc')
-              }}
-            </p>
-          </div>
-
-          <!-- Variant Selector Pills -->
-          <div
-            v-if="product.variants && product.variants.length > 0"
-            class="space-y-1.5 pt-1"
-          >
-            <span
-              class="text-2xs font-semibold tracking-wider text-muted-foreground uppercase"
-            >
-              {{ $t('page.commerce_view.select_sku_label') }}
-            </span>
-            <div class="flex flex-wrap gap-1.5">
-              <Button
-                v-for="variant in product.variants"
-                :key="variant.id"
-                type="button"
-                variant="outline"
-                size="sm"
-                class="h-auto rounded-lg px-2.5 py-1 text-left text-xs transition-colors"
-                :class="
-                  getSelectedVariant(product)?.id === variant.id
-                    ? 'border-primary bg-primary/10 font-semibold text-primary'
-                    : 'border-border/70 bg-background text-foreground hover:border-primary/40'
-                "
-                @click="selectVariant(product.id, variant.id)"
-              >
-                {{ variant.name }}
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Price, Stock & Buy CTA -->
-        <div
-          class="mt-5 flex items-end justify-between border-t border-border/50 pt-4"
-        >
-          <div class="space-y-0.5">
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-xl font-bold text-foreground">
-                {{
-                  (
-                    getSelectedVariant(product)?.price_credits ?? 0
-                  ).toLocaleString('en-US')
-                }}
-                Xu
-              </span>
-              <span
-                v-if="
-                  getSelectedVariant(product)?.compare_at_credits &&
-                  (getSelectedVariant(product)?.compare_at_credits ?? 0) >
-                    (getSelectedVariant(product)?.price_credits ?? 0)
-                "
-                class="text-xs text-muted-foreground line-through"
-              >
-                {{
-                  getSelectedVariant(
-                    product,
-                  )?.compare_at_credits?.toLocaleString('en-US')
-                }}
-                Xu
-              </span>
-            </div>
-            <div class="flex items-center gap-1.5 text-xs">
-              <span
-                v-if="getSelectedVariant(product)?.stock_mode === 'unlimited'"
-                class="font-medium text-success"
-              >
-                ● {{ $t('page.commerce_view.in_stock_unlimited') }}
-              </span>
-              <span
-                v-else-if="
-                  (getSelectedVariant(product)?.available_stock ?? 0) > 0
-                "
-                class="font-medium text-success"
-              >
-                ●
-                {{
-                  $t('page.commerce_view.stock_count', {
-                    count: getSelectedVariant(product)?.available_stock,
-                  })
-                }}
-              </span>
-              <span v-else class="font-medium text-destructive">
-                ● {{ $t('page.commerce_view.out_of_stock') }}
-              </span>
-            </div>
-          </div>
-
-          <Button
-            size="sm"
-            :disabled="!isVariantInStock(getSelectedVariant(product))"
-            class="gap-1.5"
-            @click="openCheckoutModal(product)"
-          >
-            <ShoppingBag class="size-3.5" />
-            {{ $t('page.commerce_view.buy_now') }}
-          </Button>
-        </div>
-      </div>
+        :product="product"
+        :product-type-map="productTypeMap"
+        :selected-variant-id="selectedVariantByProduct[product.id]"
+        @buy="openCheckoutModal"
+        @select-variant="selectVariant"
+      />
     </div>
 
     <!-- Multi-Channel Checkout Dialog -->
@@ -1057,119 +900,10 @@ onBeforeUnmount(() => {
     </Dialog>
 
     <!-- Instant Fulfillment Deliverables Dialog -->
-    <Dialog v-model:open="deliveryOpen">
-      <DialogContent class="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle class="flex items-center gap-2 text-base font-semibold">
-            <Check class="size-4 text-success" />
-            {{
-              $t('page.commerce_view.delivery_dialog_title', {
-                code: deliveredOrderCode,
-              })
-            }}
-          </DialogTitle>
-          <DialogDescription class="text-xs text-muted-foreground">
-            {{ $t('page.commerce_view.delivery_dialog_desc') }}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div class="space-y-4 py-2">
-          <!-- Serialized Stock Block -->
-          <div v-if="serialLinesText" class="space-y-2">
-            <div class="flex items-center justify-between">
-              <span
-                class="flex items-center gap-1.5 text-xs font-semibold text-foreground"
-              >
-                <KeyRound class="size-3.5 text-primary" />
-                {{
-                  $t('page.commerce_view.serial_data_lines', {
-                    count: deliveredItems.filter(
-                      (d) => d.delivery_type === 'serial_stock',
-                    ).length,
-                  })
-                }}
-              </span>
-              <div class="flex items-center gap-1.5">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  class="h-7 gap-1 text-xs"
-                  @click="
-                    copyText(
-                      serialLinesText,
-                      $t('page.commerce_view.all_items_label'),
-                    )
-                  "
-                >
-                  <Copy class="size-3" />
-                  {{ $t('page.commerce_view.copy_all') }}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="default"
-                  class="h-7 gap-1 text-xs"
-                  @click="downloadSerialTxt"
-                >
-                  <Download class="size-3" />
-                  {{ $t('page.commerce_view.download_txt') }}
-                </Button>
-              </div>
-            </div>
-            <Textarea
-              readonly
-              :model-value="serialLinesText"
-              :rows="6"
-              class="w-full rounded-lg bg-muted/40 p-3 text-xs"
-            />
-          </div>
-
-          <!-- Other Deliverable Items (Resource / Digital File / Wallet Credit) -->
-          <div
-            v-for="item in deliveredItems.filter(
-              (d) => d.delivery_type !== 'serial_stock',
-            )"
-            :key="item.id"
-            class="rounded-lg border border-border/60 bg-muted/20 p-3.5 text-xs"
-          >
-            <div class="flex items-center justify-between">
-              <span
-                class="flex items-center gap-1.5 font-semibold text-foreground"
-              >
-                <Server
-                  v-if="item.delivery_type === 'resource'"
-                  class="size-3.5 text-primary"
-                />
-                <FileDown
-                  v-else-if="item.delivery_type === 'digital_file'"
-                  class="size-3.5 text-primary"
-                />
-                <QrCode v-else class="size-3.5 text-primary" />
-                {{ getProductTypeBadge(item.delivery_type).label }}
-              </span>
-              <Badge variant="default" class="text-2xs">
-                {{ $t('page.commerce_view.activated_badge') }}
-              </Badge>
-            </div>
-            <pre
-              class="mt-2 overflow-x-auto rounded bg-background p-2 text-2xs text-muted-foreground"
-              >{{ JSON.stringify(item.delivered_payload, null, 2) }}</pre>
-            <div
-              v-if="item.delivered_payload?.download_url"
-              class="mt-2 flex justify-end"
-            >
-              <a
-                :href="item.delivered_payload.download_url"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-              >
-                <ExternalLink class="size-3" />
-                {{ $t('page.commerce_view.download_file') }}
-              </a>
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <OrderDeliveriesModal
+      v-model:open="deliveryOpen"
+      :deliveries="deliveredItems"
+      :order-code="deliveredOrderCode"
+    />
   </div>
 </template>

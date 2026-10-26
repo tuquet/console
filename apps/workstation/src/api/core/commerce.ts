@@ -636,9 +636,9 @@ export async function importStockBatch(params: {
 }
 
 /**
- * [Platform Admin] List all orders across all tenants and guests.
+ * [Platform Admin] List orders across all tenants and guests.
  */
-export async function listAllOrders(
+export async function listOrders(
   status?: CommerceOrderStatus,
   limit = 100,
 ): Promise<CommerceOrder[]> {
@@ -652,6 +652,11 @@ export async function listAllOrders(
   );
   return Array.isArray(rows) ? rows.map((row) => mapRawCommerceOrder(row)) : [];
 }
+
+/**
+ * @deprecated Use `listOrders` instead.
+ */
+export const listAllOrders = listOrders;
 
 export function mapRawStockItem(raw: any): CommerceStock {
   return {
@@ -1008,6 +1013,7 @@ export const commerceApi = {
   listCommerceProductVariants,
   listCommerceProducts,
   listOrderDeliveries,
+  listOrders,
   listStockItems,
   listTenantOrders,
   upsertCommerceCategory,

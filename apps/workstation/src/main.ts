@@ -11,6 +11,7 @@ import {
   captureMessage,
   initEarlyErrorInterception,
 } from './utils/bugsink';
+import { assertValidEnvironment } from './utils/env-validator';
 
 // Early intercept all unhandled promise rejections and global runtime/resource errors
 if (typeof window !== 'undefined') {
@@ -48,6 +49,9 @@ if (typeof window !== 'undefined') {
  * Mount and render pages after application initialization finishes
  */
 async function initApplication() {
+  // Fast-Fail validation of required environment configuration before any modules load
+  assertValidEnvironment();
+
   // Unique namespace identifier for app preferences, storage key prefix, and isolated data
   const env = import.meta.env.PROD ? 'prod' : 'dev';
   const appVersion = import.meta.env.VITE_APP_VERSION;

@@ -1,44 +1,35 @@
+import type { KeyValueStorageDriver } from './drivers';
+
+import { LocalStorageDriver, TauriStorageDriver } from './drivers';
 import { isTauriEnvironment } from './index';
 
-let storeInstance: any = null;
+let activeStorageDriver: KeyValueStorageDriver | null = null;
 
-async function getDesktopStore() {
-  if (!storeInstance && isTauriEnvironment()) {
-    try {
-      const { Store } = await import('@tauri-apps/plugin-store');
-      storeInstance = await Store.load('desktop-storage.json');
-    } catch (error) {
-      console.warn('[Desktop Storage] Store load failed:', error);
-    }
+/**
+ * Returns or initializes the current active storage driver based on runtime environment.
+ * Allows driver injection for testing or extending.
+ */
+export function getStorageDriver(): KeyValueStorageDriver {
+  if (!activeStorageDriver) {
+    activeStorageDriver = isTauriEnvironment()
+      ? new TauriStorageDriver()
+      : new LocalStorageDriver();
   }
-  return storeInstance;
+  return activeStorageDriver;
+}
+
+/**
+ * Injects a custom storage driver (DIP / testing).
+ */
+export function setStorageDriver(driver: KeyValueStorageDriver | null): void {
+  activeStorageDriver = driver;
 }
 
 /**
  * Stores a value in secure desktop store (or localStorage on web).
  */
 export async function setSecureItem<T>(key: string, value: T): Promise<void> {
-  if (isTauriEnvironment()) {
-    try {
-      const store = await getDesktopStore();
-      if (store) {
-        await store.set(key, value);
-        await store.save();
-        return;
-      }
-    } catch (error) {
-      console.warn('[Desktop Storage] set error:', error);
-    }
-  }
-
-  // Web Browser fallback
-  if (typeof localStorage !== 'undefined') {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch {
-      // Ignored
-    }
-  }
+  return getStorageDriver().setItem(key, value);
 }
 
 /**
@@ -48,32 +39,5 @@ export async function getSecureItem<T>(
   key: string,
   defaultValue: null | T = null,
 ): Promise<null | T> {
-  if (isTauriEnvironment()) {
-    try {
-      const store = await getDesktopStore();
-      if (store) {
-        const val = await store.get(key);
-        if (val !== undefined && val !== null) {
-          return val as T;
-        }
-        return defaultValue;
-      }
-    } catch (error) {
-      console.warn('[Desktop Storage] get error:', error);
-    }
-  }
-
-  // Web Browser fallback
-  if (typeof localStorage !== 'undefined') {
-    try {
-      const raw = localStorage.getItem(key);
-      if (raw !== null) {
-        return JSON.parse(raw) as T;
-      }
-    } catch {
-      // Return default
-    }
-  }
-
-  return defaultValue;
+  return getStorageDriver().getItem<T>(key, defaultValue);
 }

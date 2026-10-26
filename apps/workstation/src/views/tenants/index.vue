@@ -1,111 +1,33 @@
 <script lang="ts" setup>
 import type { Tenant } from '#/api';
 
-import { computed, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-
+import { Page } from '@tuquet/common-ui';
 import { usePreferences } from '@tuquet/preferences';
 
-import { Badge, Button, toast } from '@tuquet-core/shadcn-ui';
+import { Badge, Button } from '@tuquet-core/shadcn-ui';
 
 import { Building2, Check, Eye, Plus, RefreshCw, Terminal } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import {
-  createTenant,
-  getActiveTenantId,
-  listTenants,
-  setActiveTenantId,
-} from '#/api';
-import { useDateFormat } from '#/composables';
+import { createTenant, listTenants } from '#/api';
 import { FILTER_ALL, TENANT_PLAN, TENANT_STATUS } from '#/constants';
 import { $t } from '#/locales';
+import { paginateArray } from '#/utils/pagination';
+
+import { useTenantManagement } from './composables/use-tenant-management';
+import { getTenantPlanBadge, getWorkspaceColumns } from './config/columns';
 
 defineOptions({ name: 'Workspace' });
 
-const router = useRouter();
-const { formatDate } = useDateFormat();
 const { isMobile } = usePreferences();
-
-// Data
-const tenants = ref<Tenant[]>([]);
-const activeTenantId = ref(getActiveTenantId());
-
-const activeTenant = computed(() => {
-  return (
-    tenants.value.find((t) => t.id === activeTenantId.value) ||
-    tenants.value[0] ||
-    null
-  );
-});
-
-// Plan mapping config
-const PLAN_MAP: Record<string, { color: string; label: string }> = {
-  [TENANT_PLAN.ENTERPRISE]: { color: 'purple', label: 'Enterprise' },
-  [TENANT_PLAN.FREE]: { color: 'default', label: 'Free' },
-  [TENANT_PLAN.PRO]: { color: 'geekblue', label: 'Pro' },
-};
-
-function getPlanInfo(plan?: string) {
-  const key = plan?.toLowerCase() || TENANT_PLAN.PRO;
-  return PLAN_MAP[key] || { color: 'default', label: plan || 'Standard' };
-}
-
-function handleSelectTenant(record: any) {
-  activeTenantId.value = record.id;
-  setActiveTenantId(record.id);
-  toast.success($t('page.workspace.switched_to', { name: record.name }));
-}
-
-function handleConnectCli(record?: any) {
-  const targetId = record?.id || activeTenantId.value;
-  router.push(
-    `/auth/desktop?machine_name=Local Workstation&tenant_id=${encodeURIComponent(targetId)}`,
-  );
-}
-
-function getColumns() {
-  return [
-    {
-      field: 'name',
-      title: $t('page.workspace.col_name'),
-      minWidth: 240,
-      slots: { default: 'name-cell' },
-    },
-    {
-      field: 'slug',
-      title: $t('page.workspace.col_slug'),
-      minWidth: 150,
-      slots: { default: 'slug-cell' },
-    },
-    {
-      field: 'plan',
-      title: $t('page.workspace.col_plan'),
-      minWidth: 120,
-      slots: { default: 'plan-cell' },
-    },
-    {
-      field: 'status',
-      title: $t('page.workspace.col_status'),
-      minWidth: 130,
-      slots: { default: 'status-cell' },
-    },
-    {
-      field: 'created_at',
-      title: $t('page.workspace.col_created_at'),
-      minWidth: 150,
-      slots: { default: 'date-cell' },
-    },
-    {
-      field: 'actions',
-      title: $t('page.workspace.col_actions'),
-      minWidth: 280,
-      align: 'right' as const,
-      showOverflow: false,
-      slots: { default: 'actions-cell' },
-    },
-  ];
-}
+const {
+  activeTenant,
+  activeTenantId,
+  connectCli,
+  selectTenant,
+  setActiveTenant,
+  tenants,
+} = useTenantManagement();
 
 const [Grid, gridApi] = useVbenVxeGrid<Tenant>({
   separator: false,
@@ -123,8 +45,7 @@ const [Grid, gridApi] = useVbenVxeGrid<Tenant>({
     },
     onCreated: (created) => {
       if (created?.id) {
-        activeTenantId.value = created.id;
-        setActiveTenantId(created.id);
+        setActiveTenant(created.id);
       }
     },
   },
@@ -176,29 +97,8 @@ const [Grid, gridApi] = useVbenVxeGrid<Tenant>({
         }),
       },
     ],
-    layout: 'vertical',
-    showCollapseButton: false,
-    submitOnChange: true,
-    submitOnEnter: true,
-    submitButtonOptions: {
-      content: computed(() => $t('common.filter')),
-    },
-    resetButtonOptions: {
-      content: computed(() => $t('common.reset')),
-    },
-    actionWrapperClass:
-      'hidden sm:flex sm:col-span-1 items-center justify-end gap-2 pt-1 sm:pt-6',
-    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
-    border: false,
-    round: true,
-    showOverflow: true,
-    pagerConfig: {
-      autoHidden: true,
-      pageSize: 15,
-      pageSizes: [10, 15, 30, 50],
-    },
     proxyConfig: {
       autoLoad: true,
       ajax: {
@@ -209,8 +109,7 @@ const [Grid, gridApi] = useVbenVxeGrid<Tenant>({
           const list = await listTenants();
           tenants.value = list;
           if (list.length > 0 && !activeTenantId.value) {
-            activeTenantId.value = list[0]?.id || '';
-            setActiveTenantId(activeTenantId.value);
+            setActiveTenant(list[0]?.id || '');
           }
 
           let filtered = list;
@@ -240,53 +139,36 @@ const [Grid, gridApi] = useVbenVxeGrid<Tenant>({
             );
           }
 
-          const currentPage = page?.currentPage || 1;
-          const pageSize = page?.pageSize || 15;
-          const start = (currentPage - 1) * pageSize;
-          const end = start + pageSize;
-
-          return {
-            items: filtered.slice(start, end),
-            total: filtered.length,
-          };
+          return paginateArray(filtered, page);
         },
       },
     },
-    columns: getColumns(),
+    columns: getWorkspaceColumns,
   },
-});
-
-watch([() => $t('page.workspace.col_name'), isMobile], () => {
-  gridApi.setGridOptions({ columns: getColumns() });
-  gridApi.formApi?.setState({
-    commonConfig: {
-      componentProps: { class: 'w-full' },
-      hideLabel: isMobile.value,
-    },
-  });
 });
 </script>
 
 <template>
-  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
-    <!-- Top Action Bar -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="min-w-0">
-        <div class="flex flex-wrap items-center gap-2">
-          <h1
-            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-          >
-            {{ $t('page.workspace.title') }}
-          </h1>
-          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
-            {{ tenants.length }}
-          </Badge>
-        </div>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.workspace.subtitle') }}
-        </p>
+  <Page
+    :title="$t('page.workspace.title')"
+    :description="$t('page.workspace.subtitle')"
+    content-class="space-y-3 p-3 sm:space-y-4 sm:p-5"
+    header-class="border-b border-border/60 bg-card/60 px-4 py-3 sm:px-6"
+  >
+    <template #title>
+      <div class="flex items-center gap-2">
+        <h1
+          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
+        >
+          {{ $t('page.workspace.title') }}
+        </h1>
+        <Badge variant="secondary" class="shrink-0 text-2xs font-normal">
+          {{ tenants.length }}
+        </Badge>
       </div>
+    </template>
 
+    <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button
           variant="outline"
@@ -306,7 +188,7 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
           <span>{{ $t('common.createRecord') }}</span>
         </Button>
       </div>
-    </div>
+    </template>
 
     <!-- Compact Active Workspace Strip -->
     <div
@@ -337,7 +219,7 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
         size="sm"
         variant="outline"
         class="h-7 shrink-0 gap-1.5 px-2.5 text-xs"
-        @click="handleConnectCli(activeTenant)"
+        @click="connectCli(activeTenant || undefined)"
       >
         <Terminal class="size-3.5" />
         <span class="hidden sm:inline">{{
@@ -375,7 +257,7 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
 
         <template #plan-cell="{ row }">
           <Badge variant="outline" class="text-xs font-medium">
-            {{ getPlanInfo(row.metadata?.plan).label }}
+            {{ getTenantPlanBadge(row.metadata?.plan).label }}
           </Badge>
         </template>
 
@@ -395,19 +277,13 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
           </Badge>
         </template>
 
-        <template #date-cell="{ row }">
-          <span class="text-xs text-muted-foreground">
-            {{ formatDate(row.created_at) }}
-          </span>
-        </template>
-
         <template #actions-cell="{ row }">
           <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
             <Button
               size="sm"
               :variant="row.id === activeTenantId ? 'secondary' : 'default'"
               class="h-7 shrink-0 px-2.5 text-xs gap-1"
-              @click.stop="handleSelectTenant(row)"
+              @click.stop="selectTenant(row)"
             >
               <Check v-if="row.id === activeTenantId" class="size-3 shrink-0" />
               <span>
@@ -422,7 +298,7 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
               variant="outline"
               size="sm"
               class="h-7 shrink-0 px-2.5 text-xs gap-1"
-              @click.stop="router.push(`/tenants/${row.id}`)"
+              @click.stop="connectCli(row)"
             >
               <Eye class="size-3 shrink-0" />
               <span>{{ $t('page.workspace.action_detail') }}</span>
@@ -432,7 +308,7 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
               size="sm"
               class="h-7 shrink-0 px-2 text-xs gap-1"
               :title="$t('page.workspace.action_connect')"
-              @click.stop="handleConnectCli(row)"
+              @click.stop="connectCli(row)"
             >
               <Terminal class="size-3 shrink-0" />
               <span>CLI</span>
@@ -441,5 +317,5 @@ watch([() => $t('page.workspace.col_name'), isMobile], () => {
         </template>
       </Grid>
     </div>
-  </div>
+  </Page>
 </template>

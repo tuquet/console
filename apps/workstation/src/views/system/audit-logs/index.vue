@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import type { GlobalAuditLog } from '#/api';
 
-import { computed, ref, watch } from 'vue';
+import { ref } from 'vue';
 
+import { Page } from '@tuquet/common-ui';
 import { usePreferences } from '@tuquet/preferences';
 
 import { Badge, Button } from '@tuquet-core/shadcn-ui';
@@ -11,12 +12,11 @@ import { RefreshCw, User } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { listGlobalAuditLogs } from '#/api';
-import { useDateFormat } from '#/composables';
 import { $t } from '#/locales';
+import { paginateArray } from '#/utils/pagination';
 
 defineOptions({ name: 'SystemAuditLogs' });
 
-const { formatDate } = useDateFormat();
 const { isMobile } = usePreferences();
 
 const totalLogs = ref(0);
@@ -27,7 +27,7 @@ function getColumns() {
       field: 'created_at',
       title: $t('page.system_view.audit_col_time'),
       minWidth: 170,
-      slots: { default: 'time-cell' },
+      cellRender: { name: 'CellDate' },
     },
     {
       field: 'action',
@@ -97,28 +97,10 @@ const [Grid, gridApi] = useVbenVxeGrid<GlobalAuditLog>({
         }),
       },
     ],
-    layout: 'vertical',
-    showCollapseButton: false,
-    submitOnChange: true,
-    submitOnEnter: true,
-    submitButtonOptions: {
-      content: computed(() => $t('common.filter')),
-    },
-    resetButtonOptions: {
-      content: computed(() => $t('common.reset')),
-    },
     actionWrapperClass:
       'hidden sm:flex sm:col-span-2 lg:col-span-2 items-center justify-end gap-2 pt-1 sm:pt-6',
-    wrapperClass: 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3',
   },
   gridOptions: {
-    border: false,
-    round: true,
-    showOverflow: true,
-    pagerConfig: {
-      pageSize: 15,
-      pageSizes: [10, 15, 30, 50],
-    },
     proxyConfig: {
       autoLoad: true,
       ajax: {
@@ -140,32 +122,12 @@ const [Grid, gridApi] = useVbenVxeGrid<GlobalAuditLog>({
           });
           totalLogs.value = data.length;
 
-          const currentPage = page?.currentPage || 1;
-          const pageSize = page?.pageSize || 15;
-          const start = (currentPage - 1) * pageSize;
-          const end = start + pageSize;
-
-          return {
-            items: data.slice(start, end),
-            total: data.length,
-          };
+          return paginateArray(data, page);
         },
       },
     },
-    columns: getColumns(),
+    columns: getColumns,
   },
-});
-
-watch([() => $t('page.system_view.audit_col_time'), isMobile], () => {
-  gridApi.setGridOptions({ columns: getColumns() });
-  gridApi.formApi?.setState({
-    commonConfig: {
-      componentProps: {
-        class: 'w-full',
-      },
-      hideLabel: isMobile.value,
-    },
-  });
 });
 
 function getActionBadgeVariant(
@@ -197,25 +159,26 @@ function refresh() {
 </script>
 
 <template>
-  <div class="space-y-3 p-3 sm:space-y-4 sm:p-5">
-    <!-- Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="min-w-0">
-        <div class="flex flex-wrap items-center gap-2">
-          <h1
-            class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-          >
-            {{ $t('page.system.auditLogs') }}
-          </h1>
-          <Badge variant="secondary" class="shrink-0 text-xs font-normal">
-            {{ totalLogs }}
-          </Badge>
-        </div>
-        <p class="hidden text-xs text-muted-foreground sm:block">
-          {{ $t('page.system.auditLogs_desc') }}
-        </p>
+  <Page
+    :title="$t('page.system.auditLogs')"
+    :description="$t('page.system.auditLogs_desc')"
+    content-class="p-3 sm:p-5"
+    header-class="border-b border-border/60 bg-card/60 px-4 py-3 sm:px-6"
+  >
+    <template #title>
+      <div class="flex items-center gap-2">
+        <h1
+          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
+        >
+          {{ $t('page.system.auditLogs') }}
+        </h1>
+        <Badge variant="secondary" class="shrink-0 text-2xs font-normal">
+          {{ totalLogs }}
+        </Badge>
       </div>
+    </template>
 
+    <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-2">
         <Button
           variant="outline"
@@ -227,19 +190,13 @@ function refresh() {
           <RefreshCw class="size-3.5 shrink-0" />
         </Button>
       </div>
-    </div>
+    </template>
 
     <!-- Table View -->
     <div
       class="overflow-hidden rounded-xl border border-border/60 bg-card p-3 sm:p-5 shadow-xs"
     >
       <Grid class="audit-logs-vxe-grid">
-        <template #time-cell="{ row }">
-          <span class="text-xs text-muted-foreground">
-            {{ formatDate(row.created_at) }}
-          </span>
-        </template>
-
         <template #action-cell="{ row }">
           <div class="flex min-w-0 flex-col items-start gap-0.5 py-0.5">
             <Badge :variant="getActionBadgeVariant(row.action)" class="text-xs">
@@ -285,5 +242,5 @@ function refresh() {
         </template>
       </Grid>
     </div>
-  </div>
+  </Page>
 </template>

@@ -63,11 +63,11 @@ import {
   fulfillOrder,
   importStockBatch,
   inspectStockItem,
-  listAllOrders,
-  listAllPaymentGateways,
   listBankReceivingAccounts,
   listCommerceProducts,
   listManualReviewIntents,
+  listOrders,
+  listPaymentGateways,
   listStockItems,
   toggleBankReceivingAccount,
   upsertBankReceivingAccount,
@@ -443,7 +443,7 @@ const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrder>({
           { page }: { page?: { currentPage?: number; pageSize?: number } },
           formValues: Record<string, any>,
         ) => {
-          const data = await listAllOrders();
+          const data = await listOrders();
           allOrders.value = data;
           const filtered = filterCommerceOrders(data, {
             search: formValues?.search,
@@ -609,7 +609,7 @@ const [GatewaysGrid, gatewaysGridApi] = useVbenVxeGrid<PaymentGateway>({
       autoLoad: true,
       ajax: {
         query: async () => {
-          const data = await listAllPaymentGateways();
+          const data = await listPaymentGateways();
           allGateways.value = data;
           return { items: data, total: data.length };
         },
