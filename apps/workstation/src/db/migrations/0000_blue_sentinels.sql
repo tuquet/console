@@ -1,4 +1,4 @@
-CREATE TABLE `assets` (
+CREATE TABLE IF NOT EXISTS `assets` (
 	`id` text PRIMARY KEY NOT NULL,
 	`job_id` text,
 	`profile_id` text,
@@ -10,8 +10,8 @@ CREATE TABLE `assets` (
 	FOREIGN KEY (`profile_id`) REFERENCES `browser_profiles`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE INDEX `idx_assets_job_id` ON `assets` (`job_id`);--> statement-breakpoint
-CREATE TABLE `browser_profiles` (
+CREATE INDEX IF NOT EXISTS `idx_assets_job_id` ON `assets` (`job_id`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `browser_profiles` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`release_id` text,
@@ -29,9 +29,9 @@ CREATE TABLE `browser_profiles` (
 	FOREIGN KEY (`proxy_id`) REFERENCES `proxies`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE INDEX `idx_browser_profiles_proxy` ON `browser_profiles` (`proxy_id`);--> statement-breakpoint
-CREATE INDEX `idx_browser_profiles_locked` ON `browser_profiles` (`is_locked`);--> statement-breakpoint
-CREATE TABLE `devices` (
+CREATE INDEX IF NOT EXISTS `idx_browser_profiles_proxy` ON `browser_profiles` (`proxy_id`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `idx_browser_profiles_locked` ON `browser_profiles` (`is_locked`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `devices` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`ip_address` text,
@@ -41,8 +41,8 @@ CREATE TABLE `devices` (
 	`enrolled_at` text NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX `idx_devices_status` ON `devices` (`status`);--> statement-breakpoint
-CREATE TABLE `execution_logs` (
+CREATE INDEX IF NOT EXISTS `idx_devices_status` ON `devices` (`status`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `execution_logs` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`job_id` text NOT NULL,
 	`level` text DEFAULT 'info' NOT NULL,
@@ -52,9 +52,9 @@ CREATE TABLE `execution_logs` (
 	FOREIGN KEY (`job_id`) REFERENCES `jobs`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE INDEX `idx_logs_job_id` ON `execution_logs` (`job_id`);--> statement-breakpoint
-CREATE INDEX `idx_logs_level` ON `execution_logs` (`level`);--> statement-breakpoint
-CREATE TABLE `jobs` (
+CREATE INDEX IF NOT EXISTS `idx_execution_logs_job_id` ON `execution_logs` (`job_id`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `idx_execution_logs_level` ON `execution_logs` (`level`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `jobs` (
 	`id` text PRIMARY KEY NOT NULL,
 	`workflow_id` text,
 	`profile_id` text,
@@ -73,10 +73,10 @@ CREATE TABLE `jobs` (
 	FOREIGN KEY (`device_id`) REFERENCES `devices`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE INDEX `idx_jobs_workflow` ON `jobs` (`workflow_id`);--> statement-breakpoint
-CREATE INDEX `idx_jobs_profile` ON `jobs` (`profile_id`);--> statement-breakpoint
-CREATE INDEX `idx_jobs_status` ON `jobs` (`status`);--> statement-breakpoint
-CREATE TABLE `proxies` (
+CREATE INDEX IF NOT EXISTS `idx_jobs_workflow` ON `jobs` (`workflow_id`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `idx_jobs_profile` ON `jobs` (`profile_id`);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS `idx_jobs_status` ON `jobs` (`status`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `proxies` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text,
 	`protocol` text DEFAULT 'socks5' NOT NULL,
@@ -89,14 +89,14 @@ CREATE TABLE `proxies` (
 	`created_at` text NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX `idx_proxies_is_active` ON `proxies` (`is_active`);--> statement-breakpoint
-CREATE TABLE `system_settings` (
+CREATE INDEX IF NOT EXISTS `idx_proxies_is_active` ON `proxies` (`is_active`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `system_settings` (
 	`key` text PRIMARY KEY NOT NULL,
 	`value` text NOT NULL,
 	`updated_at` text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `workflows` (
+CREATE TABLE IF NOT EXISTS `workflows` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`description` text,
@@ -109,4 +109,4 @@ CREATE TABLE `workflows` (
 	`updated_at` text NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX `idx_workflows_is_active` ON `workflows` (`is_active`);
+CREATE INDEX IF NOT EXISTS `idx_workflows_is_active` ON `workflows` (`is_active`);

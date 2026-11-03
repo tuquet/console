@@ -109,6 +109,18 @@
       "problemMatcher": []
     },
     {
+      "label": "local: <db> test-sync",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "db:test-sync"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "local: <web> build",
       "type": "shell",
       "command": "pnpm",

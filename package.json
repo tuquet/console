@@ -40,6 +40,7 @@
     "db:generate": "pnpm -F @operon/workstation run db:generate",
     "db:push": "pnpm -F @operon/workstation run db:push",
     "db:studio": "pnpm -F @operon/workstation run db:studio",
+    "db:test-sync": "pnpm -F @operon/workstation run db:test-sync",
     "dev": "pnpm -F @operon/workstation run dev",
     "dev:admin": "pnpm -F @operon/workstation run dev",
     "dev:workstation": "pnpm -F @operon/workstation run dev",

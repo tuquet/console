@@ -30,6 +30,7 @@ export const workflows = sqliteTable(
       .default({})
       .notNull(),
     isActive: integer('is_active', { mode: 'boolean' }).default(true).notNull(),
+    lastSyncedAt: text('last_synced_at'),
     createdAt: text('created_at').notNull(),
     updatedAt: text('updated_at').notNull(),
   },
@@ -51,6 +52,7 @@ export const proxies = sqliteTable(
     password: text('password'),
     countryCode: text('country_code'),
     isActive: integer('is_active', { mode: 'boolean' }).default(true).notNull(),
+    lastSyncedAt: text('last_synced_at'),
     createdAt: text('created_at').notNull(),
   },
   (table) => [index('idx_proxies_is_active').on(table.isActive)],
@@ -85,6 +87,7 @@ export const browserProfiles = sqliteTable(
     isLocked: integer('is_locked', { mode: 'boolean' })
       .default(false)
       .notNull(),
+    lastSyncedAt: text('last_synced_at'),
     createdAt: text('created_at').notNull(),
     updatedAt: text('updated_at').notNull(),
   },
@@ -179,8 +182,8 @@ export const executionLogs = sqliteTable(
     createdAt: text('created_at').notNull(),
   },
   (table) => [
-    index('idx_logs_job_id').on(table.jobId),
-    index('idx_logs_level').on(table.level),
+    index('idx_execution_logs_job_id').on(table.jobId),
+    index('idx_execution_logs_level').on(table.level),
   ],
 );
 

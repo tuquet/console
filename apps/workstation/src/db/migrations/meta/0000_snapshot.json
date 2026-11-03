@@ -340,13 +340,13 @@
         }
       },
       "indexes": {
-        "idx_logs_job_id": {
-          "name": "idx_logs_job_id",
+        "idx_execution_logs_job_id": {
+          "name": "idx_execution_logs_job_id",
           "columns": ["job_id"],
           "isUnique": false
         },
-        "idx_logs_level": {
-          "name": "idx_logs_level",
+        "idx_execution_logs_level": {
+          "name": "idx_execution_logs_level",
           "columns": ["level"],
           "isUnique": false
         }
