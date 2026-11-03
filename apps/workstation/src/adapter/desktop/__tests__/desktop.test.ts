@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { parseDeepLinkAuthUrl, setupDeepLinkListener } from '../deep-link';
@@ -13,6 +14,26 @@ import {
 import { sendDesktopNotification } from '../notification';
 import { getSecureItem, setSecureItem } from '../storage';
 import { checkDesktopUpdate } from '../updater';
+
+const memoryStore = new Map<string, string>();
+const memoryStorage = {
+  getItem: (key: string) => memoryStore.get(key) ?? null,
+  setItem: (key: string, value: string) => {
+    memoryStore.set(key, String(value));
+  },
+  removeItem: (key: string) => {
+    memoryStore.delete(key);
+  },
+  clear: () => {
+    memoryStore.clear();
+  },
+};
+
+Object.defineProperty(globalThis, 'localStorage', {
+  value: memoryStorage,
+  writable: true,
+  configurable: true,
+});
 
 describe('desktop native adapter suite', () => {
   beforeEach(() => {

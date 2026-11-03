@@ -84,6 +84,31 @@
       "problemMatcher": []
     },
     {
+      "label": "local: <db> studio",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "db:studio"],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "local: <db> generate",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "db:generate"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "local: <web> build",
       "type": "shell",
       "command": "pnpm",

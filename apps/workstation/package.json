@@ -19,6 +19,9 @@
     "tauri:build": "tauri build",
     "tauri:build:exe": "tauri build --no-bundle",
     "tauri:dev": "tauri dev",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
     "typecheck": "vue-tsc --noEmit --skipLibCheck"
   },
   "imports": {
@@ -53,6 +56,7 @@
     "@tauri-apps/plugin-window-state": "catalog:",
     "@vueuse/core": "catalog:",
     "dayjs": "catalog:",
+    "drizzle-orm": "catalog:",
     "pinia": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:",
@@ -60,6 +64,9 @@
     "vxe-table": "catalog:"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "catalog:"
+    "@libsql/client": "catalog:",
+    "@tauri-apps/cli": "catalog:",
+    "drizzle-kit": "catalog:",
+    "vue-tsc": "catalog:"
   }
 }

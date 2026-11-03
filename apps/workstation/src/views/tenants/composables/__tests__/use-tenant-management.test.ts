@@ -2,6 +2,26 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useTenantManagement } from '../use-tenant-management';
 
+const memoryStore = new Map<string, string>();
+const memoryStorage = {
+  getItem: (key: string) => memoryStore.get(key) ?? null,
+  setItem: (key: string, value: string) => {
+    memoryStore.set(key, String(value));
+  },
+  removeItem: (key: string) => {
+    memoryStore.delete(key);
+  },
+  clear: () => {
+    memoryStore.clear();
+  },
+};
+
+Object.defineProperty(globalThis, 'localStorage', {
+  value: memoryStorage,
+  writable: true,
+  configurable: true,
+});
+
 const mockPush = vi.fn();
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockPush }),
