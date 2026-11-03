@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
         path: 'overview',
         component: () => import('#/views/system/overview/index.vue'),
         meta: {
-          authority: ['superadmin', 'plugins:read', 'subscriptions:read'],
+          authority: ['superadmin', 'plugins:read', 'licensing:read'],
           icon: 'lucide:activity',
           plugin: ['identity', 'licensing'],
           title: $t('page.system.overview'),
@@ -41,7 +41,7 @@ const routes: RouteRecordRaw[] = [
         path: 'plans',
         component: () => import('#/views/system/plans/index.vue'),
         meta: {
-          authority: ['superadmin', 'subscriptions:read'],
+          authority: ['superadmin', 'licensing:read'],
           icon: 'lucide:credit-card',
           plugin: 'licensing',
           title: $t('page.system.plans'),

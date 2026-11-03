@@ -121,7 +121,7 @@ describe('flattenMemberships', () => {
           {
             roles: {
               role_permissions: [
-                { permission_id: 'workers:devices:read' },
+                { permission_id: 'operon:devices:read' },
                 { permission_id: 'tenants:read' }, // duplicate in tenant-1
               ],
             },
@@ -134,7 +134,7 @@ describe('flattenMemberships', () => {
           {
             roles: {
               role_permissions: [
-                { permission_id: 'automation:workflows:read' },
+                { permission_id: 'operon:workflows:read' },
                 { permission_id: 'members:read' }, // duplicate cross-tenant
               ],
             },
@@ -150,15 +150,15 @@ describe('flattenMemberships', () => {
     const result = flattenMemberships(mockRows);
 
     expect(result.permissions).toEqual([
-      'automation:workflows:read',
       'members:read',
+      'operon:devices:read',
+      'operon:workflows:read',
       'tenants:read',
-      'workers:devices:read',
     ]);
 
     expect(result.tenantPermissions).toEqual({
-      'tenant-1': ['members:read', 'tenants:read', 'workers:devices:read'],
-      'tenant-2': ['automation:workflows:read', 'members:read'],
+      'tenant-1': ['members:read', 'operon:devices:read', 'tenants:read'],
+      'tenant-2': ['members:read', 'operon:workflows:read'],
       'tenant-empty': [],
     });
   });

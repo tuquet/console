@@ -319,7 +319,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
       is_system: false,
       name: 'devops',
       permission_count: 4,
-      permissions: ['workers:devices:view', 'workers:devices:manage'],
+      permissions: ['operon:devices:view', 'operon:devices:manage'],
     };
 
     const roleSchema = buildDynamicVxeFormSchema({

@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
         path: 'store',
         component: () => import('#/views/commerce/store/index.vue'),
         meta: {
-          authority: ['superadmin', 'commerce:read'],
+          authority: ['superadmin', 'store:read'],
           icon: 'lucide:store',
           plugin: 'store',
           title: $t('page.commerce.store'),
@@ -30,7 +30,7 @@ const routes: RouteRecordRaw[] = [
         path: 'orders',
         component: () => import('#/views/commerce/orders/index.vue'),
         meta: {
-          authority: ['superadmin', 'commerce:read'],
+          authority: ['superadmin', 'store:read'],
           icon: 'lucide:package-check',
           plugin: 'store',
           title: $t('page.commerce.orders'),
@@ -41,7 +41,7 @@ const routes: RouteRecordRaw[] = [
         path: 'admin',
         component: () => import('#/views/commerce/admin/index.vue'),
         meta: {
-          authority: ['superadmin', 'commerce:manage'],
+          authority: ['superadmin', 'store:manage'],
           icon: 'lucide:sliders-horizontal',
           plugin: 'store',
           title: $t('page.commerce.admin'),

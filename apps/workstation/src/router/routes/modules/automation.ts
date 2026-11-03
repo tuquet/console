@@ -22,11 +22,11 @@ const routes: RouteRecordRaw[] = [
           authority: [
             'superadmin',
             'local_operator',
-            'automation:workflows:read',
-            'automation:jobs:read',
-            'workers:devices:read',
-            'workers:browsers:read',
-            'workers:proxies:read',
+            'operon:workflows:read',
+            'operon:jobs:read',
+            'operon:devices:read',
+            'operon:browser_profiles:read',
+            'operon:proxies:read',
           ],
           icon: 'lucide:activity',
           plugin: 'operon',
@@ -38,11 +38,7 @@ const routes: RouteRecordRaw[] = [
         path: 'workflows',
         component: () => import('#/views/automation/workflows/index.vue'),
         meta: {
-          authority: [
-            'superadmin',
-            'local_operator',
-            'automation:workflows:read',
-          ],
+          authority: ['superadmin', 'local_operator', 'operon:workflows:read'],
           icon: 'lucide:git-branch',
           plugin: 'operon',
           title: $t('page.automation.workflows'),
@@ -53,7 +49,7 @@ const routes: RouteRecordRaw[] = [
         path: 'jobs',
         component: () => import('#/views/automation/jobs/index.vue'),
         meta: {
-          authority: ['superadmin', 'local_operator', 'automation:jobs:read'],
+          authority: ['superadmin', 'local_operator', 'operon:jobs:read'],
           icon: 'lucide:play-circle',
           plugin: 'operon',
           title: $t('page.automation.jobs'),
@@ -64,7 +60,7 @@ const routes: RouteRecordRaw[] = [
         path: 'devices',
         component: () => import('#/views/automation/devices/index.vue'),
         meta: {
-          authority: ['superadmin', 'local_operator', 'workers:devices:read'],
+          authority: ['superadmin', 'local_operator', 'operon:devices:read'],
           icon: 'lucide:laptop',
           plugin: 'operon',
           title: $t('page.automation.devices'),
@@ -75,7 +71,11 @@ const routes: RouteRecordRaw[] = [
         path: 'browsers',
         component: () => import('#/views/automation/browsers/index.vue'),
         meta: {
-          authority: ['superadmin', 'local_operator', 'workers:browsers:read'],
+          authority: [
+            'superadmin',
+            'local_operator',
+            'operon:browser_profiles:read',
+          ],
           icon: 'lucide:globe',
           plugin: 'operon',
           title: $t('page.automation.browsers'),
@@ -86,7 +86,7 @@ const routes: RouteRecordRaw[] = [
         path: 'proxies',
         component: () => import('#/views/automation/proxies/index.vue'),
         meta: {
-          authority: ['superadmin', 'local_operator', 'workers:proxies:read'],
+          authority: ['superadmin', 'local_operator', 'operon:proxies:read'],
           icon: 'lucide:network',
           plugin: 'operon',
           title: $t('page.automation.proxies'),
@@ -97,7 +97,7 @@ const routes: RouteRecordRaw[] = [
         path: 'jobs/:id',
         component: () => import('#/views/automation/jobs/detail.vue'),
         meta: {
-          authority: ['superadmin', 'local_operator', 'automation:jobs:read'],
+          authority: ['superadmin', 'local_operator', 'operon:jobs:read'],
           hideInMenu: true,
           icon: 'lucide:file-text',
           plugin: 'operon',

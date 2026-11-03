@@ -178,11 +178,11 @@ describe('system core api & helpers', () => {
         description: 'Standard member',
         id: 'r-mem',
         name: 'member',
-        role_permissions: [{ permission_id: 'workers:devices:read' }],
+        role_permissions: [{ permission_id: 'operon:devices:read' }],
       };
       const result = mapRawSystemRole(raw);
       expect(result.name).toBe('member');
-      expect(result.permissions).toEqual(['workers:devices:read']);
+      expect(result.permissions).toEqual(['operon:devices:read']);
     });
   });
 
@@ -332,7 +332,7 @@ describe('system core api & helpers', () => {
           name: 'owner',
           role_permissions: [
             { permission_id: 'tenants:manage' },
-            { permission_id: 'workers:devices:manage' },
+            { permission_id: 'operon:devices:manage' },
           ],
         },
       ]);
@@ -346,7 +346,7 @@ describe('system core api & helpers', () => {
       expect(roles[0]?.name).toBe('owner');
       expect(roles[0]?.permissions).toEqual([
         'tenants:manage',
-        'workers:devices:manage',
+        'operon:devices:manage',
       ]);
     });
 
@@ -354,17 +354,17 @@ describe('system core api & helpers', () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           description: 'Read devices',
-          id: 'workers:devices:read',
+          id: 'operon:devices:read',
           module: 'workers',
         },
         {
           description: 'Manage devices',
-          id: 'workers:devices:manage',
+          id: 'operon:devices:manage',
           module: 'workers',
         },
         {
           description: 'Read workflows',
-          id: 'automation:workflows:read',
+          id: 'operon:workflows:read',
           module: 'automation',
         },
       ]);

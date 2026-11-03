@@ -51,7 +51,7 @@ describe('getEffectiveAccess & session caching', () => {
       .spyOn(supabaseClient, 'supabaseRequest')
       .mockResolvedValueOnce([
         { id: 'tenants:read' },
-        { id: 'workers:devices:read' },
+        { id: 'operon:devices:read' },
         { id: 'billing:read' },
       ]);
 
@@ -60,8 +60,8 @@ describe('getEffectiveAccess & session caching', () => {
     expect(result1.isSuperadmin).toBe(true);
     expect(result1.permissions).toEqual([
       'billing:read',
+      'operon:devices:read',
       'tenants:read',
-      'workers:devices:read',
     ]);
     expect(requestSpy).toHaveBeenCalledTimes(1);
     expect(requestSpy).toHaveBeenCalledWith('/rest/v1/permissions?select=id');

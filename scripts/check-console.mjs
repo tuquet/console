@@ -434,7 +434,7 @@ async function runConsoleGate() {
             },
             {
               description: 'Read subscriptions',
-              id: 'subscriptions:read',
+              id: 'licensing:read',
               module: 'billing',
             },
           ]),
