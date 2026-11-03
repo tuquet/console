@@ -111,7 +111,7 @@ const [Grid, gridApi] = useVbenVxeGrid<Job>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
-    resource: 'automation.jobs',
+    resource: 'operon.jobs',
     subtitleField: 'status',
     titleField: 'name',
   },

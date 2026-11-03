@@ -30,7 +30,7 @@ describe('qC Acceptance: Browser Instances & Local-First Unbind Contract', () =>
           status: 'idle',
         }),
         method: 'PATCH',
-        schema: 'workers',
+        schema: 'operon',
       }),
     );
   });

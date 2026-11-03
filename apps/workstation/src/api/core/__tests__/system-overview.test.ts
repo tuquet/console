@@ -60,8 +60,8 @@ describe('system overview aggregation (SPEC-system-dashboard)', () => {
         user_agent: null,
       })),
       permissions: [
-        { description: 'Read', id: 'p1', module: 'core-iam' },
-        { description: 'Write', id: 'p2', module: 'core-iam' },
+        { description: 'Read', id: 'p1', module: 'identity' },
+        { description: 'Write', id: 'p2', module: 'identity' },
       ],
       plans: [
         {
@@ -103,12 +103,12 @@ describe('system overview aggregation (SPEC-system-dashboard)', () => {
       ],
       plugins: [
         {
-          description: 'Core IAM',
-          id: 'core-iam',
+          description: 'Identity & Access Management',
+          id: 'identity',
           installed_at: '2026-01-01',
           is_core: true,
           manifest: {},
-          name: 'Core IAM',
+          name: 'Identity & Access Management',
           schema_name: 'public',
           status: SYSTEM_PLUGIN_STATUS.INSTALLED,
           version: '1.0.0',

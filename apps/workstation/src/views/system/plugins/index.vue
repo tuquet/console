@@ -16,7 +16,6 @@ import { Badge, Button } from '@operon-core/shadcn-ui';
 import {
   CreditCard,
   Database,
-  HardDrive,
   KeyRound,
   Plus,
   RefreshCw,
@@ -24,7 +23,6 @@ import {
   ShoppingBag,
   Webhook,
   Workflow,
-  Zap,
 } from '@lucide/vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
@@ -158,35 +156,23 @@ const [Grid, gridApi] = useVbenVxeGrid<SystemPlugin>({
 
 function getPluginIcon(pluginId: string) {
   switch (pluginId?.toLowerCase()) {
-    case 'identity':
-    case 'core-iam': {
+    case 'identity': {
       return ShieldCheck;
     }
-    case 'operon':
-    case 'automation': {
+    case 'operon': {
       return Workflow;
     }
-    case 'workers': {
-      return Zap;
-    }
-    case 'vault':
-    case 'secrets': {
+    case 'vault': {
       return KeyRound;
     }
-    case 'store':
-    case 'commerce': {
+    case 'store': {
       return ShoppingBag;
     }
-    case 'dispatch':
-    case 'webhooks': {
+    case 'dispatch': {
       return Webhook;
     }
-    case 'licensing':
-    case 'subscriptions': {
+    case 'licensing': {
       return CreditCard;
-    }
-    case 'storage': {
-      return HardDrive;
     }
     default: {
       return Database;

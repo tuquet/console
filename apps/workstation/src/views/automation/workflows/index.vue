@@ -96,7 +96,7 @@ const [Grid, gridApi] = useVbenVxeGrid<Workflow>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
-    resource: 'automation.workflows',
+    resource: 'operon.workflows',
     subtitleField: 'version',
     titleField: 'name',
   },

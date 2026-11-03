@@ -30,25 +30,25 @@ import { supabaseRequest } from './supabase-client';
 import { getActiveTenantId } from './tenant';
 
 export type SupabaseResourceKey =
-  | 'automation.jobs'
-  | 'automation.workflows'
   | 'billing.bank_receiving_accounts'
   | 'billing.payment_gateways'
   | 'billing.payment_intents'
   | 'billing.plans'
   | 'billing.subscriptions'
   | 'billing.wallet_transactions'
-  | 'commerce.orders'
-  | 'commerce.products'
+  | 'medusa.orders'
+  | 'medusa.products'
+  | 'operon.browser_profiles'
+  | 'operon.devices'
+  | 'operon.jobs'
+  | 'operon.proxies'
+  | 'operon.workflows'
   | 'public.audit_logs'
   | 'public.permissions'
   | 'public.profiles'
   | 'public.roles'
   | 'public.system_plugins'
-  | 'public.tenants'
-  | 'workers.browsers'
-  | 'workers.devices'
-  | 'workers.proxies';
+  | 'public.tenants';
 
 export type DynamicFieldType =
   | 'boolean'
@@ -336,9 +336,9 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     },
   },
 
-  'automation.workflows': {
-    resource: 'automation.workflows',
-    schema: SUPABASE_SCHEMA.AUTOMATION,
+  'operon.workflows': {
+    resource: 'operon.workflows',
+    schema: SUPABASE_SCHEMA.OPERON,
     table: 'workflows',
     primaryKey: 'id',
     titleField: 'name',
@@ -397,7 +397,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
         access,
-        'automation.workflows.manage',
+        'operon.workflows.manage',
         row?.tenant_id,
       );
       return {
@@ -421,9 +421,9 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     },
   },
 
-  'automation.jobs': {
-    resource: 'automation.jobs',
-    schema: SUPABASE_SCHEMA.AUTOMATION,
+  'operon.jobs': {
+    resource: 'operon.jobs',
+    schema: SUPABASE_SCHEMA.OPERON,
     table: 'jobs',
     primaryKey: 'id',
     titleField: 'name',
@@ -478,7 +478,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
         access,
-        'automation:jobs:run',
+        'operon.jobs.run',
         row?.tenant_id,
       );
       return {
@@ -502,9 +502,9 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     },
   },
 
-  'workers.devices': {
-    resource: 'workers.devices',
-    schema: SUPABASE_SCHEMA.WORKERS,
+  'operon.devices': {
+    resource: 'operon.devices',
+    schema: SUPABASE_SCHEMA.OPERON,
     table: 'devices',
     primaryKey: 'id',
     titleField: 'name',
@@ -570,7 +570,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
         access,
-        'workers.manage',
+        'operon.devices.manage',
         row?.tenant_id,
       );
       return {
@@ -594,10 +594,10 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     },
   },
 
-  'workers.browsers': {
-    resource: 'workers.browsers',
-    schema: SUPABASE_SCHEMA.WORKERS,
-    table: 'browsers',
+  'operon.browser_profiles': {
+    resource: 'operon.browser_profiles',
+    schema: SUPABASE_SCHEMA.OPERON,
+    table: 'browser_profiles',
     primaryKey: 'id',
     titleField: 'name',
     columns: {
@@ -661,7 +661,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
         access,
-        'workers.manage',
+        'operon.browsers.manage',
         row?.tenant_id,
       );
       return {
@@ -685,9 +685,9 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     },
   },
 
-  'workers.proxies': {
-    resource: 'workers.proxies',
-    schema: SUPABASE_SCHEMA.WORKERS,
+  'operon.proxies': {
+    resource: 'operon.proxies',
+    schema: SUPABASE_SCHEMA.OPERON,
     table: 'proxies',
     primaryKey: 'id',
     titleField: 'host',
@@ -755,7 +755,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     evaluateRls: (row, access) => {
       const allowed = hasTenantOrGlobalPermission(
         access,
-        'workers.manage',
+        'operon.proxies.manage',
         row?.tenant_id,
       );
       return {
@@ -779,9 +779,9 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     },
   },
 
-  'commerce.orders': {
-    resource: 'commerce.orders',
-    schema: SUPABASE_SCHEMA.COMMERCE,
+  'medusa.orders': {
+    resource: 'medusa.orders',
+    schema: SUPABASE_SCHEMA.MEDUSA,
     table: 'orders',
     primaryKey: 'id',
     titleField: 'order_code',
@@ -861,9 +861,9 @@ export const SUPABASE_TABLE_REGISTRY: Record<
     },
   },
 
-  'commerce.products': {
-    resource: 'commerce.products',
-    schema: SUPABASE_SCHEMA.COMMERCE,
+  'medusa.products': {
+    resource: 'medusa.products',
+    schema: SUPABASE_SCHEMA.MEDUSA,
     table: 'products',
     primaryKey: 'id',
     titleField: 'name',
@@ -1895,12 +1895,12 @@ const ROUTE_RESOURCE_MAP: Array<{
   resource: SupabaseResourceKey;
 }> = [
   { pattern: /^\/tenants(\/|$)/, resource: 'public.tenants' },
-  { pattern: /^\/automation\/workflows/, resource: 'automation.workflows' },
-  { pattern: /^\/automation\/runs/, resource: 'automation.jobs' },
-  { pattern: /^\/automation\/devices/, resource: 'workers.devices' },
-  { pattern: /^\/automation\/browsers/, resource: 'workers.browsers' },
-  { pattern: /^\/automation\/proxies/, resource: 'workers.proxies' },
-  { pattern: /^\/commerce\/orders/, resource: 'commerce.orders' },
+  { pattern: /^\/automation\/workflows/, resource: 'operon.workflows' },
+  { pattern: /^\/automation\/runs/, resource: 'operon.jobs' },
+  { pattern: /^\/automation\/devices/, resource: 'operon.devices' },
+  { pattern: /^\/automation\/browsers/, resource: 'operon.browser_profiles' },
+  { pattern: /^\/automation\/proxies/, resource: 'operon.proxies' },
+  { pattern: /^\/commerce\/orders/, resource: 'medusa.orders' },
   { pattern: /^\/commerce\/wallet/, resource: 'billing.wallet_transactions' },
   { pattern: /^\/system\/plugins/, resource: 'public.system_plugins' },
   { pattern: /^\/system\/plans/, resource: 'billing.plans' },
@@ -1925,10 +1925,10 @@ export function inferResourceFromRouteAndRow(
   // Row-shape disambiguation for multi-grid pages (/commerce/admin & /system/roles)
   if (row && typeof row === 'object') {
     if ('product_type' in row && 'visibility' in row) {
-      return 'commerce.products';
+      return 'medusa.products';
     }
     if ('order_code' in row && 'total_credits' in row) {
-      return 'commerce.orders';
+      return 'medusa.orders';
     }
     if ('reference_code' in row && 'credits_amount' in row) {
       return 'billing.payment_intents';
@@ -1968,19 +1968,19 @@ export function inferResourceFromRouteAndRow(
       'runner_version' in row ||
       'worker_version' in row
     ) {
-      return 'workers.devices';
+      return 'operon.devices';
     }
     if ('browser_version' in row || 'os_platform' in row) {
-      return 'workers.browsers';
+      return 'operon.browser_profiles';
     }
     if ('host' in row && 'port' in row && 'protocol' in row) {
-      return 'workers.proxies';
+      return 'operon.proxies';
     }
     if ('total_tasks' in row && 'workflow_id' in row) {
-      return 'automation.jobs';
+      return 'operon.jobs';
     }
     if ('triggerSummary' in row || 'nodeCount' in row) {
-      return 'automation.workflows';
+      return 'operon.workflows';
     }
     if ('tenant_count' in row && ('email' in row || 'full_name' in row)) {
       return 'public.profiles';
@@ -2252,7 +2252,7 @@ export function extractRelationalTablesFromRow(
         sku: v?.sku || v?.code || v?.id || '—',
         stock_available: v?.stock_available ?? v?.stock ?? 0,
       })),
-      targetResource: 'commerce.product_variants',
+      targetResource: 'medusa.product_variants',
       title: humanizeFieldKey('variants'),
     });
   }
@@ -2291,7 +2291,7 @@ export function extractRelationalTablesFromRow(
         unit_price_credits: it?.unit_price_credits ?? it?.price_credits ?? 0,
         variant_name: it?.variant_name || it?.sku || '—',
       })),
-      targetResource: 'commerce.order_items',
+      targetResource: 'medusa.order_items',
       title: humanizeFieldKey('items'),
     });
   }
@@ -2320,7 +2320,7 @@ export function extractRelationalTablesFromRow(
         delivery_type: d?.delivery_type || d?.type || 'digital',
         status: d?.status || 'completed',
       })),
-      targetResource: 'commerce.order_deliveries',
+      targetResource: 'medusa.order_deliveries',
       title: humanizeFieldKey('deliveries'),
     });
   }

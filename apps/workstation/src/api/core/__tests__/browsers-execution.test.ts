@@ -33,7 +33,7 @@ describe('qC Acceptance: GoLogin Execution Pattern & Unified Cockpit', () => {
       '/rest/v1/browsers?id=eq.browser-001',
       expect.objectContaining({
         method: 'PATCH',
-        schema: 'workers',
+        schema: 'operon',
       }),
     );
   });

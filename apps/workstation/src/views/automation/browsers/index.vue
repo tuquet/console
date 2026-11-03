@@ -191,7 +191,7 @@ const [Grid, gridApi] = useVbenVxeGrid<BrowserProfile>({
         proxy_id: proxyOptions,
       };
     },
-    resource: 'workers.browsers',
+    resource: 'operon.browser_profiles',
     subtitleField: 'engine_version',
     titleField: 'name',
   },

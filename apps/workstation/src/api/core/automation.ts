@@ -23,7 +23,7 @@ import {
 import { supabaseRequest } from './supabase-client';
 
 // ============================================================================
-// PART 1: WORKFLOW ORCHESTRATION & JOBS (PostgreSQL schema: 'automation')
+// PART 1: WORKFLOW ORCHESTRATION & JOBS (PostgreSQL schema: 'operon')
 // ============================================================================
 
 export {
@@ -162,11 +162,9 @@ export function buildAutomationFilterQuery(
 }
 
 /**
- * Lấy danh sách quy trình tự động từ `automation.workflows`.
+ * Lấy danh sách quy trình tự động từ `operon.workflows`.
  *
- * PostgREST của dự án chỉ expose schema `public` (probe: PGRST106), nên đường đọc
- * chính thức là RPC `public.workflow_list` — `SECURITY INVOKER` nên RLS vẫn thi hành.
- * Xem `cloud/supabase/plugins/automation/install.sql` §7.5.
+ * PostgREST của dự án expose schema `operon` hoặc RPC `public.workflow_list` — `SECURITY INVOKER` nên RLS vẫn thi hành.
  */
 export async function listWorkflows(
   params?: ListWorkflowsParams,
@@ -195,7 +193,7 @@ export async function listWorkflows(
 }
 
 /**
- * Lấy danh sách các jobs từ schema automation.jobs
+ * Lấy danh sách các jobs từ schema operon.jobs
  */
 export async function listJobs(params?: ListJobsParams): Promise<Job[]> {
   try {
@@ -204,7 +202,7 @@ export async function listJobs(params?: ListJobsParams): Promise<Job[]> {
       params,
     );
     const data = await supabaseRequest<Job[]>(query, {
-      schema: SUPABASE_SCHEMA.AUTOMATION,
+      schema: SUPABASE_SCHEMA.OPERON,
       suppressErrorCapture: true,
     });
     return Array.isArray(data) ? data : [];
@@ -223,7 +221,7 @@ export async function getJob(runId: string): Promise<Job | null> {
   try {
     const query = `/rest/v1/jobs?id=eq.${encodeURIComponent(runId)}&select=id,tenant_id,workflow_id,worker_id,name,status,total_tasks,completed_tasks,failed_tasks,started_at,ended_at,created_at,error_message,result_summary,parameters,workflow:workflow_id(name),worker:worker_id(name)`;
     const data = await supabaseRequest<Job[]>(query, {
-      schema: SUPABASE_SCHEMA.AUTOMATION,
+      schema: SUPABASE_SCHEMA.OPERON,
     });
     return Array.isArray(data) && data.length > 0 ? (data[0] ?? null) : null;
   } catch (error: any) {
@@ -235,7 +233,7 @@ export async function getJob(runId: string): Promise<Job | null> {
 }
 
 /**
- * Lấy nhật ký thực thi của một job từ schema automation.execution_logs
+ * Lấy nhật ký thực thi của một job từ schema operon.execution_logs
  */
 export async function listExecutionLogs(
   runId: string,
@@ -250,7 +248,7 @@ export async function listExecutionLogs(
     query += `&order=id.asc&limit=${limit}`;
 
     const data = await supabaseRequest<ExecutionLog[]>(query, {
-      schema: SUPABASE_SCHEMA.AUTOMATION,
+      schema: SUPABASE_SCHEMA.OPERON,
     });
     return Array.isArray(data) ? data : [];
   } catch (error: any) {
@@ -274,12 +272,12 @@ export async function cancelJob(runId: string): Promise<void> {
       'Content-Type': 'application/json',
     },
     method: 'PATCH',
-    schema: SUPABASE_SCHEMA.AUTOMATION,
+    schema: SUPABASE_SCHEMA.OPERON,
   });
 }
 
 // ============================================================================
-// PART 2: COMPUTE DEVICES, BROWSERS & PROXIES (PostgreSQL schema: 'workers')
+// PART 2: COMPUTE DEVICES, BROWSERS & PROXIES (PostgreSQL schema: 'operon')
 // ============================================================================
 
 export interface Device {
@@ -517,7 +515,7 @@ export async function listDevices(
       params,
     );
     const data = await supabaseRequest<any[]>(query, {
-      schema: SUPABASE_SCHEMA.WORKERS,
+      schema: SUPABASE_SCHEMA.OPERON,
       suppressErrorCapture: true,
     });
     if (!Array.isArray(data)) return [];
@@ -531,20 +529,20 @@ export async function listDevices(
 }
 
 /**
- * Thu hồi quyền truy cập của một máy trạm trong schema workers.devices
+ * Thu hồi quyền truy cập của một máy trạm trong schema operon.devices
  */
 export async function revokeDevice(deviceId: string): Promise<void> {
   await supabaseRequest(
     `/rest/v1/devices?id=eq.${encodeURIComponent(deviceId)}`,
     {
       method: 'DELETE',
-      schema: SUPABASE_SCHEMA.WORKERS,
+      schema: SUPABASE_SCHEMA.OPERON,
     },
   );
 }
 
 /**
- * Lấy danh sách browser profiles từ schema workers.browsers
+ * Lấy danh sách browser profiles từ schema operon.browser_profiles
  */
 export async function listBrowsers(
   params?: ListBrowsersParams,
@@ -555,7 +553,7 @@ export async function listBrowsers(
       params,
     );
     const data = await supabaseRequest<BrowserProfile[]>(query, {
-      schema: SUPABASE_SCHEMA.WORKERS,
+      schema: SUPABASE_SCHEMA.OPERON,
       suppressErrorCapture: true,
     });
     return Array.isArray(data) ? data : [];
@@ -601,7 +599,7 @@ export async function startBrowserProfile(
           status: 'running',
         }),
         method: 'PATCH',
-        schema: SUPABASE_SCHEMA.WORKERS,
+        schema: SUPABASE_SCHEMA.OPERON,
       });
       return { success: true };
     } catch (error: any) {
@@ -651,7 +649,7 @@ export async function unbindBrowser(browserId: string): Promise<boolean> {
         status: 'idle',
       }),
       method: 'PATCH',
-      schema: SUPABASE_SCHEMA.WORKERS,
+      schema: SUPABASE_SCHEMA.OPERON,
     });
     return true;
   } catch (error) {
@@ -661,7 +659,7 @@ export async function unbindBrowser(browserId: string): Promise<boolean> {
 }
 
 /**
- * Lấy danh sách proxy pool từ schema workers.proxies
+ * Lấy danh sách proxy pool từ schema operon.proxies
  */
 export async function listProxies(
   params?: ListProxiesParams,
@@ -672,7 +670,7 @@ export async function listProxies(
       params,
     );
     const data = await supabaseRequest<ProxyServer[]>(query, {
-      schema: SUPABASE_SCHEMA.WORKERS,
+      schema: SUPABASE_SCHEMA.OPERON,
       suppressErrorCapture: true,
     });
     return Array.isArray(data) ? data : [];
@@ -701,7 +699,7 @@ export interface BrowserRelease {
 }
 
 /**
- * Lấy danh sách các bản build ungoogled/fingerprint-chromium đã compile từ schema browsers.releases
+ * Lấy danh sách các bản build ungoogled/fingerprint-chromium đã compile từ schema operon.releases
  */
 export async function listBrowserReleases(
   params?: ListBrowserReleasesParams,
@@ -726,7 +724,7 @@ export async function listBrowserReleases(
 
     const query = `/rest/v1/releases?${searchParams.toString()}`;
     const data = await supabaseRequest<BrowserRelease[]>(query, {
-      schema: SUPABASE_SCHEMA.BROWSERS,
+      schema: SUPABASE_SCHEMA.OPERON,
       suppressErrorCapture: true,
     });
     return Array.isArray(data) ? data : [];

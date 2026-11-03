@@ -5,6 +5,7 @@ import type {
 } from '@operon/constants';
 
 import {
+  CANONICAL_PLUGIN_IDS,
   FILTER_ALL,
   SUBSCRIPTION_STATUS,
   SUPABASE_SCHEMA,
@@ -125,23 +126,7 @@ export interface ListGlobalAuditLogsParams {
   tenantId?: string;
 }
 
-const CORE_PLUGIN_IDS = new Set([
-  // Legacy aliases for backward compatibility
-  'automation',
-  'browsers',
-  'core-iam',
-  'dispatch',
-  // Canonical SSOT DB Plugin IDs
-  'identity',
-  'licensing',
-  'operon',
-  'storage',
-  'store',
-  'subscriptions',
-  'vault',
-  'webhooks',
-  'workers',
-]);
+const CORE_PLUGIN_IDS = new Set<string>(CANONICAL_PLUGIN_IDS);
 
 /**
  * Pure function: Kiểm tra xem một plugin ID có thuộc 6 Core Kernel Plugins hay không

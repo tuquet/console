@@ -174,7 +174,7 @@ const [Grid, gridApi] = useVbenVxeGrid<Device>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
-    resource: 'workers.devices',
+    resource: 'operon.devices',
     subtitleField: 'hostname',
     titleField: 'name',
   },

@@ -18,6 +18,7 @@ import {
   FILTER_ALL,
   PAYMENT_CHANNEL,
   STORAGE_KEYS,
+  SUPABASE_SCHEMA,
 } from '@operon/constants';
 
 import { mapRawPaymentIntent } from './billing';
@@ -374,7 +375,7 @@ export async function listCommerceCategories(
     `/rest/v1/categories?${filter}select=*&order=sort_order.asc,name.asc`,
     {
       method: 'GET',
-      schema: 'commerce',
+      schema: SUPABASE_SCHEMA.MEDUSA,
       skipAuth: params?.skipAuth,
     },
   );
@@ -404,7 +405,7 @@ export async function listCommerceProducts(
     `/rest/v1/products?${queryPrefix}select=*,product_variants(*)&order=sort_order.asc,created_at.desc`,
     {
       method: 'GET',
-      schema: 'commerce',
+      schema: SUPABASE_SCHEMA.MEDUSA,
       skipAuth: params?.skipAuth,
     },
   );
@@ -426,7 +427,7 @@ export async function listCommerceProductVariants(
     `/rest/v1/product_variants?${filter}select=*&order=sort_order.asc,price_credits.asc`,
     {
       method: 'GET',
-      schema: 'commerce',
+      schema: SUPABASE_SCHEMA.MEDUSA,
     },
   );
   return Array.isArray(rows)
@@ -451,7 +452,7 @@ export async function createCheckoutOrder(
       _payment_method: params.payment_method,
     }),
     method: 'POST',
-    schema: 'commerce',
+    schema: SUPABASE_SCHEMA.MEDUSA,
     skipAuth: options?.skipAuth,
   });
 
@@ -485,7 +486,7 @@ export async function listTenantOrders(
     `/rest/v1/orders?buyer_tenant_id=eq.${encodeURIComponent(tenantId)}&select=*&order=created_at.desc&limit=${limit}`,
     {
       method: 'GET',
-      schema: 'commerce',
+      schema: SUPABASE_SCHEMA.MEDUSA,
     },
   );
   return Array.isArray(rows) ? rows.map((row) => mapRawCommerceOrder(row)) : [];
@@ -501,7 +502,7 @@ export async function listOrderDeliveries(
     `/rest/v1/order_deliveries?order_id=eq.${encodeURIComponent(orderId)}&select=*&order=created_at.asc`,
     {
       method: 'GET',
-      schema: 'commerce',
+      schema: SUPABASE_SCHEMA.MEDUSA,
     },
   );
   return Array.isArray(rows) ? rows.map((row) => mapRawOrderDelivery(row)) : [];
@@ -522,7 +523,7 @@ export async function getGuestOrderDeliveries(
         _order_code: orderCode,
       }),
       method: 'POST',
-      schema: 'commerce',
+      schema: SUPABASE_SCHEMA.MEDUSA,
       skipAuth: true,
     },
   );
@@ -551,7 +552,7 @@ export async function upsertCommerceCategory(
       },
       method: 'POST',
       preferRepresentation: true,
-      schema: 'commerce',
+      schema: SUPABASE_SCHEMA.MEDUSA,
     },
   );
   return mapRawCommerceCategory(Array.isArray(rows) ? rows[0] : rows);
@@ -576,7 +577,7 @@ export async function upsertCommerceProduct(
       },
       method: 'POST',
       preferRepresentation: true,
-      schema: 'commerce',
+      schema: SUPABASE_SCHEMA.MEDUSA,
     },
   );
   return mapRawCommerceProduct(Array.isArray(rows) ? rows[0] : rows);
@@ -602,7 +603,7 @@ export async function upsertProductVariant(
       },
       method: 'POST',
       preferRepresentation: true,
-      schema: 'commerce',
+      schema: SUPABASE_SCHEMA.MEDUSA,
     },
   );
   return mapRawProductVariant(Array.isArray(rows) ? rows[0] : rows);
@@ -623,7 +624,7 @@ export async function importStockBatch(params: {
       _variant_id: params.variant_id,
     }),
     method: 'POST',
-    schema: 'commerce',
+    schema: SUPABASE_SCHEMA.MEDUSA,
   });
 
   return {
@@ -647,7 +648,7 @@ export async function listOrders(
     `/rest/v1/orders?${filter}select=*&order=created_at.desc&limit=${limit}`,
     {
       method: 'GET',
-      schema: 'commerce',
+      schema: SUPABASE_SCHEMA.MEDUSA,
     },
   );
   return Array.isArray(rows) ? rows.map((row) => mapRawCommerceOrder(row)) : [];
@@ -695,7 +696,7 @@ export async function fulfillOrder(orderId: string): Promise<{
       _order_id: orderId,
     }),
     method: 'POST',
-    schema: 'commerce',
+    schema: SUPABASE_SCHEMA.MEDUSA,
   });
 
   return {
@@ -724,7 +725,7 @@ export async function claimOrderWarranty(params: {
       _reason: params.reason ?? 'Item defective/dead upon delivery',
     }),
     method: 'POST',
-    schema: 'commerce',
+    schema: SUPABASE_SCHEMA.MEDUSA,
   });
 
   return {
@@ -759,7 +760,7 @@ export async function inspectStockItem(params: {
         _stock_id: params.stock_id,
       }),
       method: 'POST',
-      schema: 'commerce',
+      schema: SUPABASE_SCHEMA.MEDUSA,
     },
   );
 
@@ -798,7 +799,7 @@ export async function listStockItems(
     `/rest/v1/stock_items?${queryParts.join('&')}`,
     {
       method: 'GET',
-      schema: 'commerce',
+      schema: SUPABASE_SCHEMA.MEDUSA,
     },
   );
 

@@ -44,13 +44,13 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     expect(keys).toEqual(
       expect.arrayContaining([
         'public.tenants',
-        'automation.workflows',
-        'automation.jobs',
-        'workers.devices',
-        'workers.browsers',
-        'workers.proxies',
-        'commerce.orders',
-        'commerce.products',
+        'operon.workflows',
+        'operon.jobs',
+        'operon.devices',
+        'operon.browser_profiles',
+        'operon.proxies',
+        'medusa.orders',
+        'medusa.products',
         'billing.wallet_transactions',
         'billing.payment_intents',
         'billing.payment_gateways',
@@ -69,7 +69,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
   it('infers resource accurately from route paths and multi-grid row shapes', () => {
     expect(inferResourceFromRouteAndRow('/tenants', {})).toBe('public.tenants');
     expect(inferResourceFromRouteAndRow('/automation/workflows', {})).toBe(
-      'automation.workflows',
+      'operon.workflows',
     );
     expect(
       inferResourceFromRouteAndRow('/commerce/admin', {
@@ -77,7 +77,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
         product_type: 'serial_stock',
         visibility: 'public',
       }),
-    ).toBe('commerce.products');
+    ).toBe('medusa.products');
     expect(
       inferResourceFromRouteAndRow('/commerce/admin', {
         credits_amount: 500,
@@ -100,8 +100,8 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     expect(
       inferResourceFromRouteAndRow('/system/roles', {
         description: 'Manage workflows',
-        id: 'automation.workflows.manage',
-        module: 'automation',
+        id: 'operon.workflows.manage',
+        module: 'operon',
       }),
     ).toBe('public.permissions');
   });
@@ -114,16 +114,16 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     };
     const viewerAccess = {
       isSuperadmin: false,
-      permissions: ['automation.workflows.view'],
+      permissions: ['operon.workflows.view'],
       tenantPermissions: {
-        t_1: ['automation.workflows.view'],
+        t_1: ['operon.workflows.view'],
       },
     };
     const managerAccess = {
       isSuperadmin: false,
-      permissions: ['automation.workflows.manage'],
+      permissions: ['operon.workflows.manage'],
       tenantPermissions: {
-        t_1: ['automation.workflows.manage'],
+        t_1: ['operon.workflows.manage'],
       },
     };
 
@@ -160,16 +160,16 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     );
     expect(customRoleRls.canUpdate.allowed).toBe(true);
 
-    // 3. Tenant RBAC enforcement on automation.workflows
+    // 3. Tenant RBAC enforcement on operon.workflows
     const viewerWorkflowRls = evaluateRowRlsPolicy(
-      'automation.workflows',
+      'operon.workflows',
       { id: 'wf_1', tenant_id: 't_1' },
       viewerAccess,
     );
     expect(viewerWorkflowRls.canUpdate.allowed).toBe(false);
 
     const managerWorkflowRls = evaluateRowRlsPolicy(
-      'automation.workflows',
+      'operon.workflows',
       { id: 'wf_1', tenant_id: 't_1' },
       managerAccess,
     );
@@ -197,7 +197,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
 
     const schema = buildDynamicVxeFormSchema({
       gridColumns: mobileGridColumns,
-      resource: 'automation.workflows',
+      resource: 'operon.workflows',
       row,
       translate: (k) => k,
     });
@@ -269,7 +269,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     const dirty = computeDirtyMutablePayload(
       originalRow,
       formData,
-      'automation.workflows',
+      'operon.workflows',
     );
     expect(dirty).toEqual({
       name: 'New Name',
@@ -286,7 +286,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     ]);
 
     const result = await executeDynamicSupabasePatch(
-      'automation.workflows',
+      'operon.workflows',
       originalRow,
       formData,
     );
@@ -300,7 +300,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
         body: JSON.stringify({ name: 'New Name', status: 'published' }),
         method: 'PATCH',
         preferRepresentation: true,
-        schema: 'automation',
+        schema: 'operon',
       }),
     );
   });
@@ -405,7 +405,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     });
 
     const productSchema = buildDynamicVxeFormSchema({
-      resource: 'commerce.products',
+      resource: 'medusa.products',
       row: {
         id: 'prod_1',
         name: 'Cloud Browser Pro',
@@ -427,7 +427,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
     expect(productSchema.relations).toHaveLength(1);
     expect(productSchema.relations[0]?.field).toBe('variants');
     expect(productSchema.relations[0]?.targetResource).toBe(
-      'commerce.product_variants',
+      'medusa.product_variants',
     );
     expect(productSchema.relations[0]?.rows[0]).toMatchObject({
       name: 'Monthly 100 Profiles',
@@ -438,7 +438,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
 
   it('builds Supabase Studio Create Mode schema (hiding uuid/system fields while keeping text PKs with insertable: true)', () => {
     const workflowCreate = buildDynamicVxeCreateSchema({
-      resource: 'automation.workflows',
+      resource: 'operon.workflows',
       translate: (k) => k,
     });
 
@@ -476,12 +476,12 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
   });
 
   it('validates required fields, auto-attaches tenant_id, and executes PostgREST POST in executeDynamicSupabaseInsert', async () => {
-    expect(validateRequiredInsertFields({}, 'automation.workflows')).toEqual([
+    expect(validateRequiredInsertFields({}, 'operon.workflows')).toEqual([
       'name',
     ]);
 
     await expect(
-      executeDynamicSupabaseInsert('automation.workflows', { name: '   ' }),
+      executeDynamicSupabaseInsert('operon.workflows', { name: '   ' }),
     ).rejects.toThrow(/Missing required fields: name/);
 
     const payload = computeInsertPayload(
@@ -491,7 +491,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
         status: 'draft',
         version: '1.0.0',
       },
-      'automation.workflows',
+      'operon.workflows',
     );
     expect(payload).toEqual({
       description: 'Auto sync orders',
@@ -508,7 +508,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
       },
     ]);
 
-    const res = await executeDynamicSupabaseInsert('automation.workflows', {
+    const res = await executeDynamicSupabaseInsert('operon.workflows', {
       description: 'Auto sync orders',
       name: 'TikTok Order Sync',
       status: 'draft',
@@ -523,7 +523,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
         body: JSON.stringify(payload),
         method: 'POST',
         preferRepresentation: true,
-        schema: 'automation',
+        schema: 'operon',
       }),
     );
   });

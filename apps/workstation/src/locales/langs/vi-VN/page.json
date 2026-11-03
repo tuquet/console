@@ -468,12 +468,6 @@
     "roles_module_store": "Cửa hàng số",
     "roles_module_vault": "Kho bảo mật Vault",
     "roles_module_dispatch": "Sự kiện & Outbox",
-    "roles_module_core_iam": "Core IAM",
-    "roles_module_workers": "Workers",
-    "roles_module_automa": "Automa",
-    "roles_module_subscriptions": "Subscriptions",
-    "roles_module_storage": "Storage",
-    "roles_module_webhooks": "Webhooks",
     "roles_col_policy_desc": "Mô tả",
     "roles_col_assigned_perms": "Quyền hạn",
     "roles_col_module": "Module",
@@ -546,8 +540,7 @@
     "overview_recent_audit": "Sự kiện kiểm toán gần đây",
     "overview_recent_subs": "Đăng ký gói gần đây",
     "overview_audit_empty": "Chưa có sự kiện kiểm toán nào",
-    "overview_subs_empty": "Chưa có thuê bao đăng ký nào",
-    "roles_module_automation": "Tự động hóa"
+    "overview_subs_empty": "Chưa có thuê bao đăng ký nào"
   },
   "commerce_view": {
     "account_list_label": "danh sách tài khoản",

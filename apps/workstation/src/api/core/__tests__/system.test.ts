@@ -32,22 +32,20 @@ describe('system core api & helpers', () => {
   });
 
   describe('isCorePlugin', () => {
-    it('should return true for all core kernel plugins', () => {
+    it('should return true for all 6 core kernel plugins', () => {
       expect(isCorePlugin('identity')).toBe(true);
       expect(isCorePlugin('operon')).toBe(true);
       expect(isCorePlugin('licensing')).toBe(true);
       expect(isCorePlugin('dispatch')).toBe(true);
       expect(isCorePlugin('store')).toBe(true);
       expect(isCorePlugin('vault')).toBe(true);
-      expect(isCorePlugin('core-iam')).toBe(true);
-      expect(isCorePlugin('workers')).toBe(true);
-      expect(isCorePlugin('automation')).toBe(true);
-      expect(isCorePlugin('storage')).toBe(true);
-      expect(isCorePlugin('subscriptions')).toBe(true);
-      expect(isCorePlugin('webhooks')).toBe(true);
     });
 
-    it('should return false for custom or empty plugin IDs', () => {
+    it('should return false for legacy aliases and custom or empty plugin IDs', () => {
+      expect(isCorePlugin('core-iam')).toBe(false);
+      expect(isCorePlugin('workers')).toBe(false);
+      expect(isCorePlugin('automation')).toBe(false);
+      expect(isCorePlugin('subscriptions')).toBe(false);
       expect(isCorePlugin('custom-ai')).toBe(false);
       expect(isCorePlugin('')).toBe(false);
     });
@@ -57,10 +55,10 @@ describe('system core api & helpers', () => {
     it('should map valid raw plugin row and identify core plugin', () => {
       const raw = {
         description: 'Multi-Tenant IAM Kernel',
-        id: 'core-iam',
+        id: 'identity',
         installed_at: '2026-10-11T00:00:00Z',
         manifest: { author: 'operon' },
-        name: 'Core IAM',
+        name: 'Identity & Access Management',
         schema_name: 'public',
         status: 'installed',
         version: '1.0.0',
@@ -71,13 +69,13 @@ describe('system core api & helpers', () => {
       expect(result).toEqual({
         dependencies: [],
         description: 'Multi-Tenant IAM Kernel',
-        id: 'core-iam',
+        id: 'identity',
         installed_at: '2026-10-11T00:00:00Z',
         is_core: true,
         is_system: true,
         manifest: { author: 'operon' },
         metadata: {},
-        name: 'Core IAM',
+        name: 'Identity & Access Management',
         schema_name: 'public',
         status: 'installed',
         version: '1.0.0',
@@ -192,8 +190,8 @@ describe('system core api & helpers', () => {
     it('should query listSystemPlugins from public.system_plugins', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
-          id: 'core-iam',
-          name: 'Core IAM',
+          id: 'identity',
+          name: 'Identity & Access Management',
           status: 'installed',
         },
       ]);
@@ -478,12 +476,12 @@ describe('system core api & helpers', () => {
         {
           description: 'Manage tenants',
           id: 'tenants:manage',
-          module: 'core-iam',
+          module: 'identity',
         },
         {
           description: 'Manage devices',
-          id: 'workers:devices:manage',
-          module: 'workers',
+          id: 'operon:devices:manage',
+          module: 'operon',
         },
       ];
       const roles = [
@@ -493,7 +491,7 @@ describe('system core api & helpers', () => {
           id: 'r-owner',
           is_system: true,
           name: 'owner',
-          permissions: ['tenants:manage', 'workers:devices:manage'],
+          permissions: ['tenants:manage', 'operon:devices:manage'],
         },
         {
           created_at: '2026-10-02T00:00:00Z',
@@ -501,7 +499,7 @@ describe('system core api & helpers', () => {
           id: 'r-custom',
           is_system: false,
           name: 'worker_ops',
-          permissions: ['workers:devices:manage'],
+          permissions: ['operon:devices:manage'],
         },
       ];
 
@@ -512,7 +510,7 @@ describe('system core api & helpers', () => {
         filterSystemRoles(roles, { role_type: 'custom' }, permsCatalog),
       ).toHaveLength(1);
       expect(
-        filterSystemRoles(roles, { module: 'core-iam' }, permsCatalog),
+        filterSystemRoles(roles, { module: 'identity' }, permsCatalog),
       ).toHaveLength(1);
       expect(
         filterSystemRoles(roles, { search: 'worker_ops' }, permsCatalog),
@@ -524,12 +522,12 @@ describe('system core api & helpers', () => {
         {
           description: 'Manage tenants',
           id: 'tenants:manage',
-          module: 'core-iam',
+          module: 'identity',
         },
         {
           description: 'Read devices',
-          id: 'workers:devices:read',
-          module: 'workers',
+          id: 'operon:devices:read',
+          module: 'operon',
         },
       ];
       const roles = [
@@ -539,7 +537,7 @@ describe('system core api & helpers', () => {
           id: 'r-owner',
           is_system: true,
           name: 'owner',
-          permissions: ['tenants:manage', 'workers:devices:read'],
+          permissions: ['tenants:manage', 'operon:devices:read'],
         },
         {
           created_at: '2026-10-01T00:00:00Z',
@@ -547,12 +545,12 @@ describe('system core api & helpers', () => {
           id: 'r-viewer',
           is_system: true,
           name: 'viewer',
-          permissions: ['workers:devices:read'],
+          permissions: ['operon:devices:read'],
         },
       ];
 
       expect(
-        filterSystemPermissions(perms, { module: 'core-iam' }, roles),
+        filterSystemPermissions(perms, { module: 'identity' }, roles),
       ).toHaveLength(1);
       expect(
         filterSystemPermissions(perms, { role: 'viewer' }, roles),

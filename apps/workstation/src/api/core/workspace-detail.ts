@@ -1,5 +1,6 @@
 import type { Tenant } from './tenant';
 
+import { SUPABASE_SCHEMA } from '@operon/constants';
 import { $t } from '@operon/locales';
 
 import { supabaseRequest } from './supabase-client';
@@ -254,15 +255,15 @@ export async function getWorkspaceDetail(
     ),
     supabaseRequest<any[]>(
       `/rest/v1/devices?tenant_id=eq.${encodedId}&select=id,status`,
-      { schema: 'workers' },
+      { schema: SUPABASE_SCHEMA.OPERON },
     ),
     supabaseRequest<any[]>(
       `/rest/v1/subscriptions?tenant_id=eq.${encodedId}&select=id,tenant_id,plan_id,status,current_period_start,current_period_end,cancel_at_period_end,plans:plan_id(*)`,
-      { schema: 'billing' },
+      { schema: SUPABASE_SCHEMA.BILLING },
     ),
     supabaseRequest<any[]>(
       `/rest/v1/usage_meters?tenant_id=eq.${encodedId}&select=metric_name,current_value`,
-      { schema: 'billing' },
+      { schema: SUPABASE_SCHEMA.BILLING },
     ),
   ]);
 
@@ -315,7 +316,7 @@ export async function getWorkspaceDetail(
     try {
       const freePlans = await supabaseRequest<WorkspaceSubscriptionPlan[]>(
         `/rest/v1/plans?id=eq.free&select=*`,
-        { schema: 'billing' },
+        { schema: SUPABASE_SCHEMA.BILLING },
       );
       if (freePlans && freePlans.length > 0) {
         defaultFreePlan = freePlans[0] ?? null;

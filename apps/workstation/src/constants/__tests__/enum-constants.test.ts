@@ -4,6 +4,8 @@ import {
   BROWSER_STATUS,
   BROWSER_STATUS_VALUES,
   buildEnumFilterOptions,
+  CANONICAL_PLUGIN_IDS,
+  CANONICAL_PLUGINS,
   COMMERCE_ORDER_STATUS,
   COMMERCE_ORDER_STATUS_VALUES,
   COMMERCE_PRODUCT_TYPE,
@@ -40,20 +42,29 @@ import {
 } from '../index';
 
 describe('enum & Constants SSOT (@operon/constants + #/constants)', () => {
-  it('exposes all canonical PostgREST schemas', () => {
+  it('exposes all canonical PostgREST schemas and SSOT plugins', () => {
     expect(SUPABASE_SCHEMA_VALUES).toEqual([
-      'automation',
       'billing',
-      'browsers',
-      'commerce',
       'events',
       'media',
+      'medusa',
+      'operon',
       'public',
-      'workers',
+      'secrets',
     ]);
-    expect(SUPABASE_SCHEMA.AUTOMATION).toBe('automation');
-    expect(SUPABASE_SCHEMA.COMMERCE).toBe('commerce');
-    expect(SUPABASE_SCHEMA.WORKERS).toBe('workers');
+    expect(SUPABASE_SCHEMA.OPERON).toBe('operon');
+    expect(SUPABASE_SCHEMA.MEDUSA).toBe('medusa');
+    expect(SUPABASE_SCHEMA.SECRETS).toBe('secrets');
+    expect(CANONICAL_PLUGIN_IDS).toEqual([
+      'dispatch',
+      'identity',
+      'licensing',
+      'operon',
+      'store',
+      'vault',
+    ]);
+    expect(CANONICAL_PLUGINS.OPERON).toBe('operon');
+    expect(CANONICAL_PLUGINS.IDENTITY).toBe('identity');
     expect(STORAGE_KEYS.ACTIVE_TENANT_ID).toBe('OPERON_ACTIVE_TENANT_ID');
   });
 

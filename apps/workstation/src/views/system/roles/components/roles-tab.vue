@@ -41,18 +41,6 @@ function getModuleOptions() {
     { label: $t('page.system_view.roles_module_store'), value: 'store' },
     { label: $t('page.system_view.roles_module_vault'), value: 'vault' },
     { label: $t('page.system_view.roles_module_dispatch'), value: 'dispatch' },
-    { label: $t('page.system_view.roles_module_core_iam'), value: 'core-iam' },
-    { label: $t('page.system_view.roles_module_workers'), value: 'workers' },
-    {
-      label: $t('page.system_view.roles_module_automation'),
-      value: 'automation',
-    },
-    {
-      label: $t('page.system_view.roles_module_subscriptions'),
-      value: 'subscriptions',
-    },
-    { label: $t('page.system_view.roles_module_storage'), value: 'storage' },
-    { label: $t('page.system_view.roles_module_webhooks'), value: 'webhooks' },
   ];
 }
 

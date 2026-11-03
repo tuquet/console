@@ -28,11 +28,11 @@ describe('buildSupabaseProfileHeaders', () => {
   });
 
   it('should set Accept-Profile for GET and HEAD operations on isolated schemas', () => {
-    expect(buildSupabaseProfileHeaders('workers', 'GET')).toEqual({
-      'Accept-Profile': 'workers',
+    expect(buildSupabaseProfileHeaders('operon', 'GET')).toEqual({
+      'Accept-Profile': 'operon',
     });
-    expect(buildSupabaseProfileHeaders('automation', 'head')).toEqual({
-      'Accept-Profile': 'automation',
+    expect(buildSupabaseProfileHeaders('medusa', 'head')).toEqual({
+      'Accept-Profile': 'medusa',
     });
     expect(buildSupabaseProfileHeaders('billing')).toEqual({
       'Accept-Profile': 'billing',
@@ -40,11 +40,11 @@ describe('buildSupabaseProfileHeaders', () => {
   });
 
   it('should set Content-Profile for mutating operations (POST, PATCH, DELETE, PUT)', () => {
-    expect(buildSupabaseProfileHeaders('workers', 'POST')).toEqual({
-      'Content-Profile': 'workers',
+    expect(buildSupabaseProfileHeaders('operon', 'POST')).toEqual({
+      'Content-Profile': 'operon',
     });
-    expect(buildSupabaseProfileHeaders('automation', 'PATCH')).toEqual({
-      'Content-Profile': 'automation',
+    expect(buildSupabaseProfileHeaders('secrets', 'PATCH')).toEqual({
+      'Content-Profile': 'secrets',
     });
     expect(buildSupabaseProfileHeaders('billing', 'DELETE')).toEqual({
       'Content-Profile': 'billing',

@@ -99,7 +99,7 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
     });
   });
 
-  describe('api functions with automation schema header', () => {
+  describe('api functions with operon schema header', () => {
     it('should call listWorkflows via workflow_list RPC', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
@@ -128,7 +128,7 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
       expect(result[0]?.name).toBe('Scraper Workflow');
     });
 
-    it('should call listJobs with schema automation', async () => {
+    it('should call listJobs with schema operon', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           completed_tasks: 10,
@@ -151,7 +151,7 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/jobs?select='),
-        { schema: 'automation', suppressErrorCapture: true },
+        { schema: 'operon', suppressErrorCapture: true },
       );
       expect(runs).toHaveLength(1);
       expect(runs[0]?.name).toBe('Morning Batch Run');
@@ -180,7 +180,7 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/jobs?id=eq.run-99'),
-        { schema: 'automation' },
+        { schema: 'operon' },
       );
       expect(run?.id).toBe('run-99');
     });
@@ -207,7 +207,7 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('&id=gt.10'),
-        { schema: 'automation' },
+        { schema: 'operon' },
       );
       expect(logs).toHaveLength(1);
       expect(logs[0]?.id).toBe(15);
@@ -223,7 +223,7 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
         expect.objectContaining({
           body: expect.stringContaining('"status":"cancelled"'),
           method: 'PATCH',
-          schema: 'automation',
+          schema: 'operon',
         }),
       );
     });
@@ -390,8 +390,8 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
     });
   });
 
-  describe('api functions with schema workers header', () => {
-    it('should query listDevices with workers schema', async () => {
+  describe('api functions with schema operon header', () => {
+    it('should query listDevices with operon schema', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           cpu_cores: 4,
@@ -406,13 +406,13 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/devices?select='),
-        { schema: 'workers', suppressErrorCapture: true },
+        { schema: 'operon', suppressErrorCapture: true },
       );
       expect(devices).toHaveLength(1);
       expect(devices[0]?.name).toBe('Device 1');
     });
 
-    it('should call revokeDevice with workers schema DELETE', async () => {
+    it('should call revokeDevice with operon schema DELETE', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce(undefined);
 
       await revokeDevice('dev-999');
@@ -421,12 +421,12 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
         '/rest/v1/devices?id=eq.dev-999',
         {
           method: 'DELETE',
-          schema: 'workers',
+          schema: 'operon',
         },
       );
     });
 
-    it('should query listBrowsers with workers schema', async () => {
+    it('should query listBrowsers with operon schema', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           browser_type: 'chromium',
@@ -440,12 +440,12 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/browsers?select='),
-        { schema: 'workers', suppressErrorCapture: true },
+        { schema: 'operon', suppressErrorCapture: true },
       );
       expect(browsers).toHaveLength(1);
     });
 
-    it('should query listProxies with workers schema', async () => {
+    it('should query listProxies with operon schema', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           host: '1.2.3.4',
@@ -460,7 +460,7 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
 
       expect(supabaseRequest).toHaveBeenCalledWith(
         expect.stringContaining('/rest/v1/proxies?select=*'),
-        { schema: 'workers', suppressErrorCapture: true },
+        { schema: 'operon', suppressErrorCapture: true },
       );
       expect(proxies).toHaveLength(1);
     });

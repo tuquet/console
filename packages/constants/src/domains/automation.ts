@@ -1,5 +1,5 @@
 /**
- * Workflow Definition Lifecycle Status (`automation.workflows.status`)
+ * Workflow Definition Lifecycle Status (`operon.workflows.status`)
  */
 export const WORKFLOW_STATUS = {
   ARCHIVED: 'archived',
@@ -15,7 +15,7 @@ export const WORKFLOW_STATUS_VALUES = Object.values(
 ) as readonly WorkflowStatus[];
 
 /**
- * Automation Job Execution Status (`automation.jobs.status`)
+ * Automation Job Execution Status (`operon.jobs.status`)
  */
 export const JOB_STATUS = {
   CANCELLED: 'cancelled',
@@ -34,7 +34,7 @@ export const JOB_STATUS_VALUES = Object.values(
 ) as readonly JobStatus[];
 
 /**
- * Execution Log Severity Level (`automation.execution_logs.level`)
+ * Execution Log Severity Level (`operon.execution_logs.level`)
  */
 export const LOG_LEVEL = {
   DEBUG: 'debug',
@@ -50,7 +50,7 @@ export type LogLevel = (typeof LOG_LEVEL)[keyof typeof LOG_LEVEL];
 export const LOG_LEVEL_VALUES = Object.values(LOG_LEVEL) as readonly LogLevel[];
 
 /**
- * Worker Device Operational Status (`workers.devices.status`)
+ * Worker Device Operational Status (`operon.devices.status`)
  */
 export const DEVICE_STATUS = {
   BUSY: 'busy',
@@ -67,7 +67,7 @@ export const DEVICE_STATUS_VALUES = Object.values(
 ) as readonly DeviceStatus[];
 
 /**
- * Antidetect Browser Profile Status (`workers.browsers.status`)
+ * Antidetect Browser Profile Status (`operon.browser_profiles.status`)
  */
 export const BROWSER_STATUS = {
   ERROR: 'error',
@@ -84,7 +84,7 @@ export const BROWSER_STATUS_VALUES = Object.values(
 ) as readonly BrowserStatus[];
 
 /**
- * Proxy Node Health Status (`workers.proxies.status`)
+ * Proxy Node Health Status (`operon.proxies.status`)
  */
 export const PROXY_STATUS = {
   ACTIVE: 'active',
@@ -100,7 +100,7 @@ export const PROXY_STATUS_VALUES = Object.values(
 ) as readonly ProxyStatus[];
 
 /**
- * Proxy Transport Protocol (`workers.proxies.protocol`)
+ * Proxy Transport Protocol (`operon.proxies.protocol`)
  */
 export const PROXY_PROTOCOL = {
   HTTP: 'http',

@@ -1,5 +1,5 @@
 /**
- * Digital Commerce Product Category Type (`commerce.products.product_type`)
+ * Digital Commerce Product Category Type (`medusa.products.product_type`)
  */
 export const COMMERCE_PRODUCT_TYPE = {
   DIGITAL_FILE: 'digital_file',
@@ -16,7 +16,7 @@ export const COMMERCE_PRODUCT_TYPE_VALUES = Object.values(
 ) as readonly CommerceProductType[];
 
 /**
- * Digital Commerce Product Visibility (`commerce.products.visibility`)
+ * Digital Commerce Product Visibility (`medusa.products.visibility`)
  */
 export const COMMERCE_PRODUCT_VISIBILITY = {
   HIDDEN: 'hidden',
@@ -32,7 +32,7 @@ export const COMMERCE_PRODUCT_VISIBILITY_VALUES = Object.values(
 ) as readonly CommerceProductVisibility[];
 
 /**
- * Product Variant Stock Tracking Mode (`commerce.product_variants.stock_mode`)
+ * Product Variant Stock Tracking Mode (`medusa.product_variants.stock_mode`)
  */
 export const COMMERCE_STOCK_MODE = {
   FINITE_COUNTER: 'finite_counter',
@@ -48,7 +48,7 @@ export const COMMERCE_STOCK_MODE_VALUES = Object.values(
 ) as readonly CommerceStockMode[];
 
 /**
- * Digital Commerce Order Lifecycle Status (`commerce.orders.status`)
+ * Digital Commerce Order Lifecycle Status (`medusa.orders.status`)
  */
 export const COMMERCE_ORDER_STATUS = {
   CANCELLED: 'cancelled',

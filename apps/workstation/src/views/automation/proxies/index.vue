@@ -101,7 +101,7 @@ const [Grid, gridApi] = useVbenVxeGrid<ProxyServer>({
   separator: false,
   gridClass: 'p-0',
   detailSheetOptions: {
-    resource: 'workers.proxies',
+    resource: 'operon.proxies',
     subtitleField: 'country_code',
     titleField: 'host',
   },

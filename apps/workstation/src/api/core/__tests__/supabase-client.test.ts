@@ -43,6 +43,8 @@ function createJwtWithExp(expSeconds: number): string {
 
 describe('supabase-client auth interceptor & JWT lifecycle', () => {
   beforeEach(() => {
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://mock.supabase.co');
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'mock-anon-key');
     mockAccessStore.accessToken = null;
     mockAccessStore.refreshToken = null;
     mockAccessStore.setAccessToken.mockReset();
@@ -63,6 +65,7 @@ describe('supabase-client auth interceptor & JWT lifecycle', () => {
   afterEach(() => {
     setSupabaseUnauthorizedHandler(null);
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   describe('decodeJwtPayload, isJwtTokenExpired & isUnauthorizedResponse', () => {
@@ -128,7 +131,7 @@ describe('supabase-client auth interceptor & JWT lifecycle', () => {
       vi.stubGlobal('fetch', fetchMock);
 
       const result = await supabaseRequest('/rest/v1/devices?select=*', {
-        schema: 'workers',
+        schema: 'operon',
       });
 
       expect(result).toEqual([{ id: 'dev-1', name: 'Node A' }]);
@@ -178,7 +181,7 @@ describe('supabase-client auth interceptor & JWT lifecycle', () => {
       vi.stubGlobal('fetch', fetchMock);
 
       const data = await supabaseRequest('/rest/v1/devices?select=*', {
-        schema: 'workers',
+        schema: 'operon',
       });
 
       expect(data).toEqual([{ id: 'dev-2' }]);
@@ -200,7 +203,7 @@ describe('supabase-client auth interceptor & JWT lifecycle', () => {
       vi.stubGlobal('fetch', fetchMock);
 
       await expect(
-        supabaseRequest('/rest/v1/devices?select=*', { schema: 'workers' }),
+        supabaseRequest('/rest/v1/devices?select=*', { schema: 'operon' }),
       ).rejects.toMatchObject({
         isAuthError: true,
         message: 'JWT expired',
@@ -250,7 +253,7 @@ describe('supabase-client auth interceptor & JWT lifecycle', () => {
       vi.stubGlobal('fetch', fetchMock);
 
       await expect(
-        supabaseRequest('/rest/v1/devices?select=*', { schema: 'workers' }),
+        supabaseRequest('/rest/v1/devices?select=*', { schema: 'operon' }),
       ).rejects.toMatchObject({
         isAuthError: true,
         message: 'JWT expired',
@@ -325,7 +328,7 @@ describe('supabase-client auth interceptor & JWT lifecycle', () => {
 
       await expect(
         supabaseRequest('/rest/v1/devices?select=*', {
-          schema: 'workers',
+          schema: 'operon',
           suppressErrorCapture: true,
         }),
       ).rejects.toThrow('Invalid schema: runners');

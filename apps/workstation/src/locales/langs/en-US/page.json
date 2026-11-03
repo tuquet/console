@@ -468,12 +468,6 @@
     "roles_module_store": "Store",
     "roles_module_vault": "Vault",
     "roles_module_dispatch": "Dispatch",
-    "roles_module_core_iam": "Core IAM",
-    "roles_module_workers": "Workers",
-    "roles_module_automa": "Automa",
-    "roles_module_subscriptions": "Subscriptions",
-    "roles_module_storage": "Storage",
-    "roles_module_webhooks": "Webhooks",
     "roles_col_policy_desc": "Description",
     "roles_col_assigned_perms": "Permissions",
     "roles_col_module": "Module",
@@ -546,8 +540,7 @@
     "overview_recent_audit": "Recent audit events",
     "overview_recent_subs": "Recent subscriptions",
     "overview_audit_empty": "No audit events yet",
-    "overview_subs_empty": "No subscriptions yet",
-    "roles_module_automation": "Automation"
+    "overview_subs_empty": "No subscriptions yet"
   },
   "commerce_view": {
     "account_list_label": "account list",

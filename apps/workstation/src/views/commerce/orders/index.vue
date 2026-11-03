@@ -173,7 +173,7 @@ function getColumns() {
 const [Grid, gridApi] = useVbenVxeGrid<CommerceOrder>({
   separator: false,
   detailSheetOptions: {
-    resource: 'commerce.orders',
+    resource: 'medusa.orders',
     subtitleField: 'payment_method',
     titleField: 'order_code',
   },

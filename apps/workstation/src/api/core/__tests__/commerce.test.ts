@@ -21,8 +21,16 @@ vi.mock('../supabase-client', () => ({
 }));
 
 describe('commerce core api (digital-commerce)', () => {
+  const store = new Map<string, string>();
   beforeEach(() => {
     vi.clearAllMocks();
+    store.clear();
+    vi.stubGlobal('localStorage', {
+      clear: () => store.clear(),
+      getItem: (key: string) => store.get(key) ?? null,
+      removeItem: (key: string) => store.delete(key),
+      setItem: (key: string, val: string) => store.set(key, String(val)),
+    });
   });
 
   describe('mapRawProductVariant & mapRawCommerceProduct', () => {
@@ -90,7 +98,7 @@ describe('commerce core api (digital-commerce)', () => {
   });
 
   describe('listCommerceCategories & listCommerceProducts', () => {
-    it('fetches active categories and products from schema commerce', async () => {
+    it('fetches active categories and products from schema medusa', async () => {
       vi.mocked(supabaseRequest).mockResolvedValueOnce([
         {
           created_at: '2026-10-14T00:00:00Z',
@@ -110,7 +118,7 @@ describe('commerce core api (digital-commerce)', () => {
         '/rest/v1/categories?is_active=eq.true&select=*&order=sort_order.asc,name.asc',
         {
           method: 'GET',
-          schema: 'commerce',
+          schema: 'medusa',
           skipAuth: true,
         },
       );
@@ -126,7 +134,7 @@ describe('commerce core api (digital-commerce)', () => {
         '/rest/v1/products?is_active=eq.true&category_id=eq.cat-1&product_type=eq.serial_stock&select=*,product_variants(*)&order=sort_order.asc,created_at.desc',
         {
           method: 'GET',
-          schema: 'commerce',
+          schema: 'medusa',
           skipAuth: undefined,
         },
       );
@@ -214,7 +222,7 @@ describe('commerce core api (digital-commerce)', () => {
             _payment_method: 'internal_wallet',
           }),
           method: 'POST',
-          schema: 'commerce',
+          schema: 'medusa',
           skipAuth: undefined,
         },
       );
@@ -290,7 +298,7 @@ describe('commerce core api (digital-commerce)', () => {
             _order_code: 'ORD-261014-GUEST1',
           }),
           method: 'POST',
-          schema: 'commerce',
+          schema: 'medusa',
           skipAuth: true,
         },
       );
@@ -499,7 +507,7 @@ describe('commerce core api (digital-commerce)', () => {
             _reason: 'Proxy dead on arrival',
           }),
           method: 'POST',
-          schema: 'commerce',
+          schema: 'medusa',
         },
       );
 
@@ -534,7 +542,7 @@ describe('commerce core api (digital-commerce)', () => {
             _stock_id: 'stk-100',
           }),
           method: 'POST',
-          schema: 'commerce',
+          schema: 'medusa',
         },
       );
 
@@ -572,7 +580,7 @@ describe('commerce core api (digital-commerce)', () => {
         '/rest/v1/stock_items?select=*&order=created_at.desc&variant_id=eq.var-1&status=eq.available&limit=50',
         {
           method: 'GET',
-          schema: 'commerce',
+          schema: 'medusa',
         },
       );
 

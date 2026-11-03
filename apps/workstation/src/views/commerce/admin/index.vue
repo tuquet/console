@@ -198,7 +198,7 @@ function getProductColumns() {
 const [ProductsGrid, productsGridApi] = useVbenVxeGrid<CommerceProduct>({
   separator: false,
   detailSheetOptions: {
-    resource: 'commerce.products',
+    resource: 'medusa.products',
     subtitleField: 'slug',
     titleField: 'name',
   },
@@ -368,7 +368,7 @@ function getOrderColumns() {
 const [OrdersGrid, ordersGridApi] = useVbenVxeGrid<CommerceOrder>({
   separator: false,
   detailSheetOptions: {
-    resource: 'commerce.orders',
+    resource: 'medusa.orders',
     subtitleField: 'buyer_email',
     titleField: 'order_code',
   },
