@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "local(console): <web> dev",
+      "label": "local: <web> dev",
       "type": "shell",
       "command": "pnpm",
       "args": ["-F", "@operon/workstation", "dev"],
@@ -19,7 +19,7 @@
       "problemMatcher": []
     },
     {
-      "label": "local(console): <tauri> dev",
+      "label": "local: <tauri> dev",
       "type": "shell",
       "command": "pnpm",
       "args": ["-F", "@operon/workstation", "tauri:dev"],
@@ -32,7 +32,7 @@
       "problemMatcher": []
     },
     {
-      "label": "local(console): <web> build",
+      "label": "local: <web> build",
       "type": "shell",
       "command": "pnpm",
       "args": ["-F", "@operon/workstation", "build"],
