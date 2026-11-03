@@ -32,6 +32,18 @@
       "problemMatcher": []
     },
     {
+      "label": "local: <web> check",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "check:type"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": ["$tsc"]
+    },
+    {
       "label": "local: <web> build",
       "type": "shell",
       "command": "pnpm",
