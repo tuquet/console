@@ -1,0 +1,47 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "local(console): <web> dev",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["-F", "@operon/workstation", "dev"],
+      "isBackground": true,
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "local(console): <tauri> dev",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["-F", "@operon/workstation", "tauri:dev"],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "local(console): <web> build",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["-F", "@operon/workstation", "build"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}
