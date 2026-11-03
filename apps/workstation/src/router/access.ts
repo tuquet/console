@@ -8,12 +8,13 @@ import { preferences } from '@operon/preferences';
 
 import { toast } from '@operon-core/shadcn-ui';
 
-import { isTauriEnvironment } from '#/adapter/desktop';
 import { getAllMenusApi } from '#/api';
 import { listInstalledPlugins } from '#/api/core/access';
 import { BasicLayout, IFrameView } from '#/layouts';
 import { $t } from '#/locales';
+import { getPlatform, isDesktop } from '#/utils/platform';
 
+import { filterRoutesByPlatform } from './platform-gate';
 import { filterRoutesByPlugins } from './plugin-gate';
 
 const forbiddenComponent = () => import('#/views/_core/fallback/forbidden.vue');
@@ -26,9 +27,10 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
     IFrameView,
   };
 
-  const isDesktop = isTauriEnvironment();
+  const platform = getPlatform();
+  const isDesktopMode = isDesktop();
   // Canonical plugins: In desktop (Tauri) local-first mode, identity, operon, and vault are always active
-  let installedPlugins: string[] = isDesktop
+  let installedPlugins: string[] = isDesktopMode
     ? ['identity', 'operon', 'vault']
     : ['identity'];
 
@@ -44,8 +46,15 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
     );
   }
 
-  const filteredRoutes = filterRoutesByPlugins(
+  // 1. Filter route tree by active platform (desktop vs web)
+  const platformFilteredRoutes = filterRoutesByPlatform(
     options.routes,
+    platform,
+  );
+
+  // 2. Filter remaining routes by installed plugins
+  const filteredRoutes = filterRoutesByPlugins(
+    platformFilteredRoutes,
     installedPlugins,
   );
 

@@ -13,6 +13,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       icon: 'lucide:key-round',
       order: 40,
+      platform: 'all',
       plugin: 'vault',
       title: $t('page.secrets.title'),
     },

@@ -8,6 +8,7 @@ const routes: RouteRecordRaw[] = [
       hideChildrenInMenu: true,
       icon: 'lucide:layout-dashboard',
       order: -1,
+      platform: 'web',
       plugin: 'identity',
       title: $t('page.dashboard.title'),
     },

@@ -3,15 +3,9 @@
  * Safe abstractions over Tauri v2 APIs with zero-crash web browser fallbacks.
  */
 
-/**
- * Checks if the current runtime environment is a Tauri Desktop Webview.
- */
-export function isTauriEnvironment(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    ('__TAURI_INTERNALS__' in window || '__TAURI__' in window)
-  );
-}
+import { isTauriEnvironment } from '#/utils/platform';
+
+export { isTauriEnvironment };
 
 /**
  * Minimizes the native window.

@@ -5,7 +5,6 @@ import { preferences } from '@operon/preferences';
 import { useAccessStore, useUserStore } from '@operon/stores';
 import { startProgress, stopProgress } from '@operon/utils';
 
-import { isTauriEnvironment } from '#/adapter/desktop';
 import {
   isJwtTokenExpired,
   setSupabaseUnauthorizedHandler,
@@ -13,6 +12,7 @@ import {
 } from '#/api';
 import { accessRoutes, coreRouteNames } from '#/router/routes';
 import { useAuthStore } from '#/store';
+import { isDesktop } from '#/utils/platform';
 import { sanitizeRedirectPath } from '#/utils/security';
 
 import { generateAccess } from './access';
@@ -55,7 +55,7 @@ function setupAccessGuard(router: Router) {
     const accessStore = useAccessStore();
     const userStore = useUserStore();
     const authStore = useAuthStore();
-    const isDesktop = isTauriEnvironment();
+    const isDesktopMode = isDesktop();
 
     // If an accessToken exists but its JWT exp has passed, attempt silent refresh first
     if (accessStore.accessToken && isJwtTokenExpired(accessStore.accessToken)) {
@@ -80,7 +80,7 @@ function setupAccessGuard(router: Router) {
             : defaultHome;
           return redirectTarget;
         }
-        if (isDesktop) {
+        if (isDesktopMode) {
           // In desktop local-first mode, avoid locking into full login page; navigate to default home
           accessStore.setLoginExpired(true);
           return preferences.app.defaultHomePath;
@@ -97,7 +97,7 @@ function setupAccessGuard(router: Router) {
       }
 
       // Desktop local-first mode: unauthenticated users are Local Operators
-      if (isDesktop) {
+      if (isDesktopMode) {
         if (!accessStore.isAccessChecked) {
           if (!userStore.userInfo) {
             userStore.setUserInfo({
@@ -128,6 +128,11 @@ function setupAccessGuard(router: Router) {
         // Cloud-only features on Desktop trigger optional login modal
         const requiresCloud = Boolean(
           (to.meta as undefined | { requiresCloud?: boolean })?.requiresCloud ||
+          to.matched.some(
+            (record) =>
+              (record.meta as undefined | { requiresCloud?: boolean })
+                ?.requiresCloud,
+          ) ||
           to.path.startsWith('/system') ||
           to.path.startsWith('/tenants') ||
           to.path.startsWith('/commerce'),

@@ -8,6 +8,7 @@ const routes: RouteRecordRaw[] = [
       icon: 'lucide:shield-check',
       order: 30,
       plugin: 'identity',
+      requiresCloud: true,
       title: $t('page.system.title'),
     },
     name: 'System',

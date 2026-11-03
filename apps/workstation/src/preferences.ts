@@ -1,6 +1,6 @@
 import { defineOverridesPreferences } from '@operon/preferences';
 
-import { isTauriEnvironment } from '#/adapter/desktop';
+import { isDesktop } from '#/utils/platform';
 
 /**
  * @description Project preferences configuration
@@ -10,13 +10,13 @@ import { isTauriEnvironment } from '#/adapter/desktop';
 export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
-    defaultHomePath: isTauriEnvironment()
+    defaultHomePath: isDesktop()
       ? '/automation/overview'
       : '/dashboard/analytics',
     enablePreferences: true,
     enableRefreshToken: true,
     locale: 'en-US',
-    loginExpiredMode: 'modal',
+    loginExpiredMode: isDesktop() ? 'modal' : 'page',
     name: 'Operon',
     preferencesButtonPosition: 'header',
     authPageLayout: 'panel-right',
