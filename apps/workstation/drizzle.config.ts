@@ -5,16 +5,36 @@ import process from 'node:process';
 
 import { defineConfig } from 'drizzle-kit';
 
-// Default path points to Operon Core local SQLite database (~/.operon/automation/automation.sqlite)
-const defaultDbDir = path.join(os.homedir(), '.operon', 'automation');
-const defaultDbPath = path.join(defaultDbDir, 'automation.sqlite');
+/**
+ * Operon Local Database SSOT Resolver
+ * Canonical location: ~/.operon/data/operon.sqlite
+ * Graceful fallback: copies legacy ~/.operon/automation/automation.sqlite if present.
+ */
+const operonHome = path.join(os.homedir(), '.operon');
+const dataDir = path.join(operonHome, 'data');
+const canonicalDbPath = path.join(dataDir, 'operon.sqlite');
 
-if (!fs.existsSync(defaultDbDir)) {
-  fs.mkdirSync(defaultDbDir, { recursive: true });
+const legacyDir = path.join(operonHome, 'automation');
+const legacyDbPath = path.join(legacyDir, 'automation.sqlite');
+
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+// Graceful auto-migration from legacy path
+if (!fs.existsSync(canonicalDbPath) && fs.existsSync(legacyDbPath)) {
+  try {
+    fs.copyFileSync(legacyDbPath, canonicalDbPath);
+  } catch (error) {
+    console.warn(
+      '[Drizzle Config] Warning: failed to auto-migrate legacy database:',
+      error,
+    );
+  }
 }
 
 // Ensure valid file: URI format across OS platforms (especially Windows)
-const fileUrl = `file:${defaultDbPath.replaceAll('\\', '/')}`;
+const fileUrl = `file:${canonicalDbPath.replaceAll('\\', '/')}`;
 
 export default defineConfig({
   schema: './src/db/schema.ts',
