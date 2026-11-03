@@ -1,5 +1,7 @@
 import { defineOverridesPreferences } from '@operon/preferences';
 
+import { isTauriEnvironment } from '#/adapter/desktop';
+
 /**
  * @description Project preferences configuration
  * Only override necessary configurations; omitted options will automatically fallback to default values.
@@ -8,7 +10,9 @@ import { defineOverridesPreferences } from '@operon/preferences';
 export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
-    defaultHomePath: '/dashboard/analytics',
+    defaultHomePath: isTauriEnvironment()
+      ? '/automation/overview'
+      : '/dashboard/analytics',
     enablePreferences: true,
     enableRefreshToken: true,
     locale: 'en-US',

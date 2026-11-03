@@ -1671,7 +1671,7 @@ export const SUPABASE_TABLE_REGISTRY: Record<
         type: 'text',
       },
       module: {
-        defaultValue: 'core-iam',
+        defaultValue: 'identity',
         editable: true,
         field: 'module',
         labelKey: 'common.module',

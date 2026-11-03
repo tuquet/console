@@ -32,6 +32,30 @@
       "problemMatcher": []
     },
     {
+      "label": "local: <tauri> check",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "tauri:check"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "local: <tauri> build:exe",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["-F", "@operon/workstation", "tauri:build:exe"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "local: <web> check",
       "type": "shell",
       "command": "pnpm",
@@ -42,6 +66,22 @@
         "clear": true
       },
       "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "local: <web> test",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "test:unit"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
     },
     {
       "label": "local: <web> build",

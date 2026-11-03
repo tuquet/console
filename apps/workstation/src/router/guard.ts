@@ -5,6 +5,7 @@ import { preferences } from '@operon/preferences';
 import { useAccessStore, useUserStore } from '@operon/stores';
 import { startProgress, stopProgress } from '@operon/utils';
 
+import { isTauriEnvironment } from '#/adapter/desktop';
 import {
   isJwtTokenExpired,
   setSupabaseUnauthorizedHandler,
@@ -54,6 +55,7 @@ function setupAccessGuard(router: Router) {
     const accessStore = useAccessStore();
     const userStore = useUserStore();
     const authStore = useAuthStore();
+    const isDesktop = isTauriEnvironment();
 
     // If an accessToken exists but its JWT exp has passed, attempt silent refresh first
     if (accessStore.accessToken && isJwtTokenExpired(accessStore.accessToken)) {
@@ -68,14 +70,21 @@ function setupAccessGuard(router: Router) {
 
     // Core routes bypass access interceptor
     if (coreRouteNames.includes(to.name as string)) {
-      if (to.path === LOGIN_PATH && accessStore.accessToken) {
-        const rawRedirect = to.query?.redirect as string | undefined;
-        const defaultHome =
-          userStore.userInfo?.homePath || preferences.app.defaultHomePath;
-        const redirectTarget = rawRedirect
-          ? sanitizeRedirectPath(rawRedirect, defaultHome)
-          : defaultHome;
-        return redirectTarget;
+      if (to.path === LOGIN_PATH) {
+        if (accessStore.accessToken) {
+          const rawRedirect = to.query?.redirect as string | undefined;
+          const defaultHome =
+            userStore.userInfo?.homePath || preferences.app.defaultHomePath;
+          const redirectTarget = rawRedirect
+            ? sanitizeRedirectPath(rawRedirect, defaultHome)
+            : defaultHome;
+          return redirectTarget;
+        }
+        if (isDesktop) {
+          // In desktop local-first mode, avoid locking into full login page; navigate to default home
+          accessStore.setLoginExpired(true);
+          return preferences.app.defaultHomePath;
+        }
       }
       return true;
     }
@@ -87,6 +96,50 @@ function setupAccessGuard(router: Router) {
         return true;
       }
 
+      // Desktop local-first mode: unauthenticated users are Local Operators
+      if (isDesktop) {
+        if (!accessStore.isAccessChecked) {
+          if (!userStore.userInfo) {
+            userStore.setUserInfo({
+              avatar: preferences.app.defaultAvatar || '',
+              homePath: '/automation/overview',
+              realName: 'Local Operator',
+              roles: ['local_operator', 'superadmin'],
+              userId: 'local-operator',
+              username: 'operator',
+            });
+          }
+          const { accessibleMenus, accessibleRoutes } = await generateAccess({
+            roles: ['local_operator', 'superadmin'],
+            router,
+            routes: accessRoutes,
+          });
+          accessStore.setAccessMenus(accessibleMenus);
+          accessStore.setAccessRoutes(accessibleRoutes);
+          accessStore.setIsAccessChecked(true);
+
+          const targetPath =
+            to.path === '/' || to.path === LOGIN_PATH
+              ? preferences.app.defaultHomePath
+              : to.fullPath;
+          return { ...router.resolve(targetPath), replace: true };
+        }
+
+        // Cloud-only features on Desktop trigger optional login modal
+        const requiresCloud = Boolean(
+          (to.meta as undefined | { requiresCloud?: boolean })?.requiresCloud ||
+          to.path.startsWith('/system') ||
+          to.path.startsWith('/tenants') ||
+          to.path.startsWith('/commerce'),
+        );
+        if (requiresCloud) {
+          accessStore.setLoginExpired(true);
+          return false;
+        }
+
+        return true;
+      }
+
       if (
         preferences.app.loginExpiredMode === 'modal' &&
         accessStore.isAccessChecked
@@ -95,7 +148,7 @@ function setupAccessGuard(router: Router) {
         return false;
       }
 
-      // Unauthorized: redirect to login page
+      // Unauthorized on Web: redirect to login page
       if (to.fullPath !== LOGIN_PATH) {
         return {
           path: LOGIN_PATH,

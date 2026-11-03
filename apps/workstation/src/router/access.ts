@@ -8,6 +8,7 @@ import { preferences } from '@operon/preferences';
 
 import { toast } from '@operon-core/shadcn-ui';
 
+import { isTauriEnvironment } from '#/adapter/desktop';
 import { getAllMenusApi } from '#/api';
 import { listInstalledPlugins } from '#/api/core/access';
 import { BasicLayout, IFrameView } from '#/layouts';
@@ -25,15 +26,20 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
     IFrameView,
   };
 
-  let installedPlugins: string[] = ['core-iam'];
+  const isDesktop = isTauriEnvironment();
+  // Canonical plugins: In desktop (Tauri) local-first mode, identity, operon, and vault are always active
+  let installedPlugins: string[] = isDesktop
+    ? ['identity', 'operon', 'vault']
+    : ['identity'];
+
   try {
     const fetched = await listInstalledPlugins();
     if (fetched && fetched.length > 0) {
-      installedPlugins = fetched;
+      installedPlugins = [...new Set([...installedPlugins, ...fetched])];
     }
   } catch (error) {
     console.warn(
-      'Failed to load installed plugins, defaulting to core-iam:',
+      `Failed to load installed plugins from cloud, defaulting to [${installedPlugins.join(', ')}]:`,
       error,
     );
   }

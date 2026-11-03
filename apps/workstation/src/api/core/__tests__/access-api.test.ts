@@ -125,12 +125,12 @@ describe('listInstalledPlugins', () => {
 
   it('should return installed plugin IDs from system_plugins table', async () => {
     vi.spyOn(supabaseClient, 'supabaseRequest').mockResolvedValueOnce([
-      { id: 'core-iam' },
-      { id: 'workers' },
-      { id: 'automation' },
+      { id: 'identity' },
+      { id: 'operon' },
+      { id: 'licensing' },
     ]);
 
     const plugins = await listInstalledPlugins();
-    expect(plugins).toEqual(['core-iam', 'workers', 'automation']);
+    expect(plugins).toEqual(['identity', 'operon', 'licensing']);
   });
 });

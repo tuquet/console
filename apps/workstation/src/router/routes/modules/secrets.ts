@@ -13,6 +13,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       icon: 'lucide:key-round',
       order: 40,
+      plugin: 'vault',
       title: $t('page.secrets.title'),
     },
     name: 'Secrets',
@@ -24,9 +25,13 @@ const routes: RouteRecordRaw[] = [
         path: 'credentials',
         component: () => import('#/views/secrets/credentials/index.vue'),
         meta: {
-          authority: ['superadmin', 'secrets:credentials:read'],
+          authority: [
+            'superadmin',
+            'local_operator',
+            'secrets:credentials:read',
+          ],
           icon: 'lucide:key-round',
-          plugin: 'secrets',
+          plugin: 'vault',
           title: $t('page.secrets.credentials'),
         },
       },

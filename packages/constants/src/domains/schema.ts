@@ -8,7 +8,10 @@ export const SUPABASE_SCHEMA = {
   COMMERCE: 'commerce',
   EVENTS: 'events',
   MEDIA: 'media',
+  MEDUSA: 'medusa',
+  OPERON: 'operon',
   PUBLIC: 'public',
+  SECRETS: 'secrets',
   WORKERS: 'workers',
 } as const;
 
@@ -18,6 +21,25 @@ export type SupabaseSchema =
 export const SUPABASE_SCHEMA_VALUES = Object.values(
   SUPABASE_SCHEMA,
 ) as readonly SupabaseSchema[];
+
+/**
+ * Canonical Plugin IDs (matching id/supabase/plugins and system_plugins.id)
+ */
+export const CANONICAL_PLUGINS = {
+  DISPATCH: 'dispatch',
+  IDENTITY: 'identity',
+  LICENSING: 'licensing',
+  OPERON: 'operon',
+  STORE: 'store',
+  VAULT: 'vault',
+} as const;
+
+export type CanonicalPluginId =
+  (typeof CANONICAL_PLUGINS)[keyof typeof CANONICAL_PLUGINS];
+
+export const CANONICAL_PLUGIN_IDS = Object.values(
+  CANONICAL_PLUGINS,
+) as readonly CanonicalPluginId[];
 
 /**
  * Canonical Browser LocalStorage Keys for Admin

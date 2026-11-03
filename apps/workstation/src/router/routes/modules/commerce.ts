@@ -7,6 +7,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       icon: 'lucide:shopping-bag',
       order: 25,
+      plugin: 'store',
       title: $t('page.commerce.title'),
     },
     name: 'Commerce',
@@ -20,7 +21,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           authority: ['superadmin', 'commerce:read'],
           icon: 'lucide:store',
-          plugin: 'commerce',
+          plugin: 'store',
           title: $t('page.commerce.store'),
         },
       },
@@ -31,7 +32,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           authority: ['superadmin', 'commerce:read'],
           icon: 'lucide:package-check',
-          plugin: 'commerce',
+          plugin: 'store',
           title: $t('page.commerce.orders'),
         },
       },
@@ -42,7 +43,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           authority: ['superadmin', 'commerce:manage'],
           icon: 'lucide:sliders-horizontal',
-          plugin: 'commerce',
+          plugin: 'store',
           title: $t('page.commerce.admin'),
         },
       },

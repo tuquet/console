@@ -9,7 +9,7 @@ const routes: RouteRecordRaw[] = [
       hideChildrenInMenu: true,
       icon: 'lucide:wallet',
       order: 26,
-      plugin: 'subscriptions',
+      plugin: 'licensing',
       title: $t('page.commerce.wallet'),
     },
     name: 'WalletRoot',

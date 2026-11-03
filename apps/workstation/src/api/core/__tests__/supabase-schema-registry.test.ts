@@ -230,10 +230,10 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
 
   it('locks core plugin status field while keeping name/description editable for superadmin', () => {
     const corePluginRow = {
-      description: 'Core IAM',
-      id: 'core-iam',
+      description: 'Identity & Organizations',
+      id: 'identity',
       is_core: true,
-      name: 'Core IAM',
+      name: 'Identity',
       status: 'installed',
       version: '1.0.0',
     };
@@ -465,7 +465,7 @@ describe('supabase-schema-registry — Enterprise Dynamic Schema & RLS Engine', 
       'module',
       'description',
     ]);
-    expect(permCreate.initialData.module).toBe('core-iam');
+    expect(permCreate.initialData.module).toBe('identity');
 
     // Append-only ledgers deny canInsert
     const auditCreate = buildDynamicVxeCreateSchema({

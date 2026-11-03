@@ -13,9 +13,9 @@ vi.mock('#/locales', () => ({
 
 describe('filterRoutesByPlugins', () => {
   it('should return empty array for empty routes input', () => {
-    expect(filterRoutesByPlugins([], ['core-iam'])).toEqual([]);
+    expect(filterRoutesByPlugins([], ['identity'])).toEqual([]);
     expect(
-      filterRoutesByPlugins(null as unknown as RouteRecordRaw[], ['core-iam']),
+      filterRoutesByPlugins(null as unknown as RouteRecordRaw[], ['identity']),
     ).toEqual([]);
   });
 
@@ -33,7 +33,7 @@ describe('filterRoutesByPlugins', () => {
       } as unknown as RouteRecordRaw,
     ];
 
-    const result = filterRoutesByPlugins(routes, ['core-iam']);
+    const result = filterRoutesByPlugins(routes, ['identity']);
     expect(result).toHaveLength(1);
     expect(result[0]?.name).toBe('Dashboard');
     expect(result[0]?.children).toHaveLength(1);
@@ -44,7 +44,7 @@ describe('filterRoutesByPlugins', () => {
       {
         path: '/automation',
         name: 'Automation',
-        meta: { plugin: 'workers' },
+        meta: { plugin: 'operon' },
         children: [
           {
             path: 'devices',
@@ -54,7 +54,7 @@ describe('filterRoutesByPlugins', () => {
       } as unknown as RouteRecordRaw,
     ];
 
-    const result = filterRoutesByPlugins(routes, ['core-iam', 'workers']);
+    const result = filterRoutesByPlugins(routes, ['identity', 'operon']);
     expect(result).toHaveLength(1);
     expect(result[0]?.name).toBe('Automation');
     expect(result[0]?.children).toHaveLength(1);
@@ -65,7 +65,7 @@ describe('filterRoutesByPlugins', () => {
       {
         path: '/automation',
         name: 'Automation',
-        meta: { plugin: 'automation' },
+        meta: { plugin: 'operon' },
         children: [
           {
             path: 'workflows',
@@ -75,7 +75,7 @@ describe('filterRoutesByPlugins', () => {
       } as unknown as RouteRecordRaw,
     ];
 
-    const result = filterRoutesByPlugins(routes, ['core-iam', 'workers']);
+    const result = filterRoutesByPlugins(routes, ['identity']);
     expect(result).toHaveLength(0);
   });
 
@@ -84,36 +84,36 @@ describe('filterRoutesByPlugins', () => {
       {
         path: '/system',
         name: 'System',
-        meta: { plugin: 'core-iam' },
+        meta: { plugin: 'identity' },
         children: [
           {
             path: 'plugins',
             name: 'Plugins',
-            meta: { plugin: 'core-iam' },
+            meta: { plugin: 'identity' },
           },
           {
             path: 'plans',
             name: 'Plans',
-            meta: { plugin: 'subscriptions' },
+            meta: { plugin: 'licensing' },
           },
         ],
       } as unknown as RouteRecordRaw,
     ];
 
-    // Case 1: subscriptions is NOT installed
-    const withoutSubs = filterRoutesByPlugins(routes, ['core-iam']);
-    expect(withoutSubs).toHaveLength(1);
-    expect(withoutSubs[0]?.children).toHaveLength(1);
-    expect(withoutSubs[0]?.children?.[0]?.name).toBe('Plugins');
+    // Case 1: licensing is NOT installed
+    const withoutLicensing = filterRoutesByPlugins(routes, ['identity']);
+    expect(withoutLicensing).toHaveLength(1);
+    expect(withoutLicensing[0]?.children).toHaveLength(1);
+    expect(withoutLicensing[0]?.children?.[0]?.name).toBe('Plugins');
 
-    // Case 2: subscriptions IS installed
-    const withSubs = filterRoutesByPlugins(routes, [
-      'core-iam',
-      'subscriptions',
+    // Case 2: licensing IS installed
+    const withLicensing = filterRoutesByPlugins(routes, [
+      'identity',
+      'licensing',
     ]);
-    expect(withSubs).toHaveLength(1);
-    expect(withSubs[0]?.children).toHaveLength(2);
-    expect(withSubs[0]?.children?.[1]?.name).toBe('Plans');
+    expect(withLicensing).toHaveLength(1);
+    expect(withLicensing[0]?.children).toHaveLength(2);
+    expect(withLicensing[0]?.children?.[1]?.name).toBe('Plans');
   });
 
   it('should prune parent route if it has no component and all its children were filtered out', () => {
@@ -126,13 +126,13 @@ describe('filterRoutesByPlugins', () => {
           {
             path: 'plans',
             name: 'Plans',
-            meta: { plugin: 'subscriptions' },
+            meta: { plugin: 'licensing' },
           },
         ],
       } as unknown as RouteRecordRaw,
     ];
 
-    const result = filterRoutesByPlugins(routes, ['core-iam']);
+    const result = filterRoutesByPlugins(routes, ['identity']);
     expect(result).toHaveLength(0);
   });
 
@@ -152,68 +152,57 @@ describe('filterRoutesByPlugins', () => {
       } as unknown as RouteRecordRaw,
     ];
 
-    const result = filterRoutesByPlugins(routes, ['core-iam']);
+    const result = filterRoutesByPlugins(routes, ['identity']);
     expect(result).toHaveLength(1);
     expect(result[0]?.name).toBe('Standalone');
     expect(result[0]?.children).toHaveLength(0);
   });
 
-  it('should gate automation and workers child routes independently inside consolidated /automation module', () => {
-    const onlyAutomation = filterRoutesByPlugins(automationRoutes, [
-      'core-iam',
-      'automation',
+  it('should gate operon child routes inside unified /automation module', () => {
+    const withOperon = filterRoutesByPlugins(automationRoutes, [
+      'identity',
+      'operon',
     ]);
-    expect(onlyAutomation).toHaveLength(1);
-    expect(onlyAutomation[0]?.children?.map((c) => c.name)).toEqual([
+    expect(withOperon).toHaveLength(1);
+    expect(withOperon[0]?.children?.map((c) => c.name)).toEqual([
       'AutomationOverview',
       'AutomationWorkflows',
       'AutomationJobs',
-      'AutomationJobDetail',
-    ]);
-
-    const onlyWorkers = filterRoutesByPlugins(automationRoutes, [
-      'core-iam',
-      'workers',
-    ]);
-    expect(onlyWorkers).toHaveLength(1);
-    expect(onlyWorkers[0]?.children?.map((c) => c.name)).toEqual([
-      'AutomationOverview',
       'AutomationDevices',
       'AutomationBrowsers',
       'AutomationProxies',
+      'AutomationJobDetail',
     ]);
 
-    const neitherInstalled = filterRoutesByPlugins(automationRoutes, [
-      'core-iam',
-    ]);
-    expect(neitherInstalled).toHaveLength(0);
+    const withoutOperon = filterRoutesByPlugins(automationRoutes, ['identity']);
+    expect(withoutOperon).toHaveLength(0);
   });
 
-  it('should gate commerce child routes inside /commerce module', () => {
-    const bothInstalled = filterRoutesByPlugins(commerceRoutes, [
-      'core-iam',
-      'commerce',
+  it('should gate store child routes inside /commerce module', () => {
+    const withStore = filterRoutesByPlugins(commerceRoutes, [
+      'identity',
+      'store',
     ]);
-    expect(bothInstalled).toHaveLength(1);
-    expect(bothInstalled[0]?.children?.map((c) => c.name)).toEqual([
+    expect(withStore).toHaveLength(1);
+    expect(withStore[0]?.children?.map((c) => c.name)).toEqual([
       'CommerceStore',
       'CommerceOrders',
       'CommerceAdmin',
     ]);
 
-    const notInstalled = filterRoutesByPlugins(commerceRoutes, ['core-iam']);
+    const notInstalled = filterRoutesByPlugins(commerceRoutes, ['identity']);
     expect(notInstalled).toHaveLength(0);
   });
 
-  it('should gate subscriptions for wallet module', () => {
+  it('should gate licensing for wallet module', () => {
     const installed = filterRoutesByPlugins(walletRoutes, [
-      'core-iam',
-      'subscriptions',
+      'identity',
+      'licensing',
     ]);
     expect(installed).toHaveLength(1);
     expect(installed[0]?.name).toBe('WalletRoot');
 
-    const notInstalled = filterRoutesByPlugins(walletRoutes, ['core-iam']);
+    const notInstalled = filterRoutesByPlugins(walletRoutes, ['identity']);
     expect(notInstalled).toHaveLength(0);
   });
 });

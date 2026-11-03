@@ -32,6 +32,15 @@ const { isMobile } = usePreferences();
 function getModuleOptions() {
   return [
     { label: $t('page.system_view.roles_module_all'), value: 'all' },
+    { label: $t('page.system_view.roles_module_identity'), value: 'identity' },
+    { label: $t('page.system_view.roles_module_operon'), value: 'operon' },
+    {
+      label: $t('page.system_view.roles_module_licensing'),
+      value: 'licensing',
+    },
+    { label: $t('page.system_view.roles_module_store'), value: 'store' },
+    { label: $t('page.system_view.roles_module_vault'), value: 'vault' },
+    { label: $t('page.system_view.roles_module_dispatch'), value: 'dispatch' },
     { label: $t('page.system_view.roles_module_core_iam'), value: 'core-iam' },
     { label: $t('page.system_view.roles_module_workers'), value: 'workers' },
     {

@@ -7,7 +7,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       icon: 'lucide:shield-check',
       order: 30,
-      plugin: 'core-iam',
+      plugin: 'identity',
       title: $t('page.system.title'),
     },
     name: 'System',
@@ -21,7 +21,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           authority: ['superadmin', 'plugins:read', 'subscriptions:read'],
           icon: 'lucide:activity',
-          plugin: ['core-iam', 'subscriptions'],
+          plugin: ['identity', 'licensing'],
           title: $t('page.system.overview'),
         },
       },
@@ -32,7 +32,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           authority: ['superadmin', 'plugins:read'],
           icon: 'lucide:puzzle',
-          plugin: 'core-iam',
+          plugin: 'identity',
           title: $t('page.system.plugins'),
         },
       },
@@ -43,7 +43,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           authority: ['superadmin', 'subscriptions:read'],
           icon: 'lucide:credit-card',
-          plugin: 'subscriptions',
+          plugin: 'licensing',
           title: $t('page.system.plans'),
         },
       },
@@ -54,7 +54,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           authority: ['superadmin'],
           icon: 'lucide:users',
-          plugin: 'core-iam',
+          plugin: 'identity',
           title: $t('page.system.users'),
         },
       },
@@ -65,7 +65,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           authority: ['superadmin'],
           icon: 'lucide:scroll-text',
-          plugin: 'core-iam',
+          plugin: 'identity',
           title: $t('page.system.auditLogs'),
         },
       },
@@ -76,7 +76,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           authority: ['superadmin'],
           icon: 'lucide:receipt',
-          plugin: 'subscriptions',
+          plugin: 'licensing',
           title: $t('page.system.subscriptions'),
         },
       },
@@ -87,7 +87,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           authority: ['superadmin'],
           icon: 'lucide:key-round',
-          plugin: 'core-iam',
+          plugin: 'identity',
           title: $t('page.system.roles'),
         },
       },

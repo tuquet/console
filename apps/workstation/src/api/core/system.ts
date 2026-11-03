@@ -126,10 +126,19 @@ export interface ListGlobalAuditLogsParams {
 }
 
 const CORE_PLUGIN_IDS = new Set([
+  // Legacy aliases for backward compatibility
   'automation',
+  'browsers',
   'core-iam',
+  'dispatch',
+  // Canonical SSOT DB Plugin IDs
+  'identity',
+  'licensing',
+  'operon',
   'storage',
+  'store',
   'subscriptions',
+  'vault',
   'webhooks',
   'workers',
 ]);

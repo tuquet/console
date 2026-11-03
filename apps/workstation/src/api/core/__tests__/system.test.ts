@@ -32,7 +32,13 @@ describe('system core api & helpers', () => {
   });
 
   describe('isCorePlugin', () => {
-    it('should return true for all 6 core kernel plugins', () => {
+    it('should return true for all core kernel plugins', () => {
+      expect(isCorePlugin('identity')).toBe(true);
+      expect(isCorePlugin('operon')).toBe(true);
+      expect(isCorePlugin('licensing')).toBe(true);
+      expect(isCorePlugin('dispatch')).toBe(true);
+      expect(isCorePlugin('store')).toBe(true);
+      expect(isCorePlugin('vault')).toBe(true);
       expect(isCorePlugin('core-iam')).toBe(true);
       expect(isCorePlugin('workers')).toBe(true);
       expect(isCorePlugin('automation')).toBe(true);

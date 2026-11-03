@@ -17,9 +17,11 @@ import {
   CreditCard,
   Database,
   HardDrive,
+  KeyRound,
   Plus,
   RefreshCw,
   ShieldCheck,
+  ShoppingBag,
   Webhook,
   Workflow,
   Zap,
@@ -156,23 +158,35 @@ const [Grid, gridApi] = useVbenVxeGrid<SystemPlugin>({
 
 function getPluginIcon(pluginId: string) {
   switch (pluginId?.toLowerCase()) {
-    case 'automation': {
-      return Workflow;
-    }
+    case 'identity':
     case 'core-iam': {
       return ShieldCheck;
+    }
+    case 'operon':
+    case 'automation': {
+      return Workflow;
     }
     case 'workers': {
       return Zap;
     }
-    case 'storage': {
-      return HardDrive;
+    case 'vault':
+    case 'secrets': {
+      return KeyRound;
     }
+    case 'store':
+    case 'commerce': {
+      return ShoppingBag;
+    }
+    case 'dispatch':
+    case 'webhooks': {
+      return Webhook;
+    }
+    case 'licensing':
     case 'subscriptions': {
       return CreditCard;
     }
-    case 'webhooks': {
-      return Webhook;
+    case 'storage': {
+      return HardDrive;
     }
     default: {
       return Database;
