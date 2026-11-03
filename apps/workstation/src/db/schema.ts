@@ -30,11 +30,16 @@ export const workflows = sqliteTable(
       .default({})
       .notNull(),
     isActive: integer('is_active', { mode: 'boolean' }).default(true).notNull(),
+    tenantId: text('tenant_id'),
     lastSyncedAt: text('last_synced_at'),
+    deletedAt: text('deleted_at'),
     createdAt: text('created_at').notNull(),
     updatedAt: text('updated_at').notNull(),
   },
-  (table) => [index('idx_workflows_is_active').on(table.isActive)],
+  (table) => [
+    index('idx_workflows_is_active').on(table.isActive),
+    index('idx_workflows_tenant').on(table.tenantId),
+  ],
 );
 
 // 2. Proxies (Network Gateway Configuration)
@@ -52,10 +57,16 @@ export const proxies = sqliteTable(
     password: text('password'),
     countryCode: text('country_code'),
     isActive: integer('is_active', { mode: 'boolean' }).default(true).notNull(),
+    tenantId: text('tenant_id'),
     lastSyncedAt: text('last_synced_at'),
+    deletedAt: text('deleted_at'),
     createdAt: text('created_at').notNull(),
+    updatedAt: text('updated_at').notNull(),
   },
-  (table) => [index('idx_proxies_is_active').on(table.isActive)],
+  (table) => [
+    index('idx_proxies_is_active').on(table.isActive),
+    index('idx_proxies_tenant').on(table.tenantId),
+  ],
 );
 
 // 3. Browser Profiles (Isolated Stealth Fingerprints & Sessions)
@@ -87,13 +98,16 @@ export const browserProfiles = sqliteTable(
     isLocked: integer('is_locked', { mode: 'boolean' })
       .default(false)
       .notNull(),
+    tenantId: text('tenant_id'),
     lastSyncedAt: text('last_synced_at'),
+    deletedAt: text('deleted_at'),
     createdAt: text('created_at').notNull(),
     updatedAt: text('updated_at').notNull(),
   },
   (table) => [
     index('idx_browser_profiles_proxy').on(table.proxyId),
     index('idx_browser_profiles_locked').on(table.isLocked),
+    index('idx_browser_profiles_tenant').on(table.tenantId),
   ],
 );
 

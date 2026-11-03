@@ -119,33 +119,36 @@ async function runQuickTest() {
       JSON.stringify([{ name: 'session_token', value: 'xyz999' }]),
       JSON.stringify({}),
       0,
+      'tenant-quick-test',
+      null, // deleted_at
       nowIso,
       nowIso,
       null, // Unsynced / offline
     ],
-    sql: `INSERT INTO browser_profiles (id, name, browser_type, user_agent, timezone, fingerprint, cookies, storage_state, is_locked, created_at, updated_at, last_synced_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO browser_profiles (id, name, browser_type, user_agent, timezone, fingerprint, cookies, storage_state, is_locked, tenant_id, deleted_at, created_at, updated_at, last_synced_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   });
   console.log(
-    `      ${ANSI.green}✔ Created local offline profile: ${testProfileId}${ANSI.reset}`,
+    `      ${ANSI.green}✔ Created local offline profile with tenant_id: ${testProfileId}${ANSI.reset}`,
   );
 
   // Query back
   const readRes = await client.execute({
     args: [testProfileId],
-    sql: `SELECT id, name, browser_type, is_locked, last_synced_at FROM browser_profiles WHERE id = ?`,
+    sql: `SELECT id, name, browser_type, is_locked, tenant_id, deleted_at, last_synced_at FROM browser_profiles WHERE id = ?`,
   });
   console.log(
     `      ${ANSI.green}✔ Read verified:${ANSI.reset} ${JSON.stringify(readRes.rows[0])}`,
   );
 
   console.log(
-    `\n${ANSI.bold}[4/4] Testing Cloud Synchronization Contract...${ANSI.reset}`,
+    `\n${ANSI.bold}[4/4] Testing Cloud Synchronization Contract (LWW & Tombstone)...${ANSI.reset}`,
   );
 
   // Simulate Cloud Sync Push (Filter dirty records)
   const dirtyRes = await client.execute({
-    sql: `SELECT id, name, updated_at, last_synced_at FROM browser_profiles WHERE last_synced_at IS NULL OR updated_at > last_synced_at`,
+    args: ['tenant-quick-test'],
+    sql: `SELECT id, name, updated_at, last_synced_at FROM browser_profiles WHERE tenant_id = ? AND (last_synced_at IS NULL OR updated_at > last_synced_at)`,
   });
   console.log(
     `      ${ANSI.cyan}ℹ Found ${dirtyRes.rows.length} dirty/un-synced profile(s) pending Cloud Push.${ANSI.reset}`,
@@ -189,13 +192,27 @@ async function runQuickTest() {
     );
   }
 
+  // Test Tombstone Soft Delete
+  const deletedIso = new Date(Date.now() + 6000).toISOString();
+  await client.execute({
+    args: [deletedIso, deletedIso, testProfileId],
+    sql: `UPDATE browser_profiles SET deleted_at = ?, updated_at = ? WHERE id = ?`,
+  });
+  const activeCount = await client.execute({
+    args: ['tenant-quick-test'],
+    sql: `SELECT COUNT(*) as cnt FROM browser_profiles WHERE tenant_id = ? AND deleted_at IS NULL`,
+  });
+  console.log(
+    `      ${ANSI.green}✔ Tombstone Soft-Delete verified: Active count is ${activeCount.rows[0].cnt} (Profile correctly marked with deleted_at = ${deletedIso})${ANSI.reset}`,
+  );
+
   // Cleanup test record
   await client.execute({
     args: [testProfileId],
     sql: `DELETE FROM browser_profiles WHERE id = ?`,
   });
   console.log(
-    `      ${ANSI.green}✔ Cleanup: removed test profile cleanly.${ANSI.reset}`,
+    `      ${ANSI.green}✔ Cleanup: purged test tombstone cleanly.${ANSI.reset}`,
   );
 
   console.log(

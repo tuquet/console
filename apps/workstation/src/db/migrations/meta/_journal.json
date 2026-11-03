@@ -15,6 +15,13 @@
       "when": 1793697755321,
       "tag": "0001_blushing_rumiko_fujikawa",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793700712045,
+      "tag": "0002_cultured_kate_bishop",
+      "breakpoints": true
     }
   ]
 }

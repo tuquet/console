@@ -37,6 +37,9 @@ describe('drizzle sqlite schema contract', () => {
     expect(cols.edges).toBeDefined();
     expect(cols.settings).toBeDefined();
     expect(cols.isActive).toBeDefined();
+    expect(cols.tenantId).toBeDefined();
+    expect(cols.deletedAt).toBeDefined();
+    expect(cols.lastSyncedAt).toBeDefined();
     expect(cols.createdAt).toBeDefined();
     expect(cols.updatedAt).toBeDefined();
   });
@@ -52,6 +55,9 @@ describe('drizzle sqlite schema contract', () => {
     expect(cols.cookies).toBeDefined();
     expect(cols.storageState).toBeDefined();
     expect(cols.isLocked).toBeDefined();
+    expect(cols.tenantId).toBeDefined();
+    expect(cols.deletedAt).toBeDefined();
+    expect(cols.lastSyncedAt).toBeDefined();
   });
 
   it('declares correct column definitions on jobs and logs', () => {
