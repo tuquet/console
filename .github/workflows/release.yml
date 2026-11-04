@@ -48,18 +48,20 @@ jobs:
           ssh-key: ${{ secrets.OPERON_DEPLOY_KEY }}
           path: operon
 
-      # 3. Setup Node.js & pnpm
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
+      # 3. Setup pnpm & Node.js with package store caching
       - name: Setup pnpm 11
         uses: pnpm/action-setup@v4
         with:
           version: 11
 
-      # 4. Setup Rust Toolchain & Cache
+      - name: Setup Node.js 22 (with pnpm cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: console/pnpm-lock.yaml
+
+      # 4. Setup Rust Toolchain & Aggressive Workspace Cache
       - name: Setup Rust Toolchain (MSVC)
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -71,6 +73,7 @@ jobs:
           workspaces: |
             console/apps/workstation/src-tauri -> target
             operon -> target
+          cache-all-crates: "true"
 
       # 5. Install Dependencies & Pre-Release Quality Gates
       - name: Install Frontend Dependencies
@@ -83,7 +86,7 @@ jobs:
           pnpm --filter @operon/workstation typecheck
           pnpm vitest run apps/workstation/src/db/__tests__
 
-      # 6. Build Tauri Desktop Bundle with Minisign Signing
+      # 6. Build Tauri Desktop Bundle (Target NSIS only for 50% faster bundling)
       - name: Build Tauri Desktop Bundle
         working-directory: console/apps/workstation
         env:
@@ -92,9 +95,9 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           OPERON_SKIP_WINRES: "1"
-        run: pnpm tauri:build
+        run: pnpm tauri:build --bundles nsis
 
-      # 7. Package Distribution Artifacts (NSIS Setup, MSI, Portable Zip, latest.json)
+      # 7. Package Distribution Artifacts (NSIS Setup, Portable Zip, latest.json)
       - name: Package Distribution Artifacts
         working-directory: console
         run: node scripts/package-portable.mjs
@@ -131,7 +134,6 @@ jobs:
 
             #### 📥 Tải trực tiếp bằng trình duyệt:
             * **Bộ cài Setup (.exe - không cần quyền Admin):** [`Operon-Workstation-Setup.exe`](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Setup.exe)
-            * **Bộ cài MSI:** [`Operon-Workstation.msi`](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation.msi)
             * **Bản Portable Zip:** [`Operon-Workstation-Portable.zip`](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Portable.zip)
 
             *Bản release này được cập nhật tự động mỗi khi có thay đổi trên nhánh `main`.*

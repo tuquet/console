@@ -31,15 +31,17 @@ jobs:
           ssh-key: ${{ secrets.OPERON_DEPLOY_KEY }}
           path: operon
 
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Setup pnpm 11
         uses: pnpm/action-setup@v4
         with:
           version: 11
+
+      - name: Setup Node.js 22 (with pnpm cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: console/pnpm-lock.yaml
 
       - name: Setup Rust Toolchain (MSVC)
         uses: dtolnay/rust-toolchain@stable
@@ -52,6 +54,7 @@ jobs:
           workspaces: |
             console/apps/workstation/src-tauri -> target
             operon -> target
+          cache-all-crates: "true"
 
       - name: Install Frontend Dependencies
         working-directory: console
