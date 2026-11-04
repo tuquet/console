@@ -162,12 +162,27 @@ export async function getEffectiveAccess(): Promise<EffectiveAccess> {
 
 /**
  * Retrieves the list of currently installed system plugin IDs.
+ * Note: public.system_plugins requires an authenticated session.
+ * For unauthenticated sessions (e.g. login screen or cold boot), returns an empty array immediately.
  */
 export async function listInstalledPlugins(): Promise<string[]> {
-  const plugins = await supabaseRequest<Array<{ id: string }>>(
-    '/rest/v1/system_plugins?status=eq.installed&select=id',
-  );
-  return (plugins || []).map((p) => p.id);
+  const accessStore = useAccessStore();
+  if (!accessStore.accessToken) {
+    return [];
+  }
+  try {
+    const plugins = await supabaseRequest<Array<{ id: string }>>(
+      '/rest/v1/system_plugins?status=eq.installed&select=id',
+      { suppressErrorCapture: true },
+    );
+    return (plugins || []).map((p) => p.id);
+  } catch (error) {
+    console.warn(
+      '[Access] Failed to query installed plugins from Supabase:',
+      error,
+    );
+    return [];
+  }
 }
 
 export const accessApi = {

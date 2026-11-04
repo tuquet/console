@@ -121,16 +121,43 @@ describe('getEffectiveAccess & session caching', () => {
 describe('listInstalledPlugins', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    mockAccessStore.accessToken = null;
   });
 
-  it('should return installed plugin IDs from system_plugins table', async () => {
-    vi.spyOn(supabaseClient, 'supabaseRequest').mockResolvedValueOnce([
-      { id: 'identity' },
-      { id: 'operon' },
-      { id: 'licensing' },
-    ]);
+  it('should return empty array immediately when unauthenticated without making network request', async () => {
+    mockAccessStore.accessToken = null;
+    const requestSpy = vi.spyOn(supabaseClient, 'supabaseRequest');
+
+    const plugins = await listInstalledPlugins();
+    expect(plugins).toEqual([]);
+    expect(requestSpy).not.toHaveBeenCalled();
+  });
+
+  it('should return installed plugin IDs from system_plugins table when authenticated', async () => {
+    mockAccessStore.accessToken = 'valid-token';
+    const requestSpy = vi
+      .spyOn(supabaseClient, 'supabaseRequest')
+      .mockResolvedValueOnce([
+        { id: 'identity' },
+        { id: 'operon' },
+        { id: 'licensing' },
+      ]);
 
     const plugins = await listInstalledPlugins();
     expect(plugins).toEqual(['identity', 'operon', 'licensing']);
+    expect(requestSpy).toHaveBeenCalledWith(
+      '/rest/v1/system_plugins?status=eq.installed&select=id',
+      { suppressErrorCapture: true },
+    );
+  });
+
+  it('should catch errors gracefully and return empty array when request fails', async () => {
+    mockAccessStore.accessToken = 'valid-token';
+    vi.spyOn(supabaseClient, 'supabaseRequest').mockRejectedValueOnce(
+      new Error('Network error or RLS 401'),
+    );
+
+    const plugins = await listInstalledPlugins();
+    expect(plugins).toEqual([]);
   });
 });
