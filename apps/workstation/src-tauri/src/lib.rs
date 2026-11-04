@@ -1,6 +1,6 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter, Listener, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_window_state::StateFlags;
 
 mod tray;
@@ -118,7 +118,7 @@ pub fn run() {
 
             // Build main window with strict navigation security guard
             let app_handle = app.handle().clone();
-            let window = WebviewWindowBuilder::new(
+            let _window = WebviewWindowBuilder::new(
                 app,
                 "main",
                 WebviewUrl::App("index.html".into()),
@@ -130,12 +130,18 @@ pub fn run() {
             .center()
             .decorations(false)
             .shadow(true)
-            .visible(false)
+            .visible(true)
             .on_navigation(move |url| {
                 let scheme = url.scheme();
                 let host = url.host_str().unwrap_or("");
-                // Allow internal dev server, loopback, or custom tauri/asset schemes
-                if scheme == "tauri" || scheme == "asset" || host == "localhost" || host == "127.0.0.1" {
+                // Allow internal app pages, loopback, or custom tauri/asset schemes
+                if scheme == "tauri"
+                    || scheme == "asset"
+                    || host == "localhost"
+                    || host == "tauri.localhost"
+                    || host.ends_with(".localhost")
+                    || host == "127.0.0.1"
+                {
                     return true;
                 }
                 // Intercept and open external links in default system browser
@@ -145,11 +151,6 @@ pub fn run() {
             })
             .build()?;
 
-            // Smooth startup: show window only after DOM is ready
-            let w = window.clone();
-            window.once("tauri://ready", move |_| {
-                let _ = w.show();
-            });
             Ok(())
         })
         .build(tauri::generate_context!())

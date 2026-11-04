@@ -36,6 +36,8 @@
         if (
           location.hostname !== 'localhost' &&
           location.hostname !== '127.0.0.1' &&
+          location.hostname !== 'tauri.localhost' &&
+          !location.hostname.endsWith('.localhost') &&
           !location.hostname.endsWith('.local')
         ) {
           var s = document.createElement('script');
