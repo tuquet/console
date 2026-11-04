@@ -3,6 +3,7 @@ import type { AuthenticationProps } from './types';
 
 import { computed, watch } from 'vue';
 
+import { X } from '@operon/icons';
 import { $t } from '@operon/locales';
 
 import { useVbenModal } from '@operon-core/popup-ui';
@@ -24,7 +25,24 @@ const props = withDefaults(defineProps<Props>(), {
 
 const open = defineModel<boolean>('open');
 
-const [Modal, modalApi] = useVbenModal();
+function closeModal() {
+  open.value = false;
+  modalApi.close();
+}
+
+const [Modal, modalApi] = useVbenModal({
+  onCancel() {
+    closeModal();
+  },
+  onClosed() {
+    closeModal();
+  },
+  onOpenChange(isOpen) {
+    if (!isOpen) {
+      open.value = false;
+    }
+  },
+});
 
 watch(
   () => open.value,
@@ -71,15 +89,25 @@ function calcZIndex() {
 <template>
   <div>
     <Modal
-      :closable="false"
-      :close-on-click-modal="false"
-      :close-on-press-escape="false"
+      :closable="true"
+      :close-on-click-modal="true"
+      :close-on-press-escape="true"
       :footer="false"
       :fullscreen-button="false"
       :header="false"
       :z-index="getZIndex"
-      class="border-none px-10 py-6 text-center shadow-xl sm:w-150 sm:rounded-2xl md:h-[unset]"
+      class="relative border-none px-10 py-6 text-center shadow-xl sm:w-150 sm:rounded-2xl md:h-[unset]"
     >
+      <!-- Direct Terminate / Close Button in top-right of the modal card -->
+      <button
+        type="button"
+        aria-label="Close"
+        class="absolute top-4 right-4 z-20 flex size-8 items-center justify-center rounded-full text-foreground/60 transition-colors hover:bg-accent hover:text-foreground focus:outline-hidden"
+        @click="closeModal"
+      >
+        <X class="size-4" />
+      </button>
+
       <VbenAvatar :src="avatar" class="mx-auto mb-6 size-20" />
       <Slot
         :show-forget-password="false"
@@ -90,6 +118,17 @@ function calcZIndex() {
       >
         <slot> </slot>
       </Slot>
+
+      <!-- Bottom Dismiss / Cancel action for local operator flexibility -->
+      <div class="mt-4 text-center">
+        <button
+          type="button"
+          class="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors"
+          @click="closeModal"
+        >
+          {{ $t('common.cancel') || 'Dismiss / Continue as Local Operator' }}
+        </button>
+      </div>
     </Modal>
   </div>
 </template>

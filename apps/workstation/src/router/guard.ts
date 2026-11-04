@@ -82,7 +82,6 @@ function setupAccessGuard(router: Router) {
         }
         if (isDesktopMode) {
           // In desktop local-first mode, avoid locking into full login page; navigate to default home
-          accessStore.setLoginExpired(true);
           return preferences.app.defaultHomePath;
         }
       }
