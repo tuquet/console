@@ -119,9 +119,14 @@ jobs:
             ### 🚀 Operon Workstation Nightly Build
             Automated test release built from commit `${{ github.sha }}` on branch `${{ github.ref_name }}`.
 
-            #### ⚡ Cài đặt nhanh bằng PowerShell (1 dòng lệnh duy nhất):
+            #### ⚡ Cài đặt nhanh (1 dòng lệnh):
+            * **Nếu đang ở PowerShell:**
             ```powershell
             irm https://raw.githubusercontent.com/tuquet/console/main/scripts/install-nightly.ps1 | iex
+            ```
+            * **Nếu đang ở CMD hoặc hộp thoại Run (Win + R):**
+            ```cmd
+            powershell -Command "irm https://raw.githubusercontent.com/tuquet/console/main/scripts/install-nightly.ps1 | iex"
             ```
 
             #### 📥 Tải trực tiếp bằng trình duyệt:
