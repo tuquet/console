@@ -27,6 +27,7 @@
     "build:desktop": "pnpm -F @operon/workstation run tauri:build",
     "build:desktop:exe": "pnpm -F @operon/workstation run tauri:build:exe",
     "build:local": "bash ./scripts/build-local.sh",
+    "release:package": "node scripts/package-portable.mjs",
     "changeset": "pnpm exec changeset",
     "check": "pnpm run check:circular && pnpm run check:dep && pnpm run check:type && pnpm check:cspell",
     "check:circular": "vsh check-circular",

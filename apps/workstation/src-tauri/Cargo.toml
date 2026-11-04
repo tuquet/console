@@ -1,6 +1,6 @@
 [package]
 name = "workstation"
-version = "0.1.0"
+version = "5.8.0"
 description = "Operon Workstation - Unified Management & Operations Console"
 authors = ["operon"]
 edition = "2021"
