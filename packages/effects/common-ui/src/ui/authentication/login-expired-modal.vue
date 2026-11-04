@@ -3,7 +3,6 @@ import type { AuthenticationProps } from './types';
 
 import { computed, watch } from 'vue';
 
-import { X } from '@operon/icons';
 import { $t } from '@operon/locales';
 
 import { useVbenModal } from '@operon-core/popup-ui';
@@ -98,16 +97,6 @@ function calcZIndex() {
       :z-index="getZIndex"
       class="relative border-none px-10 py-6 text-center shadow-xl sm:w-150 sm:rounded-2xl md:h-[unset]"
     >
-      <!-- Direct Terminate / Close Button in top-right of the modal card -->
-      <button
-        type="button"
-        aria-label="Close"
-        class="absolute top-4 right-4 z-20 flex size-8 items-center justify-center rounded-full text-foreground/60 transition-colors hover:bg-accent hover:text-foreground focus:outline-hidden"
-        @click="closeModal"
-      >
-        <X class="size-4" />
-      </button>
-
       <VbenAvatar :src="avatar" class="mx-auto mb-6 size-20" />
       <Slot
         :show-forget-password="false"

@@ -114,11 +114,14 @@ export async function handleSupabaseUnauthorized(): Promise<void> {
 
   const task = (async () => {
     const accessStore = useAccessStore();
+    const hadToken = Boolean(accessStore.accessToken);
     accessStore.setAccessToken?.(null);
     accessStore.setRefreshToken?.(null);
 
     if (unauthorizedHandler) {
-      await unauthorizedHandler();
+      if (hadToken) {
+        await unauthorizedHandler();
+      }
       return;
     }
 

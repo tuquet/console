@@ -17,6 +17,10 @@ import { preferences, usePreferences } from '@operon/preferences';
 import { useAccessStore, useUserStore } from '@operon/stores';
 import { openWindow } from '@operon/utils';
 
+import { Button } from '@operon-core/shadcn-ui';
+
+import { LogIn } from '@lucide/vue';
+
 import WorkspaceSelector from '#/components/common/workspace-selector.vue';
 import WindowControls from '#/layouts/widgets/window-controls.vue';
 import { $t } from '#/locales';
@@ -119,6 +123,12 @@ const avatar = computed(() => {
   return userStore.userInfo?.avatar ?? preferences.app.defaultAvatar;
 });
 
+const isAuthenticated = computed(() => Boolean(accessStore.accessToken));
+
+function openLoginModal() {
+  accessStore.setLoginExpired(true);
+}
+
 async function handleLogout() {
   await authStore.logout(false);
 }
@@ -211,8 +221,8 @@ watch(
 
 <template>
   <BasicLayout
-    :avatar
-    :text="userStore.userInfo?.realName"
+    :avatar="isAuthenticated ? avatar : undefined"
+    :text="isAuthenticated ? userStore.userInfo?.realName : undefined"
     @clear-preferences-and-logout="handleLogout"
     @logout="handleLogout"
   >
@@ -220,15 +230,28 @@ watch(
       <WorkspaceSelector :collapsed="collapsed" />
     </template>
     <template #user-dropdown>
-      <UserDropdown
-        :avatar
-        :menus
-        :text="userStore.userInfo?.realName"
-        description="admin@operon.com"
-        tag-text="ID"
-        @clear-preferences-and-logout="handleLogout"
-        @logout="handleLogout"
-      />
+      <div v-if="isAuthenticated">
+        <UserDropdown
+          :avatar
+          :menus
+          :text="userStore.userInfo?.realName"
+          :description="userStore.userInfo?.username || ''"
+          tag-text="ID"
+          @clear-preferences-and-logout="handleLogout"
+          @logout="handleLogout"
+        />
+      </div>
+      <div v-else class="mr-2 flex items-center">
+        <Button
+          size="sm"
+          variant="outline"
+          class="h-8 gap-1.5 rounded-full px-3 text-xs font-medium hover:bg-accent hover:text-accent-foreground"
+          @click="openLoginModal"
+        >
+          <LogIn class="size-3.5" />
+          <span>{{ $t('authentication.login') || 'Sign In' }}</span>
+        </Button>
+      </div>
     </template>
     <template #window-controls>
       <WindowControls />

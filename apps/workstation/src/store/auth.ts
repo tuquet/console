@@ -20,6 +20,7 @@ import { clearAccessCache, getAccessCodes, getCurrentUser, login } from '#/api';
 import { $t } from '#/locales';
 import { router as appRouter } from '#/router';
 import { captureError, setBugsinkUser } from '#/utils/bugsink';
+import { isDesktop } from '#/utils/platform';
 import { sanitizeRedirectPath } from '#/utils/security';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -144,6 +145,11 @@ export const useAuthStore = defineStore('auth', () => {
     setBugsinkUser(null);
     accessStore.setAccessToken(null);
     accessStore.setRefreshToken(null);
+
+    // In desktop local-first mode, login is strictly user-initiated — never auto-bringup modal
+    if (isDesktop()) {
+      return 'modal';
+    }
 
     if (
       preferences.app.loginExpiredMode === 'modal' &&

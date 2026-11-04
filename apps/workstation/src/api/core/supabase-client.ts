@@ -92,7 +92,10 @@ export async function supabaseRequest<T = any>(
     if (refreshedToken) {
       token = refreshedToken;
     } else {
-      await handleSupabaseUnauthorized();
+      // Only notify unauthorized handler if an existing session actually expired
+      if (token) {
+        await handleSupabaseUnauthorized();
+      }
       throw createAuthError('JWT expired', 401);
     }
   }
@@ -186,7 +189,10 @@ export async function supabaseRequest<T = any>(
         }
       }
 
-      await handleSupabaseUnauthorized();
+      // Only notify unauthorized handler if an existing session actually expired
+      if (token) {
+        await handleSupabaseUnauthorized();
+      }
       throw createAuthError(
         errorJson.message ||
           errorJson.msg ||

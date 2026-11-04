@@ -207,7 +207,12 @@ export async function listJobs(params?: ListJobsParams): Promise<Job[]> {
     });
     return Array.isArray(data) ? data : [];
   } catch (error: any) {
-    if (!error?.isAuthError && !error?.message?.includes('Invalid schema')) {
+    if (
+      !error?.isAuthError &&
+      !error?.message?.includes('Invalid schema') &&
+      !error?.message?.includes('Invalid API key') &&
+      error?.status !== 401
+    ) {
       console.error('[Automation] Failed to load jobs:', error);
     }
     return [];
@@ -482,7 +487,7 @@ export async function probeLocalDaemon(port = DEFAULT_DAEMON_PORT): Promise<{
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 1200);
 
-    await fetch(`http://127.0.0.1:${port}/api/v1/status`, {
+    await fetch(`http://127.0.0.1:${port}/api/v1/health`, {
       method: 'GET',
       mode: 'no-cors',
       signal: controller.signal,
@@ -521,7 +526,12 @@ export async function listDevices(
     if (!Array.isArray(data)) return [];
     return data.map((row) => mapRawDeviceToFleetNode(row));
   } catch (error: any) {
-    if (!error?.message?.includes('Invalid schema')) {
+    if (
+      !error?.isAuthError &&
+      !error?.message?.includes('Invalid schema') &&
+      !error?.message?.includes('Invalid API key') &&
+      error?.status !== 401
+    ) {
       console.error('[Automation] Failed to load devices:', error);
     }
     return [];
@@ -558,7 +568,12 @@ export async function listBrowsers(
     });
     return Array.isArray(data) ? data : [];
   } catch (error: any) {
-    if (!error?.message?.includes('Invalid schema')) {
+    if (
+      !error?.isAuthError &&
+      !error?.message?.includes('Invalid schema') &&
+      !error?.message?.includes('Invalid API key') &&
+      error?.status !== 401
+    ) {
       console.error('[Automation] Failed to load browsers:', error);
     }
     return [];
@@ -675,7 +690,12 @@ export async function listProxies(
     });
     return Array.isArray(data) ? data : [];
   } catch (error: any) {
-    if (!error?.message?.includes('Invalid schema')) {
+    if (
+      !error?.isAuthError &&
+      !error?.message?.includes('Invalid schema') &&
+      !error?.message?.includes('Invalid API key') &&
+      error?.status !== 401
+    ) {
       console.error('[Automation] Failed to load proxies:', error);
     }
     return [];

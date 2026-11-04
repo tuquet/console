@@ -12,6 +12,7 @@ import { Button } from '@operon-core/shadcn-ui';
 
 import { loginWithGitHub } from '#/api/core/auth';
 import { useAuthStore } from '#/store';
+import { isDesktop } from '#/utils/platform';
 import { loadTurnstile, TURNSTILE_SITE_KEY } from '#/utils/turnstile';
 
 defineOptions({ name: 'Login' });
@@ -50,6 +51,10 @@ const formSchema = computed((): VbenFormSchema[] => {
 });
 
 async function initTurnstile() {
+  if (isDesktop()) {
+    // Desktop Tauri client operates natively without web bot captcha
+    return;
+  }
   try {
     await loadTurnstile();
     if (window.turnstile && turnstileContainerRef.value && !widgetId) {
