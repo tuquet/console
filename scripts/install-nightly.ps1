@@ -20,6 +20,13 @@ try {
     Write-Host ("Downloaded: {0:N2} MB to {1}" -f $sizeMb, $out) -ForegroundColor Green
     Write-Host "Launching installer (CurrentUser mode, no Admin required)..." -ForegroundColor Green
     Start-Process -FilePath $out
+
+    Write-Host "==================================================" -ForegroundColor Cyan
+    Write-Host "💡 Tester Tips:" -ForegroundColor Yellow
+    Write-Host "  • Press F12 or Ctrl+Shift+I anytime in the app to open DevTools / Console." -ForegroundColor White
+    Write-Host "  • Persistent logs are saved at:" -ForegroundColor White
+    Write-Host "    $HOME\.operon\logs\workstation.log" -ForegroundColor Cyan
+    Write-Host "==================================================" -ForegroundColor Cyan
 } catch {
     Write-Host "Download failed: $_" -ForegroundColor Red
     Write-Host "Please download manually at: $url" -ForegroundColor Yellow

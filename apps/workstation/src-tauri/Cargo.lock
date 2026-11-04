@@ -7163,6 +7163,7 @@ dependencies = [
 name = "workstation"
 version = "5.8.0"
 dependencies = [
+ "chrono",
  "operon",
  "reqwest 0.12.28",
  "serde",

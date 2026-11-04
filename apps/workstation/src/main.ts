@@ -2,6 +2,7 @@ import { $t } from '@operon/locales';
 import { initPreferences, updatePreferences } from '@operon/preferences';
 import { unmountGlobalLoading } from '@operon/utils';
 
+import { initDesktopLoggingAndShortcuts } from './adapter/desktop';
 import {
   overridesPreferences,
   typographyPreferencesExtension,
@@ -16,6 +17,7 @@ import { assertValidEnvironment } from './utils/env-validator';
 // Early intercept all unhandled promise rejections and global runtime/resource errors
 if (typeof window !== 'undefined') {
   initEarlyErrorInterception();
+  initDesktopLoggingAndShortcuts();
 
   // Auto-reload on stale chunk failures after new deployments with telemetry and reload loop protection
   window.addEventListener('vite:preloadError', (event: any) => {
