@@ -83,7 +83,7 @@ jobs:
           pnpm --filter @operon/workstation typecheck
           pnpm vitest run apps/workstation/src/db/__tests__
 
-      # 6. Build Tauri Desktop Application with Minisign Signing
+      # 6. Build Tauri Desktop Bundle with Minisign Signing
       - name: Build Tauri Desktop Bundle
         working-directory: console/apps/workstation
         env:
@@ -91,6 +91,7 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          OPERON_SKIP_WINRES: "1"
         run: pnpm tauri:build
 
       # 7. Package Distribution Artifacts (NSIS Setup, MSI, Portable Zip, latest.json)
@@ -112,6 +113,7 @@ jobs:
         if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.channel == 'nightly')
         with:
           tag_name: nightly
+          target_commitish: ${{ github.sha }}
           name: 'Operon Workstation (Nightly Build)'
           body: |
             ### 🚀 Operon Workstation Nightly Build
@@ -123,6 +125,8 @@ jobs:
 
             *This release is updated automatically on every push to `main`.*
           prerelease: true
+          make_latest: false
+          fail_on_unmatched_files: false
           files: console/dist-release/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -134,7 +138,9 @@ jobs:
         with:
           name: Operon Workstation ${{ github.ref_name }}
           prerelease: false
+          make_latest: true
           generate_release_notes: true
+          fail_on_unmatched_files: false
           files: console/dist-release/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

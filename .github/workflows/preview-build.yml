@@ -68,6 +68,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          OPERON_SKIP_WINRES: "1"
         run: pnpm tauri:build:exe
 
       - name: Package Distribution Artifacts
