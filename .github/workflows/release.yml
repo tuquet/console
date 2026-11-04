@@ -119,11 +119,17 @@ jobs:
             ### 🚀 Operon Workstation Nightly Build
             Automated test release built from commit `${{ github.sha }}` on branch `${{ github.ref_name }}`.
 
-            #### 📥 Direct Downloads for Testers:
-            * **Installer (No Admin required):** [`Operon-Workstation-Setup.exe`](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Setup.exe)
-            * **Portable Archive (Zero Install):** [`Operon-Workstation-Portable.zip`](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Portable.zip)
+            #### ⚡ Cài đặt nhanh bằng PowerShell (1 dòng lệnh duy nhất):
+            ```powershell
+            irm https://raw.githubusercontent.com/tuquet/console/main/scripts/install-nightly.ps1 | iex
+            ```
 
-            *This release is updated automatically on every push to `main`.*
+            #### 📥 Tải trực tiếp bằng trình duyệt:
+            * **Bộ cài Setup (.exe - không cần quyền Admin):** [`Operon-Workstation-Setup.exe`](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Setup.exe)
+            * **Bộ cài MSI:** [`Operon-Workstation.msi`](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation.msi)
+            * **Bản Portable Zip:** [`Operon-Workstation-Portable.zip`](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Portable.zip)
+
+            *Bản release này được cập nhật tự động mỗi khi có thay đổi trên nhánh `main`.*
           prerelease: true
           make_latest: false
           fail_on_unmatched_files: false
