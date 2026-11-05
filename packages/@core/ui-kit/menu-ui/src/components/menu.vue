@@ -461,7 +461,7 @@ $namespace: vben;
   --menu-item-collapse-margin-y: 4px;
   --menu-item-collapse-margin-x: 0px;
   --menu-item-radius: 0px;
-  --menu-item-indent: 16px;
+  --menu-item-indent: 0px;
 
   &.is-dark {
     --menu-background-color: hsl(var(--menu));
@@ -567,27 +567,10 @@ $namespace: vben;
       & .#{$namespace}-sub-menu-content,
       & .#{$namespace}-menu-item-group__title {
         padding-left: calc(
-          var(--menu-item-indent) + var(--menu-level) * var(--menu-item-indent)
+          var(--menu-item-padding-x) + var(--menu-level, 0) *
+            var(--menu-item-indent, 0px)
         );
         white-space: nowrap;
-      }
-
-      & > .#{$namespace}-sub-menu {
-        & > .#{$namespace}-menu {
-          & > .#{$namespace}-menu-item {
-            padding-left: calc(
-              0px + var(--menu-item-indent) + var(--menu-level) *
-                var(--menu-item-indent)
-            );
-          }
-        }
-
-        & > .#{$namespace}-sub-menu-content {
-          padding-left: calc(var(--menu-item-indent) - 8px);
-        }
-      }
-      & > .#{$namespace}-menu-item {
-        padding-left: calc(var(--menu-item-indent) - 8px);
       }
     }
   }
