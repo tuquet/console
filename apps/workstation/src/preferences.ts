@@ -23,6 +23,7 @@ export const overridesPreferences = defineOverridesPreferences({
   },
   logo: {
     enable: true,
+    showText: false,
     fit: 'contain',
     source: '/logo.svg',
     sourceDark: '/logo.svg',

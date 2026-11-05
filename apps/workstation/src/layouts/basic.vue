@@ -91,37 +91,58 @@ const showDot = computed(() =>
   notifications.value.some((item) => !item.isRead),
 );
 
-const menus = computed(() => [
-  {
-    handler: () => {
-      router.push({ name: 'Profile' });
+const menus = computed(() => {
+  const baseMenus = [
+    {
+      handler: () => {
+        openWindow('https://docs.operon.com', {
+          target: '_blank',
+        });
+      },
+      icon: BookOpenText,
+      text: $t('common.documentation'),
     },
-    icon: 'lucide:user',
-    text: $t('page.auth.profile'),
-  },
-  {
-    handler: () => {
-      openWindow('https://docs.operon.com', {
-        target: '_blank',
-      });
+    {
+      handler: () => {
+        openWindow('https://github.com/operon/console', {
+          target: '_blank',
+        });
+      },
+      icon: SvgGithubIcon,
+      text: 'GitHub',
     },
-    icon: BookOpenText,
-    text: $t('common.documentation'),
-  },
-  {
-    handler: () => {
-      openWindow('https://github.com/operon/console', {
-        target: '_blank',
-      });
+  ];
+
+  if (isAuthenticated.value) {
+    return [
+      {
+        handler: () => {
+          router.push({ name: 'Profile' });
+        },
+        icon: 'lucide:user',
+        text: $t('page.auth.profile'),
+      },
+      ...baseMenus,
+    ];
+  }
+
+  return [
+    {
+      handler: () => {
+        openLoginModal();
+      },
+      icon: LogIn,
+      text: $t('authentication.login') || 'Sign In',
     },
-    icon: SvgGithubIcon,
-    text: 'GitHub',
-  },
-]);
+    ...baseMenus,
+  ];
+});
 
 const avatar = computed(() => {
   return userStore.userInfo?.avatar ?? preferences.app.defaultAvatar;
 });
+
+const unauthAvatar = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2371717a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>`;
 
 const isAuthenticated = computed(() => Boolean(accessStore.accessToken));
 
@@ -228,10 +249,14 @@ watch(
   >
     <template #logo="{ collapsed }">
       <WorkspaceSelector v-if="isAuthenticated" :collapsed="collapsed" />
-      <div v-else class="flex items-center gap-2.5 px-3 py-2">
+      <div
+        v-else-if="preferences.logo.enable"
+        class="flex items-center gap-2.5 px-3 py-2"
+        :class="{ 'justify-center': collapsed || !preferences.logo.showText }"
+      >
         <img src="/logo.svg" class="size-7 shrink-0" alt="Operon" />
         <span
-          v-if="!collapsed"
+          v-if="!collapsed && preferences.logo.showText"
           class="truncate font-semibold text-foreground text-sm tracking-tight"
         >
           Operon Workstation
@@ -239,19 +264,9 @@ watch(
       </div>
     </template>
     <template #user-dropdown>
-      <div v-if="isAuthenticated">
-        <UserDropdown
-          :avatar
-          :menus
-          :text="userStore.userInfo?.realName"
-          :description="userStore.userInfo?.username || ''"
-          tag-text="ID"
-          @clear-preferences-and-logout="handleLogout"
-          @logout="handleLogout"
-        />
-      </div>
-      <div v-else class="mr-2 flex items-center">
+      <div class="mr-1 flex items-center gap-2">
         <Button
+          v-if="!isAuthenticated"
           size="sm"
           variant="outline"
           class="h-8 gap-1.5 rounded-full px-3 text-xs font-medium hover:bg-accent hover:text-accent-foreground"
@@ -260,6 +275,25 @@ watch(
           <LogIn class="size-3.5" />
           <span>{{ $t('authentication.login') || 'Sign In' }}</span>
         </Button>
+        <UserDropdown
+          :avatar="isAuthenticated ? avatar : unauthAvatar"
+          :avatar-dot="isAuthenticated"
+          :menus
+          :text="
+            isAuthenticated
+              ? userStore.userInfo?.realName
+              : $t('authentication.localOperator') || 'Local Operator'
+          "
+          :description="
+            isAuthenticated
+              ? userStore.userInfo?.username || ''
+              : $t('authentication.notLoggedIn') || 'Local Session'
+          "
+          :tag-text="isAuthenticated ? 'ID' : undefined"
+          :show-logout="isAuthenticated"
+          @clear-preferences-and-logout="handleLogout"
+          @logout="handleLogout"
+        />
       </div>
     </template>
     <template #window-controls>

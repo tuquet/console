@@ -121,5 +121,7 @@
     "alignLeft": "Align left",
     "alignRight": "Align right"
   },
-  "continueOnWeb": "Continue sign-in on this browser"
+  "continueOnWeb": "Continue sign-in on this browser",
+  "localOperator": "Local Operator",
+  "notLoggedIn": "Local Session"
 }

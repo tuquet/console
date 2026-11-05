@@ -93,6 +93,8 @@ interface Props {
   trigger?: 'both' | 'click' | 'hover';
   /** Hover delay duration */
   hoverDelay?: number;
+  /** Whether to show logout action */
+  showLogout?: boolean;
 }
 
 defineOptions({
@@ -109,6 +111,7 @@ const props = withDefaults(defineProps<Props>(), {
   text: '',
   trigger: 'click',
   hoverDelay: 500,
+  showLogout: true,
 });
 
 const emit = defineEmits<{ clearPreferencesAndLogout: []; logout: [] }>();
@@ -169,8 +172,9 @@ const showLockInDropdown = computed(
 
 const showLogoutInDropdown = computed(
   () =>
-    preferences.widget.logoutButtonPosition === 'user-dropdown' ||
-    isMobile.value,
+    props.showLogout &&
+    (preferences.widget.logoutButtonPosition === 'user-dropdown' ||
+      isMobile.value),
 );
 
 const showGlobalSearchInDropdown = computed(
