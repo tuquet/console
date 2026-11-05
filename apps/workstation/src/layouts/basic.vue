@@ -227,7 +227,16 @@ watch(
     @logout="handleLogout"
   >
     <template #logo="{ collapsed }">
-      <WorkspaceSelector :collapsed="collapsed" />
+      <WorkspaceSelector v-if="isAuthenticated" :collapsed="collapsed" />
+      <div v-else class="flex items-center gap-2.5 px-3 py-2">
+        <img src="/logo.svg" class="size-7 shrink-0" alt="Operon" />
+        <span
+          v-if="!collapsed"
+          class="truncate font-semibold text-foreground text-sm tracking-tight"
+        >
+          Operon Workstation
+        </span>
+      </div>
     </template>
     <template #user-dropdown>
       <div v-if="isAuthenticated">

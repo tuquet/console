@@ -26,9 +26,10 @@ import {
   revokeDevice,
   workflowsApi,
 } from '../automation';
-import { supabaseRequest } from '../supabase-client';
+import { hasCloudAuth, supabaseRequest } from '../supabase-client';
 
 vi.mock('../supabase-client', () => ({
+  hasCloudAuth: vi.fn().mockReturnValue(true),
   supabaseRequest: vi.fn(),
 }));
 
@@ -476,6 +477,25 @@ describe('automation core api & helpers (automation & workers schemas)', () => {
       expect(jobsApi.listLogs).toBe(listExecutionLogs);
       expect(workflowsApi.list).toBe(listWorkflows);
       expect(proxiesApi.list).toBe(listProxies);
+    });
+
+    it('should return empty arrays without calling supabaseRequest when unauthenticated', async () => {
+      vi.mocked(hasCloudAuth).mockReturnValueOnce(false);
+      expect(await listWorkflows()).toEqual([]);
+
+      vi.mocked(hasCloudAuth).mockReturnValueOnce(false);
+      expect(await listJobs()).toEqual([]);
+
+      vi.mocked(hasCloudAuth).mockReturnValueOnce(false);
+      expect(await listDevices()).toEqual([]);
+
+      vi.mocked(hasCloudAuth).mockReturnValueOnce(false);
+      expect(await listBrowsers()).toEqual([]);
+
+      vi.mocked(hasCloudAuth).mockReturnValueOnce(false);
+      expect(await listProxies()).toEqual([]);
+
+      expect(supabaseRequest).not.toHaveBeenCalled();
     });
 
     it('should call local daemon session endpoint when starting and stopping browser', async () => {

@@ -103,13 +103,13 @@ function setupAccessGuard(router: Router) {
               avatar: preferences.app.defaultAvatar || '',
               homePath: '/automation/overview',
               realName: 'Local Operator',
-              roles: ['local_operator', 'superadmin'],
+              roles: ['local_operator'],
               userId: 'local-operator',
               username: 'operator',
             });
           }
           const { accessibleMenus, accessibleRoutes } = await generateAccess({
-            roles: ['local_operator', 'superadmin'],
+            roles: ['local_operator'],
             router,
             routes: accessRoutes,
           });

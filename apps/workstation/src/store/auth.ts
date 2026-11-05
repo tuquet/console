@@ -16,9 +16,17 @@ import { toast } from '@operon-core/shadcn-ui';
 
 import { defineStore } from 'pinia';
 
-import { clearAccessCache, getAccessCodes, getCurrentUser, login } from '#/api';
+import {
+  clearAccessCache,
+  getAccessCodes,
+  getCurrentUser,
+  login,
+  logout as logoutApi,
+} from '#/api';
 import { $t } from '#/locales';
 import { router as appRouter } from '#/router';
+import { generateAccess } from '#/router/access';
+import { accessRoutes } from '#/router/routes';
 import { captureError, setBugsinkUser } from '#/utils/bugsink';
 import { isDesktop } from '#/utils/platform';
 import { sanitizeRedirectPath } from '#/utils/security';
@@ -63,6 +71,16 @@ export const useAuthStore = defineStore('auth', () => {
         userStore.setUserInfo(userInfo);
         setBugsinkUser(userInfo);
         accessStore.setAccessCodes(accessCodes);
+
+        if (isDesktop()) {
+          const { accessibleMenus, accessibleRoutes } = await generateAccess({
+            roles: userInfo?.roles || ['superadmin'],
+            router,
+            routes: accessRoutes,
+          });
+          accessStore.setAccessMenus(accessibleMenus);
+          accessStore.setAccessRoutes(accessibleRoutes);
+        }
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
@@ -114,12 +132,33 @@ export const useAuthStore = defineStore('auth', () => {
     clearAccessCache();
     setBugsinkUser(null);
     try {
-      await logout();
+      await logoutApi();
     } catch {
       // Ignore network errors on logout
     }
     resetAllStores();
     accessStore.setLoginExpired(false);
+
+    if (isDesktop()) {
+      userStore.setUserInfo({
+        avatar: preferences.app.defaultAvatar || '',
+        homePath: '/automation/overview',
+        realName: 'Local Operator',
+        roles: ['local_operator'],
+        userId: 'local-operator',
+        username: 'operator',
+      });
+      const { accessibleMenus, accessibleRoutes } = await generateAccess({
+        roles: ['local_operator'],
+        router,
+        routes: accessRoutes,
+      });
+      accessStore.setAccessMenus(accessibleMenus);
+      accessStore.setAccessRoutes(accessibleRoutes);
+      accessStore.setIsAccessChecked(true);
+      await router.replace('/automation/overview');
+      return;
+    }
 
     // On the login page the current route is the login page itself, so carrying it as
     // `redirect` would nest one more encoded layer on every repeat.

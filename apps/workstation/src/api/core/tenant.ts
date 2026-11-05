@@ -2,7 +2,7 @@ import type { TenantPlan, TenantStatus } from '@operon/constants';
 
 import { STORAGE_KEYS, TENANT_PLAN, TENANT_STATUS } from '@operon/constants';
 
-import { supabaseRequest } from './supabase-client';
+import { hasCloudAuth, supabaseRequest } from './supabase-client';
 
 export { TENANT_PLAN, TENANT_STATUS };
 export type { TenantPlan, TenantStatus };
@@ -43,6 +43,9 @@ export function setActiveTenantId(tenantId: string) {
  * Fetch all tenants from Supabase Cloud
  */
 export async function listTenants(): Promise<Tenant[]> {
+  if (!hasCloudAuth()) {
+    return [];
+  }
   return supabaseRequest<Tenant[]>(
     '/rest/v1/tenants?select=*&order=created_at.desc',
   );

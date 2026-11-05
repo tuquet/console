@@ -56,6 +56,20 @@ export function createAuthError(
 }
 
 /**
+ * Safe check for authenticated cloud session.
+ * In a Vue runtime with Pinia initialized, returns true if an accessToken is present.
+ * If called in an environment without active Pinia (such as unit tests), safely falls back to true.
+ */
+export function hasCloudAuth(): boolean {
+  try {
+    const accessStore = useAccessStore();
+    return Boolean(accessStore.accessToken);
+  } catch {
+    return true;
+  }
+}
+
+/**
  * Builds PostgREST schema switching headers.
  * Uses Accept-Profile for read operations (GET/HEAD) and Content-Profile for write operations.
  */

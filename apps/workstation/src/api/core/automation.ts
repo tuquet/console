@@ -20,7 +20,7 @@ import {
   WORKFLOW_STATUS,
 } from '@operon/constants';
 
-import { supabaseRequest } from './supabase-client';
+import { hasCloudAuth, supabaseRequest } from './supabase-client';
 
 // ============================================================================
 // PART 1: WORKFLOW ORCHESTRATION & JOBS (PostgreSQL schema: 'operon')
@@ -169,6 +169,9 @@ export function buildAutomationFilterQuery(
 export async function listWorkflows(
   params?: ListWorkflowsParams,
 ): Promise<Workflow[]> {
+  if (!hasCloudAuth()) {
+    return [];
+  }
   try {
     const data = await supabaseRequest<Workflow[]>(
       '/rest/v1/rpc/workflow_list',
@@ -196,6 +199,9 @@ export async function listWorkflows(
  * Lấy danh sách các jobs từ schema operon.jobs
  */
 export async function listJobs(params?: ListJobsParams): Promise<Job[]> {
+  if (!hasCloudAuth()) {
+    return [];
+  }
   try {
     const query = buildAutomationFilterQuery(
       '/rest/v1/jobs?select=id,tenant_id,workflow_id,worker_id,name,status,total_tasks,completed_tasks,failed_tasks,started_at,ended_at,created_at,error_message,workflow:workflow_id(name),worker:worker_id(name)&order=created_at.desc',
@@ -514,6 +520,9 @@ export async function probeLocalDaemon(port = DEFAULT_DAEMON_PORT): Promise<{
 export async function listDevices(
   params?: ListDevicesParams,
 ): Promise<Device[]> {
+  if (!hasCloudAuth()) {
+    return [];
+  }
   try {
     const query = buildFleetFilterQuery(
       '/rest/v1/devices?select=*&order=last_heartbeat_at.desc.nullslast',
@@ -557,6 +566,9 @@ export async function revokeDevice(deviceId: string): Promise<void> {
 export async function listBrowsers(
   params?: ListBrowsersParams,
 ): Promise<BrowserProfile[]> {
+  if (!hasCloudAuth()) {
+    return [];
+  }
   try {
     const query = buildFleetFilterQuery(
       '/rest/v1/browsers?select=id,tenant_id,name,browser_type,engine_version,os_platform,os_version,cpu_cores,ram_gb,status,storage_size_bytes,cookies_count,created_at,last_synced_at,locked_by_device:locked_by_device_id(name),proxy:proxy_id(host,port,protocol)&order=created_at.desc',
@@ -679,6 +691,9 @@ export async function unbindBrowser(browserId: string): Promise<boolean> {
 export async function listProxies(
   params?: ListProxiesParams,
 ): Promise<ProxyServer[]> {
+  if (!hasCloudAuth()) {
+    return [];
+  }
   try {
     const query = buildFleetFilterQuery(
       '/rest/v1/proxies?select=*&order=created_at.desc',

@@ -5,6 +5,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Page } from '@operon/common-ui';
+import { useAccessStore } from '@operon/stores';
 
 import {
   Badge,
@@ -44,9 +45,22 @@ defineOptions({ name: 'AutomationOverview' });
 
 const route = useRoute();
 const router = useRouter();
+const accessStore = useAccessStore();
 
 const loading = ref(false);
 const isConnectModalVisible = ref(false);
+
+function handleConnectFleet() {
+  if (!accessStore.accessToken) {
+    toast.info(
+      $t('authentication.loginAgainSubTitle') ||
+        'Please sign in to connect this device to a cloud workspace.',
+    );
+    accessStore.setLoginExpired(true);
+    return;
+  }
+  isConnectModalVisible.value = true;
+}
 
 const overview = ref<AutomationOverviewSummary>({
   browsers: { error: 0, idle: 0, running: 0, total: 0 },
@@ -235,7 +249,7 @@ onMounted(() => {
         <Button
           size="sm"
           class="h-8 gap-1.5 px-2.5"
-          @click="isConnectModalVisible = true"
+          @click="handleConnectFleet"
         >
           <Plus class="size-3.5" />
           <span>{{ $t('common.connect') }}</span>

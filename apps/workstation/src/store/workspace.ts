@@ -2,6 +2,8 @@ import type { Tenant } from '#/api/core/tenant';
 
 import { computed, ref } from 'vue';
 
+import { useAccessStore } from '@operon/stores';
+
 import { toast } from '@operon-core/shadcn-ui';
 
 import { defineStore } from 'pinia';
@@ -30,6 +32,13 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   });
 
   async function fetchWorkspaces(force = false) {
+    const accessStore = useAccessStore();
+    if (!accessStore.accessToken) {
+      workspaces.value = [];
+      activeWorkspaceId.value = '';
+      return [];
+    }
+
     if (workspaces.value.length > 0 && !force) {
       return workspaces.value;
     }

@@ -1,3 +1,5 @@
+import { useAccessStore } from '@operon/stores';
+
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -29,6 +31,8 @@ vi.mock('#/api/core/tenant', () => ({
 describe('useWorkspaceStore Pinia store TDD suite', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+    const accessStore = useAccessStore();
+    accessStore.setAccessToken('mock-access-token');
     vi.clearAllMocks();
   });
 
@@ -45,6 +49,15 @@ describe('useWorkspaceStore Pinia store TDD suite', () => {
 
     expect(store.workspaces.length).toBe(2);
     expect(store.activeWorkspace?.name).toBe('Tenant One');
+  });
+
+  it('fetchWorkspaces returns empty array and skips listTenants when unauthenticated', async () => {
+    const accessStore = useAccessStore();
+    accessStore.setAccessToken(null);
+    const store = useWorkspaceStore();
+    const result = await store.fetchWorkspaces();
+    expect(result).toEqual([]);
+    expect(store.workspaces).toEqual([]);
   });
 
   it('setWorkspace updates active workspace and dispatches custom event', () => {
