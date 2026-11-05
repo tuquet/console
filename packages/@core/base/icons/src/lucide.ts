@@ -99,6 +99,8 @@ export {
   Underline,
   Undo2,
   Unlink2,
+  User,
+  UserRound,
   UserRoundPen,
   X,
 } from '@lucide/vue';

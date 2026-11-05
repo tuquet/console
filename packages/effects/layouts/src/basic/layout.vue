@@ -61,6 +61,8 @@ interface Props {
   logoSrcDark?: string;
   /** Custom Logo text; uses preferences default if omitted */
   logoText?: string;
+  /** Override sidebar logo visibility */
+  sidebarLogoVisible?: boolean;
   /** User avatar image URL */
   avatar?: string;
   /** User text (e.g. username) */
@@ -75,6 +77,15 @@ const finalLogoSrcDark = computed(
 );
 /** Resolved Logo text (custom takes priority, falls back to default app name) */
 const finalLogoText = computed(() => props.logoText || preferences.app.name);
+
+const slots: SetupContext['slots'] = useSlots();
+
+const isSidebarLogoVisible = computed(() => {
+  if (props.sidebarLogoVisible !== undefined) {
+    return props.sidebarLogoVisible;
+  }
+  return preferences.logo.enable;
+});
 
 const {
   isDark,
@@ -163,6 +174,9 @@ const logoTheme = computed(() => {
  * layout-sidebar extra title slot height
  */
 const sidebarExtraTitleHeight = computed<number | undefined>(() => {
+  if (slots.logo) {
+    return undefined;
+  }
   const showSideExtraTitle =
     preferences.logo.enable && preferences.logo.showText;
   return showSideExtraTitle ? undefined : 0;
@@ -263,7 +277,6 @@ watch(i18n.global.locale, refreshAll, { flush: 'post' });
 // Refresh page when timezone updates
 watch(() => timezoneStore.timezone, refreshAll, { flush: 'post' });
 
-const slots: SetupContext['slots'] = useSlots();
 const headerSlots = computed(() => {
   return Object.keys(slots).filter((key) => key.startsWith('header-'));
 });
@@ -306,7 +319,7 @@ const headerSlots = computed(() => {
     :sidebar-theme-sub="sidebarThemeSub"
     :sidebar-width="preferences.sidebar.width"
     :side-collapse-width="preferences.sidebar.collapseWidth"
-    :sidebar-logo-visible="preferences.logo.enable"
+    :sidebar-logo-visible="isSidebarLogoVisible"
     :tabbar-enable="preferences.tabbar.enable"
     :tabbar-height="preferences.tabbar.height"
     :z-index="preferences.app.zIndex"
@@ -331,7 +344,7 @@ const headerSlots = computed(() => {
     "
   >
     <!-- logo -->
-    <template #logo>
+    <template v-if="isSidebarLogoVisible" #logo>
       <slot
         :collapsed="logoCollapsed"
         :is-mobile="preferences.app.isMobile"

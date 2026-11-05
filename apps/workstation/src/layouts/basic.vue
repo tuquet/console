@@ -17,8 +17,6 @@ import { preferences, usePreferences } from '@operon/preferences';
 import { useAccessStore, useUserStore } from '@operon/stores';
 import { openWindow } from '@operon/utils';
 
-import { Button } from '@operon-core/shadcn-ui';
-
 import { LogIn } from '@lucide/vue';
 
 import WorkspaceSelector from '#/components/common/workspace-selector.vue';
@@ -142,8 +140,6 @@ const avatar = computed(() => {
   return userStore.userInfo?.avatar ?? preferences.app.defaultAvatar;
 });
 
-const unauthAvatar = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2371717a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>`;
-
 const isAuthenticated = computed(() => Boolean(accessStore.accessToken));
 
 function openLoginModal() {
@@ -244,13 +240,17 @@ watch(
   <BasicLayout
     :avatar="isAuthenticated ? avatar : undefined"
     :text="isAuthenticated ? userStore.userInfo?.realName : undefined"
+    :sidebar-logo-visible="isAuthenticated || preferences.logo.enable"
     @clear-preferences-and-logout="handleLogout"
     @logout="handleLogout"
   >
-    <template #logo="{ collapsed }">
+    <template
+      v-if="isAuthenticated || preferences.logo.enable"
+      #logo="{ collapsed }"
+    >
       <WorkspaceSelector v-if="isAuthenticated" :collapsed="collapsed" />
       <div
-        v-else-if="preferences.logo.enable"
+        v-else
         class="flex items-center gap-2.5 px-3 py-2"
         :class="{ 'justify-center': collapsed || !preferences.logo.showText }"
       >
@@ -265,18 +265,8 @@ watch(
     </template>
     <template #user-dropdown>
       <div class="mr-1 flex items-center gap-2">
-        <Button
-          v-if="!isAuthenticated"
-          size="sm"
-          variant="outline"
-          class="h-8 gap-1.5 rounded-full px-3 text-xs font-medium hover:bg-accent hover:text-accent-foreground"
-          @click="openLoginModal"
-        >
-          <LogIn class="size-3.5" />
-          <span>{{ $t('authentication.login') || 'Sign In' }}</span>
-        </Button>
         <UserDropdown
-          :avatar="isAuthenticated ? avatar : unauthAvatar"
+          :avatar="isAuthenticated ? avatar : undefined"
           :avatar-dot="isAuthenticated"
           :menus
           :text="

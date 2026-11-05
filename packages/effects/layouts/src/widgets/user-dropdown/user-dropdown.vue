@@ -19,6 +19,7 @@ import {
   RotateCw,
   Search,
   Settings,
+  User,
 } from '@operon/icons';
 import { $t, loadLocaleMessages } from '@operon/locales';
 import {
@@ -407,7 +408,16 @@ if (lockKey) {
 
   <DropdownMenu v-model:open="openPopover" :modal="false">
     <DropdownMenuTrigger ref="refTrigger" :disabled="props.trigger === 'hover'">
-      <div class="mr-2 ml-1 cursor-pointer rounded-full p-1.5 hover:bg-accent">
+      <div
+        v-if="!avatar"
+        class="mr-1 flex-center size-8 cursor-pointer rounded-full hover:bg-accent hover:text-accent-foreground text-foreground transition-colors"
+      >
+        <User class="size-4" />
+      </div>
+      <div
+        v-else
+        class="mr-2 ml-1 cursor-pointer rounded-full p-1.5 hover:bg-accent"
+      >
         <div class="flex-center hover:text-accent-foreground">
           <VbenAvatar
             :alt="text"
@@ -425,12 +435,19 @@ if (lockKey) {
       <div ref="refContent">
         <DropdownMenuLabel class="flex items-center p-3">
           <VbenAvatar
+            v-if="avatar"
             :alt="text"
             :src="avatar"
             class="size-12"
             :dot="avatarDot"
             :dot-class="avatarDotClass"
           />
+          <div
+            v-else
+            class="flex-center size-10 shrink-0 rounded-full bg-muted text-muted-foreground"
+          >
+            <User class="size-5" />
+          </div>
           <div class="ml-2 w-full">
             <div
               v-if="tagText || text || $slots.tagText"

@@ -8,6 +8,7 @@ export { default as Copyright } from './layout/copyright.vue';
 export { default as Footer } from './layout/footer.vue';
 export { default as Header } from './layout/header.vue';
 export { default as Layout } from './layout/layout.vue';
+export { default as Logo } from './layout/logo.vue';
 export { default as Navigation } from './layout/navigation.vue';
 export { default as Sidebar } from './layout/sidebar.vue';
 export { default as Tabbar } from './layout/tabbar.vue';

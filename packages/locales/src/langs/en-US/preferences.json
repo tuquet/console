@@ -50,6 +50,14 @@
     "fixed": "Fixed",
     "userDropdown": "User menu"
   },
+  "logo": {
+    "title": "Logo",
+    "visible": "Show logo",
+    "showText": "Show app title",
+    "mode": "Logo display mode",
+    "modeIcon": "Icon",
+    "modeFull": "Full logo"
+  },
   "sidebar": {
     "buttons": "Control buttons",
     "buttonFixed": "Pin",

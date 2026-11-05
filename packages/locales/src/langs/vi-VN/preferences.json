@@ -50,6 +50,14 @@
     "fixed": "Cố định góc",
     "userDropdown": "Menu người dùng"
   },
+  "logo": {
+    "title": "Logo",
+    "visible": "Hiện logo",
+    "showText": "Hiện tên ứng dụng",
+    "mode": "Chế độ hiển thị",
+    "modeIcon": "Biểu tượng",
+    "modeFull": "Logo đầy đủ"
+  },
   "sidebar": {
     "buttons": "Hiện nút bấm",
     "buttonFixed": "Cố định",

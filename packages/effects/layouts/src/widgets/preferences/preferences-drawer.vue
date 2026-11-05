@@ -61,6 +61,7 @@ import {
   GlobalShortcutKeys,
   Header,
   Layout,
+  Logo,
   Navigation,
   Radius,
   Sidebar,
@@ -197,7 +198,11 @@ const navigationStyleType = defineModel<NavigationStyleType | undefined>(
 const navigationSplit = defineModel<boolean>('navigationSplit');
 const navigationAccordion = defineModel<boolean>('navigationAccordion');
 
-// const logoVisible = defineModel<boolean>('logoVisible');
+const logoEnable = defineModel<boolean>('logoEnable');
+const logoShowText = defineModel<boolean>('logoShowText');
+const logoLogoMode = defineModel<'full' | 'icon' | undefined>('logoLogoMode', {
+  default: undefined,
+});
 
 const footerEnable = defineModel<boolean>('footerEnable');
 const footerFixed = defineModel<boolean>('footerFixed');
@@ -491,6 +496,14 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
             </Block>
             <Block :title="$t('preferences.content')">
               <Content v-model="appContentCompact" />
+            </Block>
+
+            <Block :title="$t('preferences.logo.title')">
+              <Logo
+                v-model:logo-enable="logoEnable"
+                v-model:logo-show-text="logoShowText"
+                v-model:logo-mode="logoLogoMode"
+              />
             </Block>
 
             <Block :title="$t('preferences.sidebar.title')">
