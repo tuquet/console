@@ -11,6 +11,7 @@ import {
   VxeTextarea as _VxeTextarea,
 } from 'vxe-pc-ui';
 
+export * from './components';
 export { setupVbenVxeTable } from './init';
 export type { VxeTableGridColumns, VxeTableGridOptions } from './types';
 export * from './use-vxe-grid';

@@ -52,6 +52,12 @@
   height: auto !important;
 }
 
+.vxe-grid.is--round {
+  overflow: hidden;
+  border: 1px solid hsl(var(--border) / 60%);
+  border-radius: calc(var(--radius) + 2px);
+}
+
 .vxe-table--header-wrapper {
   background-color: hsl(var(--muted) / 30%);
   border-bottom: 1px solid hsl(var(--border) / 60%);
@@ -59,7 +65,7 @@
 
 .vxe-table--header-wrapper th {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
   color: hsl(var(--muted-foreground));
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -90,6 +96,18 @@
 .vxe-body--column .vxe-cell {
   padding-right: 0.875rem !important;
   padding-left: 0.875rem !important;
+}
+
+.vxe-table--body .vxe-body--row {
+  transition: background-color 0.15s ease-in-out;
+}
+
+.vxe-table--body .vxe-body--row.row--checked {
+  background-color: hsl(var(--muted) / 50%) !important;
+}
+
+.vxe-table--body .vxe-body--row.row--checked .vxe-body--column {
+  background-color: transparent !important;
 }
 
 .vxe-table--body .vxe-body--column {

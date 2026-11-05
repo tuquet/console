@@ -26,7 +26,18 @@ import {
 } from '@operon/plugins/vxe-table';
 import { usePreferences } from '@operon/preferences';
 
-import { Badge, Button } from '@operon-core/shadcn-ui';
+import {
+  Badge,
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '@operon-core/shadcn-ui';
+
+import { MoreHorizontal } from '@lucide/vue';
 
 import {
   isInteractiveCellClick,
@@ -318,6 +329,214 @@ setupVbenVxeTable({
         const variant = props?.variant || 'secondary';
 
         return h(Badge, { class: badgeClass, variant }, () => text);
+      },
+    });
+
+    // Row Action Menu: cellRender: { name: 'CellActions', props: { actions: [...] } }
+    vxeUI.renderer.add('CellActions', {
+      renderTableDefault(renderOpts, params) {
+        const { props } = renderOpts;
+        const rawActions =
+          typeof props?.actions === 'function'
+            ? props.actions(params)
+            : props?.actions;
+        if (!Array.isArray(rawActions) || rawActions.length === 0) {
+          return [] as any;
+        }
+
+        const visibleActions = rawActions.filter((act) => {
+          if (!act) return false;
+          if (typeof act.show === 'function') return act.show(params);
+          if (act.show === false) return false;
+          return true;
+        });
+
+        if (visibleActions.length === 0) return [] as any;
+
+        return h(
+          DropdownMenu,
+          {},
+          {
+            default: () => [
+              h(
+                DropdownMenuTrigger,
+                { asChild: true },
+                {
+                  default: () =>
+                    h(
+                      Button,
+                      {
+                        class:
+                          'size-7 p-0 text-muted-foreground hover:text-foreground data-[state=open]:bg-muted',
+                        size: 'icon',
+                        variant: 'ghost',
+                        onClick(e: MouseEvent) {
+                          e.stopPropagation();
+                        },
+                      },
+                      {
+                        default: () => h(MoreHorizontal, { class: 'size-4' }),
+                      },
+                    ),
+                },
+              ),
+              h(
+                DropdownMenuContent,
+                { align: props?.align || 'end', class: 'w-44' },
+                {
+                  default: () =>
+                    visibleActions.flatMap((act, idx) => {
+                      const isDisabled =
+                        typeof act.disabled === 'function'
+                          ? act.disabled(params)
+                          : Boolean(act.disabled);
+                      const isDanger =
+                        act.danger || act.variant === 'destructive';
+                      const items = [];
+
+                      if (act.separator && idx > 0) {
+                        items.push(
+                          h(DropdownMenuSeparator, { key: `sep-${idx}` }),
+                        );
+                      }
+
+                      items.push(
+                        h(
+                          DropdownMenuItem,
+                          {
+                            key: act.code || `act-${idx}`,
+                            class: [
+                              'text-xs cursor-pointer',
+                              isDanger &&
+                                'text-destructive focus:text-destructive focus:bg-destructive/10',
+                            ],
+                            disabled: isDisabled,
+                            onSelect(e: Event) {
+                              e.stopPropagation();
+                              if (typeof act.onClick === 'function') {
+                                act.onClick(params);
+                              }
+                            },
+                          },
+                          {
+                            default: () => [
+                              act.icon &&
+                                h(act.icon, {
+                                  class: [
+                                    'mr-2 size-3.5',
+                                    isDanger
+                                      ? 'text-destructive'
+                                      : 'text-muted-foreground',
+                                  ],
+                                }),
+                              h('span', { class: 'truncate' }, act.label),
+                              act.shortcut &&
+                                h(
+                                  DropdownMenuShortcut,
+                                  { class: 'ml-auto text-[10px]' },
+                                  { default: () => act.shortcut },
+                                ),
+                            ],
+                          },
+                        ),
+                      );
+                      return items;
+                    }),
+                },
+              ),
+            ],
+          },
+        );
+      },
+    });
+
+    // Progress Bar Cell: cellRender: { name: 'CellProgress', props: { max, showText, tone, toneField } }
+    vxeUI.renderer.add('CellProgress', {
+      renderTableDefault(renderOpts, params) {
+        const { props } = renderOpts;
+        const { column, row } = params;
+        const val = Number(row[column.field] ?? 0);
+        const max = Number(props?.max ?? 100);
+        const pct = Math.min(100, Math.max(0, Math.round((val / max) * 100)));
+
+        const tone =
+          props?.tone || (props?.toneField ? row[props.toneField] : 'primary');
+        const toneClassMap: Record<string, string> = {
+          danger: 'bg-destructive',
+          destructive: 'bg-destructive',
+          info: 'bg-primary',
+          primary: 'bg-primary',
+          success: 'bg-success',
+          warning: 'bg-warning',
+        };
+        const barColorClass = toneClassMap[tone] || 'bg-primary';
+
+        return h('div', { class: 'flex w-full items-center gap-2' }, [
+          h(
+            'div',
+            {
+              class:
+                'relative h-1.5 w-full min-w-16 overflow-hidden rounded-full bg-muted',
+            },
+            [
+              h('div', {
+                class: `h-full rounded-full transition-all duration-300 ${barColorClass}`,
+                style: { width: `${pct}%` },
+              }),
+            ],
+          ),
+          props?.showText !== false &&
+            h(
+              'span',
+              {
+                class:
+                  'w-9 shrink-0 text-right font-mono text-[11px] text-muted-foreground',
+              },
+              `${pct}%`,
+            ),
+        ]);
+      },
+    });
+
+    // Formatted Duration Cell: cellRender: { name: 'CellDuration', props: { unit: 's' | 'ms' } }
+    vxeUI.renderer.add('CellDuration', {
+      renderTableDefault(renderOpts, params) {
+        const { props } = renderOpts;
+        const { column, row } = params;
+        const raw = row[column.field];
+        if (raw === undefined || raw === null || raw === '') {
+          return h('span', { class: 'text-muted-foreground' }, '—');
+        }
+
+        const isMs = props?.unit === 'ms';
+        const totalSeconds = Math.round(
+          isMs ? Number(raw) / 1000 : Number(raw),
+        );
+
+        if (Number.isNaN(totalSeconds) || totalSeconds < 0) {
+          return h('span', { class: 'text-muted-foreground' }, '—');
+        }
+
+        let formatted: string;
+        if (totalSeconds < 1) {
+          formatted = '< 1s';
+        } else if (totalSeconds < 60) {
+          formatted = `${totalSeconds}s`;
+        } else if (totalSeconds < 3600) {
+          const minutes = Math.floor(totalSeconds / 60);
+          const seconds = totalSeconds % 60;
+          formatted = seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`;
+        } else {
+          const hours = Math.floor(totalSeconds / 3600);
+          const minutes = Math.floor((totalSeconds % 3600) / 60);
+          formatted = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+        }
+
+        return h(
+          'span',
+          { class: 'font-mono text-xs text-muted-foreground' },
+          formatted,
+        );
       },
     });
   },
