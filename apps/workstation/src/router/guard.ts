@@ -117,11 +117,23 @@ function setupAccessGuard(router: Router) {
           accessStore.setAccessRoutes(accessibleRoutes);
           accessStore.setIsAccessChecked(true);
 
-          const targetPath =
+          const fallbackHome =
+            userStore.userInfo?.homePath ||
+            preferences.app.defaultHomePath ||
+            '/automation/overview';
+          let targetPath =
             to.path === '/' || to.path === LOGIN_PATH
-              ? preferences.app.defaultHomePath
+              ? fallbackHome
               : to.fullPath;
-          return { ...router.resolve(targetPath), replace: true };
+          let resolved = router.resolve(targetPath);
+          if (
+            resolved.name === 'FallbackNotFound' ||
+            resolved.matched.length === 0
+          ) {
+            targetPath = fallbackHome;
+            resolved = router.resolve(targetPath);
+          }
+          return { ...resolved, replace: true };
         }
 
         // Cloud-only features on Desktop trigger optional login modal
@@ -219,8 +231,17 @@ function setupAccessGuard(router: Router) {
       } catch {}
     }
 
+    let resolved = router.resolve(redirectPath);
+    if (resolved.name === 'FallbackNotFound' || resolved.matched.length === 0) {
+      redirectPath =
+        userInfo.homePath ||
+        preferences.app.defaultHomePath ||
+        '/automation/overview';
+      resolved = router.resolve(redirectPath);
+    }
+
     return {
-      ...router.resolve(redirectPath),
+      ...resolved,
       replace: true,
     };
   });
