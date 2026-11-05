@@ -9,10 +9,26 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
-const releaseDir = path.resolve(
-  rootDir,
-  'apps/workstation/src-tauri/target/release',
-);
+const targetDir = path.resolve(rootDir, 'apps/workstation/src-tauri/target');
+
+// Auto-detect release directory across default and target-triple outputs (e.g. x86_64-pc-windows-gnu or x86_64-pc-windows-msvc)
+const candidateDirs = [
+  path.resolve(targetDir, 'release'),
+  ...(fs.existsSync(targetDir)
+    ? fs
+        .readdirSync(targetDir, { withFileTypes: true })
+        .filter(
+          (d) => d.isDirectory() && d.name !== 'release' && d.name !== 'debug',
+        )
+        .map((d) => path.resolve(targetDir, d.name, 'release'))
+    : []),
+];
+
+const releaseDir =
+  candidateDirs.find((d) => fs.existsSync(path.join(d, 'bundle/nsis'))) ||
+  candidateDirs.find((d) => fs.existsSync(d)) ||
+  path.resolve(targetDir, 'release');
+
 const nsisDir = path.resolve(releaseDir, 'bundle/nsis');
 const msiDir = path.resolve(releaseDir, 'bundle/msi');
 const distDir = path.resolve(rootDir, 'dist-release');
@@ -51,13 +67,16 @@ if (fs.existsSync(msiDir)) {
 }
 
 // 3. Locate standalone binary and create Portable Zip
-const rawExe = path.join(releaseDir, 'Operon Workstation.exe');
-if (fs.existsSync(rawExe)) {
+const rawExeName = ['Operon Workstation.exe', 'workstation.exe'].find((name) =>
+  fs.existsSync(path.join(releaseDir, name)),
+);
+if (rawExeName) {
+  const rawExe = path.join(releaseDir, rawExeName);
   const portableZip = path.join(distDir, 'Operon-Workstation-Portable.zip');
   console.log(`Creating portable archive from ${rawExe}...`);
   try {
     execSync(
-      `tar -a -c -f "${portableZip}" -C "${releaseDir}" "Operon Workstation.exe"`,
+      `tar -a -c -f "${portableZip}" -C "${releaseDir}" "${rawExeName}"`,
       {
         stdio: 'inherit',
       },
