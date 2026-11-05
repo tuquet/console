@@ -211,12 +211,7 @@ watch(
 </script>
 
 <template>
-  <Page
-    auto-content-height
-    content-class="p-2.5 sm:p-4 flex flex-col min-h-0"
-    :title="$t('page.automation.jobs')"
-    :description="$t('page.automation.jobs_desc')"
-  >
+  <Page :title="$t('page.automation.jobs')">
     <template #title>
       <div class="flex items-center gap-2">
         <h1

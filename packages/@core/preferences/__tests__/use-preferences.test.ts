@@ -64,6 +64,27 @@ describe('usePreferences - anti-lockout safeguards', () => {
     });
   });
 
+  it('falls back to fixed position when user dropdown is unavailable without a header', () => {
+    const { preferencesButtonPosition } = usePreferences();
+
+    preferencesManager.updatePreferences({
+      app: {
+        enablePreferences: true,
+        preferencesButtonPosition: 'user-dropdown',
+      },
+      header: {
+        enable: false,
+        hidden: false,
+      },
+    });
+
+    expect(preferencesButtonPosition.value).toEqual({
+      fixed: true,
+      header: false,
+      userDropdown: false,
+    });
+  });
+
   it('returns all false when enablePreferences is false', () => {
     const { preferencesButtonPosition } = usePreferences();
 

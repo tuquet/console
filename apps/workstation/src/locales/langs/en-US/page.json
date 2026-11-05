@@ -4,6 +4,11 @@
     "register": "Register",
     "profile": "Profile"
   },
+  "authentication": {
+    "appLoadErrorTitle": "Unable to load the application",
+    "appLoadErrorDesc": "Something went wrong while starting the application. Please reload and try again.",
+    "appReloadBtn": "Reload"
+  },
   "dashboard": {
     "title": "Dashboard",
     "analytics": "Analytics"

@@ -149,12 +149,7 @@ const [Grid, gridApi] = useVbenVxeGrid<Tenant>({
 </script>
 
 <template>
-  <Page
-    auto-content-height
-    content-class="p-2.5 sm:p-4 flex flex-col min-h-0 space-y-3 sm:space-y-4"
-    :title="$t('page.workspace.title')"
-    :description="$t('page.workspace.subtitle')"
-  >
+  <Page :title="$t('page.workspace.title')">
     <template #title>
       <div class="flex items-center gap-2">
         <h1

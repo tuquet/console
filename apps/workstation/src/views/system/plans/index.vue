@@ -159,12 +159,7 @@ const [Grid, gridApi] = useVbenVxeGrid<BillingPlan>({
 </script>
 
 <template>
-  <Page
-    auto-content-height
-    content-class="p-2.5 sm:p-4 flex flex-col min-h-0"
-    :title="$t('page.system.plans')"
-    :description="$t('page.system.plans_desc')"
-  >
+  <Page :title="$t('page.system.plans')">
     <template #title>
       <div class="flex items-center gap-2">
         <h1

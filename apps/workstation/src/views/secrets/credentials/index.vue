@@ -106,10 +106,7 @@ onMounted(load);
 </script>
 
 <template>
-  <Page
-    :title="$t('page.secrets.title')"
-    :description="$t('page.secrets.credentials_desc')"
-  >
+  <Page :title="$t('page.secrets.title')">
     <template #extra>
       <div class="flex flex-wrap gap-2">
         <Button variant="outline" :disabled="busy" @click="load">

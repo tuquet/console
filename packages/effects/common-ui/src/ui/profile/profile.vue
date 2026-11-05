@@ -27,7 +27,7 @@ const tabsValue = defineModel<string | undefined>('modelValue', {
 });
 </script>
 <template>
-  <Page auto-content-height>
+  <Page>
     <div class="flex size-full">
       <Card class="w-1/6 flex-none">
         <div class="mt-4 flex-col-center h-40 gap-4">

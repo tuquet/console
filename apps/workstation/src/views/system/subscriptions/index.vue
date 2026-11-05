@@ -177,12 +177,7 @@ const [Grid, gridApi] = useVbenVxeGrid<PlatformSubscription>({
 </script>
 
 <template>
-  <Page
-    auto-content-height
-    content-class="p-2.5 sm:p-4 flex flex-col min-h-0"
-    :title="$t('page.system.subscriptions')"
-    :description="$t('page.system.subscriptions_desc')"
-  >
+  <Page :title="$t('page.system.subscriptions')">
     <template #title>
       <div class="flex items-center gap-2">
         <h1

@@ -11,7 +11,7 @@ import {
   useLayoutHeaderStyle,
   useLayoutViewportHeight,
 } from '@operon-core/composables';
-import { PanelLeftClose, PanelLeftOpen } from '@operon-core/icons';
+import { PanelLeft, PanelLeftOpen } from '@operon-core/icons';
 import { VbenIconButton } from '@operon-core/shadcn-ui';
 import {
   ELEMENT_ID_LAYOUT_SCROLL,
@@ -680,7 +680,7 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
                 class="my-0 size-8 rounded-md"
                 @click="handleHeaderToggle"
               >
-                <PanelLeftClose
+                <PanelLeft
                   v-if="isMobile ? !activeSidebarCollapse : showSidebar"
                   class="size-5"
                 />

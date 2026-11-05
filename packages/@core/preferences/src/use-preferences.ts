@@ -233,10 +233,9 @@ function usePreferences() {
 
     // If explicit position is configured
     if (preferencesButtonPosition !== 'auto') {
-      // Anti-Lockout Invariant: If header is disabled or hidden while position is 'header',
-      // automatically fallback to floating fixed button so user is never locked out of settings
+      // Keep preferences accessible when its configured header location is unavailable.
       const headerUnavailable = !header.enable || headerHidden;
-      if (isHeaderPosition && headerUnavailable) {
+      if ((isHeaderPosition || isUserDropdownPosition) && headerUnavailable) {
         return {
           fixed: true,
           header: false,

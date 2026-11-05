@@ -1,5 +1,3 @@
- 
-
 import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
@@ -21,14 +19,18 @@ const ANSI = {
   yellow: '\u001B[33m',
 };
 
+function log(message) {
+  process.stdout.write(`${message}\n`);
+}
+
 async function runQuickTest() {
-  console.log(
+  log(
     `\n${ANSI.bold}${ANSI.cyan}================================================================${ANSI.reset}`,
   );
-  console.log(
+  log(
     `${ANSI.bold}${ANSI.cyan}   OPERON LOCAL-FIRST SQLITE & CLOUD SYNC VERIFICATION TOOL    ${ANSI.reset}`,
   );
-  console.log(
+  log(
     `${ANSI.bold}${ANSI.cyan}================================================================${ANSI.reset}\n`,
   );
 
@@ -36,15 +38,13 @@ async function runQuickTest() {
   const fileUrl = `file:${dbPath.replaceAll('\\', '/')}`;
   const migrationsFolder = path.resolve(__dirname, '../src/db/migrations');
 
-  console.log(
-    `${ANSI.bold}[1/4] Connecting to Local SQLite Database...${ANSI.reset}`,
-  );
-  console.log(`      Path: ${ANSI.yellow}${dbPath}${ANSI.reset}`);
+  log(`${ANSI.bold}[1/4] Connecting to Local SQLite Database...${ANSI.reset}`);
+  log(`      Path: ${ANSI.yellow}${dbPath}${ANSI.reset}`);
 
   const client = createClient({ url: fileUrl });
   const db = drizzle(client);
 
-  console.log(
+  log(
     `\n${ANSI.bold}[2/4] Executing Automatic Schema Migrations (Drizzle Engine)...${ANSI.reset}`,
   );
 
@@ -75,20 +75,18 @@ async function runQuickTest() {
       }
     }
   } catch (error) {
-    console.log(
+    log(
       `      ${ANSI.yellow}ℹ Legacy pre-check note: ${error.message}${ANSI.reset}`,
     );
   }
 
   try {
     await migrate(db, { migrationsFolder });
-    console.log(
+    log(
       `      ${ANSI.green}✔ Migrations successfully applied from: ${migrationsFolder}${ANSI.reset}`,
     );
   } catch (error) {
-    console.log(
-      `      ${ANSI.yellow}ℹ Migration note: ${error.message}${ANSI.reset}`,
-    );
+    log(`      ${ANSI.yellow}ℹ Migration note: ${error.message}${ANSI.reset}`);
     throw error;
   }
 
@@ -97,11 +95,11 @@ async function runQuickTest() {
     "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name ASC;",
   );
   const tableNames = tableQuery.rows.map((r) => r.name);
-  console.log(
+  log(
     `      ${ANSI.green}✔ Active tables discovered (${tableNames.length}):${ANSI.reset} ${tableNames.join(', ')}`,
   );
 
-  console.log(
+  log(
     `\n${ANSI.bold}[3/4] Testing Local-First CRUD Operations...${ANSI.reset}`,
   );
   const testProfileId = `test-profile-${Date.now()}`;
@@ -128,7 +126,7 @@ async function runQuickTest() {
     sql: `INSERT INTO browser_profiles (id, name, browser_type, user_agent, timezone, fingerprint, cookies, storage_state, is_locked, tenant_id, deleted_at, created_at, updated_at, last_synced_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   });
-  console.log(
+  log(
     `      ${ANSI.green}✔ Created local offline profile with tenant_id: ${testProfileId}${ANSI.reset}`,
   );
 
@@ -137,11 +135,11 @@ async function runQuickTest() {
     args: [testProfileId],
     sql: `SELECT id, name, browser_type, is_locked, tenant_id, deleted_at, last_synced_at FROM browser_profiles WHERE id = ?`,
   });
-  console.log(
+  log(
     `      ${ANSI.green}✔ Read verified:${ANSI.reset} ${JSON.stringify(readRes.rows[0])}`,
   );
 
-  console.log(
+  log(
     `\n${ANSI.bold}[4/4] Testing Cloud Synchronization Contract (LWW & Tombstone)...${ANSI.reset}`,
   );
 
@@ -150,7 +148,7 @@ async function runQuickTest() {
     args: ['tenant-quick-test'],
     sql: `SELECT id, name, updated_at, last_synced_at FROM browser_profiles WHERE tenant_id = ? AND (last_synced_at IS NULL OR updated_at > last_synced_at)`,
   });
-  console.log(
+  log(
     `      ${ANSI.cyan}ℹ Found ${dirtyRes.rows.length} dirty/un-synced profile(s) pending Cloud Push.${ANSI.reset}`,
   );
 
@@ -160,7 +158,7 @@ async function runQuickTest() {
     args: [syncedIso, testProfileId],
     sql: `UPDATE browser_profiles SET last_synced_at = ? WHERE id = ?`,
   });
-  console.log(
+  log(
     `      ${ANSI.green}✔ Simulated Cloud Push: marked profile ${testProfileId} with last_synced_at = ${syncedIso}${ANSI.reset}`,
   );
 
@@ -187,7 +185,7 @@ async function runQuickTest() {
       ],
       sql: `UPDATE browser_profiles SET name = ?, updated_at = ?, last_synced_at = ? WHERE id = ?`,
     });
-    console.log(
+    log(
       `      ${ANSI.green}✔ Conflict Resolution (LWW): Cloud is newer -> updated local profile title to "${simulatedCloudProfile.name}"${ANSI.reset}`,
     );
   }
@@ -202,7 +200,7 @@ async function runQuickTest() {
     args: ['tenant-quick-test'],
     sql: `SELECT COUNT(*) as cnt FROM browser_profiles WHERE tenant_id = ? AND deleted_at IS NULL`,
   });
-  console.log(
+  log(
     `      ${ANSI.green}✔ Tombstone Soft-Delete verified: Active count is ${activeCount.rows[0].cnt} (Profile correctly marked with deleted_at = ${deletedIso})${ANSI.reset}`,
   );
 
@@ -211,17 +209,17 @@ async function runQuickTest() {
     args: [testProfileId],
     sql: `DELETE FROM browser_profiles WHERE id = ?`,
   });
-  console.log(
+  log(
     `      ${ANSI.green}✔ Cleanup: purged test tombstone cleanly.${ANSI.reset}`,
   );
 
-  console.log(
+  log(
     `\n${ANSI.bold}${ANSI.green}================================================================${ANSI.reset}`,
   );
-  console.log(
+  log(
     `${ANSI.bold}${ANSI.green}   ALL TESTS PASSED: LOCAL SQLITE & CLOUD SYNC ARE 100% READY!  ${ANSI.reset}`,
   );
-  console.log(
+  log(
     `${ANSI.bold}${ANSI.green}================================================================${ANSI.reset}\n`,
   );
 }

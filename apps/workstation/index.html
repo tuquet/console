@@ -69,7 +69,9 @@
             typeof window.__TAURI_INTERNALS__.invoke === 'function'
           ) {
             e.preventDefault();
-            window.__TAURI_INTERNALS__.invoke('toggle_devtools').catch(function () {});
+            window.__TAURI_INTERNALS__
+              .invoke('toggle_devtools')
+              .catch(function () {});
           }
         }
       });

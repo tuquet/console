@@ -209,10 +209,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Page
-    :title="$t('page.automation.overview')"
-    :description="$t('page.automation.overview_desc')"
-  >
+  <Page :title="$t('page.automation.overview')">
     <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Badge

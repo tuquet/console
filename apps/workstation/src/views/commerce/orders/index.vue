@@ -319,10 +319,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Page
-    :title="$t('page.commerce.orders')"
-    :description="$t('page.commerce.orders_desc')"
-  >
+  <Page :title="$t('page.commerce.orders')">
     <template #title>
       <div class="flex items-center gap-2">
         <h1

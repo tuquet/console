@@ -161,10 +161,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Page
-    :title="$t('page.system.overview')"
-    :description="$t('page.system.overview_desc')"
-  >
+  <Page :title="$t('page.system.overview')">
     <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button

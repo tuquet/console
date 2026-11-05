@@ -405,10 +405,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <Page
-    :title="$t('page.commerce.wallet')"
-    :description="$t('page.commerce.wallet_desc')"
-  >
+  <Page :title="$t('page.commerce.wallet')">
     <template #title>
       <div class="flex items-center gap-2">
         <h1

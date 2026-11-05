@@ -117,10 +117,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Page
-    :title="$t('page.system.roles')"
-    :description="$t('page.system_view.roles_page_desc')"
-  >
+  <Page :title="$t('page.system.roles')">
     <template #title>
       <div class="flex items-center gap-2">
         <h1

@@ -4,6 +4,11 @@
     "register": "Đăng ký",
     "profile": "Hồ sơ"
   },
+  "authentication": {
+    "appLoadErrorTitle": "Không thể tải ứng dụng",
+    "appLoadErrorDesc": "Đã xảy ra lỗi khi khởi động ứng dụng. Vui lòng tải lại trang để thử lại.",
+    "appReloadBtn": "Tải lại"
+  },
   "dashboard": {
     "title": "Bảng điều khiển",
     "analytics": "Phân tích"

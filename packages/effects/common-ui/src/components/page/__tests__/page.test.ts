@@ -15,14 +15,26 @@ describe('page.vue', () => {
     expect(wrapper.text()).toContain('Test Title');
   });
 
+  it('does not add spacing below the title when description is omitted', () => {
+    const wrapper = mount(Page, {
+      props: {
+        title: 'Test Title',
+      },
+    });
+
+    expect(wrapper.find('.text-lg').classes()).not.toContain('mb-2');
+  });
+
   it('renders description when passed', () => {
     const wrapper = mount(Page, {
       props: {
         description: 'Test Description',
+        title: 'Test Title',
       },
     });
 
     expect(wrapper.text()).toContain('Test Description');
+    expect(wrapper.find('.text-lg').classes()).toContain('mb-2');
   });
 
   it('renders default slot content', () => {

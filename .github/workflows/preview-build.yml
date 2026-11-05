@@ -1,4 +1,4 @@
-name: "Preview: pr build"
+name: 'Preview: pr build'
 
 on:
   pull_request:
@@ -55,7 +55,7 @@ jobs:
           workspaces: |
             console/apps/workstation/src-tauri -> target
             operon -> target
-          cache-all-crates: "true"
+          cache-all-crates: 'true'
 
       - name: Install Frontend Dependencies
         working-directory: console
@@ -72,7 +72,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          OPERON_SKIP_WINRES: "1"
+          OPERON_SKIP_WINRES: '1'
         run: pnpm tauri:build:exe
 
       - name: Package Distribution Artifacts

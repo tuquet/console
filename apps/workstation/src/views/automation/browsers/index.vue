@@ -288,12 +288,7 @@ watch(
 </script>
 
 <template>
-  <Page
-    auto-content-height
-    content-class="p-2.5 sm:p-4 flex flex-col min-h-0"
-    :title="$t('page.automation.browsers')"
-    :description="$t('page.automation.browsers_desc')"
-  >
+  <Page :title="$t('page.automation.browsers')">
     <template #title>
       <div class="flex items-center gap-2">
         <h1

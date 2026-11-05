@@ -2,9 +2,14 @@ import process from 'node:process';
 
 import { defineConfig } from '@operon/vite-config';
 
+import { loadEnv } from 'vite';
+
 const isTauri = Boolean(process.env.TAURI_ENV_PLATFORM);
 
-export default defineConfig(async () => {
+export default defineConfig(async ({ mode }) => {
+  const appTitle =
+    loadEnv(mode, process.cwd(), 'VITE_').VITE_APP_TITLE ?? 'Tuquet Console';
+
   return {
     application: {
       pwa: !isTauri,
@@ -47,7 +52,17 @@ export default defineConfig(async () => {
     },
     vite: {
       clearScreen: false,
-      plugins: [],
+      plugins: [
+        {
+          name: 'workstation-app-title',
+          transformIndexHtml: {
+            order: 'pre',
+            handler(html) {
+              return html.replaceAll('%VITE_APP_TITLE%', appTitle);
+            },
+          },
+        },
+      ],
       resolve: {
         dedupe: ['vue', 'vue-router', 'pinia'],
       },

@@ -12,7 +12,7 @@ defineOptions({
 });
 
 const {
-  autoContentHeight = false,
+  autoContentHeight = true,
   heightOffset = 0,
   footerFixed = false,
 } = defineProps<PageProps>();
@@ -55,7 +55,11 @@ const contentStyle = computed<StyleValue>(() => {
     >
       <div class="min-w-0 flex-auto">
         <slot name="title">
-          <div v-if="title" class="mb-2 flex text-lg font-semibold">
+          <div
+            v-if="title"
+            class="flex text-lg font-semibold"
+            :class="{ 'mb-2': description || $slots.description }"
+          >
             {{ title }}
           </div>
         </slot>

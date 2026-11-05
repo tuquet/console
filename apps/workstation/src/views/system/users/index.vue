@@ -204,12 +204,7 @@ async function handleRefresh() {
 </script>
 
 <template>
-  <Page
-    auto-content-height
-    content-class="p-2.5 sm:p-4 flex flex-col min-h-0"
-    :title="$t('page.system.users')"
-    :description="$t('page.system.users_desc')"
-  >
+  <Page :title="$t('page.system.users')">
     <template #title>
       <div class="flex items-center gap-2">
         <h1

@@ -223,12 +223,7 @@ watch(
 </script>
 
 <template>
-  <Page
-    auto-content-height
-    content-class="p-2.5 sm:p-4 flex flex-col min-h-0"
-    :title="$t('page.automation.proxies')"
-    :description="$t('page.automation.proxies_desc')"
-  >
+  <Page :title="$t('page.automation.proxies')">
     <template #title>
       <div class="flex items-center gap-2">
         <h1
