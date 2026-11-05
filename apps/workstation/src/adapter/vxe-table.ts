@@ -881,4 +881,12 @@ export type {
   VxeDetailSheetMode,
   VxeDetailSheetOptions,
 } from '#/components/vxe-detail-sheet/types';
+
+export {
+  VxeBatchActionBar,
+  VxeFacetedFilter,
+  VxeInlineToolbar,
+  VxeViewOptions,
+} from '@operon/plugins/vxe-table';
+export type { FacetedOption } from '@operon/plugins/vxe-table';
 export type * from '@operon/plugins/vxe-table';

@@ -7,7 +7,7 @@ import { useRoute } from 'vue-router';
 import { Page } from '@operon/common-ui';
 import { usePreferences } from '@operon/preferences';
 
-import { Badge, Button } from '@operon-core/shadcn-ui';
+import { Button } from '@operon-core/shadcn-ui';
 
 import { GitBranch, Plus, RefreshCw } from '@lucide/vue';
 
@@ -184,36 +184,13 @@ function refresh() {
 
 <template>
   <Page :title="$t('page.automation.workflows')">
-    <template #title>
-      <div class="flex items-center gap-2">
-        <h1
-          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
-        >
-          {{ $t('page.automation.workflows') }}
-        </h1>
-        <Badge variant="secondary" class="shrink-0">
-          {{ allWorkflows.length }}
-        </Badge>
-      </div>
-    </template>
-
     <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          class="h-8 gap-1.5 px-2.5"
-          :title="$t('common.refresh')"
-          @click="refresh"
-        >
+        <Button variant="outline" size="sm" class="h-8 gap-1.5 px-2.5" :title="$t('common.refresh')" @click="refresh">
           <RefreshCw class="size-3.5 shrink-0" />
           <span class="hidden sm:inline">{{ $t('common.refresh') }}</span>
         </Button>
-        <Button
-          size="sm"
-          class="h-8 gap-1.5 px-2.5 sm:px-3"
-          @click="() => gridApi.openCreateSheet()"
-        >
+        <Button size="sm" class="h-8 gap-1.5 px-2.5 sm:px-3" @click="() => gridApi.openCreateSheet()">
           <Plus class="size-3.5 shrink-0" />
           <span>{{ $t('common.createRecord') }}</span>
         </Button>
@@ -224,9 +201,7 @@ function refresh() {
     <Grid class="workflow-vxe-grid flex-1 min-h-0 overflow-hidden">
       <template #name-cell="{ row }">
         <div class="flex items-center gap-2.5 py-1">
-          <div
-            class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
-          >
+          <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
             <GitBranch class="size-4" />
           </div>
           <div class="min-w-0 flex-1 text-left">
@@ -241,12 +216,8 @@ function refresh() {
       </template>
 
       <template #empty>
-        <div
-          class="flex flex-col items-center justify-center px-4 py-8 text-center text-muted-foreground"
-        >
-          <GitBranch
-            class="mb-3 size-10 stroke-[1.5] text-muted-foreground/60"
-          />
+        <div class="flex flex-col items-center justify-center px-4 py-8 text-center text-muted-foreground">
+          <GitBranch class="mb-3 size-10 stroke-[1.5] text-muted-foreground/60" />
           <p class="text-foreground">
             {{ $t('page.workflows_view.empty_title') }}
           </p>

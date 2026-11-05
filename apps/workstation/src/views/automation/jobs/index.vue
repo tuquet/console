@@ -7,7 +7,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { Page } from '@operon/common-ui';
 import { usePreferences } from '@operon/preferences';
 
-import { Badge, Button } from '@operon-core/shadcn-ui';
+import { Button } from '@operon-core/shadcn-ui';
 
 import { Eye, Laptop, PlayCircle, RefreshCw } from '@lucide/vue';
 
@@ -178,10 +178,10 @@ const [Grid, gridApi] = useVbenVxeGrid<Job>({
             filtered =
               formValues.status === JOB_STATUS.PENDING
                 ? filtered.filter(
-                    (r) =>
-                      r.status === JOB_STATUS.PENDING ||
-                      r.status === JOB_STATUS.QUEUED,
-                  )
+                  (r) =>
+                    r.status === JOB_STATUS.PENDING ||
+                    r.status === JOB_STATUS.QUEUED,
+                )
                 : filtered.filter((r) => r.status === formValues.status);
           }
 
@@ -212,28 +212,10 @@ watch(
 
 <template>
   <Page :title="$t('page.automation.jobs')">
-    <template #title>
-      <div class="flex items-center gap-2">
-        <h1
-          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
-        >
-          {{ $t('page.automation.jobs') }}
-        </h1>
-        <Badge variant="secondary" class="shrink-0">
-          {{ allRuns.length }}
-        </Badge>
-      </div>
-    </template>
-
     <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          class="h-8 gap-1.5 px-2.5"
-          :title="$t('common.refresh')"
-          @click="() => gridApi.reload()"
-        >
+        <Button variant="outline" size="sm" class="h-8 gap-1.5 px-2.5" :title="$t('common.refresh')"
+          @click="() => gridApi.reload()">
           <RefreshCw class="size-3.5" />
           <span class="hidden sm:inline">{{ $t('common.refresh') }}</span>
         </Button>
@@ -244,9 +226,7 @@ watch(
     <Grid class="runs-vxe-grid flex-1 min-h-0 overflow-hidden">
       <template #name-cell="{ row }">
         <div class="flex items-center gap-2.5 py-1">
-          <div
-            class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"
-          >
+          <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
             <PlayCircle class="size-4" />
           </div>
           <div class="min-w-0 flex-1">
@@ -265,10 +245,7 @@ watch(
       </template>
 
       <template #device-cell="{ row }">
-        <div
-          v-if="row.device"
-          class="inline-flex items-center gap-1.5 text-foreground"
-        >
+        <div v-if="row.device" class="inline-flex items-center gap-1.5 text-foreground">
           <Laptop class="size-3.5 shrink-0 text-muted-foreground" />
           <span>{{ row.device.name }}</span>
         </div>
@@ -293,37 +270,24 @@ watch(
             </span>
           </div>
           <div class="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              class="h-full rounded-full transition-all"
-              :class="getRunStatusBarClass(row.status)"
-              :style="{
-                width: `${calculateProgressPercentage(row.completed_tasks, row.total_tasks)}%`,
-              }"
-            ></div>
+            <div class="h-full rounded-full transition-all" :class="getRunStatusBarClass(row.status)" :style="{
+              width: `${calculateProgressPercentage(row.completed_tasks, row.total_tasks)}%`,
+            }"></div>
           </div>
         </div>
       </template>
 
       <template #actions-cell="{ row }">
-        <Button
-          variant="outline"
-          size="sm"
-          class="inline-flex h-7 items-center gap-1 px-2.5"
-          :title="$t('common.detail')"
-          @click="handleViewDetail(row.id)"
-        >
+        <Button variant="outline" size="sm" class="inline-flex h-7 items-center gap-1 px-2.5"
+          :title="$t('common.detail')" @click="handleViewDetail(row.id)">
           <Eye class="size-3.5 shrink-0" />
           <span>{{ $t('common.detail') }}</span>
         </Button>
       </template>
 
       <template #empty>
-        <div
-          class="flex flex-col items-center justify-center px-4 py-8 text-center text-muted-foreground"
-        >
-          <PlayCircle
-            class="mb-3 size-10 stroke-[1.5] text-muted-foreground/60"
-          />
+        <div class="flex flex-col items-center justify-center px-4 py-8 text-center text-muted-foreground">
+          <PlayCircle class="mb-3 size-10 stroke-[1.5] text-muted-foreground/60" />
           <p class="text-foreground">
             {{ $t('page.jobs_view.empty_title') }}
           </p>

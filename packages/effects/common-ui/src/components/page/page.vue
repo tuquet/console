@@ -48,7 +48,7 @@ const contentStyle = computed<StyleValue>(() => {
       "
       :class="
         cn(
-          'relative flex shrink-0 flex-wrap items-end justify-between gap-2 border-b border-border bg-card px-4 py-3 sm:px-6 sm:py-4 space-y-4',
+          'relative flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 sm:px-6',
           headerClass,
         )
       "
@@ -57,7 +57,7 @@ const contentStyle = computed<StyleValue>(() => {
         <slot name="title">
           <div
             v-if="title"
-            class="flex text-lg font-semibold"
+            class="flex text-lg font-semibold tracking-tight text-foreground"
             :class="{ 'mb-2': description || $slots.description }"
           >
             {{ title }}
@@ -65,7 +65,7 @@ const contentStyle = computed<StyleValue>(() => {
         </slot>
 
         <slot name="description">
-          <p v-if="description" class="text-muted-foreground">
+          <p v-if="description" class="text-sm text-muted-foreground">
             {{ description }}
           </p>
         </slot>
@@ -84,7 +84,7 @@ const contentStyle = computed<StyleValue>(() => {
       :class="
         cn(
           autoContentHeight
-            ? 'min-h-0 flex-1 flex flex-col overflow-hidden'
+            ? 'min-h-0 flex-1 flex flex-col overflow-y-auto'
             : 'flex-1',
           'p-4',
           contentClass,

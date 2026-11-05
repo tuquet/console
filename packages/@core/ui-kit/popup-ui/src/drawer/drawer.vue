@@ -223,7 +223,7 @@ const getForceMount = computed(() => {
         v-if="showHeader"
         :class="
           cn(
-            'flex! flex-row items-center justify-between border-b px-6 py-5',
+            'flex! flex-row items-center justify-between border-b border-border dark:border-neutral-800 px-6 py-5',
             headerClass,
             {
               'px-4 py-3': closable,
@@ -309,7 +309,7 @@ const getForceMount = computed(() => {
         v-if="showFooter"
         :class="
           cn(
-            'w-full flex-row items-center justify-end border-t p-2 px-3',
+            'w-full flex-row items-center justify-end border-t border-border dark:border-neutral-800 p-2 px-3',
             footerClass,
           )
         "
