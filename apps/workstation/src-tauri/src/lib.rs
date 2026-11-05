@@ -202,7 +202,7 @@ pub fn run() {
             let _window = WebviewWindowBuilder::new(
                 app,
                 "main",
-                WebviewUrl::App("index.html".into()),
+                WebviewUrl::default(),
             )
             .title("Operon Workstation")
             .inner_size(1440.0, 900.0)
