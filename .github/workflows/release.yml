@@ -1,4 +1,4 @@
-name: Release Operon Workstation
+name: "Release: Operon Workstation (Desktop Binaries)"
 
 on:
   push:
@@ -16,6 +16,10 @@ on:
         options:
           - nightly
           - stable
+  repository_dispatch:
+    types:
+      - build-release
+      - trigger-release
 
 permissions:
   contents: write
