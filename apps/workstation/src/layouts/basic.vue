@@ -259,7 +259,7 @@ watch(
           v-if="!collapsed && preferences.logo.showText"
           class="truncate font-semibold text-foreground text-sm tracking-tight"
         >
-          Operon Workstation
+          Operon
         </span>
       </div>
     </template>

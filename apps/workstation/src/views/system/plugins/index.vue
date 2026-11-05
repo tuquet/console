@@ -187,19 +187,6 @@ function refresh() {
 
 <template>
   <Page :title="$t('page.system.plugins')">
-    <template #title>
-      <div class="flex items-center gap-2">
-        <h1
-          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
-        >
-          {{ $t('page.system.plugins') }}
-        </h1>
-        <Badge variant="secondary" class="shrink-0">
-          {{ allPlugins.length }}
-        </Badge>
-      </div>
-    </template>
-
     <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <Button

@@ -5,7 +5,7 @@ use tauri_plugin_window_state::StateFlags;
 
 mod tray;
 
-/// Resolves the canonical Operon workstation log file (~/.operon/logs/workstation.log)
+/// Resolves the canonical Operon log file (~/.operon/logs/workstation.log)
 pub fn get_workstation_log_path() -> std::path::PathBuf {
     let base = std::env::var("DATA_DIR")
         .ok()
@@ -187,7 +187,7 @@ pub fn run() {
         ])
         .setup(move |app| {
             let log_path = get_workstation_log_path();
-            log_to_file("INFO", &format!("Operon Workstation v{} starting on {} ({})",
+            log_to_file("INFO", &format!("Operon v{} starting on {} ({})",
                 app.package_info().version, std::env::consts::OS, std::env::consts::ARCH));
             log_to_file("INFO", &format!("Log sink initialized at: {}", log_path.display()));
 
@@ -204,7 +204,7 @@ pub fn run() {
                 "main",
                 WebviewUrl::default(),
             )
-            .title("Operon Workstation")
+            .title("Operon")
             .inner_size(1440.0, 900.0)
             .min_inner_size(1024.0, 700.0)
             .resizable(true)
@@ -250,7 +250,7 @@ pub fn run() {
 
     app.run(move |_app_handle, event| {
         if let tauri::RunEvent::ExitRequested { .. } = event {
-            log_to_file("INFO", "Operon Workstation exit requested, cleaning up...");
+            log_to_file("INFO", "Operon exit requested, cleaning up...");
             let is_embedded = ownership_shutdown.is_embedded.load(Ordering::SeqCst);
             if is_embedded {
                 println!("[tauri::shutdown] Desktop app exiting (Embedded Daemon Owner). Reaping child browser and daemon resources...");

@@ -320,19 +320,6 @@ onMounted(() => {
 
 <template>
   <Page :title="$t('page.commerce.orders')">
-    <template #title>
-      <div class="flex items-center gap-2">
-        <h1
-          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
-        >
-          {{ $t('page.commerce.orders') }}
-        </h1>
-        <Badge variant="secondary" class="shrink-0">
-          {{ allOrders.length }}
-        </Badge>
-      </div>
-    </template>
-
     <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2">
         <div class="flex items-center gap-1.5">

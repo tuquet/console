@@ -122,9 +122,9 @@ jobs:
         with:
           tag_name: nightly
           target_commitish: ${{ github.sha }}
-          name: Operon Workstation (Nightly Build)
+          name: Operon (Nightly Build)
           body: |
-            ### 🚀 Operon Workstation Nightly Build
+            ### 🚀 Operon Nightly Build
             Automated test release built from commit `${{ github.sha }}` on branch `${{ github.ref_name }}`.
 
             #### ⚡ Cài đặt nhanh (1 dòng lệnh):
@@ -154,7 +154,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.channel == 'stable')
         with:
-          name: Operon Workstation ${{ github.ref_name }}
+          name: Operon ${{ github.ref_name }}
           prerelease: false
           make_latest: true
           generate_release_notes: true

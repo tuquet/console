@@ -118,19 +118,6 @@ onMounted(() => {
 
 <template>
   <Page :title="$t('page.system.roles')">
-    <template #title>
-      <div class="flex items-center gap-2">
-        <h1
-          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
-        >
-          {{ $t('page.system.roles') }}
-        </h1>
-        <Badge variant="secondary" class="shrink-0">
-          {{ activeTab === 'roles' ? allRoles.length : allPermissions.length }}
-        </Badge>
-      </div>
-    </template>
-
     <template #extra>
       <div class="flex shrink-0 items-center gap-2">
         <Tabs v-model="activeTab" class="w-auto">

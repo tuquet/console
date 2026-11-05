@@ -387,7 +387,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
     <Drawer
       :description="$t('preferences.subtitle')"
       :title="$t('preferences.title')"
-      class="border-0! sm:max-w-sm"
+      class="border-l border-border dark:border-neutral-700 sm:max-w-sm"
     >
       <template #extra>
         <div class="flex items-center">

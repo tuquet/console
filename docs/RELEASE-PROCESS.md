@@ -1,6 +1,6 @@
-# Quy Trình Phát Hành Tự Động (Automated Release Process) - Operon Workstation
+# Quy Trình Phát Hành Tự Động (Automated Release Process) - Operon
 
-Tài liệu này hướng dẫn chi tiết quy trình CI/CD tự động đóng gói, phát hành và kiểm thử bản **Operon Workstation** (Tauri v2 Desktop App trên Windows x64).
+Tài liệu này hướng dẫn chi tiết quy trình CI/CD tự động đóng gói, phát hành và kiểm thử bản **Operon** (Tauri v2 Desktop App trên Windows x64).
 
 ---
 
@@ -65,7 +65,7 @@ _Lệnh trên sẽ tự động tải bản build mới nhất về thư mục `
 - **Bộ cài Setup (.exe):** [Operon-Workstation-Setup.exe](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Setup.exe)  
   _(Cài đặt ở chế độ `currentUser`, không yêu cầu quyền Quản trị viên - Administrator UAC)._
 - **Bản Portable (.zip):** [Operon-Workstation-Portable.zip](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Portable.zip)  
-  _(Chỉ cần giải nén và chạy ngay `Operon Workstation.exe`)._
+  _(Chỉ cần giải nén và chạy ngay `Operon.exe`)._
 
 ---
 

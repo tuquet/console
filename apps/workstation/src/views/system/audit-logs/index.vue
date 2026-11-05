@@ -154,19 +154,6 @@ function refresh() {
 
 <template>
   <Page :title="$t('page.system.auditLogs')">
-    <template #title>
-      <div class="flex items-center gap-2">
-        <h1
-          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
-        >
-          {{ $t('page.system.auditLogs') }}
-        </h1>
-        <Badge variant="secondary" class="shrink-0">
-          {{ totalLogs }}
-        </Badge>
-      </div>
-    </template>
-
     <template #extra>
       <div class="flex shrink-0 flex-wrap items-center gap-2">
         <Button

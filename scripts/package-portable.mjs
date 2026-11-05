@@ -67,7 +67,7 @@ if (fs.existsSync(msiDir)) {
 }
 
 // 3. Locate standalone binary and create Portable Zip
-const rawExeName = ['Operon Workstation.exe', 'workstation.exe'].find((name) =>
+const rawExeName = ['Operon.exe', 'workstation.exe'].find((name) =>
   fs.existsSync(path.join(releaseDir, name)),
 );
 if (rawExeName) {

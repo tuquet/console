@@ -205,19 +205,6 @@ async function handleRefresh() {
 
 <template>
   <Page :title="$t('page.system.users')">
-    <template #title>
-      <div class="flex items-center gap-2">
-        <h1
-          class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg"
-        >
-          {{ $t('page.system.users') }}
-        </h1>
-        <Badge variant="secondary" class="shrink-0">
-          {{ allUsers.length }}
-        </Badge>
-      </div>
-    </template>
-
     <template #extra>
       <Button
         variant="outline"

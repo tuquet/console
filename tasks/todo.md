@@ -11,7 +11,7 @@
   - Files: `apps/workstation/src-tauri/tauri.conf.json`, `apps/workstation/src/composables/use-app-updater.ts`.
 
 - [x] Task 3: Create portable packager helper script
-  - Acceptance: Script `scripts/package-portable.mjs` created to bundle standalone `Operon Workstation.exe` into `Operon-Workstation-Portable.zip` with any required runtime assets.
+  - Acceptance: Script `scripts/package-portable.mjs` created to bundle standalone `Operon.exe` into `Operon-Workstation-Portable.zip` with any required runtime assets.
   - Verify: Execute `node scripts/package-portable.mjs` test run.
   - Files: `scripts/package-portable.mjs`, `package.json`.
 

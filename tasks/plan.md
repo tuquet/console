@@ -1,4 +1,4 @@
-# Implementation Plan: Automated Release & Distribution Pipeline for Operon Workstation
+# Implementation Plan: Automated Release & Distribution Pipeline for Operon
 
 Based on the approved specification [SPEC-automated-release-and-distribution.md](../SPEC-automated-release-and-distribution.md) and user decisions:
 

@@ -64,7 +64,7 @@ export const overridesPreferences = defineOverridesPreferences({
     globalSearchButtonPosition: 'user-dropdown',
     languageToggleButtonPosition: 'user-dropdown',
     lockScreenButtonPosition: 'user-dropdown',
-    notificationButtonPosition: 'user-dropdown',
+    // notificationButtonPosition: 'user-dropdown',
     refreshButtonPosition: 'user-dropdown',
     themeToggleButtonPosition: 'user-dropdown',
     timezoneButtonPosition: 'user-dropdown',

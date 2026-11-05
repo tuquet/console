@@ -1,10 +1,10 @@
-# Spec: Automated Release & Distribution Pipeline for Operon Workstation
+# Spec: Automated Release & Distribution Pipeline for Operon
 
 ## 1. Executive Summary & Brainstorm Analysis
 
 ### 1.1 The Problem
 
-To test new features or bug fixes in Operon Workstation today, a user must:
+To test new features or bug fixes in Operon today, a user must:
 
 1. Clone multiple repositories (`tuquet/console` and `tuquet/operon`).
 2. Install Node.js v22, pnpm v11, and the Rust toolchain (Cargo, MSVC Build Tools).
@@ -87,7 +87,7 @@ operon = { package = "operon", path = "../../../../operon/crates/cli" }
 
 ### 2.1 Core Objective
 
-Automate the build, packaging, and distribution of **Operon Workstation** for Windows (`x86_64`) so that anyone can download and run the application without installing any developer tools.
+Automate the build, packaging, and distribution of **Operon** for Windows (`x86_64`) so that anyone can download and run the application without installing any developer tools.
 
 ### 2.2 User Stories
 
@@ -105,7 +105,7 @@ Automate the build, packaging, and distribution of **Operon Workstation** for Wi
 - **CI / CD Runner:** GitHub Actions (`windows-latest`)
 - **Packaging Targets:**
   1. `nsis`: Windows Setup Installer (`.exe`), currentUser mode (no admin privilege prompt).
-  2. Standalone Portable Zip (`.zip` containing `Operon Workstation.exe` and webview runtime dependencies).
+  2. Standalone Portable Zip (`.zip` containing `Operon.exe` and webview runtime dependencies).
 - **Auto-Updater:** `@tauri-apps/plugin-updater` with GitHub Releases metadata (`latest.json`).
 
 ---
@@ -187,7 +187,7 @@ The workflow must implement:
 4. **Publishing Step:** Upload assets to GitHub Releases using `softprops/action-gh-release@v2`.
 
 ```yaml
-name: Release Operon Workstation
+name: Release Operon
 
 on:
   push:
@@ -288,7 +288,7 @@ When a tester downloads `Operon-Workstation-Setup.exe` on a clean Windows machin
 
 1. **Installation:** Double-click `.exe`. Installer runs in currentUser mode without requiring Administrator UAC elevation.
 2. **First Launch:** App opens to Loading screen $\rightarrow$ main dashboard within 3 seconds.
-3. **Daemon Auto-Spawn:** In Task Manager or Resource Monitor, `Operon Workstation.exe` runs with internal port `8765` listening.
+3. **Daemon Auto-Spawn:** In Task Manager or Resource Monitor, `Operon.exe` runs with internal port `8765` listening.
 4. **SQLite Auto-Migration:** `%USERPROFILE%\.operon\data\operon.sqlite` is automatically initialized with 12 tables and indices.
 5. **No Local Dev Prerequisites:** No Node, Rust, or Git required on the target machine.
 

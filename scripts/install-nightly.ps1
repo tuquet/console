@@ -1,4 +1,4 @@
-# Operon Workstation - Automated Nightly Test Installer
+# Operon - Automated Nightly Test Installer
 # Usage in Windows PowerShell:
 #   irm https://raw.githubusercontent.com/tuquet/console/main/scripts/install-nightly.ps1 | iex
 
@@ -9,7 +9,7 @@ $url = "https://github.com/tuquet/console/releases/download/nightly/Operon-Works
 $out = "$env:TEMP\Operon-Workstation-Setup.exe"
 
 Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host "      Operon Workstation - Nightly Test Setup     " -ForegroundColor Cyan
+Write-Host "      Operon - Nightly Test Setup     " -ForegroundColor Cyan
 Write-Host "==================================================" -ForegroundColor Cyan
 Write-Host "Downloading latest nightly installer..." -ForegroundColor Yellow
 
