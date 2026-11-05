@@ -215,6 +215,13 @@ pub fn run() {
             .on_navigation(move |url| {
                 let scheme = url.scheme();
                 let host = url.host_str().unwrap_or("");
+                log_to_file("DEBUG", &format!("[navigation] url={} scheme={} host={}", url.as_str(), scheme, host));
+
+                // Allow internal browser pseudoprotocols & resource schemes (about:blank, data:, blob:)
+                if scheme == "about" || scheme == "data" || scheme == "blob" || scheme == "javascript" {
+                    return true;
+                }
+
                 // Allow internal app pages, loopback, or custom tauri/asset schemes
                 if scheme == "tauri"
                     || scheme == "asset"
@@ -225,9 +232,13 @@ pub fn run() {
                 {
                     return true;
                 }
-                // Intercept and open external links in default system browser
-                use tauri_plugin_opener::OpenerExt;
-                let _ = app_handle.opener().open_url(url.as_str(), None::<&str>);
+
+                // Intercept and open external HTTP/HTTPS/mailto links in default system browser
+                if scheme == "http" || scheme == "https" || scheme == "mailto" {
+                    log_to_file("INFO", &format!("[navigation] Opening external link in system browser: {}", url.as_str()));
+                    use tauri_plugin_opener::OpenerExt;
+                    let _ = app_handle.opener().open_url(url.as_str(), None::<&str>);
+                }
                 false
             })
             .build()?;
