@@ -61,6 +61,8 @@ pre-commit:
       glob: '*.{vue,css,less,scss}'
       run: pnpm exec stylelint --fix {staged_files}
       stage_fixed: true
+    - name: checkI18n
+      run: pnpm run check:i18n
     - name: checkType
       run: pnpm check:type
 

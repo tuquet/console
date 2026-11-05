@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       channel:
-        description: 'Release Channel'
+        description: Release Channel
         required: true
-        default: 'nightly'
+        default: nightly
         type: choice
         options:
           - nightly
@@ -58,7 +58,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: pnpm
           cache-dependency-path: console/pnpm-lock.yaml
 
       # 4. Setup Rust Toolchain & Aggressive Workspace Cache
@@ -73,18 +73,19 @@ jobs:
           workspaces: |
             console/apps/workstation/src-tauri -> target
             operon -> target
-          cache-all-crates: "true"
+          cache-all-crates: 'true'
 
       # 5. Install Dependencies & Pre-Release Quality Gates
       - name: Install Frontend Dependencies
         working-directory: console
         run: pnpm install --frozen-lockfile
 
-      - name: Pre-Release Quality Gate (Typecheck & Unit Tests)
+      - name: Pre-Release Quality Gate (Typecheck, i18n & Unit Tests)
         working-directory: console
         run: |
+          pnpm run check:i18n
           pnpm --filter @operon/workstation typecheck
-          pnpm vitest run apps/workstation/src/db/__tests__
+          pnpm vitest run packages/locales/__tests__ apps/workstation/src/db/__tests__
 
       # 6. Build Tauri Desktop Bundle (Target NSIS only for 50% faster bundling)
       - name: Build Tauri Desktop Bundle
@@ -94,7 +95,7 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          OPERON_SKIP_WINRES: "1"
+          OPERON_SKIP_WINRES: '1'
         run: pnpm tauri:build --bundles nsis
 
       # 7. Package Distribution Artifacts (NSIS Setup, Portable Zip, latest.json)
@@ -117,7 +118,7 @@ jobs:
         with:
           tag_name: nightly
           target_commitish: ${{ github.sha }}
-          name: 'Operon Workstation (Nightly Build)'
+          name: Operon Workstation (Nightly Build)
           body: |
             ### 🚀 Operon Workstation Nightly Build
             Automated test release built from commit `${{ github.sha }}` on branch `${{ github.ref_name }}`.

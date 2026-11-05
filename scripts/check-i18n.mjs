@@ -1,8 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
-const ROOT_DIR = process.cwd();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT_DIR = path.resolve(__dirname, '..');
 
 const LOCALE_DIRS = [
   'packages/locales/src/langs',
@@ -88,7 +90,8 @@ function walkSourceFiles(dir, files = []) {
   return files;
 }
 
-function main() {
+export function auditI18n(options = {}) {
+  const silent = Boolean(options.silent);
   const trees = {};
   const flatMaps = {};
 
@@ -190,69 +193,103 @@ function main() {
     }
   }
 
-  console.log('============================================================');
-  console.log('  Admin i18n Integrity Report (en-US <-> vi-VN)');
-  console.log('============================================================');
-  console.log(`  - Total en-US dictionary keys : ${enKeys.size}`);
-  console.log(`  - Total vi-VN dictionary keys : ${viKeys.size}`);
-  console.log(`  - Referenced keys verified    : ${totalReferencedCount}`);
-  console.log(`  - Missing keys in vi-VN       : ${missingInVi.length}`);
-  console.log(`  - Missing keys in en-US       : ${missingInEn.length}`);
-  console.log(`  - Unresolved $t(...) calls    : ${missingUsedKeys.length}`);
-  console.log(`  - Hardcoded Vietnamese lines  : ${hardcodedVnLeaks.length}`);
-  console.log(
-    `  - Raw {{ }} interpolation leaks: ${interpolationLeaks.length}`,
-  );
-  console.log('============================================================');
+  if (!silent) {
+    console.log('============================================================');
+    console.log('  Admin i18n Integrity Report (en-US <-> vi-VN)');
+    console.log('============================================================');
+    console.log(`  - Total en-US dictionary keys : ${enKeys.size}`);
+    console.log(`  - Total vi-VN dictionary keys : ${viKeys.size}`);
+    console.log(`  - Referenced keys verified    : ${totalReferencedCount}`);
+    console.log(`  - Missing keys in vi-VN       : ${missingInVi.length}`);
+    console.log(`  - Missing keys in en-US       : ${missingInEn.length}`);
+    console.log(`  - Unresolved $t(...) calls    : ${missingUsedKeys.length}`);
+    console.log(`  - Hardcoded Vietnamese lines  : ${hardcodedVnLeaks.length}`);
+    console.log(
+      `  - Raw {{ }} interpolation leaks: ${interpolationLeaks.length}`,
+    );
+    console.log('============================================================');
+  }
 
   let hasError = false;
 
   if (missingInVi.length > 0) {
     hasError = true;
-    console.error('\n[ERROR] Keys present in en-US but missing in vi-VN:');
-    for (const k of missingInVi) console.error(`  - ${k}`);
+    if (!silent) {
+      console.error('\n[ERROR] Keys present in en-US but missing in vi-VN:');
+      for (const k of missingInVi) console.error(`  - ${k}`);
+    }
   }
 
   if (missingInEn.length > 0) {
     hasError = true;
-    console.error('\n[ERROR] Keys present in vi-VN but missing in en-US:');
-    for (const k of missingInEn) console.error(`  - ${k}`);
+    if (!silent) {
+      console.error('\n[ERROR] Keys present in vi-VN but missing in en-US:');
+      for (const k of missingInEn) console.error(`  - ${k}`);
+    }
   }
 
   if (missingUsedKeys.length > 0) {
     hasError = true;
-    console.error('\n[ERROR] Referenced i18n keys missing from locale files:');
-    for (const item of missingUsedKeys) {
+    if (!silent) {
       console.error(
-        `  - ${item.key} in ${item.file} (en-US: ${item.enExists}, vi-VN: ${item.viExists})`,
+        '\n[ERROR] Referenced i18n keys missing from locale files:',
       );
+      for (const item of missingUsedKeys) {
+        console.error(
+          `  - ${item.key} in ${item.file} (en-US: ${item.enExists}, vi-VN: ${item.viExists})`,
+        );
+      }
     }
   }
 
   if (hardcodedVnLeaks.length > 0) {
     hasError = true;
-    console.error('\n[ERROR] Hardcoded Vietnamese text found in source files:');
-    for (const leak of hardcodedVnLeaks) {
-      console.error(`  - ${leak.file}:${leak.line}: ${leak.text}`);
+    if (!silent) {
+      console.error(
+        '\n[ERROR] Hardcoded Vietnamese text found in source files:',
+      );
+      for (const leak of hardcodedVnLeaks) {
+        console.error(`  - ${leak.file}:${leak.line}: ${leak.text}`);
+      }
     }
   }
 
   if (interpolationLeaks.length > 0) {
     hasError = true;
-    console.error(
-      '\n[ERROR] Locale messages contain raw `{{ }}` — vue-i18n will throw at render:',
-    );
-    for (const leak of interpolationLeaks) {
-      console.error(`  - ${leak.locale} · ${leak.key}: ${leak.value}`);
+    if (!silent) {
+      console.error(
+        '\n[ERROR] Locale messages contain raw `{{ }}` — vue-i18n will throw at render:',
+      );
+      for (const leak of interpolationLeaks) {
+        console.error(`  - ${leak.locale} · ${leak.key}: ${leak.value}`);
+      }
+      console.error("  Fix: reword the message or escape with {'{'} / {'}'}.");
     }
-    console.error("  Fix: reword the message or escape with {'{'} / {'}'}.");
   }
 
-  if (hasError) {
-    process.exit(1);
+  if (!silent && !hasError) {
+    console.log('  STATUS: PASS (100% i18n parity & zero missing keys)');
   }
 
-  console.log('  STATUS: PASS (100% i18n parity & zero missing keys)');
+  return {
+    enKeysCount: enKeys.size,
+    viKeysCount: viKeys.size,
+    totalReferencedCount,
+    missingInVi,
+    missingInEn,
+    missingUsedKeys,
+    hardcodedVnLeaks,
+    interpolationLeaks,
+    hasError,
+  };
 }
 
-main();
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
+  const result = auditI18n();
+  if (result.hasError) {
+    process.exit(1);
+  }
+}

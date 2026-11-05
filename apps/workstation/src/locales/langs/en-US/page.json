@@ -388,6 +388,9 @@
     "status_paused": "Paused",
     "per_month_suffix": "/mo",
     "roles_all": "All roles",
+    "roles_create_btn": "Create role",
+    "roles_page_desc": "Manage system roles, assign granular permissions, and control access levels.",
+    "roles_unassigned": "Unassigned",
     "role_owner": "Owner",
     "role_admin": "Admin",
     "role_member": "Member",
@@ -592,6 +595,7 @@
     "col_dispatch": "Dispatch",
     "col_gateway_name": "Gateway",
     "col_order_code": "Order",
+    "order_label": "Order",
     "col_payment_channel_short": "Channel",
     "col_payment_method": "Method",
     "col_product": "Product",
@@ -619,6 +623,7 @@
     "default_public_product_desc": "Delivered automatically after payment.",
     "default_variant_name": "Standard package",
     "default_wallet_tx_desc": "Xu wallet transaction",
+    "delivered_goods": "Delivered items",
     "delivered_resource_type": "Resource ({type})",
     "delivery_detail_desc": "Accounts, keys, or resources provisioned for this order.",
     "delivery_detail_title": "Delivery — {code}",
@@ -851,6 +856,7 @@
     "warranty_claim_title": "Process warranty claim",
     "warranty_claim_desc": "Review and refund order items under warranty terms.",
     "warranty_reason_label": "Warranty reason",
+    "warranty_default_reason": "Product issue or claim within warranty period",
     "submit_warranty_claim": "Confirm warranty claim"
   },
   "jobs_view": {

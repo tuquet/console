@@ -388,6 +388,9 @@
     "status_paused": "Tạm dừng",
     "per_month_suffix": "/tháng",
     "roles_all": "Tất cả vai trò",
+    "roles_create_btn": "Tạo vai trò",
+    "roles_page_desc": "Quản lý vai trò hệ thống, phân quyền chi tiết và kiểm soát cấp độ truy cập.",
+    "roles_unassigned": "Chưa phân vai trò",
     "role_owner": "Chủ sở hữu",
     "role_admin": "Quản trị viên",
     "role_member": "Thành viên",
@@ -592,6 +595,7 @@
     "col_dispatch": "Điều phối",
     "col_gateway_name": "Cổng TT",
     "col_order_code": "Mã đơn",
+    "order_label": "Đơn hàng",
     "col_payment_channel_short": "Kênh TT",
     "col_payment_method": "Phương thức",
     "col_product": "Sản phẩm",
@@ -619,6 +623,7 @@
     "default_public_product_desc": "Bàn giao tự động ngay sau khi thanh toán.",
     "default_variant_name": "Gói tiêu chuẩn",
     "default_wallet_tx_desc": "Giao dịch ví Xu",
+    "delivered_goods": "Hàng đã giao",
     "delivered_resource_type": "Tài nguyên ({type})",
     "delivery_detail_desc": "Dữ liệu tài khoản, key hoặc tài nguyên đã cấp phát cho đơn này.",
     "delivery_detail_title": "Bàn giao — {code}",
@@ -851,6 +856,7 @@
     "warranty_claim_title": "Xử lý yêu cầu bảo hành",
     "warranty_claim_desc": "Xem xét và hoàn tiền đơn hàng theo chính sách bảo hành.",
     "warranty_reason_label": "Lý do bảo hành",
+    "warranty_default_reason": "Lỗi sản phẩm hoặc khiếu nại trong thời hạn bảo hành",
     "submit_warranty_claim": "Xác nhận xử lý bảo hành"
   },
   "jobs_view": {

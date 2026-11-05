@@ -29,7 +29,7 @@
     "build:local": "bash ./scripts/build-local.sh",
     "release:package": "node scripts/package-portable.mjs",
     "changeset": "pnpm exec changeset",
-    "check": "pnpm run check:circular && pnpm run check:dep && pnpm run check:type && pnpm check:cspell",
+    "check": "pnpm run check:circular && pnpm run check:dep && pnpm run check:i18n && pnpm run check:type && pnpm check:cspell",
     "check:circular": "vsh check-circular",
     "check:console": "node ./scripts/check-console.mjs",
     "check:cspell": "cspell lint \"**/*.ts\" \"**/README.md\" \".changeset/*.md\" --no-progress",
