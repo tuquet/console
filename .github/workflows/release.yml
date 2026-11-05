@@ -1,4 +1,4 @@
-name: "Release: Operon Workstation (Desktop Binaries)"
+name: "Release: desktop binaries"
 
 on:
   push:
