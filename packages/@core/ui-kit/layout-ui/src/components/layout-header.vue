@@ -66,9 +66,13 @@ const logoStyle = computed((): CSSProperties => {
     };
   }
 
-  return {
-    minWidth: `${props.isMobile ? 40 : props.sidebarWidth}px`,
-  };
+  if (props.isMobile) {
+    return {
+      minWidth: '40px',
+    };
+  }
+
+  return {};
 });
 </script>
 
@@ -92,7 +96,9 @@ const logoStyle = computed((): CSSProperties => {
     <div
       v-if="slots.logo || (!logoVisible && !isMobile)"
       :style="logoStyle"
-      :class="isMobile ? 'order-2 hidden md:block' : 'order-1'"
+      :class="
+        isMobile ? 'order-2 hidden md:block shrink-0' : 'order-1 shrink-0'
+      "
     >
       <slot name="logo"></slot>
     </div>
