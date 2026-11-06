@@ -406,10 +406,14 @@ const headerWrapperStyle = computed((): CSSProperties => {
 
 /**
  * Sidebar z-index
+ * sidebar-mixed-nav / header-mixed-nav on desktop: extra panel must not overlay header,
+ * so sidebar z-index must be lower than header z-index (headerZIndex = zIndex + 0).
  */
 const sidebarZIndex = computed(() => {
   const { isMobile, zIndex } = props;
-  let offset = isMobile || isSideMode.value ? 1 : -1;
+  const isMixedSideLayout =
+    !isMobile && (isSidebarMixedNav.value || isHeaderMixedNav.value);
+  let offset = isMobile || (isSideMode.value && !isMixedSideLayout) ? 1 : -1;
 
   if (isMixedNav.value) {
     offset += 1;
@@ -639,8 +643,8 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
       <template #extra-title>
         <slot name="side-extra-title"></slot>
       </template>
-      <template v-if="$slots['side-bottom']" #bottom>
-        <slot name="side-bottom"></slot>
+      <template v-if="$slots['side-bottom']" #bottom="{ collapsed }">
+        <slot name="side-bottom" :collapsed="collapsed"></slot>
       </template>
     </LayoutSidebar>
 

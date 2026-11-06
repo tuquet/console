@@ -223,9 +223,17 @@ const contentWidthStyle = computed((): CSSProperties => {
 
 const contentStyle = computed((): CSSProperties => {
   const { bottomHeight, collapseHeight, headerHeight } = props;
+  let footerHeight: number;
+  if (!slots.bottom || props.isSidebarMixed) {
+    footerHeight = collapseHeight + bottomHeight;
+  } else if (collapse.value && props.showCollapseButton) {
+    footerHeight = 85;
+  } else {
+    footerHeight = 49;
+  }
 
   return {
-    height: `calc(100% - ${headerHeight + collapseHeight + bottomHeight}px)`,
+    height: `calc(100% - ${headerHeight + footerHeight}px)`,
     paddingTop: '8px',
     ...contentWidthStyle.value,
   };
@@ -386,7 +394,7 @@ onUnmounted(() => {
         {
           'border-r border-border bg-sidebar transition-[clip-path,transform] duration-300 ease-out':
             !isMobile && !isSidebarMixed,
-          'transition-transform duration-300 ease-out':
+          'border-r border-border transition-transform duration-300 ease-out':
             !isMobile && isSidebarMixed,
         },
       ]"
@@ -404,7 +412,9 @@ onUnmounted(() => {
         :style="{ width: `${width}px` }"
       >
         <SidebarFixedButton
-          v-if="!collapse && !isSidebarMixed && showFixedButton"
+          v-if="
+            !slots.bottom && !collapse && !isSidebarMixed && showFixedButton
+          "
           v-model:collapse="collapse"
           v-model:expand-on-hover="expandOnHover"
           v-model:expand-on-hovering="expandOnHovering"
@@ -417,22 +427,49 @@ onUnmounted(() => {
           <slot></slot>
         </VbenScrollbar>
 
-        <div v-if="$slots.bottom" class="shrink-0">
-          <slot name="bottom"></slot>
+        <div
+          v-if="slots.bottom && !isSidebarMixed"
+          data-layout-region="sidebar-footer"
+          class="flex min-h-[49px] items-center gap-1 border-t border-border px-2 py-2"
+          :class="collapse ? 'flex-col' : ''"
+        >
+          <div
+            class="min-w-0 flex-1"
+            :class="collapse ? 'flex justify-center' : ''"
+          >
+            <slot name="bottom" :collapsed="collapse"></slot>
+          </div>
+          <SidebarCollapseButton
+            v-if="showCollapseButton"
+            v-model:collapsed="collapse"
+            inline
+          />
+          <SidebarFixedButton
+            v-if="!collapse && showFixedButton"
+            v-model:collapse="collapse"
+            v-model:expand-on-hover="expandOnHover"
+            v-model:expand-on-hovering="expandOnHovering"
+            v-model:extra-visible="extraVisible"
+            inline
+          />
         </div>
-
-        <div :style="collapseStyle"></div>
-        <SidebarCollapseButton
-          v-if="showCollapseButton && !isSidebarMixed"
-          v-model:collapsed="collapse"
-        />
+        <template v-else>
+          <div v-if="slots.bottom" class="shrink-0">
+            <slot name="bottom" :collapsed="collapse"></slot>
+          </div>
+          <div :style="collapseStyle"></div>
+          <SidebarCollapseButton
+            v-if="showCollapseButton && !isSidebarMixed"
+            v-model:collapsed="collapse"
+          />
+        </template>
       </div>
       <div
         v-if="isSidebarMixed"
         :class="[
           themeSub,
           {
-            'border-l': extraPanelExpanded,
+            // border-l removed: aside already provides border-r separator for sidebar-mixed
           },
         ]"
         :style="extraStyle"
