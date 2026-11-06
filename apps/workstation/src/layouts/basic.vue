@@ -20,7 +20,6 @@ import { openWindow } from '@operon/utils';
 import { LogIn } from '@lucide/vue';
 
 import WorkspaceSelector from '#/components/common/workspace-selector.vue';
-import WindowControls from '#/layouts/widgets/window-controls.vue';
 import { $t } from '#/locales';
 import { useAuthStore } from '#/store';
 import LoginForm from '#/views/_core/authentication/login.vue';
@@ -264,30 +263,25 @@ watch(
       </div>
     </template>
     <template #user-dropdown>
-      <div class="mr-1 flex items-center gap-2">
-        <UserDropdown
-          :avatar="isAuthenticated ? avatar : undefined"
-          :avatar-dot="isAuthenticated"
-          :menus
-          :text="
-            isAuthenticated
-              ? userStore.userInfo?.realName
-              : $t('authentication.localOperator') || 'Local Operator'
-          "
-          :description="
-            isAuthenticated
-              ? userStore.userInfo?.username || ''
-              : $t('authentication.notLoggedIn') || 'Local Session'
-          "
-          :tag-text="isAuthenticated ? 'ID' : undefined"
-          :show-logout="isAuthenticated"
-          @clear-preferences-and-logout="handleLogout"
-          @logout="handleLogout"
-        />
-      </div>
-    </template>
-    <template #window-controls>
-      <WindowControls />
+      <UserDropdown
+        :avatar="isAuthenticated ? avatar : undefined"
+        :avatar-dot="isAuthenticated"
+        :menus
+        :text="
+          isAuthenticated
+            ? userStore.userInfo?.realName
+            : $t('authentication.localOperator') || 'Local Operator'
+        "
+        :description="
+          isAuthenticated
+            ? userStore.userInfo?.username || ''
+            : $t('authentication.notLoggedIn') || 'Local Session'
+        "
+        :tag-text="isAuthenticated ? 'ID' : undefined"
+        :show-logout="isAuthenticated"
+        @clear-preferences-and-logout="handleLogout"
+        @logout="handleLogout"
+      />
     </template>
     <template #notification>
       <Notification

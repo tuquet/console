@@ -10,10 +10,12 @@ import {
   isTauriEnvironment,
   revealWindow,
 } from '#/adapter/desktop';
+import DesktopShell from '#/layouts/widgets/desktop-shell.vue';
 
 defineOptions({ name: 'App' });
 
 const { isDark } = usePreferences();
+const isDesktop = isTauriEnvironment();
 
 onMounted(async () => {
   if (isTauriEnvironment()) {
@@ -24,7 +26,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <RouterView />
+  <DesktopShell v-if="isDesktop">
+    <RouterView />
+  </DesktopShell>
+  <RouterView v-else />
   <Toaster
     position="top-right"
     :theme="isDark ? 'dark' : 'light'"

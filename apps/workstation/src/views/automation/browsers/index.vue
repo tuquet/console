@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { FacetedOption } from '#/adapter/vxe-table';
 import type { BrowserProfile } from '#/api';
 
 import { computed, ref, watch } from 'vue';
@@ -38,7 +39,6 @@ import {
 } from '@lucide/vue';
 
 import {
-  type FacetedOption,
   useVbenVxeGrid,
   VxeBatchActionBar,
   VxeFacetedFilter,
@@ -115,18 +115,18 @@ const platformOptions: FacetedOption[] = [
   },
 ];
 
-const proxyOptions: FacetedOption[] = [
+const proxyOptions = computed<FacetedOption[]>(() => [
   {
     icon: Shield,
-    label: 'Có Proxy',
+    label: $t('page.automation_view.browser_filter_proxied'),
     value: 'proxied',
   },
   {
     icon: Globe,
-    label: 'Trực tiếp (Direct)',
+    label: $t('page.automation_view.browser_filter_direct'),
     value: 'direct',
   },
-];
+]);
 
 // Reactive Dynamic Counts for Faceted Filters
 const statusCounts = computed(() => {
@@ -179,15 +179,21 @@ async function handleToggleRun(row: BrowserProfile) {
   isToggling.value[row.id] = true;
   try {
     const isStopping = row.status === 'running';
-    await (isStopping ? stopBrowserProfile(row.id) : startBrowserProfile(row.id));
+    await (isStopping
+      ? stopBrowserProfile(row.id)
+      : startBrowserProfile(row.id));
     toast.success(
       isStopping
-        ? `Đã dừng profile ${row.name}`
-        : `Đã khởi chạy profile ${row.name}`,
+        ? $t('page.automation_view.browser_stopped_profile', { name: row.name })
+        : $t('page.automation_view.browser_started_profile', {
+            name: row.name,
+          }),
     );
     await gridApi.reload();
-  } catch (err: any) {
-    toast.error(err?.message || 'Thao tác thất bại');
+  } catch (error: any) {
+    toast.error(
+      error?.message || $t('page.automation_view.browser_action_failed'),
+    );
   } finally {
     isToggling.value[row.id] = false;
   }
@@ -199,11 +205,15 @@ async function handleUnbind(row: BrowserProfile) {
   try {
     const ok = await unbindBrowser(row.id);
     if (ok) {
-      toast.success(`Đã gỡ khóa thiết bị cho ${row.name}`);
+      toast.success(
+        $t('page.automation_view.browser_unbind_success', { name: row.name }),
+      );
       await gridApi.reload();
     }
-  } catch (err: any) {
-    toast.error(err?.message || 'Gỡ khóa thất bại');
+  } catch (error: any) {
+    toast.error(
+      error?.message || $t('page.automation_view.browser_unbind_failed'),
+    );
   } finally {
     isUnbinding.value[row.id] = false;
   }
@@ -218,7 +228,7 @@ function handleClearSelection() {
 async function handleBatchRun(rows: BrowserProfile[]) {
   const toRun = rows.filter((r) => r.status !== 'running' && r.id);
   if (toRun.length === 0) {
-    toast.info('Tất cả profile đã chọn đều đang chạy.');
+    toast.info($t('page.automation_view.browser_batch_all_running'));
     return;
   }
   isBatchOperating.value = true;
@@ -227,11 +237,18 @@ async function handleBatchRun(rows: BrowserProfile[]) {
       toRun.map((r) => startBrowserProfile(r.id)),
     );
     const successCount = results.filter((r) => r.status === 'fulfilled').length;
-    toast.success(`Đã khởi chạy ${successCount}/${toRun.length} trình duyệt.`);
+    toast.success(
+      $t('page.automation_view.browser_batch_started', {
+        count: successCount,
+        total: toRun.length,
+      }),
+    );
     handleClearSelection();
     await gridApi.reload();
   } catch (error: any) {
-    toast.error(error?.message || 'Khởi chạy thất bại');
+    toast.error(
+      error?.message || $t('page.automation_view.browser_batch_start_failed'),
+    );
   } finally {
     isBatchOperating.value = false;
   }
@@ -240,7 +257,7 @@ async function handleBatchRun(rows: BrowserProfile[]) {
 async function handleBatchStop(rows: BrowserProfile[]) {
   const toStop = rows.filter((r) => r.status === 'running' && r.id);
   if (toStop.length === 0) {
-    toast.info('Không có profile nào đang chạy trong danh sách chọn.');
+    toast.info($t('page.automation_view.browser_batch_none_running'));
     return;
   }
   isBatchOperating.value = true;
@@ -249,11 +266,18 @@ async function handleBatchStop(rows: BrowserProfile[]) {
       toStop.map((r) => stopBrowserProfile(r.id)),
     );
     const successCount = results.filter((r) => r.status === 'fulfilled').length;
-    toast.success(`Đã dừng ${successCount}/${toStop.length} trình duyệt.`);
+    toast.success(
+      $t('page.automation_view.browser_batch_stopped', {
+        count: successCount,
+        total: toStop.length,
+      }),
+    );
     handleClearSelection();
     await gridApi.reload();
   } catch (error: any) {
-    toast.error(error?.message || 'Dừng thất bại');
+    toast.error(
+      error?.message || $t('page.automation_view.browser_batch_stop_failed'),
+    );
   } finally {
     isBatchOperating.value = false;
   }
@@ -262,7 +286,7 @@ async function handleBatchStop(rows: BrowserProfile[]) {
 async function handleBatchUnbind(rows: BrowserProfile[]) {
   const toUnbind = rows.filter((r) => r.locked_by_device && r.id);
   if (toUnbind.length === 0) {
-    toast.info('Không có profile nào đang bị khóa bởi thiết bị.');
+    toast.info($t('page.automation_view.browser_batch_none_locked'));
     return;
   }
   isBatchOperating.value = true;
@@ -273,11 +297,18 @@ async function handleBatchUnbind(rows: BrowserProfile[]) {
     const successCount = results.filter(
       (r) => r.status === 'fulfilled' && r.value,
     ).length;
-    toast.success(`Đã gỡ khóa ${successCount}/${toUnbind.length} trình duyệt.`);
+    toast.success(
+      $t('page.automation_view.browser_batch_unbound', {
+        count: successCount,
+        total: toUnbind.length,
+      }),
+    );
     handleClearSelection();
     await gridApi.reload();
   } catch (error: any) {
-    toast.error(error?.message || 'Gỡ khóa thất bại');
+    toast.error(
+      error?.message || $t('page.automation_view.browser_batch_unbind_failed'),
+    );
   } finally {
     isBatchOperating.value = false;
   }
@@ -419,10 +450,12 @@ const [Grid, gridApi] = useVbenVxeGrid<BrowserProfile>({
   },
   gridEvents: {
     checkboxChange(params: any) {
-      selectedRows.value = (params.$table?.getCheckboxRecords?.() || []) as BrowserProfile[];
+      selectedRows.value = (params.$table?.getCheckboxRecords?.() ||
+        []) as BrowserProfile[];
     },
     checkboxAll(params: any) {
-      selectedRows.value = (params.$table?.getCheckboxRecords?.() || []) as BrowserProfile[];
+      selectedRows.value = (params.$table?.getCheckboxRecords?.() ||
+        []) as BrowserProfile[];
     },
   },
   gridOptions: {
@@ -434,9 +467,11 @@ const [Grid, gridApi] = useVbenVxeGrid<BrowserProfile>({
     proxyConfig: {
       autoLoad: true,
       ajax: {
-        query: async (
-          { page }: { page?: { currentPage?: number; pageSize?: number } },
-        ) => {
+        query: async ({
+          page,
+        }: {
+          page?: { currentPage?: number; pageSize?: number };
+        }) => {
           const tenantId = (route.query.tenant as string) || undefined;
           const data = await listBrowsers({ tenantId });
           allBrowsers.value = data;
@@ -458,7 +493,9 @@ const [Grid, gridApi] = useVbenVxeGrid<BrowserProfile>({
 
           // Status faceted filter
           if (statusFilter.value.length > 0) {
-            filtered = filtered.filter((b) => statusFilter.value.includes(b.status));
+            filtered = filtered.filter((b) =>
+              statusFilter.value.includes(b.status),
+            );
           }
 
           // Platform faceted filter
@@ -474,8 +511,10 @@ const [Grid, gridApi] = useVbenVxeGrid<BrowserProfile>({
           if (proxyFilter.value.length > 0) {
             filtered = filtered.filter((b) => {
               const hasProxy = Boolean(b.proxy);
-              if (proxyFilter.value.includes('proxied') && hasProxy) return true;
-              if (proxyFilter.value.includes('direct') && !hasProxy) return true;
+              if (proxyFilter.value.includes('proxied') && hasProxy)
+                return true;
+              if (proxyFilter.value.includes('direct') && !hasProxy)
+                return true;
               return false;
             });
           }
@@ -488,7 +527,7 @@ const [Grid, gridApi] = useVbenVxeGrid<BrowserProfile>({
   },
 });
 
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let debounceTimer: null | ReturnType<typeof setTimeout> = null;
 watch(searchKeyword, () => {
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
@@ -555,7 +594,7 @@ watch(
           <!-- OS Platform Faceted Filter -->
           <VxeFacetedFilter
             v-model="platformFilter"
-            title="Hệ điều hành"
+            :title="$t('page.automation_view.browser_filter_platform')"
             :options="platformOptions"
             :counts="platformCounts"
           />
@@ -584,7 +623,10 @@ watch(
                 {{ row.name }}
               </div>
               <div class="flex items-center gap-1.5 text-muted-foreground">
-                <Badge variant="outline" class="px-1 py-0 text-[10px] capitalize">
+                <Badge
+                  variant="outline"
+                  class="px-1 py-0 text-[10px] capitalize"
+                >
                   {{ row.os_platform }}
                 </Badge>
                 <Badge variant="secondary" class="px-1 py-0 text-[10px]">
@@ -631,11 +673,15 @@ watch(
 
         <template #storage-cell="{ row }">
           <div class="flex items-center gap-2 text-foreground">
-            <span class="font-mono text-xs">{{ formatBytes(row.storage_size_bytes) }}</span>
+            <span class="font-mono text-xs">{{
+              formatBytes(row.storage_size_bytes)
+            }}</span>
             <span class="text-muted-foreground">&bull;</span>
             <span class="text-xs text-muted-foreground">
               {{
-                $t('page.automation_view.cookies_count_unit', [row.cookies_count])
+                $t('page.automation_view.cookies_count_unit', [
+                  row.cookies_count,
+                ])
               }}
             </span>
           </div>
@@ -653,7 +699,11 @@ watch(
                   row.status !== 'running',
               }"
               :disabled="isToggling[row.id] || row.status === 'syncing'"
-              :title="row.status === 'running' ? 'Dừng Browser' : 'Chạy Browser'"
+              :title="
+                row.status === 'running'
+                  ? $t('page.automation_view.browser_stop_title')
+                  : $t('page.automation_view.browser_start_title')
+              "
               @click.stop="handleToggleRun(row)"
             >
               <Square
@@ -686,7 +736,11 @@ watch(
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
-                  v-if="row.locked_by_device || row.status === 'running' || row.status === 'error'"
+                  v-if="
+                    row.locked_by_device ||
+                    row.status === 'running' ||
+                    row.status === 'error'
+                  "
                   class="cursor-pointer text-xs text-warning focus:bg-warning/10 focus:text-warning"
                   :disabled="isUnbinding[row.id]"
                   @select="handleUnbind(row)"
@@ -703,7 +757,11 @@ watch(
                 >
                   <Copy class="mr-2 size-3.5 text-muted-foreground" />
                   <span>{{ $t('common.copy') }} ID</span>
-                  <DropdownMenuShortcut class="ml-auto text-[10px]">ID</DropdownMenuShortcut>
+                  <DropdownMenuShortcut class="ml-auto text-[10px]"
+                    >
+ID
+</DropdownMenuShortcut
+                  >
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -739,7 +797,7 @@ watch(
             @click="handleBatchRun(rows)"
           >
             <Play class="size-3 fill-current" />
-            <span>Khởi chạy</span>
+            <span>{{ $t('page.automation_view.browser_batch_run_btn') }}</span>
           </Button>
           <Button
             size="sm"
@@ -749,7 +807,7 @@ watch(
             @click="handleBatchStop(rows)"
           >
             <Square class="size-3 fill-current" />
-            <span>Dừng</span>
+            <span>{{ $t('page.automation_view.browser_batch_stop_btn') }}</span>
           </Button>
           <Button
             size="sm"
@@ -759,7 +817,9 @@ watch(
             @click="handleBatchUnbind(rows)"
           >
             <Unlock class="size-3" />
-            <span>Gỡ khóa</span>
+            <span>{{
+              $t('page.automation_view.browser_batch_unbind_btn')
+            }}</span>
           </Button>
         </template>
       </VxeBatchActionBar>

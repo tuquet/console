@@ -103,10 +103,7 @@ const logoStyle = computed((): CSSProperties => {
       <slot name="logo"></slot>
     </div>
 
-    <div
-      class="order-3 flex min-w-0 flex-1 items-center h-full"
-      data-tauri-drag-region
-    >
+    <div class="order-3 flex min-w-0 flex-1 items-center h-full">
       <slot></slot>
     </div>
   </header>

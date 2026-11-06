@@ -20,6 +20,7 @@ export * from './input';
 export * from './input-group';
 export * from './kbd';
 export * from './label';
+export * from './menubar';
 export * from './number-field';
 export * from './pagination';
 export * from './pin-input';
