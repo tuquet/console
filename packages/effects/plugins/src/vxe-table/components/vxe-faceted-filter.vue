@@ -146,44 +146,46 @@ function clearFilters() {
         </div>
 
         <!-- Options list -->
-        <ScrollArea class="max-h-56 p-1.5">
-          <div
-            v-if="filteredOptions.length === 0"
-            class="py-6 text-center text-xs text-muted-foreground"
-          >
-            Không tìm thấy kết quả
-          </div>
-
-          <div
-            v-for="opt in filteredOptions"
-            :key="String(opt.value)"
-            class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
-            @click="toggleOption(opt.value)"
-          >
+        <ScrollArea class="max-h-56">
+          <div class="p-1.5">
             <div
-              class="mr-2 flex size-3.5 items-center justify-center rounded-[3px] border border-primary transition-colors"
-              :class="[
-                selectedValues.has(opt.value)
-                  ? 'bg-primary text-primary-foreground'
-                  : 'opacity-40 [&_svg]:invisible',
-              ]"
+              v-if="filteredOptions.length === 0"
+              class="py-6 text-center text-xs text-muted-foreground"
             >
-              <Check class="size-3 text-current" />
+              Không tìm thấy kết quả
             </div>
 
-            <component
-              :is="opt.icon"
-              v-if="opt.icon"
-              class="mr-2 size-3.5 text-muted-foreground"
-            />
-            <span class="truncate">{{ opt.label }}</span>
-
-            <span
-              v-if="counts[opt.value] !== undefined"
-              class="ml-auto font-mono text-[11px] text-muted-foreground"
+            <div
+              v-for="opt in filteredOptions"
+              :key="String(opt.value)"
+              class="flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+              @click="toggleOption(opt.value)"
             >
-              {{ counts[opt.value] }}
-            </span>
+              <div
+                class="mr-2 flex size-3.5 items-center justify-center rounded-[3px] border border-primary transition-colors"
+                :class="[
+                  selectedValues.has(opt.value)
+                    ? 'bg-primary text-primary-foreground'
+                    : 'opacity-40 [&_svg]:invisible',
+                ]"
+              >
+                <Check class="size-3 text-current" />
+              </div>
+
+              <component
+                :is="opt.icon"
+                v-if="opt.icon"
+                class="mr-2 size-3.5 text-muted-foreground"
+              />
+              <span class="truncate">{{ opt.label }}</span>
+
+              <span
+                v-if="counts[opt.value] !== undefined"
+                class="ml-auto font-mono text-[11px] text-muted-foreground"
+              >
+                {{ counts[opt.value] }}
+              </span>
+            </div>
           </div>
         </ScrollArea>
 
