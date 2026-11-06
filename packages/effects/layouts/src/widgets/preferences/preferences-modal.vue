@@ -385,25 +385,35 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
     :description="$t('preferences.subtitle')"
     :fullscreen-button="false"
     :title="$t('preferences.title')"
-    class="flex h-[88vh] max-h-[88vh] w-[min(900px,95vw)] max-w-none flex-col overflow-hidden p-0"
+    class="flex h-[88vh] max-h-[88vh] w-[min(1100px,96vw)] max-w-none flex-col overflow-hidden p-0"
     content-class="flex-1 overflow-hidden p-0"
     footer-class="border-t border-border px-6 py-3"
-    header-class="border-b border-border px-6 py-3.5 shrink-0"
+    header-class="border-b border-border px-6 py-0 shrink-0"
   >
-    <!-- Header extra: reset button -->
-    <template #extra>
-      <VbenIconButton
-        :disabled="!mergedDiffPreference"
-        :tooltip="$t('preferences.resetTip')"
-        class="relative"
-        @click="handleReset"
-      >
-        <span
-          v-if="mergedDiffPreference"
-          class="absolute right-0.5 top-0.5 size-2 rounded-sm bg-primary"
-        ></span>
-        <RotateCw class="size-4" />
-      </VbenIconButton>
+    <!-- Header extra: reset button — placed inside title slot for proper alignment -->
+    <template #title>
+      <div class="flex h-14 items-center justify-between">
+        <div class="flex flex-col gap-0.5">
+          <span class="text-base font-semibold leading-none">{{
+            $t('preferences.title')
+          }}</span>
+          <span class="text-xs text-muted-foreground">{{
+            $t('preferences.subtitle')
+          }}</span>
+        </div>
+        <VbenIconButton
+          :disabled="!mergedDiffPreference"
+          :tooltip="$t('preferences.resetTip')"
+          class="relative mr-8"
+          @click="handleReset"
+        >
+          <span
+            v-if="mergedDiffPreference"
+            class="absolute right-0.5 top-0.5 size-2 rounded-sm bg-primary"
+          ></span>
+          <RotateCw class="size-4" />
+        </VbenIconButton>
+      </div>
     </template>
 
     <!-- Body: 2-column layout -->
@@ -659,7 +669,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
 
       <!-- DESKTOP CONTENT — right panel (≥ md) -->
       <div class="hidden flex-1 overflow-y-auto md:block">
-        <div class="mx-auto max-w-2xl px-8 py-6 space-y-2">
+        <div class="mx-auto max-w-3xl px-8 py-6 space-y-2">
           <template v-if="activeTab === 'appearance'">
             <Block :title="$t('preferences.theme.title')">
               <Theme
