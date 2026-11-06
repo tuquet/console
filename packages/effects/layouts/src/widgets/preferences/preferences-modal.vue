@@ -34,8 +34,12 @@ import {
   usePreferences,
 } from '@operon/preferences';
 
-import { useVbenModal } from '@operon-core/popup-ui';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
   Select,
   SelectContent,
   SelectItem,
@@ -295,7 +299,7 @@ const {
 } = usePreferences();
 const { copy } = useClipboard({ legacy: true });
 
-const [Modal] = useVbenModal();
+const open = defineModel<boolean>('open', { default: false });
 
 const activeTab = ref('appearance');
 
@@ -380,519 +384,534 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
 </script>
 
 <template>
-  <Modal
-    :fullscreen-button="false"
-    :title="$t('preferences.title')"
-    class="flex h-[88vh] max-h-[88vh] w-[min(1100px,96vw)] max-w-none flex-col overflow-hidden p-0"
-    content-class="flex-1 overflow-hidden p-0"
-    header-class="border-b border-border px-6 py-0 shrink-0"
-  >
-    <!-- Header extra: reset button — placed inside title slot for proper alignment -->
-    <template #title>
-      <div class="flex h-14 items-center justify-between">
-        <div class="flex flex-col gap-0.5">
-          <span class="text-base font-semibold leading-none">{{
-            $t('preferences.title')
-          }}</span>
-          <span class="text-xs text-muted-foreground">{{
-            $t('preferences.subtitle')
-          }}</span>
+  <Dialog v-model:open="open">
+    <DialogContent
+      :open="open"
+      modal
+      class="flex h-[88vh] max-h-[88vh] w-[min(1100px,96vw)] max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-none"
+      @close="open = false"
+    >
+      <!-- Header extra: reset button — placed inside title slot for proper alignment -->
+      <DialogHeader class="shrink-0 border-b border-border px-6 py-0">
+        <div class="flex h-14 items-center justify-between">
+          <div class="flex flex-col gap-0.5">
+            <DialogTitle>{{ $t('preferences.title') }}</DialogTitle>
+            <DialogDescription>
+{{
+              $t('preferences.subtitle')
+            }}
+</DialogDescription>
+          </div>
+          <VbenIconButton
+            :disabled="!mergedDiffPreference"
+            :tooltip="$t('preferences.resetTip')"
+            class="relative mr-8"
+            @click="handleReset"
+          >
+            <span
+              v-if="mergedDiffPreference"
+              class="absolute right-0.5 top-0.5 size-2 rounded-sm bg-primary"
+            ></span>
+            <RotateCw class="size-4" />
+          </VbenIconButton>
         </div>
-        <VbenIconButton
-          :disabled="!mergedDiffPreference"
-          :tooltip="$t('preferences.resetTip')"
-          class="relative mr-8"
-          @click="handleReset"
+      </DialogHeader>
+
+      <!-- Body: 2-column layout -->
+      <div class="flex min-h-0 w-full flex-1 overflow-hidden">
+        <!-- LEFT NAV — desktop (≥ md) -->
+        <nav
+          class="hidden w-52 shrink-0 flex-col border-r border-border md:flex"
         >
-          <span
-            v-if="mergedDiffPreference"
-            class="absolute right-0.5 top-0.5 size-2 rounded-sm bg-primary"
-          ></span>
-          <RotateCw class="size-4" />
-        </VbenIconButton>
-      </div>
-    </template>
+          <!-- Nav items -->
+          <div class="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2 py-4">
+            <p
+              class="mb-1 px-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60"
+            >
+              {{ $t('preferences.title') }}
+            </p>
+            <button
+              v-for="tab in tabs"
+              :key="tab.value"
+              :data-active="activeTab === tab.value"
+              class="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[active=true]:bg-accent data-[active=true]:font-medium data-[active=true]:text-foreground"
+              type="button"
+              @click="activeTab = tab.value"
+            >
+              <component :is="tab.icon" class="size-4 shrink-0" />
+              {{ tab.label }}
+            </button>
+          </div>
 
-    <!-- Body: 2-column layout -->
-    <div class="flex size-full overflow-hidden">
-      <!-- LEFT NAV — desktop (≥ md) -->
-      <nav class="hidden w-52 shrink-0 flex-col border-r border-border md:flex">
-        <!-- Nav items -->
-        <div class="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2 py-4">
-          <p
-            class="mb-1 px-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60"
-          >
-            {{ $t('preferences.title') }}
-          </p>
-          <button
-            v-for="tab in tabs"
-            :key="tab.value"
-            :data-active="activeTab === tab.value"
-            class="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[active=true]:bg-accent data-[active=true]:font-medium data-[active=true]:text-foreground"
-            type="button"
-            @click="activeTab = tab.value"
-          >
-            <component :is="tab.icon" class="size-4 shrink-0" />
-            {{ tab.label }}
-          </button>
-        </div>
+          <!-- Nav bottom actions (mirror of footer) -->
+          <div class="shrink-0 border-t border-border px-2 py-2">
+            <button
+              v-if="appEnableCopyPreferences"
+              class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+              type="button"
+              :disabled="!mergedDiffPreference"
+              @click="handleCopy"
+            >
+              <Copy class="size-3.5 shrink-0" />
+              {{ $t('preferences.copyPreferences') }}
+            </button>
+            <button
+              class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm text-destructive transition-colors hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-40"
+              type="button"
+              :disabled="!mergedDiffPreference"
+              @click="handleClearCache"
+            >
+              {{ $t('preferences.clearAndLogout') }}
+            </button>
+          </div>
+        </nav>
 
-        <!-- Nav bottom actions (mirror of footer) -->
-        <div class="shrink-0 border-t border-border px-2 py-2">
-          <button
-            v-if="appEnableCopyPreferences"
-            class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
-            type="button"
-            :disabled="!mergedDiffPreference"
-            @click="handleCopy"
-          >
-            <Copy class="size-3.5 shrink-0" />
-            {{ $t('preferences.copyPreferences') }}
-          </button>
-          <button
-            class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm text-destructive transition-colors hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-40"
-            type="button"
-            :disabled="!mergedDiffPreference"
-            @click="handleClearCache"
-          >
-            {{ $t('preferences.clearAndLogout') }}
-          </button>
-        </div>
-      </nav>
+        <!-- MOBILE NAV — select dropdown (< md) -->
+        <div
+          class="flex w-full shrink-0 flex-col overflow-hidden md:hidden md:w-0"
+        >
+          <div class="border-b border-border px-4 py-2.5">
+            <Select v-model="activeTab">
+              <SelectTrigger class="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="tab in tabs"
+                  :key="tab.value"
+                  :value="tab.value"
+                >
+                  {{ tab.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      <!-- MOBILE NAV — select dropdown (< md) -->
-      <div
-        class="flex w-full shrink-0 flex-col overflow-hidden md:hidden md:w-0"
-      >
-        <div class="border-b border-border px-4 py-2.5">
-          <Select v-model="activeTab">
-            <SelectTrigger class="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                v-for="tab in tabs"
-                :key="tab.value"
-                :value="tab.value"
+          <!-- Mobile content -->
+          <div class="flex-1 overflow-y-auto px-4 py-4">
+            <template v-if="activeTab === 'appearance'">
+              <Block :title="$t('preferences.theme.title')">
+                <Theme
+                  v-model="themeMode"
+                  v-model:theme-semi-dark-header="themeSemiDarkHeader"
+                  v-model:theme-semi-dark-sidebar="themeSemiDarkSidebar"
+                  v-model:theme-semi-dark-sidebar-sub="themeSemiDarkSidebarSub"
+                />
+              </Block>
+              <Block :title="$t('preferences.theme.builtin.title')">
+                <BuiltinTheme
+                  v-model="themeBuiltinType"
+                  v-model:theme-color-primary="themeColorPrimary"
+                  :is-dark="isDark"
+                />
+              </Block>
+              <Block :title="$t('preferences.theme.radius')">
+                <Radius v-model="themeRadius" />
+              </Block>
+              <Block :title="$t('preferences.typography.title')">
+                <Custom
+                  v-if="customPreferencesTab?.fields.length"
+                  :fields="customPreferencesTab.fields"
+                  :values="customPreferences"
+                  @update="handleCustomPreferencesUpdate"
+                />
+                <FontSize v-model="themeFontSize" />
+              </Block>
+              <Block :title="$t('preferences.other')">
+                <ColorMode
+                  v-model:app-color-gray-mode="appColorGrayMode"
+                  v-model:app-color-weak-mode="appColorWeakMode"
+                />
+              </Block>
+            </template>
+
+            <template v-else-if="activeTab === 'layout'">
+              <Block :title="$t('preferences.layout')">
+                <Layout v-model="appLayout" />
+              </Block>
+              <Block :title="$t('preferences.content')">
+                <Content v-model="appContentCompact" />
+              </Block>
+              <Block :title="$t('preferences.logo.title')">
+                <Logo
+                  v-model:logo-enable="logoEnable"
+                  v-model:logo-mode="logoLogoMode"
+                  v-model:logo-show-text="logoShowText"
+                />
+              </Block>
+              <Block :title="$t('preferences.sidebar.title')">
+                <Sidebar
+                  v-model:sidebar-auto-activate-child="sidebarAutoActivateChild"
+                  v-model:sidebar-collapsed="sidebarCollapsed"
+                  v-model:sidebar-collapsed-button="sidebarCollapsedButton"
+                  v-model:sidebar-collapsed-show-title="
+                    sidebarCollapsedShowTitle
+                  "
+                  v-model:sidebar-draggable="sidebarDraggable"
+                  v-model:sidebar-enable="sidebarEnable"
+                  v-model:sidebar-expand-on-hover="sidebarExpandOnHover"
+                  v-model:sidebar-fixed-button="sidebarFixedButton"
+                  v-model:sidebar-width="sidebarWidth"
+                  :current-layout="appLayout"
+                  :disabled="!isSideMode"
+                />
+              </Block>
+              <Block :title="$t('preferences.header.title')">
+                <Header
+                  v-model:header-enable="headerEnable"
+                  v-model:header-menu-align="headerMenuAlign"
+                  v-model:header-mode="headerMode"
+                  :disabled="isFullContent"
+                />
+              </Block>
+              <Block :title="$t('preferences.navigationMenu.title')">
+                <Navigation
+                  v-model:navigation-accordion="navigationAccordion"
+                  v-model:navigation-split="navigationSplit"
+                  v-model:navigation-style-type="navigationStyleType"
+                  :disabled="isFullContent"
+                  :disabled-navigation-split="!isMixedNav"
+                />
+              </Block>
+              <Block :title="$t('preferences.breadcrumb.title')">
+                <Breadcrumb
+                  v-model:breadcrumb-enable="breadcrumbEnable"
+                  v-model:breadcrumb-hide-only-one="breadcrumbHideOnlyOne"
+                  v-model:breadcrumb-show-home="breadcrumbShowHome"
+                  v-model:breadcrumb-show-icon="breadcrumbShowIcon"
+                  v-model:breadcrumb-style-type="breadcrumbStyleType"
+                  :disabled="
+                    !showBreadcrumbConfig ||
+                    !(isSideNav || isSideMixedNav || isHeaderSidebarNav)
+                  "
+                />
+              </Block>
+              <Block :title="$t('preferences.tabbar.title')">
+                <Tabbar
+                  v-model:tabbar-draggable="tabbarDraggable"
+                  v-model:tabbar-enable="tabbarEnable"
+                  v-model:tabbar-max-count="tabbarMaxCount"
+                  v-model:tabbar-middle-click-to-close="
+                    tabbarMiddleClickToClose
+                  "
+                  v-model:tabbar-persist="tabbarPersist"
+                  v-model:tabbar-show-icon="tabbarShowIcon"
+                  v-model:tabbar-show-maximize="tabbarShowMaximize"
+                  v-model:tabbar-show-more="tabbarShowMore"
+                  v-model:tabbar-show-refresh="tabbarShowRefresh"
+                  v-model:tabbar-style-type="tabbarStyleType"
+                  v-model:tabbar-visit-history="tabbarVisitHistory"
+                  v-model:tabbar-wheelable="tabbarWheelable"
+                />
+              </Block>
+              <Block :title="$t('preferences.widget.title')">
+                <Widget
+                  v-model:app-preferences-button-position="
+                    appPreferencesButtonPosition
+                  "
+                  v-model:widget-fullscreen-button-position="
+                    widgetFullscreenButtonPosition
+                  "
+                  v-model:widget-global-search-button-position="
+                    widgetGlobalSearchButtonPosition
+                  "
+                  v-model:widget-language-toggle-button-position="
+                    widgetLanguageToggleButtonPosition
+                  "
+                  v-model:widget-lock-screen-button-position="
+                    widgetLockScreenButtonPosition
+                  "
+                  v-model:widget-logout-button-position="
+                    widgetLogoutButtonPosition
+                  "
+                  v-model:widget-notification-button-position="
+                    widgetNotificationButtonPosition
+                  "
+                  v-model:widget-order="widgetOrder"
+                  v-model:widget-refresh-button-position="
+                    widgetRefreshButtonPosition
+                  "
+                  v-model:widget-theme-toggle-button-position="
+                    widgetThemeToggleButtonPosition
+                  "
+                  v-model:widget-timezone-button-position="
+                    widgetTimezoneButtonPosition
+                  "
+                />
+              </Block>
+              <Block :title="$t('preferences.footer.title')">
+                <Footer
+                  v-model:footer-enable="footerEnable"
+                  v-model:footer-fixed="footerFixed"
+                />
+              </Block>
+              <Block
+                v-if="copyrightSettingShow"
+                :title="$t('preferences.copyright.title')"
               >
-                {{ tab.label }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+                <Copyright
+                  v-model:copyright-company-name="copyrightCompanyName"
+                  v-model:copyright-company-site-link="copyrightCompanySiteLink"
+                  v-model:copyright-date="copyrightDate"
+                  v-model:copyright-enable="copyrightEnable"
+                  v-model:copyright-icp="copyrightIcp"
+                  v-model:copyright-icp-link="copyrightIcpLink"
+                  :disabled="!footerEnable"
+                />
+              </Block>
+            </template>
+
+            <template v-else-if="activeTab === 'shortcutKey'">
+              <Block :title="$t('preferences.shortcutKeys.global')">
+                <GlobalShortcutKeys
+                  v-model:shortcut-keys-enable="shortcutKeysEnable"
+                  v-model:shortcut-keys-escape="shortcutKeysGlobalEscape"
+                  v-model:shortcut-keys-global-search="shortcutKeysGlobalSearch"
+                  v-model:shortcut-keys-lock-screen="
+                    shortcutKeysGlobalLockScreen
+                  "
+                  v-model:shortcut-keys-logout="shortcutKeysGlobalLogout"
+                />
+              </Block>
+            </template>
+
+            <template v-else-if="activeTab === 'general'">
+              <Block :title="$t('preferences.general')">
+                <General
+                  v-model:app-dynamic-title="appDynamicTitle"
+                  v-model:app-enable-check-updates="appEnableCheckUpdates"
+                  v-model:app-enable-copy-preferences="appEnableCopyPreferences"
+                  v-model:app-locale="appLocale"
+                  v-model:app-timezone="appTimezone"
+                  v-model:app-watermark="appWatermark"
+                  v-model:app-watermark-content="appWatermarkContent"
+                />
+              </Block>
+              <Block :title="$t('preferences.animation.title')">
+                <Animation
+                  v-model:transition-enable="transitionEnable"
+                  v-model:transition-loading="transitionLoading"
+                  v-model:transition-name="transitionName"
+                  v-model:transition-progress="transitionProgress"
+                />
+              </Block>
+            </template>
+          </div>
         </div>
 
-        <!-- Mobile content -->
-        <div class="flex-1 overflow-y-auto px-4 py-4">
-          <template v-if="activeTab === 'appearance'">
-            <Block :title="$t('preferences.theme.title')">
-              <Theme
-                v-model="themeMode"
-                v-model:theme-semi-dark-header="themeSemiDarkHeader"
-                v-model:theme-semi-dark-sidebar="themeSemiDarkSidebar"
-                v-model:theme-semi-dark-sidebar-sub="themeSemiDarkSidebarSub"
-              />
-            </Block>
-            <Block :title="$t('preferences.theme.builtin.title')">
-              <BuiltinTheme
-                v-model="themeBuiltinType"
-                v-model:theme-color-primary="themeColorPrimary"
-                :is-dark="isDark"
-              />
-            </Block>
-            <Block :title="$t('preferences.theme.radius')">
-              <Radius v-model="themeRadius" />
-            </Block>
-            <Block :title="$t('preferences.typography.title')">
-              <Custom
-                v-if="customPreferencesTab?.fields.length"
-                :fields="customPreferencesTab.fields"
-                :values="customPreferences"
-                @update="handleCustomPreferencesUpdate"
-              />
-              <FontSize v-model="themeFontSize" />
-            </Block>
-            <Block :title="$t('preferences.other')">
-              <ColorMode
-                v-model:app-color-gray-mode="appColorGrayMode"
-                v-model:app-color-weak-mode="appColorWeakMode"
-              />
-            </Block>
-          </template>
+        <!-- DESKTOP CONTENT — right panel (≥ md) -->
+        <div class="hidden flex-1 overflow-y-auto md:block">
+          <div class="mx-auto max-w-3xl px-8 py-6 space-y-2">
+            <template v-if="activeTab === 'appearance'">
+              <Block :title="$t('preferences.theme.title')">
+                <Theme
+                  v-model="themeMode"
+                  v-model:theme-semi-dark-header="themeSemiDarkHeader"
+                  v-model:theme-semi-dark-sidebar="themeSemiDarkSidebar"
+                  v-model:theme-semi-dark-sidebar-sub="themeSemiDarkSidebarSub"
+                />
+              </Block>
+              <Block :title="$t('preferences.theme.builtin.title')">
+                <BuiltinTheme
+                  v-model="themeBuiltinType"
+                  v-model:theme-color-primary="themeColorPrimary"
+                  :is-dark="isDark"
+                />
+              </Block>
+              <Block :title="$t('preferences.theme.radius')">
+                <Radius v-model="themeRadius" />
+              </Block>
+              <Block :title="$t('preferences.typography.title')">
+                <Custom
+                  v-if="customPreferencesTab?.fields.length"
+                  :fields="customPreferencesTab.fields"
+                  :values="customPreferences"
+                  @update="handleCustomPreferencesUpdate"
+                />
+                <FontSize v-model="themeFontSize" />
+              </Block>
+              <Block :title="$t('preferences.other')">
+                <ColorMode
+                  v-model:app-color-gray-mode="appColorGrayMode"
+                  v-model:app-color-weak-mode="appColorWeakMode"
+                />
+              </Block>
+            </template>
 
-          <template v-else-if="activeTab === 'layout'">
-            <Block :title="$t('preferences.layout')">
-              <Layout v-model="appLayout" />
-            </Block>
-            <Block :title="$t('preferences.content')">
-              <Content v-model="appContentCompact" />
-            </Block>
-            <Block :title="$t('preferences.logo.title')">
-              <Logo
-                v-model:logo-enable="logoEnable"
-                v-model:logo-mode="logoLogoMode"
-                v-model:logo-show-text="logoShowText"
-              />
-            </Block>
-            <Block :title="$t('preferences.sidebar.title')">
-              <Sidebar
-                v-model:sidebar-auto-activate-child="sidebarAutoActivateChild"
-                v-model:sidebar-collapsed="sidebarCollapsed"
-                v-model:sidebar-collapsed-button="sidebarCollapsedButton"
-                v-model:sidebar-collapsed-show-title="sidebarCollapsedShowTitle"
-                v-model:sidebar-draggable="sidebarDraggable"
-                v-model:sidebar-enable="sidebarEnable"
-                v-model:sidebar-expand-on-hover="sidebarExpandOnHover"
-                v-model:sidebar-fixed-button="sidebarFixedButton"
-                v-model:sidebar-width="sidebarWidth"
-                :current-layout="appLayout"
-                :disabled="!isSideMode"
-              />
-            </Block>
-            <Block :title="$t('preferences.header.title')">
-              <Header
-                v-model:header-enable="headerEnable"
-                v-model:header-menu-align="headerMenuAlign"
-                v-model:header-mode="headerMode"
-                :disabled="isFullContent"
-              />
-            </Block>
-            <Block :title="$t('preferences.navigationMenu.title')">
-              <Navigation
-                v-model:navigation-accordion="navigationAccordion"
-                v-model:navigation-split="navigationSplit"
-                v-model:navigation-style-type="navigationStyleType"
-                :disabled="isFullContent"
-                :disabled-navigation-split="!isMixedNav"
-              />
-            </Block>
-            <Block :title="$t('preferences.breadcrumb.title')">
-              <Breadcrumb
-                v-model:breadcrumb-enable="breadcrumbEnable"
-                v-model:breadcrumb-hide-only-one="breadcrumbHideOnlyOne"
-                v-model:breadcrumb-show-home="breadcrumbShowHome"
-                v-model:breadcrumb-show-icon="breadcrumbShowIcon"
-                v-model:breadcrumb-style-type="breadcrumbStyleType"
-                :disabled="
-                  !showBreadcrumbConfig ||
-                  !(isSideNav || isSideMixedNav || isHeaderSidebarNav)
-                "
-              />
-            </Block>
-            <Block :title="$t('preferences.tabbar.title')">
-              <Tabbar
-                v-model:tabbar-draggable="tabbarDraggable"
-                v-model:tabbar-enable="tabbarEnable"
-                v-model:tabbar-max-count="tabbarMaxCount"
-                v-model:tabbar-middle-click-to-close="tabbarMiddleClickToClose"
-                v-model:tabbar-persist="tabbarPersist"
-                v-model:tabbar-show-icon="tabbarShowIcon"
-                v-model:tabbar-show-maximize="tabbarShowMaximize"
-                v-model:tabbar-show-more="tabbarShowMore"
-                v-model:tabbar-show-refresh="tabbarShowRefresh"
-                v-model:tabbar-style-type="tabbarStyleType"
-                v-model:tabbar-visit-history="tabbarVisitHistory"
-                v-model:tabbar-wheelable="tabbarWheelable"
-              />
-            </Block>
-            <Block :title="$t('preferences.widget.title')">
-              <Widget
-                v-model:app-preferences-button-position="
-                  appPreferencesButtonPosition
-                "
-                v-model:widget-fullscreen-button-position="
-                  widgetFullscreenButtonPosition
-                "
-                v-model:widget-global-search-button-position="
-                  widgetGlobalSearchButtonPosition
-                "
-                v-model:widget-language-toggle-button-position="
-                  widgetLanguageToggleButtonPosition
-                "
-                v-model:widget-lock-screen-button-position="
-                  widgetLockScreenButtonPosition
-                "
-                v-model:widget-logout-button-position="
-                  widgetLogoutButtonPosition
-                "
-                v-model:widget-notification-button-position="
-                  widgetNotificationButtonPosition
-                "
-                v-model:widget-order="widgetOrder"
-                v-model:widget-refresh-button-position="
-                  widgetRefreshButtonPosition
-                "
-                v-model:widget-theme-toggle-button-position="
-                  widgetThemeToggleButtonPosition
-                "
-                v-model:widget-timezone-button-position="
-                  widgetTimezoneButtonPosition
-                "
-              />
-            </Block>
-            <Block :title="$t('preferences.footer.title')">
-              <Footer
-                v-model:footer-enable="footerEnable"
-                v-model:footer-fixed="footerFixed"
-              />
-            </Block>
-            <Block
-              v-if="copyrightSettingShow"
-              :title="$t('preferences.copyright.title')"
-            >
-              <Copyright
-                v-model:copyright-company-name="copyrightCompanyName"
-                v-model:copyright-company-site-link="copyrightCompanySiteLink"
-                v-model:copyright-date="copyrightDate"
-                v-model:copyright-enable="copyrightEnable"
-                v-model:copyright-icp="copyrightIcp"
-                v-model:copyright-icp-link="copyrightIcpLink"
-                :disabled="!footerEnable"
-              />
-            </Block>
-          </template>
+            <template v-else-if="activeTab === 'layout'">
+              <Block :title="$t('preferences.layout')">
+                <Layout v-model="appLayout" />
+              </Block>
+              <Block :title="$t('preferences.content')">
+                <Content v-model="appContentCompact" />
+              </Block>
+              <Block :title="$t('preferences.logo.title')">
+                <Logo
+                  v-model:logo-enable="logoEnable"
+                  v-model:logo-mode="logoLogoMode"
+                  v-model:logo-show-text="logoShowText"
+                />
+              </Block>
+              <Block :title="$t('preferences.sidebar.title')">
+                <Sidebar
+                  v-model:sidebar-auto-activate-child="sidebarAutoActivateChild"
+                  v-model:sidebar-collapsed="sidebarCollapsed"
+                  v-model:sidebar-collapsed-button="sidebarCollapsedButton"
+                  v-model:sidebar-collapsed-show-title="
+                    sidebarCollapsedShowTitle
+                  "
+                  v-model:sidebar-draggable="sidebarDraggable"
+                  v-model:sidebar-enable="sidebarEnable"
+                  v-model:sidebar-expand-on-hover="sidebarExpandOnHover"
+                  v-model:sidebar-fixed-button="sidebarFixedButton"
+                  v-model:sidebar-width="sidebarWidth"
+                  :current-layout="appLayout"
+                  :disabled="!isSideMode"
+                />
+              </Block>
+              <Block :title="$t('preferences.header.title')">
+                <Header
+                  v-model:header-enable="headerEnable"
+                  v-model:header-menu-align="headerMenuAlign"
+                  v-model:header-mode="headerMode"
+                  :disabled="isFullContent"
+                />
+              </Block>
+              <Block :title="$t('preferences.navigationMenu.title')">
+                <Navigation
+                  v-model:navigation-accordion="navigationAccordion"
+                  v-model:navigation-split="navigationSplit"
+                  v-model:navigation-style-type="navigationStyleType"
+                  :disabled="isFullContent"
+                  :disabled-navigation-split="!isMixedNav"
+                />
+              </Block>
+              <Block :title="$t('preferences.breadcrumb.title')">
+                <Breadcrumb
+                  v-model:breadcrumb-enable="breadcrumbEnable"
+                  v-model:breadcrumb-hide-only-one="breadcrumbHideOnlyOne"
+                  v-model:breadcrumb-show-home="breadcrumbShowHome"
+                  v-model:breadcrumb-show-icon="breadcrumbShowIcon"
+                  v-model:breadcrumb-style-type="breadcrumbStyleType"
+                  :disabled="
+                    !showBreadcrumbConfig ||
+                    !(isSideNav || isSideMixedNav || isHeaderSidebarNav)
+                  "
+                />
+              </Block>
+              <Block :title="$t('preferences.tabbar.title')">
+                <Tabbar
+                  v-model:tabbar-draggable="tabbarDraggable"
+                  v-model:tabbar-enable="tabbarEnable"
+                  v-model:tabbar-max-count="tabbarMaxCount"
+                  v-model:tabbar-middle-click-to-close="
+                    tabbarMiddleClickToClose
+                  "
+                  v-model:tabbar-persist="tabbarPersist"
+                  v-model:tabbar-show-icon="tabbarShowIcon"
+                  v-model:tabbar-show-maximize="tabbarShowMaximize"
+                  v-model:tabbar-show-more="tabbarShowMore"
+                  v-model:tabbar-show-refresh="tabbarShowRefresh"
+                  v-model:tabbar-style-type="tabbarStyleType"
+                  v-model:tabbar-visit-history="tabbarVisitHistory"
+                  v-model:tabbar-wheelable="tabbarWheelable"
+                />
+              </Block>
+              <Block :title="$t('preferences.widget.title')">
+                <Widget
+                  v-model:app-preferences-button-position="
+                    appPreferencesButtonPosition
+                  "
+                  v-model:widget-fullscreen-button-position="
+                    widgetFullscreenButtonPosition
+                  "
+                  v-model:widget-global-search-button-position="
+                    widgetGlobalSearchButtonPosition
+                  "
+                  v-model:widget-language-toggle-button-position="
+                    widgetLanguageToggleButtonPosition
+                  "
+                  v-model:widget-lock-screen-button-position="
+                    widgetLockScreenButtonPosition
+                  "
+                  v-model:widget-logout-button-position="
+                    widgetLogoutButtonPosition
+                  "
+                  v-model:widget-notification-button-position="
+                    widgetNotificationButtonPosition
+                  "
+                  v-model:widget-order="widgetOrder"
+                  v-model:widget-refresh-button-position="
+                    widgetRefreshButtonPosition
+                  "
+                  v-model:widget-theme-toggle-button-position="
+                    widgetThemeToggleButtonPosition
+                  "
+                  v-model:widget-timezone-button-position="
+                    widgetTimezoneButtonPosition
+                  "
+                />
+              </Block>
+              <Block :title="$t('preferences.footer.title')">
+                <Footer
+                  v-model:footer-enable="footerEnable"
+                  v-model:footer-fixed="footerFixed"
+                />
+              </Block>
+              <Block
+                v-if="copyrightSettingShow"
+                :title="$t('preferences.copyright.title')"
+              >
+                <Copyright
+                  v-model:copyright-company-name="copyrightCompanyName"
+                  v-model:copyright-company-site-link="copyrightCompanySiteLink"
+                  v-model:copyright-date="copyrightDate"
+                  v-model:copyright-enable="copyrightEnable"
+                  v-model:copyright-icp="copyrightIcp"
+                  v-model:copyright-icp-link="copyrightIcpLink"
+                  :disabled="!footerEnable"
+                />
+              </Block>
+            </template>
 
-          <template v-else-if="activeTab === 'shortcutKey'">
-            <Block :title="$t('preferences.shortcutKeys.global')">
-              <GlobalShortcutKeys
-                v-model:shortcut-keys-enable="shortcutKeysEnable"
-                v-model:shortcut-keys-escape="shortcutKeysGlobalEscape"
-                v-model:shortcut-keys-global-search="shortcutKeysGlobalSearch"
-                v-model:shortcut-keys-lock-screen="shortcutKeysGlobalLockScreen"
-                v-model:shortcut-keys-logout="shortcutKeysGlobalLogout"
-              />
-            </Block>
-          </template>
+            <template v-else-if="activeTab === 'shortcutKey'">
+              <Block :title="$t('preferences.shortcutKeys.global')">
+                <GlobalShortcutKeys
+                  v-model:shortcut-keys-enable="shortcutKeysEnable"
+                  v-model:shortcut-keys-escape="shortcutKeysGlobalEscape"
+                  v-model:shortcut-keys-global-search="shortcutKeysGlobalSearch"
+                  v-model:shortcut-keys-lock-screen="
+                    shortcutKeysGlobalLockScreen
+                  "
+                  v-model:shortcut-keys-logout="shortcutKeysGlobalLogout"
+                />
+              </Block>
+            </template>
 
-          <template v-else-if="activeTab === 'general'">
-            <Block :title="$t('preferences.general')">
-              <General
-                v-model:app-dynamic-title="appDynamicTitle"
-                v-model:app-enable-check-updates="appEnableCheckUpdates"
-                v-model:app-enable-copy-preferences="appEnableCopyPreferences"
-                v-model:app-locale="appLocale"
-                v-model:app-timezone="appTimezone"
-                v-model:app-watermark="appWatermark"
-                v-model:app-watermark-content="appWatermarkContent"
-              />
-            </Block>
-            <Block :title="$t('preferences.animation.title')">
-              <Animation
-                v-model:transition-enable="transitionEnable"
-                v-model:transition-loading="transitionLoading"
-                v-model:transition-name="transitionName"
-                v-model:transition-progress="transitionProgress"
-              />
-            </Block>
-          </template>
-        </div>
-      </div>
-
-      <!-- DESKTOP CONTENT — right panel (≥ md) -->
-      <div class="hidden flex-1 overflow-y-auto md:block">
-        <div class="mx-auto max-w-3xl px-8 py-6 space-y-2">
-          <template v-if="activeTab === 'appearance'">
-            <Block :title="$t('preferences.theme.title')">
-              <Theme
-                v-model="themeMode"
-                v-model:theme-semi-dark-header="themeSemiDarkHeader"
-                v-model:theme-semi-dark-sidebar="themeSemiDarkSidebar"
-                v-model:theme-semi-dark-sidebar-sub="themeSemiDarkSidebarSub"
-              />
-            </Block>
-            <Block :title="$t('preferences.theme.builtin.title')">
-              <BuiltinTheme
-                v-model="themeBuiltinType"
-                v-model:theme-color-primary="themeColorPrimary"
-                :is-dark="isDark"
-              />
-            </Block>
-            <Block :title="$t('preferences.theme.radius')">
-              <Radius v-model="themeRadius" />
-            </Block>
-            <Block :title="$t('preferences.typography.title')">
-              <Custom
-                v-if="customPreferencesTab?.fields.length"
-                :fields="customPreferencesTab.fields"
-                :values="customPreferences"
-                @update="handleCustomPreferencesUpdate"
-              />
-              <FontSize v-model="themeFontSize" />
-            </Block>
-            <Block :title="$t('preferences.other')">
-              <ColorMode
-                v-model:app-color-gray-mode="appColorGrayMode"
-                v-model:app-color-weak-mode="appColorWeakMode"
-              />
-            </Block>
-          </template>
-
-          <template v-else-if="activeTab === 'layout'">
-            <Block :title="$t('preferences.layout')">
-              <Layout v-model="appLayout" />
-            </Block>
-            <Block :title="$t('preferences.content')">
-              <Content v-model="appContentCompact" />
-            </Block>
-            <Block :title="$t('preferences.logo.title')">
-              <Logo
-                v-model:logo-enable="logoEnable"
-                v-model:logo-mode="logoLogoMode"
-                v-model:logo-show-text="logoShowText"
-              />
-            </Block>
-            <Block :title="$t('preferences.sidebar.title')">
-              <Sidebar
-                v-model:sidebar-auto-activate-child="sidebarAutoActivateChild"
-                v-model:sidebar-collapsed="sidebarCollapsed"
-                v-model:sidebar-collapsed-button="sidebarCollapsedButton"
-                v-model:sidebar-collapsed-show-title="sidebarCollapsedShowTitle"
-                v-model:sidebar-draggable="sidebarDraggable"
-                v-model:sidebar-enable="sidebarEnable"
-                v-model:sidebar-expand-on-hover="sidebarExpandOnHover"
-                v-model:sidebar-fixed-button="sidebarFixedButton"
-                v-model:sidebar-width="sidebarWidth"
-                :current-layout="appLayout"
-                :disabled="!isSideMode"
-              />
-            </Block>
-            <Block :title="$t('preferences.header.title')">
-              <Header
-                v-model:header-enable="headerEnable"
-                v-model:header-menu-align="headerMenuAlign"
-                v-model:header-mode="headerMode"
-                :disabled="isFullContent"
-              />
-            </Block>
-            <Block :title="$t('preferences.navigationMenu.title')">
-              <Navigation
-                v-model:navigation-accordion="navigationAccordion"
-                v-model:navigation-split="navigationSplit"
-                v-model:navigation-style-type="navigationStyleType"
-                :disabled="isFullContent"
-                :disabled-navigation-split="!isMixedNav"
-              />
-            </Block>
-            <Block :title="$t('preferences.breadcrumb.title')">
-              <Breadcrumb
-                v-model:breadcrumb-enable="breadcrumbEnable"
-                v-model:breadcrumb-hide-only-one="breadcrumbHideOnlyOne"
-                v-model:breadcrumb-show-home="breadcrumbShowHome"
-                v-model:breadcrumb-show-icon="breadcrumbShowIcon"
-                v-model:breadcrumb-style-type="breadcrumbStyleType"
-                :disabled="
-                  !showBreadcrumbConfig ||
-                  !(isSideNav || isSideMixedNav || isHeaderSidebarNav)
-                "
-              />
-            </Block>
-            <Block :title="$t('preferences.tabbar.title')">
-              <Tabbar
-                v-model:tabbar-draggable="tabbarDraggable"
-                v-model:tabbar-enable="tabbarEnable"
-                v-model:tabbar-max-count="tabbarMaxCount"
-                v-model:tabbar-middle-click-to-close="tabbarMiddleClickToClose"
-                v-model:tabbar-persist="tabbarPersist"
-                v-model:tabbar-show-icon="tabbarShowIcon"
-                v-model:tabbar-show-maximize="tabbarShowMaximize"
-                v-model:tabbar-show-more="tabbarShowMore"
-                v-model:tabbar-show-refresh="tabbarShowRefresh"
-                v-model:tabbar-style-type="tabbarStyleType"
-                v-model:tabbar-visit-history="tabbarVisitHistory"
-                v-model:tabbar-wheelable="tabbarWheelable"
-              />
-            </Block>
-            <Block :title="$t('preferences.widget.title')">
-              <Widget
-                v-model:app-preferences-button-position="
-                  appPreferencesButtonPosition
-                "
-                v-model:widget-fullscreen-button-position="
-                  widgetFullscreenButtonPosition
-                "
-                v-model:widget-global-search-button-position="
-                  widgetGlobalSearchButtonPosition
-                "
-                v-model:widget-language-toggle-button-position="
-                  widgetLanguageToggleButtonPosition
-                "
-                v-model:widget-lock-screen-button-position="
-                  widgetLockScreenButtonPosition
-                "
-                v-model:widget-logout-button-position="
-                  widgetLogoutButtonPosition
-                "
-                v-model:widget-notification-button-position="
-                  widgetNotificationButtonPosition
-                "
-                v-model:widget-order="widgetOrder"
-                v-model:widget-refresh-button-position="
-                  widgetRefreshButtonPosition
-                "
-                v-model:widget-theme-toggle-button-position="
-                  widgetThemeToggleButtonPosition
-                "
-                v-model:widget-timezone-button-position="
-                  widgetTimezoneButtonPosition
-                "
-              />
-            </Block>
-            <Block :title="$t('preferences.footer.title')">
-              <Footer
-                v-model:footer-enable="footerEnable"
-                v-model:footer-fixed="footerFixed"
-              />
-            </Block>
-            <Block
-              v-if="copyrightSettingShow"
-              :title="$t('preferences.copyright.title')"
-            >
-              <Copyright
-                v-model:copyright-company-name="copyrightCompanyName"
-                v-model:copyright-company-site-link="copyrightCompanySiteLink"
-                v-model:copyright-date="copyrightDate"
-                v-model:copyright-enable="copyrightEnable"
-                v-model:copyright-icp="copyrightIcp"
-                v-model:copyright-icp-link="copyrightIcpLink"
-                :disabled="!footerEnable"
-              />
-            </Block>
-          </template>
-
-          <template v-else-if="activeTab === 'shortcutKey'">
-            <Block :title="$t('preferences.shortcutKeys.global')">
-              <GlobalShortcutKeys
-                v-model:shortcut-keys-enable="shortcutKeysEnable"
-                v-model:shortcut-keys-escape="shortcutKeysGlobalEscape"
-                v-model:shortcut-keys-global-search="shortcutKeysGlobalSearch"
-                v-model:shortcut-keys-lock-screen="shortcutKeysGlobalLockScreen"
-                v-model:shortcut-keys-logout="shortcutKeysGlobalLogout"
-              />
-            </Block>
-          </template>
-
-          <template v-else-if="activeTab === 'general'">
-            <Block :title="$t('preferences.general')">
-              <General
-                v-model:app-dynamic-title="appDynamicTitle"
-                v-model:app-enable-check-updates="appEnableCheckUpdates"
-                v-model:app-enable-copy-preferences="appEnableCopyPreferences"
-                v-model:app-locale="appLocale"
-                v-model:app-timezone="appTimezone"
-                v-model:app-watermark="appWatermark"
-                v-model:app-watermark-content="appWatermarkContent"
-              />
-            </Block>
-            <Block :title="$t('preferences.animation.title')">
-              <Animation
-                v-model:transition-enable="transitionEnable"
-                v-model:transition-loading="transitionLoading"
-                v-model:transition-name="transitionName"
-                v-model:transition-progress="transitionProgress"
-              />
-            </Block>
-          </template>
+            <template v-else-if="activeTab === 'general'">
+              <Block :title="$t('preferences.general')">
+                <General
+                  v-model:app-dynamic-title="appDynamicTitle"
+                  v-model:app-enable-check-updates="appEnableCheckUpdates"
+                  v-model:app-enable-copy-preferences="appEnableCopyPreferences"
+                  v-model:app-locale="appLocale"
+                  v-model:app-timezone="appTimezone"
+                  v-model:app-watermark="appWatermark"
+                  v-model:app-watermark-content="appWatermarkContent"
+                />
+              </Block>
+              <Block :title="$t('preferences.animation.title')">
+                <Animation
+                  v-model:transition-enable="transitionEnable"
+                  v-model:transition-loading="transitionLoading"
+                  v-model:transition-name="transitionName"
+                  v-model:transition-progress="transitionProgress"
+                />
+              </Block>
+            </template>
+          </div>
         </div>
       </div>
-    </div>
-  </Modal>
+    </DialogContent>
+  </Dialog>
 </template>
