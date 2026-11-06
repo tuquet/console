@@ -11,6 +11,7 @@ export * from './chart-area';
 export * from './chart-bar';
 export * from './chart-donut';
 export * from './checkbox';
+export * from './command';
 export * from './dialog';
 export * from './dropdown-menu';
 export * from './empty';

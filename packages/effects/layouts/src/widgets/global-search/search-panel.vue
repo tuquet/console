@@ -8,7 +8,7 @@ import { SearchX, X } from '@operon/icons';
 import { $t } from '@operon/locales';
 import { mapTree, traverseTreeValues, uniqueByField } from '@operon/utils';
 
-import { VbenIcon, VbenScrollbar } from '@operon-core/shadcn-ui';
+import { VbenIcon } from '@operon-core/shadcn-ui';
 import { isHttpUrl } from '@operon-core/shared/utils';
 
 import {
@@ -237,61 +237,55 @@ useEventListener('mousemove', () => {
 </script>
 
 <template>
-  <VbenScrollbar>
-    <div class="flex! h-full justify-center px-2 sm:max-h-112.5">
-      <!-- No search results -->
-      <div
-        v-if="keyword && searchResults.length === 0"
-        class="text-center text-muted-foreground"
-      >
-        <SearchX class="mx-auto mt-4 size-12" />
-        <p class="mt-6 mb-10">
-          {{ $t('ui.widgets.search.noResults') }}
-          <span class="text-foreground"> "{{ keyword }}" </span>
-        </p>
-      </div>
-      <!-- Search history & no search results -->
-      <div
-        v-if="!keyword && searchResults.length === 0"
-        class="text-center text-muted-foreground"
-      >
-        <p class="my-10">
-          {{ $t('ui.widgets.search.noRecent') }}
-        </p>
-      </div>
-
-      <ul v-show="searchResults.length > 0" class="w-full">
-        <li
-          v-if="searchHistory.length > 0 && !keyword"
-          class="mb-2 text-muted-foreground"
-        >
-          {{ $t('ui.widgets.search.recent') }}
-        </li>
-        <li
-          v-for="(item, index) in uniqueByField(searchResults, 'path')"
-          :key="item.path"
-          :class="
-            activeIndex === index
-              ? 'active bg-primary text-primary-foreground'
-              : ''
-          "
-          :data-index="index"
-          :data-search-item="index"
-          class="group mb-3 flex-center w-full cursor-pointer rounded-lg bg-accent p-4"
-          @click="handleEnter"
-          @mouseenter="handleMouseenter"
-        >
-          <VbenIcon :icon="item.icon" class="mr-2 size-5 shrink-0" fallback />
-
-          <span class="flex-1">{{ item.name }}</span>
-          <div
-            class="flex-center rounded-full p-1 hover:scale-110 hover:text-primary-foreground dark:hover:bg-accent"
-            @click.stop="removeItem(index)"
-          >
-            <X class="size-4" />
-          </div>
-        </li>
-      </ul>
+  <div class="flex justify-center px-2 py-2">
+    <!-- No search results -->
+    <div
+      v-if="keyword && searchResults.length === 0"
+      class="w-full text-center text-muted-foreground"
+    >
+      <SearchX class="mx-auto mt-4 size-12" />
+      <p class="mb-6 mt-6">
+        {{ $t('ui.widgets.search.noResults') }}
+        <span class="text-foreground"> "{{ keyword }}" </span>
+      </p>
     </div>
-  </VbenScrollbar>
+    <!-- Search history & no search results -->
+    <div
+      v-if="!keyword && searchResults.length === 0"
+      class="w-full text-center text-muted-foreground"
+    >
+      <p class="my-10">
+        {{ $t('ui.widgets.search.noRecent') }}
+      </p>
+    </div>
+
+    <ul v-show="searchResults.length > 0" class="w-full">
+      <li
+        v-if="searchHistory.length > 0 && !keyword"
+        class="mb-2 px-1 text-xs font-medium text-muted-foreground"
+      >
+        {{ $t('ui.widgets.search.recent') }}
+      </li>
+      <li
+        v-for="(item, index) in uniqueByField(searchResults, 'path')"
+        :key="item.path"
+        :class="activeIndex === index ? 'bg-accent text-accent-foreground' : ''"
+        :data-index="index"
+        :data-search-item="index"
+        class="group mb-1 flex w-full cursor-pointer items-center rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+        @click="handleEnter"
+        @mouseenter="handleMouseenter"
+      >
+        <VbenIcon :icon="item.icon" class="mr-2 size-4 shrink-0" fallback />
+
+        <span class="flex-1 truncate">{{ item.name }}</span>
+        <div
+          class="flex-center rounded-sm p-1 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
+          @click.stop="removeItem(index)"
+        >
+          <X class="size-3.5" />
+        </div>
+      </li>
+    </ul>
+  </div>
 </template>

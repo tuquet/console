@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import type { MenuRecordRaw } from '@operon/types';
 
-import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
-import { ArrowDown, ArrowUp, CornerDownLeft, Search, X } from '@operon/icons';
+import { Search } from '@operon/icons';
 import { $t } from '@operon/locales';
 import { isWindowsOs } from '@operon/utils';
 
-import { useVbenModal } from '@operon-core/popup-ui';
-import { Input, Kbd } from '@operon-core/shadcn-ui';
+import {
+  CommandDialog,
+  CommandInput,
+  CommandList,
+  Kbd,
+} from '@operon-core/shadcn-ui';
 
 import { useMagicKeys, whenever } from '@vueuse/core';
 
@@ -32,24 +36,21 @@ const props = withDefaults(
   },
 );
 
+const open = ref(false);
 const keyword = ref('');
-const searchInputRef = ref<InstanceType<typeof Input> | null>(null);
-
-const [Modal, modalApi] = useVbenModal({
-  onCancel() {
-    modalApi.close();
-  },
-  onOpenChange(isOpen: boolean) {
-    if (!isOpen) {
-      keyword.value = '';
-    }
-  },
-});
-const open = modalApi.useStore((state) => state.isOpen);
 
 function handleClose() {
-  modalApi.close();
+  open.value = false;
   keyword.value = '';
+}
+
+function toggleOpen() {
+  open.value = !open.value;
+}
+
+// Reset keyword when dialog closes
+function handleOpenChange(val: boolean) {
+  if (!val) keyword.value = '';
 }
 
 const keys = useMagicKeys();
@@ -57,19 +58,10 @@ const cmd = isWindowsOs() ? keys['ctrl+k'] : keys['cmd+k'];
 if (cmd) {
   whenever(cmd, () => {
     if (props.enableShortcutKey) {
-      modalApi.open();
+      open.value = true;
     }
   });
 }
-
-whenever(open, () => {
-  nextTick(() => {
-    const el = (searchInputRef.value?.$el ?? searchInputRef.value) as
-      | HTMLElement
-      | undefined;
-    el?.focus?.();
-  });
-});
 
 const preventDefaultBrowserSearchHotKey = (event: KeyboardEvent) => {
   if (event.key?.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)) {
@@ -85,18 +77,19 @@ const toggleKeydownListener = () => {
   }
 };
 
-const toggleOpen = () => {
-  open.value ? modalApi.close() : modalApi.open();
-};
-
-watch(() => props.enableShortcutKey, toggleKeydownListener);
+// Expose to parent component to allow triggering search modal externally
+defineExpose({
+  open: () => (open.value = true),
+  close: () => (open.value = false),
+  toggle: toggleOpen,
+});
 
 onMounted(() => {
   toggleKeydownListener();
 
   // Allow external components (e.g. titlebar menubar) to open the search
   // modal via a lightweight custom event: window.dispatchEvent(new Event('open-global-search'))
-  const handleExternalOpen = () => modalApi.open();
+  const handleExternalOpen = () => (open.value = true);
   window.addEventListener('open-global-search', handleExternalOpen);
 
   onUnmounted(() => {
@@ -104,53 +97,27 @@ onMounted(() => {
     window.removeEventListener('open-global-search', handleExternalOpen);
   });
 });
-
-// Expose to parent component to allow triggering search modal externally (e.g. from user-dropdown)
-defineExpose({
-  open: () => modalApi.open(),
-  close: () => modalApi.close(),
-  toggle: toggleOpen,
-});
 </script>
 
 <template>
   <div>
-    <Modal
-      :fullscreen-button="false"
-      class="w-150"
-      header-class="py-2 border-b"
-    >
-      <template #title>
-        <div class="flex items-center">
-          <Search class="mr-2 size-4 text-muted-foreground" />
-          <Input
-            ref="searchInputRef"
-            v-model="keyword"
-            :placeholder="$t('ui.widgets.search.searchNavigate')"
-            class="h-8 w-[80%] border-none bg-transparent px-2.5 py-1 shadow-none outline-hidden focus-visible:ring-0 focus-visible:ring-transparent"
-          />
-        </div>
-      </template>
+    <CommandDialog v-model:open="open" @update:open="handleOpenChange">
+      <!--
+        We bypass CommandDialog's internal filter (filterState.search) in favour of
+        SearchPanel's own throttled fuzzy search. CommandInput is used only as a
+        styled text field — its value is kept in sync with our `keyword` ref.
+      -->
+      <CommandInput
+        v-model="keyword"
+        :filter-fn="() => true"
+        :placeholder="$t('ui.widgets.search.searchNavigate')"
+      />
+      <CommandList class="max-h-[450px]">
+        <SearchPanel :keyword="keyword" :menus="menus" @close="handleClose" />
+      </CommandList>
+    </CommandDialog>
 
-      <SearchPanel :keyword="keyword" :menus="menus" @close="handleClose" />
-      <template #footer>
-        <div class="flex w-full justify-start">
-          <div class="mr-2 flex items-center">
-            <CornerDownLeft class="mr-1 size-3" />
-            {{ $t('ui.widgets.search.select') }}
-          </div>
-          <div class="mr-2 flex items-center">
-            <ArrowUp class="mr-1 size-3" />
-            <ArrowDown class="mr-1 size-3" />
-            {{ $t('ui.widgets.search.navigate') }}
-          </div>
-          <div class="flex items-center">
-            <X class="mr-1 size-3" />
-            {{ $t('ui.widgets.search.close') }}
-          </div>
-        </div>
-      </template>
-    </Modal>
+    <!-- Trigger button -->
     <div
       v-if="showButton"
       class="group flex h-8 cursor-pointer items-center gap-3 rounded-2xl border-none bg-none px-2 py-0.5 outline-hidden md:bg-accent"
