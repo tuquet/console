@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 
 import { isWindowsOs } from '@operon/utils';
 
@@ -13,8 +13,6 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from '@operon-core/shadcn-ui';
-
-import { useMagicKeys, whenever } from '@vueuse/core';
 
 import {
   closeWindow,
@@ -33,17 +31,32 @@ defineOptions({ name: 'TitlebarMenubar' });
 const { version } = useAppVersion();
 
 // ── Command Palette shortcut (Ctrl+Shift+P / Cmd+Shift+P) ──────────────────
-const keys = useMagicKeys();
-const cmdPalette = isWindowsOs() ? keys['ctrl+shift+p'] : keys['meta+shift+p'];
-
+// Use native keydown listener so we can preventDefault before the browser
+// intercepts Ctrl+Shift+P as the native Print dialog.
 function openCommandPalette() {
   window.dispatchEvent(new Event('open-global-search'));
 }
 
+function handleCommandPaletteKey(e: KeyboardEvent) {
+  const isMatch = isWindowsOs()
+    ? e.ctrlKey && e.shiftKey && e.code === 'KeyP'
+    : e.metaKey && e.shiftKey && e.code === 'KeyP';
+  if (!isMatch) return;
+  e.preventDefault();
+  e.stopPropagation();
+  openCommandPalette();
+}
+
 onMounted(() => {
-  if (cmdPalette) {
-    whenever(cmdPalette, openCommandPalette);
-  }
+  window.addEventListener('keydown', handleCommandPaletteKey, {
+    capture: true,
+  });
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleCommandPaletteKey, {
+    capture: true,
+  });
 });
 
 // ── Keyboard shortcut labels (OS-aware) ────────────────────────────────────
@@ -87,7 +100,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
       <MenubarContent class="min-w-[220px]">
         <MenubarItem @select="openCommandPalette">
           {{ $t('page.app.menu_command_palette') }}
-          <MenubarShortcut>{{ mod }}⇧P</MenubarShortcut>
+          <MenubarShortcut>{{ mod }}+Shift+P</MenubarShortcut>
         </MenubarItem>
       </MenubarContent>
     </MenubarMenu>
@@ -102,7 +115,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
       <MenubarContent class="min-w-[200px]">
         <MenubarItem @select="zoomIn">
           {{ $t('page.app.menu_zoom_in') }}
-          <MenubarShortcut>{{ mod }}=</MenubarShortcut>
+          <MenubarShortcut>{{ mod }}+</MenubarShortcut>
         </MenubarItem>
         <MenubarItem @select="zoomOut">
           {{ $t('page.app.menu_zoom_out') }}
@@ -110,7 +123,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
         </MenubarItem>
         <MenubarItem @select="resetZoom">
           {{ $t('page.app.menu_reset_zoom') }}
-          <MenubarShortcut>{{ mod }}0</MenubarShortcut>
+          <MenubarShortcut>{{ mod }}+0</MenubarShortcut>
         </MenubarItem>
       </MenubarContent>
     </MenubarMenu>

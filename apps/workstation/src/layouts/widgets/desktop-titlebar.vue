@@ -11,19 +11,6 @@ defineOptions({ name: 'DesktopTitlebar' });
     data-layout-region="window-titlebar"
     data-tauri-drag-region
   >
-    <!-- Left: App brand -->
-    <div
-      class="flex shrink-0 items-center pl-3 pointer-events-none"
-      data-tauri-drag-region
-    >
-      <span
-        class="font-semibold tracking-tight text-foreground text-sm"
-        data-tauri-drag-region
-      >
-        Operon
-      </span>
-    </div>
-
     <!-- Menubar navigation (interactive — no drag) -->
     <div class="no-drag flex items-center pl-1" @dblclick.stop>
       <TitlebarMenubar />
