@@ -8,6 +8,7 @@ import { Toaster } from '@operon-core/shadcn-ui';
 import {
   initDesktopAuthHandling,
   isTauriEnvironment,
+  restoreZoom,
   revealWindow,
 } from '#/adapter/desktop';
 import DesktopShell from '#/layouts/widgets/desktop-shell.vue';
@@ -21,6 +22,7 @@ onMounted(async () => {
   if (isTauriEnvironment()) {
     await revealWindow();
     await initDesktopAuthHandling();
+    await restoreZoom();
   }
 });
 </script>

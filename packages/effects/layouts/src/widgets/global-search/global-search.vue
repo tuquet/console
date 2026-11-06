@@ -94,8 +94,14 @@ watch(() => props.enableShortcutKey, toggleKeydownListener);
 onMounted(() => {
   toggleKeydownListener();
 
+  // Allow external components (e.g. titlebar menubar) to open the search
+  // modal via a lightweight custom event: window.dispatchEvent(new Event('open-global-search'))
+  const handleExternalOpen = () => modalApi.open();
+  window.addEventListener('open-global-search', handleExternalOpen);
+
   onUnmounted(() => {
     window.removeEventListener('keydown', preventDefaultBrowserSearchHotKey);
+    window.removeEventListener('open-global-search', handleExternalOpen);
   });
 });
 

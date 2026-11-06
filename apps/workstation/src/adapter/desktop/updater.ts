@@ -37,3 +37,30 @@ export async function checkDesktopUpdate(): Promise<UpdateInfo> {
     return { available: false };
   }
 }
+
+/**
+ * Checks for updates and surfaces a toast notification with the result.
+ * - Update available → success toast with version
+ * - Up to date       → info toast
+ * - Error            → warning toast
+ */
+export async function checkAndNotifyUpdate(): Promise<void> {
+  const { toast } = await import('@operon-core/shadcn-ui');
+  try {
+    const info = await checkDesktopUpdate();
+    if (info.available) {
+      toast.success(
+        `Update v${info.version} is available! Restart the app to install.`,
+        { duration: 8000 },
+      );
+    } else {
+      toast.info(`Operon v${info.currentVersion ?? ''} is up to date.`, {
+        duration: 3000,
+      });
+    }
+  } catch {
+    toast.warning('Could not check for updates. Try again later.', {
+      duration: 4000,
+    });
+  }
+}

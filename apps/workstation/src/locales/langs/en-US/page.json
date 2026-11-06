@@ -935,5 +935,16 @@
     "remote_count": "on cloud",
     "empty": "No credentials yet. Add one or Pull from Cloud.",
     "daemon_offline": "Cannot reach the CLI daemon (127.0.0.1:8765). Start it with `opn worker start`."
+  },
+  "app": {
+    "menu_operon": "Operon",
+    "menu_check_updates": "Check for Updates...",
+    "menu_workspace": "Workspace",
+    "menu_command_palette": "Command Palette",
+    "menu_view": "View",
+    "menu_zoom_in": "Zoom In",
+    "menu_zoom_out": "Zoom Out",
+    "menu_reset_zoom": "Reset Zoom",
+    "menu_window": "Window"
   }
 }

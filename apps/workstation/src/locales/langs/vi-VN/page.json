@@ -935,5 +935,16 @@
     "remote_count": "trên cloud",
     "empty": "Chưa có credential nào. Thêm mới hoặc Tải về từ Cloud.",
     "daemon_offline": "Không kết nối được CLI daemon (127.0.0.1:8765). Hãy chạy `opn worker start`."
+  },
+  "app": {
+    "menu_operon": "Operon",
+    "menu_check_updates": "Kiểm tra cập nhật...",
+    "menu_workspace": "Workspace",
+    "menu_command_palette": "Command Palette",
+    "menu_view": "Hiển thị",
+    "menu_zoom_in": "Phóng to",
+    "menu_zoom_out": "Thu nhỏ",
+    "menu_reset_zoom": "Đặt lại Zoom",
+    "menu_window": "Cửa sổ"
   }
 }

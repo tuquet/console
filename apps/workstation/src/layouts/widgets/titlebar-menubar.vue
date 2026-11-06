@@ -1,95 +1,53 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
+
+import { isWindowsOs } from '@operon/utils';
 
 import {
   Menubar,
   MenubarContent,
   MenubarItem,
+  MenubarLabel,
   MenubarMenu,
   MenubarSeparator,
+  MenubarShortcut,
   MenubarTrigger,
 } from '@operon-core/shadcn-ui';
 
+import { useMagicKeys, whenever } from '@vueuse/core';
+
+import {
+  closeWindow,
+  minimizeWindow,
+  resetZoom,
+  toggleMaximizeWindow,
+  zoomIn,
+  zoomOut,
+} from '#/adapter/desktop';
+import { checkAndNotifyUpdate } from '#/adapter/desktop/updater';
+import { useAppVersion } from '#/composables/use-app-version';
 import { $t } from '#/locales';
 
 defineOptions({ name: 'TitlebarMenubar' });
 
-const router = useRouter();
+const { version } = useAppVersion();
 
-function go(path: string) {
-  router.push(path);
+// ── Command Palette shortcut (Ctrl+Shift+P / Cmd+Shift+P) ──────────────────
+const keys = useMagicKeys();
+const cmdPalette = isWindowsOs() ? keys['ctrl+shift+p'] : keys['meta+shift+p'];
+
+function openCommandPalette() {
+  window.dispatchEvent(new Event('open-global-search'));
 }
 
-interface MenuEntry {
-  path: string;
-  label: () => string;
-  separator?: boolean;
-}
+onMounted(() => {
+  if (cmdPalette) {
+    whenever(cmdPalette, openCommandPalette);
+  }
+});
 
-interface MenuGroup {
-  label: () => string;
-  items: MenuEntry[];
-}
-
-const menus: MenuGroup[] = [
-  {
-    label: () => $t('page.dashboard.title'),
-    items: [
-      {
-        path: '/dashboard/analytics',
-        label: () => $t('page.dashboard.analytics'),
-      },
-    ],
-  },
-  {
-    label: () => $t('page.automation.title'),
-    items: [
-      {
-        path: '/automation/overview',
-        label: () => $t('page.automation.overview'),
-      },
-      {
-        path: '/automation/workflows',
-        label: () => $t('page.automation.workflows'),
-      },
-      {
-        path: '/automation/devices',
-        label: () => $t('page.automation.devices'),
-      },
-      {
-        path: '/automation/browsers',
-        label: () => $t('page.automation.browsers'),
-      },
-    ],
-  },
-  {
-    label: () => $t('page.commerce.title'),
-    items: [
-      { path: '/commerce/store', label: () => $t('page.commerce.store') },
-      { path: '/commerce/orders', label: () => $t('page.commerce.orders') },
-      { path: '/commerce/wallet', label: () => $t('page.commerce.wallet') },
-      {
-        separator: true,
-        path: '/commerce/admin',
-        label: () => $t('page.commerce.admin'),
-      },
-    ],
-  },
-  {
-    label: () => $t('page.system.title'),
-    items: [
-      { path: '/system/overview', label: () => $t('page.system.overview') },
-      { path: '/system/plugins', label: () => $t('page.system.plugins') },
-      { path: '/system/users', label: () => $t('page.system.users') },
-      {
-        separator: true,
-        path: '/system/plans',
-        label: () => $t('page.system.plans'),
-      },
-      { path: '/system/audit-logs', label: () => $t('page.system.auditLogs') },
-    ],
-  },
-];
+// ── Keyboard shortcut labels (OS-aware) ────────────────────────────────────
+const mod = isWindowsOs() ? 'Ctrl' : '⌘';
 </script>
 
 <template>
@@ -97,19 +55,85 @@ const menus: MenuGroup[] = [
     class="h-full border-none bg-transparent p-0 shadow-none"
     @dblclick.stop
   >
-    <MenubarMenu v-for="group in menus" :key="group.label()">
+    <!-- ── Operon ─────────────────────────────────────────────────────── -->
+    <MenubarMenu>
+      <MenubarTrigger
+        class="h-7 px-2.5 text-xs font-semibold text-foreground data-[state=open]:text-foreground"
+      >
+        {{ $t('page.app.menu_operon') }}
+      </MenubarTrigger>
+      <MenubarContent class="min-w-[200px]">
+        <!-- Version badge — non-interactive label -->
+        <MenubarLabel
+          v-if="version"
+          class="text-xs text-muted-foreground font-normal"
+        >
+          Version {{ version }}
+        </MenubarLabel>
+        <MenubarSeparator v-if="version" />
+        <MenubarItem @select="checkAndNotifyUpdate">
+          {{ $t('page.app.menu_check_updates') }}
+        </MenubarItem>
+      </MenubarContent>
+    </MenubarMenu>
+
+    <!-- ── Workspace ─────────────────────────────────────────────────── -->
+    <MenubarMenu>
       <MenubarTrigger
         class="h-7 px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
       >
-        {{ group.label() }}
+        {{ $t('page.app.menu_workspace') }}
       </MenubarTrigger>
-      <MenubarContent class="min-w-[160px]">
-        <template v-for="item in group.items" :key="item.path">
-          <MenubarSeparator v-if="item.separator" />
-          <MenubarItem @select="go(item.path)">
-            {{ item.label() }}
-          </MenubarItem>
-        </template>
+      <MenubarContent class="min-w-[220px]">
+        <MenubarItem @select="openCommandPalette">
+          {{ $t('page.app.menu_command_palette') }}
+          <MenubarShortcut>{{ mod }}⇧P</MenubarShortcut>
+        </MenubarItem>
+      </MenubarContent>
+    </MenubarMenu>
+
+    <!-- ── View ──────────────────────────────────────────────────────── -->
+    <MenubarMenu>
+      <MenubarTrigger
+        class="h-7 px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
+      >
+        {{ $t('page.app.menu_view') }}
+      </MenubarTrigger>
+      <MenubarContent class="min-w-[200px]">
+        <MenubarItem @select="zoomIn">
+          {{ $t('page.app.menu_zoom_in') }}
+          <MenubarShortcut>{{ mod }}=</MenubarShortcut>
+        </MenubarItem>
+        <MenubarItem @select="zoomOut">
+          {{ $t('page.app.menu_zoom_out') }}
+          <MenubarShortcut>{{ mod }}-</MenubarShortcut>
+        </MenubarItem>
+        <MenubarItem @select="resetZoom">
+          {{ $t('page.app.menu_reset_zoom') }}
+          <MenubarShortcut>{{ mod }}0</MenubarShortcut>
+        </MenubarItem>
+      </MenubarContent>
+    </MenubarMenu>
+
+    <!-- ── Window ────────────────────────────────────────────────────── -->
+    <MenubarMenu>
+      <MenubarTrigger
+        class="h-7 px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
+      >
+        {{ $t('page.app.menu_window') }}
+      </MenubarTrigger>
+      <MenubarContent class="min-w-[200px]">
+        <MenubarItem @select="minimizeWindow">
+          {{ $t('common.windowMinimize') }}
+        </MenubarItem>
+        <MenubarItem @select="toggleMaximizeWindow">
+          {{ $t('common.windowMaximize') }}
+        </MenubarItem>
+        <MenubarSeparator />
+        <MenubarItem variant="destructive" @select="closeWindow">
+          {{ $t('common.windowClose') }}
+          <MenubarShortcut>Alt F4</MenubarShortcut>
+        </MenubarItem>
       </MenubarContent>
     </MenubarMenu>
   </Menubar>

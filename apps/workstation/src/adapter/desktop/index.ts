@@ -215,3 +215,75 @@ export function initDesktopLoggingAndShortcuts(): void {
 }
 
 export * from './deep-link';
+
+// ---------------------------------------------------------------------------
+// Webview Zoom
+// ---------------------------------------------------------------------------
+
+const ZOOM_KEY = '--operon-zoom';
+const ZOOM_STEP = 0.1;
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 2;
+
+/** Returns the persisted zoom factor (default 1.0 = 100%). */
+export function getCurrentZoom(): number {
+  return Number(localStorage.getItem(ZOOM_KEY) ?? '1');
+}
+
+async function applyZoom(next: number): Promise<void> {
+  const { getCurrentWebview } = await import('@tauri-apps/api/webview');
+  await getCurrentWebview().setZoom(next);
+  localStorage.setItem(ZOOM_KEY, String(next));
+}
+
+/** Increases webview zoom by 10% (max 200%). */
+export async function zoomIn(): Promise<void> {
+  if (!isTauriEnvironment()) return;
+  try {
+    const next = Math.min(
+      ZOOM_MAX,
+      Number((getCurrentZoom() + ZOOM_STEP).toFixed(1)),
+    );
+    await applyZoom(next);
+  } catch (error) {
+    console.error('[Desktop] zoomIn failed:', error);
+  }
+}
+
+/** Decreases webview zoom by 10% (min 50%). */
+export async function zoomOut(): Promise<void> {
+  if (!isTauriEnvironment()) return;
+  try {
+    const next = Math.max(
+      ZOOM_MIN,
+      Number((getCurrentZoom() - ZOOM_STEP).toFixed(1)),
+    );
+    await applyZoom(next);
+  } catch (error) {
+    console.error('[Desktop] zoomOut failed:', error);
+  }
+}
+
+/** Resets webview zoom to 100%. */
+export async function resetZoom(): Promise<void> {
+  if (!isTauriEnvironment()) return;
+  try {
+    await applyZoom(1);
+  } catch (error) {
+    console.error('[Desktop] resetZoom failed:', error);
+  }
+}
+
+/** Restores persisted zoom on app startup. Call once in app.vue onMounted. */
+export async function restoreZoom(): Promise<void> {
+  if (!isTauriEnvironment()) return;
+  const saved = getCurrentZoom();
+  if (saved !== 1) {
+    try {
+      const { getCurrentWebview } = await import('@tauri-apps/api/webview');
+      await getCurrentWebview().setZoom(saved);
+    } catch {
+      // non-critical
+    }
+  }
+}
