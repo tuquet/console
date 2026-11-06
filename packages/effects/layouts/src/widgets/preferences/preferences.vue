@@ -6,10 +6,10 @@ import { $t, loadLocaleMessages } from '@operon/locales';
 import { preferences, updatePreferences } from '@operon/preferences';
 import { capitalizeFirstLetter } from '@operon/utils';
 
-import { useVbenDrawer } from '@operon-core/popup-ui';
+import { useVbenModal } from '@operon-core/popup-ui';
 import { VbenButton } from '@operon-core/shadcn-ui';
 
-import PreferencesDrawer from './preferences-drawer.vue';
+import PreferencesModal from './preferences-modal.vue';
 
 interface Props {
   /** Whether to show button */
@@ -22,13 +22,13 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{ clearPreferencesAndLogout: [] }>();
 
-const [Drawer, drawerApi] = useVbenDrawer({
-  connectedComponent: PreferencesDrawer,
+const [Modal, modalApi] = useVbenModal({
+  connectedComponent: PreferencesModal,
 });
 
-// Expose method to open preferences drawer
+// Expose method to open preferences modal
 defineExpose({
-  open: () => drawerApi.open(),
+  open: () => modalApi.open(),
 });
 
 /**
@@ -78,7 +78,7 @@ const listen = computed(() => {
 </script>
 <template>
   <div>
-    <Drawer
+    <Modal
       v-bind="{ ...$attrs, ...attrs }"
       v-on="listen"
       @clear-preferences-and-logout="emit('clearPreferencesAndLogout')"
@@ -90,7 +90,7 @@ const listen = computed(() => {
         v-if="props.showButton"
         :title="$t('preferences.title')"
         class="flex-col-center size-10 cursor-pointer rounded-l-lg rounded-r-none border-none bg-primary"
-        @click="() => drawerApi.open()"
+        @click="() => modalApi.open()"
       >
         <Settings class="size-5" />
       </VbenButton>
