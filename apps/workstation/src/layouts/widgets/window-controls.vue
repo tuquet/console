@@ -79,7 +79,7 @@ useEventListener(window, 'resize', refreshMaximized);
     <Button
       variant="ghost"
       size="icon"
-      class="size-7 text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
+      class="size-7 text-muted-foreground hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive dark:hover:text-destructive-foreground"
       :title="$t('common.windowClose')"
       :aria-label="$t('common.windowClose')"
       @click="handleClose"
