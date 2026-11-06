@@ -41,7 +41,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  VbenButton,
   VbenIconButton,
 } from '@operon-core/shadcn-ui';
 import { globalShareState } from '@operon-core/shared/global-state';
@@ -386,7 +385,6 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
     :title="$t('preferences.title')"
     class="flex h-[88vh] max-h-[88vh] w-[min(1100px,96vw)] max-w-none flex-col overflow-hidden p-0"
     content-class="flex-1 overflow-hidden p-0"
-    footer-class="border-t border-border px-6 py-3"
     header-class="border-b border-border px-6 py-0 shrink-0"
   >
     <!-- Header extra: reset button — placed inside title slot for proper alignment -->
@@ -418,25 +416,48 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
     <!-- Body: 2-column layout -->
     <div class="flex size-full overflow-hidden">
       <!-- LEFT NAV — desktop (≥ md) -->
-      <nav
-        class="hidden w-52 shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-border px-2 py-4 md:flex"
-      >
-        <p
-          class="mb-1 px-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60"
-        >
-          {{ $t('preferences.title') }}
-        </p>
-        <button
-          v-for="tab in tabs"
-          :key="tab.value"
-          :data-active="activeTab === tab.value"
-          class="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[active=true]:bg-accent data-[active=true]:font-medium data-[active=true]:text-foreground"
-          type="button"
-          @click="activeTab = tab.value"
-        >
-          <component :is="tab.icon" class="size-4 shrink-0" />
-          {{ tab.label }}
-        </button>
+      <nav class="hidden w-52 shrink-0 flex-col border-r border-border md:flex">
+        <!-- Nav items -->
+        <div class="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2 py-4">
+          <p
+            class="mb-1 px-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60"
+          >
+            {{ $t('preferences.title') }}
+          </p>
+          <button
+            v-for="tab in tabs"
+            :key="tab.value"
+            :data-active="activeTab === tab.value"
+            class="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[active=true]:bg-accent data-[active=true]:font-medium data-[active=true]:text-foreground"
+            type="button"
+            @click="activeTab = tab.value"
+          >
+            <component :is="tab.icon" class="size-4 shrink-0" />
+            {{ tab.label }}
+          </button>
+        </div>
+
+        <!-- Nav bottom actions (mirror of footer) -->
+        <div class="shrink-0 border-t border-border px-2 py-2">
+          <button
+            v-if="appEnableCopyPreferences"
+            class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+            type="button"
+            :disabled="!mergedDiffPreference"
+            @click="handleCopy"
+          >
+            <Copy class="size-3.5 shrink-0" />
+            {{ $t('preferences.copyPreferences') }}
+          </button>
+          <button
+            class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm text-destructive transition-colors hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-40"
+            type="button"
+            :disabled="!mergedDiffPreference"
+            @click="handleClearCache"
+          >
+            {{ $t('preferences.clearAndLogout') }}
+          </button>
+        </div>
       </nav>
 
       <!-- MOBILE NAV — select dropdown (< md) -->
@@ -873,29 +894,5 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
         </div>
       </div>
     </div>
-
-    <!-- Footer actions -->
-    <template #footer>
-      <div class="flex w-full items-center gap-2">
-        <VbenButton
-          v-if="appEnableCopyPreferences"
-          :disabled="!mergedDiffPreference"
-          size="sm"
-          variant="default"
-          @click="handleCopy"
-        >
-          <Copy class="mr-1.5 size-3" />
-          {{ $t('preferences.copyPreferences') }}
-        </VbenButton>
-        <VbenButton
-          :disabled="!mergedDiffPreference"
-          size="sm"
-          variant="ghost"
-          @click="handleClearCache"
-        >
-          {{ $t('preferences.clearAndLogout') }}
-        </VbenButton>
-      </div>
-    </template>
   </Modal>
 </template>
