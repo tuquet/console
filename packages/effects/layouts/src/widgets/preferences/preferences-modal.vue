@@ -382,7 +382,6 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
 
 <template>
   <Modal
-    :description="$t('preferences.subtitle')"
     :fullscreen-button="false"
     :title="$t('preferences.title')"
     class="flex h-[88vh] max-h-[88vh] w-[min(1100px,96vw)] max-w-none flex-col overflow-hidden p-0"
