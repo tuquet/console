@@ -8,10 +8,10 @@ import { $t } from '@operon/locales';
 import { isWindowsOs } from '@operon/utils';
 
 import {
+  Button,
   CommandDialog,
   CommandInput,
   CommandList,
-  Kbd,
 } from '@operon-core/shadcn-ui';
 
 import { useMagicKeys, whenever } from '@vueuse/core';
@@ -101,7 +101,11 @@ onMounted(() => {
 
 <template>
   <div>
-    <CommandDialog v-model:open="open" @update:open="handleOpenChange">
+    <CommandDialog
+      v-model:open="open"
+      close-class="top-3"
+      @update:open="handleOpenChange"
+    >
       <!--
         We bypass CommandDialog's internal filter (filterState.search) in favour of
         SearchPanel's own throttled fuzzy search. CommandInput is used only as a
@@ -117,27 +121,19 @@ onMounted(() => {
       </CommandList>
     </CommandDialog>
 
-    <!-- Trigger button -->
-    <div
+    <Button
       v-if="showButton"
-      class="group flex h-8 cursor-pointer items-center gap-3 rounded-2xl border-none bg-none px-2 py-0.5 outline-hidden md:bg-accent"
-      @click="toggleOpen()"
+      type="button"
+      variant="ghost"
+      size="icon"
+      :title="$t('ui.widgets.search.title')"
+      :aria-label="$t('ui.widgets.search.title')"
+      :aria-keyshortcuts="
+        enableShortcutKey ? (isWindowsOs() ? 'Control+K' : 'Meta+K') : undefined
+      "
+      @click="toggleOpen"
     >
-      <Search
-        class="size-4 text-muted-foreground group-hover:text-foreground group-hover:opacity-100"
-      />
-      <span
-        class="hidden text-muted-foreground duration-300 group-hover:text-foreground md:block"
-      >
-        {{ $t('ui.widgets.search.title') }}
-      </span>
-      <Kbd
-        v-if="enableShortcutKey"
-        class="hidden rounded-sm rounded-r-xl bg-background px-1.5 py-1 leading-none text-muted-foreground group-hover:text-foreground md:inline-flex"
-      >
-        {{ isWindowsOs() ? 'Ctrl' : '⌘' }} K
-      </Kbd>
-      <span v-else></span>
-    </div>
+      <Search />
+    </Button>
   </div>
 </template>

@@ -87,7 +87,7 @@ function clearFilters() {
         size="sm"
         variant="outline"
       >
-        <Plus class="mr-1.5 size-3.5 text-muted-foreground" />
+        <Plus class="text-muted-foreground" />
         <span>{{ title }}</span>
 
         <template v-if="selectedValues.size > 0">
@@ -128,8 +128,8 @@ function clearFilters() {
     <PopoverContent align="start" class="w-56 p-0 shadow-md">
       <div class="flex flex-col">
         <!-- Search bar within Popover -->
-        <div class="flex items-center border-b px-2.5 py-1.5">
-          <Search class="mr-2 size-3.5 shrink-0 text-muted-foreground" />
+        <div class="flex items-center gap-1.5 border-b px-2.5 py-2">
+          <Search class="size-3.5 shrink-0 text-muted-foreground" />
           <Input
             v-model="searchQuery"
             :placeholder="placeholder || `Tìm ${title.toLowerCase()}...`"
@@ -137,7 +137,7 @@ function clearFilters() {
           />
           <button
             v-if="searchQuery"
-            class="ml-1 text-muted-foreground hover:text-foreground"
+            class="text-muted-foreground hover:text-foreground"
             type="button"
             @click="searchQuery = ''"
           >
@@ -146,7 +146,7 @@ function clearFilters() {
         </div>
 
         <!-- Options list -->
-        <ScrollArea class="max-h-56 p-1">
+        <ScrollArea class="max-h-56 p-1.5">
           <div
             v-if="filteredOptions.length === 0"
             class="py-6 text-center text-xs text-muted-foreground"
