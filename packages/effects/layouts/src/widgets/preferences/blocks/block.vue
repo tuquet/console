@@ -13,10 +13,10 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-  <div class="flex flex-col py-4">
-    <h3 class="mb-3 leading-none font-semibold tracking-tight">
+  <section class="py-5 border-b border-border last:border-b-0">
+    <h3 class="mb-4 text-sm font-semibold text-foreground">
       {{ title }}
     </h3>
     <slot></slot>
-  </div>
+  </section>
 </template>

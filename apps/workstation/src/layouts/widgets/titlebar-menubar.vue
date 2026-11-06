@@ -143,7 +143,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
           {{ $t('common.windowMaximize') }}
         </MenubarItem>
         <MenubarSeparator />
-        <MenubarItem variant="destructive" @select="closeWindow">
+        <MenubarItem @select="closeWindow">
           {{ $t('common.windowClose') }}
           <MenubarShortcut>Alt + F4</MenubarShortcut>
         </MenubarItem>

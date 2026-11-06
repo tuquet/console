@@ -385,10 +385,10 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
     :description="$t('preferences.subtitle')"
     :fullscreen-button="false"
     :title="$t('preferences.title')"
-    class="flex h-[85vh] max-h-[85vh] max-w-3xl flex-col overflow-hidden p-0 sm:max-w-3xl"
+    class="flex h-[88vh] max-h-[88vh] w-[min(900px,95vw)] max-w-none flex-col overflow-hidden p-0"
     content-class="flex-1 overflow-hidden p-0"
-    footer-class="border-t border-border px-4 py-3"
-    header-class="border-b border-border px-5 py-3 shrink-0"
+    footer-class="border-t border-border px-6 py-3"
+    header-class="border-b border-border px-6 py-3.5 shrink-0"
   >
     <!-- Header extra: reset button -->
     <template #extra>
@@ -410,13 +410,18 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
     <div class="flex size-full overflow-hidden">
       <!-- LEFT NAV — desktop (≥ md) -->
       <nav
-        class="hidden w-44 shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-border py-3 md:flex"
+        class="hidden w-52 shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-border px-2 py-4 md:flex"
       >
+        <p
+          class="mb-1 px-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60"
+        >
+          {{ $t('preferences.title') }}
+        </p>
         <button
           v-for="tab in tabs"
           :key="tab.value"
           :data-active="activeTab === tab.value"
-          class="mx-1.5 flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[active=true]:bg-accent data-[active=true]:font-medium data-[active=true]:text-foreground"
+          class="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground data-[active=true]:bg-accent data-[active=true]:font-medium data-[active=true]:text-foreground"
           type="button"
           @click="activeTab = tab.value"
         >
@@ -653,8 +658,8 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
       </div>
 
       <!-- DESKTOP CONTENT — right panel (≥ md) -->
-      <div class="hidden flex-1 overflow-y-auto px-5 py-4 md:block">
-        <div class="space-y-5">
+      <div class="hidden flex-1 overflow-y-auto md:block">
+        <div class="mx-auto max-w-2xl px-8 py-6 space-y-2">
           <template v-if="activeTab === 'appearance'">
             <Block :title="$t('preferences.theme.title')">
               <Theme
