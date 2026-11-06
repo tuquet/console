@@ -96,6 +96,12 @@ interface Props {
   hoverDelay?: number;
   /** Whether to show logout action */
   showLogout?: boolean;
+  /**
+   * Whether to show the user info label (name + description) in the dropdown header.
+   * Set to false when user is not authenticated.
+   * @default true
+   */
+  showLabel?: boolean;
 }
 
 defineOptions({
@@ -113,6 +119,7 @@ const props = withDefaults(defineProps<Props>(), {
   trigger: 'click',
   hoverDelay: 500,
   showLogout: true,
+  showLabel: true,
 });
 
 const emit = defineEmits<{ clearPreferencesAndLogout: []; logout: [] }>();
@@ -433,7 +440,7 @@ if (lockKey) {
       class="mr-2 min-w-60 max-h-[85vh] overflow-y-auto p-0 pb-1"
     >
       <div ref="refContent">
-        <DropdownMenuLabel class="flex items-center p-3">
+        <DropdownMenuLabel v-if="showLabel" class="flex items-center p-3">
           <VbenAvatar
             v-if="avatar"
             :alt="text"
@@ -469,7 +476,7 @@ if (lockKey) {
             </div>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator v-if="menus?.length" />
+        <DropdownMenuSeparator v-if="showLabel && menus?.length" />
         <DropdownMenuItem
           v-for="menu in menus"
           :key="menu.text"
@@ -483,7 +490,7 @@ if (lockKey) {
         </DropdownMenuItem>
 
         <template v-if="hasUtilityInDropdown">
-          <DropdownMenuSeparator v-if="menus?.length" />
+          <DropdownMenuSeparator v-if="showLabel && menus?.length" />
           <DropdownMenuItem
             v-if="showGlobalSearchInDropdown"
             class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"

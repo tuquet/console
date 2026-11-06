@@ -267,6 +267,7 @@ watch(
         :avatar="isAuthenticated ? avatar : undefined"
         :avatar-dot="isAuthenticated"
         :menus
+        :show-label="isAuthenticated"
         :text="
           isAuthenticated
             ? userStore.userInfo?.realName
