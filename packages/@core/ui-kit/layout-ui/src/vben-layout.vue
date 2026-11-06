@@ -600,6 +600,7 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
       v-model:extra-visible="sidebarExtraVisible"
       :show-collapse-button="sidebarCollapsedButton"
       :show-fixed-button="sidebarFixedButton"
+      :bottom-height="$slots['side-bottom'] ? 48 : 0"
       :collapse-width="getSideCollapseWidth"
       :dom-visible="!isMobile"
       :expanded-width="sidebarWidth"

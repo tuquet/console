@@ -11,6 +11,11 @@ import { SidebarCollapseButton, SidebarFixedButton } from './widgets';
 
 interface Props {
   /**
+   * Height of bottom slot area (e.g. sidebar-bottom preferences button)
+   * @default 0
+   */
+  bottomHeight?: number;
+  /**
    * Collapse trigger height
    * @default 42
    */
@@ -106,6 +111,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  bottomHeight: 0,
   collapseHeight: 42,
   collapseWidth: 48,
   domVisible: true,
@@ -216,10 +222,10 @@ const contentWidthStyle = computed((): CSSProperties => {
 });
 
 const contentStyle = computed((): CSSProperties => {
-  const { collapseHeight, headerHeight } = props;
+  const { bottomHeight, collapseHeight, headerHeight } = props;
 
   return {
-    height: `calc(100% - ${headerHeight + collapseHeight}px)`,
+    height: `calc(100% - ${headerHeight + collapseHeight + bottomHeight}px)`,
     paddingTop: '8px',
     ...contentWidthStyle.value,
   };
@@ -247,6 +253,16 @@ const collapseStyle = computed((): CSSProperties => {
   return {
     height: `${props.collapseHeight}px`,
   };
+});
+
+/**
+ * Offset for absolute-positioned collapse/fixed buttons when a bottom slot is present.
+ * Buttons use `bottom-2` (8px); we push them up by bottomHeight so they sit above the slot.
+ */
+const collapseButtonStyle = computed((): CSSProperties => {
+  return props.bottomHeight > 0
+    ? { bottom: `${props.bottomHeight + 8}px` }
+    : {};
 });
 
 function getMenuWidthValue(isHiddenDom: boolean) {
@@ -403,6 +419,7 @@ onUnmounted(() => {
           v-model:expand-on-hover="expandOnHover"
           v-model:expand-on-hovering="expandOnHovering"
           v-model:extra-visible="extraVisible"
+          :style="collapseButtonStyle"
         />
         <div v-if="slots.logo" :style="headerStyle">
           <slot name="logo"></slot>
@@ -419,6 +436,7 @@ onUnmounted(() => {
         <SidebarCollapseButton
           v-if="showCollapseButton && !isSidebarMixed"
           v-model:collapsed="collapse"
+          :style="collapseButtonStyle"
         />
       </div>
       <div
