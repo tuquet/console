@@ -71,7 +71,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
     <!-- ── Operon ─────────────────────────────────────────────────────── -->
     <MenubarMenu>
       <MenubarTrigger
-        class="h-7 px-2.5 text-xs font-semibold text-foreground data-[state=open]:text-foreground"
+        class="h-7 px-2.5 text-xs font-semibold cursor-default text-foreground data-[state=open]:text-foreground"
       >
         {{ $t('page.app.menu_operon') }}
       </MenubarTrigger>
@@ -79,7 +79,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
         <!-- Version badge — non-interactive label -->
         <MenubarLabel
           v-if="version"
-          class="text-xs text-muted-foreground font-normal"
+          class="font-normal text-xs text-muted-foreground"
         >
           Version {{ version }}
         </MenubarLabel>
@@ -93,7 +93,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
     <!-- ── Workspace ─────────────────────────────────────────────────── -->
     <MenubarMenu>
       <MenubarTrigger
-        class="h-7 px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
+        class="h-7 px-2.5 text-xs font-medium cursor-default text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
       >
         {{ $t('page.app.menu_workspace') }}
       </MenubarTrigger>
@@ -108,14 +108,14 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
     <!-- ── View ──────────────────────────────────────────────────────── -->
     <MenubarMenu>
       <MenubarTrigger
-        class="h-7 px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
+        class="h-7 px-2.5 text-xs font-medium cursor-default text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
       >
         {{ $t('page.app.menu_view') }}
       </MenubarTrigger>
       <MenubarContent class="min-w-[200px]">
         <MenubarItem @select="zoomIn">
           {{ $t('page.app.menu_zoom_in') }}
-          <MenubarShortcut>{{ mod }}+</MenubarShortcut>
+          <MenubarShortcut>{{ mod }}=</MenubarShortcut>
         </MenubarItem>
         <MenubarItem @select="zoomOut">
           {{ $t('page.app.menu_zoom_out') }}
@@ -123,7 +123,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
         </MenubarItem>
         <MenubarItem @select="resetZoom">
           {{ $t('page.app.menu_reset_zoom') }}
-          <MenubarShortcut>{{ mod }}+0</MenubarShortcut>
+          <MenubarShortcut>{{ mod }}0</MenubarShortcut>
         </MenubarItem>
       </MenubarContent>
     </MenubarMenu>
@@ -131,7 +131,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
     <!-- ── Window ────────────────────────────────────────────────────── -->
     <MenubarMenu>
       <MenubarTrigger
-        class="h-7 px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
+        class="h-7 px-2.5 text-xs font-medium cursor-default text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
       >
         {{ $t('page.app.menu_window') }}
       </MenubarTrigger>
@@ -145,7 +145,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
         <MenubarSeparator />
         <MenubarItem variant="destructive" @select="closeWindow">
           {{ $t('common.windowClose') }}
-          <MenubarShortcut>Alt F4</MenubarShortcut>
+          <MenubarShortcut>Alt + F4</MenubarShortcut>
         </MenubarItem>
       </MenubarContent>
     </MenubarMenu>

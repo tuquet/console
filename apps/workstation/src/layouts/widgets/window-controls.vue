@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 
+import { Button } from '@operon-core/shadcn-ui';
+
 import { Copy, Minus, Square, X } from '@lucide/vue';
 import { useEventListener } from '@vueuse/core';
 
@@ -44,22 +46,24 @@ useEventListener(window, 'resize', refreshMaximized);
 <template>
   <div
     v-if="isDesktop"
-    class="flex items-center space-x-1 shrink-0 ml-1 mr-2 no-drag"
+    class="flex items-center gap-1 shrink-0 ml-1 mr-2 no-drag"
     @dblclick.stop
   >
-    <button
-      type="button"
-      class="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+    <Button
+      variant="ghost"
+      size="icon"
+      class="size-7 text-muted-foreground"
       :title="$t('common.windowMinimize')"
       :aria-label="$t('common.windowMinimize')"
       @click="handleMinimize"
     >
       <Minus class="size-3.5" />
-    </button>
+    </Button>
 
-    <button
-      type="button"
-      class="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+    <Button
+      variant="ghost"
+      size="icon"
+      class="size-7 text-muted-foreground"
       :title="
         isMaximized ? $t('common.windowRestore') : $t('common.windowMaximize')
       "
@@ -70,16 +74,17 @@ useEventListener(window, 'resize', refreshMaximized);
     >
       <Copy v-if="isMaximized" class="size-3 -rotate-90" />
       <Square v-else class="size-3" />
-    </button>
+    </Button>
 
-    <button
-      type="button"
-      class="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive hover:text-destructive-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+    <Button
+      variant="ghost"
+      size="icon"
+      class="size-7 text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
       :title="$t('common.windowClose')"
       :aria-label="$t('common.windowClose')"
       @click="handleClose"
     >
       <X class="size-3.5" />
-    </button>
+    </Button>
   </div>
 </template>

@@ -17,7 +17,7 @@ defineOptions({ name: 'DesktopTitlebar' });
     </div>
 
     <!-- Center: Drag handle area -->
-    <div class="flex-1 h-full" data-tauri-drag-region></div>
+    <div class="flex-1" data-tauri-drag-region></div>
 
     <!-- Right: Window controls -->
     <WindowControls />
