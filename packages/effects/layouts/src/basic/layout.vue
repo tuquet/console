@@ -460,6 +460,15 @@ const headerSlots = computed(() => {
       </slot>
     </template>
 
+    <template v-if="preferencesButtonPosition.sidebarBottom" #side-bottom>
+      <div class="border-t border-border px-2 py-2">
+        <Preferences
+          class="w-full"
+          @clear-preferences-and-logout="clearPreferencesAndLogout"
+        />
+      </div>
+    </template>
+
     <template #tabbar>
       <LayoutTabbar
         v-if="preferences.tabbar.enable"

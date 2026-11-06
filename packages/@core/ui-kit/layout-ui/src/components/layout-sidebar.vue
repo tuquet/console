@@ -411,6 +411,10 @@ onUnmounted(() => {
           <slot></slot>
         </VbenScrollbar>
 
+        <div v-if="$slots.bottom" class="shrink-0">
+          <slot name="bottom"></slot>
+        </div>
+
         <div :style="collapseStyle"></div>
         <SidebarCollapseButton
           v-if="showCollapseButton && !isSidebarMixed"

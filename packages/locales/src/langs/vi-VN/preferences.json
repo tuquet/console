@@ -48,6 +48,7 @@
     "header": "Thanh tiêu đề",
     "auto": "Tự động",
     "fixed": "Cố định góc",
+    "sidebarBottom": "Cuối sidebar",
     "userDropdown": "Menu người dùng"
   },
   "logo": {

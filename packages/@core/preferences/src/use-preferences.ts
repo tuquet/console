@@ -217,6 +217,7 @@ function usePreferences() {
       return {
         fixed: false,
         header: false,
+        sidebarBottom: false,
         userDropdown: false,
       };
     }
@@ -228,6 +229,8 @@ function usePreferences() {
     const contentIsMaximize = headerHidden && sidebarHidden;
 
     const isHeaderPosition = preferencesButtonPosition === 'header';
+    const isSidebarBottomPosition =
+      preferencesButtonPosition === 'sidebar-bottom';
     const isUserDropdownPosition =
       preferencesButtonPosition === 'user-dropdown';
 
@@ -239,6 +242,7 @@ function usePreferences() {
         return {
           fixed: true,
           header: false,
+          sidebarBottom: false,
           userDropdown: false,
         };
       }
@@ -246,6 +250,7 @@ function usePreferences() {
       return {
         fixed: preferencesButtonPosition === 'fixed',
         header: isHeaderPosition,
+        sidebarBottom: isSidebarBottomPosition,
         userDropdown: isUserDropdownPosition,
       };
     }
@@ -261,6 +266,7 @@ function usePreferences() {
     return {
       fixed,
       header: !fixed,
+      sidebarBottom: false,
       userDropdown: !fixed && isUserDropdownPosition,
     };
   });

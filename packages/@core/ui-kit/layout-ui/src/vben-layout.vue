@@ -638,6 +638,9 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
       <template #extra-title>
         <slot name="side-extra-title"></slot>
       </template>
+      <template v-if="$slots['side-bottom']" #bottom>
+        <slot name="side-bottom"></slot>
+      </template>
     </LayoutSidebar>
 
     <div
