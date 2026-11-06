@@ -19,8 +19,8 @@ export const overridesPreferences = defineOverridesPreferences({
     loginExpiredMode: isDesktop() ? 'modal' : 'page',
     name: 'Operon',
     authPageLayout: 'panel-right',
-    layout: 'header-sidebar-nav',
-    preferencesButtonPosition: 'user-dropdown',
+    layout: 'sidebar-nav',
+    preferencesButtonPosition: 'sidebar-bottom',
   },
   logo: {
     enable: true,

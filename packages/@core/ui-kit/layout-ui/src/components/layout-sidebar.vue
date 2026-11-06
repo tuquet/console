@@ -255,16 +255,6 @@ const collapseStyle = computed((): CSSProperties => {
   };
 });
 
-/**
- * Offset for absolute-positioned collapse/fixed buttons when a bottom slot is present.
- * Buttons use `bottom-2` (8px); we push them up by bottomHeight so they sit above the slot.
- */
-const collapseButtonStyle = computed((): CSSProperties => {
-  return props.bottomHeight > 0
-    ? { bottom: `${props.bottomHeight + 8}px` }
-    : {};
-});
-
 function getMenuWidthValue(isHiddenDom: boolean) {
   const { collapseWidth, extraWidth, mixedWidth, isSidebarMixed, width } =
     props;
@@ -419,7 +409,6 @@ onUnmounted(() => {
           v-model:expand-on-hover="expandOnHover"
           v-model:expand-on-hovering="expandOnHovering"
           v-model:extra-visible="extraVisible"
-          :style="collapseButtonStyle"
         />
         <div v-if="slots.logo" :style="headerStyle">
           <slot name="logo"></slot>
@@ -436,7 +425,6 @@ onUnmounted(() => {
         <SidebarCollapseButton
           v-if="showCollapseButton && !isSidebarMixed"
           v-model:collapsed="collapse"
-          :style="collapseButtonStyle"
         />
       </div>
       <div
