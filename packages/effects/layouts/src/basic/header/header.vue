@@ -325,7 +325,7 @@ function clearPreferencesAndLogout() {
           <GlobalSearch
             :enable-shortcut-key="globalSearchShortcutKey"
             :menus="accessStore.accessMenus"
-            class="mr-1 sm:mr-4"
+            class="mr-1"
           />
         </template>
 

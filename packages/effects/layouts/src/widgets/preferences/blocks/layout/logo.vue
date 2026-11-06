@@ -6,7 +6,8 @@ import { computed } from 'vue';
 import { $t } from '@operon/locales';
 
 import SelectItem from '../select-item.vue';
-import SwitchItem from '../switch-item.vue';
+
+type LogoDisplayMode = 'full' | 'hidden' | 'icon';
 
 const logoEnable = defineModel<boolean>('logoEnable');
 const logoShowText = defineModel<boolean>('logoShowText');
@@ -16,6 +17,10 @@ const logoMode = defineModel<'full' | 'icon' | undefined>('logoMode', {
 
 const logoModeItems = computed((): SelectOption[] => [
   {
+    label: $t('preferences.logo.modeHidden'),
+    value: 'hidden',
+  },
+  {
     label: $t('preferences.logo.modeIcon'),
     value: 'icon',
   },
@@ -24,16 +29,31 @@ const logoModeItems = computed((): SelectOption[] => [
     value: 'full',
   },
 ]);
+
+/** Derive a single display-mode value from the three underlying prefs */
+const displayMode = computed<LogoDisplayMode>({
+  get() {
+    if (!logoEnable.value) return 'hidden';
+    return logoShowText.value ? 'full' : 'icon';
+  },
+  set(val: LogoDisplayMode) {
+    if (val === 'hidden') {
+      logoEnable.value = false;
+    } else if (val === 'icon') {
+      logoEnable.value = true;
+      logoShowText.value = false;
+      logoMode.value = 'icon';
+    } else {
+      logoEnable.value = true;
+      logoShowText.value = true;
+      logoMode.value = 'full';
+    }
+  },
+});
 </script>
 
 <template>
-  <SwitchItem v-model="logoEnable">
-    {{ $t('preferences.logo.visible') }}
-  </SwitchItem>
-  <SwitchItem v-model="logoShowText" :disabled="!logoEnable">
-    {{ $t('preferences.logo.showText') }}
-  </SwitchItem>
-  <SelectItem v-model="logoMode" :disabled="!logoEnable" :items="logoModeItems">
+  <SelectItem v-model="displayMode" :items="logoModeItems">
     {{ $t('preferences.logo.mode') }}
   </SelectItem>
 </template>

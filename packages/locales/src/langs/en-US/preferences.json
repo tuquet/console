@@ -1,4 +1,8 @@
 {
+  "resetConfiguration": "Reset preferences",
+  "settingsTitle": "Settings",
+  "settingsDescription": "Manage application settings and preferences.",
+  "configuration": "Configuration",
   "title": "Preferences",
   "subtitle": "",
   "enableStickyPreferencesNavigationBar": "Pin navigation bar",
@@ -53,11 +57,10 @@
   },
   "logo": {
     "title": "Logo",
-    "visible": "Show logo",
-    "showText": "Show app title",
     "mode": "Logo display mode",
-    "modeIcon": "Icon",
-    "modeFull": "Full logo"
+    "modeHidden": "Hidden",
+    "modeIcon": "Icon only",
+    "modeFull": "Icon + title"
   },
   "sidebar": {
     "buttons": "Control buttons",

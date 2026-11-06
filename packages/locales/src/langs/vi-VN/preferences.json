@@ -1,4 +1,8 @@
 {
+  "resetConfiguration": "Đặt lại tùy chọn",
+  "settingsTitle": "Cài đặt",
+  "settingsDescription": "Quản lý cài đặt và tùy chọn ứng dụng.",
+  "configuration": "Cấu hình",
   "title": "Cài đặt",
   "subtitle": "",
   "enableStickyPreferencesNavigationBar": "Cố định thanh điều hướng",
@@ -53,11 +57,10 @@
   },
   "logo": {
     "title": "Logo",
-    "visible": "Hiện logo",
-    "showText": "Hiện tên ứng dụng",
-    "mode": "Chế độ hiển thị",
-    "modeIcon": "Biểu tượng",
-    "modeFull": "Logo đầy đủ"
+    "mode": "Chế độ hiển thị logo",
+    "modeHidden": "Ẩn",
+    "modeIcon": "Chỉ icon",
+    "modeFull": "Icon + tên"
   },
   "sidebar": {
     "buttons": "Hiện nút bấm",
