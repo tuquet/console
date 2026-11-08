@@ -117,7 +117,7 @@ jobs:
 
       # 9. Publish Rolling Nightly Release (on push to main)
       - name: Publish Rolling Nightly Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.channel == 'nightly')
         with:
           tag_name: nightly
@@ -151,7 +151,7 @@ jobs:
 
       # 10. Publish Official Tagged Release (on v* tag push)
       - name: Publish Official Versioned Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.channel == 'stable')
         with:
           name: Operon ${{ github.ref_name }}
