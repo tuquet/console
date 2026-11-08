@@ -35,7 +35,7 @@ jobs:
     steps:
       # 1. SSH Agent for private submodule/subsystem authentication
       - name: Setup SSH Agent for Operon Subsystem
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.OPERON_DEPLOY_KEY }}
 
