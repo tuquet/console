@@ -2,12 +2,14 @@
 import type { BuiltinThemePreset } from '@operon/preferences';
 import type { BuiltinThemeType } from '@operon/types';
 
-import { computed, ref } from 'vue';
+import { computed, useId } from 'vue';
 
 import { UserRoundPen } from '@operon/icons';
 import { $t } from '@operon/locales';
 import { BUILT_IN_THEME_PRESETS } from '@operon/preferences';
 import { convertToHsl, TinyColor } from '@operon/utils';
+
+import { Label, RadioGroup, RadioGroupItem } from '@operon-core/shadcn-ui';
 
 import { useThrottleFn } from '@vueuse/core';
 
@@ -17,7 +19,7 @@ defineOptions({
 
 const props = defineProps<{ isDark: boolean }>();
 
-const colorInput = ref();
+const id = useId();
 const modelValue = defineModel<BuiltinThemeType>({ default: 'neutral' });
 const themeColorPrimary = defineModel<string | undefined>('themeColorPrimary', {
   default: undefined,
@@ -108,49 +110,59 @@ function handleInputChange(e: Event) {
   modelValue.value = 'custom';
   updateThemeColorPrimary(convertToHsl(target.value));
 }
-
-function selectColor() {
-  colorInput.value?.[0]?.click?.();
-}
 </script>
 
 <template>
-  <div class="flex w-full flex-wrap justify-between">
-    <template v-for="theme in builtinThemePresets" :key="theme.type">
-      <div class="flex cursor-pointer flex-col" @click="handleSelect(theme)">
-        <div
-          :class="{
-            'outline-box-active': theme.type === modelValue,
-          }"
-          class="group outline-box flex-center cursor-pointer"
-        >
-          <template v-if="theme.type !== 'custom'">
-            <div
-              :style="{ backgroundColor: theme.color }"
-              class="mx-9 my-2 size-5 rounded-md"
-            ></div>
-          </template>
-          <template v-else>
-            <div class="size-full px-9 py-2" @click.stop="selectColor">
-              <div class="relative flex-center size-5 rounded-sm">
-                <UserRoundPen
-                  class="absolute z-1 size-5 opacity-60 group-hover:opacity-100"
-                />
-                <input
-                  ref="colorInput"
-                  :value="inputValue"
-                  class="absolute inset-0 opacity-0"
-                  type="color"
-                  @input="handleInputChange"
-                />
-              </div>
-            </div>
-          </template>
-        </div>
-        <div class="my-2 text-center text-muted-foreground">
-          {{ typeView(theme.type) }}
-        </div>
-      </div>
-    </template>
+  <RadioGroup
+    :model-value="modelValue"
+    class="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5"
+    @update:model-value="
+      (value) => {
+        const theme = builtinThemePresets.find((item) => item.type === value);
+        if (theme) handleSelect(theme);
+      }
+    "
+  >
+    <div
+      v-for="theme in builtinThemePresets"
+      :key="theme.type"
+      class="flex min-w-0 flex-col gap-1.5"
+    >
+      <RadioGroupItem
+        :id="`${id}-${theme.type}`"
+        :value="theme.type"
+        class="peer sr-only"
+      />
+      <Label
+        :for="`${id}-${theme.type}`"
+        class="flex h-10 cursor-pointer items-center justify-center rounded-md border border-input peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-data-[state=checked]:ring-2 peer-data-[state=checked]:ring-ring"
+      >
+        <span
+          v-if="theme.type !== 'custom'"
+          :style="{ backgroundColor: theme.color }"
+          class="size-5 rounded-md"
+        ></span>
+        <UserRoundPen v-else class="size-5" />
+        <span class="sr-only">{{ typeView(theme.type) }}</span>
+      </Label>
+      <span class="truncate text-center text-sm text-muted-foreground">
+        {{ typeView(theme.type) }}
+      </span>
+    </div>
+  </RadioGroup>
+  <div
+    v-if="modelValue === 'custom'"
+    class="mt-3 flex items-center justify-between gap-2"
+  >
+    <Label :for="`${id}-custom-color`">{{
+      $t('preferences.theme.builtin.custom')
+    }}</Label>
+    <input
+      :id="`${id}-custom-color`"
+      :value="inputValue"
+      type="color"
+      class="h-8 w-16 cursor-pointer rounded-md border border-input"
+      @input="handleInputChange"
+    />
   </div>
 </template>

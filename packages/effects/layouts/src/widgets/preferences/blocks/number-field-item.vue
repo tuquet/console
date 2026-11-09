@@ -1,17 +1,22 @@
 <script setup lang="ts">
 import type { SelectOption } from '@operon/types';
 
-import { useSlots } from 'vue';
+import { useId, useSlots } from 'vue';
 
 import { CircleHelp } from '@operon/icons';
+import { $t } from '@operon/locales';
 
 import {
+  Button,
   NumberField,
   NumberFieldContent,
   NumberFieldDecrement,
   NumberFieldIncrement,
   NumberFieldInput,
-  VbenTooltip,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@operon-core/shadcn-ui';
 
 defineOptions({
@@ -35,6 +40,7 @@ withDefaults(
 
 const inputValue = defineModel<number | undefined>({ default: undefined });
 
+const id = useId();
 const slots = useSlots();
 </script>
 
@@ -46,27 +52,44 @@ const slots = useSlots();
     }"
     class="my-1 flex w-full items-center justify-between rounded-md px-2 py-1"
   >
-    <span class="flex items-center">
+    <span :id="id" class="flex items-center">
       <slot></slot>
 
-      <VbenTooltip v-if="slots.tip || tip" side="bottom">
-        <template #trigger>
-          <CircleHelp class="ml-1 size-3 cursor-help" />
-        </template>
-        <slot name="tip">
-          <template v-if="tip">
-            <p v-for="(line, index) in tip.split('\n')" :key="index">
-              {{ line }}
-            </p>
-          </template>
-        </slot>
-      </VbenTooltip>
+      <TooltipProvider>
+        <Tooltip v-if="slots.tip || tip">
+          <TooltipTrigger as-child>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              class="size-5"
+              :aria-label="tip || $t('common.help')"
+            >
+              <CircleHelp />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <slot name="tip">
+              <template v-if="tip">
+                <p v-for="(line, index) in tip.split('\n')" :key="index">
+                  {{ line }}
+                </p>
+              </template>
+            </slot>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </span>
 
-    <NumberField v-model="inputValue" v-bind="$attrs" class="w-41.25">
+    <NumberField
+      :disabled="disabled"
+      v-model="inputValue"
+      v-bind="$attrs"
+      class="w-41.25"
+    >
       <NumberFieldContent>
         <NumberFieldDecrement />
-        <NumberFieldInput />
+        <NumberFieldInput :aria-labelledby="id" />
         <NumberFieldIncrement />
       </NumberFieldContent>
     </NumberField>

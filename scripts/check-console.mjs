@@ -9,7 +9,7 @@ import { createServer } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
-const webAdminDir = path.join(repoRoot, 'apps', 'workstation');
+const webAdminDir = path.join(repoRoot, 'apps', 'shell');
 
 const PORT = Number(process.env.VITE_PORT || 5666);
 const HOST = '127.0.0.1';

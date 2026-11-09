@@ -88,13 +88,6 @@ function usePreferences() {
   );
 
   /**
-   * Whether sidebar mixed nav mode
-   */
-  const isSideMixedNav = computed(
-    () => appPreferences.value.layout === 'sidebar-mixed-nav',
-  );
-
-  /**
    * Whether header nav mode
    */
   const isHeaderNav = computed(
@@ -128,7 +121,6 @@ function usePreferences() {
   const isSideMode = computed(() => {
     return (
       isMixedNav.value ||
-      isSideMixedNav.value ||
       isSideNav.value ||
       isHeaderMixedNav.value ||
       isHeaderSidebarNav.value
@@ -290,7 +282,6 @@ function usePreferences() {
     isHeaderSidebarNav,
     isMixedNav,
     isMobile,
-    isSideMixedNav,
     isSideMode,
     isSideNav,
     keepAlive,

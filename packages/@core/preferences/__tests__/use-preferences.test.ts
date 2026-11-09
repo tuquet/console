@@ -26,6 +26,7 @@ describe('usePreferences - anti-lockout safeguards', () => {
     expect(preferencesButtonPosition.value).toEqual({
       fixed: false,
       header: true,
+      sidebarBottom: false,
       userDropdown: false,
     });
 
@@ -39,6 +40,7 @@ describe('usePreferences - anti-lockout safeguards', () => {
     expect(preferencesButtonPosition.value).toEqual({
       fixed: true,
       header: false,
+      sidebarBottom: false,
       userDropdown: false,
     });
   });
@@ -60,6 +62,7 @@ describe('usePreferences - anti-lockout safeguards', () => {
     expect(preferencesButtonPosition.value).toEqual({
       fixed: true,
       header: false,
+      sidebarBottom: false,
       userDropdown: false,
     });
   });
@@ -81,6 +84,7 @@ describe('usePreferences - anti-lockout safeguards', () => {
     expect(preferencesButtonPosition.value).toEqual({
       fixed: true,
       header: false,
+      sidebarBottom: false,
       userDropdown: false,
     });
   });
@@ -102,6 +106,7 @@ describe('usePreferences - anti-lockout safeguards', () => {
     expect(preferencesButtonPosition.value).toEqual({
       fixed: false,
       header: false,
+      sidebarBottom: false,
       userDropdown: false,
     });
   });

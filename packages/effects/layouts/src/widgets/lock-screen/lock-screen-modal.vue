@@ -1,13 +1,19 @@
 <script setup lang="ts">
-import type { Recordable } from '@operon/types';
-
-import { computed, reactive } from 'vue';
+import { computed, reactive, watch } from 'vue';
 
 import { $t } from '@operon/locales';
 
 import { useVbenForm, z } from '@operon-core/form-ui';
-import { useVbenModal } from '@operon-core/popup-ui';
-import { VbenAvatar, VbenButton } from '@operon-core/shadcn-ui';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@operon-core/shadcn-ui';
 
 interface Props {
   avatar?: string;
@@ -24,10 +30,10 @@ withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  submit: [Recordable<any>];
+  submit: [string];
 }>();
 
-const [Form, { resetForm, validate, getValues, getFieldComponentRef }] =
+const [Form, { reset, validate, getValues, getFieldComponentRef }] =
   useVbenForm(
     reactive({
       commonConfig: {
@@ -52,23 +58,18 @@ const [Form, { resetForm, validate, getValues, getFieldComponentRef }] =
     }),
   );
 
-const [Modal] = useVbenModal({
-  onConfirm() {
-    handleSubmit();
-  },
-  onOpenChange(isOpen) {
-    if (isOpen) {
-      resetForm();
-    }
-  },
-  onOpened() {
-    requestAnimationFrame(() => {
-      getFieldComponentRef('lockScreenPassword')
-        ?.$el?.querySelector('[name="lockScreenPassword"]')
-        ?.focus();
-    });
-  },
+const open = defineModel<boolean>('open', { default: false });
+watch(open, (value) => {
+  if (value) reset();
 });
+function focusPassword(event: Event) {
+  event.preventDefault();
+  requestAnimationFrame(() =>
+    getFieldComponentRef('lockScreenPassword')
+      ?.$el?.querySelector('[name="lockScreenPassword"]')
+      ?.focus(),
+  );
+}
 
 async function handleSubmit() {
   const { valid } = await validate();
@@ -80,31 +81,33 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <Modal
-    :footer="false"
-    :fullscreen-button="false"
-    :title="$t('ui.widgets.lockScreen.title')"
-  >
-    <div
-      class="mb-10 flex w-full flex-col items-center px-10"
-      @keydown.enter.prevent="handleSubmit"
+  <Dialog v-model:open="open">
+    <DialogContent
+      :open="open"
+      modal
+      :aria-describedby="undefined"
+      @close="open = false"
+      @open-auto-focus="focusPassword"
     >
-      <div class="w-full">
-        <div class="ml-2 flex w-full flex-col items-center">
-          <VbenAvatar
-            :src="avatar"
-            class="size-20"
-            dot-class="bottom-0 right-1 border-2 size-4 bg-success"
-          />
-          <div class="my-6 flex items-center text-foreground">
-            {{ text }}
-          </div>
+      <DialogHeader>
+        <DialogTitle>{{ $t('ui.widgets.lockScreen.title') }}</DialogTitle>
+      </DialogHeader>
+      <div
+        class="flex flex-col items-center gap-4"
+        @keydown.enter.prevent="handleSubmit"
+      >
+        <Avatar class="size-20">
+          <AvatarImage :src="avatar" :alt="text" />
+          <AvatarFallback>{{ text?.slice(0, 2) || '?' }}</AvatarFallback>
+        </Avatar>
+        <p>{{ text }}</p>
+        <div class="w-full">
+          <Form />
+          <Button type="button" class="mt-2 w-full" @click="handleSubmit">
+            {{ $t('ui.widgets.lockScreen.screenButton') }}
+          </Button>
         </div>
-        <Form />
-        <VbenButton class="mt-1 w-full" @click="handleSubmit">
-          {{ $t('ui.widgets.lockScreen.screenButton') }}
-        </VbenButton>
       </div>
-    </div>
-  </Modal>
+    </DialogContent>
+  </Dialog>
 </template>

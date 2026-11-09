@@ -8,7 +8,7 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 
 const LOCALE_DIRS = [
   'packages/locales/src/langs',
-  'apps/workstation/src/locales/langs',
+  'apps/shell/src/locales/langs',
 ];
 
 const SUPPORTED_LOCALES = ['en-US', 'vi-VN'];
@@ -106,8 +106,8 @@ export function auditI18n(options = {}) {
   const missingInVi = [...enKeys].filter((k) => !viKeys.has(k));
   const missingInEn = [...viKeys].filter((k) => !enKeys.has(k));
 
-  // Extract used i18n keys across apps/workstation/src
-  const appFiles = walkSourceFiles('apps/workstation/src');
+  // Extract used i18n keys across apps/shell/src
+  const appFiles = walkSourceFiles('apps/shell/src');
   const keyPatterns = [
     /\$t\(\s*["'`]([a-zA-Z0-9_.-]+)["'`]/gs,
     /(?:labelKey|allLabelKey|titleKey|descKey|placeholderKey):\s*["'`]([a-zA-Z0-9_.-]+)["'`]/gs,

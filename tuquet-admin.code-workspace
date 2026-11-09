@@ -1,8 +1,16 @@
 {
   "folders": [
     {
-      "name": "@operon/workstation",
-      "path": "apps/workstation"
+      "name": "@operon/shell",
+      "path": "apps/shell"
+    },
+    {
+      "name": "@operon/automation",
+      "path": "apps/automation"
+    },
+    {
+      "name": "@operon/system",
+      "path": "apps/system"
     },
     {
       "name": "@operon/docs",

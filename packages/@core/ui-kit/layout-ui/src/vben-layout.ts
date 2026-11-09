@@ -96,7 +96,6 @@ interface VbenLayoutProps {
    * sidebar-nav: Sidebar menu layout
    * header-nav: Header menu layout
    * mixed-nav: Sidebar and header menu layout
-   * sidebar-mixed-nav: Sidebar mixed menu layout
    * full-content: Full content layout
    * @default sidebar-nav
    */
@@ -144,11 +143,6 @@ interface VbenLayoutProps {
    * Whether sidebar logo area is displayed
    */
   sidebarLogoVisible: boolean;
-  /**
-   * Mixed sidebar width
-   * @default 80
-   */
-  sidebarMixedWidth?: number;
   /**
    * Sidebar
    * @default dark

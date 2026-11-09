@@ -7,7 +7,12 @@ import { storeToRefs, useAccessStore } from '@operon/stores';
 
 import { useScrollLock } from '@operon-core/composables';
 import { useVbenForm, z } from '@operon-core/form-ui';
-import { VbenAvatar, VbenButton } from '@operon-core/shadcn-ui';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+} from '@operon-core/shadcn-ui';
 
 import { useDateFormat, useNow } from '@vueuse/core';
 
@@ -91,7 +96,9 @@ useScrollLock();
   <div class="fixed z-2000 size-full bg-background">
     <transition name="slide-left">
       <div v-show="!showUnlockForm" class="size-full">
-        <div
+        <Button
+          type="button"
+          variant="ghost"
           class="group fixed top-6 left-1/2 z-2001 flex-col-center -translate-x-1/2 cursor-pointer text-xl font-semibold text-foreground/80 hover:text-foreground"
           @click="toggleUnlockForm"
         >
@@ -99,7 +106,7 @@ useScrollLock();
             class="size-5 transition-all duration-300 group-hover:scale-125"
           />
           <span>{{ $t('ui.widgets.lockScreen.unlock') }}</span>
-        </div>
+        </Button>
         <div class="flex-center size-full">
           <div class="flex w-full justify-center gap-4 px-4 sm:gap-6 md:gap-8">
             <div
@@ -127,27 +134,32 @@ useScrollLock();
         @keydown.enter.prevent="handleSubmit"
       >
         <div class="mb-10 flex-col-center w-[90%] max-w-75 px-4">
-          <VbenAvatar :src="avatar" class="enter-x mb-6 size-20" />
+          <span class="relative inline-flex shrink-0">
+            <Avatar class="enter-x mb-6 size-20">
+              <AvatarImage :src="avatar" alt="" />
+              <AvatarFallback>{{ '?' }}</AvatarFallback>
+            </Avatar>
+          </span>
           <div class="enter-x mb-2 w-full items-center">
             <Form />
           </div>
-          <VbenButton class="enter-x w-full" @click="handleSubmit">
+          <Button class="enter-x w-full" @click="handleSubmit">
             {{ $t('ui.widgets.lockScreen.entry') }}
-          </VbenButton>
-          <VbenButton
+          </Button>
+          <Button
             class="enter-x my-2 w-full"
             variant="ghost"
             @click="$emit('toLogin')"
           >
             {{ $t('ui.widgets.lockScreen.backToLogin') }}
-          </VbenButton>
-          <VbenButton
+          </Button>
+          <Button
             class="enter-x mr-2 w-full"
             variant="ghost"
             @click="toggleUnlockForm"
           >
             {{ $t('common.back') }}
-          </VbenButton>
+          </Button>
         </div>
       </div>
     </transition>

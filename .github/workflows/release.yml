@@ -75,7 +75,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            console/apps/workstation/src-tauri -> target
+            console/apps/shell/src-tauri -> target
             operon -> target
           cache-all-crates: 'true'
 
@@ -88,12 +88,12 @@ jobs:
         working-directory: console
         run: |
           pnpm run check:i18n
-          pnpm --filter @operon/workstation typecheck
-          pnpm vitest run packages/locales/__tests__ apps/workstation/src/db/__tests__
+          pnpm --filter @operon/shell typecheck
+          pnpm vitest run packages/locales/__tests__ packages/local-db/src/__tests__
 
       # 6. Build Tauri Desktop Bundle (Target NSIS only for 50% faster bundling)
       - name: Build Tauri Desktop Bundle
-        working-directory: console/apps/workstation
+        working-directory: console/apps/shell
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}

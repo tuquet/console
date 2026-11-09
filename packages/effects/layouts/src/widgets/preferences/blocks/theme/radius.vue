@@ -27,10 +27,7 @@ const items = [
     variant="outline"
   >
     <template v-for="item in items" :key="item.value">
-      <ToggleGroupItem
-        :value="item.value"
-        class="h-7 w-16 rounded-sm data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-      >
+      <ToggleGroupItem :value="item.value" class="w-16">
         {{ item.label }}
       </ToggleGroupItem>
     </template>

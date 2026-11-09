@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { watch } from 'vue';
+import { useId, watch } from 'vue';
 
 import { $t } from '@operon/locales';
 
 import {
+  Label,
   NumberField,
   NumberFieldContent,
   NumberFieldDecrement,
@@ -19,6 +20,7 @@ const modelValue = defineModel<number>({
   default: 16,
 });
 
+const fontSizeId = useId();
 const min = 15;
 const max = 22;
 const step = 1;
@@ -38,25 +40,31 @@ watch(
 </script>
 
 <template>
-  <div class="flex w-full flex-col gap-4">
-    <div class="flex items-center gap-2">
+  <div
+    class="my-1 flex items-center justify-between gap-4 rounded-md px-2 py-1"
+  >
+    <Label :for="fontSizeId">{{ $t('preferences.theme.fontSize') }}</Label>
+    <div class="flex shrink-0 items-center gap-2">
       <NumberField
         v-model="modelValue"
         :max="max"
         :min="min"
         :step="step"
-        class="w-full"
+        class="w-36"
       >
         <NumberFieldContent>
           <NumberFieldDecrement />
-          <NumberFieldInput />
+          <NumberFieldInput
+            :id="fontSizeId"
+            :aria-describedby="`${fontSizeId}-description`"
+          />
           <NumberFieldIncrement />
         </NumberFieldContent>
       </NumberField>
-      <span class="whitespace-nowrap text-muted-foreground">px</span>
+      <span class="text-sm text-muted-foreground">px</span>
     </div>
-    <div class="text-muted-foreground">
+    <p :id="`${fontSizeId}-description`" class="sr-only">
       {{ $t('preferences.theme.fontSizeTip') }}
-    </div>
+    </p>
   </div>
 </template>

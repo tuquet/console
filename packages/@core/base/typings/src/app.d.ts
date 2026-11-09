@@ -4,7 +4,6 @@ type LayoutType =
   | 'header-nav'
   | 'header-sidebar-nav'
   | 'mixed-nav'
-  | 'sidebar-mixed-nav'
   | 'sidebar-nav';
 
 type ThemeModeType = 'auto' | 'dark' | 'light';

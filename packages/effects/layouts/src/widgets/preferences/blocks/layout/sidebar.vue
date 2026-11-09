@@ -88,9 +88,7 @@ const handleCheckboxChange = () => {
     v-model="sidebarAutoActivateChild"
     :disabled="
       !sidebarEnable ||
-      !['sidebar-mixed-nav', 'mixed-nav', 'header-mixed-nav'].includes(
-        currentLayout as string,
-      ) ||
+      !['mixed-nav', 'header-mixed-nav'].includes(currentLayout as string) ||
       disabled
     "
     :tip="$t('preferences.sidebar.autoActivateChildTip')"

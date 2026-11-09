@@ -1,17 +1,26 @@
 <script setup lang="ts">
 import type { SelectOption } from '@operon/types';
 
-import { useSlots } from 'vue';
+import { computed, useSlots } from 'vue';
 
 import { CircleHelp } from '@operon/icons';
+import { $t } from '@operon/locales';
 
-import { VbenCheckButtonGroup, VbenTooltip } from '@operon-core/shadcn-ui';
+import {
+  Button,
+  ToggleGroup,
+  ToggleGroupItem,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@operon-core/shadcn-ui';
 
 defineOptions({
   name: 'PreferenceCheckboxItem',
 });
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     disabled?: boolean;
     items?: SelectOption[];
@@ -30,6 +39,23 @@ withDefaults(
 
 const inputValue = defineModel<string[] | undefined>({ default: undefined });
 
+const selection = computed({
+  get: () =>
+    props.multiple ? (inputValue.value ?? []) : inputValue.value?.[0],
+  set: (value: string | string[] | undefined) => {
+    let next: string[] = [];
+    if (Array.isArray(value)) {
+      next = value;
+    } else if (value) {
+      next = [value];
+    }
+    const changed =
+      next.find((item) => !inputValue.value?.includes(item)) ??
+      inputValue.value?.find((item) => !next.includes(item));
+    inputValue.value = next;
+    if (changed) props.onBtnClick(changed);
+  },
+});
 const slots = useSlots();
 </script>
 
@@ -44,20 +70,40 @@ const slots = useSlots();
     <span class="flex items-center">
       <slot></slot>
 
-      <VbenTooltip v-if="slots.tip" side="bottom">
-        <template #trigger>
-          <CircleHelp class="ml-1 size-3 cursor-help" />
-        </template>
-        <slot name="tip"></slot>
-      </VbenTooltip>
+      <TooltipProvider>
+        <Tooltip v-if="slots.tip">
+          <TooltipTrigger as-child>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              class="size-5"
+              :aria-label="$t('common.help')"
+            >
+              <CircleHelp />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <slot name="tip"></slot>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </span>
-    <VbenCheckButtonGroup
-      v-model="inputValue"
-      class="h-8 w-41.25"
-      :options="items"
+    <ToggleGroup
+      v-model="selection"
+      :type="multiple ? 'multiple' : 'single'"
       :disabled="disabled"
-      :multiple="multiple"
-      @btn-click="onBtnClick"
-    />
+      variant="outline"
+      size="sm"
+      class="gap-2"
+    >
+      <ToggleGroupItem
+        v-for="item in items"
+        :key="item.value"
+        :value="item.value"
+      >
+        {{ item.label }}
+      </ToggleGroupItem>
+    </ToggleGroup>
   </div>
 </template>

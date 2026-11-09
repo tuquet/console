@@ -21,23 +21,20 @@ const modelValue = defineModel<string | undefined>({ default: undefined });
       'pointer-events-none opacity-50': disabled,
     }"
     class="flex w-full items-center justify-between rounded-md p-2 hover:bg-accent"
-    disabled
   >
     <span>
       <slot></slot>
     </span>
     <ToggleGroup
       v-model="modelValue"
+      :disabled="disabled"
       class="gap-2"
       size="sm"
       type="single"
       variant="outline"
     >
       <template v-for="item in items" :key="item.value">
-        <ToggleGroupItem
-          :value="item.value"
-          class="h-7 rounded-sm data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-        >
+        <ToggleGroupItem :value="item.value">
           {{ item.label }}
         </ToggleGroupItem>
       </template>

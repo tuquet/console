@@ -53,7 +53,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            console/apps/workstation/src-tauri -> target
+            console/apps/shell/src-tauri -> target
             operon -> target
           cache-all-crates: 'true'
 
@@ -64,11 +64,11 @@ jobs:
       - name: Quality Gate (Typecheck & Unit Tests)
         working-directory: console
         run: |
-          pnpm --filter @operon/workstation typecheck
-          pnpm vitest run apps/workstation/src/db/__tests__
+          pnpm --filter @operon/shell typecheck
+          pnpm vitest run packages/local-db/src/__tests__
 
       - name: Build Tauri Desktop Bundle
-        working-directory: console/apps/workstation
+        working-directory: console/apps/shell
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}

@@ -3,7 +3,16 @@ import { onMounted, onUnmounted, ref } from 'vue';
 
 import { $t } from '@operon/locales';
 
-import { useVbenModal } from '@operon-core/popup-ui';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@operon-core/shadcn-ui';
 
 interface Props {
   // Polling interval in minutes
@@ -24,25 +33,21 @@ const currentVersionTag = ref('');
 const lastVersionTag = ref('');
 const timer = ref<ReturnType<typeof setInterval>>();
 
-const [UpdateNoticeModal, modalApi] = useVbenModal({
-  closable: false,
-  closeOnPressEscape: false,
-  closeOnClickModal: false,
-  async onConfirm() {
-    lastVersionTag.value = currentVersionTag.value;
-    if ('serviceWorker' in navigator) {
-      try {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        for (const registration of registrations) {
-          registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
-        }
-      } catch (error) {
-        console.error('Failed to notify waiting service worker:', error);
+const open = ref(false);
+async function refresh() {
+  lastVersionTag.value = currentVersionTag.value;
+  if ('serviceWorker' in navigator) {
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
       }
+    } catch (error) {
+      console.error('Failed to notify waiting service worker:', error);
     }
-    window.location.reload();
-  },
-});
+  }
+  window.location.reload();
+}
 
 async function getVersionTag() {
   try {
@@ -86,7 +91,7 @@ async function checkForUpdates() {
 }
 function handleNotice(versionTag: string) {
   currentVersionTag.value = versionTag;
-  modalApi.open();
+  open.value = true;
 }
 
 function start() {
@@ -130,16 +135,22 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <UpdateNoticeModal
-    :cancel-text="$t('common.cancel')"
-    :confirm-text="$t('common.refresh')"
-    :fullscreen-button="false"
-    :title="$t('ui.widgets.checkUpdatesTitle')"
-    centered
-    content-class="px-8 min-h-10"
-    footer-class="border-none mb-3 mr-3"
-    header-class="border-none"
-  >
-    {{ $t('ui.widgets.checkUpdatesDescription') }}
-  </UpdateNoticeModal>
+  <AlertDialog v-model:open="open">
+    <AlertDialogContent :open="open" centered>
+      <AlertDialogHeader>
+        <AlertDialogTitle>
+          {{ $t('ui.widgets.checkUpdatesTitle') }}
+        </AlertDialogTitle>
+        <AlertDialogDescription>
+          {{ $t('ui.widgets.checkUpdatesDescription') }}
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>{{ $t('common.cancel') }}</AlertDialogCancel>
+        <AlertDialogAction @click="refresh">
+          {{ $t('common.refresh') }}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>

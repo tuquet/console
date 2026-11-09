@@ -29,7 +29,13 @@ const props = withDefaults(defineProps<Props>(), {
     :data-size="size"
     :as="as"
     :as-child="asChild"
-    :class="cn(buttonVariants({ variant, size }), props.class)"
+    :class="
+      cn(
+        buttonVariants({ variant, size }),
+        'gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-4',
+        props.class,
+      )
+    "
   >
     <slot></slot>
   </Primitive>

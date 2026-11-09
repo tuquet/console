@@ -7,18 +7,29 @@ import type { AnyFunction } from '@operon/types';
 
 import type { ClassType } from '@operon-core/typings';
 
-import { computed, onUnmounted, ref, useTemplateRef, watch } from 'vue';
+import {
+  computed,
+  onMounted,
+  onUnmounted,
+  ref,
+  useTemplateRef,
+  watch,
+} from 'vue';
 
 import { onSupportLanguagesChange } from '@operon/constants';
 import { useHoverToggle, useRefresh } from '@operon/hooks';
 import {
+  Bell,
   Globe,
   Languages,
   LockKeyhole,
   LogOut,
+  Maximize,
+  Minimize,
   RotateCw,
   Search,
   Settings,
+  SunMoon,
   User,
 } from '@operon/icons';
 import { $t, loadLocaleMessages } from '@operon/locales';
@@ -30,29 +41,32 @@ import {
 import { useAccessStore } from '@operon/stores';
 import { isWindowsOs } from '@operon/utils';
 
-import { useVbenModal } from '@operon-core/popup-ui';
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
   Badge,
+  Button,
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-  VbenAvatar,
-  VbenFullScreen,
   VbenIcon,
-  VbenIconButton,
 } from '@operon-core/shadcn-ui';
 
 import { useFullscreen, useMagicKeys, whenever } from '@vueuse/core';
 
 import { GlobalSearch } from '../global-search';
 import { LockScreenModal } from '../lock-screen';
+import LogoutConfirmation from '../logout-confirmation.vue';
 import { Notification } from '../notification';
 import { Preferences } from '../preferences';
-import { ThemeToggle } from '../theme-toggle';
 import { TimezoneButton } from '../timezone';
 
 interface Props {
@@ -133,24 +147,16 @@ const {
   isMobile,
 } = usePreferences();
 const { refresh } = useRefresh();
-const { toggle: toggleFullscreen } = useFullscreen();
+const { toggle: toggleFullscreen, isFullscreen } = useFullscreen();
 const accessStore = useAccessStore();
-const [LockModal, lockModalApi] = useVbenModal({
-  connectedComponent: LockScreenModal,
-});
-const [LogoutModal, logoutModalApi] = useVbenModal({
-  onConfirm() {
-    handleSubmitLogout();
-  },
-  openAutoFocus: true,
-});
+const lockOpen = ref(false);
+const logoutOpen = ref(false);
 
 const refTrigger = useTemplateRef('refTrigger');
 const refContent = useTemplateRef('refContent');
 const refPreferences = useTemplateRef('refPreferences');
 const refGlobalSearch = useTemplateRef('refGlobalSearch');
 const refTimezone = useTemplateRef('refTimezone');
-const refNotification = useTemplateRef('refNotification');
 
 const [openPopover, hoverWatcher] = useHoverToggle(
   [refTrigger, refContent],
@@ -260,22 +266,22 @@ const enableLockScreenShortcutKey = computed(() => {
 });
 
 function handleOpenLock() {
-  lockModalApi.open();
+  lockOpen.value = true;
 }
 
 function handleSubmitLock(lockScreenPassword: string) {
-  lockModalApi.close();
+  lockOpen.value = false;
   accessStore.lockScreen(lockScreenPassword);
 }
 
 function handleLogout() {
-  logoutModalApi.open();
+  logoutOpen.value = true;
   openPopover.value = false;
 }
 
 function handleSubmitLogout() {
   emit('logout');
-  logoutModalApi.close();
+  logoutOpen.value = false;
 }
 
 // Settings - open preferences drawer
@@ -309,12 +315,6 @@ function handleTimezoneSelect() {
 // Fullscreen toggle
 function handleFullscreenSelect() {
   toggleFullscreen();
-}
-
-// Notifications
-function handleNotificationSelect(event?: Event) {
-  event?.preventDefault();
-  refNotification.value?.toggle();
 }
 
 // Locale switch - prevent Radix from closing outer dropdown, toggle inline
@@ -368,29 +368,34 @@ if (lockKey) {
     }
   });
 }
+
+onMounted(() => {
+  const handleOpenLockModal = () => {
+    if (preferences.widget.lockScreenButtonPosition !== 'header') {
+      handleOpenLock();
+    }
+  };
+  window.addEventListener('open-lock-screen-modal', handleOpenLockModal);
+  onUnmounted(() => {
+    window.removeEventListener('open-lock-screen-modal', handleOpenLockModal);
+  });
+});
 </script>
 
 <template>
-  <LockModal
-    v-if="showLockInDropdown"
+  <LockScreenModal
+    v-model:open="lockOpen"
+    v-if="showLockInDropdown || lockOpen"
     :avatar="avatar"
     :text="text"
     @submit="handleSubmitLock"
   />
 
-  <LogoutModal
+  <LogoutConfirmation
     v-if="showLogoutInDropdown"
-    :cancel-text="$t('common.cancel')"
-    :confirm-text="$t('common.confirm')"
-    :fullscreen-button="false"
-    :title="$t('common.prompt')"
-    centered
-    content-class="px-8 min-h-10"
-    footer-class="border-none mb-3 mr-3"
-    header-class="border-none"
-  >
-    {{ $t('ui.widgets.logoutTip') }}
-  </LogoutModal>
+    v-model:open="logoutOpen"
+    @confirm="handleSubmitLogout"
+  />
 
   <Preferences
     v-if="showPreferencesInDropdown"
@@ -414,205 +419,182 @@ if (lockKey) {
   />
 
   <DropdownMenu v-model:open="openPopover" :modal="false">
-    <DropdownMenuTrigger ref="refTrigger" :disabled="props.trigger === 'hover'">
-      <div
-        v-if="!avatar"
-        class="mr-1 flex-center size-8 cursor-pointer rounded-full hover:bg-accent hover:text-accent-foreground text-foreground transition-colors"
+    <DropdownMenuTrigger
+      ref="refTrigger"
+      as-child
+      :disabled="props.trigger === 'hover'"
+    >
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        :aria-label="text || $t('page.auth.profile')"
+        class="relative"
       >
-        <User class="size-4" />
-      </div>
-      <div
-        v-else
-        class="mr-2 ml-1 cursor-pointer rounded-full p-1.5 hover:bg-accent"
-      >
-        <div class="flex-center hover:text-accent-foreground">
-          <VbenAvatar
-            :alt="text"
-            :src="avatar"
-            class="size-8"
-            :dot="avatarDot"
-            :dot-class="avatarDotClass"
-          />
-        </div>
-      </div>
+        <Avatar v-if="avatar" class="size-8">
+          <AvatarImage :src="avatar" :alt="text" />
+          <AvatarFallback>{{ text?.slice(0, 2) || '?' }}</AvatarFallback>
+        </Avatar>
+        <User v-else />
+        <span
+          v-if="avatar && avatarDot"
+          :class="avatarDotClass"
+          class="absolute rounded-full"
+        ></span>
+      </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent
       class="mr-2 min-w-60 max-h-[85vh] overflow-y-auto p-0 pb-1"
     >
-      <div ref="refContent">
-        <DropdownMenuLabel v-if="showLabel" class="flex items-center p-3">
-          <VbenAvatar
-            v-if="avatar"
-            :alt="text"
-            :src="avatar"
-            class="size-12"
-            :dot="avatarDot"
-            :dot-class="avatarDotClass"
-          />
-          <div
-            v-else
-            class="flex-center size-10 shrink-0 rounded-full bg-muted text-muted-foreground"
-          >
-            <User class="size-5" />
-          </div>
-          <div class="ml-2 w-full">
+      <DropdownMenuGroup as-child>
+        <div ref="refContent">
+          <DropdownMenuLabel v-if="showLabel" class="flex items-center p-3">
+            <span v-if="avatar" class="relative inline-flex shrink-0">
+              <Avatar class="size-12">
+                <AvatarImage :src="avatar" :alt="text" />
+                <AvatarFallback>{{ text?.slice(0, 2) || '?' }}</AvatarFallback>
+              </Avatar>
+              <span
+                v-if="avatarDot"
+                :class="avatarDotClass"
+                class="absolute rounded-full"
+              ></span>
+            </span>
             <div
-              v-if="tagText || text || $slots.tagText"
-              class="mb-1 flex items-center text-foreground"
+              v-else
+              class="flex-center size-10 shrink-0 rounded-full bg-muted text-muted-foreground"
             >
-              {{ text }}
-              <slot name="tagText">
-                <Badge
-                  v-if="tagText"
-                  variant="secondary"
-                  class="ml-2 text-success"
-                >
-                  {{ tagText }}
-                </Badge>
-              </slot>
+              <User class="size-5" />
             </div>
-            <div class="text-muted-foreground">
-              {{ description }}
+            <div class="ml-2 w-full">
+              <div
+                v-if="tagText || text || $slots.tagText"
+                class="mb-1 flex items-center text-foreground"
+              >
+                {{ text }}
+                <slot name="tagText">
+                  <Badge v-if="tagText" variant="secondary" class="ml-2">
+                    {{ tagText }}
+                  </Badge>
+                </slot>
+              </div>
+              <div class="text-muted-foreground">
+                {{ description }}
+              </div>
             </div>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator v-if="showLabel && menus?.length" />
-        <DropdownMenuItem
-          v-for="menu in menus"
-          :key="menu.text"
-          class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-          @click="menu.handler"
-        >
-          <VbenIconButton class="mr-2" @click="menu.handler">
-            <VbenIcon :icon="menu.icon" class="size-4" />
-          </VbenIconButton>
-          {{ menu.text }}
-        </DropdownMenuItem>
-
-        <template v-if="hasUtilityInDropdown">
+          </DropdownMenuLabel>
           <DropdownMenuSeparator v-if="showLabel && menus?.length" />
           <DropdownMenuItem
-            v-if="showGlobalSearchInDropdown"
-            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-            @select="handleGlobalSearch"
+            v-for="menu in menus"
+            :key="menu.text"
+            @select="menu.handler"
           >
-            <VbenIconButton class="mr-2" @click="handleGlobalSearch">
-              <Search class="size-4" />
-            </VbenIconButton>
-            {{ $t('preferences.widget.globalSearch') }}
+            <VbenIcon :icon="menu.icon" />
+            {{ menu.text }}
           </DropdownMenuItem>
-          <DropdownMenuItem
-            v-if="showThemeToggleInDropdown"
-            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-            @select="handleThemeToggleSelect"
-          >
-            <ThemeToggle class="mr-2" />
-            {{ $t('preferences.theme.title') }}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            v-if="showLanguageToggleInDropdown"
-            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-            @select="handleLanguageToggleSelect"
-          >
-            <VbenIconButton class="mr-2" @click="handleLanguageToggleSelect">
-              <Languages class="size-4" />
-            </VbenIconButton>
-            {{ $t('preferences.widget.languageToggle') }}
-          </DropdownMenuItem>
-          <template v-if="showLanguageList">
+
+          <template v-if="hasUtilityInDropdown">
+            <DropdownMenuSeparator v-if="showLabel && menus?.length" />
             <DropdownMenuItem
-              v-for="lang in languageList"
-              :key="lang.value"
-              class="mx-1 flex cursor-pointer items-center rounded-sm py-1 pl-8 leading-8"
-              @select="(e: Event) => handleLocaleChange(e, lang.value)"
+              v-if="showGlobalSearchInDropdown"
+              @select="handleGlobalSearch"
             >
-              <span
-                :class="
-                  lang.value === preferences.app.locale ? 'bg-foreground' : ''
-                "
-                class="mr-2 size-1.5 rounded-full"
-              ></span>
-              {{ lang.label }}
+              <Search />
+              {{ $t('preferences.widget.globalSearch') }}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              v-if="showThemeToggleInDropdown"
+              @select="handleThemeToggleSelect"
+            >
+              <SunMoon />
+              {{ $t('preferences.theme.title') }}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              v-if="showLanguageToggleInDropdown"
+              @select="handleLanguageToggleSelect"
+            >
+              <Languages />
+              {{ $t('preferences.widget.languageToggle') }}
+            </DropdownMenuItem>
+            <DropdownMenuRadioGroup
+              v-if="showLanguageList"
+              :model-value="preferences.app.locale"
+            >
+              <DropdownMenuRadioItem
+                v-for="lang in languageList"
+                :key="lang.value"
+                :value="lang.value"
+                @select="(e: Event) => handleLocaleChange(e, lang.value)"
+              >
+                {{ lang.label }}
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+            <DropdownMenuItem
+              v-if="showTimezoneInDropdown"
+              @select="handleTimezoneSelect"
+            >
+              <Globe />
+              {{ $t('ui.widgets.timezone.setTimezone') }}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              v-if="showFullscreenInDropdown"
+              @select="handleFullscreenSelect"
+            >
+              <Minimize v-if="isFullscreen" />
+              <Maximize v-else />
+              {{ $t('preferences.widget.fullscreen') }}
+            </DropdownMenuItem>
+            <Notification v-if="showNotificationInDropdown" class="w-full">
+              <template #trigger>
+                <DropdownMenuItem @select.prevent>
+                  <Bell />
+                  {{ $t('preferences.widget.notification') }}
+                </DropdownMenuItem>
+              </template>
+            </Notification>
+            <DropdownMenuItem
+              v-if="showRefreshInDropdown"
+              @select="handleRefresh"
+            >
+              <RotateCw />
+              {{ $t('preferences.widget.refresh') }}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              v-if="showPreferencesInDropdown"
+              @select="handleOpenSettings"
+            >
+              <Settings />
+              {{ $t('preferences.settingsTitle') }}
             </DropdownMenuItem>
           </template>
-          <DropdownMenuItem
-            v-if="showTimezoneInDropdown"
-            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-            @select="handleTimezoneSelect"
-          >
-            <VbenIconButton class="mr-2" @click="handleTimezoneSelect">
-              <Globe class="size-4" />
-            </VbenIconButton>
-            {{ $t('ui.widgets.timezone.setTimezone') }}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            v-if="showFullscreenInDropdown"
-            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-            @select="handleFullscreenSelect"
-          >
-            <VbenFullScreen class="mr-2" @click.stop />
-            {{ $t('preferences.widget.fullscreen') }}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            v-if="showNotificationInDropdown"
-            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-            @select="handleNotificationSelect"
-          >
-            <Notification ref="refNotification" class="mr-2" />
-            {{ $t('preferences.widget.notification') }}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            v-if="showRefreshInDropdown"
-            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-            @click="handleRefresh"
-          >
-            <VbenIconButton class="mr-2" @click="handleRefresh">
-              <RotateCw class="size-4" />
-            </VbenIconButton>
-            {{ $t('preferences.widget.refresh') }}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            v-if="showPreferencesInDropdown"
-            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-            @click="handleOpenSettings"
-          >
-            <VbenIconButton class="mr-2" @click="handleOpenSettings">
-              <Settings class="size-4" />
-            </VbenIconButton>
-            {{ $t('preferences.title') }}
-          </DropdownMenuItem>
-        </template>
 
-        <template v-if="showLockInDropdown || showLogoutInDropdown">
-          <DropdownMenuSeparator v-if="menus?.length || hasUtilityInDropdown" />
-          <DropdownMenuItem
-            v-if="showLockInDropdown"
-            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-            @click="handleOpenLock"
-          >
-            <VbenIconButton class="mr-2" @click="handleOpenLock">
-              <LockKeyhole class="size-4" />
-            </VbenIconButton>
-            {{ $t('ui.widgets.lockScreen.title') }}
-            <DropdownMenuShortcut v-if="enableLockScreenShortcutKey">
-              {{ altView }} L
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            v-if="showLogoutInDropdown"
-            class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"
-            @click="handleLogout"
-          >
-            <VbenIconButton class="mr-2" @click="handleLogout">
-              <LogOut class="size-4" />
-            </VbenIconButton>
-            {{ $t('common.logout') }}
-            <DropdownMenuShortcut v-if="enableLogoutShortcutKey">
-              {{ altView }} Q
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </template>
-      </div>
+          <template v-if="showLockInDropdown || showLogoutInDropdown">
+            <DropdownMenuSeparator
+              v-if="menus?.length || hasUtilityInDropdown"
+            />
+            <DropdownMenuItem
+              v-if="showLockInDropdown"
+              @select="handleOpenLock"
+            >
+              <LockKeyhole />
+              {{ $t('ui.widgets.lockScreen.title') }}
+              <DropdownMenuShortcut v-if="enableLockScreenShortcutKey">
+                {{ altView }} L
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              v-if="showLogoutInDropdown"
+              @select="handleLogout"
+            >
+              <LogOut />
+              {{ $t('common.logout') }}
+              <DropdownMenuShortcut v-if="enableLogoutShortcutKey">
+                {{ altView }} Q
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+          </template>
+        </div>
+      </DropdownMenuGroup>
     </DropdownMenuContent>
   </DropdownMenu>
 </template>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { $t } from '@operon/locales';
 
+import { ToggleGroup, ToggleGroupItem } from '@operon-core/shadcn-ui';
+
 import SwitchItem from '../switch-item.vue';
 
 defineOptions({
@@ -18,10 +20,6 @@ const transitionEnable = defineModel<boolean>('transitionEnable');
 const transitionLoading = defineModel<boolean>('transitionLoading');
 
 const transitionPreset = ['fade', 'fade-slide', 'fade-up', 'fade-down'];
-
-function handleClick(value: string) {
-  transitionName.value = value;
-}
 </script>
 
 <template>
@@ -34,23 +32,30 @@ function handleClick(value: string) {
   <SwitchItem v-model="transitionEnable">
     {{ $t('preferences.animation.transition') }}
   </SwitchItem>
-  <div
+  <ToggleGroup
     v-if="transitionEnable"
-    class="mt-3 mb-2 flex justify-between gap-3 px-2"
+    :model-value="transitionName"
+    type="single"
+    variant="outline"
+    class="mt-3 flex-wrap gap-3"
+    @update:model-value="
+      (value) => {
+        if (typeof value === 'string' && value) transitionName = value;
+      }
+    "
   >
-    <div
+    <ToggleGroupItem
       v-for="item in transitionPreset"
       :key="item"
-      :class="{
-        'outline-box-active': transitionName === item,
-      }"
-      class="outline-box p-2"
-      @click="handleClick(item)"
+      :value="item"
+      :aria-label="item"
+      :title="item"
+      class="h-auto p-3"
     >
       <div
         :class="`${item}-slow`"
         class="h-10 w-12 rounded-md bg-primary"
       ></div>
-    </div>
-  </div>
+    </ToggleGroupItem>
+  </ToggleGroup>
 </template>

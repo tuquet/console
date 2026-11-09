@@ -10,9 +10,12 @@ import {
 } from '@operon/preferences';
 
 import {
+  Button,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   ToggleGroup,
   ToggleGroupItem,
-  VbenTooltip,
 } from '@operon-core/shadcn-ui';
 
 import ThemeButton from './theme-button.vue';
@@ -52,32 +55,46 @@ const PRESETS = [
 ];
 </script>
 <template>
-  <div>
-    <VbenTooltip :disabled="!shouldOnHover" side="bottom">
-      <template #trigger>
-        <ThemeButton
-          :model-value="isDark"
-          type="icon"
-          @update:model-value="handleChange"
-        />
-      </template>
-      <ToggleGroup
-        :model-value="preferences.theme.mode"
-        class="gap-2"
-        type="single"
-        variant="outline"
-        @update:model-value="
-          (val) => updatePreferences({ theme: { mode: val as ThemeModeType } })
-        "
-      >
-        <ToggleGroupItem
-          v-for="item in PRESETS"
-          :key="item.name"
-          :value="item.name"
+  <div class="inline-flex empty:hidden">
+    <ThemeButton
+      v-if="!shouldOnHover"
+      :model-value="isDark"
+      type="icon"
+      @update:model-value="handleChange"
+    />
+    <Popover v-else>
+      <PopoverTrigger as-child>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          :aria-label="$t('preferences.theme.title')"
         >
-          <component :is="item.icon" class="size-5" />
-        </ToggleGroupItem>
-      </ToggleGroup>
-    </VbenTooltip>
+          <SunMoon />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" class="w-auto">
+        <ToggleGroup
+          :model-value="preferences.theme.mode"
+          type="single"
+          variant="outline"
+          @update:model-value="
+            (val) =>
+              val &&
+              updatePreferences({ theme: { mode: val as ThemeModeType } })
+          "
+        >
+          <ToggleGroupItem
+            v-for="item in PRESETS"
+            :key="item.name"
+            :value="item.name"
+            :aria-label="item.title"
+            :title="item.title"
+          >
+            <component :is="item.icon" />
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </PopoverContent>
+    </Popover>
   </div>
 </template>

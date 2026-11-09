@@ -133,7 +133,11 @@ function performSearch() {
 
     searchResults.value = [...matchedNav, ...matchedCmds];
   } else {
-    searchResults.value = searchHistory.value;
+    // Show recent history if available; otherwise show all navigation items (VS Code Quick Open behavior)
+    searchResults.value =
+      searchHistory.value.length > 0
+        ? searchHistory.value
+        : navigationItems.value;
   }
   activeIndex.value = 0;
 }
@@ -217,7 +221,10 @@ function handleMouseenter(e: MouseEvent) {
 function removeItem(index: number) {
   if (isRecentView.value) {
     searchHistory.value.splice(index, 1);
-    searchResults.value = searchHistory.value;
+    searchResults.value =
+      searchHistory.value.length > 0
+        ? searchHistory.value
+        : navigationItems.value;
   } else {
     searchResults.value.splice(index, 1);
   }

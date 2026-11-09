@@ -8,7 +8,6 @@ import { Check, Plus, Search, X } from '@operon/icons';
 import {
   Badge,
   Button,
-  Input,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -130,10 +129,15 @@ function clearFilters() {
         <!-- Search bar within Popover -->
         <div class="flex items-center gap-1.5 border-b px-2.5 py-2">
           <Search class="size-3.5 shrink-0 text-muted-foreground" />
-          <Input
+          <input
             v-model="searchQuery"
             :placeholder="placeholder || `Tìm ${title.toLowerCase()}...`"
-            class="h-7 w-full border-none p-0 text-xs shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            class="h-7 w-full border-0 bg-transparent p-0 text-xs text-foreground placeholder:text-muted-foreground/60 shadow-none outline-none focus:border-0 focus:outline-none focus:ring-0 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0"
+            style="
+              outline: none !important;
+              border: none !important;
+              box-shadow: none !important;
+            "
           />
           <button
             v-if="searchQuery"

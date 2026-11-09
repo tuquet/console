@@ -6,6 +6,7 @@ import type { MenuRecordRaw } from '@operon/types';
 import { computed, useSlots, watch } from 'vue';
 
 import { useRefresh } from '@operon/hooks';
+import { Settings } from '@operon/icons';
 import { $t, i18n } from '@operon/locales';
 import {
   preferences,
@@ -20,7 +21,7 @@ import {
 import { cloneDeep, mapTree } from '@operon/utils';
 
 import { VbenAdminLayout } from '@operon-core/layout-ui';
-import { VbenBackTop, VbenLogo } from '@operon-core/shadcn-ui';
+import { VbenBackTop, VbenButton, VbenLogo } from '@operon-core/shadcn-ui';
 import { ELEMENT_ID_LAYOUT_SCROLL } from '@operon-core/shared/constants';
 
 import { Breadcrumb, CheckUpdates, Preferences } from '../widgets';
@@ -31,7 +32,6 @@ import { LayoutHeader } from './header';
 import {
   LayoutExtraMenu,
   LayoutMenu,
-  LayoutMixedMenu,
   useExtraMenu,
   useMixedMenu,
 } from './menu';
@@ -93,7 +93,6 @@ const {
   isMixedNav,
   isMobile,
   isSideMode,
-  isSideMixedNav,
   isHeaderMixedNav,
   isHeaderSidebarNav,
   layout,
@@ -131,10 +130,6 @@ const logoClass = computed(() => {
     classes.push('mx-auto');
   }
 
-  if (isSideMixedNav.value) {
-    classes.push('flex-center');
-  }
-
   return classes.join(' ');
 });
 
@@ -149,9 +144,7 @@ const logoCollapsed = computed(() => {
   if (isHeaderNav.value || isMixedNav.value || isHeaderSidebarNav.value) {
     return false;
   }
-  return (
-    sidebarCollapsed.value || isSideMixedNav.value || isHeaderMixedNav.value
-  );
+  return sidebarCollapsed.value || isHeaderMixedNav.value;
 });
 
 const showHeaderNav = computed(() => {
@@ -170,18 +163,6 @@ const logoTheme = computed(() => {
   return showLogoInHeader ? headerTheme.value : sidebarTheme.value;
 });
 
-/**
- * layout-sidebar extra title slot height
- */
-const sidebarExtraTitleHeight = computed<number | undefined>(() => {
-  if (slots.logo) {
-    return undefined;
-  }
-  const showSideExtraTitle =
-    preferences.logo.enable && preferences.logo.showText;
-  return showSideExtraTitle ? undefined : 0;
-});
-
 const {
   handleMenuSelect,
   handleMenuOpen,
@@ -193,23 +174,11 @@ const {
   sidebarVisible,
 } = useMixedMenu();
 
-// Multi-column sidebar menu
-const {
-  extraActiveMenu,
-  extraMenus,
-  handleDefaultSelect,
-  handleMenuMouseEnter,
-  handleMixedMenuSelect,
-  handleSideMouseLeave,
-  sidebarExtraVisible,
-} = useExtraMenu(mixHeaderMenus);
+const { extraActiveMenu, extraMenus } = useExtraMenu(mixHeaderMenus);
 
-/**
- * Active domain title for two-column sidebar extra panel
- */
 const extraDomainTitle = computed(() => {
   const activeKey = extraActiveMenu.value;
-  const activeItem = (mixHeaderMenus.value || []).find(
+  const activeItem = mixHeaderMenus.value.find(
     (item) => item.path === activeKey || item.name === activeKey,
   );
   return activeItem ? $t(activeItem.name) : finalLogoText.value;
@@ -250,19 +219,6 @@ function clickLogo() {
   emit('clickLogo');
 }
 
-watch(
-  () => preferences.app.layout,
-  async (val) => {
-    if (val === 'sidebar-mixed-nav' && preferences.sidebar.hidden) {
-      updatePreferences({
-        sidebar: {
-          hidden: false,
-        },
-      });
-    }
-  },
-);
-
 const tabbarStore = useTabbarStore();
 
 function refreshAll() {
@@ -284,7 +240,6 @@ const headerSlots = computed(() => {
 
 <template>
   <VbenAdminLayout
-    v-model:sidebar-extra-visible="sidebarExtraVisible"
     :content-compact="preferences.app.contentCompact"
     :content-compact-width="preferences.app.contentCompactWidth"
     :content-padding="preferences.app.contentPadding"
@@ -312,9 +267,7 @@ const headerSlots = computed(() => {
     :sidebar-expand-on-hover="preferences.sidebar.expandOnHover"
     :sidebar-extra-collapse="preferences.sidebar.extraCollapse"
     :sidebar-extra-collapsed-width="preferences.sidebar.extraCollapsedWidth"
-    :sidebar-extra-title-height="sidebarExtraTitleHeight"
     :sidebar-hidden="preferences.sidebar.hidden"
-    :sidebar-mixed-width="preferences.sidebar.mixedWidth"
     :sidebar-theme="sidebarTheme"
     :sidebar-theme-sub="sidebarThemeSub"
     :sidebar-width="preferences.sidebar.width"
@@ -323,7 +276,6 @@ const headerSlots = computed(() => {
     :tabbar-enable="preferences.tabbar.enable"
     :tabbar-height="preferences.tabbar.height"
     :z-index="preferences.app.zIndex"
-    @side-mouse-leave="handleSideMouseLeave"
     @toggle-sidebar="toggleSidebar"
     @update:sidebar-collapse="
       (value: boolean) => updatePreferences({ sidebar: { collapsed: value } })
@@ -427,17 +379,6 @@ const headerSlots = computed(() => {
         @select="handleMenuSelect"
       />
     </template>
-    <template #mixed-menu>
-      <LayoutMixedMenu
-        :active-path="extraActiveMenu"
-        :menus="wrapperMenus(mixHeaderMenus, false)"
-        :rounded="isMenuRounded"
-        :theme="sidebarTheme"
-        @default-select="handleDefaultSelect"
-        @enter="handleMenuMouseEnter"
-        @select="handleMixedMenuSelect"
-      />
-    </template>
     <!-- Sidebar extra area -->
     <template #side-extra>
       <LayoutExtraMenu
@@ -460,12 +401,29 @@ const headerSlots = computed(() => {
       </slot>
     </template>
 
-    <template v-if="preferencesButtonPosition.sidebarBottom" #side-bottom>
-      <div class="border-t border-border px-2 py-2">
+    <template
+      v-if="preferencesButtonPosition.sidebarBottom"
+      #side-bottom="{ collapsed }"
+    >
+      <div class="min-w-0">
         <Preferences
           class="w-full"
           @clear-preferences-and-logout="clearPreferencesAndLogout"
-        />
+        >
+          <template #default="{ open }">
+            <VbenButton
+              variant="ghost"
+              :size="collapsed ? 'icon' : 'default'"
+              class="h-8 justify-start gap-2 px-2"
+              :title="$t('preferences.settingsTitle')"
+              :aria-label="$t('preferences.settingsTitle')"
+              @click="open"
+            >
+              <Settings class="size-4 shrink-0" />
+              <!-- <span v-if="!collapsed" class="truncate">{{ $t('preferences.settingsTitle') }}</span> -->
+            </VbenButton>
+          </template>
+        </Preferences>
       </div>
     </template>
 

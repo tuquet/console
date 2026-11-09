@@ -9,28 +9,28 @@ DISK_USAGE=$(df / --output=pcent | tail -1 | tr -dc '0-9')
 echo "Current disk usage: ${DISK_USAGE}%"
 if [ "$DISK_USAGE" -gt 85 ]; then
   echo "WARNING: Disk usage exceeds 85%. Cleaning temporary turbo caches..."
-  rm -rf .turbo apps/workstation/.turbo
+  rm -rf .turbo apps/shell/.turbo
 fi
 
 echo "=== [2/5] Running Core Preferences Unit Tests ==="
 pnpm test:unit packages/@core/preferences/__tests__/preferences.test.ts
 
-echo "=== [3/5] Building @operon/admin-web (Local Only) ==="
+echo "=== [3/5] Building @operon/shell (Local Only) ==="
 export NODE_OPTIONS="--max-old-space-size=3072"
-if [ -d "apps/workstation/dist" ] && [ -f "apps/workstation/dist/index.html" ]; then
-  rm -rf apps/workstation/dist.bak
-  cp -a apps/workstation/dist apps/workstation/dist.bak
+if [ -d "apps/shell/dist" ] && [ -f "apps/shell/dist/index.html" ]; then
+  rm -rf apps/shell/dist.bak
+  cp -a apps/shell/dist apps/shell/dist.bak
 fi
-trap 'if [ ! -f "apps/workstation/dist/index.html" ] && [ -d "apps/workstation/dist.bak" ]; then echo "Restoring previous dist backup to prevent Nginx 403..."; rm -rf apps/workstation/dist && mv apps/workstation/dist.bak apps/workstation/dist; fi' EXIT
+trap 'if [ ! -f "apps/shell/dist/index.html" ] && [ -d "apps/shell/dist.bak" ]; then echo "Restoring previous dist backup to prevent Nginx 403..."; rm -rf apps/shell/dist && mv apps/shell/dist.bak apps/shell/dist; fi' EXIT
 
-pnpm exec turbo build --filter="@operon/admin-web^..." --concurrency=1
-pnpm --filter @operon/admin-web run build
-rm -rf apps/workstation/dist.bak
+pnpm exec turbo build --filter="@operon/shell^..." --concurrency=1
+pnpm --filter @operon/shell run build
+rm -rf apps/shell/dist.bak
 
 echo "=== [4/5] Writing Build Metadata to dist ==="
 COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-cat <<EOF > apps/workstation/dist/.build-meta.json
+cat <<EOF > apps/shell/dist/.build-meta.json
 {
   "commit": "${COMMIT_HASH}",
   "buildTime": "${BUILD_TIME}",

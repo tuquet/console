@@ -86,8 +86,8 @@ function setPosition(key: string, value: string | undefined) {
 </script>
 
 <template>
-  <div class="space-y-1">
-    <div ref="listRef" class="space-y-1">
+  <div class="flex flex-col gap-1">
+    <div ref="listRef" class="flex flex-col gap-1">
       <div
         v-for="item in sortableList"
         :key="item.key"

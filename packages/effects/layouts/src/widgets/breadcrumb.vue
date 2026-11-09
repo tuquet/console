@@ -8,7 +8,15 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { $t } from '@operon/locales';
 
-import { VbenBreadcrumbView } from '@operon-core/shadcn-ui';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  VbenIcon,
+} from '@operon-core/shadcn-ui';
 
 import { resolveBreadcrumbMatches } from './breadcrumb-routes';
 
@@ -68,11 +76,26 @@ function handleSelect(path: string) {
 }
 </script>
 <template>
-  <VbenBreadcrumbView
-    :breadcrumbs="breadcrumbs"
-    :show-icon="showIcon"
-    :style-type="type"
-    class="ml-2"
-    @select="handleSelect"
-  />
+  <Breadcrumb class="ml-2" :data-style="type">
+    <BreadcrumbList>
+      <template v-for="(item, index) in breadcrumbs" :key="item.path">
+        <BreadcrumbSeparator v-if="index > 0" />
+        <BreadcrumbItem>
+          <BreadcrumbPage v-if="index === breadcrumbs.length - 1">
+            <VbenIcon v-if="showIcon && item.icon" :icon="item.icon" />
+            {{ item.title || $t('common.home') }}
+          </BreadcrumbPage>
+          <BreadcrumbLink
+            v-else
+            :href="item.path"
+            class="inline-flex items-center gap-1"
+            @click.prevent="item.path && handleSelect(item.path)"
+          >
+            <VbenIcon v-if="showIcon && item.icon" :icon="item.icon" />
+            {{ item.title || $t('common.home') }}
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+      </template>
+    </BreadcrumbList>
+  </Breadcrumb>
 </template>

@@ -1,11 +1,21 @@
 <script setup lang="ts">
 import type { SelectOption } from '@operon/types';
 
-import { useSlots } from 'vue';
+import { useId, useSlots } from 'vue';
 
 import { CircleHelp, CircleX } from '@operon/icons';
+import { $t } from '@operon/locales';
 
-import { Input, VbenTooltip } from '@operon-core/shadcn-ui';
+import {
+  Button,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@operon-core/shadcn-ui';
 
 defineOptions({
   name: 'PreferenceSelectItem',
@@ -28,6 +38,7 @@ withDefaults(
 
 const inputValue = defineModel<string | undefined>({ default: undefined });
 
+const id = useId();
 const slots = useSlots();
 </script>
 
@@ -39,33 +50,55 @@ const slots = useSlots();
     }"
     class="my-1 flex w-full items-center justify-between rounded-md px-2 py-1"
   >
-    <span class="flex items-center">
+    <span :id="id" class="flex items-center">
       <slot></slot>
 
-      <VbenTooltip v-if="slots.tip || tip" side="bottom">
-        <template #trigger>
-          <CircleHelp class="ml-1 size-3 cursor-help" />
-        </template>
-        <slot name="tip">
-          <template v-if="tip">
-            <p v-for="(line, index) in tip.split('\n')" :key="index">
-              {{ line }}
-            </p>
-          </template>
-        </slot>
-      </VbenTooltip>
+      <TooltipProvider>
+        <Tooltip v-if="slots.tip || tip">
+          <TooltipTrigger as-child>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              class="size-5"
+              :aria-label="tip || $t('common.help')"
+            >
+              <CircleHelp />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <slot name="tip">
+              <template v-if="tip">
+                <p v-for="(line, index) in tip.split('\n')" :key="index">
+                  {{ line }}
+                </p>
+              </template>
+            </slot>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </span>
-    <div class="relative">
-      <Input
+    <InputGroup class="h-8 w-41.25">
+      <InputGroupInput
+        :aria-labelledby="id"
         v-model="inputValue"
-        class="h-8 w-41.25"
+        :disabled="disabled"
         :placeholder="placeholder"
       />
-      <CircleX
-        v-if="inputValue"
-        class="absolute top-1/2 right-2 size-3 -translate-y-1/2 transform cursor-pointer text-foreground/60 hover:text-foreground"
-        @click="() => (inputValue = '')"
-      />
-    </div>
+      <InputGroupAddon align="inline-end">
+        <Button
+          v-if="inputValue"
+          type="button"
+          variant="ghost"
+          size="icon"
+          class="size-6"
+          :disabled="disabled"
+          :aria-label="$t('common.clear')"
+          @click="inputValue = ''"
+        >
+          <CircleX />
+        </Button>
+      </InputGroupAddon>
+    </InputGroup>
   </div>
 </template>

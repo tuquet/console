@@ -5,7 +5,7 @@
       "label": "local: <web> dev",
       "type": "shell",
       "command": "pnpm",
-      "args": ["-F", "@operon/workstation", "dev"],
+      "args": ["-F", "@operon/shell", "dev"],
       "isBackground": true,
       "group": {
         "kind": "build",
@@ -22,7 +22,7 @@
       "label": "local: <tauri> dev",
       "type": "shell",
       "command": "pnpm",
-      "args": ["-F", "@operon/workstation", "tauri:dev"],
+      "args": ["-F", "@operon/shell", "tauri:dev"],
       "isBackground": true,
       "presentation": {
         "reveal": "always",
@@ -47,7 +47,7 @@
       "label": "local: <tauri> build:exe",
       "type": "shell",
       "command": "pnpm",
-      "args": ["-F", "@operon/workstation", "tauri:build:exe"],
+      "args": ["-F", "@operon/shell", "tauri:build:exe"],
       "presentation": {
         "reveal": "always",
         "panel": "shared",
@@ -124,7 +124,7 @@
       "label": "local: <web> build",
       "type": "shell",
       "command": "pnpm",
-      "args": ["-F", "@operon/workstation", "build"],
+      "args": ["-F", "@operon/shell", "build"],
       "presentation": {
         "reveal": "always",
         "panel": "shared",

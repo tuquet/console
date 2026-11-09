@@ -13,14 +13,14 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY internal ./internal
 COPY packages ./packages
-COPY apps/workstation ./apps/workstation
+COPY apps ./apps
 COPY scripts ./scripts
 
 # Install dependencies using cache mount
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
-# Build workstation
-RUN pnpm --filter @operon/workstation build
+# Build shell
+RUN pnpm --filter @operon/shell build
 
 # Production Stage: Nginx Alpine
 FROM nginx:stable-alpine AS production
@@ -28,7 +28,7 @@ FROM nginx:stable-alpine AS production
 RUN rm -rf /etc/nginx/conf.d/default.conf
 
 # Copy build artifacts
-COPY --from=builder /app/apps/workstation/dist /usr/share/nginx/html
+COPY --from=builder /app/apps/shell/dist /usr/share/nginx/html
 
 # Copy nginx config
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf

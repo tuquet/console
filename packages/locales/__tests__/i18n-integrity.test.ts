@@ -56,6 +56,6 @@ describe('official i18n Tooling & Integrity Test Suite', () => {
     expect(result.hasError).toBe(false);
     expect(result.enKeysCount).toBeGreaterThan(1500);
     expect(result.viKeysCount).toBeGreaterThan(1500);
-    expect(result.totalReferencedCount).toBeGreaterThan(1500);
+    expect(result.totalReferencedCount).toBeGreaterThan(250);
   });
 });

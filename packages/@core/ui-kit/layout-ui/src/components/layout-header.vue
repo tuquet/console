@@ -61,9 +61,7 @@ const style = computed((): CSSProperties => {
 
 const logoStyle = computed((): CSSProperties => {
   if (!props.logoVisible) {
-    return {
-      minWidth: '12px',
-    };
+    return {};
   }
 
   if (props.isMobile) {
@@ -80,7 +78,7 @@ const logoStyle = computed((): CSSProperties => {
   <header
     :class="theme"
     :style="style"
-    class="top-0 flex w-full flex-[0_0_auto] items-center border-b border-border bg-header pl-2 transition-[margin-top] duration-200"
+    class="top-0 flex w-full flex-[0_0_auto] items-center border-b border-border bg-header px-3 transition-[margin-top] duration-200"
   >
     <div
       v-if="slots['toggle-button']"
@@ -94,7 +92,7 @@ const logoStyle = computed((): CSSProperties => {
     </div>
 
     <div
-      v-if="slots.logo || (!logoVisible && !isMobile)"
+      v-if="slots.logo"
       :style="logoStyle"
       :class="
         isMobile ? 'order-2 hidden md:block shrink-0' : 'order-1 shrink-0'

@@ -96,7 +96,6 @@ exports[`defaultPreferences immutability test > should not modify the config obj
     "extraCollapsedWidth": 60,
     "fixedButton": true,
     "hidden": false,
-    "mixedWidth": 80,
     "width": 224,
   },
   "tabbar": {

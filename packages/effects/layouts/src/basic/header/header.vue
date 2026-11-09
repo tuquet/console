@@ -1,20 +1,21 @@
 <script lang="ts" setup>
-import { computed, useSlots } from 'vue';
+import { computed, onMounted, onUnmounted, ref, useSlots } from 'vue';
 
 import { useRefresh } from '@operon/hooks';
-import { LockKeyhole, LogOut, RotateCw } from '@operon/icons';
+import {
+  LockKeyhole,
+  LogOut,
+  Maximize,
+  Minimize,
+  RotateCw,
+} from '@operon/icons';
 import { $t } from '@operon/locales';
 import { preferences, usePreferences } from '@operon/preferences';
 import { useAccessStore } from '@operon/stores';
 
-import { useVbenModal } from '@operon-core/popup-ui';
-import {
-  VbenFullScreen,
-  VbenIconButton,
-  VbenTooltip,
-} from '@operon-core/shadcn-ui';
+import { Button } from '@operon-core/shadcn-ui';
 
-import { useMagicKeys, whenever } from '@vueuse/core';
+import { useFullscreen, useMagicKeys, whenever } from '@vueuse/core';
 
 import {
   GlobalSearch,
@@ -25,6 +26,7 @@ import {
   ThemeToggle,
   TimezoneButton,
 } from '../../widgets';
+import LogoutConfirmation from '../../widgets/logout-confirmation.vue';
 
 interface Props {
   /**
@@ -59,6 +61,7 @@ const emit = defineEmits<{
 
 const REFERENCE_VALUE = 100;
 
+const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
 const accessStore = useAccessStore();
 const {
   globalLockScreenShortcutKey,
@@ -87,32 +90,25 @@ const enableLogoutShortcutKey = computed(() => {
   return showLogoutInHeader.value && globalLogoutShortcutKey.value;
 });
 
-const [LockModal, lockModalApi] = useVbenModal({
-  connectedComponent: LockScreenModal,
-});
-const [LogoutModal, logoutModalApi] = useVbenModal({
-  onConfirm() {
-    handleSubmitLogout();
-  },
-  openAutoFocus: true,
-});
+const lockOpen = ref(false);
+const logoutOpen = ref(false);
 
 function handleOpenLock() {
-  lockModalApi.open();
+  lockOpen.value = true;
 }
 
 function handleSubmitLock(lockScreenPassword: string) {
-  lockModalApi.close();
+  lockOpen.value = false;
   accessStore.lockScreen(lockScreenPassword);
 }
 
 function handleLogout() {
-  logoutModalApi.open();
+  logoutOpen.value = true;
 }
 
 function handleSubmitLogout() {
   emit('logout');
-  logoutModalApi.close();
+  logoutOpen.value = false;
 }
 
 // Keyboard shortcuts
@@ -266,29 +262,34 @@ function nextIndex(list: Array<SlotItem>) {
 function clearPreferencesAndLogout() {
   emit('clearPreferencesAndLogout');
 }
+
+onMounted(() => {
+  const handleOpenLockModal = () => {
+    if (showLockInHeader.value) {
+      lockOpen.value = true;
+    }
+  };
+  window.addEventListener('open-lock-screen-modal', handleOpenLockModal);
+  onUnmounted(() => {
+    window.removeEventListener('open-lock-screen-modal', handleOpenLockModal);
+  });
+});
 </script>
 
 <template>
-  <LockModal
-    v-if="showLockInHeader"
+  <LockScreenModal
+    v-model:open="lockOpen"
+    v-if="showLockInHeader || lockOpen"
     :avatar="avatar"
     :text="text"
     @submit="handleSubmitLock"
   />
 
-  <LogoutModal
+  <LogoutConfirmation
     v-if="showLogoutInHeader"
-    :cancel-text="$t('common.cancel')"
-    :confirm-text="$t('common.confirm')"
-    :fullscreen-button="false"
-    :title="$t('common.prompt')"
-    centered
-    content-class="px-8 min-h-10"
-    footer-class="border-none mb-3 mr-3"
-    header-class="border-none"
-  >
-    {{ $t('ui.widgets.logoutTip') }}
-  </LogoutModal>
+    v-model:open="logoutOpen"
+    @confirm="handleSubmitLogout"
+  />
 
   <template
     v-for="slot in leftSlots.filter((item) => item.index < REFERENCE_VALUE)"
@@ -296,9 +297,14 @@ function clearPreferencesAndLogout() {
   >
     <slot :name="slot.name">
       <template v-if="slot.name === 'refresh'">
-        <VbenIconButton class="my-0 mr-1 rounded-md" @click="refresh">
-          <RotateCw class="size-4" />
-        </VbenIconButton>
+        <Button
+          class="my-0 mr-1 rounded-md"
+          @click="refresh"
+          variant="ghost"
+          size="icon"
+        >
+          <RotateCw />
+        </Button>
       </template>
     </slot>
   </template>
@@ -330,75 +336,73 @@ function clearPreferencesAndLogout() {
         </template>
 
         <template v-else-if="slot.name === 'preferences'">
-          <VbenTooltip side="bottom">
-            <template #trigger>
-              <PreferencesButton
-                class="mr-1 hidden md:flex"
-                @clear-preferences-and-logout="clearPreferencesAndLogout"
-              />
-            </template>
-            {{ $t('preferences.title') }}
-          </VbenTooltip>
+          <PreferencesButton
+            class="mr-1 hidden md:flex"
+            @clear-preferences-and-logout="clearPreferencesAndLogout"
+          />
         </template>
         <template v-else-if="slot.name === 'theme-toggle'">
-          <VbenTooltip side="bottom">
-            <template #trigger>
-              <ThemeToggle class="mr-1 hidden md:flex" />
-            </template>
-            {{ $t('preferences.theme.title') }}
-          </VbenTooltip>
+          <ThemeToggle class="mr-1 hidden md:flex" />
         </template>
         <template v-else-if="slot.name === 'language-toggle'">
-          <VbenTooltip side="bottom">
-            <template #trigger>
-              <LanguageToggle class="mr-1 hidden md:flex" />
-            </template>
-            {{ $t('preferences.widget.languageToggle') }}
-          </VbenTooltip>
+          <LanguageToggle class="mr-1 hidden md:flex" />
         </template>
         <template v-else-if="slot.name === 'fullscreen'">
-          <VbenFullScreen
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
             class="mr-1 hidden md:flex"
-            :tooltip="$t('preferences.widget.fullscreen')"
-          />
+            :title="$t('preferences.widget.fullscreen')"
+            :aria-label="$t('preferences.widget.fullscreen')"
+            :aria-pressed="isFullscreen"
+            @click="toggleFullscreen"
+          >
+            <Minimize v-if="isFullscreen" />
+            <Maximize v-else />
+          </Button>
         </template>
         <template v-else-if="slot.name === 'timezone'">
           <TimezoneButton class="mr-1 hidden md:flex" />
         </template>
         <template v-else-if="slot.name === 'lock-screen-btn'">
-          <VbenIconButton
+          <Button
             class="mr-1 hidden md:flex"
-            :tooltip="$t('ui.widgets.lockScreen.title')"
+            :aria-label="$t('ui.widgets.lockScreen.title')"
+            :title="$t('ui.widgets.lockScreen.title')"
             @click="handleOpenLock"
+            variant="ghost"
+            size="icon"
           >
-            <LockKeyhole class="size-4" />
-          </VbenIconButton>
+            <LockKeyhole />
+          </Button>
         </template>
         <template v-else-if="slot.name === 'logout-btn'">
-          <VbenIconButton
+          <Button
             class="mr-1 hidden md:flex"
-            :tooltip="$t('common.logout')"
+            :aria-label="$t('common.logout')"
+            :title="$t('common.logout')"
             @click="handleLogout"
+            variant="ghost"
+            size="icon"
           >
-            <LogOut class="size-4" />
-          </VbenIconButton>
+            <LogOut />
+          </Button>
         </template>
         <template v-else-if="slot.name === 'notification'">
-          <VbenTooltip side="bottom">
-            <template #trigger>
-              <Notification class="mr-1" />
-            </template>
-            {{ $t('preferences.widget.notification') }}
-          </VbenTooltip>
+          <Notification class="mr-1" />
         </template>
         <template v-else-if="slot.name === 'refresh'">
-          <VbenIconButton
+          <Button
             class="my-0 mr-1 rounded-md"
-            :tooltip="$t('preferences.widget.refresh')"
+            :aria-label="$t('preferences.widget.refresh')"
+            :title="$t('preferences.widget.refresh')"
             @click="refresh"
+            variant="ghost"
+            size="icon"
           >
-            <RotateCw class="size-4" />
-          </VbenIconButton>
+            <RotateCw />
+          </Button>
         </template>
       </slot>
     </template>

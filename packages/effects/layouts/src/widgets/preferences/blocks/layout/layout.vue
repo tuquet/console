@@ -3,12 +3,11 @@ import type { Component } from 'vue';
 
 import type { LayoutType } from '@operon/types';
 
-import { computed } from 'vue';
+import { computed, useId } from 'vue';
 
-import { CircleHelp } from '@operon/icons';
 import { $t } from '@operon/locales';
 
-import { VbenTooltip } from '@operon-core/shadcn-ui';
+import { Label, RadioGroup, RadioGroupItem } from '@operon-core/shadcn-ui';
 
 import {
   FullContent,
@@ -16,7 +15,6 @@ import {
   HeaderNav,
   HeaderSidebarNav,
   MixedNav,
-  SidebarMixedNav,
   SidebarNav,
 } from '../../icons';
 
@@ -30,13 +28,13 @@ defineOptions({
   name: 'PreferenceLayout',
 });
 
+const id = useId();
 const modelValue = defineModel<LayoutType>({ default: 'sidebar-nav' });
 
 const components: Record<LayoutType, Component> = {
   'full-content': FullContent,
   'header-nav': HeaderNav,
   'mixed-nav': MixedNav,
-  'sidebar-mixed-nav': SidebarMixedNav,
   'sidebar-nav': SidebarNav,
   'header-mixed-nav': HeaderMixedNav,
   'header-sidebar-nav': HeaderSidebarNav,
@@ -47,11 +45,6 @@ const PRESET = computed((): PresetItem[] => [
     name: $t('preferences.vertical'),
     tip: $t('preferences.verticalTip'),
     type: 'sidebar-nav',
-  },
-  {
-    name: $t('preferences.twoColumn'),
-    tip: $t('preferences.twoColumnTip'),
-    type: 'sidebar-mixed-nav',
   },
   {
     name: $t('preferences.horizontal'),
@@ -79,34 +72,27 @@ const PRESET = computed((): PresetItem[] => [
     type: 'full-content',
   },
 ]);
-
-function activeClass(theme: string): string[] {
-  return theme === modelValue.value ? ['outline-box-active'] : [];
-}
 </script>
 
 <template>
-  <div class="flex w-full flex-wrap gap-5">
-    <template v-for="theme in PRESET" :key="theme.name">
-      <div
-        class="flex w-25 cursor-pointer flex-col"
-        @click="modelValue = theme.type"
+  <RadioGroup
+    v-model="modelValue"
+    class="grid grid-cols-2 gap-4 sm:grid-cols-3"
+  >
+    <div v-for="theme in PRESET" :key="theme.type" class="min-w-0">
+      <RadioGroupItem
+        :id="`${id}-${theme.type}`"
+        :value="theme.type"
+        class="peer sr-only"
+      />
+      <Label
+        :for="`${id}-${theme.type}`"
+        :title="theme.tip"
+        class="flex cursor-pointer flex-col items-center gap-2 rounded-md border border-input p-3 peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-data-[state=checked]:ring-2 peer-data-[state=checked]:ring-ring"
       >
-        <div :class="activeClass(theme.type)" class="outline-box flex-center">
-          <component :is="components[theme.type]" />
-        </div>
-        <div
-          class="mt-2 flex-center text-center text-muted-foreground hover:text-foreground"
-        >
-          {{ theme.name }}
-          <VbenTooltip v-if="theme.tip" side="bottom">
-            <template #trigger>
-              <CircleHelp class="ml-1 size-3 cursor-help" />
-            </template>
-            {{ theme.tip }}
-          </VbenTooltip>
-        </div>
-      </div>
-    </template>
-  </div>
+        <component :is="components[theme.type]" />
+        <span class="text-center">{{ theme.name }}</span>
+      </Label>
+    </div>
+  </RadioGroup>
 </template>

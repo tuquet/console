@@ -223,13 +223,9 @@ const contentWidthStyle = computed((): CSSProperties => {
 
 const contentStyle = computed((): CSSProperties => {
   const { bottomHeight, collapseHeight, headerHeight } = props;
-  let footerHeight: number;
-  if (!slots.bottom || props.isSidebarMixed) {
-    footerHeight = collapseHeight + bottomHeight;
-  } else if (collapse.value && props.showCollapseButton) {
-    footerHeight = 85;
-  } else {
-    footerHeight = 49;
+  let footerHeight = collapseHeight + bottomHeight;
+  if (slots.bottom && !props.isSidebarMixed) {
+    footerHeight = collapse.value && props.showCollapseButton ? 85 : 49;
   }
 
   return {

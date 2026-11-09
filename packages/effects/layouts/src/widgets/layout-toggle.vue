@@ -1,25 +1,26 @@
 <script setup lang="ts">
 import type { AuthPageLayoutType } from '@operon/types';
 
-import type { VbenDropdownMenuItem } from '@operon-core/shadcn-ui';
-
 import { computed } from 'vue';
 
 import { InspectionPanel, PanelLeft, PanelRight } from '@operon/icons';
 import { $t } from '@operon/locales';
-import {
-  preferences,
-  updatePreferences,
-  usePreferences,
-} from '@operon/preferences';
+import { preferences, updatePreferences } from '@operon/preferences';
 
-import { VbenDropdownRadioMenu, VbenIconButton } from '@operon-core/shadcn-ui';
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@operon-core/shadcn-ui';
 
 defineOptions({
   name: 'AuthenticationLayoutToggle',
 });
 
-const menus = computed((): VbenDropdownMenuItem[] => [
+const menus = computed(() => [
   {
     icon: PanelLeft,
     label: $t('authentication.layout.alignLeft'),
@@ -37,8 +38,6 @@ const menus = computed((): VbenDropdownMenuItem[] => [
   },
 ]);
 
-const { authPanelCenter, authPanelLeft, authPanelRight } = usePreferences();
-
 function handleUpdate(value: string | undefined) {
   if (!value) return;
   updatePreferences({
@@ -50,15 +49,36 @@ function handleUpdate(value: string | undefined) {
 </script>
 
 <template>
-  <VbenDropdownRadioMenu
-    :menus="menus"
-    :model-value="preferences.app.authPageLayout"
-    @update:model-value="handleUpdate"
-  >
-    <VbenIconButton>
-      <PanelRight v-if="authPanelRight" class="size-4" />
-      <PanelLeft v-if="authPanelLeft" class="size-4" />
-      <InspectionPanel v-if="authPanelCenter" class="size-4" />
-    </VbenIconButton>
-  </VbenDropdownRadioMenu>
+  <div class="inline-flex empty:hidden">
+    <DropdownMenu>
+      <DropdownMenuTrigger as-child>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          :aria-label="$t('preferences.layout')"
+          :title="$t('preferences.layout')"
+        >
+          <InspectionPanel />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuRadioGroup
+          :model-value="preferences.app.authPageLayout"
+          @update:model-value="
+            (value) => typeof value === 'string' && handleUpdate(value)
+          "
+        >
+          <DropdownMenuRadioItem
+            v-for="item in menus"
+            :key="item.value"
+            :value="String(item.value)"
+          >
+            <component :is="item.icon" />
+            {{ item.label }}
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </div>
 </template>

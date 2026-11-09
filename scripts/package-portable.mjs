@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
-const targetDir = path.resolve(rootDir, 'apps/workstation/src-tauri/target');
+const targetDir = path.resolve(rootDir, 'apps/shell/src-tauri/target');
 
 // Auto-detect release directory across default and target-triple outputs (e.g. x86_64-pc-windows-gnu or x86_64-pc-windows-msvc)
 const candidateDirs = [

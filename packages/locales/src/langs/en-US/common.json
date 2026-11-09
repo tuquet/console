@@ -1,4 +1,8 @@
 {
+  "help": "Help",
+  "clear": "Clear",
+  "home": "Home",
+
   "back": "Back",
   "backToHome": "Back to home",
   "login": "Login",

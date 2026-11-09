@@ -6,6 +6,6 @@ coverage
 .claude
 .agent
 .agents
-apps/workstation/src-tauri/**
+apps/shell/src-tauri/**
 **/src-tauri/**
 **/target/**

@@ -6,10 +6,17 @@ import { onUnmounted, ref } from 'vue';
 
 import { onSupportLanguagesChange } from '@operon/constants';
 import { Languages } from '@operon/icons';
-import { loadLocaleMessages } from '@operon/locales';
+import { $t, loadLocaleMessages } from '@operon/locales';
 import { preferences, updatePreferences } from '@operon/preferences';
 
-import { VbenDropdownRadioMenu, VbenIconButton } from '@operon-core/shadcn-ui';
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@operon-core/shadcn-ui';
 
 defineOptions({
   name: 'LanguageToggle',
@@ -34,15 +41,35 @@ async function handleUpdate(value: string | undefined) {
 </script>
 
 <template>
-  <div>
-    <VbenDropdownRadioMenu
-      :menus="languageList"
-      :model-value="preferences.app.locale"
-      @update:model-value="handleUpdate"
-    >
-      <VbenIconButton class="hover:animate-[shrink_0.3s_ease-in-out]">
-        <Languages class="size-4 text-foreground" />
-      </VbenIconButton>
-    </VbenDropdownRadioMenu>
+  <div class="inline-flex empty:hidden">
+    <DropdownMenu>
+      <DropdownMenuTrigger as-child>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          :aria-label="$t('preferences.widget.languageToggle')"
+          :title="$t('preferences.widget.languageToggle')"
+        >
+          <Languages />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuRadioGroup
+          :model-value="preferences.app.locale"
+          @update:model-value="
+            (value) => typeof value === 'string' && handleUpdate(value)
+          "
+        >
+          <DropdownMenuRadioItem
+            v-for="item in languageList"
+            :key="item.value"
+            :value="String(item.value)"
+          >
+            {{ item.label }}
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   </div>
 </template>

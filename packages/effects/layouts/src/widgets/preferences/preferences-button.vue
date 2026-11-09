@@ -2,8 +2,9 @@
 import { ref } from 'vue';
 
 import { Settings } from '@operon/icons';
+import { $t } from '@operon/locales';
 
-import { VbenIconButton } from '@operon-core/shadcn-ui';
+import { Button } from '@operon-core/shadcn-ui';
 
 import Preferences from './preferences.vue';
 
@@ -21,11 +22,15 @@ const preferencesRef = ref<InstanceType<typeof Preferences> | null>(null);
     ref="preferencesRef"
     @clear-preferences-and-logout="clearPreferencesAndLogout"
   >
-    <VbenIconButton
-      class="hover:animate-[shrink_0.3s_ease-in-out]"
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      :title="$t('preferences.settingsTitle')"
+      :aria-label="$t('preferences.settingsTitle')"
       @click="preferencesRef?.open()"
     >
-      <Settings class="size-4 text-foreground" />
-    </VbenIconButton>
+      <Settings />
+    </Button>
   </Preferences>
 </template>

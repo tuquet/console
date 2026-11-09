@@ -59,7 +59,6 @@ const props = withDefaults(defineProps<Props>(), {
   sidebarExtraCollapsedWidth: 60,
   sidebarFixedButton: true,
   sidebarHidden: false,
-  sidebarMixedWidth: 80,
   sidebarTheme: 'dark',
   sidebarThemeSub: 'dark',
   sidebarWidth: 180,
@@ -117,7 +116,6 @@ const {
   isHeaderMixedNav,
   isHeaderNav,
   isMixedNav,
-  isSidebarMixedNav,
 } = useLayout(props);
 
 /**
@@ -155,9 +153,7 @@ const getSideCollapseWidth = computed(() => {
     sideCollapseWidth,
   } = props;
 
-  return sidebarCollapseShowTitle ||
-    isSidebarMixedNav.value ||
-    isHeaderMixedNav.value
+  return sidebarCollapseShowTitle || isHeaderMixedNav.value
     ? sidebarExtraCollapsedWidth
     : sideCollapseWidth;
 });
@@ -193,7 +189,7 @@ const sidebarMarginTop = computed(() => {
  * Dynamically get sidebar width
  */
 const getSidebarWidth = computed(() => {
-  const { isMobile, sidebarHidden, sidebarMixedWidth, sidebarWidth } = props;
+  const { isMobile, sidebarHidden, sidebarWidth } = props;
   let width = 0;
 
   if (sidebarHidden) {
@@ -202,16 +198,13 @@ const getSidebarWidth = computed(() => {
 
   if (
     !sidebarEnableState.value ||
-    (sidebarHidden &&
-      !isSidebarMixedNav.value &&
-      !isMixedNav.value &&
-      !isHeaderMixedNav.value)
+    (sidebarHidden && !isMixedNav.value && !isHeaderMixedNav.value)
   ) {
     return width;
   }
 
-  if ((isHeaderMixedNav.value || isSidebarMixedNav.value) && !isMobile) {
-    width = sidebarMixedWidth;
+  if (isHeaderMixedNav.value && !isMobile) {
+    width = props.sidebarExtraCollapsedWidth;
   } else if (activeSidebarCollapse.value) {
     width = isMobile ? 0 : getSideCollapseWidth.value;
   } else {
@@ -235,7 +228,6 @@ const sidebarExtraWidth = computed(() => {
 const isSideMode = computed(
   () =>
     currentLayout.value === 'mixed-nav' ||
-    currentLayout.value === 'sidebar-mixed-nav' ||
     currentLayout.value === 'sidebar-nav' ||
     currentLayout.value === 'header-mixed-nav' ||
     currentLayout.value === 'header-sidebar-nav',
@@ -278,13 +270,13 @@ const mainStyle = computed(() => {
   ) {
     // Effective under fixed mode
     const isSideNavEffective =
-      (isSidebarMixedNav.value || isHeaderMixedNav.value) &&
+      isHeaderMixedNav.value &&
       sidebarExpandOnHover.value &&
       sidebarExtraVisible.value &&
       !activeSidebarCollapse.value;
 
     if (isSideNavEffective) {
-      const sideCollapseWidth = props.sidebarMixedWidth;
+      const sideCollapseWidth = getSidebarWidth.value;
       const sideWidth = sidebarExtraCollapse.value
         ? props.sidebarExtraCollapsedWidth
         : props.sidebarWidth;
@@ -295,10 +287,7 @@ const mainStyle = computed(() => {
     } else {
       let sidebarWidth = getSidebarWidth.value;
       if (sidebarExpandOnHovering.value && !sidebarExpandOnHover.value) {
-        sidebarWidth =
-          isSidebarMixedNav.value || isHeaderMixedNav.value
-            ? props.sidebarMixedWidth
-            : getSideCollapseWidth.value;
+        sidebarWidth = getSideCollapseWidth.value;
       }
       sidebarAndExtraWidth = `${sidebarWidth}px`;
       width = `calc(100% - ${sidebarAndExtraWidth})`;
@@ -406,13 +395,12 @@ const headerWrapperStyle = computed((): CSSProperties => {
 
 /**
  * Sidebar z-index
- * sidebar-mixed-nav / header-mixed-nav on desktop: extra panel must not overlay header,
+ * header-mixed-nav on desktop: extra panel must not overlay header,
  * so sidebar z-index must be lower than header z-index (headerZIndex = zIndex + 0).
  */
 const sidebarZIndex = computed(() => {
   const { isMobile, zIndex } = props;
-  const isMixedSideLayout =
-    !isMobile && (isSidebarMixedNav.value || isHeaderMixedNav.value);
+  const isMixedSideLayout = !isMobile && isHeaderMixedNav.value;
   let offset = isMobile || (isSideMode.value && !isMixedSideLayout) ? 1 : -1;
 
   if (isMixedNav.value) {
@@ -450,7 +438,6 @@ const showHeaderToggleButton = computed(() => {
     props.isMobile ||
     (props.headerToggleSidebarButton &&
       isSideMode.value &&
-      !isSidebarMixedNav.value &&
       !isMixedNav.value &&
       !props.isMobile)
   );
@@ -611,13 +598,10 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
       :extra-width="sidebarExtraWidth"
       :fixed-extra="sidebarExpandOnHover"
       :header-height="sidebarHeaderHeight"
-      :extra-title-height="
-        isSidebarMixedNav || isHeaderMixedNav ? sidebarExtraTitleHeight : 0
-      "
-      :is-sidebar-mixed="isSidebarMixedNav || isHeaderMixedNav"
+      :extra-title-height="isHeaderMixedNav ? sidebarExtraTitleHeight : 0"
+      :is-sidebar-mixed="isHeaderMixedNav"
       :is-mobile="isMobile"
       :margin-top="sidebarMarginTop"
-      :mixed-width="sidebarMixedWidth"
       :show="showSidebar"
       :theme="sidebarTheme"
       :theme-sub="sidebarThemeSub"
@@ -630,7 +614,7 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
         <slot name="logo"></slot>
       </template>
 
-      <template v-if="isSidebarMixedNav || isHeaderMixedNav">
+      <template v-if="isHeaderMixedNav">
         <slot name="mixed-menu"></slot>
       </template>
       <template v-else>

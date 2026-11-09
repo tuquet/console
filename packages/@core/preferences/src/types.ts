@@ -273,8 +273,6 @@ interface SidebarPreferences {
   fixedButton: boolean;
   /** Whether sidebar is hidden via CSS */
   hidden: boolean;
-  /** Mixed sidebar width */
-  mixedWidth: number;
   /** Sidebar width */
   width: number;
 }
