@@ -41,6 +41,7 @@ watch(
       filterState.search = val;
     }
   },
+  { immediate: true },
 );
 
 // When filterState changes (typed into input), emit update

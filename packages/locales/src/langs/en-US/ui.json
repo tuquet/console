@@ -139,13 +139,21 @@
     "checkUpdatesDescription": "Click to refresh and update",
     "search": {
       "title": "Search",
-      "searchNavigate": "Search navigation",
+      "searchNavigate": "Search navigation...",
+      "placeholderCommand": "Type a command to run...",
+      "placeholderNav": "Search navigation... (Type '>' for commands)",
       "select": "Select",
       "navigate": "Navigate",
       "close": "Close",
       "noResults": "No results found",
       "noRecent": "No recent searches",
-      "recent": "Recent"
+      "recent": "Recently Used",
+      "groupCommands": "Commands",
+      "groupNavigation": "Navigation",
+      "hintNavigate": "Navigate",
+      "hintSelect": "Select / Run",
+      "hintClose": "Close",
+      "hintTypeCommand": "type > for commands"
     },
     "lockScreen": {
       "title": "Lock screen",

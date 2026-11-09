@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { MenuRecordRaw } from '@operon/types';
 
-import { onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 import { Search } from '@operon/icons';
 import { $t } from '@operon/locales';
@@ -9,12 +9,13 @@ import { isWindowsOs } from '@operon/utils';
 
 import {
   Button,
-  CommandDialog,
+  Command,
   CommandInput,
   CommandList,
+  Dialog,
+  DialogContent,
+  DialogTitle,
 } from '@operon-core/shadcn-ui';
-
-import { useMagicKeys, whenever } from '@vueuse/core';
 
 import SearchPanel from './search-panel.vue';
 
@@ -39,6 +40,13 @@ const props = withDefaults(
 const open = ref(false);
 const keyword = ref('');
 
+const placeholder = computed(() => {
+  return keyword.value.startsWith('>')
+    ? $t('ui.widgets.search.placeholderCommand') || 'Type a command to run...'
+    : $t('ui.widgets.search.placeholderNav') ||
+        "Search navigation... (Type '>' for commands)";
+});
+
 function handleClose() {
   open.value = false;
   keyword.value = '';
@@ -46,6 +54,9 @@ function handleClose() {
 
 function toggleOpen() {
   open.value = !open.value;
+  if (open.value) {
+    keyword.value = '';
+  }
 }
 
 // Reset keyword when dialog closes
@@ -53,73 +64,115 @@ function handleOpenChange(val: boolean) {
   if (!val) keyword.value = '';
 }
 
-const keys = useMagicKeys();
-const cmd = isWindowsOs() ? keys['ctrl+k'] : keys['cmd+k'];
-if (cmd) {
-  whenever(cmd, () => {
-    if (props.enableShortcutKey) {
-      open.value = true;
-    }
-  });
+interface PaletteDetail {
+  initialValue?: string;
+  mode?: 'command' | 'navigation';
 }
 
-const preventDefaultBrowserSearchHotKey = (event: KeyboardEvent) => {
-  if (event.key?.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)) {
-    event.preventDefault();
-  }
-};
-
-const toggleKeydownListener = () => {
-  if (props.enableShortcutKey) {
-    window.addEventListener('keydown', preventDefaultBrowserSearchHotKey);
+function openWithMode(detail?: PaletteDetail) {
+  if (detail?.initialValue !== undefined) {
+    keyword.value = detail.initialValue;
+  } else if (detail?.mode === 'command') {
+    keyword.value = '>';
   } else {
-    window.removeEventListener('keydown', preventDefaultBrowserSearchHotKey);
+    keyword.value = '';
+  }
+  open.value = true;
+}
+
+// Global hotkey capture listener to preempt browser defaults on Web (Chrome print, etc.)
+const handleGlobalKeydown = (event: KeyboardEvent) => {
+  if (!props.enableShortcutKey) return;
+
+  const isMac = !isWindowsOs();
+  const ctrlOrCmd = isMac ? event.metaKey : event.ctrlKey;
+  const key = event.key?.toLowerCase();
+  const isP = key === 'p' || event.code === 'KeyP';
+  const isK = key === 'k' || event.code === 'KeyK';
+  const isF1 = event.key === 'F1';
+
+  // 1. Command Mode: Ctrl+Shift+P, Cmd+Shift+P, or F1
+  if ((ctrlOrCmd && event.shiftKey && isP) || isF1) {
+    event.preventDefault();
+    event.stopPropagation();
+    openWithMode({ mode: 'command', initialValue: '>' });
+    return;
+  }
+
+  // 2. Navigation Mode: Ctrl+P, Cmd+P, or Ctrl+K, Cmd+K
+  if ((ctrlOrCmd && !event.shiftKey && isP) || (ctrlOrCmd && isK)) {
+    event.preventDefault();
+    event.stopPropagation();
+    openWithMode({ mode: 'navigation', initialValue: '' });
   }
 };
 
 // Expose to parent component to allow triggering search modal externally
 defineExpose({
-  open: () => (open.value = true),
   close: () => (open.value = false),
+  open: (mode?: 'command' | 'navigation') => openWithMode({ mode }),
   toggle: toggleOpen,
 });
 
 onMounted(() => {
-  toggleKeydownListener();
+  window.addEventListener('keydown', handleGlobalKeydown, { capture: true });
 
-  // Allow external components (e.g. titlebar menubar) to open the search
-  // modal via a lightweight custom event: window.dispatchEvent(new Event('open-global-search'))
-  const handleExternalOpen = () => (open.value = true);
-  window.addEventListener('open-global-search', handleExternalOpen);
+  // Custom events dispatched by app menubar, titlebar, or external scripts
+  const handlePaletteEvent = (e: Event) => {
+    const custom = e as CustomEvent<PaletteDetail>;
+    openWithMode(custom.detail);
+  };
+  const handleLegacyOpen = () => openWithMode({ mode: 'navigation' });
+
+  window.addEventListener('open-command-palette', handlePaletteEvent);
+  window.addEventListener('open-global-search', handleLegacyOpen);
 
   onUnmounted(() => {
-    window.removeEventListener('keydown', preventDefaultBrowserSearchHotKey);
-    window.removeEventListener('open-global-search', handleExternalOpen);
+    window.removeEventListener('keydown', handleGlobalKeydown, {
+      capture: true,
+    });
+    window.removeEventListener('open-command-palette', handlePaletteEvent);
+    window.removeEventListener('open-global-search', handleLegacyOpen);
   });
 });
 </script>
 
 <template>
   <div>
-    <CommandDialog
-      v-model:open="open"
-      close-class="top-3"
-      @update:open="handleOpenChange"
-    >
-      <!--
-        We bypass CommandDialog's internal filter (filterState.search) in favour of
-        SearchPanel's own throttled fuzzy search. CommandInput is used only as a
-        styled text field — its value is kept in sync with our `keyword` ref.
-      -->
-      <CommandInput
-        v-model="keyword"
-        :filter-fn="() => true"
-        :placeholder="$t('ui.widgets.search.searchNavigate')"
-      />
-      <CommandList class="max-h-[450px]">
-        <SearchPanel :keyword="keyword" :menus="menus" @close="handleClose" />
-      </CommandList>
-    </CommandDialog>
+    <Dialog v-model:open="open" @update:open="handleOpenChange">
+      <DialogContent
+        :open="open"
+        modal
+        :centered="false"
+        close-class="top-3"
+        :aria-describedby="undefined"
+        class="overflow-hidden p-0 sm:max-w-2xl border border-border shadow-2xl rounded-xl"
+        @close="open = false"
+      >
+        <DialogTitle class="sr-only">
+          {{ $t('ui.widgets.search.title') }}
+        </DialogTitle>
+        <Command>
+          <!--
+            We bypass Command's internal text filter in favor of SearchPanel's
+            dual-mode fuzzy matching. CommandInput acts as the styled search input.
+          -->
+          <CommandInput
+            v-model="keyword"
+            :filter-fn="() => true"
+            :placeholder="placeholder"
+          />
+          <CommandList class="max-h-[460px]">
+            <SearchPanel
+              :keyword="keyword"
+              :menus="menus"
+              @close="handleClose"
+              @update:keyword="(val) => (keyword = val)"
+            />
+          </CommandList>
+        </Command>
+      </DialogContent>
+    </Dialog>
 
     <Button
       v-if="showButton"

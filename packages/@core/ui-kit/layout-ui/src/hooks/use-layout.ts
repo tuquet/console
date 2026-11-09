@@ -18,7 +18,7 @@ export function useLayout(props: VbenLayoutProps) {
    * Whether sidebar mixed mode
    */
   const isSidebarMixedNav = computed(
-    () => currentLayout.value === 'sidebar-mixed-nav',
+    () => (currentLayout.value as any) === 'sidebar-mixed-nav',
   );
 
   /**

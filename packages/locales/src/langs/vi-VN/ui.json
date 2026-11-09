@@ -139,13 +139,21 @@
     "checkUpdatesDescription": "Nhấn để làm mới và cập nhật",
     "search": {
       "title": "Tìm kiếm",
-      "searchNavigate": "Điều hướng tìm kiếm",
+      "searchNavigate": "Điều hướng tìm kiếm...",
+      "placeholderCommand": "Nhập lệnh thực thi...",
+      "placeholderNav": "Tìm kiếm điều hướng... (Gõ '>' để mở lệnh)",
       "select": "Chọn",
       "navigate": "Di chuyển",
       "close": "Đóng",
       "noResults": "Không có kết quả",
       "noRecent": "Chưa có lịch sử tìm kiếm",
-      "recent": "Gần đây"
+      "recent": "Gần đây",
+      "groupCommands": "Lệnh thao tác",
+      "groupNavigation": "Trang điều hướng",
+      "hintNavigate": "Di chuyển",
+      "hintSelect": "Chọn / Chạy lệnh",
+      "hintClose": "Đóng",
+      "hintTypeCommand": "gõ > để mở lệnh"
     },
     "lockScreen": {
       "title": "Khóa màn hình",

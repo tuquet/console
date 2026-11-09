@@ -1,13 +1,20 @@
 <script setup lang="ts">
-import type { Component } from 'vue';
-
 import type { ThemeModeType } from '@operon/types';
 
-import { watch } from 'vue';
+import { useId, watch } from 'vue';
 
-import { MoonStar, Sun, SunMoon } from '@operon/icons';
 import { $t } from '@operon/locales';
 import { usePreferences } from '@operon/preferences';
+
+import {
+  Label,
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@operon-core/shadcn-ui';
 
 import SwitchItem from '../switch-item.vue';
 
@@ -31,24 +38,8 @@ watch(
   },
 );
 
-const THEME_PRESET: Array<{ icon: Component; name: ThemeModeType }> = [
-  {
-    icon: Sun,
-    name: 'light',
-  },
-  {
-    icon: MoonStar,
-    name: 'dark',
-  },
-  {
-    icon: SunMoon,
-    name: 'auto',
-  },
-];
-
-function activeClass(theme: string): string[] {
-  return theme === modelValue.value ? ['outline-box-active'] : [];
-}
+const themeId = useId();
+const THEME_PRESET: ThemeModeType[] = ['light', 'dark', 'auto'];
 
 function nameView(name: string) {
   switch (name) {
@@ -66,23 +57,26 @@ function nameView(name: string) {
 </script>
 
 <template>
-  <div class="flex w-full flex-wrap justify-between">
-    <template v-for="theme in THEME_PRESET" :key="theme.name">
-      <div
-        class="flex cursor-pointer flex-col"
-        @click="modelValue = theme.name"
-      >
-        <div
-          :class="activeClass(theme.name)"
-          class="outline-box flex-center py-4"
-        >
-          <component :is="theme.icon" class="mx-9 size-5" />
-        </div>
-        <div class="mt-2 text-center text-muted-foreground">
-          {{ nameView(theme.name) }}
-        </div>
-      </div>
-    </template>
+  <div class="flex w-full flex-col">
+    <div class="my-1 flex items-center justify-between gap-4 px-2 py-1">
+      <Label :for="themeId">{{ $t('preferences.theme.title') }}</Label>
+      <Select v-model="modelValue">
+        <SelectTrigger :id="themeId" class="h-8 w-41.25 shrink-0">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem
+              v-for="theme in THEME_PRESET"
+              :key="theme"
+              :value="theme"
+            >
+              {{ nameView(theme) }}
+            </SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
 
     <SwitchItem
       v-model="themeSemiDarkSidebar"
@@ -92,7 +86,6 @@ function nameView(name: string) {
         layout === 'full-content'
       "
       :tip="$t('preferences.theme.darkSidebarTip')"
-      class="mt-6"
     >
       {{ $t('preferences.theme.darkSidebar') }}
     </SwitchItem>
@@ -100,7 +93,8 @@ function nameView(name: string) {
       v-model="themeSemiDarkSidebarSub"
       :disabled="
         modelValue === 'dark' ||
-        (layout !== 'header-mixed-nav' && layout !== 'sidebar-mixed-nav') ||
+        (layout !== 'header-mixed-nav' &&
+          (layout as any) !== 'sidebar-mixed-nav') ||
         !themeSemiDarkSidebar
       "
       :tip="$t('preferences.theme.darkSidebarSubTip')"

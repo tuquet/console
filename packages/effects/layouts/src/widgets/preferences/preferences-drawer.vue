@@ -17,16 +17,7 @@ import type { SegmentedItem } from '@operon-core/shadcn-ui';
 
 import { computed, ref } from 'vue';
 
-import {
-  Copy,
-  Keyboard,
-  LayoutTemplate,
-  Palette,
-  Pin,
-  PinOff,
-  RotateCw,
-  Settings,
-} from '@operon/icons';
+import { Keyboard, LayoutTemplate, Palette, Settings } from '@operon/icons';
 import { $t, loadLocaleMessages } from '@operon/locales';
 import {
   clearCache,
@@ -36,11 +27,17 @@ import {
   usePreferences,
 } from '@operon/preferences';
 
-import { useVbenDrawer } from '@operon-core/popup-ui';
 import {
-  VbenButton,
-  VbenIconButton,
-  VbenSegmented,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
 } from '@operon-core/shadcn-ui';
 import { globalShareState } from '@operon-core/shared/global-state';
 
@@ -69,6 +66,7 @@ import {
   Theme,
   Widget,
 } from './blocks';
+import PreferencesActions from './preferences-actions.vue';
 
 const emit = defineEmits<{ clearPreferencesAndLogout: [] }>();
 
@@ -102,9 +100,6 @@ const appWatermarkContent = defineModel<string | undefined>(
 const appEnableCheckUpdates = defineModel<boolean>('appEnableCheckUpdates');
 const appEnableCopyPreferences = defineModel<boolean>(
   'appEnableCopyPreferences',
-);
-const appEnableStickyPreferencesNavigationBar = defineModel<boolean>(
-  'appEnableStickyPreferencesNavigationBar',
 );
 const appPreferencesButtonPosition = defineModel<
   PreferencesButtonPositionType | undefined
@@ -160,7 +155,9 @@ const headerMode = defineModel<LayoutHeaderModeType | undefined>('headerMode', {
 });
 const headerMenuAlign = defineModel<LayoutHeaderMenuAlignType | undefined>(
   'headerMenuAlign',
-  { default: undefined },
+  {
+    default: undefined,
+  },
 );
 
 const breadcrumbEnable = defineModel<boolean>('breadcrumbEnable');
@@ -168,7 +165,9 @@ const breadcrumbShowIcon = defineModel<boolean>('breadcrumbShowIcon');
 const breadcrumbShowHome = defineModel<boolean>('breadcrumbShowHome');
 const breadcrumbStyleType = defineModel<BreadcrumbStyleType | undefined>(
   'breadcrumbStyleType',
-  { default: undefined },
+  {
+    default: undefined,
+  },
 );
 const breadcrumbHideOnlyOne = defineModel<boolean>('breadcrumbHideOnlyOne');
 
@@ -193,7 +192,9 @@ const tabbarMiddleClickToClose = defineModel<boolean>(
 
 const navigationStyleType = defineModel<NavigationStyleType | undefined>(
   'navigationStyleType',
-  { default: undefined },
+  {
+    default: undefined,
+  },
 );
 const navigationSplit = defineModel<boolean>('navigationSplit');
 const navigationAccordion = defineModel<boolean>('navigationAccordion');
@@ -217,7 +218,9 @@ const copyrightCompanyName = defineModel<string | undefined>(
 );
 const copyrightCompanySiteLink = defineModel<string | undefined>(
   'copyrightCompanySiteLink',
-  { default: undefined },
+  {
+    default: undefined,
+  },
 );
 const copyrightDate = defineModel<string | undefined>('copyrightDate', {
   default: undefined,
@@ -270,12 +273,16 @@ const widgetLockScreenButtonPosition = defineModel<string | undefined>(
 );
 const widgetLogoutButtonPosition = defineModel<string | undefined>(
   'widgetLogoutButtonPosition',
-  { default: undefined },
+  {
+    default: undefined,
+  },
 );
 const widgetOrder = defineModel<string[]>('widgetOrder', { required: true });
 const widgetRefreshButtonPosition = defineModel<string | undefined>(
   'widgetRefreshButtonPosition',
-  { default: undefined },
+  {
+    default: undefined,
+  },
 );
 const widgetTimezoneButtonPosition = defineModel<string | undefined>(
   'widgetTimezoneButtonPosition',
@@ -292,15 +299,14 @@ const {
   isHeaderSidebarNav,
   isMixedNav,
   preferencesExtension,
-  isSideMixedNav,
   isSideMode,
   isSideNav,
 } = usePreferences();
 const { copy } = useClipboard({ legacy: true });
 
-const [Drawer] = useVbenDrawer();
+const open = defineModel<boolean>('open', { default: false });
 
-const activeTab = ref('appearance');
+const activeTab = ref('general');
 
 const customPreferencesTab = computed(() => {
   return preferencesExtension.value;
@@ -383,57 +389,25 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
 </script>
 
 <template>
-  <div>
-    <Drawer
-      :description="$t('preferences.subtitle')"
-      :title="$t('preferences.title')"
-      class="border-l border-border dark:border-neutral-700 sm:max-w-sm"
+  <Sheet v-model:open="open">
+    <SheetContent
+      :open="open"
+      modal
+      @close="open = false"
+      class="flex flex-col gap-0 overflow-hidden p-0 sm:max-w-md"
     >
-      <template #extra>
-        <div class="flex items-center">
-          <VbenIconButton
-            :disabled="!mergedDiffPreference"
-            :tooltip="$t('preferences.resetTip')"
-            class="relative"
-            @click="handleReset"
-          >
-            <span
-              v-if="mergedDiffPreference"
-              class="absolute top-0.5 right-0.5 size-2 rounded-sm bg-primary"
-            ></span>
-            <RotateCw class="size-4" />
-          </VbenIconButton>
-          <VbenIconButton
-            :tooltip="
-              appEnableStickyPreferencesNavigationBar
-                ? $t('preferences.disableStickyPreferencesNavigationBar')
-                : $t('preferences.enableStickyPreferencesNavigationBar')
-            "
-            class="relative"
-            @click="
-              () =>
-                (appEnableStickyPreferencesNavigationBar =
-                  !appEnableStickyPreferencesNavigationBar)
-            "
-          >
-            <PinOff
-              v-if="appEnableStickyPreferencesNavigationBar"
-              class="size-4"
-            />
-            <Pin v-else class="size-4" />
-          </VbenIconButton>
-        </div>
-      </template>
-
-      <div>
-        <VbenSegmented
-          v-model="activeTab"
-          :tabs="tabs"
-          :class="{
-            'sticky-tabs-header': appEnableStickyPreferencesNavigationBar,
-          }"
-        >
-          <template #general>
+      <SheetHeader class="border-b border-border px-4 py-4">
+        <SheetTitle>{{ $t('preferences.settingsTitle') }}</SheetTitle>
+        <SheetDescription>{{ $t('preferences.subtitle') }}</SheetDescription>
+      </SheetHeader>
+      <Tabs v-model="activeTab" class="min-h-0 flex-1 gap-0">
+        <TabsList class="mx-4 my-3 h-auto max-w-full flex-wrap">
+          <TabsTrigger v-for="tab in tabs" :key="tab.value" :value="tab.value">
+            {{ tab.label }}
+          </TabsTrigger>
+        </TabsList>
+        <div class="min-h-0 flex-1 overflow-y-auto px-4">
+          <TabsContent value="general">
             <Block :title="$t('preferences.general')">
               <General
                 v-model:app-dynamic-title="appDynamicTitle"
@@ -454,8 +428,8 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:transition-progress="transitionProgress"
               />
             </Block>
-          </template>
-          <template #appearance>
+          </TabsContent>
+          <TabsContent value="appearance">
             <Block :title="$t('preferences.theme.title')">
               <Theme
                 v-model="themeMode"
@@ -489,8 +463,8 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:app-color-weak-mode="appColorWeakMode"
               />
             </Block>
-          </template>
-          <template #layout>
+          </TabsContent>
+          <TabsContent value="layout">
             <Block :title="$t('preferences.layout')">
               <Layout v-model="appLayout" />
             </Block>
@@ -550,7 +524,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:breadcrumb-style-type="breadcrumbStyleType"
                 :disabled="
                   !showBreadcrumbConfig ||
-                  !(isSideNav || isSideMixedNav || isHeaderSidebarNav)
+                  !(isSideNav || isMixedNav || isHeaderSidebarNav)
                 "
               />
             </Block>
@@ -625,9 +599,8 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 :disabled="!footerEnable"
               />
             </Block>
-          </template>
-
-          <template #shortcutKey>
+          </TabsContent>
+          <TabsContent value="shortcutKey">
             <Block :title="$t('preferences.shortcutKeys.global')">
               <GlobalShortcutKeys
                 v-model:shortcut-keys-enable="shortcutKeysEnable"
@@ -637,38 +610,18 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:shortcut-keys-escape="shortcutKeysGlobalEscape"
               />
             </Block>
-          </template>
-        </VbenSegmented>
-      </div>
-
-      <template #footer>
-        <VbenButton
-          v-if="appEnableCopyPreferences"
-          :disabled="!mergedDiffPreference"
-          class="mx-4 w-full"
-          size="sm"
-          variant="default"
-          @click="handleCopy"
-        >
-          <Copy class="mr-2 size-3" />
-          {{ $t('preferences.copyPreferences') }}
-        </VbenButton>
-        <VbenButton
-          :disabled="!mergedDiffPreference"
-          class="mr-4 w-full"
-          size="sm"
-          variant="ghost"
-          @click="handleClearCache"
-        >
-          {{ $t('preferences.clearAndLogout') }}
-        </VbenButton>
-      </template>
-    </Drawer>
-  </div>
+          </TabsContent>
+        </div>
+      </Tabs>
+      <SheetFooter class="shrink-0 border-t border-border p-4">
+        <PreferencesActions
+          :can-reset="!!mergedDiffPreference"
+          :show-copy="appEnableCopyPreferences"
+          @reset="handleReset"
+          @copy="handleCopy"
+          @clear="handleClearCache"
+        />
+      </SheetFooter>
+    </SheetContent>
+  </Sheet>
 </template>
-
-<style scoped>
-:deep(.sticky-tabs-header [role='tablist']) {
-  @apply -top-3 z-9999 sticky;
-}
-</style>

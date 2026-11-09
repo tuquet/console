@@ -1,14 +1,14 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 import { Settings } from '@operon/icons';
 import { $t, loadLocaleMessages } from '@operon/locales';
 import { preferences, updatePreferences } from '@operon/preferences';
 import { capitalizeFirstLetter } from '@operon/utils';
 
-import { VbenButton } from '@operon-core/shadcn-ui';
+import { Button } from '@operon-core/shadcn-ui';
 
-import PreferencesModal from './preferences-modal.vue';
+import SettingsDialog from './settings-dialog.vue';
 
 interface Props {
   /** Whether to show button */
@@ -22,6 +22,16 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{ clearPreferencesAndLogout: [] }>();
 
 const open = ref(false);
+
+onMounted(() => {
+  const handleOpenPreferences = () => {
+    open.value = true;
+  };
+  window.addEventListener('open-preferences', handleOpenPreferences);
+  onUnmounted(() => {
+    window.removeEventListener('open-preferences', handleOpenPreferences);
+  });
+});
 
 // Expose method to open preferences modal
 defineExpose({
@@ -77,7 +87,7 @@ const listen = computed(() => {
 </script>
 <template>
   <div>
-    <PreferencesModal
+    <SettingsDialog
       v-model:open="open"
       :widget-order="[...preferences.widget.order]"
       v-bind="{ ...$attrs, ...attrs }"
@@ -86,15 +96,18 @@ const listen = computed(() => {
     />
 
     <!-- Button to open preferences (can be overridden) -->
-    <slot>
-      <VbenButton
+    <slot :open="() => (open = true)">
+      <Button
         v-if="props.showButton"
-        :title="$t('preferences.title')"
-        class="flex-col-center size-10 cursor-pointer rounded-l-lg rounded-r-none border-none bg-primary"
+        :title="$t('preferences.settingsTitle')"
+        type="button"
+        variant="ghost"
+        size="icon"
+        :aria-label="$t('preferences.settingsTitle')"
         @click="open = true"
       >
-        <Settings class="size-5" />
-      </VbenButton>
+        <Settings />
+      </Button>
     </slot>
   </div>
 </template>

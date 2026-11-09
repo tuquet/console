@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue';
-
 import { isWindowsOs } from '@operon/utils';
 
 import {
@@ -30,34 +28,14 @@ defineOptions({ name: 'TitlebarMenubar' });
 
 const { version } = useAppVersion();
 
-// ── Command Palette shortcut (Ctrl+Shift+P / Cmd+Shift+P) ──────────────────
-// Use native keydown listener so we can preventDefault before the browser
-// intercepts Ctrl+Shift+P as the native Print dialog.
+// Keyboard shortcut is registered by App for both web and desktop.
 function openCommandPalette() {
-  window.dispatchEvent(new Event('open-global-search'));
+  window.dispatchEvent(
+    new CustomEvent('open-command-palette', {
+      detail: { mode: 'command', initialValue: '>' },
+    }),
+  );
 }
-
-function handleCommandPaletteKey(e: KeyboardEvent) {
-  const isMatch = isWindowsOs()
-    ? e.ctrlKey && e.shiftKey && e.code === 'KeyP'
-    : e.metaKey && e.shiftKey && e.code === 'KeyP';
-  if (!isMatch) return;
-  e.preventDefault();
-  e.stopPropagation();
-  openCommandPalette();
-}
-
-onMounted(() => {
-  window.addEventListener('keydown', handleCommandPaletteKey, {
-    capture: true,
-  });
-});
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleCommandPaletteKey, {
-    capture: true,
-  });
-});
 
 // ── Keyboard shortcut labels (OS-aware) ────────────────────────────────────
 const mod = isWindowsOs() ? 'Ctrl' : '⌘';
