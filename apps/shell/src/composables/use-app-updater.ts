@@ -8,11 +8,16 @@ export interface UpdateInfo {
   version: string;
 }
 
+// Global reactive singleton state shared across all components (Titlebar, Menu, Dialogs)
+const isChecking = ref(false);
+const isUpdating = ref(false);
+const updateAvailable = ref<null | UpdateInfo>(null);
+const updateError = ref<null | string>(null);
+
 export function useAppUpdater() {
-  const isChecking = ref(false);
-  const isUpdating = ref(false);
-  const updateAvailable = ref<null | UpdateInfo>(null);
-  const updateError = ref<null | string>(null);
+  function setUpdateAvailable(info: null | UpdateInfo) {
+    updateAvailable.value = info;
+  }
 
   async function checkForUpdates(silent = true) {
     if (!isDesktop()) {
@@ -25,11 +30,12 @@ export function useAppUpdater() {
       const { check } = await import('@tauri-apps/plugin-updater');
       const update = await check();
       if (update) {
-        updateAvailable.value = {
+        const info: UpdateInfo = {
           body: update.body ?? undefined,
           date: update.date ?? undefined,
           version: update.version,
         };
+        updateAvailable.value = info;
         return update;
       }
       updateAvailable.value = null;
@@ -63,6 +69,12 @@ export function useAppUpdater() {
     } catch (error: any) {
       updateError.value = error?.message || String(error);
       console.error('[Updater] Failed to download and install update:', error);
+      try {
+        const { toast } = await import('@operon-core/shadcn-ui');
+        toast.error(`Update failed: ${updateError.value}`, { duration: 6000 });
+      } catch {
+        // Fallback if toast component is unavailable
+      }
     } finally {
       isUpdating.value = false;
     }
@@ -73,6 +85,7 @@ export function useAppUpdater() {
     installUpdate,
     isChecking,
     isUpdating,
+    setUpdateAvailable,
     updateAvailable,
     updateError,
   };

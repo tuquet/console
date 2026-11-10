@@ -1,3 +1,5 @@
+import { useAppUpdater } from '#/composables/use-app-updater';
+
 import { isTauriEnvironment } from './index';
 
 export interface UpdateInfo {
@@ -12,6 +14,8 @@ export interface UpdateInfo {
  * Checks for desktop updates via configured Tauri updater endpoint.
  */
 export async function checkDesktopUpdate(): Promise<UpdateInfo> {
+  const { setUpdateAvailable } = useAppUpdater();
+
   if (!isTauriEnvironment()) {
     return {
       available: false,
@@ -33,6 +37,12 @@ export async function checkDesktopUpdate(): Promise<UpdateInfo> {
     const update = await check();
 
     if (update) {
+      setUpdateAvailable({
+        body: update.body ?? undefined,
+        date: update.date ?? undefined,
+        version: update.version,
+      });
+
       return {
         available: true,
         currentVersion: update.currentVersion || currentVersion,
@@ -41,6 +51,7 @@ export async function checkDesktopUpdate(): Promise<UpdateInfo> {
       };
     }
 
+    setUpdateAvailable(null);
     return {
       available: false,
       currentVersion,

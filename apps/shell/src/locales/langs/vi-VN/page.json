@@ -939,6 +939,9 @@
   "app": {
     "menu_operon": "Operon",
     "menu_check_updates": "Kiểm tra cập nhật...",
+    "restart_to_update": "Khởi động lại để cập nhật",
+    "restarting_update": "Đang khởi động lại...",
+    "update_available_title": "Phiên bản mới {version} đã sẵn sàng cài đặt",
     "menu_workspace": "Workspace",
     "menu_command_palette": "Command Palette",
     "menu_view": "Hiển thị",
