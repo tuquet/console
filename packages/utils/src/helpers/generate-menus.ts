@@ -1,10 +1,7 @@
 import type { Router, RouteRecordRaw } from 'vue-router';
 
-import type {
-  ExRouteRecordRaw,
-  MenuRecordRaw,
-  RouteMeta,
-} from '@operon-core/typings';
+import type { ExRouteRecordRaw, MenuRecordRaw } from '@operon-core/typings';
+import type { RouteMeta } from '@operon-core/typings/vue-router';
 
 import { filterTree, mapTree, sortTree } from '@operon-core/shared/utils';
 

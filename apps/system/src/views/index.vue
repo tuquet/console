@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+
 import { useKernel } from '@operon/kernel';
 
 import { Badge, Button, Card } from '@operon-core/shadcn-ui';
@@ -15,12 +18,14 @@ import {
   Users,
 } from '@lucide/vue';
 
-import { useSystemSampleStore } from '../stores/sample';
-
 defineOptions({ name: 'SystemStarterView' });
 
+const props = defineProps<{
+  tab?: 'audit' | 'overview' | 'plugins' | 'roles' | 'users';
+}>();
+const router = useRouter();
 const kernel = useKernel();
-const systemStore = useSystemSampleStore();
+const activeTab = computed(() => props.tab ?? 'overview');
 
 function notifyShell(
   type: 'error' | 'info' | 'success' | 'warning',
@@ -32,7 +37,14 @@ function notifyShell(
 function handleTabChange(
   tab: 'audit' | 'overview' | 'plugins' | 'roles' | 'users',
 ) {
-  systemStore.setTab(tab);
+  const names = {
+    audit: 'SystemAuditLogs',
+    overview: 'SystemOverview',
+    plugins: 'SystemPlugins',
+    roles: 'SystemRoles',
+    users: 'SystemUsers',
+  };
+  void router.push({ name: names[tab] });
   notifyShell('info', `Switched to System ${tab.toUpperCase()} tab`);
 }
 </script>
@@ -54,8 +66,8 @@ function handleTabChange(
           </Badge>
         </div>
         <p class="text-sm text-muted-foreground">
-          Autonomous IAM, RBAC roles, audit logs, and extensions decoupled from
-          Host Shell.
+          Development preview: users, roles, plugins and audit data below are
+          samples.
         </p>
       </div>
 
@@ -91,8 +103,7 @@ function handleTabChange(
       <Card
         class="cursor-pointer border-border bg-card p-4 transition-all hover:border-primary/50"
         :class="{
-          'border-primary ring-1 ring-primary':
-            systemStore.activeTab === 'overview',
+          'border-primary ring-1 ring-primary': activeTab === 'overview',
         }"
         @click="handleTabChange('overview')"
       >
@@ -111,8 +122,7 @@ function handleTabChange(
       <Card
         class="cursor-pointer border-border bg-card p-4 transition-all hover:border-primary/50"
         :class="{
-          'border-primary ring-1 ring-primary':
-            systemStore.activeTab === 'users',
+          'border-primary ring-1 ring-primary': activeTab === 'users',
         }"
         @click="handleTabChange('users')"
       >
@@ -131,8 +141,7 @@ function handleTabChange(
       <Card
         class="cursor-pointer border-border bg-card p-4 transition-all hover:border-primary/50"
         :class="{
-          'border-primary ring-1 ring-primary':
-            systemStore.activeTab === 'roles',
+          'border-primary ring-1 ring-primary': activeTab === 'roles',
         }"
         @click="handleTabChange('roles')"
       >
@@ -153,8 +162,7 @@ function handleTabChange(
       <Card
         class="cursor-pointer border-border bg-card p-4 transition-all hover:border-primary/50"
         :class="{
-          'border-primary ring-1 ring-primary':
-            systemStore.activeTab === 'plugins',
+          'border-primary ring-1 ring-primary': activeTab === 'plugins',
         }"
         @click="handleTabChange('plugins')"
       >
@@ -173,7 +181,7 @@ function handleTabChange(
 
     <!-- Active Tab Content Area -->
     <Card class="border-border bg-card p-6">
-      <div v-if="systemStore.activeTab === 'overview'" class="flex flex-col gap-4">
+      <div v-if="activeTab === 'overview'" class="flex flex-col gap-4">
         <h3 class="text-lg font-semibold text-foreground">
           System Overview & Diagnostics
         </h3>
@@ -203,7 +211,7 @@ function handleTabChange(
         </div>
       </div>
 
-      <div v-else-if="systemStore.activeTab === 'users'" class="flex flex-col gap-4">
+      <div v-else-if="activeTab === 'users'" class="flex flex-col gap-4">
         <div class="flex items-center justify-between">
           <h3 class="text-lg font-semibold text-foreground">User Management</h3>
           <Button
@@ -234,7 +242,7 @@ function handleTabChange(
         </div>
       </div>
 
-      <div v-else-if="systemStore.activeTab === 'roles'" class="flex flex-col gap-4">
+      <div v-else-if="activeTab === 'roles'" class="flex flex-col gap-4">
         <h3 class="text-lg font-semibold text-foreground">
           RBAC Roles & Permissions
         </h3>
@@ -264,7 +272,7 @@ function handleTabChange(
         </div>
       </div>
 
-      <div v-else-if="systemStore.activeTab === 'audit'" class="flex flex-col gap-4">
+      <div v-else-if="activeTab === 'audit'" class="flex flex-col gap-4">
         <h3 class="text-lg font-semibold text-foreground">
           System Audit Trail
         </h3>
@@ -279,7 +287,7 @@ function handleTabChange(
         </div>
       </div>
 
-      <div v-else-if="systemStore.activeTab === 'plugins'" class="flex flex-col gap-4">
+      <div v-else-if="activeTab === 'plugins'" class="flex flex-col gap-4">
         <h3 class="text-lg font-semibold text-foreground">
           Installed Plugins & Micro-Apps
         </h3>

@@ -4,6 +4,7 @@ import type { KernelContext } from '@operon/kernel';
 
 import { reactive } from 'vue';
 
+import { KernelApiError } from '@operon/kernel';
 import { useAccessStore, useUserStore } from '@operon/stores';
 
 import { toast } from '@operon-core/shadcn-ui';
@@ -47,7 +48,7 @@ export function createHostKernel(router?: Router): KernelContext {
 
   const api = {
     daemonPort,
-    localDaemonFetch: async <T = any>(
+    localDaemonFetch: async <T = unknown>(
       endpoint: string,
       options?: RequestInit,
     ) => {
@@ -57,7 +58,10 @@ export function createHostKernel(router?: Router): KernelContext {
       const res = await fetch(url, options);
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err?.message || `Local daemon error: ${res.status}`);
+        throw new KernelApiError(
+          err?.message || `Local daemon error: ${res.status}`,
+          res.status,
+        );
       }
       return (await res.json()) as T;
     },

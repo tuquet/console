@@ -1,5 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+import type { RouteMeta } from '@operon-core/typings/vue-router';
+
 import { filterTree, mapTree } from '@operon-core/shared/utils';
 
 /**
@@ -34,7 +36,7 @@ async function generateRoutesByFrontend(
  * @param access
  */
 function hasAuthority(route: RouteRecordRaw, access: string[]) {
-  const authority = route.meta?.authority;
+  const authority: RouteMeta['authority'] = route.meta?.authority;
   if (!authority) {
     return true;
   }

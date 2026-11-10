@@ -27,17 +27,10 @@
   "dependencies": {
     "@lucide/vue": "catalog:",
     "@operon-core/shadcn-ui": "workspace:*",
-    "@operon/common-ui": "workspace:*",
-    "@operon/constants": "workspace:*",
     "@operon/kernel": "workspace:*",
-    "@operon/locales": "workspace:*",
-    "@operon/plugins": "workspace:*",
     "@operon/preferences": "workspace:*",
-    "@operon/stores": "workspace:*",
     "@operon/styles": "workspace:*",
     "@operon/types": "workspace:*",
-    "@operon/utils": "workspace:*",
-    "@vueuse/core": "catalog:",
     "pinia": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:"

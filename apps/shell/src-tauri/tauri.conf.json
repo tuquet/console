@@ -43,7 +43,8 @@
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg2NUZBNzE0NEFCOTE5QzMKUldUREdibEtGS2RmaG1SSGtqdnJOZXdTSEx6cXIrdXlNV0xxb2FLZytkUzYxSGptNFJ4WnlTYzQK",
       "endpoints": [
         "https://github.com/tuquet/console/releases/latest/download/latest.json"
-      ]
+      ],
+      "requireSignedVersion": true
     }
   }
 }

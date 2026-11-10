@@ -7,7 +7,8 @@ describe('env-validator (Fast-Fail)', () => {
     const originalUrl = import.meta.env.VITE_SUPABASE_URL;
     const originalKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
     try {
-      (import.meta.env as any).VITE_SUPABASE_URL = 'https://example.supabase.co';
+      (import.meta.env as any).VITE_SUPABASE_URL =
+        'https://example.supabase.co';
       (import.meta.env as any).VITE_SUPABASE_ANON_KEY = 'mock-anon-key';
       const result = validateEnvironment();
       expect(result.errors).toEqual([]);

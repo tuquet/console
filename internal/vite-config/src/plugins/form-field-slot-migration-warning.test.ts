@@ -16,7 +16,10 @@ describe('form field slot migration warning plugin', () => {
     expect(plugin.configResolved).toBeTypeOf('function');
     if (typeof plugin.configResolved !== 'function') return;
 
-    plugin.configResolved({ logger: { warn: warning } } as ResolvedConfig);
+    plugin.configResolved.call(
+      {} as never,
+      { logger: { warn: warning } } as unknown as ResolvedConfig,
+    );
 
     expect(warning).toHaveBeenCalledOnce();
     expect(warning).toHaveBeenCalledWith(FORM_FIELD_SLOT_MIGRATION_WARNING);

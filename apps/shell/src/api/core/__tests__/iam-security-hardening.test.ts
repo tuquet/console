@@ -104,4 +104,3 @@ describe('sanitizeRedirectPath & isSafeRedirectPath', () => {
     expect(sanitizeRedirectPath(undefined, '/fallback')).toBe('/fallback');
   });
 });
-

@@ -1,67 +1,15 @@
-# @operon/tenants — Multi-Tenant Workspaces Micro-App
+# @operon/tenants
 
-> **Architecture Role:** Autonomous Domain Micro-App for Workspace Management, Quota Orchestration, and Team Isolation in Operon.
+Workspace list and detail preview screens backed by a local sample store.
 
----
+This application is compiled and released with the shell. Standalone development uses a mock kernel; it does not provide independent production deployment.
 
-## 1. Overview & Operational Model
+- `src/manifest.ts` owns child routes and screen-level permissions.
+- `src/remote-entry.ts` exports `tenantsManifest` for the shell.
+- `src/bootstrap.ts` mounts a router view with the same routes for standalone development.
+- Host session, HTTP clients and notifications are consumed through `useKernel()`.
+- Local stores use the `tenants:*` namespace and share the shell's Pinia instance when embedded.
 
-`@operon/tenants` is an independent Micro-Frontend application decoupled from the Host Shell. It runs in two distinct modes:
+Run `pnpm dev:tenants` from the repository root (port 5323). Use named routes for navigation so screens work under standalone and shell route prefixes.
 
-1. **Integrated Shell Mode (Production / Desktop):** Dynamically loaded into the Host Shell router (`apps/shell`) via `@operon/tenants` remote entry (`TenantsView`, `TenantDetailView`).
-2. **Autonomous Standalone Mode (Local Dev):** Runs on port `5323` (`http://localhost:5323`) using `@operon/kernel`'s `createMockKernel()` for offline development.
-
----
-
-## 2. Directory Layout
-
-```text
-apps/tenants/
-├── src/
-│   ├── bootstrap.ts      # Standalone bootstrapping with MockKernel
-│   ├── main.ts           # Standalone entry point
-│   ├── remote-entry.ts   # Micro-frontend contract (exports TenantsView, TenantDetailView)
-│   ├── stores/
-│   │   └── sample.ts     # Scoped Pinia store (namespace: 'tenants:workspace')
-│   └── views/
-│       ├── detail.vue    # Workspace details, tier quotas & team overview
-│       └── index.vue     # Multi-tenant workspace hub & switcher
-├── index.html            # Standalone HTML entry
-├── package.json          # @operon/tenants definition
-├── tsconfig.json         # TypeScript configuration
-├── tsconfig.node.json    # TypeScript node config
-└── vite.config.ts        # Standalone Vite dev server (port 5323)
-```
-
----
-
-## 3. Communication Contract with Host Shell
-
-`@operon/tenants` accesses host services exclusively through the `@operon/kernel` bridge:
-
-```ts
-import { useKernel } from '@operon/kernel';
-
-const kernel = useKernel();
-
-// Access active session tenant
-const tenantId = kernel.auth.tenantId;
-
-// Send UI notifications to Shell
-kernel.events.notify('success', 'Active workspace switched');
-```
-
----
-
-## 4. Development Scripts
-
-```bash
-# Start standalone dev server on port 5323
-pnpm --filter @operon/tenants dev
-
-# Type check with vue-tsc
-pnpm --filter @operon/tenants typecheck
-
-# Build bundle
-pnpm --filter @operon/tenants build
-```
+See [architecture](../../docs/ARCHITECTURE.md) and [development setup](../../docs/DEVELOPMENT.md).

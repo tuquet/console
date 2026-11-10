@@ -1,5 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+import { tenantsManifest } from '@operon/tenants';
+
 import { $t } from '#/locales';
 
 const routes: RouteRecordRaw[] = [
@@ -15,31 +17,7 @@ const routes: RouteRecordRaw[] = [
     },
     name: 'TenantsRoot',
     path: '/tenants',
-    redirect: '/tenants',
-    children: [
-      {
-        name: 'Tenants',
-        path: '',
-        component: () => import('@operon/tenants').then((m) => m.TenantsView),
-        meta: {
-          authority: ['superadmin', 'tenants:read'],
-          icon: 'lucide:building-2',
-          title: $t('page.tenants.title'),
-        },
-      },
-      {
-        name: 'TenantDetail',
-        path: ':id',
-        component: () =>
-          import('@operon/tenants').then((m) => m.TenantDetailView),
-        meta: {
-          authority: ['superadmin', 'tenants:read'],
-          hideInMenu: true,
-          icon: 'lucide:layout-grid',
-          title: $t('page.tenants.detail'),
-        },
-      },
-    ],
+    children: tenantsManifest.routes($t),
   },
 ];
 

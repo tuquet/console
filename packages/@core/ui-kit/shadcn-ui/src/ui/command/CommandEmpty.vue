@@ -10,7 +10,7 @@ import { cn } from '@operon-core/shared/utils';
 import { reactiveOmit } from '@vueuse/core';
 import { Primitive } from 'reka-ui';
 
-import { useCommand } from '.';
+import { useCommand } from './context';
 
 const props = defineProps<
   PrimitiveProps & { class?: HTMLAttributes['class'] }

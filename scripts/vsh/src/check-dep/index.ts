@@ -15,6 +15,9 @@ const DEFAULT_CONFIG = {
   ignore: ['dist/**', 'docs/**', 'node_modules/**', 'public/**'],
   ignoreBinaries: [] as string[],
   ignoreDependencies: [
+    // Font imports are consumed from CSS, which Knip does not traverse.
+    '@fontsource/inter',
+    '@fontsource/roboto',
     '@iconify/json',
     '@operon-core/design',
     '@operon/commitlint-config',
@@ -119,13 +122,14 @@ async function runKnipCheck(): Promise<void> {
     if (execaError.exitCode === 1 && execaError.stdout) {
       const result: KnipResult = JSON.parse(execaError.stdout);
       formatResult(result);
-      return;
+      throw new Error('Unused dependencies found', { cause: error });
     }
 
     console.error(
       '❌ Dependency check failed:',
       error instanceof Error ? error.message : error,
     );
+    throw error;
   } finally {
     await rm(tempDir, { force: true, recursive: true });
   }
@@ -144,4 +148,4 @@ function defineCheckDepCommand(cac: CAC): void {
     });
 }
 
-export { defineCheckDepCommand };
+export { defineCheckDepCommand, runKnipCheck };

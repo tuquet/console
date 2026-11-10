@@ -10,7 +10,7 @@ import { cn } from '@operon-core/shared/utils';
 import { reactiveOmit } from '@vueuse/core';
 import { ListboxGroup, ListboxGroupLabel, useId } from 'reka-ui';
 
-import { provideCommandGroupContext, useCommand } from '.';
+import { provideCommandGroupContext, useCommand } from './context';
 
 const props = defineProps<
   ListboxGroupProps & {

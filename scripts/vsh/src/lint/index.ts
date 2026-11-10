@@ -94,12 +94,9 @@ async function runParallel(commands: Command[]) {
   const results = await Promise.allSettled(subprocesses);
 
   // Summarize all failed commands, consistent with serial mode error output
-  const failed: Command[] = [];
-  results.forEach((result, index) => {
-    if (result.status === 'rejected') {
-      failed.push(commands[index]);
-    }
-  });
+  const failed = commands.filter(
+    (_command, index) => results[index]?.status === 'rejected',
+  );
 
   if (failed.length > 0) {
     throw new LintError(failed);

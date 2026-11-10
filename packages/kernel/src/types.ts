@@ -1,3 +1,5 @@
+import type { SupabaseSchema } from '@operon/constants';
+
 export interface KernelAuthContext {
   /** JWT token for authenticated Supabase sessions */
   accessToken: null | string;
@@ -15,11 +17,22 @@ export interface KernelAuthContext {
   username?: string;
 }
 
+/** Public cloud request options. Retry state stays inside the host client. */
+export interface KernelRequestOptions extends RequestInit {
+  preferRepresentation?: boolean;
+  schema?: SupabaseSchema;
+  skipAuth?: boolean;
+  suppressErrorCapture?: boolean;
+}
+
 export interface KernelApiContext {
   /** Centralized Supabase PostgREST client invoking cloud tables */
-  supabaseRequest: <T = any>(path: string, options?: any) => Promise<T>;
+  supabaseRequest: <T = unknown>(
+    path: string,
+    options?: KernelRequestOptions,
+  ) => Promise<T>;
   /** Client for invoking device-local CLI daemon (opn) on port 8765 */
-  localDaemonFetch: <T = any>(
+  localDaemonFetch: <T = unknown>(
     endpoint: string,
     options?: RequestInit,
   ) => Promise<T>;

@@ -289,7 +289,9 @@ onMounted(async () => {
 
             <div class="w-full flex flex-col gap-4">
               <div class="flex flex-col gap-1.5">
-                <Label for="profile-full-name">{{ $t('profile.fullName') }}</Label>
+                <Label for="profile-full-name">{{
+                  $t('profile.fullName')
+                }}</Label>
                 <InputGroup class="h-10 w-full">
                   <InputGroupAddon>
                     <User class="size-4 text-muted-foreground" />
@@ -303,7 +305,9 @@ onMounted(async () => {
               </div>
 
               <div class="flex flex-col gap-1.5">
-                <Label for="profile-email">{{ $t('profile.loginEmail') }}</Label>
+                <Label for="profile-email">{{
+                  $t('profile.loginEmail')
+                }}</Label>
                 <div class="flex flex-col gap-1.5 w-full">
                   <InputGroup class="h-10 w-full bg-muted">
                     <InputGroupAddon>
@@ -322,7 +326,9 @@ onMounted(async () => {
               </div>
 
               <div class="flex flex-col gap-1.5">
-                <Label for="profile-avatar">{{ $t('profile.avatarUrl') }}</Label>
+                <Label for="profile-avatar">{{
+                  $t('profile.avatarUrl')
+                }}</Label>
                 <Input
                   id="profile-avatar"
                   v-model="avatarUrl"
@@ -373,7 +379,9 @@ onMounted(async () => {
 
             <div class="w-full flex flex-col gap-4">
               <div class="flex flex-col gap-1.5">
-                <Label for="profile-new-password">{{ $t('authentication.newPassword') }}</Label>
+                <Label for="profile-new-password">{{
+                  $t('authentication.newPassword')
+                }}</Label>
                 <InputGroup class="h-10 w-full">
                   <InputGroupAddon>
                     <Lock class="size-4 text-muted-foreground" />
@@ -388,7 +396,9 @@ onMounted(async () => {
               </div>
 
               <div class="flex flex-col gap-1.5">
-                <Label for="profile-confirm-password">{{ $t('authentication.confirmPassword') }}</Label>
+                <Label for="profile-confirm-password">{{
+                  $t('authentication.confirmPassword')
+                }}</Label>
                 <InputGroup class="h-10 w-full">
                   <InputGroupAddon>
                     <Lock class="size-4 text-muted-foreground" />

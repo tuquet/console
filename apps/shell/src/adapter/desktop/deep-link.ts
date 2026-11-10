@@ -1,4 +1,4 @@
-import { isTauriEnvironment } from './index';
+import { isTauriEnvironment } from '#/utils/platform';
 
 export interface DeepLinkAuthPayload {
   machineName?: string;

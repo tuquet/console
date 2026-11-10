@@ -11,7 +11,7 @@ import { Search } from '@lucide/vue';
 import { reactiveOmit } from '@vueuse/core';
 import { ListboxFilter, useForwardProps } from 'reka-ui';
 
-import { useCommand } from '.';
+import { useCommand } from './context';
 
 defineOptions({
   inheritAttrs: false,

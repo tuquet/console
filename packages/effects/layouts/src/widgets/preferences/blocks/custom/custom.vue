@@ -18,7 +18,7 @@ defineOptions({
 });
 
 const props = defineProps<{
-  fields: Array<CustomPreferencesField>;
+  fields: ReadonlyArray<CustomPreferencesField>;
   values: CustomPreferencesRecord;
 }>();
 

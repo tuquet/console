@@ -1,5 +1,7 @@
 import type { SupabaseSchema } from '@operon/constants';
+import type { KernelRequestOptions } from '@operon/kernel';
 
+import { KernelApiError } from '@operon/kernel';
 import { $t } from '@operon/locales';
 import { useAccessStore } from '@operon/stores';
 
@@ -17,13 +19,9 @@ export type { SupabaseSchema };
 export * from './token-manager';
 export { SUPABASE_SCHEMA } from '@operon/constants';
 
-export interface SupabaseRequestOptions extends RequestInit {
+export interface SupabaseRequestOptions extends KernelRequestOptions {
   _isRetry?: boolean;
   _retryToken?: string;
-  preferRepresentation?: boolean;
-  schema?: SupabaseSchema;
-  skipAuth?: boolean;
-  suppressErrorCapture?: boolean;
 }
 
 export interface SupabaseAuthError extends Error {
@@ -49,7 +47,7 @@ export function createAuthError(
   message: string,
   status = 401,
 ): SupabaseAuthError {
-  const error = new Error(message) as SupabaseAuthError;
+  const error = new KernelApiError(message, status) as SupabaseAuthError;
   error.isAuthError = true;
   error.status = status;
   return error;
@@ -216,11 +214,12 @@ export async function supabaseRequest<T = any>(
       );
     }
 
-    const apiError = new Error(
+    const apiError = new KernelApiError(
       errorJson.message ||
         errorJson.msg ||
         errorJson.error_description ||
         $t('authentication.supabaseRequestFailed', { status: response.status }),
+      response.status,
     );
     if (!suppressErrorCapture) {
       captureError(apiError, {

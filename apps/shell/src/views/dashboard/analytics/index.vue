@@ -277,10 +277,7 @@ onMounted(() => {
           >
             {{ analyticsData.fleet.loopbackPort }}
           </div>
-          <Badge
-            variant="secondary"
-            class="shrink-0 text-success"
-          >
+          <Badge variant="secondary" class="shrink-0 text-success">
             {{ analyticsData.fleet.status }}
           </Badge>
         </div>
@@ -310,10 +307,7 @@ onMounted(() => {
           >
             {{ analyticsData.system.latencyMs }}ms
           </div>
-          <Badge
-            variant="secondary"
-            class="shrink-0 text-success"
-          >
+          <Badge variant="secondary" class="shrink-0 text-success">
             {{ analyticsData.system.status }}
           </Badge>
         </div>
@@ -379,9 +373,7 @@ onMounted(() => {
                 <div class="mt-1 text-lg font-bold text-foreground">
                   {{ point.count }}
                 </div>
-                <div class="mt-1 text-xs text-success">
-                  Active Tenant Node
-                </div>
+                <div class="mt-1 text-xs text-success">Active Tenant Node</div>
               </div>
             </div>
 
@@ -584,9 +576,7 @@ onMounted(() => {
                 </div>
               </div>
               <Badge variant="secondary">
-                <span
-                  class="mr-1.5 size-1.5 rounded-full bg-success"
-                ></span>
+                <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
                 {{ $t('page.analytics.operational') }}
               </Badge>
             </div>
@@ -601,9 +591,7 @@ onMounted(() => {
                 </div>
               </div>
               <Badge variant="secondary">
-                <span
-                  class="mr-1.5 size-1.5 rounded-full bg-success"
-                ></span>
+                <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
                 {{ $t('page.analytics.online') }}
               </Badge>
             </div>
@@ -618,9 +606,7 @@ onMounted(() => {
                 </div>
               </div>
               <Badge variant="secondary">
-                <span
-                  class="mr-1.5 size-1.5 rounded-full bg-success"
-                ></span>
+                <span class="mr-1.5 size-1.5 rounded-full bg-success"></span>
                 {{ $t('page.analytics.operational') }}
               </Badge>
             </div>
