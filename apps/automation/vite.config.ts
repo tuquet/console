@@ -8,6 +8,7 @@ export default defineConfig(async () => {
     },
     vite: {
       server: {
+        cors: true,
         host: true,
         port: 5321,
       },

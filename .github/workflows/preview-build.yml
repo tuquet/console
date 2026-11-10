@@ -1,95 +1,69 @@
-name: 'Preview: pr build'
+name: Desktop preview
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: preview-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-preview:
-    name: Build PR Preview Test Binary
+  build:
+    name: Unsigned PR preview
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: windows-latest
     steps:
-      - name: Setup SSH Agent for Operon Subsystem
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.OPERON_DEPLOY_KEY }}
-
-      - name: Checkout Console Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           path: console
-
-      - name: Read subsystem revision
-        id: subsystem
+          persist-credentials: false
+      - name: Read build pins
+        id: pins
         shell: pwsh
         run: |
-          $revision = (Get-Content console/subsystem.json -Raw | ConvertFrom-Json).revision
-          "revision=$revision" >> $env:GITHUB_OUTPUT
-
-      - name: Checkout Operon Subsystem (Private)
-        uses: actions/checkout@v4
+          "revision=$((Get-Content console/subsystem.json -Raw | ConvertFrom-Json).revision)" >> $env:GITHUB_OUTPUT
+          "rust=$((Get-Content console/release/config.json -Raw | ConvertFrom-Json).rustToolchain)" >> $env:GITHUB_OUTPUT
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: tuquet/operon
-          ref: ${{ steps.subsystem.outputs.revision }}
+          ref: ${{ steps.pins.outputs.revision }}
           ssh-key: ${{ secrets.OPERON_DEPLOY_KEY }}
           path: operon
-
-      - name: Setup pnpm 11
-        uses: pnpm/action-setup@v4
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
         with:
-          version: 11
-
-      - name: Setup Node.js 22 (with pnpm cache)
-        uses: actions/setup-node@v4
+          package_json_file: console/package.json
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 22
-          cache: 'pnpm'
+          node-version-file: console/.node-version
+          cache: pnpm
           cache-dependency-path: console/pnpm-lock.yaml
-
-      - name: Setup Rust Toolchain (MSVC)
-        uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
+          toolchain: ${{ steps.pins.outputs.rust }}
           targets: x86_64-pc-windows-msvc
-
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with:
-          workspaces: |
-            console/apps/shell/src-tauri -> target
-            operon -> target
-          cache-all-crates: 'true'
-
-      - name: Install Frontend Dependencies
-        working-directory: console
+          workspaces: console/apps/shell/src-tauri -> target
+      - working-directory: console
         run: pnpm install --frozen-lockfile
-
-      - name: Quality Gate (Typecheck & Unit Tests)
-        working-directory: console
-        run: |
-          pnpm --filter @operon/shell typecheck
-          pnpm vitest run packages/local-db/src/__tests__
-
-      - name: Build Tauri Desktop Bundle
+      - name: Build preview without release signing credentials
         working-directory: console/apps/shell
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           OPERON_SKIP_WINRES: '1'
-        run: pnpm tauri:build:exe
-
-      - name: Package Distribution Artifacts
-        working-directory: console
-        run: node scripts/package-portable.mjs
-
-      - name: Upload PR Test Artifact
-        uses: actions/upload-artifact@v4
+        run: pnpm tauri build --ci --target x86_64-pc-windows-msvc --no-bundle -- --locked
+      - working-directory: console
+        run: pnpm release:package --preview
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: Operon-Workstation-PR-${{ github.event.pull_request.number || github.sha }}
+          name: preview-${{ github.event.pull_request.number || github.run_number }}
           path: console/dist-release/
+          if-no-files-found: error
           retention-days: 7

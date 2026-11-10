@@ -1,127 +1,86 @@
-# Quy Trình Phát Hành Tự Động (Automated Release Process) - Operon
+# Product release lifecycle
 
-Tài liệu này hướng dẫn chi tiết quy trình CI/CD tự động đóng gói, phát hành và kiểm thử bản **Operon** (Tauri v2 Desktop App trên Windows x64).
+GitHub Releases is the download hub. Every published release has a unique version tag and immutable assets. The `release-state` branch contains the release registry, channel feeds and the audit history in Git. It contains metadata, not binaries. No application database or additional hosting service is required.
 
----
+## Sources of truth
 
-## 1. Tổng Quan Kiến Trúc (Architecture)
+- `release/version.json`: product version. Run `pnpm release:version 5.8.1` to synchronize the root package, shell package, Tauri configuration, Cargo manifest and the workstation entry in Cargo.lock. Internal libraries keep their own versions.
+- `subsystem.json`: exact embedded Operon subsystem commit.
+- `release/config.json`: repository, supported platforms, Rust toolchain and retention.
+- `release-state/registry.json`: published release IDs, asset IDs, hashes, provenance, active/revoked/archived status, channel pointers and change history.
 
-```mermaid
-flowchart TD
-    subgraph Source["Source Repositories"]
-        C["tuquet/console (Public)\nFrontend & Tauri App Shell"]
-        O["tuquet/operon (Private)\nCore Rust CLI & Embedded Daemon"]
-    end
+## Release paths
 
-    subgraph CI["GitHub Actions Pipeline (.github/workflows/release.yml)"]
-        A1["Checkout console"]
-        A2["Checkout operon\n(via Deploy Key SSH)"]
-        Cache["Rust Cache + pnpm Cache (~5m build)"]
-        Build["pnpm tauri build\n(Target: NSIS x64)"]
-        Pack["Package Artifacts\n(.exe Setup + .zip Portable)"]
-        A1 --> Cache
-        A2 --> Cache
-        Cache --> Build
-        Build --> Pack
-    end
+| Trigger | Result |
+| --- | --- |
+| Pull request | Frontend quality checks; trusted in-repository PRs also get an unsigned portable preview with no production signing secret |
+| Push to main | Signed `MAJOR.MINOR.PATCH-nightly.RUN.ATTEMPT` release |
+| Tag matching committed stable version | Signed stable release, requiring approval in the `release-stable` environment |
+| Tag matching committed `-beta.N` version | Signed beta release |
 
-    subgraph Releases["Distribution Channels (GitHub Releases)"]
-        Nightly["Tag: nightly (Rolling Release)\nCập nhật tự động mỗi khi push lên 'main'"]
-        Official["Tag: v*.*.* (Official Release)\nKích hoạt khi push tag phiên bản chính thức"]
-    end
+The Release workflow requires the reusable quality workflow to pass before building. The build uses locked pnpm and Cargo dependencies and the pinned subsystem/toolchain. PR preview artifacts expire after 7 days; signed CI staging artifacts after 14 days.
 
-    Source --> CI
-    Pack --> Nightly
-    Pack --> Official
+## Preparing a stable or beta release
+
+1. Run the **Prepare product release** workflow with a new version, such as `5.8.1` or `5.9.0-beta.1`. It creates a version PR and explicitly dispatches quality checks because events created using GITHUB_TOKEN do not automatically start other workflows.
+2. Review and merge the version PR after checks pass.
+3. Tag the merged main commit, then push the tag:
+
+```sh
+git fetch origin main
+git tag v5.8.1 origin/main
+git push origin v5.8.1
 ```
 
----
+4. Approve the stable deployment in GitHub Actions when requested. A beta release uses the prerelease environment and does not become GitHub's Latest stable release.
 
-## 2. Các Kênh Phát Hành (Release Channels)
+Alternatively, synchronize versions locally, commit them through a normal PR and follow the same tag process. Tags must exactly match the committed product version. Never re-tag an existing version; publish a higher patch version for a fix.
 
-| Kênh | Điều Kiện Kích Hoạt | Mục Đích | URL Tải Trực Tiếp |
-| :-- | :-- | :-- | :-- |
-| **Nightly (Rolling)** | Mỗi khi có commit mới được push hoặc merge vào nhánh `main` | Dành cho Tester, QA, Product Manager kiểm thử tính năng và sửa lỗi tức thì | [GitHub Releases Nightly](https://github.com/tuquet/console/releases/tag/nightly) |
-| **Official Version** | Khi push git tag (ví dụ: `git tag v5.8.1 && git spush origin v5.8.1`) hoặc kích hoạt thủ công qua `workflow_dispatch` | Dành cho người dùng cuối (End-users) và production | [GitHub Releases Latest](https://github.com/tuquet/console/releases/latest) |
+## Artifact contract and publication
 
----
+A release must contain all of:
 
-## 3. Hướng Dẫn Dành Cho Tester & QA
+- `Operon-VERSION-windows-x86_64-setup.exe` and its `.sig` file.
+- `Operon-VERSION-windows-x86_64-portable.zip`.
+- `release-manifest.json`: source commits, build timestamp/run, toolchain and artifact metadata.
+- `latest.json`: Tauri updater version, publication information, platform URL and inline signature.
+- `checksums.sha256`: SHA-256 checksums of every other release file.
 
-Tester **không cần cài đặt** bất kỳ công cụ lập trình nào (Node.js, Rust, Git, v.v.).
+Packaging requires a fresh output directory and exactly one installer/binary. It verifies file hashes and both Ed25519 Minisign signatures against the configured Tauri public key and requires the signed version to match the manifest. Publication creates a draft, uploads and checks every GitHub asset digest, then publishes and advances the channel. Assets are never overwritten. Tauri updater signatures do not replace Windows Authenticode certificates; this pipeline uses the existing updater signing key and does not claim publisher signing.
 
-### ⚡ Cài đặt nhanh nhất (1 dòng lệnh PowerShell)
+Published manifests use version-specific GitHub download URLs. Channel feeds are:
 
-Mở cửa sổ Windows PowerShell (hoặc Terminal) và chạy lệnh:
-
-```powershell
-irm https://raw.githubusercontent.com/tuquet/console/main/scripts/install-nightly.ps1 | iex
+```text
+https://raw.githubusercontent.com/tuquet/console/release-state/updates/stable/latest.json
+https://raw.githubusercontent.com/tuquet/console/release-state/updates/beta/latest.json
+https://raw.githubusercontent.com/tuquet/console/release-state/updates/nightly/latest.json
 ```
 
-_Lệnh trên sẽ tự động tải bản build mới nhất về thư mục `%TEMP%` và kích hoạt bộ cài._
+Each binary is built with its channel endpoint. Older installed clients that use GitHub's Latest-release endpoint can still consume `latest.json` on stable releases. GitHub serves the feeds with its cache policy; channel changes are not guaranteed instantaneous at every client.
 
-### 📥 Tải trực tiếp bằng trình duyệt
+## Promotion, withdrawal and recovery
 
-- **Bộ cài Setup (.exe):** [Operon-Workstation-Setup.exe](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Setup.exe)  
-  _(Cài đặt ở chế độ `currentUser`, không yêu cầu quyền Quản trị viên - Administrator UAC)._
-- **Bản Portable (.zip):** [Operon-Workstation-Portable.zip](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Portable.zip)  
-  _(Chỉ cần giải nén và chạy ngay `Operon.exe`)._
+Use **Manage releases** on main:
 
----
+- **promote**: select an existing published tag and eligible channel. Prereleases cannot enter stable; moving a channel to a lower version is blocked.
+- **revoke**: provide a tag and reason. Every channel referencing it is cleared; the release is marked revoked, removed from GitHub Latest eligibility and its description is annotated. GitHub assets remain immutable for investigation. Existing installations are not removed.
+- **reconcile**: after a published release failed to update its registry, download and verify its assets, then register it. This avoids rebuilding an existing version.
+- **prune**: preview retention by default for manual runs; set apply to delete. The weekly schedule applies the configured policy to managed nightlies only.
 
-## 4. Các Tính Năng Hỗ Trợ Test Tích Hợp Sẵn
+Revoking the active release removes its updater feed until a safe release is promoted or published. Update clients treat the missing feed as a check failure. For an installed bad release, publish a higher fixed version; static Tauri feeds do not force downgrades, mandatory updates or staged tenant rollout.
 
-Bản build release đã được cấu hình sẵn các công cụ phục vụ chẩn đoán lỗi:
+The retention policy keeps at least 14 managed nightlies and 30 days of builds; active channel targets and stable/beta releases are never pruned. Historical tags, registry entries and checksums remain after nightly release assets are archived. The legacy rolling `nightly` release is not managed or deleted by this policy.
 
-1. **Mở DevTools / Console bất cứ lúc nào:**
-   - Bấm phím **`F12`** hoặc **`Ctrl + Shift + I`** trên bàn phím.
-   - Hoặc click **Chuột phải** $\rightarrow$ chọn **Inspect Element (Kiểm tra)**.
+## Repository configuration
 
-2. **File Log kiên cố (Persistent File Logging):**
-   - Toàn bộ hoạt động khởi động, lỗi unhandled exception, `console.error`, và trạng thái của Daemon API background đều được ghi tự động vào file:
-     ```plaintext
-     %USERPROFILE%\.operon\logs\workstation.log
-     ```
-     _(Ví dụ: `C:\Users\<Tên_User>\.operon\logs\workstation.log`)_
+An administrator runs once (and can rerun idempotently):
 
-3. **Chế độ Local Operator (Không bắt buộc đăng nhập):**
-   - Khi mở app, người dùng vào thẳng chế độ **Local Operator** (`Automation > Overview`) kết nối với Daemon in-process (cổng `8765`).
-   - Nếu dialog đăng nhập xuất hiện, bạn có thể đóng bất kỳ lúc nào bằng cách:
-     - Bấm nút **`X`** ở góc trên bên phải.
-     - Bấm phím **`Esc`**.
-     - Click chuột ra ngoài vùng nền modal.
-     - Bấm liên kết **"Dismiss / Continue as Local Operator"**.
-
----
-
-## 5. Cấu Hình Hạ Tầng CI/CD & Bảo Mật (DevOps)
-
-### 5.1 Dual-Repo Checkout
-
-Dự án máy trạm phụ thuộc vào crate lõi `operon` nằm trong repo private `tuquet/operon` qua đường dẫn tương đối:
-
-```toml
-operon = { package = "operon", path = "../../../../operon/crates/cli" }
+```sh
+node scripts/release/configure-github.mjs --apply
 ```
 
-GitHub Actions workflow giải quyết việc này bằng cách checkout cả 2 repos song song:
+This enables immutable releases, protects main with the `Frontend quality` check, prevents version-tag deletion/rewrites, enables Actions-created release PRs, creates release deployment environments and initializes the metadata branch. `release-stable` requires the configuring administrator's review. Main requires a PR and green checks; it does not require a second approver in this single-owner repo.
 
-- `tuquet/console` $\rightarrow$ thư mục `console/`
-- `tuquet/operon` $\rightarrow$ thư mục `operon/` (sử dụng SSH Deploy Key `OPERON_DEPLOY_KEY`).
+Existing repository secrets are required: `OPERON_DEPLOY_KEY`, `TAURI_SIGNING_PRIVATE_KEY`, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Private signing keys never enter manifests, release assets or logs. Key rotation requires a deliberate client migration.
 
-### 5.2 Danh mục Secrets trên GitHub
-
-Các secrets cần thiết được lưu trữ tại `https://github.com/tuquet/console/settings/secrets/actions`:
-
-- `OPERON_DEPLOY_KEY`: SSH private key (Read-only) của private repo `tuquet/operon`.
-- `VITE_SUPABASE_URL`: Endpoint Supabase Cloud.
-- `VITE_SUPABASE_ANON_KEY`: Supabase Anonymous Public Key.
-- `TAURI_SIGNING_PRIVATE_KEY` & `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`: Khóa ký số phục vụ tính năng tự động cập nhật (In-App Updater).
-
-### 5.3 Tối ưu hóa thời gian build (Build Speed Optimization)
-
-Pipeline áp dụng các kỹ thuật:
-
-- **Rust Cache (`Swatinem/rust-cache@v2`):** Cache toàn bộ crates biên dịch và target artifacts.
-- **pnpm Cache:** Lưu cache store của pnpm theo `pnpm-lock.yaml`.
-- **Target NSIS Only:** Bỏ qua bước đóng gói WiX MSI nặng nề, chỉ đóng gói NSIS installer giúp rút ngắn thời gian build xuống còn **~5-7 phút**.
+The registry can later be synchronized to a database for fleet-specific policy. A database is only necessary when introducing tenant rollout, mandatory version policies or per-device update state; those features are not simulated by static JSON.

@@ -1,106 +1,75 @@
-name: 'Release: desktop binaries'
+name: Release
 
 on:
   push:
-    branches:
-      - main
-    tags:
-      - 'v*'
+    branches: [main]
+    tags: ['v*']
   workflow_dispatch:
-    inputs:
-      channel:
-        description: Release Channel
-        required: true
-        default: nightly
-        type: choice
-        options:
-          - nightly
-          - stable
-  repository_dispatch:
-    types:
-      - build-release
-      - trigger-release
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  release-windows:
-    name: Build & Release Windows x64
-    runs-on: windows-latest
-    steps:
-      # 1. SSH Agent for private submodule/subsystem authentication
-      - name: Setup SSH Agent for Operon Subsystem
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.OPERON_DEPLOY_KEY }}
+  quality:
+    name: Quality
+    uses: ./.github/workflows/quality.yml
 
-      # 2. Dual Checkout: console + operon side-by-side
-      - name: Checkout Console Repository
-        uses: actions/checkout@v4
+  build:
+    name: Signed Windows x64
+    needs: quality
+    runs-on: windows-latest
+    environment: release-build
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      channel: ${{ steps.release.outputs.channel }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           path: console
-
-      - name: Read subsystem revision
-        id: subsystem
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Read pinned subsystem and Rust toolchain
+        id: pins
         shell: pwsh
         run: |
-          $revision = (Get-Content console/subsystem.json -Raw | ConvertFrom-Json).revision
-          "revision=$revision" >> $env:GITHUB_OUTPUT
-
-      - name: Checkout Operon Subsystem (Private)
-        uses: actions/checkout@v4
+          "revision=$((Get-Content console/subsystem.json -Raw | ConvertFrom-Json).revision)" >> $env:GITHUB_OUTPUT
+          "rust=$((Get-Content console/release/config.json -Raw | ConvertFrom-Json).rustToolchain)" >> $env:GITHUB_OUTPUT
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: tuquet/operon
-          ref: ${{ steps.subsystem.outputs.revision }}
+          ref: ${{ steps.pins.outputs.revision }}
           ssh-key: ${{ secrets.OPERON_DEPLOY_KEY }}
           path: operon
-
-      # 3. Setup pnpm & Node.js with package store caching
-      - name: Setup pnpm 11
-        uses: pnpm/action-setup@v4
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
         with:
-          version: 11
-
-      - name: Setup Node.js 22 (with pnpm cache)
-        uses: actions/setup-node@v4
+          package_json_file: console/package.json
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 22
+          node-version-file: console/.node-version
           cache: pnpm
           cache-dependency-path: console/pnpm-lock.yaml
-
-      # 4. Setup Rust Toolchain & Aggressive Workspace Cache
-      - name: Setup Rust Toolchain (MSVC)
-        uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
+          toolchain: ${{ steps.pins.outputs.rust }}
           targets: x86_64-pc-windows-msvc
-
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with:
-          workspaces: |
-            console/apps/shell/src-tauri -> target
-            operon -> target
-          cache-all-crates: 'true'
-
-      # 5. Install Dependencies & Pre-Release Quality Gates
-      - name: Install Frontend Dependencies
+          workspaces: console/apps/shell/src-tauri -> target
+      - name: Install locked frontend dependencies
         working-directory: console
         run: pnpm install --frozen-lockfile
-
-      - name: Pre-Release Quality Gate (Typecheck, i18n & Unit Tests)
+      - name: Verify checkout and prepare release identity
+        id: release
         working-directory: console
         run: |
-          pnpm run check:i18n
-          pnpm --filter @operon/shell typecheck
-          pnpm vitest run packages/locales/__tests__ packages/local-db/src/__tests__
-
-      # 6. Build Tauri Desktop Bundle (Target NSIS only for 50% faster bundling)
-      - name: Build Tauri Desktop Bundle
+          pnpm desktop:check
+          pnpm release:prepare
+      - name: Build signed updater artifacts
         working-directory: console/apps/shell
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
@@ -108,65 +77,44 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           OPERON_SKIP_WINRES: '1'
-        run: pnpm tauri:build --bundles nsis
-
-      # 7. Package Distribution Artifacts (NSIS Setup, Portable Zip, latest.json)
-      - name: Package Distribution Artifacts
+        shell: pwsh
+        run: |
+          $configPath = (Resolve-Path ../../.temp/release/tauri.json).Path
+          pnpm tauri build --ci --target x86_64-pc-windows-msvc --bundles nsis --config $configPath -- --locked
+      - name: Package and verify signatures, checksums and manifests
         working-directory: console
-        run: node scripts/package-portable.mjs
-
-      # 8. Upload Artifact to GitHub Run (for direct download from Actions tab)
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+        run: |
+          pnpm release:package
+          pnpm release:verify
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: Operon-Workstation-Windows-x64
+          name: release-${{ steps.release.outputs.tag }}
           path: console/dist-release/
+          if-no-files-found: error
           retention-days: 14
 
-      # 9. Publish Rolling Nightly Release (on push to main)
-      - name: Publish Rolling Nightly Release
-        uses: softprops/action-gh-release@v2
-        if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.channel == 'nightly')
+  publish:
+    name: Publish immutable release
+    needs: build
+    runs-on: ubuntu-latest
+    environment: ${{ needs.build.outputs.channel == 'stable' && 'release-stable' || 'release-prerelease' }}
+    permissions:
+      contents: write
+    concurrency:
+      group: release-registry
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          tag_name: nightly
-          target_commitish: ${{ github.sha }}
-          name: Operon (Nightly Build)
-          body: |
-            ### 🚀 Operon Nightly Build
-            Automated test release built from commit `${{ github.sha }}` on branch `${{ github.ref_name }}`.
-
-            #### ⚡ Cài đặt nhanh (1 dòng lệnh):
-            * **Nếu đang ở PowerShell:**
-            ```powershell
-            irm https://raw.githubusercontent.com/tuquet/console/main/scripts/install-nightly.ps1 | iex
-            ```
-            * **Nếu đang ở CMD hoặc hộp thoại Run (Win + R):**
-            ```cmd
-            powershell -Command "irm https://raw.githubusercontent.com/tuquet/console/main/scripts/install-nightly.ps1 | iex"
-            ```
-
-            #### 📥 Tải trực tiếp bằng trình duyệt:
-            * **Bộ cài Setup (.exe - không cần quyền Admin):** [`Operon-Workstation-Setup.exe`](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Setup.exe)
-            * **Bản Portable Zip:** [`Operon-Workstation-Portable.zip`](https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Portable.zip)
-
-            *Bản release này được cập nhật tự động mỗi khi có thay đổi trên nhánh `main`.*
-          prerelease: true
-          make_latest: false
-          fail_on_unmatched_files: false
-          files: console/dist-release/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # 10. Publish Official Tagged Release (on v* tag push)
-      - name: Publish Official Versioned Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.channel == 'stable')
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          name: Operon ${{ github.ref_name }}
-          prerelease: false
-          make_latest: true
-          generate_release_notes: true
-          fail_on_unmatched_files: false
-          files: console/dist-release/*
+          node-version-file: .node-version
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-${{ needs.build.outputs.tag }}
+          path: dist-release
+      - name: Verify and publish draft, then advance channel
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release/publish.mjs
