@@ -19,10 +19,6 @@
     "tauri:build": "tauri build",
     "tauri:build:exe": "tauri build --no-bundle",
     "tauri:dev": "tauri dev",
-    "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "db:test-sync": "node scripts/test-local-db-sync.mjs",
     "typecheck": "vue-tsc --noEmit --skipLibCheck"
   },
   "imports": {
