@@ -82,8 +82,7 @@
     "release:verify": "node scripts/release/artifacts.mjs --verify",
     "release:publish": "node scripts/release/publish.mjs",
     "release:manage": "node scripts/release/state.mjs",
-    "build:unit-test-sample": "pnpm -F @operon/unit-test-sample run build",
-    "dev:unit-test-sample": "pnpm -F @operon/unit-test-sample run dev"
+    "updater:simulate": "node scripts/simulate-updater.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "catalog:",

@@ -84,3 +84,53 @@ This enables immutable releases, protects main with the `Frontend quality` check
 Existing repository secrets are required: `OPERON_DEPLOY_KEY`, `TAURI_SIGNING_PRIVATE_KEY`, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Private signing keys never enter manifests, release assets or logs. Key rotation requires a deliberate client migration.
 
 The registry can later be synchronized to a database for fleet-specific policy. A database is only necessary when introducing tenant rollout, mandatory version policies or per-device update state; those features are not simulated by static JSON.
+
+## Local updater simulation and testing
+
+To verify the end-to-end auto-update lifecycle locally without publishing GitHub releases, waiting for CI, or exposing private production signing keys, use the local updater harness:
+
+```sh
+pnpm updater:simulate
+```
+
+The harness automates the two-stage lifecycle:
+
+1. **Mock Release Pipeline:**
+   - Generates an in-memory Ed25519 Minisign keypair conforming to the Minisign / libsodium specification.
+   - Packages mock installer artifacts (`Operon-VERSION-windows-x86_64-setup.exe` and `.sig`).
+   - Signs the payload using BLAKE2b-512 and Ed25519, binding the announced SemVer in trusted comments.
+   - Generates `latest.json`, `release-manifest.json`, and `checksums.sha256`.
+   - Validates the generated release directory with cryptographic signature checks (`verifyArtifactSignature`).
+2. **Local Mock Feed Server & Client Verification:**
+   - Starts a lightweight local HTTP server (default `http://127.0.0.1:4567`) serving `latest.json` (with CORS) and installer binaries.
+   - Queries the local feed, parses SemVer against the current version, downloads the installer binary, and cryptographically verifies the signature against the simulated public key.
+
+### Interactive testing with the live Desktop application
+
+To test the updater prompt and toast notifications in the actual Tauri desktop UI:
+
+1. Start the persistent mock feed server and patch the local Tauri configuration:
+   ```sh
+   pnpm updater:simulate --server-only --apply-config
+   ```
+   *`--apply-config` temporarily updates `plugins.updater.endpoints` and `plugins.updater.pubkey` in `apps/shell/src-tauri/tauri.conf.json`. The original configuration is automatically restored upon exit (Ctrl+C).*
+
+2. In a second terminal, launch the desktop workstation:
+   ```sh
+   pnpm dev:desktop
+   ```
+
+3. In the workstation UI, trigger the update check (e.g. from the user/settings menu or `useAppUpdater().checkForUpdates()`). The UI will detect the simulated release (e.g. `v5.9.0`) and display the update notification toast.
+
+4. Press `Ctrl+C` in the first terminal when finished. The harness automatically shuts down the HTTP server, deletes temporary artifacts, and restores `tauri.conf.json`.
+
+### CLI options
+
+| Option | Description | Default |
+| --- | --- | --- |
+| `--port <number>` | Port for the local mock feed server | `4567` |
+| `--version <semver>` | Simulated release version to announce | `5.9.0` |
+| `--apply-config` | Temporarily patch `apps/shell/src-tauri/tauri.conf.json` with local endpoint & pubkey | `false` |
+| `--server-only` | Keep the mock feed server running persistently | `false` |
+| `--dry-run` | Generate and verify artifacts without starting the server | `false` |
+

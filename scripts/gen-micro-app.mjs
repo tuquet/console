@@ -8,7 +8,9 @@ import {
 } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-const root = process.cwd();
+const root = process.env.OPERON_ROOT
+  ? resolve(process.env.OPERON_ROOT)
+  : process.cwd();
 const rawName = process.argv[2]?.trim();
 
 if (!rawName) {
