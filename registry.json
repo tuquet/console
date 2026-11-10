@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "product": "operon-console",
+  "channels": {},
+  "releases": {},
+  "history": [
+    {
+      "at": "2026-11-10T03:57:14.739Z",
+      "actor": "local",
+      "action": "initialize"
+    }
+  ]
+}
