@@ -1,33 +1,22 @@
-# Operon - Automated Nightly Test Installer
-# Usage in Windows PowerShell:
-#   irm https://raw.githubusercontent.com/tuquet/console/main/scripts/install-nightly.ps1 | iex
-
+# Install the active managed nightly. GitHub Releases hosts the versioned installer.
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$url = "https://github.com/tuquet/console/releases/download/nightly/Operon-Workstation-Setup.exe"
-$out = "$env:TEMP\Operon-Workstation-Setup.exe"
-
-Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host "      Operon - Nightly Test Setup     " -ForegroundColor Cyan
-Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host "Downloading latest nightly installer..." -ForegroundColor Yellow
-
-try {
-    $wc = New-Object System.Net.WebClient
-    $wc.DownloadFile($url, $out)
-    $sizeMb = ([System.IO.FileInfo]$out).Length / 1MB
-    Write-Host ("Downloaded: {0:N2} MB to {1}" -f $sizeMb, $out) -ForegroundColor Green
-    Write-Host "Launching installer (CurrentUser mode, no Admin required)..." -ForegroundColor Green
-    Start-Process -FilePath $out
-
-    Write-Host "==================================================" -ForegroundColor Cyan
-    Write-Host "💡 Tester Tips:" -ForegroundColor Yellow
-    Write-Host "  • Press F12 or Ctrl+Shift+I anytime in the app to open DevTools / Console." -ForegroundColor White
-    Write-Host "  • Persistent logs are saved at:" -ForegroundColor White
-    Write-Host "    $HOME\.operon\logs\workstation.log" -ForegroundColor Cyan
-    Write-Host "==================================================" -ForegroundColor Cyan
-} catch {
-    Write-Host "Download failed: $_" -ForegroundColor Red
-    Write-Host "Please download manually at: $url" -ForegroundColor Yellow
-}
+$registryUrl = 'https://raw.githubusercontent.com/tuquet/console/release-state/registry.json'
+$registry = Invoke-RestMethod -Uri $registryUrl
+$tag = $registry.channels.nightly.tag
+if (-not $tag) { throw 'No active nightly release is available.' }
+$release = $registry.releases.$tag
+if ($release.status -ne 'published') { throw 'The nightly release is unavailable or has been revoked.' }
+$installer = @($release.artifacts | Where-Object { $_.kind -eq 'installer' -and $_.platform -eq 'windows-x86_64' })
+if ($installer.Count -ne 1) { throw 'The nightly installer manifest is invalid.' }
+$asset = $installer[0]
+$expectedPrefix = "https://github.com/tuquet/console/releases/download/$tag/"
+if (-not $asset.url.StartsWith($expectedPrefix) -or $asset.sha256 -notmatch '^[a-f0-9]{64}$') { throw 'The installer URL or checksum is invalid.' }
+$installerPath = Join-Path $env:TEMP ('Operon-' + [Guid]::NewGuid().ToString('N') + '-setup.exe')
+Write-Host "Downloading $tag..."
+Invoke-WebRequest -Uri $asset.url -OutFile $installerPath
+$actualHash = (Get-FileHash -LiteralPath $installerPath -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($actualHash -ne $asset.sha256) { throw 'Installer checksum verification failed. Installation stopped.' }
+Write-Host 'Checksum verified. Starting the installer.'
+Start-Process -FilePath $installerPath

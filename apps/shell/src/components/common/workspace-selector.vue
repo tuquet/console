@@ -273,7 +273,9 @@ async function handleCreateWorkspace() {
         </div>
 
         <!-- Quick Actions Footer -->
-        <div class="border-t border-border p-1 bg-muted/20 flex flex-col gap-0.5">
+        <div
+          class="border-t border-border p-1 bg-muted/20 flex flex-col gap-0.5"
+        >
           <Button
             type="button"
             variant="ghost"

@@ -1,6 +1,6 @@
 {
   "name": "@operon/console",
-  "version": "0.1.0",
+  "version": "5.8.0",
   "private": true,
   "keywords": [
     "operon",
@@ -33,13 +33,13 @@
     "build:local": "bash ./scripts/build-local.sh",
     "release:package": "node scripts/package-portable.mjs",
     "changeset": "pnpm exec changeset",
-    "check": "pnpm run check:circular && pnpm run check:dep && pnpm run check:i18n && pnpm run check:type && pnpm check:cspell",
+    "check": "pnpm run check:architecture && pnpm run check:circular && pnpm run check:dep && pnpm run check:i18n && pnpm run check:type && pnpm check:cspell",
     "check:circular": "vsh check-circular",
     "check:console": "node ./scripts/check-console.mjs",
     "check:cspell": "cspell lint \"**/*.ts\" \"**/README.md\" \".changeset/*.md\" --no-progress",
     "check:dep": "vsh check-dep",
     "check:i18n": "node ./scripts/check-i18n.mjs",
-    "check:type": "turbo run typecheck --concurrency=1",
+    "check:type": "pnpm run check:type-coverage && turbo run typecheck --concurrency=1",
     "clean": "node ./scripts/clean.mjs",
     "commit": "czg",
     "db:generate": "pnpm -F @operon/local-db run db:generate",
@@ -70,10 +70,18 @@
     "test:e2e": "turbo run test:e2e --concurrency=1",
     "update:deps": "npx taze -r -w",
     "version": "pnpm exec changeset version && pnpm install --no-frozen-lockfile",
-    "catalog": "pnpm dlx codemod pnpm/catalog"
+    "catalog": "pnpm dlx codemod pnpm/catalog",
+    "check:architecture": "node scripts/check-architecture.mjs",
+    "check:type-coverage": "node scripts/check-typecheck-coverage.mjs",
+    "desktop:check": "node scripts/check-desktop.mjs",
+    "release:version": "node scripts/release/version.mjs",
+    "release:check": "node scripts/release/version.mjs --check",
+    "release:prepare": "node scripts/release/prepare.mjs",
+    "release:verify": "node scripts/release/artifacts.mjs --verify",
+    "release:publish": "node scripts/release/publish.mjs",
+    "release:manage": "node scripts/release/state.mjs"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "catalog:",
     "@changesets/cli": "catalog:",
     "@eslint-community/eslint-plugin-eslint-comments": "catalog:",
     "@operon/commitlint-config": "workspace:*",
@@ -108,7 +116,6 @@
     "vite": "catalog:",
     "vitest": "catalog:",
     "vue": "catalog:",
-    "vue-i18n-extract": "catalog:",
     "vue-tsc": "catalog:"
   },
   "engines": {

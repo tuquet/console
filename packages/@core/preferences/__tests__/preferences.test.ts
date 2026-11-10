@@ -417,7 +417,7 @@ describe('preferences', () => {
       }>() as { pageSize: number };
     const preferencesExtension = preferenceManager.getPreferencesExtension<{
       pageSize: number;
-    }>() as {
+    }>() as unknown as {
       fields: Array<{ componentProps?: { max?: number }; label: string }>;
     };
     const [firstField] = preferencesExtension.fields;

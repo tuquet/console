@@ -1,5 +1,7 @@
 import type { KernelContext } from './types';
 
+import { KernelApiError } from './errors';
+
 /**
  * Creates a mock Kernel Context for standalone micro-app development and testing.
  */
@@ -21,13 +23,13 @@ export function createMockKernel(
     },
     api: {
       daemonPort: defaultDaemonPort,
-      supabaseRequest: async <T = any>(path: string) => {
+      supabaseRequest: async <T = unknown>(path: string) => {
         console.warn(
           `[MockKernel] supabaseRequest called on path "${path}" without active cloud auth.`,
         );
         return [] as unknown as T;
       },
-      localDaemonFetch: async <T = any>(
+      localDaemonFetch: async <T = unknown>(
         endpoint: string,
         options?: RequestInit,
       ) => {
@@ -36,7 +38,10 @@ export function createMockKernel(
           : `http://127.0.0.1:${defaultDaemonPort}${endpoint}`;
         const res = await fetch(url, options);
         if (!res.ok) {
-          throw new Error(`Local daemon responded with HTTP ${res.status}`);
+          throw new KernelApiError(
+            `Local daemon responded with HTTP ${res.status}`,
+            res.status,
+          );
         }
         return (await res.json()) as T;
       },

@@ -114,7 +114,8 @@ describe('dateUtils', () => {
     it('should return a valid IANA timezone string', () => {
       const tz = getSystemTimezone();
       expect(typeof tz).toBe('string');
-      expect(tz).toMatch(/^[A-Z]+\/[A-Z_]+/i);
+      const formatter = new Intl.DateTimeFormat('en', { timeZone: tz });
+      expect(formatter.resolvedOptions().timeZone).toBeTruthy();
     });
   });
 

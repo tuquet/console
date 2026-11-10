@@ -11,6 +11,9 @@
   },
   "license": "MIT",
   "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "files": [
     "src"
   ],

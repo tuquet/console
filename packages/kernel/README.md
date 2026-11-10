@@ -1,79 +1,11 @@
-# @operon/kernel — Micro-Frontend Shared Contract & Bridge
+# @operon/kernel
 
-> **Mô hình:** Hợp đồng giao tiếp kiểu dữ liệu (Contract SSOT) và cầu nối trung tâm giữa Host Shell (`@operon/shell`) và các ứng dụng vệ tinh (Micro-Apps).
+Typed contract between the shell and business applications. Applications consume host authentication, HTTP clients and events through `useKernel()`; they must not import shell internals.
 
----
+The shell provides `KERNEL_INJECTION_KEY`. Standalone applications provide `createMockKernel()`. Public types are defined in `src/types.ts`, including `KernelRequestOptions`; the implementation is the source of truth.
 
-## 1. Mục đích Kiến trúc
+HTTP failures use `KernelApiError` with an HTTP `status`. Network failures retain the original error. Response generics default to `unknown`; callers must select a response type or narrow the result. Generic types do not validate server payloads.
 
-Để đạt được tiêu chí **Decoupling hoàn toàn**, các Micro-Apps (`@operon/automation`, `@operon/system`) **tuyệt đối không được import trực tiếp** các Store hay hàm nội bộ của Shell.
+Apps are currently compiled and released with the shell. Prefer optional contract additions for compatibility; adding a required property requires updating host, mock and consumers together.
 
-Thay vào đó:
-
-1. **Shell** triển khai `KernelContext` và cung cấp qua Vue injection:
-   ```ts
-   // Tại apps/shell
-   import { KERNEL_INJECTION_KEY } from '@operon/kernel';
-   app.provide(KERNEL_INJECTION_KEY, hostKernel);
-   ```
-2. **Micro-App** tiêu thụ context thông qua hook chuẩn:
-   ```ts
-   // Tại micro-app
-   import { useKernel } from '@operon/kernel';
-   const kernel = useKernel();
-   console.log(kernel.auth.userId, kernel.auth.tenantId);
-   kernel.events.notify('success', 'Thao tác thành công');
-   ```
-3. **Chế độ Dev Offline (Standalone):**
-   ```ts
-   // Micro-app tự chạy độc lập không cần Shell
-   import { createMockKernel, KERNEL_INJECTION_KEY } from '@operon/kernel';
-   app.provide(KERNEL_INJECTION_KEY, createMockKernel());
-   ```
-
----
-
-## 2. Giao diện Hợp đồng (Contract API)
-
-```ts
-export interface KernelAuthContext {
-  accessToken: null | string;
-  hasCloudAuth: boolean;
-  userId: null | string;
-  tenantId: null | string;
-  roles: string[];
-  isSuperadmin: boolean;
-  username?: string;
-}
-
-export interface KernelApiContext {
-  supabaseRequest: <T = any>(path: string, options?: any) => Promise<T>;
-  localDaemonFetch: <T = any>(
-    endpoint: string,
-    options?: RequestInit,
-  ) => Promise<T>;
-  daemonPort: number;
-}
-
-export interface KernelEventContext {
-  notify: (
-    type: 'error' | 'info' | 'success' | 'warning',
-    message: string,
-  ) => void;
-  openLoginModal: () => void;
-  navigate: (path: string) => void;
-}
-
-export interface KernelContext {
-  auth: Readonly<KernelAuthContext>;
-  api: Readonly<KernelApiContext>;
-  events: Readonly<KernelEventContext>;
-}
-```
-
----
-
-## 3. Quy tắc Versioning (SemVer)
-
-- Mọi thay đổi trong `@operon/kernel` phải đảm bảo tương thích ngược tối đa (Backward Compatibility).
-- Khi thêm thuộc tính mới vào `KernelContext` (Minor version), các micro-apps cũ vẫn hoạt động bình thường mà không cần cập nhật.
+See [architecture](../../docs/ARCHITECTURE.md).

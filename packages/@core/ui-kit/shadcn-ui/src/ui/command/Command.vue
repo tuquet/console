@@ -10,7 +10,7 @@ import { cn } from '@operon-core/shared/utils';
 import { reactiveOmit } from '@vueuse/core';
 import { ListboxRoot, useFilter, useForwardPropsEmits } from 'reka-ui';
 
-import { provideCommandContext } from '.';
+import { provideCommandContext } from './context';
 
 const props = withDefaults(
   defineProps<ListboxRootProps & { class?: HTMLAttributes['class'] }>(),

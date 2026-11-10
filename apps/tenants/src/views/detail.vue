@@ -31,7 +31,7 @@ const workspace = computed(() => {
 });
 
 function goBack() {
-  router.push('/tenants');
+  void router.push({ name: 'Tenants' });
 }
 
 function notifyShell(

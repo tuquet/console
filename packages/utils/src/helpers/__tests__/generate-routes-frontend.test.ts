@@ -11,42 +11,54 @@ import {
 const mockRoutes = [
   {
     meta: {
+      title: 'Test route',
       authority: ['admin', 'user'],
       hideInMenu: false,
     },
+    component: { render: () => null },
     path: '/dashboard',
     children: [
       {
+        component: { render: () => null },
         path: '/dashboard/overview',
-        meta: { authority: ['admin'], hideInMenu: false },
+        meta: { title: 'Test route', authority: ['admin'], hideInMenu: false },
       },
       {
+        component: { render: () => null },
         path: '/dashboard/stats',
-        meta: { authority: ['user'], hideInMenu: true },
+        meta: { title: 'Test route', authority: ['user'], hideInMenu: true },
       },
     ],
   },
   {
-    meta: { authority: ['admin'], hideInMenu: false },
+    meta: { title: 'Test route', authority: ['admin'], hideInMenu: false },
+    component: { render: () => null },
     path: '/settings',
   },
   {
-    meta: { hideInMenu: false },
+    meta: { title: 'Test route', hideInMenu: false },
+    component: { render: () => null },
     path: '/profile',
   },
 ] as RouteRecordRaw[];
 
+function routeAt(index: number): RouteRecordRaw {
+  const route = mockRoutes[index];
+  if (!route) throw new Error(`Missing route fixture ${index}`);
+  return route;
+}
+
 describe('hasAuthority', () => {
   it('should return true if there is no authority defined', () => {
-    expect(hasAuthority(mockRoutes[2], ['admin'])).toBe(true);
+    expect(hasAuthority(routeAt(2), ['admin'])).toBe(true);
   });
 
   it('should return true if the user has the required authority', () => {
-    expect(hasAuthority(mockRoutes[0], ['admin'])).toBe(true);
+    expect(hasAuthority(routeAt(0), ['admin'])).toBe(true);
   });
 
   it('should return false if the user does not have the required authority', () => {
-    expect(hasAuthority(mockRoutes[1], ['user'])).toBe(false);
+    expect(hasAuthority(routeAt(1), ['user'])).toBe(false);
   });
 });
 
@@ -89,8 +101,8 @@ describe('generateRoutesByFrontend', () => {
   it('should handle missing meta fields', async () => {
     const routesWithMissingMeta = [
       { path: '/path1' }, // No meta
-      { meta: {}, path: '/path2' }, // Empty meta
-      { meta: { authority: ['admin'] }, path: '/path3' }, // Only authority
+      { meta: { title: 'Test route' }, path: '/path2' }, // Empty meta
+      { meta: { title: 'Test route', authority: ['admin'] }, path: '/path3' }, // Only authority
     ];
     const generatedRoutes = await generateRoutesByFrontend(
       routesWithMissingMeta as RouteRecordRaw[],
@@ -98,8 +110,8 @@ describe('generateRoutesByFrontend', () => {
     );
     expect(generatedRoutes).toEqual([
       { path: '/path1' },
-      { meta: {}, path: '/path2' },
-      { meta: { authority: ['admin'] }, path: '/path3' },
+      { meta: { title: 'Test route' }, path: '/path2' },
+      { meta: { title: 'Test route', authority: ['admin'] }, path: '/path3' },
     ]);
   });
 
@@ -109,11 +121,19 @@ describe('generateRoutesByFrontend', () => {
     // causing higher-privilege users to lose access to those routes.
     const routes = [
       {
-        meta: { authority: ['admin', 'user'] },
+        meta: { title: 'Test route', authority: ['admin', 'user'] },
         path: '/dashboard',
         children: [
-          { path: '/dashboard/overview', meta: { authority: ['admin'] } },
-          { path: '/dashboard/stats', meta: { authority: ['user'] } },
+          {
+            component: { render: () => null },
+            path: '/dashboard/overview',
+            meta: { title: 'Test route', authority: ['admin'] },
+          },
+          {
+            component: { render: () => null },
+            path: '/dashboard/stats',
+            meta: { title: 'Test route', authority: ['user'] },
+          },
         ],
       },
     ] as unknown as RouteRecordRaw[];

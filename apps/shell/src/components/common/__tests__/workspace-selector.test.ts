@@ -2,10 +2,11 @@
 /* eslint-disable vue/multi-word-component-names, vue/no-reserved-component-names */
 import { createApp, defineComponent, h, nextTick } from 'vue';
 
+import { useAccessStore } from '@operon/stores';
+
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useAccessStore } from '@operon/stores';
 import { useWorkspaceStore } from '#/store/workspace';
 
 import WorkspaceSelector from '../workspace-selector.vue';

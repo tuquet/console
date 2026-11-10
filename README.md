@@ -1,6 +1,6 @@
 # OperonAdmin
 
-> Cross-platform enterprise administration portal and desktop management center built with Tauri v2, Vue 3, and UnoCSS.
+> Cross-platform enterprise administration portal and desktop management center built with Tauri v2, Vue 3, and Tailwind CSS.
 
 Official Documentation & Guides: **[https://docs.operon.com/en/console/](https://docs.operon.com/en/console/)**
 
@@ -14,6 +14,11 @@ pnpm dev
 ```
 
 ---
+
+## Repository guides
+
+- [Architecture and module ownership](docs/ARCHITECTURE.md)
+- [Web and desktop development](docs/DEVELOPMENT.md)
 
 ## Documentation
 

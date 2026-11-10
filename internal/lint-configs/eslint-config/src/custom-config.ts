@@ -67,7 +67,7 @@ const customConfig: Linter.Config[] = [
         {
           patterns: [
             {
-              group: ['@operon/*'],
+              group: ['@operon/*', '**/apps/**'],
               message:
                 'The @core package cannot import the @operon package, please use the @core package itself',
             },
@@ -86,7 +86,7 @@ const customConfig: Linter.Config[] = [
         {
           patterns: [
             {
-              group: ['@operon/*', '@operon-core/*'],
+              group: ['@operon/*', '@operon-core/*', '**/apps/**'],
               message:
                 'The @operon-core/shared package cannot import the @operon package, please use the @core/shared package itself',
             },
@@ -115,9 +115,69 @@ const customConfig: Linter.Config[] = [
         {
           patterns: [
             {
-              group: ['@operon/*'],
+              group: ['@operon/*', '**/apps/**'],
               message:
                 'The @operon package cannot be imported, please use the @core package itself',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  ...['automation', 'system', 'tenants'].map((app): Linter.Config => ({
+    files: [`apps/${app}/**/*`],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['#/api/*', '#/layouts/*', '#/locales/*', '#/stores/*'],
+              message: 'Use the public module entry point.',
+            },
+            {
+              group: ['shell', 'automation', 'system', 'tenants'].flatMap(
+                (target) =>
+                  target === app
+                    ? []
+                    : [
+                        `@operon/${target}`,
+                        `@operon/${target}/**`,
+                        `**/${target}/**`,
+                      ],
+              ),
+              message:
+                'Business applications communicate through @operon/kernel; cross-app imports are forbidden.',
+            },
+          ],
+        },
+      ],
+    },
+  })),
+  {
+    files: [
+      'packages/effects/**/*',
+      'packages/kernel/**/*',
+      'packages/local-db/**/*',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '**/apps/**',
+                '@operon/shell',
+                '@operon/system',
+                '@operon/automation',
+                '@operon/tenants',
+                '@operon/shell/**',
+                '@operon/system/**',
+                '@operon/automation/**',
+                '@operon/tenants/**',
+              ],
+              message: 'Shared packages must not import applications.',
             },
           ],
         },
