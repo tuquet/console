@@ -965,11 +965,14 @@ describe('useVbenForm integration', () => {
 
     await input.trigger('blur');
     await flushPromises();
-    expect(wrapper.text()).toContain('Name is required');
+    await vi.waitFor(() => {
+      expect(wrapper.text()).toContain('Name is required');
+    });
 
     await input.setValue('Ada');
-    await flushPromises();
-    expect(wrapper.text()).not.toContain('Name is required');
+    await vi.waitFor(() => {
+      expect(wrapper.text()).not.toContain('Name is required');
+    });
 
     await input.trigger('blur');
     await flushPromises();
