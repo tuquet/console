@@ -1,3 +1,5 @@
+import type { Rollup } from 'vite';
+
 import { describe, expect, it } from 'vitest';
 
 import { viteCssLayerPlugin } from './css-layer';
@@ -77,12 +79,17 @@ describe('viteCssLayerPlugin', () => {
       },
     ]);
 
-    generateBundle.call(undefined as never, {} as never, bundle);
+    generateBundle.call(
+      undefined as never,
+      {} as never,
+      bundle as unknown as Rollup.OutputBundle,
+      false,
+    );
 
-    expect(bundle['element-x.css'].source).toBe(
+    expect(bundle['element-x.css']?.source).toBe(
       `${LAYER_ORDER_STATEMENT}\n@layer el{.el-button{color:red}}`,
     );
-    expect(bundle['theme-x.css'].source).toBe('.local { color: blue; }');
+    expect(bundle['theme-x.css']?.source).toBe('.local { color: blue; }');
   });
 
   it('does not inject the statement twice when already present', () => {
@@ -102,9 +109,14 @@ describe('viteCssLayerPlugin', () => {
       },
     ]);
 
-    generateBundle.call(undefined as never, {} as never, bundle);
+    generateBundle.call(
+      undefined as never,
+      {} as never,
+      bundle as unknown as Rollup.OutputBundle,
+      false,
+    );
 
-    expect(bundle['element-x.css'].source).toBe(
+    expect(bundle['element-x.css']?.source).toBe(
       `${LAYER_ORDER_STATEMENT}\n@layer el{.el-button{color:red}}`,
     );
   });
@@ -126,9 +138,14 @@ describe('viteCssLayerPlugin', () => {
       },
     ]);
 
-    generateBundle.call(undefined as never, {} as never, bundle);
+    generateBundle.call(
+      undefined as never,
+      {} as never,
+      bundle as unknown as Rollup.OutputBundle,
+      false,
+    );
 
-    expect(bundle['element-x.css'].source).toBe(
+    expect(bundle['element-x.css']?.source).toBe(
       `${LAYER_ORDER_STATEMENT}\n\uFEFF@layer el{.el-button{color:red}}`,
     );
   });
@@ -150,9 +167,14 @@ describe('viteCssLayerPlugin', () => {
       },
     ]);
 
-    generateBundle.call(undefined as never, {} as never, bundle);
+    generateBundle.call(
+      undefined as never,
+      {} as never,
+      bundle as unknown as Rollup.OutputBundle,
+      false,
+    );
 
-    expect(bundle['element-x.js'].source).toBe(
+    expect(bundle['element-x.js']?.source).toBe(
       '@layer el{.el-button{color:red}}',
     );
   });

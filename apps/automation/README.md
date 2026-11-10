@@ -1,63 +1,15 @@
-# @operon/automation — Automation Mesh & Browser Sandbox Micro-App
+# @operon/automation
 
-> **Mô hình:** Micro-Frontend độc lập phụ trách điều khiển luồng tự động hóa, quản trị proxy mạng và hồ sơ trình duyệt Chromium chống phát hiện (stealth sandbox).
+Automation development overview and a browser management placeholder. Browser management is not implemented yet.
 
----
+This application is compiled and released with the shell. Standalone development uses a mock kernel; it does not provide independent production deployment.
 
-## 1. Tính năng & Kiến trúc Micro-Frontend
+- `src/manifest.ts` owns child routes and screen-level permissions.
+- `src/remote-entry.ts` exports `automationManifest` for the shell.
+- `src/bootstrap.ts` mounts a router view with the same routes for standalone development.
+- Host session, HTTP clients and notifications are consumed through `useKernel()`.
+- Local stores use the `automation:*` namespace and share the shell's Pinia instance when embedded.
 
-Ứng dụng được thiết kế theo chuẩn **Micro-Frontend decoupled 100%**:
+Run `pnpm dev:automation` from the repository root (port 5321). Use named routes for navigation so screens work under standalone and shell route prefixes.
 
-| Chế độ chạy | Cổng / Entry | Mô tả |
-| :-- | :-- | :-- |
-| **Standalone Dev** | `http://localhost:5321` (`src/main.ts`) | Khởi chạy độc lập, tự tạo Mock Kernel qua `createMockKernel()` của `@operon/kernel` để phát triển và test UI mà không cần chạy Host Shell. |
-| **Embedded Remote** | `src/remote-entry.ts` | Xuất `AutomationView`, `BrowsersView` và `automationRoutes` để Host Shell (`@operon/shell`) nạp động qua URL/CDN hoặc workspace module. |
-
----
-
-## 2. Nguyên tắc Quản lý State & Pinia Store
-
-1. **Store ID Namespacing:** Mọi Pinia store bên trong micro-app bắt buộc phải có tiền tố `automation:*` (ví dụ: `useAutomationSampleStore = defineStore('automation:sample', ...)`).
-2. **Single Pinia Tree:**
-   - Ở chế độ **Standalone**, `src/bootstrap.ts` khởi tạo `createPinia()`.
-   - Ở chế độ **Embedded**, micro-app tự động tái sử dụng instance Pinia toàn cục của Shell (`getActivePinia()`), tuyệt đối không tạo thêm Pinia instance mới để tránh phá vỡ reactivity.
-3. **Ranh giới Dữ liệu (State Boundary):**
-   - Micro-app chỉ đọc Auth/Session/Tenant thông qua `useKernel().auth`.
-   - Gửi thông báo/sự kiện lên Shell qua `useKernel().events.notify(type, message)`.
-
----
-
-## 3. Cấu trúc Thư mục
-
-```text
-apps/automation/
-├── src/
-│   ├── stores/          # Pinia stores cục bộ (namespaced automation:*)
-│   ├── views/           # UI components & views chuẩn Shadcn UI + Tailwind v4
-│   │   └── index.vue    # Starter View demo Kernel Auth, Toast & Reactive State
-│   ├── bootstrap.ts     # Standalone bootstrap với MockKernel
-│   ├── main.ts          # Entry point Standalone
-│   └── remote-entry.ts  # Điểm xuất module công khai cho Host Shell
-├── index.html           # HTML template cho chế độ Standalone
-├── package.json         # Cấu hình gói @operon/automation
-├── tsconfig.json        # Cấu hình TypeScript web-app
-├── tsconfig.node.json   # Cấu hình TypeScript cho Vite config
-└── vite.config.ts       # Cấu hình Vite cổng 5321
-```
-
----
-
-## 4. Các Lệnh Thực thi (Scripts)
-
-Chạy từ thư mục gốc monorepo hoặc trực tiếp trong `apps/automation`:
-
-```bash
-# Chạy standalone dev server tại http://localhost:5321
-pnpm --filter @operon/automation dev
-
-# Kiểm tra lỗi kiểu dữ liệu TypeScript (vue-tsc)
-pnpm --filter @operon/automation typecheck
-
-# Đóng gói bundle production
-pnpm --filter @operon/automation build
-```
+See [architecture](../../docs/ARCHITECTURE.md) and [development setup](../../docs/DEVELOPMENT.md).

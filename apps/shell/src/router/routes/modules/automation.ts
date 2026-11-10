@@ -1,5 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+import { automationManifest } from '@operon/automation';
+
 import { $t } from '#/locales';
 
 const routes: RouteRecordRaw[] = [
@@ -13,33 +15,8 @@ const routes: RouteRecordRaw[] = [
     },
     name: 'Automation',
     path: '/automation',
-    redirect: '/automation/overview',
-    children: [
-      {
-        name: 'AutomationOverview',
-        path: 'overview',
-        component: () =>
-          import('@operon/automation').then((m) => m.AutomationView),
-        meta: {
-          authority: ['superadmin', 'local_operator'],
-          icon: 'lucide:activity',
-          plugin: 'operon',
-          title: $t('page.automation.overview'),
-        },
-      },
-      {
-        name: 'AutomationBrowsers',
-        path: 'browsers',
-        component: () =>
-          import('@operon/automation').then((m) => m.BrowsersView),
-        meta: {
-          authority: ['superadmin', 'local_operator'],
-          icon: 'lucide:globe',
-          plugin: 'operon',
-          title: $t('page.automation.browsers'),
-        },
-      },
-    ],
+    redirect: `/automation/${automationManifest.defaultPath}`,
+    children: automationManifest.routes($t),
   },
 ];
 

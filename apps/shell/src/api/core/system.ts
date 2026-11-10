@@ -70,7 +70,10 @@ export async function listSystemPlugins(): Promise<SystemPlugin[]> {
   } catch (error: unknown) {
     const err = error as { isAuthError?: boolean; message?: string };
     if (!err?.isAuthError) {
-      console.error('[System] Failed to load system plugins:', err?.message || err);
+      console.error(
+        '[System] Failed to load system plugins:',
+        err?.message || err,
+      );
     }
     return [];
   }

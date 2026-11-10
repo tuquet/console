@@ -1,0 +1,40 @@
+name: Quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Architecture and circular dependencies
+        run: |
+          pnpm check:architecture
+          pnpm check:circular
+      - name: Workspace types
+        run: pnpm check:type
+      - name: Lint
+        run: pnpm lint
+      - name: Translations
+        run: pnpm check:i18n
+      - name: Unit tests
+        run: pnpm test:unit
+      - name: Dependency declarations
+        run: pnpm check:dep

@@ -3,7 +3,7 @@ import type { CAC } from 'cac';
 import { access, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
-import { extname, join } from 'node:path';
+import { extname, join, resolve } from 'node:path';
 
 import { execa, getStagedFiles } from '@operon/node-utils';
 
@@ -59,7 +59,13 @@ async function detectCircularDependencies({
   const outputFile = join(tempDir, 'circles.json');
 
   try {
-    const args = [circularScannerCli, cwd, '--output', outputFile];
+    const args = [
+      circularScannerCli,
+      cwd,
+      '--exclude-types',
+      '--output',
+      outputFile,
+    ];
 
     if (staged) {
       args.push('--absolute');
@@ -67,18 +73,19 @@ async function detectCircularDependencies({
 
     args.push('--ignore', ignorePattern);
 
+    // The scanner does not write an output file when no cycles exist.
     await execa(process.execPath, args, {
       cwd,
     });
 
-    await access(outputFile);
+    try {
+      await access(outputFile);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') return [];
+      throw error;
+    }
     const output = await readFile(outputFile, 'utf8');
     return JSON.parse(output) as CircularDependencyResult[];
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException)?.code === 'ENOENT') {
-      return [];
-    }
-    throw error;
   } finally {
     await rm(tempDir, { force: true, recursive: true });
   }
@@ -120,6 +127,11 @@ async function checkCircular({
       ...DEFAULT_CONFIG,
       ...config,
     };
+    if (!Number.isInteger(finalConfig.threshold) || finalConfig.threshold < 0) {
+      throw new Error(
+        'Circular dependency threshold must be a non-negative integer',
+      );
+    }
 
     // Generate ignore pattern
     const ignorePattern = `**/{${finalConfig.ignoreDirs.join(',')}}/**`;
@@ -130,6 +142,11 @@ async function checkCircular({
       const cachedResults = cache.get(cacheKey);
       if (cachedResults && verbose) {
         formatCircles(cachedResults);
+      }
+      if (cachedResults && cachedResults.length > finalConfig.threshold) {
+        throw new Error(
+          `${cachedResults.length} circular dependencies exceed threshold ${finalConfig.threshold}`,
+        );
       }
       return;
     }
@@ -150,14 +167,12 @@ async function checkCircular({
 
       const circularFiles: CircularDependencyResult[] = [];
 
-      for (const file of files) {
-        for (const result of results) {
-          const resultFiles = result.flat();
-          if (resultFiles.includes(file)) {
-            circularFiles.push(result);
-          }
-        }
-      }
+      const stagedPaths = new Set(files.map((file) => resolve(file)));
+      circularFiles.push(
+        ...results.filter((result) =>
+          result.flat().some((file) => stagedPaths.has(resolve(file))),
+        ),
+      );
 
       // Update cache
       cache.set(cacheKey, circularFiles);
@@ -172,10 +187,10 @@ async function checkCircular({
       }
     }
 
-    // If circular dependencies are found, only log warning
-    if (results.length > 0) {
-      console.log(
-        '\n⚠️ Warning: Circular dependencies found, please check and fix',
+    const selectedResults = cache.get(cacheKey) ?? [];
+    if (selectedResults.length > finalConfig.threshold) {
+      throw new Error(
+        `${selectedResults.length} circular dependencies exceed threshold ${finalConfig.threshold}`,
       );
     }
   } catch (error) {
@@ -183,6 +198,7 @@ async function checkCircular({
       '❌ Error checking circular dependencies:',
       error instanceof Error ? error.message : error,
     );
+    throw error;
   }
 }
 
@@ -214,4 +230,4 @@ function defineCheckCircularCommand(cac: CAC): void {
     });
 }
 
-export { type CheckCircularConfig, defineCheckCircularCommand };
+export { checkCircular, type CheckCircularConfig, defineCheckCircularCommand };

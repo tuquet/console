@@ -53,7 +53,7 @@ interface CustomPreferencesSelectField<
   TKey extends string = string,
 > extends BaseCustomPreferencesField<TKey, string> {
   component: 'select';
-  options: CustomPreferencesOption[];
+  options: readonly CustomPreferencesOption[];
 }
 
 interface CustomPreferencesSwitchField<
@@ -90,7 +90,7 @@ type CustomPreferencesField<
 interface PreferencesExtension<
   TCustomPreferences extends object = CustomPreferencesRecord,
 > {
-  fields: Array<CustomPreferencesField<TCustomPreferences>>;
+  fields: ReadonlyArray<CustomPreferencesField<TCustomPreferences>>;
   tabLabel: string;
   title?: string;
 }

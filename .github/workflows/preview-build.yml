@@ -25,10 +25,18 @@ jobs:
         with:
           path: console
 
+      - name: Read subsystem revision
+        id: subsystem
+        shell: pwsh
+        run: |
+          $revision = (Get-Content console/subsystem.json -Raw | ConvertFrom-Json).revision
+          "revision=$revision" >> $env:GITHUB_OUTPUT
+
       - name: Checkout Operon Subsystem (Private)
         uses: actions/checkout@v4
         with:
           repository: tuquet/operon
+          ref: ${{ steps.subsystem.outputs.revision }}
           ssh-key: ${{ secrets.OPERON_DEPLOY_KEY }}
           path: operon
 

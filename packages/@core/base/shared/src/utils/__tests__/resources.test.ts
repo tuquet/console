@@ -38,7 +38,7 @@ describe('loadScript', () => {
   });
 
   it('should reject when the script fails to load', async () => {
-    let capturedScript: HTMLScriptElement | null = null;
+    const captured: { script?: HTMLScriptElement } = {};
 
     // Intercept append and capture script element without inserting into DOM,
     // preventing happy-dom v20+ from auto-firing load event
@@ -47,7 +47,7 @@ describe('loadScript', () => {
       .mockImplementation((...nodes) => {
         for (const node of nodes) {
           if (node instanceof HTMLScriptElement) {
-            capturedScript = node;
+            captured.script = node;
           }
         }
       });
@@ -56,11 +56,11 @@ describe('loadScript', () => {
 
     appendSpy.mockRestore();
 
-    expect(capturedScript).toBeTruthy();
-    if (!capturedScript) {
+    expect(captured.script).toBeTruthy();
+    if (!captured.script) {
       throw new Error('Expected the captured script element to exist');
     }
-    capturedScript.dispatchEvent(new Event('error'));
+    captured.script.dispatchEvent(new Event('error'));
 
     await expect(promise).rejects.toThrow('Failed to load script: error.js');
   });

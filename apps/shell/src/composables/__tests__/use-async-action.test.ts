@@ -91,6 +91,7 @@ describe('useAsyncAction & executeWithFeedback', () => {
     const { executeAction } = useAsyncAction();
     await executeAction(
       async () => {
+        // oxlint-disable-next-line no-throw-literal -- Exercise non-Error rejection normalization.
         throw {};
       },
       {

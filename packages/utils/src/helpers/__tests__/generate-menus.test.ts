@@ -14,14 +14,17 @@ describe('generateMenus', () => {
     {
       meta: { icon: 'home-icon', title: 'Home' },
       name: 'home',
+      component: { render: () => null },
       path: '/home',
     },
     {
       meta: { hideChildrenInMenu: true, icon: 'about-icon', title: 'About' },
       name: 'about',
+      component: { render: () => null },
       path: '/about',
       children: [
         {
+          component: { render: () => null },
           path: 'team',
           name: 'team',
           meta: { icon: 'team-icon', title: 'Team' },
@@ -78,6 +81,7 @@ describe('generateMenus', () => {
       {
         meta: { icon: 'user-icon', order: 1, title: 'Profile' },
         name: 'profile',
+        component: { render: () => null },
         path: '/profile',
       },
     ] as RouteRecordRaw[];
@@ -105,6 +109,7 @@ describe('generateMenus', () => {
       {
         meta: { icon: 'details-icon', title: 'User Details' },
         name: 'userDetails',
+        component: { render: () => null },
         path: '/users/:userId',
       },
     ] as RouteRecordRaw[];
@@ -131,12 +136,14 @@ describe('generateMenus', () => {
     const mockRoutesWithRedirect = [
       {
         name: 'redirectedRoute',
+        component: { render: () => null },
         path: '/old-path',
         redirect: '/new-path',
       },
       {
         meta: { icon: 'path-icon', title: 'New Path' },
         name: 'newPath',
+        component: { render: () => null },
         path: '/new-path',
       },
     ] as RouteRecordRaw[];

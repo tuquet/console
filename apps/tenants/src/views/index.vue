@@ -36,7 +36,7 @@ function handleSwitchWorkspace(id: string, name: string) {
 }
 
 function navigateToDetail(id: string) {
-  router.push(`/tenants/${id}`);
+  void router.push({ name: 'TenantDetail', params: { id } });
 }
 </script>
 

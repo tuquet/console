@@ -10,6 +10,9 @@
   },
   "license": "MIT",
   "type": "module",
+  "scripts": {
+    "typecheck": "vue-tsc --noEmit"
+  },
   "sideEffects": [
     "**/*.css"
   ],
@@ -25,7 +28,6 @@
     "@operon-core/form-ui": "workspace:*",
     "@operon-core/layout-ui": "workspace:*",
     "@operon-core/menu-ui": "workspace:*",
-    "@operon-core/popup-ui": "workspace:*",
     "@operon-core/shadcn-ui": "workspace:*",
     "@operon-core/shared": "workspace:*",
     "@operon-core/tabs-ui": "workspace:*",

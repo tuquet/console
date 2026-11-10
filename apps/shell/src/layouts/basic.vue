@@ -64,7 +64,7 @@ const notifications = ref<NotificationItem[]>([
     isRead: false,
     message: 'Quick link to overview workspace dashboard.',
     title: 'Navigate to Workspace',
-    link: '/workspace',
+    link: '/tenants',
   },
   {
     id: 6,
