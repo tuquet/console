@@ -84,6 +84,9 @@ catalogs:
     '@tanstack/vue-store':
       specifier: ^0.11.0
       version: 0.11.1
+    '@tanstack/vue-table':
+      specifier: ^9.3.1
+      version: 9.3.1
     '@tauri-apps/api':
       specifier: ^2.2.0
       version: 2.12.4
@@ -654,7 +657,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/types
       '@tanstack/vue-table':
-        specifier: ^9.3.1
+        specifier: 'catalog:'
         version: 9.3.1(vue@3.5.41(typescript@6.0.3))
       pinia:
         specifier: ^4.0.2
@@ -14240,7 +14243,7 @@ snapshots:
     dependencies:
       '@tanstack/devtools-event-client': 0.4.4
       '@tanstack/pacer-lite': 0.1.1
-      '@tanstack/store': 0.11.1
+      '@tanstack/store': 0.11.2
 
   '@tanstack/pacer-lite@0.1.1': {}
 
