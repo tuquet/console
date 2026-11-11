@@ -22,6 +22,7 @@ import {
   zoomOut,
 } from '#/adapter/desktop';
 import { checkAndNotifyUpdate } from '#/adapter/desktop/updater';
+import { useAppUpdater } from '#/composables/use-app-updater';
 import { createHostKernel } from '#/kernel/host-kernel';
 import DesktopShell from '#/layouts/widgets/desktop-shell.vue';
 
@@ -222,6 +223,11 @@ onMounted(async () => {
     await revealWindow();
     await initDesktopAuthHandling();
     await restoreZoom();
+
+    // Silent background check for updates after window is initialized
+    setTimeout(() => {
+      useAppUpdater().checkForUpdates(true);
+    }, 2500);
   }
 });
 

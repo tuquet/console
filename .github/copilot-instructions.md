@@ -16,12 +16,12 @@ pnpm check:type
 pnpm run lint
 
 # 3. Web build test
-pnpm run build:admin
+pnpm run build:shell
 ```
 
 ## Catalog Dependencies:
 
-- Always use `"catalog:"` in `apps/web-admin/package.json` for external dependencies.
+- Always use `"catalog:"` in `apps/shell/package.json` for external dependencies.
 - Define versions in `pnpm-workspace.yaml`.
 
 ## CI Optimization:

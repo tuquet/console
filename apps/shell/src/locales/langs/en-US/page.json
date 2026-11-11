@@ -939,6 +939,9 @@
   "app": {
     "menu_operon": "Operon",
     "menu_check_updates": "Check for Updates...",
+    "restart_to_update": "Restart to update",
+    "restarting_update": "Restarting...",
+    "update_available_title": "New version {version} is ready to install",
     "menu_workspace": "Workspace",
     "menu_command_palette": "Command Palette",
     "menu_view": "View",
@@ -946,5 +949,9 @@
     "menu_zoom_out": "Zoom Out",
     "menu_reset_zoom": "Reset Zoom",
     "menu_window": "Window"
+  },
+  "playground": {
+    "title": "Playground",
+    "overview": "Overview"
   }
 }

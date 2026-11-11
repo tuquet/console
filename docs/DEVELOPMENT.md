@@ -38,3 +38,23 @@ If the checkout already exists, fetch and inspect local changes before switching
 `subsystem.json` pins the exact subsystem commit used by preview and release CI. To upgrade it, test a clean checkout at the proposed revision and commit the manifest change with the console changes that require it. Run `pnpm desktop:check` before a local release build. This validates Rust tools, the checkout revision and its clean working tree; installer-specific requirements are checked by Tauri.
 
 The CI quality workflow checks frontend code without private credentials. Desktop preview and release workflows additionally require subsystem checkout access and the existing build/signing configuration.
+
+## Local updater simulation
+
+To test the desktop auto-updater flow locally without GitHub releases or CI access:
+
+```sh
+pnpm updater:simulate
+```
+
+To test interactively alongside a running desktop application:
+
+```sh
+# Terminal 1: Start mock updater server and patch local Tauri config
+pnpm updater:simulate --server-only --apply-config
+
+# Terminal 2: Run desktop app
+pnpm dev:desktop
+```
+
+See [docs/RELEASE-PROCESS.md](RELEASE-PROCESS.md#local-updater-simulation-and-testing) for architecture, workflow stages and CLI flags.
