@@ -110,12 +110,15 @@ The harness automates the two-stage lifecycle:
 To test the updater prompt and toast notifications in the actual Tauri desktop UI:
 
 1. Start the persistent mock feed server and patch the local Tauri configuration:
+
    ```sh
    pnpm updater:simulate --server-only --apply-config
    ```
-   *`--apply-config` temporarily updates `plugins.updater.endpoints` and `plugins.updater.pubkey` in `apps/shell/src-tauri/tauri.conf.json`. The original configuration is automatically restored upon exit (Ctrl+C).*
+
+   _`--apply-config` temporarily updates `plugins.updater.endpoints` and `plugins.updater.pubkey` in `apps/shell/src-tauri/tauri.conf.json`. The original configuration is automatically restored upon exit (Ctrl+C)._
 
 2. In a second terminal, launch the desktop workstation:
+
    ```sh
    pnpm dev:desktop
    ```
@@ -133,4 +136,3 @@ To test the updater prompt and toast notifications in the actual Tauri desktop U
 | `--apply-config` | Temporarily patch `apps/shell/src-tauri/tauri.conf.json` with local endpoint & pubkey | `false` |
 | `--server-only` | Keep the mock feed server running persistently | `false` |
 | `--dry-run` | Generate and verify artifacts without starting the server | `false` |
-

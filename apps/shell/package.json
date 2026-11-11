@@ -58,8 +58,7 @@
     "dayjs": "catalog:",
     "pinia": "catalog:",
     "vue": "catalog:",
-    "vue-router": "catalog:",
-    "@operon/playground": "workspace:*"
+    "vue-router": "catalog:"
   },
   "devDependencies": {
     "@tauri-apps/cli": "catalog:",

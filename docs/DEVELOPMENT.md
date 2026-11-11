@@ -58,4 +58,3 @@ pnpm dev:desktop
 ```
 
 See [docs/RELEASE-PROCESS.md](RELEASE-PROCESS.md#local-updater-simulation-and-testing) for architecture, workflow stages and CLI flags.
-
