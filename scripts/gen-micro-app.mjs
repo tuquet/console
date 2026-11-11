@@ -197,21 +197,12 @@ makeFile(
   'README.md',
   `# @operon/${name}
 
-Micro-app độc lập quản lý miền nghiệp vụ **${titleName}** trong kiến trúc Operon Console.
+${titleName} micro-app (\`${name}:*\` Pinia stores, \`src/manifest.ts\` routes, \`useKernel()\` host bridge).
 
-## Chế độ hoạt động
-
-1. **Phát triển độc lập (Standalone Sandbox):**
-   \`\`\`bash
-   pnpm --filter @operon/${name} dev
-   \`\`\`
-   Chạy tại \`http://localhost:${nextPort}\` với Mock Kernel đầy đủ.
-
-2. **Chạy tích hợp cùng Host Shell:**
-   \`\`\`bash
-   pnpm dev:shell
-   \`\`\`
-   Nạp động qua remote-entry tại route \`/${name}\`.
+\`\`\`sh
+pnpm dev:${name}   # Standalone mock-host sandbox (port ${nextPort})
+pnpm dev:shell    # Embedded at /${name}
+\`\`\`
 `,
 );
 

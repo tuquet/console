@@ -1,32 +1,20 @@
-# OperonAdmin
+# Operon Console
 
-> Cross-platform enterprise administration portal and desktop management center built with Tauri v2, Vue 3, and Tailwind CSS.
+Enterprise administration portal and Tauri v2 desktop workstation (Vue 3, Tailwind CSS, TypeScript).
 
-Official Documentation & Guides: **[https://docs.operon.com/en/console/](https://docs.operon.com/en/console/)**
+## Quick start
 
----
-
-## Installation & Development
-
-```bash
-pnpm install
+```sh
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
----
+## Guides
 
-## Repository guides
-
-- [Architecture and module ownership](docs/ARCHITECTURE.md)
-- [Web and desktop development](docs/DEVELOPMENT.md)
-
-## Documentation
-
-Full operational guides, control plane views, and architecture references are maintained at the official Documentation SSOT:
-
-👉 **[https://docs.operon.com/en/console/](https://docs.operon.com/en/console/)**
-
----
+- [Architecture & boundaries](docs/ARCHITECTURE.md)
+- [Web & desktop development](docs/DEVELOPMENT.md)
+- [Release lifecycle & CI/CD](docs/RELEASING.md)
+- [Official docs](https://docs.operon.com/en/console/)
 
 ## License
 

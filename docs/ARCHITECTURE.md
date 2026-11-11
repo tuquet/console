@@ -1,44 +1,42 @@
-# Console architecture
+# Architecture
 
-Console is a pnpm monorepo. The shell and business applications are compiled and released together. Dynamic imports split bundles; they do not provide independent application deployment.
+`console` is a pnpm monorepo. The shell and micro-apps compile and release together; dynamic imports split bundles rather than deploying apps independently.
 
-## Responsibilities
+## Workspace layout
 
-| Directory | Responsibility |
+| Path | Owns |
 | --- | --- |
-| `apps/shell` | Authentication, session lifecycle, layout, top-level routes, access guards and desktop adapters |
-| `apps/system`, `apps/tenants`, `apps/automation` | Business screens, local state and child route manifests |
-| `packages/kernel` | Typed host contract, injection key, mock implementation and HTTP error type |
-| `packages/@core` | Base types, UI primitives and reusable components |
-| `packages/effects` | Shared integrations, layouts, hooks and higher-level UI |
-| `packages/local-db` | Local database schemas, migrations and synchronization |
-| `internal` | Shared build, TypeScript and lint configuration |
-| `scripts` | Workspace maintenance and release tooling |
+| `apps/shell` | Auth, session, layout, top-level routes, access guards, desktop adapters, `@operon/kernel` host |
+| `apps/{automation,system,tenants,playground}` | Domain screens, `app:*` Pinia stores, child route manifests (`src/manifest.ts`) |
+| `packages/kernel` | Typed host contract (`useKernel()`, `KERNEL_INJECTION_KEY`), mock host, `KernelApiError` |
+| `packages/@core` | Base types, UI primitives, `shadcn-ui` |
+| `packages/effects` | Shared layouts, hooks, higher-level UI |
+| `packages/local-db` | Local SQLite schemas, migrations, sync |
+| `internal` / `scripts` | Build, TypeScript, lint, scaffold (`pnpm gen:app`), release tooling |
 
-## Dependency rules
+## Dependency boundaries
 
-- Shell may import business application manifests.
-- Business applications consume host services through `useKernel()` and shared packages.
-- Business applications must not import shell internals or another business application.
-- Shared packages must not import applications.
-- Core packages must not depend on higher-level `@operon/*` packages (enforced by ESLint).
+Enforced by `pnpm check:architecture`, `pnpm check:circular`, and ESLint:
 
-`pnpm check:architecture` checks package dependencies and static imports, re-exports, literal dynamic imports, import types and `require()` calls, including relative paths and Vue script blocks. Computed import paths and custom cross-app aliases are not supported; do not use them to reach another application. `pnpm check:circular` rejects runtime import cycles. Type-only references are excluded because they do not create runtime initialization dependencies.
+- `apps/shell` may import micro-app manifests (`@operon/<app>`).
+- Micro-apps consume host services via `useKernel()` and shared packages; never import `apps/shell` or another micro-app.
+- `packages/*` must not import `apps/*`; `@operon-core/*` must not depend on `@operon/*`.
+- Every source package must expose a `typecheck` script (`pnpm check:type-coverage`).
 
-## Adding a screen
+## Desktop shell layout
 
-1. Add the screen and its state/API consumers inside its owning application.
-2. Add its lazy route to that application's `src/manifest.ts`, including a unique route name, title key and screen-level permissions.
-3. Use named routes for navigation so the screen works under both shell and standalone prefixes.
-4. Shell owns the root prefix, layout and platform/plugin policy. New child screens do not require edits to shell's view imports.
-5. Add behavior tests for routing, access or API interactions when changed.
+Tauri mounts `DesktopShell` once in `App` across all routes (including auth and errors); web renders `RouterView` directly:
 
-Standalone apps use the same manifest with a mock kernel and a `RouterView` root. Standalone mode is for development; it does not enforce production authorization. System screens currently display sample data. Browser management is a development placeholder, not a working browser control interface.
+- **`window-titlebar`** (`DesktopTitlebar` + `WindowControls`): app identity, `data-tauri-drag-region`, update button, window buttons (excluded from drag region).
+- **`desktop-viewport`**: `min-height: 0` + `contain: layout` isolates fixed headers/sidebars/masks inside `vben-layout.vue` without titlebar offset math. `useElementSize` sets `--vben-viewport-height` for sub-titlebar overlays; `body`-teleported dialogs remain full-window.
 
-## Validation
+## Adding a screen or micro-app
 
-Run `pnpm check:type`, `pnpm check:architecture`, `pnpm check:circular`, `pnpm check:i18n`, `pnpm check:dep` and `pnpm test:unit` before submitting changes. Use `pnpm lint` for Oxlint, formatting, ESLint and Stylelint validation without autofixes. The quality workflow runs without desktop subsystem credentials.
+- **New micro-app**: run `pnpm gen:app <name>`.
+- **New screen**: add view + store under `apps/<name>/src`, register a lazy named route in `src/manifest.ts`, and navigate by route name so standalone (`createMockKernel()`) and shell prefixes both work.
 
-Every workspace package with source must expose a `typecheck` task. `pnpm check:type-coverage` prevents new source packages from being silently skipped.
+## Pre-PR checks
 
-Kernel public request options reuse the canonical database schema type from `@operon/constants`. Host-private retry state stays in the shell client. HTTP failures use `KernelApiError.status`; authentication failures retain `isAuthError` for existing callers. Transport failures retain their original error.
+```sh
+pnpm check && pnpm lint && pnpm test:unit
+```
