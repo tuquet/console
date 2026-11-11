@@ -430,15 +430,18 @@ $namespace: vben;
 }
 
 @mixin menu-title {
-  display: inline-flex;
-  align-items: center;
+  display: block;
   max-width: var(--menu-title-width);
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: var(--menu-font-size) !important;
-  line-height: 1;
+  line-height: 1.4;
   white-space: nowrap;
   opacity: 1;
+
+  > * {
+    vertical-align: baseline;
+  }
 }
 
 .is-menu-align {
