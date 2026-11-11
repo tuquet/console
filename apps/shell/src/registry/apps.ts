@@ -46,6 +46,16 @@ export const APP_REGISTRY: Record<string, RegisteredMicroApp> = {
     titleKey: 'page.tenants.title',
     order: 40,
   },
+  playground: {
+    id: 'playground',
+    name: 'Playground',
+    version: '0.1.0',
+    devPort: 5324,
+    defaultPath: 'overview',
+    icon: 'lucide:layers',
+    titleKey: 'page.playground.title',
+    order: 50,
+  },
 };
 
 export function getRegisteredApp(id: string): RegisteredMicroApp | undefined {

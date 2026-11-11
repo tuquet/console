@@ -76,7 +76,9 @@
     "update:deps": "npx taze -r -w",
     "prepare": "is-ci || pnpm exec lefthook install --force || true",
     "preinstall": "npx only-allow pnpm",
-    "postinstall": "pnpm -r run --if-present stub"
+    "postinstall": "pnpm -r run --if-present stub",
+    "build:playground": "pnpm -F @operon/playground run build",
+    "dev:playground": "pnpm -F @operon/playground run dev"
   },
   "devDependencies": {
     "@changesets/cli": "catalog:",

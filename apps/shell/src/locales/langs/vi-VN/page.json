@@ -949,5 +949,9 @@
     "menu_zoom_out": "Thu nhỏ",
     "menu_reset_zoom": "Đặt lại Zoom",
     "menu_window": "Cửa sổ"
+  },
+  "playground": {
+    "title": "Playground",
+    "overview": "Tổng quan"
   }
 }

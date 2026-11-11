@@ -949,5 +949,9 @@
     "menu_zoom_out": "Zoom Out",
     "menu_reset_zoom": "Reset Zoom",
     "menu_window": "Window"
+  },
+  "playground": {
+    "title": "Playground",
+    "overview": "Overview"
   }
 }

@@ -36,6 +36,7 @@
     "@operon/kernel": "workspace:*",
     "@operon/layouts": "workspace:*",
     "@operon/locales": "workspace:*",
+    "@operon/playground": "workspace:*",
     "@operon/plugins": "workspace:*",
     "@operon/preferences": "workspace:*",
     "@operon/stores": "workspace:*",
@@ -57,7 +58,8 @@
     "dayjs": "catalog:",
     "pinia": "catalog:",
     "vue": "catalog:",
-    "vue-router": "catalog:"
+    "vue-router": "catalog:",
+    "@operon/playground": "workspace:*"
   },
   "devDependencies": {
     "@tauri-apps/cli": "catalog:",

@@ -31,6 +31,16 @@
       "icon": "lucide:building-2",
       "titleKey": "page.tenants.title",
       "order": 40
+    },
+    "playground": {
+      "id": "playground",
+      "name": "Playground",
+      "version": "0.1.0",
+      "devPort": 5324,
+      "defaultPath": "overview",
+      "icon": "lucide:layers",
+      "titleKey": "page.playground.title",
+      "order": 50
     }
   }
 }

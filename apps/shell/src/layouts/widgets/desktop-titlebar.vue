@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
-import { Loader2, RotateCw } from '@lucide/vue';
+import { Loader2 } from '@lucide/vue';
 
 import { useAppUpdater } from '#/composables/use-app-updater';
 import { $t } from '#/locales';
@@ -17,10 +17,7 @@ const buttonLabel = computed(() => {
   if (isUpdating.value) {
     return $t('page.app.restarting_update');
   }
-  const version = updateAvailable.value?.version;
-  return version
-    ? `${$t('page.app.restart_to_update')} (v${version})`
-    : $t('page.app.restart_to_update');
+  return $t('page.app.restart_to_update');
 });
 
 const updateTooltip = computed(() => {
@@ -62,8 +59,7 @@ async function handleRestart() {
         @click="handleRestart"
       >
         <Loader2 v-if="isUpdating" class="size-3 animate-spin text-primary" />
-        <RotateCw v-else class="size-3 text-primary animate-pulse" />
-        <span>{{ buttonLabel }}</span>
+        <span class="animate-pulse">{{ buttonLabel }}</span>
       </button>
     </div>
 
