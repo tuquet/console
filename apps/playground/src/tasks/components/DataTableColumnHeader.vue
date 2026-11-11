@@ -8,6 +8,7 @@ import {
   Button,
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -33,7 +34,7 @@ export default {
 <template>
   <div
     v-if="column.getCanSort()"
-    :class="cn('flex items-center space-x-2', $attrs.class ?? '')"
+    :class="cn('flex items-center gap-2', $attrs.class ?? '')"
   >
     <DropdownMenu>
       <DropdownMenuTrigger as-child>
@@ -45,29 +46,38 @@ export default {
           <span>{{ title }}</span>
           <ArrowDown
             v-if="column.getIsSorted() === 'desc'"
-            class="ml-2 h-4 w-4"
+            class="ml-1.5 size-3.5"
           />
           <ArrowUp
             v-else-if="column.getIsSorted() === 'asc'"
-            class="ml-2 h-4 w-4"
+            class="ml-1.5 size-3.5"
           />
-          <ChevronsUpDown v-else class="ml-2 h-4 w-4" />
+          <ChevronsUpDown
+            v-else
+            class="ml-1.5 size-3.5 text-muted-foreground/70"
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
-        <DropdownMenuItem @click="column.toggleSorting(false)">
-          <ArrowUp class="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-          Asc
-        </DropdownMenuItem>
-        <DropdownMenuItem @click="column.toggleSorting(true)">
-          <ArrowDown class="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-          Desc
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem @click="column.toggleVisibility(false)">
-          <EyeOff class="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-          Hide
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuItem @click="column.toggleSorting(false)">
+            <ArrowUp class="mr-2 size-3.5 text-muted-foreground/70" />
+            Asc
+          </DropdownMenuItem>
+          <DropdownMenuItem @click="column.toggleSorting(true)">
+            <ArrowDown class="mr-2 size-3.5 text-muted-foreground/70" />
+            Desc
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <template v-if="column.getCanHide()">
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem @click="column.toggleVisibility(false)">
+              <EyeOff class="mr-2 size-3.5 text-muted-foreground/70" />
+              Hide
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </template>
       </DropdownMenuContent>
     </DropdownMenu>
   </div>

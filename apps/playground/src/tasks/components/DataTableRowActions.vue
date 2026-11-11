@@ -10,6 +10,7 @@ import {
   Button,
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -21,14 +22,28 @@ import {
   DropdownMenuTrigger,
 } from '@operon-core/shadcn-ui';
 
-import { MoreHorizontal } from '@lucide/vue';
+import { Copy, MoreHorizontal, Pencil, Star, Trash2 } from '@lucide/vue';
 
-import { labels } from '../data/data';
+import { labels, priorities, statuses } from '../data/data';
 import { taskSchema } from '../data/schema';
 
+export interface RowActionCallbacks {
+  onCopyId: (id: string) => void;
+  onDelete: (id: string) => void;
+  onDuplicate: (id: string) => void;
+  onInspect: (task: Task) => void;
+  onQuickUpdate: (
+    id: string,
+    patch: Partial<Pick<Task, 'assignee' | 'label' | 'priority' | 'status'>>,
+  ) => void;
+  onToggleFavorite: (id: string) => void;
+}
+
 interface DataTableRowActionsProps {
+  actions: RowActionCallbacks;
   row: Row<TasksTableFeatures, Task>;
 }
+
 const props = defineProps<DataTableRowActionsProps>();
 
 const task = computed(() => taskSchema.parse(props.row.original));
@@ -39,36 +54,112 @@ const task = computed(() => taskSchema.parse(props.row.original));
     <DropdownMenuTrigger as-child>
       <Button
         variant="ghost"
-        class="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
+        class="flex size-8 p-0 data-[state=open]:bg-muted"
       >
-        <MoreHorizontal class="h-4 w-4" />
+        <MoreHorizontal class="size-4" />
         <span class="sr-only">Open menu</span>
       </Button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" class="w-[160px]">
-      <DropdownMenuItem>Edit</DropdownMenuItem>
-      <DropdownMenuItem>Make a copy</DropdownMenuItem>
-      <DropdownMenuItem>Favorite</DropdownMenuItem>
+    <DropdownMenuContent align="end" class="w-[180px]">
+      <DropdownMenuGroup>
+        <DropdownMenuItem @select="actions.onInspect(task)">
+          <Pencil class="mr-2 size-3.5 text-muted-foreground" />
+          Inspect & Edit
+        </DropdownMenuItem>
+        <DropdownMenuItem @select="actions.onDuplicate(task.id)">
+          <Copy class="mr-2 size-3.5 text-muted-foreground" />
+          Duplicate
+        </DropdownMenuItem>
+        <DropdownMenuItem @select="actions.onToggleFavorite(task.id)">
+          <Star
+            class="mr-2 size-3.5"
+            :class="
+              task.favorite
+                ? 'fill-amber-400 text-amber-400'
+                : 'text-muted-foreground'
+            "
+          />
+          {{ task.favorite ? 'Unpin favorite' : 'Pin favorite' }}
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+
       <DropdownMenuSeparator />
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
-        <DropdownMenuSubContent>
-          <DropdownMenuRadioGroup :value="task.label">
-            <DropdownMenuRadioItem
-              v-for="label in labels"
-              :key="label.value"
-              :value="label.value"
+
+      <DropdownMenuGroup>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>Status</DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuRadioGroup
+              :model-value="task.status"
+              @update:model-value="
+                (val) => actions.onQuickUpdate(task.id, { status: String(val) })
+              "
             >
-              {{ label.label }}
-            </DropdownMenuRadioItem>
-          </DropdownMenuRadioGroup>
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
+              <DropdownMenuRadioItem
+                v-for="status in statuses"
+                :key="status.value"
+                :value="status.value"
+              >
+                {{ status.label }}
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>Priority</DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuRadioGroup
+              :model-value="task.priority"
+              @update:model-value="
+                (val) =>
+                  actions.onQuickUpdate(task.id, { priority: String(val) })
+              "
+            >
+              <DropdownMenuRadioItem
+                v-for="priority in priorities"
+                :key="priority.value"
+                :value="priority.value"
+              >
+                {{ priority.label }}
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>Label</DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuRadioGroup
+              :model-value="task.label"
+              @update:model-value="
+                (val) => actions.onQuickUpdate(task.id, { label: String(val) })
+              "
+            >
+              <DropdownMenuRadioItem
+                v-for="label in labels"
+                :key="label.value"
+                :value="label.value"
+              >
+                {{ label.label }}
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+      </DropdownMenuGroup>
+
       <DropdownMenuSeparator />
-      <DropdownMenuItem>
-        Delete
-        <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
-      </DropdownMenuItem>
+
+      <DropdownMenuGroup>
+        <DropdownMenuItem
+          class="text-rose-500 focus:text-rose-500"
+          @select="actions.onDelete(task.id)"
+        >
+          <Trash2 class="mr-2 size-3.5" />
+          Delete
+          <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
     </DropdownMenuContent>
   </DropdownMenu>
 </template>

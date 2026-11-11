@@ -12,12 +12,12 @@ import {
   rowSelectionFeature,
   rowSortingFeature,
   sortFn_alphanumeric,
+  sortFn_basic,
   sortFn_text,
   tableFeatures,
 } from '@tanstack/vue-table';
 
-// New in v9: declare the features this table uses — anything you don't
-// register is tree-shaken out of the bundle.
+// Declare only the features this table uses so unused logic is tree-shaken.
 export const features = tableFeatures({
   columnFacetingFeature,
   columnFilteringFeature,
@@ -31,7 +31,11 @@ export const features = tableFeatures({
   paginatedRowModel: createPaginatedRowModel(),
   sortedRowModel: createSortedRowModel(),
   filterFns: { includesString: filterFn_includesString },
-  sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+  sortFns: {
+    alphanumeric: sortFn_alphanumeric,
+    basic: sortFn_basic,
+    text: sortFn_text,
+  },
 });
 
 export type TasksTableFeatures = typeof features;
