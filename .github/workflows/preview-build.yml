@@ -35,6 +35,12 @@ jobs:
           ssh-key: ${{ secrets.OPERON_DEPLOY_KEY }}
           path: operon
           persist-credentials: false
+      - name: Normalize pinned operon file timestamps for Cargo cache
+        shell: pwsh
+        run: |
+          $commitTime = [DateTimeOffset]::Parse((git -C operon show -s --format=%cI HEAD)).UtcDateTime
+          Get-ChildItem -Path operon -Force | Where-Object { $_.Name -ne '.git' } | Get-ChildItem -Recurse -File -Force | ForEach-Object { $_.LastWriteTimeUtc = $commitTime }
+          Get-ChildItem -Path operon -File -Force | ForEach-Object { $_.LastWriteTimeUtc = $commitTime }
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
         with:
           package_json_file: console/package.json
@@ -50,6 +56,9 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with:
           workspaces: console/apps/shell/src-tauri -> target
+          cache-workspace-crates: true
+          key: operon-${{ steps.pins.outputs.revision }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - working-directory: console
         run: pnpm install --frozen-lockfile
       - name: Build preview without release signing credentials
@@ -58,7 +67,10 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           OPERON_SKIP_WINRES: '1'
-        run: pnpm tauri build --ci --target x86_64-pc-windows-msvc --no-bundle -- --locked
+        shell: pwsh
+        run: |
+          Remove-Item -Force src-tauri/target/x86_64-pc-windows-msvc/release/workstation.exe, src-tauri/target/x86_64-pc-windows-msvc/release/Operon.exe -ErrorAction SilentlyContinue
+          pnpm tauri build --ci --target x86_64-pc-windows-msvc --no-bundle -- --locked
       - working-directory: console
         run: pnpm release:package --preview
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
