@@ -24,6 +24,14 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Restore Turborepo cache
+        id: turbo-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
       - name: Product version consistency
         run: pnpm release:check
       - name: Architecture and circular dependencies
@@ -40,3 +48,9 @@ jobs:
         run: pnpm test:unit
       - name: Dependency declarations
         run: pnpm check:dep
+      - name: Save Turborepo cache
+        if: github.ref == 'refs/heads/main' && steps.turbo-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .turbo/cache
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
