@@ -12,6 +12,7 @@ pnpm dev
 ## Guides
 
 - [Architecture & boundaries](docs/ARCHITECTURE.md)
+- [Sidebar & layout architecture](docs/SIDEBAR.md)
 - [Web & desktop development](docs/DEVELOPMENT.md)
 - [Release lifecycle & CI/CD](docs/RELEASING.md)
 - [Official docs](https://docs.operon.com/en/console/)
