@@ -1,60 +1,39 @@
 # Development
 
-## Web
+Use the Node version in `.node-version` and the `packageManager` pnpm version in `package.json`.
 
-Use the Node version in `.node-version` and the pnpm version pinned by `packageManager` in the root `package.json`.
+## Web & standalone micro-apps
+
+Web mode needs neither Rust nor the private desktop subsystem. Configure `apps/shell/.env` (never commit secrets).
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm dev:web
-```
-
-Web development does not require Rust or the private desktop subsystem. Configure the shell's `.env` settings for cloud integration. Never commit local credentials.
-
-Individual applications can run with a mock host:
-
-```sh
+pnpm dev:web          # Full shell (port 5320)
+pnpm dev:automation   # Standalone mock-host apps (ports 5321..5324)
 pnpm dev:system
 pnpm dev:tenants
-pnpm dev:automation
+pnpm dev:playground
 ```
 
-## Desktop on Windows
+## Desktop (Windows)
 
-Install the Rust MSVC toolchain, Microsoft C++ build tools and WebView2 runtime. Desktop uses a sibling checkout of the private Operon subsystem because Cargo resolves `apps/shell/src-tauri/Cargo.toml` to `../operon/crates/cli`.
-
-From the console repository root, bootstrap the subsystem with PowerShell:
+Requires Rust MSVC, C++ build tools, WebView2, and a sibling checkout of `tuquet/operon` (`../operon`) at the commit pinned in `subsystem.json`:
 
 ```powershell
-$subsystem = Get-Content subsystem.json -Raw | ConvertFrom-Json
-git clone "git@github.com:$($subsystem.repository).git" $subsystem.path
-git -C $subsystem.path checkout --detach $subsystem.revision
+$s = Get-Content subsystem.json -Raw | ConvertFrom-Json
+git clone "git@github.com:$($s.repository).git" $s.path
+git -C $s.path checkout --detach $s.revision
 pnpm desktop:check
 pnpm dev:desktop
 ```
 
-If the checkout already exists, fetch and inspect local changes before switching revisions. The prerequisite checker never changes another repository.
-
-`subsystem.json` pins the exact subsystem commit used by preview and release CI. To upgrade it, test a clean checkout at the proposed revision and commit the manifest change with the console changes that require it. Run `pnpm desktop:check` before a local release build. This validates Rust tools, the checkout revision and its clean working tree; installer-specific requirements are checked by Tauri.
-
-The CI quality workflow checks frontend code without private credentials. Desktop preview and release workflows additionally require subsystem checkout access and the existing build/signing configuration.
+When bumping `subsystem.json`, verify a clean checkout at the new commit with `pnpm desktop:check` and commit `subsystem.json` alongside the console changes.
 
 ## Local updater simulation
 
-To test the desktop auto-updater flow locally without GitHub releases or CI access:
-
 ```sh
-pnpm updater:simulate
+pnpm updater:simulate                                # Self-contained CLI test
+pnpm updater:simulate --server-only --apply-config   # Live server for pnpm dev:desktop (Ctrl+C restores tauri.conf.json)
 ```
 
-To test interactively alongside a running desktop application:
-
-```sh
-# Terminal 1: Start mock updater server and patch local Tauri config
-pnpm updater:simulate --server-only --apply-config
-
-# Terminal 2: Run desktop app
-pnpm dev:desktop
-```
-
-See [docs/RELEASE-PROCESS.md](RELEASE-PROCESS.md#local-updater-simulation-and-testing) for architecture, workflow stages and CLI flags.
+See [Releasing](RELEASING.md#local-updater-simulation) for flags and signing details.

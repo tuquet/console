@@ -1,19 +1,8 @@
 # @operon/playground
 
-Micro-app độc lập quản lý miền nghiệp vụ **Playground** trong kiến trúc Operon Console.
+UI component showcase micro-app featuring `shadcn-vue` patterns and TanStack Table v9 (`playground:*` Pinia stores, `src/manifest.ts` routes, `useKernel()` host bridge).
 
-## Chế độ hoạt động
-
-1. **Phát triển độc lập (Standalone Sandbox):**
-
-   ```bash
-   pnpm --filter @operon/playground dev
-   ```
-
-   Chạy tại `http://localhost:5324` với Mock Kernel đầy đủ.
-
-2. **Chạy tích hợp cùng Host Shell:**
-   ```bash
-   pnpm dev:shell
-   ```
-   Nạp động qua remote-entry tại route `/playground`.
+```sh
+pnpm dev:playground   # Standalone mock-host sandbox (port 5324)
+pnpm dev:shell        # Embedded at /playground
+```

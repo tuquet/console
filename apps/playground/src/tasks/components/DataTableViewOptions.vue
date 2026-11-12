@@ -11,6 +11,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -34,24 +35,29 @@ const columns = computed(() =>
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
-      <Button variant="outline" size="sm" class="ml-auto hidden h-8 lg:flex">
-        <Settings2 class="mr-2 h-4 w-4" />
-        View
+      <Button
+        variant="outline"
+        size="sm"
+        class="text-muted-foreground hover:text-foreground hidden h-8 text-xs font-normal lg:flex"
+      >
+        <Settings2 class="mr-1.5 size-3.5 opacity-70" />
+        Columns
       </Button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" class="w-[150px]">
-      <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+    <DropdownMenuContent align="end" class="w-[160px]">
+      <DropdownMenuLabel class="text-xs">Toggle columns</DropdownMenuLabel>
       <DropdownMenuSeparator />
-
-      <DropdownMenuCheckboxItem
-        v-for="column in columns"
-        :key="column.id"
-        class="capitalize"
-        :model-value="column.getIsVisible()"
-        @update:model-value="(value) => column.toggleVisibility(!!value)"
-      >
-        {{ column.id }}
-      </DropdownMenuCheckboxItem>
+      <DropdownMenuGroup>
+        <DropdownMenuCheckboxItem
+          v-for="column in columns"
+          :key="column.id"
+          class="capitalize"
+          :model-value="column.getIsVisible()"
+          @update:model-value="(value) => column.toggleVisibility(!!value)"
+        >
+          {{ column.id === 'updatedAt' ? 'updated' : column.id }}
+        </DropdownMenuCheckboxItem>
+      </DropdownMenuGroup>
     </DropdownMenuContent>
   </DropdownMenu>
 </template>
