@@ -223,17 +223,7 @@ interface HeaderPreferences {
 }
 
 interface LogoPreferences {
-  /** Whether logo is visible */
-  enable: boolean;
-  /** Logo object-fit mode */
-  fit: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
-  /** Logo height (effective only when logoMode=full) */
-  fullLogoHeight?: number | string;
-  /** Logo display type: icon or full */
-  logoMode: 'full' | 'icon';
-  /** Whether logo text is visible */
-  showText: boolean;
-  /** Logo URL */
+  /** Logo URL (used by authentication layout) */
   source: string;
   /** Dark theme Logo URL */
   sourceDark?: string;
@@ -265,8 +255,6 @@ interface SidebarPreferences {
   enable: boolean;
   /** Menu auto-expand state */
   expandOnHover: boolean;
-  /** Whether sidebar extra area is collapsed */
-  extraCollapse: boolean;
   /** Sidebar extra area collapsed width */
   extraCollapsedWidth: number;
   /** Whether sidebar pin button is visible */
@@ -344,8 +332,6 @@ interface ThemePreferences {
   semiDarkHeader: boolean;
   /** Semi-dark menu (light theme only) */
   semiDarkSidebar: boolean;
-  /** Semi-dark sub-menu (light theme only) */
-  semiDarkSidebarSub: boolean;
 }
 
 interface TransitionPreferences {

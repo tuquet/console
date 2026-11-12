@@ -29,6 +29,8 @@ const localesMap = loadLocalesMapFromDir(
   modules,
 );
 let loadMessages: LoadMessageFn;
+const appLocaleLoaders = new Map<string, LoadMessageFn>();
+const loadedAppLocales = new Set<string>();
 
 /**
  * Load locale modules
@@ -116,6 +118,49 @@ async function setupI18n(app: App, options: LocaleSetupOptions = {}) {
   });
 }
 
+async function loadRegisteredAppLocales(lang: SupportedLanguagesType) {
+  const entries = [...appLocaleLoaders.entries()];
+  if (entries.length === 0) {
+    return;
+  }
+  await Promise.all(
+    entries.map(async ([id, loader]) => {
+      const messages = await loader(lang);
+      if (messages) {
+        i18n.global.mergeLocaleMessage(lang, messages);
+      }
+      loadedAppLocales.add(`${id}:${lang}`);
+    }),
+  );
+}
+
+/**
+ * Register a lazy micro-app locale loader.
+ * Loads and merges messages for the active language immediately, and
+ * automatically reloads them whenever the runtime language switches.
+ */
+async function registerLocaleMessages(id: string, loader: LoadMessageFn) {
+  appLocaleLoaders.set(id, loader);
+  const currentLang = unref(i18n.global.locale) as '' | SupportedLanguagesType;
+  if (!currentLang) {
+    return;
+  }
+  const cacheKey = `${id}:${currentLang}`;
+  if (loadedAppLocales.has(cacheKey)) {
+    return;
+  }
+  const messages = await loader(currentLang);
+  if (messages) {
+    i18n.global.mergeLocaleMessage(currentLang, messages);
+  }
+  loadedAppLocales.add(cacheKey);
+}
+
+function resetRegisteredLocaleMessages() {
+  appLocaleLoaders.clear();
+  loadedAppLocales.clear();
+}
+
 /**
  * Load locale messages
  * @param lang
@@ -125,6 +170,7 @@ async function loadLocaleMessages(lang: SupportedLanguagesType) {
     return setI18nLanguage(lang);
   }
   setSimpleLocale(lang);
+  loadedAppLocales.clear();
 
   const message = await localesMap[lang]?.();
 
@@ -133,7 +179,11 @@ async function loadLocaleMessages(lang: SupportedLanguagesType) {
   }
 
   const mergeMessage = await loadMessages(lang);
-  i18n.global.mergeLocaleMessage(lang, mergeMessage);
+  if (mergeMessage) {
+    i18n.global.mergeLocaleMessage(lang, mergeMessage);
+  }
+
+  await loadRegisteredAppLocales(lang);
 
   return setI18nLanguage(lang);
 }
@@ -143,5 +193,7 @@ export {
   loadLocaleMessages,
   loadLocalesMap,
   loadLocalesMapFromDir,
+  registerLocaleMessages,
+  resetRegisteredLocaleMessages,
   setupI18n,
 };

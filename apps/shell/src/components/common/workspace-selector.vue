@@ -123,7 +123,7 @@ async function handleCreateWorkspace() {
 </script>
 
 <template>
-  <div class="flex size-full items-center">
+  <div class="flex w-full items-center justify-center">
     <Popover v-model:open="isOpen">
       <PopoverTrigger as-child>
         <!-- Collapsed button (icon-only mode when sidebar is collapsed) -->
@@ -131,8 +131,9 @@ async function handleCreateWorkspace() {
           v-if="props.collapsed"
           type="button"
           variant="ghost"
+          size="icon"
           data-testid="workspace-selector-trigger-collapsed"
-          class="flex size-full h-auto items-center justify-center rounded-none p-2 transition-colors hover:bg-accent/50 focus-visible:outline-none"
+          class="size-9 rounded-lg p-0 transition-colors hover:bg-accent/60 focus-visible:outline-none"
           :title="activeWorkspace?.name || $t('page.workspace.not_selected')"
         >
           <div
@@ -148,13 +149,13 @@ async function handleCreateWorkspace() {
           </div>
         </Button>
 
-        <!-- Expanded button (full workspace card replacing logo at top of sidebar/header) -->
+        <!-- Expanded button (full workspace card at top of sidebar) -->
         <Button
           v-else
           type="button"
           variant="ghost"
           data-testid="workspace-selector-trigger"
-          class="group flex size-full h-auto items-center justify-between gap-2.5 rounded-none px-3 py-2 text-left transition-colors hover:bg-accent/40 focus-visible:outline-none"
+          class="group flex h-auto w-full items-center justify-between gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/50 focus-visible:outline-none"
         >
           <!-- Workspace Avatar / Initial icon -->
           <div class="flex items-center gap-2.5 min-w-0">

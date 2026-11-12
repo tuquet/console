@@ -13,7 +13,6 @@
 @import 'tw-animate-css';
 
 @plugin '@tailwindcss/typography';
-@plugin '@iconify/tailwind4';
 
 /* Monorepo source detection: scan all packages and apps for utility classes */
 @source '../../../packages/';

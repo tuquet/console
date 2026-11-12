@@ -1,6 +1,6 @@
 import type { MicroAppManifest } from '../remote-loader';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { createRemoteRoute } from '../remote-loader';
 
@@ -73,5 +73,27 @@ describe('createRemoteRoute', () => {
 
     const resolved = await loader();
     expect(resolved).toEqual({ default: { name: 'DummyComponent' } });
+  });
+
+  it('invokes manifest.setupLocales in parallel when lazy route activates', async () => {
+    const setupLocales = vi.fn(async () => undefined);
+    const wrappedRoutes = createRemoteRoute({
+      appId: 'dummy',
+      manifest: {
+        ...dummyManifest,
+        setupLocales,
+      },
+      t: (key) => key,
+    });
+
+    expect(setupLocales).not.toHaveBeenCalled();
+
+    const loader = wrappedRoutes[0]?.component as
+      | (() => Promise<unknown>)
+      | undefined;
+    expect(typeof loader).toBe('function');
+    await loader?.();
+
+    expect(setupLocales).toHaveBeenCalledTimes(1);
   });
 });

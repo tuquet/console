@@ -2,11 +2,13 @@ import type { SupportedLanguagesType } from '@operon-core/typings';
 
 export type { SupportedLanguagesType };
 
-export type ImportLocaleFn = () => Promise<{ default: Record<string, string> }>;
+export type ImportLocaleFn = () => Promise<{
+  default: Record<string, any>;
+}>;
 
 export type LoadMessageFn = (
   lang: SupportedLanguagesType,
-) => Promise<Record<string, string> | undefined>;
+) => Promise<Record<string, any> | undefined>;
 
 export interface LocaleSetupOptions {
   /**

@@ -5,11 +5,9 @@ export * from './count-to';
 export * from './cropper';
 export * from './ellipsis-text';
 export * from './icon-picker';
-export * from './json-viewer';
 export * from './loading';
 export * from './page';
 export * from './resize';
-export * from './tippy';
 export * from './tree';
 export * from '@operon-core/form-ui';
 export * from '@operon-core/popup-ui';
@@ -21,7 +19,6 @@ export {
   VbenButtonGroup,
   VbenCheckbox,
   VbenCheckButtonGroup,
-  VbenCollapsibleParams,
   VbenContextMenu,
   VbenCountToAnimator,
   VbenDescriptions,
@@ -39,8 +36,6 @@ export {
 
 export type {
   ActionItem,
-  CollapsibleParamSchema,
-  CollapsibleParamsProps,
   DescriptionsColumn,
   DescriptionsItemType,
   DescriptionsProps,

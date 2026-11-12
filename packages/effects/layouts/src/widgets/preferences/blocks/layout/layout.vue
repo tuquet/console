@@ -11,7 +11,6 @@ import { Label, RadioGroup, RadioGroupItem } from '@operon-core/shadcn-ui';
 
 import {
   FullContent,
-  HeaderMixedNav,
   HeaderNav,
   HeaderSidebarNav,
   MixedNav,
@@ -36,7 +35,6 @@ const components: Record<LayoutType, Component> = {
   'header-nav': HeaderNav,
   'mixed-nav': MixedNav,
   'sidebar-nav': SidebarNav,
-  'header-mixed-nav': HeaderMixedNav,
   'header-sidebar-nav': HeaderSidebarNav,
 };
 
@@ -60,11 +58,6 @@ const PRESET = computed((): PresetItem[] => [
     name: $t('preferences.mixedMenu'),
     tip: $t('preferences.mixedMenuTip'),
     type: 'mixed-nav',
-  },
-  {
-    name: $t('preferences.headerTwoColumn'),
-    tip: $t('preferences.headerTwoColumnTip'),
-    type: 'header-mixed-nav',
   },
   {
     name: $t('preferences.fullContent'),

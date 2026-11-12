@@ -151,7 +151,30 @@ class PreferenceManager {
     // Deduplicate here after loading cache, preserving first occurrence.
     this.sanitizeCachedArray(cachedPreferences, 'widget', 'order');
     if (cachedPreferences.app) {
-      delete (cachedPreferences.app as Record<string, unknown>).isMobile;
+      const cachedApp = cachedPreferences.app as Record<string, unknown>;
+      delete cachedApp.isMobile;
+      if (cachedApp.preferencesButtonPosition === 'sidebar-bottom') {
+        cachedApp.preferencesButtonPosition = 'auto';
+      }
+      if (cachedApp.layout === 'header-mixed-nav') {
+        cachedApp.layout = 'sidebar-nav';
+      }
+    }
+    if (cachedPreferences.sidebar) {
+      delete (cachedPreferences.sidebar as Record<string, unknown>)
+        .extraCollapse;
+    }
+    if (cachedPreferences.theme) {
+      delete (cachedPreferences.theme as Record<string, unknown>)
+        .semiDarkSidebarSub;
+    }
+    if (cachedPreferences.logo) {
+      const cachedLogo = cachedPreferences.logo as Record<string, unknown>;
+      delete cachedLogo.enable;
+      delete cachedLogo.fit;
+      delete cachedLogo.fullLogoHeight;
+      delete cachedLogo.logoMode;
+      delete cachedLogo.showText;
     }
     const mergedPreference = mergeWithArrayOverride(
       {},

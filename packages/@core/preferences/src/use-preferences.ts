@@ -95,13 +95,6 @@ function usePreferences() {
   );
 
   /**
-   * Whether header mixed nav mode
-   */
-  const isHeaderMixedNav = computed(
-    () => appPreferences.value.layout === 'header-mixed-nav',
-  );
-
-  /**
    * Whether mixed nav mode
    */
   const isHeaderSidebarNav = computed(
@@ -119,12 +112,7 @@ function usePreferences() {
    * Whether contains sidebar nav
    */
   const isSideMode = computed(() => {
-    return (
-      isMixedNav.value ||
-      isSideNav.value ||
-      isHeaderMixedNav.value ||
-      isHeaderSidebarNav.value
-    );
+    return isMixedNav.value || isSideNav.value || isHeaderSidebarNav.value;
   });
 
   const sidebarCollapsed = computed(() => {
@@ -209,7 +197,6 @@ function usePreferences() {
       return {
         fixed: false,
         header: false,
-        sidebarBottom: false,
         userDropdown: false,
       };
     }
@@ -221,8 +208,6 @@ function usePreferences() {
     const contentIsMaximize = headerHidden && sidebarHidden;
 
     const isHeaderPosition = preferencesButtonPosition === 'header';
-    const isSidebarBottomPosition =
-      preferencesButtonPosition === 'sidebar-bottom';
     const isUserDropdownPosition =
       preferencesButtonPosition === 'user-dropdown';
 
@@ -234,7 +219,6 @@ function usePreferences() {
         return {
           fixed: true,
           header: false,
-          sidebarBottom: false,
           userDropdown: false,
         };
       }
@@ -242,7 +226,6 @@ function usePreferences() {
       return {
         fixed: preferencesButtonPosition === 'fixed',
         header: isHeaderPosition,
-        sidebarBottom: isSidebarBottomPosition,
         userDropdown: isUserDropdownPosition,
       };
     }
@@ -258,7 +241,6 @@ function usePreferences() {
     return {
       fixed,
       header: !fixed,
-      sidebarBottom: false,
       userDropdown: !fixed && isUserDropdownPosition,
     };
   });
@@ -277,7 +259,6 @@ function usePreferences() {
     globalSearchShortcutKey,
     isDark,
     isFullContent,
-    isHeaderMixedNav,
     isHeaderNav,
     isHeaderSidebarNav,
     isMixedNav,

@@ -1,6 +1,5 @@
 type LayoutType =
   | 'full-content'
-  | 'header-mixed-nav'
   | 'header-nav'
   | 'header-sidebar-nav'
   | 'mixed-nav'
@@ -13,7 +12,6 @@ type ThemeModeType = 'auto' | 'dark' | 'light';
  * auto: Automatically toggle between header/fixed based on layout
  * fixed: Fixed on right edge of screen
  * header: In header toolbar
- * sidebar-bottom: Pinned at bottom of sidebar
  * user-dropdown: In user dropdown menu
  * none: Do not display
  */
@@ -22,7 +20,6 @@ type PreferencesButtonPositionType =
   | 'fixed'
   | 'header'
   | 'none'
-  | 'sidebar-bottom'
   | 'user-dropdown';
 
 type BuiltinThemeType =

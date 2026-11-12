@@ -6,7 +6,7 @@ import { computed, watch } from 'vue';
 import { $t } from '@operon/locales';
 
 import { useVbenModal } from '@operon-core/popup-ui';
-import { Slot, VbenAvatar } from '@operon-core/shadcn-ui';
+import { Button, Slot, VbenAvatar } from '@operon-core/shadcn-ui';
 
 interface Props extends AuthenticationProps {
   avatar?: string;
@@ -110,13 +110,15 @@ function calcZIndex() {
 
       <!-- Bottom Dismiss / Cancel action for local operator flexibility -->
       <div class="mt-4 text-center">
-        <button
+        <Button
           type="button"
-          class="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors"
+          variant="link"
+          size="sm"
+          class="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
           @click="closeModal"
         >
           {{ $t('common.cancel') || 'Dismiss / Continue as Local Operator' }}
-        </button>
+        </Button>
       </div>
     </Modal>
   </div>

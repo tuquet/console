@@ -20,12 +20,9 @@ export const overridesPreferences = defineOverridesPreferences({
     name: 'Operon',
     authPageLayout: 'panel-right',
     layout: 'sidebar-nav',
-    preferencesButtonPosition: 'sidebar-bottom',
+    preferencesButtonPosition: 'header',
   },
   logo: {
-    enable: false,
-    showText: false,
-    fit: 'contain',
     source: '/logo.svg',
     sourceDark: '/logo.svg',
   },

@@ -105,6 +105,7 @@ makeFile(
         '@lucide/vue': 'catalog:',
         '@operon-core/shadcn-ui': 'workspace:*',
         '@operon/kernel': 'workspace:*',
+        '@operon/locales': 'workspace:*',
         '@operon/preferences': 'workspace:*',
         '@operon/styles': 'workspace:*',
         '@operon/types': 'workspace:*',
@@ -215,6 +216,76 @@ void bootstrap();
 );
 
 makeFile(
+  'src/locales/index.ts',
+  `import type { App } from 'vue';
+
+import type { SupportedLanguagesType } from '@operon/locales';
+
+import {
+  $t,
+  setupI18n as coreSetup,
+  loadLocalesMapFromDir,
+  registerLocaleMessages,
+} from '@operon/locales';
+import { preferences } from '@operon/preferences';
+
+const APP_LOCALE_ID = '${name}';
+
+const modules = import.meta.glob('./langs/**/*.json');
+
+const localesMap = loadLocalesMapFromDir(
+  /\\.\\/langs\\/([^/]+)\\/(.*)\\.json$/,
+  modules,
+);
+
+async function loadMessages(lang: SupportedLanguagesType) {
+  const appLocaleMessages = await localesMap[lang]?.();
+  return appLocaleMessages?.default;
+}
+
+export async function setupAppLocales() {
+  await registerLocaleMessages(APP_LOCALE_ID, loadMessages);
+}
+
+export async function setupStandaloneI18n(app: App) {
+  await coreSetup(app, {
+    defaultLocale: preferences.app.locale,
+    loadMessages,
+    missingWarn: !import.meta.env.PROD,
+  });
+}
+
+export { $t };
+`,
+);
+
+makeFile(
+  `src/locales/langs/en-US/${name}.json`,
+  `${JSON.stringify(
+    {
+      title: `${titleName} Micro-App`,
+      description: `Scaffolded autonomous micro-frontend running on port ${nextPort}.`,
+      test_toast_btn: 'Test Shell Toast',
+    },
+    null,
+    2,
+  )}\n`,
+);
+
+makeFile(
+  `src/locales/langs/vi-VN/${name}.json`,
+  `${JSON.stringify(
+    {
+      title: `Phân hệ ${titleName}`,
+      description: `Micro-frontend độc lập khởi chạy trên cổng ${nextPort}.`,
+      test_toast_btn: 'Kiểm tra thông báo Shell',
+    },
+    null,
+    2,
+  )}\n`,
+);
+
+makeFile(
   'src/bootstrap.ts',
   `import { createApp, h } from 'vue';
 import { createRouter, createWebHistory, RouterView } from 'vue-router';
@@ -225,6 +296,7 @@ import '@operon/styles';
 
 import { createPinia } from 'pinia';
 
+import { $t, setupStandaloneI18n } from './locales';
 import { ${camelName}Manifest } from './manifest';
 
 export async function bootstrap(namespace = 'operon-${name}-dev') {
@@ -233,6 +305,8 @@ export async function bootstrap(namespace = 'operon-${name}-dev') {
   });
 
   const app = createApp({ render: () => h(RouterView) });
+  await setupStandaloneI18n(app);
+
   const pinia = createPinia();
   const router = createRouter({
     history: createWebHistory(),
@@ -241,7 +315,7 @@ export async function bootstrap(namespace = 'operon-${name}-dev') {
         path: '/',
         component: { render: () => h(RouterView) },
         redirect: \`/\${${camelName}Manifest.defaultPath}\`,
-        children: ${camelName}Manifest.routes((key) => key),
+        children: ${camelName}Manifest.routes($t),
       },
     ],
   });
@@ -261,6 +335,8 @@ makeFile(
   'src/manifest.ts',
   `import type { RouteRecordRaw } from 'vue-router';
 
+import { setupAppLocales } from './locales';
+
 /**
  * Manifest definitions for @operon/${name}
  */
@@ -268,6 +344,7 @@ export const ${camelName}Manifest = {
   id: '${name}',
   name: '${titleName}',
   defaultPath: 'overview',
+  setupLocales: setupAppLocales,
   routes(t: (key: string) => string): RouteRecordRaw[] {
     return [
       {
@@ -331,6 +408,7 @@ import { Badge, Button, Card } from '@operon-core/shadcn-ui';
 
 import { CheckCircle2, Cloud, Cpu, Layers, Sparkles } from '@lucide/vue';
 
+import { $t } from '../locales';
 import { use${pascalName}Store } from '../stores/sample';
 
 defineOptions({ name: '${pascalName}OverviewView' });
@@ -355,7 +433,7 @@ function handleNotify() {
         <div class="flex items-center gap-2.5">
           <Layers class="size-6 text-primary" />
           <h2 class="text-xl font-semibold tracking-tight">
-            ${titleName} Micro-App
+            {{ $t('${name}.title') }}
           </h2>
           <Badge
             variant="outline"
@@ -372,14 +450,14 @@ function handleNotify() {
           </Badge>
         </div>
         <p class="text-sm text-muted-foreground mt-1">
-          Scaffolded autonomous micro-frontend running on port ${nextPort}.
+          {{ $t('${name}.description') }}
         </p>
       </div>
 
       <div class="flex items-center gap-2">
         <Button size="sm" variant="outline" @click="handleNotify">
           <Sparkles class="size-3.5 mr-1.5" />
-          Test Shell Toast
+          {{ $t('${name}.test_toast_btn') }}
         </Button>
       </div>
     </div>

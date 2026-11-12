@@ -8,17 +8,18 @@ import {
   Maximize,
   Minimize,
   RotateCw,
+  Search,
 } from '@operon/icons';
 import { $t } from '@operon/locales';
 import { preferences, usePreferences } from '@operon/preferences';
 import { useAccessStore } from '@operon/stores';
+import { isWindowsOs } from '@operon/utils';
 
 import { Button } from '@operon-core/shadcn-ui';
 
 import { useFullscreen, useMagicKeys, whenever } from '@vueuse/core';
 
 import {
-  GlobalSearch,
   LanguageToggle,
   LockScreenModal,
   Notification,
@@ -259,8 +260,12 @@ function nextIndex(list: Array<SlotItem>) {
   return index + 1;
 }
 
-function clearPreferencesAndLogout() {
-  emit('clearPreferencesAndLogout');
+function openGlobalSearch() {
+  window.dispatchEvent(
+    new CustomEvent('open-command-palette', {
+      detail: { mode: 'navigation', initialValue: '' },
+    }),
+  );
 }
 
 onMounted(() => {
@@ -328,18 +333,28 @@ onMounted(() => {
     <template v-for="slot in rightSlots" :key="slot.name">
       <slot :name="slot.name">
         <template v-if="slot.name === 'global-search'">
-          <GlobalSearch
-            :enable-shortcut-key="globalSearchShortcutKey"
-            :menus="accessStore.accessMenus"
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
             class="mr-1"
-          />
+            :title="$t('ui.widgets.search.title')"
+            :aria-label="$t('ui.widgets.search.title')"
+            :aria-keyshortcuts="
+              globalSearchShortcutKey
+                ? isWindowsOs()
+                  ? 'Control+K'
+                  : 'Meta+K'
+                : undefined
+            "
+            @click="openGlobalSearch"
+          >
+            <Search />
+          </Button>
         </template>
 
         <template v-else-if="slot.name === 'preferences'">
-          <PreferencesButton
-            class="mr-1 hidden md:flex"
-            @clear-preferences-and-logout="clearPreferencesAndLogout"
-          />
+          <PreferencesButton class="mr-1 hidden md:flex" />
         </template>
         <template v-else-if="slot.name === 'theme-toggle'">
           <ThemeToggle class="mr-1 hidden md:flex" />

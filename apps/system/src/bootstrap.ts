@@ -7,6 +7,7 @@ import '@operon/styles';
 
 import { createPinia } from 'pinia';
 
+import { $t, setupStandaloneI18n } from './locales';
 import { systemManifest } from './manifest';
 
 export async function bootstrap(namespace = 'operon-system-dev') {
@@ -15,6 +16,8 @@ export async function bootstrap(namespace = 'operon-system-dev') {
   });
 
   const app = createApp({ render: () => h(RouterView) });
+  await setupStandaloneI18n(app);
+
   const pinia = createPinia();
   const router = createRouter({
     history: createWebHistory(),
@@ -23,7 +26,7 @@ export async function bootstrap(namespace = 'operon-system-dev') {
         path: '/',
         component: { render: () => h(RouterView) },
         redirect: `/${systemManifest.defaultPath}`,
-        children: systemManifest.routes((key) => key),
+        children: systemManifest.routes($t),
       },
     ],
   });

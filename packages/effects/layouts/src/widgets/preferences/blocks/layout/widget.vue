@@ -90,12 +90,12 @@ const preferencesPositionItems = computed((): SelectOption[] => [
     value: 'fixed',
   },
   {
-    label: $t('preferences.position.sidebarBottom'),
-    value: 'sidebar-bottom',
-  },
-  {
     label: $t('preferences.position.userDropdown'),
     value: 'user-dropdown',
+  },
+  {
+    label: $t('common.notShow'),
+    value: 'none',
   },
 ]);
 

@@ -121,7 +121,7 @@ defineExpose({
       v-bind="{ ...$attrs, ...forwarded }"
       :class="
         cn(
-          'z-popup bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed left-1/2 -translate-x-1/2 max-h-[90vh] overflow-y-auto w-full max-w-[calc(100%-2rem)] sm:max-w-lg border border-border p-6 shadow-xl outline-hidden sm:rounded-xl',
+          'z-popup bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed left-1/2 -translate-x-1/2 grid gap-4 max-h-[90vh] overflow-y-auto w-full max-w-[calc(100%-2rem)] sm:max-w-lg border border-border p-6 shadow-xl outline-hidden sm:rounded-xl',
           {
             'data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-top-[48%]':
               animationType === 'slide' && !centered,

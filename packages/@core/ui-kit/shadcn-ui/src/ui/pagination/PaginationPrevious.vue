@@ -11,7 +11,7 @@ import { ChevronLeft } from '@lucide/vue';
 import { reactiveOmit } from '@vueuse/core';
 import { PaginationPrev, useForwardProps } from 'reka-ui';
 
-import { Button, buttonVariants } from '../button';
+import { buttonVariants } from '../button';
 
 const props = withDefaults(
   defineProps<
@@ -21,7 +21,7 @@ const props = withDefaults(
     }
   >(),
   {
-    size: 'default',
+    size: 'icon',
   },
 );
 
@@ -34,17 +34,14 @@ const forwarded = useForwardProps(delegatedProps);
     data-slot="pagination-previous"
     :class="
       cn(
-        buttonVariants({ variant: 'ghost', size }),
-        'gap-1 px-2.5 sm:pr-2.5',
+        !props.asChild && [buttonVariants({ variant: 'outline', size }), 'p-0'],
         props.class,
       )
     "
     v-bind="forwarded"
   >
-    <Button :class="cn('size-8 p-0', props.class)" variant="outline">
-      <slot>
-        <ChevronLeft class="size-4" />
-      </slot>
-    </Button>
+    <slot>
+      <ChevronLeft class="size-4" />
+    </slot>
   </PaginationPrev>
 </template>

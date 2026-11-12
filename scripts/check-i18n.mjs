@@ -6,19 +6,44 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, '..');
 
-const LOCALE_DIRS = [
-  'packages/locales/src/langs',
-  'apps/shell/src/locales/langs',
-];
-
 const SUPPORTED_LOCALES = ['en-US', 'vi-VN'];
+
+const CORE_NAMESPACES = new Set([
+  'authentication',
+  'common',
+  'preferences',
+  'profile',
+  'term',
+  'ui',
+]);
+
+function getAppNames() {
+  const appsDir = path.join(ROOT_DIR, 'apps');
+  if (!fs.existsSync(appsDir)) return [];
+  return fs
+    .readdirSync(appsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .toSorted();
+}
+
+function getLocaleDirs() {
+  const dirs = ['packages/locales/src/langs'];
+  for (const app of getAppNames()) {
+    const rel = `apps/${app}/src/locales/langs`;
+    if (fs.existsSync(path.join(ROOT_DIR, rel))) {
+      dirs.push(rel);
+    }
+  }
+  return dirs;
+}
 
 const VN_DIACRITIC_REGEX =
   /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]/;
 
 function loadLocaleTree(locale) {
   const tree = {};
-  for (const relDir of LOCALE_DIRS) {
+  for (const relDir of getLocaleDirs()) {
     const absDir = path.join(ROOT_DIR, relDir, locale);
     if (!fs.existsSync(absDir)) continue;
     for (const file of fs.readdirSync(absDir)) {
@@ -71,6 +96,8 @@ function walkSourceFiles(dir, files = []) {
         'langs',
         'locales',
         'node_modules',
+        'src-tauri',
+        'target',
       ].includes(entry.name)
     ) {
       continue;
@@ -106,26 +133,46 @@ export function auditI18n(options = {}) {
   const missingInVi = [...enKeys].filter((k) => !viKeys.has(k));
   const missingInEn = [...viKeys].filter((k) => !enKeys.has(k));
 
-  // Extract used i18n keys across apps/shell/src
-  const appFiles = walkSourceFiles('apps/shell/src');
+  // Extract used i18n keys across apps/*/src and packages/effects
+  const appNames = getAppNames();
+  const appFiles = appNames.flatMap((app) =>
+    walkSourceFiles(`apps/${app}/src`),
+  );
+  const referencedFiles = [...appFiles, ...walkSourceFiles('packages/effects')];
+  const namespacePattern = [
+    'page',
+    ...CORE_NAMESPACES,
+    ...appNames.filter((app) => app !== 'shell'),
+  ].join('|');
   const keyPatterns = [
-    /\$t\(\s*["'`]([a-zA-Z0-9_.-]+)["'`]/gs,
+    /(?:\$t|\bt)\(\s*["'`]([a-zA-Z0-9_.-]+)["'`]/gs,
     /(?:labelKey|allLabelKey|titleKey|descKey|placeholderKey):\s*["'`]([a-zA-Z0-9_.-]+)["'`]/gs,
-    /title:\s*["'`]((?:page|common|term|ui|preferences|authentication|profile)\.[a-zA-Z0-9_.-]+)["'`]/gs,
+    new RegExp(
+      `title:\\s*["'\`]((?:${namespacePattern})\\.[a-zA-Z0-9_.-]+)["'\`]`,
+      'gs',
+    ),
   ];
 
   const missingUsedKeys = [];
+  const crossScopeLeaks = [];
   let totalReferencedCount = 0;
 
-  for (const file of appFiles) {
-    const content = fs.readFileSync(file, 'utf8');
+  for (const file of referencedFiles) {
+    const rawContent = fs.readFileSync(file, 'utf8');
+    // Strip block comments, HTML comments, and single-line comments so JSDoc examples are ignored
+    const content = rawContent
+      .replaceAll(/\/\*[\s\S]*?\*\//g, '')
+      .replaceAll(/<!--[\s\S]*?-->/g, '')
+      .replaceAll(/^\s*\/\/.*$/gm, '');
     const relFile = path.relative(ROOT_DIR, file);
+    const normalizedRel = relFile.replaceAll('\\', '/');
+    const sourceApp = normalizedRel.match(/^apps\/([^/]+)\//)?.[1];
 
     for (const pattern of keyPatterns) {
       let match;
       while ((match = pattern.exec(content)) !== null) {
         const key = match[1].trim();
-        if (!key || key.includes('${')) continue;
+        if (!key || !key.includes('.') || key.includes('${')) continue;
         totalReferencedCount++;
 
         const enVal = getByPath(trees['en-US'], key);
@@ -139,11 +186,29 @@ export function auditI18n(options = {}) {
             viExists: typeof viVal === 'string',
           });
         }
+
+        // Enforce scoped locale ownership across apps
+        const [topNs, subNs] = key.split('.');
+        if (sourceApp && sourceApp !== 'shell') {
+          const isAllowed =
+            CORE_NAMESPACES.has(topNs) ||
+            topNs === sourceApp ||
+            (topNs === 'page' && subNs === sourceApp);
+          if (!isAllowed) {
+            crossScopeLeaks.push({ file: relFile, key, sourceApp });
+          }
+        } else if (
+          sourceApp === 'shell' &&
+          !CORE_NAMESPACES.has(topNs) &&
+          topNs !== 'page'
+        ) {
+          crossScopeLeaks.push({ file: relFile, key, sourceApp });
+        }
       }
     }
   }
 
-  // Scan for hardcoded Vietnamese lines in apps/workstation/src
+  // Scan for hardcoded Vietnamese lines in apps/*/src
   const hardcodedVnLeaks = [];
   for (const file of appFiles) {
     const lines = fs.readFileSync(file, 'utf8').split('\n');
@@ -203,6 +268,7 @@ export function auditI18n(options = {}) {
     console.log(`  - Missing keys in vi-VN       : ${missingInVi.length}`);
     console.log(`  - Missing keys in en-US       : ${missingInEn.length}`);
     console.log(`  - Unresolved $t(...) calls    : ${missingUsedKeys.length}`);
+    console.log(`  - Cross-scope locale leaks    : ${crossScopeLeaks.length}`);
     console.log(`  - Hardcoded Vietnamese lines  : ${hardcodedVnLeaks.length}`);
     console.log(
       `  - Raw {{ }} interpolation leaks: ${interpolationLeaks.length}`,
@@ -237,6 +303,18 @@ export function auditI18n(options = {}) {
       for (const item of missingUsedKeys) {
         console.error(
           `  - ${item.key} in ${item.file} (en-US: ${item.enExists}, vi-VN: ${item.viExists})`,
+        );
+      }
+    }
+  }
+
+  if (crossScopeLeaks.length > 0) {
+    hasError = true;
+    if (!silent) {
+      console.error('\n[ERROR] Cross-app locale scope violation detected:');
+      for (const leak of crossScopeLeaks) {
+        console.error(
+          `  - ${leak.key} referenced in ${leak.file} (app "${leak.sourceApp}" cannot read sibling/shell private namespaces)`,
         );
       }
     }
@@ -278,6 +356,7 @@ export function auditI18n(options = {}) {
     missingInVi,
     missingInEn,
     missingUsedKeys,
+    crossScopeLeaks,
     hardcodedVnLeaks,
     interpolationLeaks,
     hasError,

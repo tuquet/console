@@ -1,8 +1,8 @@
 import type { Ref } from 'vue';
 
+import type { DataTableFeatures } from '../../components/data-table';
 import type { Task } from '../data/schema';
-import type { RowActionCallbacks } from './DataTableRowActions.vue';
-import type { TasksTableFeatures } from './features';
+import type { RowActionCallbacks } from './TasksTableRowActions.vue';
 
 import { h } from 'vue';
 
@@ -18,11 +18,11 @@ import { cn } from '@operon-core/shared/utils';
 import { Check, Copy, Star } from '@lucide/vue';
 import { createColumnHelper } from '@tanstack/vue-table';
 
+import { DataTableColumnHeader } from '../../components/data-table';
 import { assignees, labels, priorities, statuses } from '../data/data';
-import DataTableColumnHeader from './DataTableColumnHeader.vue';
-import DataTableRowActions from './DataTableRowActions.vue';
+import TasksTableRowActions from './TasksTableRowActions.vue';
 
-const columnHelper = createColumnHelper<TasksTableFeatures, Task>();
+const columnHelper = createColumnHelper<DataTableFeatures, Task>();
 
 const priorityRank = new Map(priorities.map((p) => [p.value, p.rank]));
 const assigneeMap = new Map(assignees.map((a) => [a.value, a]));
@@ -74,7 +74,7 @@ export function createTaskColumns(
     }),
 
     columnHelper.accessor('id', {
-      meta: { class: 'w-[132px]' },
+      meta: { class: 'w-[132px] whitespace-nowrap' },
       header: ({ column }) =>
         h(DataTableColumnHeader, { column, title: 'Task' }),
       cell: ({ row }) => {
@@ -317,7 +317,7 @@ export function createTaskColumns(
     }),
 
     columnHelper.accessor('updatedAt', {
-      meta: { class: 'w-[100px] text-right' },
+      meta: { class: 'w-[100px] text-right', label: 'Updated' },
       header: ({ column }) =>
         h(DataTableColumnHeader, {
           column,
@@ -343,7 +343,7 @@ export function createTaskColumns(
             class: 'flex justify-end',
             onClick: (e: MouseEvent) => e.stopPropagation(),
           },
-          [h(DataTableRowActions, { row, actions })],
+          [h(TasksTableRowActions, { row, actions })],
         ),
       enableHiding: false,
     }),

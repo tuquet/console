@@ -3,6 +3,8 @@ import {
   loadLocaleMessages,
   loadLocalesMap,
   loadLocalesMapFromDir,
+  registerLocaleMessages,
+  resetRegisteredLocaleMessages,
   setupI18n,
 } from './i18n';
 
@@ -16,10 +18,13 @@ export {
   loadLocaleMessages,
   loadLocalesMap,
   loadLocalesMapFromDir,
+  registerLocaleMessages,
+  resetRegisteredLocaleMessages,
   setupI18n,
 };
 export {
   type ImportLocaleFn,
+  type LoadMessageFn,
   type LocaleSetupOptions,
   type SupportedLanguagesType,
 } from './typing';

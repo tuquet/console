@@ -81,14 +81,6 @@ async function bootstrap(namespace: string) {
   // Register access control directives
   registerAccessDirective(app);
 
-  // Initialize Tippy
-  const { initTippy } = await import('@operon/common-ui/es/tippy');
-  initTippy(app);
-
-  // Configure Motion plugin
-  const { MotionPlugin } = await import('@operon/plugins/motion');
-  app.use(MotionPlugin);
-
   // Dynamically update document title
   watchEffect(() => {
     if (preferences.app.dynamicTitle) {

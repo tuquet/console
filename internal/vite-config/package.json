@@ -29,30 +29,21 @@
   },
   "dependencies": {
     "@intlify/unplugin-vue-i18n": "catalog:",
-    "@jspm/generator": "catalog:",
     "@operon/node-utils": "workspace:*",
     "@tailwindcss/vite": "catalog:",
-    "archiver": "catalog:",
-    "cheerio": "catalog:",
-    "get-port": "catalog:",
     "html-minifier-terser": "catalog:",
-    "nitropack": "catalog:",
     "vite-plugin-pwa": "catalog:",
     "vite-plugin-vue-devtools": "catalog:"
   },
   "devDependencies": {
     "@pnpm/workspace.read-manifest": "catalog:",
-    "@types/archiver": "catalog:",
     "@types/html-minifier-terser": "catalog:",
     "@vitejs/plugin-vue": "catalog:",
     "@vitejs/plugin-vue-jsx": "catalog:",
     "dotenv": "catalog:",
     "rollup-plugin-visualizer": "catalog:",
-    "sass": "catalog:",
     "sass-embedded": "catalog:",
     "unplugin-dts": "catalog:",
-    "vite": "catalog:",
-    "vite-plugin-compression": "catalog:",
-    "vite-plugin-lazy-import": "catalog:"
+    "vite": "catalog:"
   }
 }

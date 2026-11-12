@@ -1,0 +1,10 @@
+{
+  "title": "Tác vụ",
+  "description": "Theo dõi, phân loại mức ưu tiên và điều phối công việc kỹ thuật",
+  "cloud_synced": "Đã đồng bộ Cloud",
+  "local_workspace": "Workspace cục bộ",
+  "export_csv": "Xuất CSV",
+  "reset_btn": "Đặt lại",
+  "empty_title": "Không có tác vụ phù hợp",
+  "empty_description": "Không có tác vụ nào khớp với từ khóa hoặc bộ lọc hiện tại."
+}

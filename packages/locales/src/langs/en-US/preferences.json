@@ -23,8 +23,8 @@
   "horizontalTip": "Top horizontal navigation menu",
   "headerSidebarNav": "Header vertical",
   "headerSidebarNavTip": "Full-width header with sidebar menu",
-  "headerTwoColumn": "Header two-column",
-  "headerTwoColumnTip": "Combined header and two-column sidebar",
+  "mixedMenu": "Mixed menu",
+  "mixedMenuTip": "Top primary navigation with left submenu",
   "fullContent": "Full content",
   "fullContentTip": "Content only, hide all menus",
   "normal": "Normal",
@@ -48,15 +48,7 @@
     "header": "Header",
     "auto": "Auto",
     "fixed": "Fixed",
-    "sidebarBottom": "Sidebar bottom",
     "userDropdown": "User menu"
-  },
-  "logo": {
-    "title": "Logo",
-    "mode": "Logo display mode",
-    "modeHidden": "Hidden",
-    "modeIcon": "Icon only",
-    "modeFull": "Icon + title"
   },
   "sidebar": {
     "buttons": "Control buttons",
@@ -143,8 +135,6 @@
     "dark": "Dark",
     "darkSidebar": "Dark sidebar",
     "darkSidebarTip": "Applies when using light theme with a sidebar.",
-    "darkSidebarSub": "Dark sub-sidebar",
-    "darkSidebarSubTip": "Applies in two-column menu mode.",
     "darkHeader": "Dark header",
     "weakMode": "High contrast",
     "grayMode": "Monochrome",

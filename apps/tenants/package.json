@@ -28,6 +28,7 @@
     "@lucide/vue": "catalog:",
     "@operon-core/shadcn-ui": "workspace:*",
     "@operon/kernel": "workspace:*",
+    "@operon/locales": "workspace:*",
     "@operon/preferences": "workspace:*",
     "@operon/styles": "workspace:*",
     "@operon/types": "workspace:*",

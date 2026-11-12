@@ -15,13 +15,6 @@ export function useLayout(props: VbenLayoutProps) {
   const isFullContent = computed(() => currentLayout.value === 'full-content');
 
   /**
-   * Whether sidebar mixed mode
-   */
-  const isSidebarMixedNav = computed(
-    () => (currentLayout.value as any) === 'sidebar-mixed-nav',
-  );
-
-  /**
    * Whether header navigation mode
    */
   const isHeaderNav = computed(() => currentLayout.value === 'header-nav');
@@ -35,19 +28,10 @@ export function useLayout(props: VbenLayoutProps) {
       currentLayout.value === 'header-sidebar-nav',
   );
 
-  /**
-   * Whether header mixed mode
-   */
-  const isHeaderMixedNav = computed(
-    () => currentLayout.value === 'header-mixed-nav',
-  );
-
   return {
     currentLayout,
     isFullContent,
-    isHeaderMixedNav,
     isHeaderNav,
     isMixedNav,
-    isSidebarMixedNav,
   };
 }

@@ -127,6 +127,33 @@ describe('gen-micro-app CLI Scaffolder', () => {
     expect(existsSync(join(testAppDir, 'src', 'bootstrap.ts'))).toBe(true);
     expect(existsSync(join(testAppDir, 'src', 'manifest.ts'))).toBe(true);
     expect(existsSync(join(testAppDir, 'src', 'remote-entry.ts'))).toBe(true);
+    expect(existsSync(join(testAppDir, 'src', 'locales', 'index.ts'))).toBe(
+      true,
+    );
+    expect(
+      existsSync(
+        join(
+          testAppDir,
+          'src',
+          'locales',
+          'langs',
+          'en-US',
+          `${testAppName}.json`,
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      existsSync(
+        join(
+          testAppDir,
+          'src',
+          'locales',
+          'langs',
+          'vi-VN',
+          `${testAppName}.json`,
+        ),
+      ),
+    ).toBe(true);
     expect(existsSync(join(testAppDir, 'src', 'views', 'index.vue'))).toBe(
       true,
     );
@@ -136,6 +163,7 @@ describe('gen-micro-app CLI Scaffolder', () => {
     );
     expect(pkg.name).toBe(`@operon/${testAppName}`);
     expect(pkg.dependencies['@operon/kernel']).toBe('workspace:*');
+    expect(pkg.dependencies['@operon/locales']).toBe('workspace:*');
 
     // Check shell route was created in sandbox
     expect(existsSync(shellRoutePath)).toBe(true);

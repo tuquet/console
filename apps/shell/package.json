@@ -37,7 +37,6 @@
     "@operon/layouts": "workspace:*",
     "@operon/locales": "workspace:*",
     "@operon/playground": "workspace:*",
-    "@operon/plugins": "workspace:*",
     "@operon/preferences": "workspace:*",
     "@operon/stores": "workspace:*",
     "@operon/styles": "workspace:*",

@@ -14,11 +14,6 @@ interface AuthenticationProps {
   loading?: boolean;
 
   /**
-   * QR code login path
-   */
-  qrCodeLoginPath?: string;
-
-  /**
    * Register path
    */
   registerPath?: string;
@@ -31,11 +26,6 @@ interface AuthenticationProps {
    * Whether to show forgot password
    */
   showForgetPassword?: boolean;
-
-  /**
-   * Whether to show QR code login
-   */
-  showQrcodeLogin?: boolean;
 
   /**
    * Whether to show register button
