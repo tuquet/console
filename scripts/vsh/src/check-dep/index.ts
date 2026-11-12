@@ -18,7 +18,6 @@ const DEFAULT_CONFIG = {
     // Font imports are consumed from CSS, which Knip does not traverse.
     '@fontsource/inter',
     '@fontsource/roboto',
-    '@iconify/json',
     '@operon-core/design',
     '@operon/commitlint-config',
     '@operon/eslint-config',
@@ -27,7 +26,6 @@ const DEFAULT_CONFIG = {
     '@operon/vite-config',
     '@operon/oxlint-config',
     'playwright',
-    'rimraf',
     'tailwindcss',
   ],
   ignoreWorkspaces: ['internal/lint-configs/*', 'scripts/*'],

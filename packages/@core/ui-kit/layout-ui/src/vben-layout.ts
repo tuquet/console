@@ -121,14 +121,10 @@ interface VbenLayoutProps {
    */
   sidebarEnable?: boolean;
   /**
-   * Sidebar collapsed extra width
+   * Sidebar collapsed extra width (used when collapsedShowTitle is enabled)
    * @default 48
    */
   sidebarExtraCollapsedWidth?: number;
-  /**
-   * Height of extra-title in extra panel
-   */
-  sidebarExtraTitleHeight?: number;
   /**
    * Whether sidebar collapse button is fixed
    * @default true
@@ -140,19 +136,10 @@ interface VbenLayoutProps {
    */
   sidebarHidden?: boolean;
   /**
-   * Whether sidebar logo area is displayed
-   */
-  sidebarLogoVisible: boolean;
-  /**
    * Sidebar
    * @default dark
    */
   sidebarTheme?: ThemeModeType;
-  /**
-   * Sidebar extra sub-panel
-   * @default dark
-   */
-  sidebarThemeSub?: ThemeModeType;
   /**
    * Sidebar width
    * @default 210

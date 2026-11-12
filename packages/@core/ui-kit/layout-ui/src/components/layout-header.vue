@@ -17,10 +17,6 @@ interface Props {
    */
   isMobile: boolean;
   /**
-   * Whether logo is displayed
-   */
-  logoVisible?: boolean;
-  /**
    * Whether to display
    */
   show: boolean;
@@ -42,9 +38,7 @@ interface Props {
   zIndex: number;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  logoVisible: true,
-});
+const props = defineProps<Props>();
 
 const slots = useSlots();
 
@@ -58,20 +52,6 @@ const style = computed((): CSSProperties => {
     right,
   };
 });
-
-const logoStyle = computed((): CSSProperties => {
-  if (!props.logoVisible) {
-    return {};
-  }
-
-  if (props.isMobile) {
-    return {
-      minWidth: '40px',
-    };
-  }
-
-  return {};
-});
 </script>
 
 <template>
@@ -83,25 +63,13 @@ const logoStyle = computed((): CSSProperties => {
     <div
       v-if="slots['toggle-button']"
       :class="
-        isMobile
-          ? 'order-first mr-1 flex h-full items-center'
-          : 'order-2 flex h-full items-center'
+        isMobile ? 'mr-1 flex h-full items-center' : 'flex h-full items-center'
       "
     >
       <slot name="toggle-button"> </slot>
     </div>
 
-    <div
-      v-if="slots.logo"
-      :style="logoStyle"
-      :class="
-        isMobile ? 'order-2 hidden md:block shrink-0' : 'order-1 shrink-0'
-      "
-    >
-      <slot name="logo"></slot>
-    </div>
-
-    <div class="order-3 flex min-w-0 flex-1 items-center h-full">
+    <div class="flex h-full min-w-0 flex-1 items-center">
       <slot></slot>
     </div>
   </header>

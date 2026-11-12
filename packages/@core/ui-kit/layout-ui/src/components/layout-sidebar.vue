@@ -3,23 +3,12 @@ import type { CSSProperties } from 'vue';
 
 import { computed, onUnmounted, shallowRef, useSlots } from 'vue';
 
-import { useScrollLock } from '@operon-core/composables';
 import { VbenScrollbar } from '@operon-core/shadcn-ui';
 
 import { useSidebarDrag } from '../hooks/use-sidebar-drag';
 import { SidebarCollapseButton, SidebarFixedButton } from './widgets';
 
 interface Props {
-  /**
-   * Height of bottom slot area (e.g. sidebar-bottom preferences button)
-   * @default 0
-   */
-  bottomHeight?: number;
-  /**
-   * Collapse trigger height
-   * @default 42
-   */
-  collapseHeight?: number;
   /**
    * Collapsed width
    * @default 48
@@ -35,45 +24,18 @@ interface Props {
    */
   expandedWidth?: number;
   /**
-   * Height of extra-title in extra panel
-   */
-  extraTitleHeight?: number;
-  /**
-   * Extra panel width
-   */
-  extraWidth: number;
-  /**
-   * Fix extra panel
-   * @default false
-   */
-  fixedExtra?: boolean;
-  /**
-   * Header height
-   */
-  headerHeight: number;
-  /**
    * Whether mobile drawer mode
    * @default false
    */
   isMobile?: boolean;
   /**
-   * Whether sidebar mixed mode
-   * @default false
-   */
-  isSidebarMixed?: boolean;
-  /**
    * Top margin
-   * @default 60
+   * @default 0
    */
   marginTop?: number;
   /**
-   * Mixed menu width
-   * @default 80
-   */
-  mixedWidth?: number;
-  /**
    * Top padding
-   * @default 60
+   * @default 0
    */
   paddingTop?: number;
   /**
@@ -96,10 +58,6 @@ interface Props {
    */
   theme: string;
   /**
-   * Sub-theme
-   */
-  themeSub: string;
-  /**
    * Width
    */
   width: number;
@@ -111,17 +69,11 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  bottomHeight: 0,
-  collapseHeight: 42,
   collapseWidth: 48,
   domVisible: true,
   expandedWidth: 180,
-  extraTitleHeight: undefined,
-  fixedExtra: false,
   isMobile: false,
-  isSidebarMixed: false,
   marginTop: 0,
-  mixedWidth: 70,
   paddingTop: 0,
   show: true,
   showCollapseButton: true,
@@ -129,15 +81,12 @@ const props = withDefaults(defineProps<Props>(), {
   zIndex: 0,
 });
 
-const emit = defineEmits<{ leave: []; 'update:width': [value: number] }>();
+const emit = defineEmits<{ 'update:width': [value: number] }>();
 const draggable = defineModel<boolean>('draggable');
 const collapse = defineModel<boolean>('collapse');
-const extraCollapse = defineModel<boolean>('extraCollapse');
 const expandOnHovering = defineModel<boolean>('expandOnHovering');
 const expandOnHover = defineModel<boolean>('expandOnHover');
-const extraVisible = defineModel<boolean>('extraVisible');
 
-const isLocked = useScrollLock({ immediate: false });
 const slots = useSlots();
 
 const asideRef = shallowRef<HTMLElement | null>(null);
@@ -155,9 +104,9 @@ const hiddenSideStyle = computed((): CSSProperties => {
 
 const sidebarVisualWidth = computed(() => {
   const currentWidth = Number.parseFloat(getMenuWidthValue(false));
-  return !props.isMobile && !props.isSidebarMixed
-    ? Math.max(currentWidth, props.expandedWidth)
-    : currentWidth;
+  return props.isMobile
+    ? currentWidth
+    : Math.max(currentWidth, props.expandedWidth);
 });
 
 const dragBarStyle = computed((): CSSProperties => {
@@ -166,20 +115,6 @@ const dragBarStyle = computed((): CSSProperties => {
     right: `${Math.max(0, sidebarVisualWidth.value - currentWidth)}px`,
   };
 });
-
-/**
- * Whether the secondary panel is expanded. Visibility and placeholder width must be driven by the same condition:
- * Inconsistency causes the panel to float over the main content (vben-layout header offset only checks extraVisible).
- * fixedExtra and expandOnHover are bound to the same preference in vben-layout, but as component API we cannot assume callers always pass them in pairs.
- */
-const extraPanelExpanded = computed(
-  () =>
-    props.isSidebarMixed &&
-    props.show &&
-    !collapse.value &&
-    !!extraVisible.value &&
-    (props.fixedExtra || expandOnHover.value || expandOnHovering.value),
-);
 
 const style = computed((): CSSProperties => {
   const { marginTop, paddingTop, zIndex } = props;
@@ -191,85 +126,24 @@ const style = computed((): CSSProperties => {
     marginTop: `${marginTop}px`,
     paddingTop: `${paddingTop}px`,
     zIndex,
-    ...(extraPanelExpanded.value ? { transition: 'none' } : {}),
   };
 });
 
-const extraStyle = computed((): CSSProperties => {
-  const { extraWidth, width, zIndex } = props;
-
-  return {
-    left: `${width}px`,
-    width: extraPanelExpanded.value ? `${extraWidth}px` : 0,
-    zIndex,
-  };
-});
-
-const extraTitleStyle = computed((): CSSProperties => {
-  const { extraTitleHeight, headerHeight } = props;
-
-  return {
-    height: `${extraTitleHeight ?? headerHeight - 1}px`,
-  };
-});
-
-const contentWidthStyle = computed((): CSSProperties => {
-  const { fixedExtra, isSidebarMixed, mixedWidth } = props;
-  if (isSidebarMixed && fixedExtra) {
-    return { width: `${mixedWidth}px` };
-  }
-  return {};
-});
-
-const contentStyle = computed((): CSSProperties => {
-  const { bottomHeight, collapseHeight, headerHeight } = props;
-  let footerHeight = collapseHeight + bottomHeight;
-  if (slots.bottom && !props.isSidebarMixed) {
-    footerHeight = collapse.value && props.showCollapseButton ? 85 : 49;
-  }
-
-  return {
-    height: `calc(100% - ${headerHeight + footerHeight}px)`,
-    paddingTop: '8px',
-    ...contentWidthStyle.value,
-  };
-});
-
-const headerStyle = computed((): CSSProperties => {
-  const { headerHeight, isSidebarMixed } = props;
-
-  return {
-    ...(isSidebarMixed ? { display: 'flex', justifyContent: 'center' } : {}),
-    height: `${headerHeight - 1}px`,
-    ...contentWidthStyle.value,
-  };
-});
-
-const extraContentStyle = computed((): CSSProperties => {
-  const { collapseHeight, extraTitleHeight, headerHeight } = props;
-  const titleHeight = extraTitleHeight ?? headerHeight;
-  return {
-    height: `calc(100% - ${titleHeight + collapseHeight}px)`,
-  };
-});
-
-const collapseStyle = computed((): CSSProperties => {
-  return {
-    height: `${props.collapseHeight}px`,
-  };
+const showFooter = computed(() => {
+  return (
+    Boolean(slots.footer) ||
+    props.showCollapseButton ||
+    (!collapse.value && props.showFixedButton)
+  );
 });
 
 function getMenuWidthValue(isHiddenDom: boolean) {
-  const { collapseWidth, extraWidth, mixedWidth, isSidebarMixed, width } =
-    props;
+  const { collapseWidth, width } = props;
 
-  let widthValue =
-    width === 0
-      ? '0px'
-      : `${width + (extraPanelExpanded.value ? extraWidth : 0)}px`;
+  let widthValue = width === 0 ? '0px' : `${width}px`;
 
   if (isHiddenDom && expandOnHovering.value && !expandOnHover.value) {
-    widthValue = isSidebarMixed ? `${mixedWidth}px` : `${collapseWidth}px`;
+    widthValue = `${collapseWidth}px`;
   }
   return widthValue;
 }
@@ -306,61 +180,41 @@ function handleMouseenter(e: MouseEvent) {
   }
 
   if (expandOnHover.value) {
-    if (props.isSidebarMixed) {
-      extraVisible.value = true;
-    }
     return;
   }
   if (!expandOnHovering.value) {
     collapse.value = false;
   }
-  if (props.isSidebarMixed) {
-    isLocked.value = true;
-    extraVisible.value = true;
-  }
   expandOnHovering.value = true;
 }
 
 function handleMouseleave() {
-  emit('leave');
-  if (props.isSidebarMixed) {
-    isLocked.value = false;
-  }
   if (expandOnHover.value || props.isMobile) {
     return;
   }
 
   expandOnHovering.value = false;
   collapse.value = true;
-  extraVisible.value = false;
 }
 
 const { startDrag, endDrag } = useSidebarDrag();
 
 const handleDragSidebar = (e: MouseEvent) => {
-  const { isSidebarMixed, collapseWidth, width } = props;
-  const minLimit = isSidebarMixed ? width + collapseWidth : collapseWidth;
-  const maxLimit = isSidebarMixed ? width + 320 : 320;
+  const { collapseWidth } = props;
 
   startDrag(
     e,
     {
-      min: minLimit,
-      max: maxLimit,
+      min: collapseWidth,
+      max: 320,
     },
     {
       target: asideRef.value,
       dragBar: dragBarRef.value,
     },
     (newWidth) => {
-      if (isSidebarMixed) {
-        emit('update:width', newWidth - width);
-        extraCollapse.value = collapse.value =
-          newWidth - width <= collapseWidth;
-      } else {
-        emit('update:width', newWidth);
-        collapse.value = extraCollapse.value = newWidth <= collapseWidth;
-      }
+      emit('update:width', newWidth);
+      collapse.value = newWidth <= collapseWidth;
     },
   );
 };
@@ -389,111 +243,76 @@ onUnmounted(() => {
         theme,
         {
           'border-r border-border bg-sidebar transition-[clip-path,transform] duration-300 ease-out':
-            !isMobile && !isSidebarMixed,
-          'border-r border-border transition-transform duration-300 ease-out':
-            !isMobile && isSidebarMixed,
+            !isMobile,
         },
       ]"
       @mouseenter="handleMouseenter"
       @mouseleave="handleMouseleave"
     >
       <div
-        class="h-full"
-        :class="[
-          {
-            'bg-sidebar-deep': isSidebarMixed,
-            'border-r border-border bg-sidebar': !isSidebarMixed,
-          },
-        ]"
+        class="flex h-full flex-col border-r border-border bg-sidebar"
         :style="{ width: `${width}px` }"
       >
-        <SidebarFixedButton
-          v-if="
-            !slots.bottom && !collapse && !isSidebarMixed && showFixedButton
-          "
-          v-model:collapse="collapse"
-          v-model:expand-on-hover="expandOnHover"
-          v-model:expand-on-hovering="expandOnHovering"
-          v-model:extra-visible="extraVisible"
-        />
-        <div v-if="slots.logo" :style="headerStyle">
-          <slot name="logo"></slot>
+        <div
+          v-if="slots.header"
+          data-layout-region="sidebar-header"
+          class="flex min-h-[50px] shrink-0 items-center border-b border-border"
+          :class="collapse ? 'justify-center px-1.5 py-2' : 'px-2 py-1.5'"
+        >
+          <slot name="header" :collapsed="collapse"></slot>
         </div>
-        <VbenScrollbar :style="contentStyle" shadow shadow-border>
-          <slot></slot>
+
+        <VbenScrollbar class="min-h-0 flex-1 py-2" shadow shadow-border>
+          <slot :collapsed="collapse"></slot>
         </VbenScrollbar>
 
         <div
-          v-if="slots.bottom && !isSidebarMixed"
+          v-if="showFooter"
           data-layout-region="sidebar-footer"
-          class="flex min-h-[49px] items-center gap-1 border-t border-border px-2 py-2"
-          :class="collapse ? 'flex-col' : ''"
+          class="flex min-h-[42px] shrink-0 items-center gap-1.5 border-t border-border py-1.5"
+          :class="
+            collapse
+              ? 'flex-col justify-center px-1.5'
+              : 'justify-between px-2.5'
+          "
         >
-          <div
-            class="min-w-0 flex-1"
-            :class="collapse ? 'flex justify-center' : ''"
-          >
-            <slot name="bottom" :collapsed="collapse"></slot>
-          </div>
-          <SidebarCollapseButton
-            v-if="showCollapseButton"
-            v-model:collapsed="collapse"
-            inline
-          />
-          <SidebarFixedButton
-            v-if="!collapse && showFixedButton"
-            v-model:collapse="collapse"
-            v-model:expand-on-hover="expandOnHover"
-            v-model:expand-on-hovering="expandOnHovering"
-            v-model:extra-visible="extraVisible"
-            inline
-          />
+          <template v-if="slots.footer">
+            <div
+              class="min-w-0 flex-1"
+              :class="collapse ? 'flex justify-center' : ''"
+            >
+              <slot name="footer" :collapsed="collapse"></slot>
+            </div>
+            <div
+              v-if="showCollapseButton || (!collapse && showFixedButton)"
+              class="flex shrink-0 items-center gap-1"
+              :class="collapse ? 'flex-col' : ''"
+            >
+              <SidebarFixedButton
+                v-if="!collapse && showFixedButton"
+                v-model:collapse="collapse"
+                v-model:expand-on-hover="expandOnHover"
+                v-model:expand-on-hovering="expandOnHovering"
+              />
+              <SidebarCollapseButton
+                v-if="showCollapseButton"
+                v-model:collapsed="collapse"
+              />
+            </div>
+          </template>
+          <template v-else>
+            <SidebarCollapseButton
+              v-if="showCollapseButton"
+              v-model:collapsed="collapse"
+            />
+            <SidebarFixedButton
+              v-if="!collapse && showFixedButton"
+              v-model:collapse="collapse"
+              v-model:expand-on-hover="expandOnHover"
+              v-model:expand-on-hovering="expandOnHovering"
+            />
+          </template>
         </div>
-        <template v-else>
-          <div v-if="slots.bottom" class="shrink-0">
-            <slot name="bottom" :collapsed="collapse"></slot>
-          </div>
-          <div :style="collapseStyle"></div>
-          <SidebarCollapseButton
-            v-if="showCollapseButton && !isSidebarMixed"
-            v-model:collapsed="collapse"
-          />
-        </template>
-      </div>
-      <div
-        v-if="isSidebarMixed"
-        :class="[
-          themeSub,
-          {
-            // border-l removed: aside already provides border-r separator for sidebar-mixed
-          },
-        ]"
-        :style="extraStyle"
-        class="fixed top-0 h-full overflow-hidden border-r border-border bg-sidebar transition-[left,width] duration-300 ease-out"
-      >
-        <SidebarCollapseButton
-          v-if="isSidebarMixed && expandOnHover"
-          v-model:collapsed="extraCollapse"
-        />
-
-        <SidebarFixedButton
-          v-if="!extraCollapse"
-          v-model:collapse="collapse"
-          v-model:expand-on-hover="expandOnHover"
-          v-model:expand-on-hovering="expandOnHovering"
-          v-model:extra-visible="extraVisible"
-        />
-        <div v-if="!extraCollapse" :style="extraTitleStyle" class="pl-2">
-          <slot name="extra-title"></slot>
-        </div>
-        <VbenScrollbar
-          :style="extraContentStyle"
-          class="border-border py-2"
-          shadow
-          shadow-border
-        >
-          <slot name="extra"></slot>
-        </VbenScrollbar>
       </div>
       <div
         v-if="draggable"

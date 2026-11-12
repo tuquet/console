@@ -1,5 +1,3 @@
-import { Buffer } from 'node:buffer';
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -26,18 +24,28 @@ vi.mock('@operon/stores', () => ({
   useAccessStore: () => mockAccessStore,
 }));
 
+function toBase64Url(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCodePoint(byte);
+  }
+  return btoa(binary)
+    .replaceAll('+', '-')
+    .replaceAll('/', '_')
+    .replace(/=+$/, '');
+}
+
 function createJwtWithExp(expSeconds: number): string {
-  const header = Buffer.from(
-    JSON.stringify({ alg: 'HS256', typ: 'JWT' }),
-  ).toString('base64url');
-  const payload = Buffer.from(
+  const header = toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const payload = toBase64Url(
     JSON.stringify({
       exp: expSeconds,
       role: 'authenticated',
       sub: 'user-123',
       user_metadata: { full_name: 'Qu\u1EA3n tr\u1ECB vi\u00EAn' },
     }),
-  ).toString('base64url');
+  );
   return `${header}.${payload}.sig`;
 }
 

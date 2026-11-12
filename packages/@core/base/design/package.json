@@ -46,7 +46,6 @@
   },
   "dependencies": {
     "@fontsource/inter": "catalog:",
-    "@fontsource/roboto": "catalog:",
-    "@iconify/json": "catalog:"
+    "@fontsource/roboto": "catalog:"
   }
 }

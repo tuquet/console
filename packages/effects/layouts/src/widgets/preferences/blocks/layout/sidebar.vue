@@ -86,11 +86,7 @@ const handleCheckboxChange = () => {
   </SwitchItem>
   <SwitchItem
     v-model="sidebarAutoActivateChild"
-    :disabled="
-      !sidebarEnable ||
-      !['mixed-nav', 'header-mixed-nav'].includes(currentLayout as string) ||
-      disabled
-    "
+    :disabled="!sidebarEnable || currentLayout !== 'mixed-nav' || disabled"
     :tip="$t('preferences.sidebar.autoActivateChildTip')"
   >
     {{ $t('preferences.sidebar.autoActivateChild') }}

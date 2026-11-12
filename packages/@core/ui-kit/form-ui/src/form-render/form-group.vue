@@ -4,7 +4,11 @@ import type { FormGroupSchema } from '../types';
 import { computed, ref, watch } from 'vue';
 
 import { ChevronsDown } from '@operon-core/icons';
-import { VbenCollapsible, VbenRenderContent } from '@operon-core/shadcn-ui';
+import {
+  Collapsible,
+  CollapsibleContent,
+  VbenRenderContent,
+} from '@operon-core/shadcn-ui';
 import { cn } from '@operon-core/shared/utils';
 
 import { injectRenderFormProps } from './context';
@@ -70,54 +74,54 @@ function toggleCollapsed() {
       )
     "
   >
-    <VbenCollapsible v-model:open="collapseOpen" :show-trigger="false">
-      <template #label>
-        <div
-          class="form-group-header mb-2 flex min-h-7 flex-1 items-center gap-2"
+    <Collapsible
+      v-model:open="collapseOpen"
+      :unmount-on-hide="false"
+      class="flex flex-col"
+    >
+      <div
+        class="form-group-header mb-2 flex min-h-7 flex-1 items-center gap-2"
+      >
+        <component
+          :is="shouldCollapsible ? 'button' : 'div'"
+          :aria-expanded="shouldCollapsible ? collapseOpen : undefined"
+          :class="
+            cn('flex min-w-0 flex-1 items-center gap-2 text-left', {
+              'focus-visible:ring-ring cursor-pointer select-none rounded-sm outline-none focus-visible:ring-2':
+                shouldCollapsible,
+            })
+          "
+          :type="shouldCollapsible ? 'button' : undefined"
+          class="form-group-trigger"
+          @click="toggleCollapsed"
         >
-          <component
-            :is="shouldCollapsible ? 'button' : 'div'"
-            :aria-expanded="shouldCollapsible ? collapseOpen : undefined"
+          <span class="bg-primary h-3.5 w-[3px] flex-none rounded-full"></span>
+          <span v-if="props.schema.title" class="form-group-title leading-6">
+            <VbenRenderContent :content="props.schema.title" />
+          </span>
+          <ChevronsDown
+            v-if="shouldCollapsible"
+            aria-hidden="true"
+            :size="16"
             :class="
-              cn('flex min-w-0 flex-1 items-center gap-2 text-left', {
-                'focus-visible:ring-ring cursor-pointer select-none rounded-sm outline-none focus-visible:ring-2':
-                  shouldCollapsible,
-              })
+              cn(
+                'text-muted-foreground ml-auto flex-none transition-transform',
+                {
+                  'rotate-180': collapseOpen,
+                },
+              )
             "
-            :type="shouldCollapsible ? 'button' : undefined"
-            class="form-group-trigger"
-            @click="toggleCollapsed"
-          >
-            <span
-              class="bg-primary h-3.5 w-[3px] flex-none rounded-full"
-            ></span>
-            <span v-if="props.schema.title" class="form-group-title leading-6">
-              <VbenRenderContent :content="props.schema.title" />
-            </span>
-            <ChevronsDown
-              v-if="shouldCollapsible"
-              aria-hidden="true"
-              :size="16"
-              :class="
-                cn(
-                  'text-muted-foreground ml-auto flex-none transition-transform',
-                  {
-                    'rotate-180': collapseOpen,
-                  },
-                )
-              "
-            />
-          </component>
-          <div v-if="props.schema.extra" class="flex-none">
-            <VbenRenderContent :content="props.schema.extra" />
-          </div>
+          />
+        </component>
+        <div v-if="props.schema.extra" class="flex-none">
+          <VbenRenderContent :content="props.schema.extra" />
         </div>
-      </template>
-      <template #collapsibleContent>
+      </div>
+      <CollapsibleContent>
         <div :class="props.contentClass">
           <slot></slot>
         </div>
-      </template>
-    </VbenCollapsible>
+      </CollapsibleContent>
+    </Collapsible>
   </div>
 </template>

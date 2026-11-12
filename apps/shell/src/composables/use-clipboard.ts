@@ -35,10 +35,7 @@ export function useClipboard() {
     text: string,
     label = $t('common.content'),
   ): Promise<boolean> {
-    return copyToClipboard(
-      text,
-      $t('page.commerce_view.copied_label', { label }),
-    );
+    return copyToClipboard(text, label);
   }
 
   return {

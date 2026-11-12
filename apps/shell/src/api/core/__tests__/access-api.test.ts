@@ -1,5 +1,3 @@
-import { Buffer } from 'node:buffer';
-
 import { $t } from '@operon/locales';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -19,11 +17,21 @@ vi.mock('@operon/stores', () => ({
   useAccessStore: () => mockAccessStore,
 }));
 
+function toBase64Url(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCodePoint(byte);
+  }
+  return btoa(binary)
+    .replaceAll('+', '-')
+    .replaceAll('/', '_')
+    .replace(/=+$/, '');
+}
+
 function createMockJwt(payload: Record<string, any>): string {
-  const header = Buffer.from(
-    JSON.stringify({ alg: 'HS256', typ: 'JWT' }),
-  ).toString('base64url');
-  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const header = toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const body = toBase64Url(JSON.stringify(payload));
   return `${header}.${body}.mock_sig`;
 }
 

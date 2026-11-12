@@ -60,7 +60,6 @@ const props = withDefaults(defineProps<Props>(), {
   sidebarFixedButton: true,
   sidebarHidden: false,
   sidebarTheme: 'dark',
-  sidebarThemeSub: 'dark',
   sidebarWidth: 180,
   sideCollapseWidth: 60,
   tabbarEnable: true,
@@ -69,7 +68,6 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  sideMouseLeave: [];
   toggleSidebar: [];
   'update:sidebarWidth': [value: number];
 }>();
@@ -77,10 +75,6 @@ const sidebarDraggable = defineModel<boolean>('sidebarDraggable', {
   default: true,
 });
 const sidebarCollapse = defineModel<boolean>('sidebarCollapse', {
-  default: false,
-});
-const sidebarExtraVisible = defineModel<boolean>('sidebarExtraVisible');
-const sidebarExtraCollapse = defineModel<boolean>('sidebarExtraCollapse', {
   default: false,
 });
 const sidebarExpandOnHover = defineModel<boolean>('sidebarExpandOnHover', {
@@ -110,13 +104,8 @@ useLayoutViewportHeight();
 const { setLayoutHeaderHeight } = useLayoutHeaderStyle();
 const { setLayoutFooterHeight } = useLayoutFooterStyle();
 
-const {
-  currentLayout,
-  isFullContent,
-  isHeaderMixedNav,
-  isHeaderNav,
-  isMixedNav,
-} = useLayout(props);
+const { currentLayout, isFullContent, isHeaderNav, isMixedNav } =
+  useLayout(props);
 
 /**
  * Whether header auto-hides
@@ -153,7 +142,7 @@ const getSideCollapseWidth = computed(() => {
     sideCollapseWidth,
   } = props;
 
-  return sidebarCollapseShowTitle || isHeaderMixedNav.value
+  return sidebarCollapseShowTitle
     ? sidebarExtraCollapsedWidth
     : sideCollapseWidth;
 });
@@ -190,36 +179,15 @@ const sidebarMarginTop = computed(() => {
  */
 const getSidebarWidth = computed(() => {
   const { isMobile, sidebarHidden, sidebarWidth } = props;
-  let width = 0;
 
-  if (sidebarHidden) {
-    return width;
+  if (sidebarHidden || !sidebarEnableState.value) {
+    return 0;
   }
 
-  if (
-    !sidebarEnableState.value ||
-    (sidebarHidden && !isMixedNav.value && !isHeaderMixedNav.value)
-  ) {
-    return width;
+  if (activeSidebarCollapse.value) {
+    return isMobile ? 0 : getSideCollapseWidth.value;
   }
-
-  if (isHeaderMixedNav.value && !isMobile) {
-    width = props.sidebarExtraCollapsedWidth;
-  } else if (activeSidebarCollapse.value) {
-    width = isMobile ? 0 : getSideCollapseWidth.value;
-  } else {
-    width = sidebarWidth;
-  }
-  return width;
-});
-
-/**
- * Get extra area width
- */
-const sidebarExtraWidth = computed(() => {
-  const { sidebarExtraCollapsedWidth, sidebarWidth } = props;
-
-  return sidebarExtraCollapse.value ? sidebarExtraCollapsedWidth : sidebarWidth;
+  return sidebarWidth;
 });
 
 /**
@@ -229,7 +197,6 @@ const isSideMode = computed(
   () =>
     currentLayout.value === 'mixed-nav' ||
     currentLayout.value === 'sidebar-nav' ||
-    currentLayout.value === 'header-mixed-nav' ||
     currentLayout.value === 'header-sidebar-nav',
 );
 
@@ -268,30 +235,12 @@ const mainStyle = computed(() => {
     showSidebar.value &&
     !props.isMobile
   ) {
-    // Effective under fixed mode
-    const isSideNavEffective =
-      isHeaderMixedNav.value &&
-      sidebarExpandOnHover.value &&
-      sidebarExtraVisible.value &&
-      !activeSidebarCollapse.value;
-
-    if (isSideNavEffective) {
-      const sideCollapseWidth = getSidebarWidth.value;
-      const sideWidth = sidebarExtraCollapse.value
-        ? props.sidebarExtraCollapsedWidth
-        : props.sidebarWidth;
-
-      // 100% - sidebar mixed width - menu width
-      sidebarAndExtraWidth = `${sideCollapseWidth + sideWidth}px`;
-      width = `calc(100% - ${sidebarAndExtraWidth})`;
-    } else {
-      let sidebarWidth = getSidebarWidth.value;
-      if (sidebarExpandOnHovering.value && !sidebarExpandOnHover.value) {
-        sidebarWidth = getSideCollapseWidth.value;
-      }
-      sidebarAndExtraWidth = `${sidebarWidth}px`;
-      width = `calc(100% - ${sidebarAndExtraWidth})`;
+    let sidebarWidth = getSidebarWidth.value;
+    if (sidebarExpandOnHovering.value && !sidebarExpandOnHover.value) {
+      sidebarWidth = getSideCollapseWidth.value;
     }
+    sidebarAndExtraWidth = `${sidebarWidth}px`;
+    width = `calc(100% - ${sidebarAndExtraWidth})`;
   }
   return {
     sidebarAndExtraWidth,
@@ -395,13 +344,10 @@ const headerWrapperStyle = computed((): CSSProperties => {
 
 /**
  * Sidebar z-index
- * header-mixed-nav on desktop: extra panel must not overlay header,
- * so sidebar z-index must be lower than header z-index (headerZIndex = zIndex + 0).
  */
 const sidebarZIndex = computed(() => {
   const { isMobile, zIndex } = props;
-  const isMixedSideLayout = !isMobile && isHeaderMixedNav.value;
-  let offset = isMobile || (isSideMode.value && !isMixedSideLayout) ? 1 : -1;
+  let offset = isMobile || isSideMode.value ? 1 : -1;
 
   if (isMixedNav.value) {
     offset += 1;
@@ -422,17 +368,6 @@ const maskStyle = computed((): CSSProperties => {
   return { zIndex: props.zIndex };
 });
 
-/**
- * Whether sidebar logo area is displayed
- */
-const sidebarHeaderHeight = computed(() => {
-  if (isMixedNav.value || !props.sidebarLogoVisible) {
-    return 0;
-  }
-
-  return props.headerHeight;
-});
-
 const showHeaderToggleButton = computed(() => {
   return (
     props.isMobile ||
@@ -440,14 +375,6 @@ const showHeaderToggleButton = computed(() => {
       isSideMode.value &&
       !isMixedNav.value &&
       !props.isMobile)
-  );
-});
-
-const showHeaderLogo = computed(() => {
-  return (
-    (!isSideMode.value || isMixedNav.value) &&
-    !props.isMobile &&
-    props.sidebarLogoVisible
   );
 });
 
@@ -587,48 +514,27 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
       v-model:collapse="activeSidebarCollapse"
       v-model:expand-on-hover="sidebarExpandOnHover"
       v-model:expand-on-hovering="sidebarExpandOnHovering"
-      v-model:extra-collapse="sidebarExtraCollapse"
-      v-model:extra-visible="sidebarExtraVisible"
       :show-collapse-button="sidebarCollapsedButton"
       :show-fixed-button="sidebarFixedButton"
-      :bottom-height="$slots['side-bottom'] ? 48 : 0"
       :collapse-width="getSideCollapseWidth"
       :dom-visible="!isMobile"
       :expanded-width="sidebarWidth"
-      :extra-width="sidebarExtraWidth"
-      :fixed-extra="sidebarExpandOnHover"
-      :header-height="sidebarHeaderHeight"
-      :extra-title-height="isHeaderMixedNav ? sidebarExtraTitleHeight : 0"
-      :is-sidebar-mixed="isHeaderMixedNav"
       :is-mobile="isMobile"
       :margin-top="sidebarMarginTop"
       :show="showSidebar"
       :theme="sidebarTheme"
-      :theme-sub="sidebarThemeSub"
       :width="getSidebarWidth"
       :z-index="sidebarZIndex"
-      @leave="() => emit('sideMouseLeave')"
       @update:width="(val) => emit('update:sidebarWidth', val)"
     >
-      <template v-if="isSideMode && !isMixedNav && sidebarLogoVisible" #logo>
-        <slot name="logo"></slot>
+      <template v-if="$slots['sidebar-header']" #header="{ collapsed }">
+        <slot name="sidebar-header" :collapsed="collapsed"></slot>
       </template>
 
-      <template v-if="isHeaderMixedNav">
-        <slot name="mixed-menu"></slot>
-      </template>
-      <template v-else>
-        <slot name="menu"></slot>
-      </template>
+      <slot name="menu"></slot>
 
-      <template #extra>
-        <slot name="side-extra"></slot>
-      </template>
-      <template #extra-title>
-        <slot name="side-extra-title"></slot>
-      </template>
-      <template v-if="$slots['side-bottom']" #bottom="{ collapsed }">
-        <slot name="side-bottom" :collapsed="collapsed"></slot>
+      <template v-if="$slots['sidebar-footer']" #footer="{ collapsed }">
+        <slot name="sidebar-footer" :collapsed="collapsed"></slot>
       </template>
     </LayoutSidebar>
 
@@ -659,12 +565,7 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
             :theme="headerTheme"
             :width="mainStyle.width"
             :z-index="headerZIndex"
-            :logo-visible="sidebarLogoVisible"
           >
-            <template v-if="showHeaderLogo" #logo>
-              <slot name="logo"></slot>
-            </template>
-
             <template #toggle-button>
               <VbenIconButton
                 v-if="showHeaderToggleButton"

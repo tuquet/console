@@ -1,7 +1,5 @@
 import type { TenantMembershipQueryResult } from '../access';
 
-import { Buffer } from 'node:buffer';
-
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -11,11 +9,21 @@ import {
 } from '../access';
 import { buildSupabaseProfileHeaders } from '../supabase-client';
 
+function toBase64Url(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCodePoint(byte);
+  }
+  return btoa(binary)
+    .replaceAll('+', '-')
+    .replaceAll('/', '_')
+    .replace(/=+$/, '');
+}
+
 function createMockJwt(payload: Record<string, any>): string {
-  const header = Buffer.from(
-    JSON.stringify({ alg: 'HS256', typ: 'JWT' }),
-  ).toString('base64url');
-  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const header = toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const body = toBase64Url(JSON.stringify(payload));
   const sig = 'mock_signature';
   return `${header}.${body}.${sig}`;
 }

@@ -1,0 +1,10 @@
+{
+  "title": "Tasks",
+  "description": "Track, prioritize, and coordinate engineering issues",
+  "cloud_synced": "Cloud Synced",
+  "local_workspace": "Local Workspace",
+  "export_csv": "Export CSV",
+  "reset_btn": "Reset",
+  "empty_title": "No matching tasks",
+  "empty_description": "No tasks match your current search or filter criteria."
+}

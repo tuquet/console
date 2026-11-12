@@ -1,9 +1,12 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+import { setupAppLocales } from './locales';
+
 /** Routes are shared by standalone development and the host shell. */
 export const automationManifest = {
   id: 'automation',
   defaultPath: 'overview',
+  setupLocales: setupAppLocales,
   routes(t: (key: string) => string): RouteRecordRaw[] {
     return [
       {

@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "@eslint/js": "catalog:",
-    "@operon/oxlint-config": "workspace:*",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
     "eslint-plugin-jsonc": "catalog:",

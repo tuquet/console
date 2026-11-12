@@ -9,7 +9,7 @@ import { findMonorepoRoot } from '@operon/node-utils';
 import { NodePackageImporter } from 'sass-embedded';
 import { defineConfig, loadEnv, mergeConfig } from 'vite';
 
-import { defaultImportmapOptions, getDefaultPwaOptions } from '../options';
+import { getDefaultPwaOptions } from '../options';
 import { loadApplicationPlugins } from '../plugins';
 import { loadAndConvertEnv } from '../utils/env';
 import { getCommonConfig } from './common';
@@ -25,30 +25,22 @@ function defineApplicationConfig(userConfigPromise?: DefineApplicationOptions) {
     const env = loadEnv(mode, root);
 
     const plugins = await loadApplicationPlugins({
-      archiver: true,
-      archiverPluginOptions: {},
-      compress: false,
-      compressTypes: ['brotli', 'gzip'],
       devtools: true,
       env,
       extraAppConfig: true,
       html: true,
       i18n: true,
-      importmapOptions: defaultImportmapOptions,
       injectAppLoading: true,
       injectMetadata: true,
       isBuild,
       license: true,
       mode,
-      nitroMock: !isBuild,
-      nitroMockOptions: {},
       print: !isBuild,
       printInfoMap: {
         'Admin Docs': 'https://github.com/operon/console#readme',
       },
       pwa: true,
       pwaOptions: getDefaultPwaOptions(appTitle),
-      vxeTableLazyImport: true,
       ...envConfig,
       ...application,
     });

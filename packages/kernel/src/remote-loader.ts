@@ -9,6 +9,8 @@ export interface MicroAppManifest<TRoute = any> {
   version?: string;
   /** Default redirect subpath relative to app root */
   defaultPath: string;
+  /** Lazy-loads the micro-app's scoped locale dictionary when its route activates */
+  setupLocales?: () => Promise<void>;
   /** Generates route records given an i18n translation function */
   routes: (t: (key: string) => string) => TRoute[];
 }
@@ -108,9 +110,11 @@ export function createRemoteRoute<
                 matchingRoute &&
                 typeof matchingRoute.component === 'function'
               ) {
-                return await (
-                  matchingRoute.component as () => Promise<Component>
-                )();
+                const [remoteComponent] = await Promise.all([
+                  (matchingRoute.component as () => Promise<Component>)(),
+                  (remoteManifest.setupLocales ?? manifest.setupLocales)?.(),
+                ]);
+                return remoteComponent;
               }
             }
           } catch {
@@ -118,7 +122,11 @@ export function createRemoteRoute<
           }
         }
 
-        return await originalLoader();
+        const [bundledComponent] = await Promise.all([
+          originalLoader(),
+          manifest.setupLocales?.(),
+        ]);
+        return bundledComponent;
       };
 
       return {

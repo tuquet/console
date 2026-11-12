@@ -23,8 +23,8 @@
   "horizontalTip": "Menu ngang trên đầu trang",
   "headerSidebarNav": "Tiêu đề dọc",
   "headerSidebarNavTip": "Tiêu đề rộng, menu thanh bên",
-  "headerTwoColumn": "Tiêu đề hai cột",
-  "headerTwoColumnTip": "Kết hợp tiêu đề và thanh bên hai cột",
+  "mixedMenu": "Menu hỗn hợp",
+  "mixedMenuTip": "Kết hợp menu ngang cấp 1 và thanh bên menu con",
   "fullContent": "Toàn màn hình",
   "fullContentTip": "Chỉ hiện nội dung, ẩn menu",
   "normal": "Mặc định",
@@ -48,15 +48,7 @@
     "header": "Thanh tiêu đề",
     "auto": "Tự động",
     "fixed": "Cố định góc",
-    "sidebarBottom": "Cuối sidebar",
     "userDropdown": "Menu người dùng"
-  },
-  "logo": {
-    "title": "Logo",
-    "mode": "Chế độ hiển thị logo",
-    "modeHidden": "Ẩn",
-    "modeIcon": "Chỉ icon",
-    "modeFull": "Icon + tên"
   },
   "sidebar": {
     "buttons": "Hiện nút bấm",
@@ -143,8 +135,6 @@
     "dark": "Tối",
     "darkSidebar": "Thanh bên tối",
     "darkSidebarTip": "Áp dụng khi dùng chủ đề sáng và có thanh bên.",
-    "darkSidebarSub": "Menu phụ tối",
-    "darkSidebarSubTip": "Áp dụng ở chế độ menu hai cột.",
     "darkHeader": "Tiêu đề tối",
     "weakMode": "Tương phản cao",
     "grayMode": "Đơn sắc",

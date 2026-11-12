@@ -1,7 +1,5 @@
 import type { Options as PwaPluginOptions } from 'vite-plugin-pwa';
 
-import type { ImportmapPluginOptions } from './typing';
-
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 const getDefaultPwaOptions = (name: string): Partial<PwaPluginOptions> => ({
@@ -24,21 +22,4 @@ const getDefaultPwaOptions = (name: string): Partial<PwaPluginOptions> => ({
   },
 });
 
-/**
- * importmap CDN is temporarily disabled due to unsupported packages and network instability
- */
-const defaultImportmapOptions: ImportmapPluginOptions = {
-  // Imported via Importmap CDN,
-  // currently only esm.sh has better compatibility; jspm.io has strict requirements on esm entrypoints
-  defaultProvider: 'esm.sh',
-  importmap: [
-    { name: 'vue' },
-    { name: 'pinia' },
-    { name: 'vue-router' },
-    // { name: 'vue-i18n' },
-    { name: 'dayjs' },
-    { name: 'vue-demi' },
-  ],
-};
-
-export { defaultImportmapOptions, getDefaultPwaOptions };
+export { getDefaultPwaOptions };

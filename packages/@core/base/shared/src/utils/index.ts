@@ -16,6 +16,4 @@ export * from './unique';
 export * from './update-css-variables';
 export * from './util';
 export * from './window';
-export { debounce, get, isEqual, set } from 'es-toolkit/compat';
-// export { cloneDeep } from 'es-toolkit/object';
-export { default as cloneDeep } from 'lodash.clonedeep';
+export { cloneDeep, debounce, get, isEqual, set } from 'es-toolkit/compat';

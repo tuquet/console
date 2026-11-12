@@ -145,11 +145,3 @@ export const assignees = [
     avatarClass: 'bg-rose-500/15 text-rose-600 dark:text-rose-400',
   },
 ];
-
-export type TableDensity = 'comfortable' | 'compact' | 'normal';
-
-export const densityCellClasses: Record<TableDensity, string> = {
-  compact: 'py-1.5',
-  normal: 'py-2.5',
-  comfortable: 'py-3.5',
-};
