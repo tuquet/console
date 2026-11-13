@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 import {
   getLocalBridgeInstallInfo,
@@ -14,9 +15,12 @@ import { $t } from '#/locales';
 
 defineOptions({ name: 'LocalBridgeNotice' });
 
+const route = useRoute();
 const bridge = useLocalBridgeHeartbeat({ intervalMs: 5000 });
 const installInfo = getLocalBridgeInstallInfo();
 const minimized = ref(false);
+
+const isOverviewPage = computed(() => route?.path === '/dashboard/overview');
 
 async function copyCommand() {
   try {
@@ -30,7 +34,7 @@ async function copyCommand() {
 
 <template>
   <div
-    v-if="bridge.status.value === 'offline'"
+    v-if="bridge.status.value === 'offline' && !isOverviewPage"
     class="fixed right-4 bottom-4 z-50 max-w-md"
   >
     <Button

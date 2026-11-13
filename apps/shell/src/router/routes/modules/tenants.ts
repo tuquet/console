@@ -10,6 +10,7 @@ export default defineMicroAppRouteModule({
     hideChildrenInMenu: true,
     platform: 'all',
     plugin: 'identity',
+    requiresCloud: true,
   },
   name: 'TenantsRoot',
   redirectToDefault: false,
