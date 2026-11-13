@@ -11,6 +11,7 @@
   },
   "dashboard": {
     "title": "Bảng điều khiển",
+    "overview": "Tổng quan",
     "analytics": "Phân tích"
   },
   "tenants": {
@@ -166,5 +167,31 @@
     "copied": "Đã sao chép lệnh cài đặt",
     "copyFailed": "Không thể sao chép lệnh",
     "offlinePill": "Local Bridge Offline"
+  },
+  "overview": {
+    "title": "Bắt đầu",
+    "description": "Cài đặt dịch vụ Operon để mở khóa các module tự động hóa và giám sát.",
+    "daemonStatus": "Trạng thái dịch vụ cục bộ",
+    "daemonPort": "Cổng :{port}",
+    "daemonChecking": "Đang kiểm tra…",
+    "daemonHealthy": "Đã kết nối",
+    "daemonOffline": "Ngoại tuyến",
+    "retryCheck": "Kiểm tra lại",
+    "installTitle": "Cài đặt Operon CLI",
+    "installDesc": "Chạy lệnh sau trong terminal để cài đặt Operon CLI daemon:",
+    "installCopy": "Sao chép",
+    "installCopied": "Đã sao chép!",
+    "installCopyFailed": "Không thể sao chép",
+    "installDownload": "Tải file cài đặt",
+    "checklistTitle": "Cài đặt nhanh",
+    "checklistStep1": "Cài Operon CLI (opn) bằng lệnh phía trên",
+    "checklistStep2": "Khởi động daemon: opn start",
+    "checklistStep3": "Tải lại trang để xác nhận kết nối",
+    "modulesTitle": "Các module",
+    "modulesDesc": "Các module sẽ khả dụng sau khi kết nối dịch vụ cục bộ.",
+    "moduleRequiresBridge": "Yêu cầu Operon",
+    "moduleRequiresCloud": "Yêu cầu đăng nhập Cloud",
+    "moduleUnlocked": "Mở",
+    "moduleLocked": "Cài Operon để mở khóa"
   }
 }

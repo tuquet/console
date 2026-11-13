@@ -11,6 +11,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "overview": "Overview",
     "analytics": "Analytics"
   },
   "tenants": {
@@ -166,5 +167,31 @@
     "copied": "Install command copied",
     "copyFailed": "Failed to copy command",
     "offlinePill": "Local Bridge Offline"
+  },
+  "overview": {
+    "title": "Getting Started",
+    "description": "Install the Operon local service to unlock automation and monitoring modules.",
+    "daemonStatus": "Local Service Status",
+    "daemonPort": "Port :{port}",
+    "daemonChecking": "Checking…",
+    "daemonHealthy": "Connected",
+    "daemonOffline": "Offline",
+    "retryCheck": "Retry",
+    "installTitle": "Install Operon CLI",
+    "installDesc": "Run the following command in your terminal to install the Operon CLI daemon:",
+    "installCopy": "Copy",
+    "installCopied": "Copied!",
+    "installCopyFailed": "Copy failed",
+    "installDownload": "Download binary",
+    "checklistTitle": "Quick Setup",
+    "checklistStep1": "Install Operon CLI (opn) using the command above",
+    "checklistStep2": "Start the daemon: opn start",
+    "checklistStep3": "Reload this page to confirm connection",
+    "modulesTitle": "Modules",
+    "modulesDesc": "Modules become available once the local service is connected.",
+    "moduleRequiresBridge": "Requires Operon",
+    "moduleRequiresCloud": "Requires Cloud sign-in",
+    "moduleUnlocked": "Open",
+    "moduleLocked": "Install Operon to unlock"
   }
 }

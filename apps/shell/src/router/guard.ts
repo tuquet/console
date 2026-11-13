@@ -1,6 +1,6 @@
 import type { RouteLocationNormalized, Router } from 'vue-router';
 
-import { LOGIN_PATH } from '@operon/constants';
+import { DEFAULT_HOME_PATH, LOGIN_PATH } from '@operon/constants';
 import { preferences } from '@operon/preferences';
 import { useAccessStore, useUserStore } from '@operon/stores';
 import { startProgress, stopProgress } from '@operon/utils';
@@ -12,7 +12,6 @@ import {
 } from '#/api';
 import { accessRoutes, coreRouteNames } from '#/router/routes';
 import { useAuthStore } from '#/store';
-import { isDesktop } from '#/utils/platform';
 import { sanitizeRedirectPath } from '#/utils/security';
 
 import { bootstrapLocalOperatorSession, generateAccess } from './access';
@@ -60,30 +59,19 @@ function requiresCloudAccess(to: RouteLocationNormalized): boolean {
     to.matched.some(
       (record) =>
         (record.meta as undefined | { requiresCloud?: boolean })?.requiresCloud,
-    ) ||
-    to.path.startsWith('/system') ||
-    to.path.startsWith('/tenants'),
+    ),
   );
 }
 
-function handleCoreRouteNavigation(
-  to: RouteLocationNormalized,
-  isDesktopMode: boolean,
-) {
+function handleCoreRouteNavigation(to: RouteLocationNormalized) {
   const accessStore = useAccessStore();
   const userStore = useUserStore();
 
-  if (to.path === LOGIN_PATH) {
-    if (accessStore.accessToken) {
-      const rawRedirect = to.query?.redirect as string | undefined;
-      const defaultHome =
-        userStore.userInfo?.homePath || preferences.app.defaultHomePath;
-      return sanitizeRedirectPath(rawRedirect, defaultHome);
-    }
-    if (isDesktopMode) {
-      // In desktop local-first mode, avoid locking into full login page; navigate to default home
-      return preferences.app.defaultHomePath;
-    }
+  if (to.path === LOGIN_PATH && accessStore.accessToken) {
+    const rawRedirect = to.query?.redirect as string | undefined;
+    const defaultHome =
+      userStore.userInfo?.homePath || preferences.app.defaultHomePath;
+    return sanitizeRedirectPath(rawRedirect, defaultHome);
   }
   return true;
 }
@@ -91,7 +79,6 @@ function handleCoreRouteNavigation(
 async function handleUnauthenticatedNavigation(
   to: RouteLocationNormalized,
   router: Router,
-  isDesktopMode: boolean,
 ) {
   const accessStore = useAccessStore();
   const userStore = useUserStore();
@@ -101,16 +88,10 @@ async function handleUnauthenticatedNavigation(
     const fallbackHome =
       userStore.userInfo?.homePath ||
       preferences.app.defaultHomePath ||
-      (isDesktopMode ? '/automation/overview' : '/dashboard/analytics');
+      DEFAULT_HOME_PATH;
     const targetPath =
       to.path === '/' || to.path === LOGIN_PATH ? fallbackHome : to.fullPath;
     return resolveRouteWithFallback(router, targetPath, fallbackHome);
-  }
-
-  // Cloud-only features on Desktop trigger optional login modal
-  if (isDesktopMode && requiresCloudAccess(to)) {
-    accessStore.setLoginExpired(true);
-    return false;
   }
 
   return true;
@@ -154,7 +135,6 @@ function setupAccessGuard(router: Router) {
     const accessStore = useAccessStore();
     const userStore = useUserStore();
     const authStore = useAuthStore();
-    const isDesktopMode = isDesktop();
 
     // Attempt silent refresh first if an existing JWT accessToken is expired
     if (accessStore.accessToken && isJwtTokenExpired(accessStore.accessToken)) {
@@ -169,15 +149,18 @@ function setupAccessGuard(router: Router) {
 
     // Core routes bypass access interceptor
     if (coreRouteNames.includes(to.name as string)) {
-      return handleCoreRouteNavigation(to, isDesktopMode);
+      return handleCoreRouteNavigation(to);
     }
 
-    // Unauthenticated navigation (both Web and Desktop operate without mandatory login)
     if (!accessStore.accessToken) {
       if (to.meta.ignoreAccess) {
         return true;
       }
-      return handleUnauthenticatedNavigation(to, router, isDesktopMode);
+      if (requiresCloudAccess(to)) {
+        accessStore.setLoginExpired(true);
+        return false;
+      }
+      return handleUnauthenticatedNavigation(to, router);
     }
 
     if (accessStore.isAccessChecked) {
@@ -206,9 +189,7 @@ function setupAccessGuard(router: Router) {
     accessStore.setIsAccessChecked(true);
 
     const fallbackHome =
-      userInfo.homePath ||
-      preferences.app.defaultHomePath ||
-      '/automation/overview';
+      userInfo.homePath || preferences.app.defaultHomePath || DEFAULT_HOME_PATH;
     const redirectPath = resolvePostAuthRedirect(to, from, fallbackHome);
 
     return resolveRouteWithFallback(router, redirectPath, fallbackHome);
