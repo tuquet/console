@@ -7,151 +7,108 @@ import { isTauriEnvironment } from '#/utils/platform';
 
 export { isTauriEnvironment };
 
-/**
- * Minimizes the native window.
- */
-export async function minimizeWindow(): Promise<void> {
-  if (!isTauriEnvironment()) return;
+type WebviewWindow = Awaited<
+  ReturnType<
+    (typeof import('@tauri-apps/api/webviewWindow'))['getCurrentWebviewWindow']
+  >
+>;
+type TauriInvoke = (typeof import('@tauri-apps/api/core'))['invoke'];
+
+async function withWebviewWindow<T>(
+  action: string,
+  fallback: T,
+  fn: (win: WebviewWindow) => Promise<T>,
+): Promise<T> {
+  if (!isTauriEnvironment()) return fallback;
   try {
     const { getCurrentWebviewWindow } =
       await import('@tauri-apps/api/webviewWindow');
-    await getCurrentWebviewWindow().minimize();
+    return await fn(getCurrentWebviewWindow());
   } catch (error) {
-    console.error('[Desktop] Failed to minimize window:', error);
+    console.error(`[Desktop] ${action} failed:`, error);
+    return fallback;
   }
 }
 
-/**
- * Toggles maximize / restore on the native window.
- */
-export async function toggleMaximizeWindow(): Promise<boolean> {
-  if (!isTauriEnvironment()) return false;
+async function withTauriCore<T>(
+  action: string,
+  fallback: T,
+  fn: (invoke: TauriInvoke) => Promise<T>,
+  silent = false,
+): Promise<T> {
+  if (!isTauriEnvironment()) return fallback;
   try {
-    const { getCurrentWebviewWindow } =
-      await import('@tauri-apps/api/webviewWindow');
-    const win = getCurrentWebviewWindow();
+    const { invoke } = await import('@tauri-apps/api/core');
+    return await fn(invoke);
+  } catch (error) {
+    if (!silent) {
+      console.error(`[Desktop] ${action} failed:`, error);
+    }
+    return fallback;
+  }
+}
+
+/** Minimizes the native window. */
+export const minimizeWindow = (): Promise<void> =>
+  withWebviewWindow('minimize window', undefined, (win) => win.minimize());
+
+/** Toggles maximize / restore on the native window. */
+export const toggleMaximizeWindow = (): Promise<boolean> =>
+  withWebviewWindow('toggle maximize window', false, async (win) => {
     await win.toggleMaximize();
     return await win.isMaximized();
-  } catch (error) {
-    console.error('[Desktop] Failed to toggle maximize window:', error);
-    return false;
-  }
-}
+  });
 
-/**
- * Closes the native window (or exits the application).
- */
-export async function closeWindow(): Promise<void> {
-  if (!isTauriEnvironment()) return;
-  try {
-    const { getCurrentWebviewWindow } =
-      await import('@tauri-apps/api/webviewWindow');
-    await getCurrentWebviewWindow().close();
-  } catch (error) {
-    console.error('[Desktop] Failed to close window:', error);
-  }
-}
+/** Closes the native window (or exits the application). */
+export const closeWindow = (): Promise<void> =>
+  withWebviewWindow('close window', undefined, (win) => win.close());
 
-/**
- * Checks if the native window is currently maximized.
- */
-export async function isWindowMaximized(): Promise<boolean> {
-  if (!isTauriEnvironment()) return false;
-  try {
-    const { getCurrentWebviewWindow } =
-      await import('@tauri-apps/api/webviewWindow');
-    return await getCurrentWebviewWindow().isMaximized();
-  } catch {
-    return false;
-  }
-}
+/** Checks if the native window is currently maximized. */
+export const isWindowMaximized = (): Promise<boolean> =>
+  withWebviewWindow('check maximized state', false, (win) => win.isMaximized());
 
-/**
- * Reveals the native window smoothly once the frontend DOM has initialized.
- */
-export async function revealWindow(): Promise<void> {
-  if (!isTauriEnvironment()) return;
-  try {
-    const { getCurrentWebviewWindow } =
-      await import('@tauri-apps/api/webviewWindow');
-    const win = getCurrentWebviewWindow();
+/** Reveals the native window smoothly once the frontend DOM has initialized. */
+export const revealWindow = (): Promise<void> =>
+  withWebviewWindow('reveal window', undefined, async (win) => {
     await win.show();
     await win.setFocus();
-  } catch (error) {
-    console.warn('[Desktop] revealWindow fallback:', error);
-  }
-}
+  });
 
-/**
- * Starts window dragging on mousedown in Tauri environment.
- */
-export async function startDragging(): Promise<void> {
-  if (!isTauriEnvironment()) return;
-  try {
-    const { getCurrentWebviewWindow } =
-      await import('@tauri-apps/api/webviewWindow');
-    await getCurrentWebviewWindow().startDragging();
-  } catch (error) {
-    console.error('[Desktop] Failed to start window dragging:', error);
-  }
-}
+/** Starts window dragging on mousedown in Tauri environment. */
+export const startDragging = (): Promise<void> =>
+  withWebviewWindow('start window dragging', undefined, (win) =>
+    win.startDragging(),
+  );
 
-/**
- * Toggles developer tools window.
- */
-export async function toggleDevtools(): Promise<boolean> {
-  if (!isTauriEnvironment()) return false;
-  try {
-    const { invoke } = await import('@tauri-apps/api/core');
-    return await invoke<boolean>('toggle_devtools');
-  } catch (error) {
-    console.error('[Desktop] Failed to toggle DevTools:', error);
-    return false;
-  }
-}
+/** Toggles developer tools window. */
+export const toggleDevtools = (): Promise<boolean> =>
+  withTauriCore('toggle DevTools', false, (invoke) =>
+    invoke<boolean>('toggle_devtools'),
+  );
 
-/**
- * Opens developer tools window.
- */
-export async function openDevtools(): Promise<void> {
-  if (!isTauriEnvironment()) return;
-  try {
-    const { invoke } = await import('@tauri-apps/api/core');
+/** Opens developer tools window. */
+export const openDevtools = (): Promise<void> =>
+  withTauriCore('open DevTools', undefined, async (invoke) => {
     await invoke('open_devtools');
-  } catch (error) {
-    console.error('[Desktop] Failed to open DevTools:', error);
-  }
-}
+  });
 
-/**
- * Returns the canonical workstation log path on the host.
- */
-export async function getLogPath(): Promise<string> {
-  if (!isTauriEnvironment()) return '';
-  try {
-    const { invoke } = await import('@tauri-apps/api/core');
-    return await invoke<string>('get_log_path');
-  } catch (error) {
-    console.error('[Desktop] Failed to get log path:', error);
-    return '';
-  }
-}
+/** Returns the canonical workstation log path on the host. */
+export const getLogPath = (): Promise<string> =>
+  withTauriCore('get log path', '', (invoke) => invoke<string>('get_log_path'));
 
-/**
- * Appends a log line to the persistent workstation log file (~/.operon/logs/workstation.log).
- */
-export async function appendDesktopLog(
+/** Appends a log line to the persistent workstation log file (~/.operon/logs/workstation.log). */
+export const appendDesktopLog = (
   level: 'debug' | 'error' | 'info' | 'warn',
   message: string,
-): Promise<void> {
-  if (!isTauriEnvironment()) return;
-  try {
-    const { invoke } = await import('@tauri-apps/api/core');
-    await invoke('append_log', { level, message });
-  } catch {
-    // Fail-safe silently if IPC is unavailable
-  }
-}
+): Promise<void> =>
+  withTauriCore(
+    'append_log',
+    undefined,
+    async (invoke) => {
+      await invoke('append_log', { level, message });
+    },
+    true,
+  );
 
 /**
  * Initializes desktop keyboard shortcuts (F12, Ctrl+Shift+I) and intercepts
@@ -160,7 +117,6 @@ export async function appendDesktopLog(
 export function initDesktopLoggingAndShortcuts(): void {
   if (!isTauriEnvironment() || typeof window === 'undefined') return;
 
-  // 1. Keyboard shortcuts for DevTools (F12 and Ctrl+Shift+I)
   window.addEventListener('keydown', (event) => {
     if (
       event.key === 'F12' ||
@@ -173,7 +129,6 @@ export function initDesktopLoggingAndShortcuts(): void {
     }
   });
 
-  // 2. Forward uncaught errors to persistent file log
   window.addEventListener('error', (event) => {
     const errorMsg =
       event.error?.stack ||
@@ -189,7 +144,6 @@ export function initDesktopLoggingAndShortcuts(): void {
     appendDesktopLog('error', `[Frontend] Unhandled rejection: ${reason}`);
   });
 
-  // 3. Intercept console.error to also append to workstation.log
   const originalConsoleError = console.error;
   console.error = (...args: any[]) => {
     originalConsoleError.apply(console, args);
@@ -207,7 +161,6 @@ export function initDesktopLoggingAndShortcuts(): void {
     }
   };
 
-  // 4. Log initial frontend readiness
   appendDesktopLog(
     'info',
     '[Frontend] Webview runtime initialized with DevTools listener active',
@@ -230,60 +183,46 @@ export function getCurrentZoom(): number {
   return Number(localStorage.getItem(ZOOM_KEY) ?? '1');
 }
 
-async function applyZoom(next: number): Promise<void> {
-  const { getCurrentWebview } = await import('@tauri-apps/api/webview');
-  await getCurrentWebview().setZoom(next);
-  localStorage.setItem(ZOOM_KEY, String(next));
+async function applyZoom(
+  action: string,
+  next: number,
+  persist = true,
+): Promise<void> {
+  if (!isTauriEnvironment()) return;
+  try {
+    const { getCurrentWebview } = await import('@tauri-apps/api/webview');
+    await getCurrentWebview().setZoom(next);
+    if (persist) {
+      localStorage.setItem(ZOOM_KEY, String(next));
+    }
+  } catch (error) {
+    if (persist) {
+      console.error(`[Desktop] ${action} failed:`, error);
+    }
+  }
 }
 
 /** Increases webview zoom by 10% (max 200%). */
-export async function zoomIn(): Promise<void> {
-  if (!isTauriEnvironment()) return;
-  try {
-    const next = Math.min(
-      ZOOM_MAX,
-      Number((getCurrentZoom() + ZOOM_STEP).toFixed(1)),
-    );
-    await applyZoom(next);
-  } catch (error) {
-    console.error('[Desktop] zoomIn failed:', error);
-  }
-}
+export const zoomIn = (): Promise<void> =>
+  applyZoom(
+    'zoomIn',
+    Math.min(ZOOM_MAX, Number((getCurrentZoom() + ZOOM_STEP).toFixed(1))),
+  );
 
 /** Decreases webview zoom by 10% (min 50%). */
-export async function zoomOut(): Promise<void> {
-  if (!isTauriEnvironment()) return;
-  try {
-    const next = Math.max(
-      ZOOM_MIN,
-      Number((getCurrentZoom() - ZOOM_STEP).toFixed(1)),
-    );
-    await applyZoom(next);
-  } catch (error) {
-    console.error('[Desktop] zoomOut failed:', error);
-  }
-}
+export const zoomOut = (): Promise<void> =>
+  applyZoom(
+    'zoomOut',
+    Math.max(ZOOM_MIN, Number((getCurrentZoom() - ZOOM_STEP).toFixed(1))),
+  );
 
 /** Resets webview zoom to 100%. */
-export async function resetZoom(): Promise<void> {
-  if (!isTauriEnvironment()) return;
-  try {
-    await applyZoom(1);
-  } catch (error) {
-    console.error('[Desktop] resetZoom failed:', error);
-  }
-}
+export const resetZoom = (): Promise<void> => applyZoom('resetZoom', 1);
 
 /** Restores persisted zoom on app startup. Call once in app.vue onMounted. */
 export async function restoreZoom(): Promise<void> {
-  if (!isTauriEnvironment()) return;
   const saved = getCurrentZoom();
   if (saved !== 1) {
-    try {
-      const { getCurrentWebview } = await import('@tauri-apps/api/webview');
-      await getCurrentWebview().setZoom(saved);
-    } catch {
-      // non-critical
-    }
+    await applyZoom('restoreZoom', saved, false);
   }
 }

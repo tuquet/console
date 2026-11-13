@@ -334,7 +334,7 @@ function handleClosed() {
       :centered="shouldCentered"
       :class="
         cn(
-          'flex w-full max-w-[calc(100vw-2rem)] sm:w-130 flex-col p-0',
+          'flex w-full max-w-[calc(100vw-2rem)] sm:w-130 flex-col gap-0 p-0',
           shouldFullscreen ? 'rounded-none' : 'rounded-(--radius)',
           {
             'border border-border': bordered,

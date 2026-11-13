@@ -13,22 +13,17 @@ import viteVue from '@vitejs/plugin-vue';
 import viteVueJsx from '@vitejs/plugin-vue-jsx';
 import { visualizer as viteVisualizerPlugin } from 'rollup-plugin-visualizer';
 import viteDtsPlugin from 'unplugin-dts/vite';
-import viteCompressPlugin from 'vite-plugin-compression';
 import { VitePWA } from 'vite-plugin-pwa';
 import viteVueDevTools from 'vite-plugin-vue-devtools';
 
-import { viteArchiverPlugin } from './archiver';
 import { viteDayjsPlugin } from './dayjs';
 import { viteExtraAppConfigPlugin } from './extra-app-config';
 import { viteHtmlPlugin } from './html';
-import { viteImportMapPlugin } from './importmap';
 import { viteInjectAppLoadingPlugin } from './inject-app-loading';
 import { viteMetadataPlugin } from './inject-metadata';
 import { viteLicensePlugin } from './license';
-import { viteNitroMockPlugin } from './nitro-mock';
 import { vitePrintPlugin } from './print';
 import { viteTailwindReferencePlugin } from './tailwind-reference';
-import { viteVxeTableImportsPlugin } from './vxe-table';
 
 /**
  * Get conditional Vite plugins
@@ -100,25 +95,16 @@ async function loadApplicationPlugins(
   const env = options.env;
 
   const {
-    archiver,
-    archiverPluginOptions,
-    compress,
-    compressTypes,
     extraAppConfig,
     html,
     dayjs,
     i18n,
-    importmap,
-    importmapOptions,
     injectAppLoading,
     license,
-    nitroMock,
-    nitroMockOptions,
     print,
     printInfoMap,
     pwa,
     pwaOptions,
-    vxeTableLazyImport,
     ...commonOptions
   } = options;
 
@@ -145,19 +131,6 @@ async function loadApplicationPlugins(
       },
     },
     {
-      condition: vxeTableLazyImport,
-      plugins: async () => {
-        return [await viteVxeTableImportsPlugin()];
-      },
-    },
-    {
-      condition: nitroMock,
-      plugins: async () => {
-        return [await viteNitroMockPlugin(nitroMockOptions)];
-      },
-    },
-
-    {
       condition: injectAppLoading,
       plugins: async () => [await viteInjectAppLoadingPlugin(!!isBuild, env)],
     },
@@ -183,43 +156,14 @@ async function loadApplicationPlugins(
         }),
     },
     {
-      condition: isBuild && !!compress,
-      plugins: () => {
-        const compressPlugins: PluginOption[] = [];
-        if (compressTypes?.includes('brotli')) {
-          compressPlugins.push(
-            viteCompressPlugin({ deleteOriginFile: false, ext: '.br' }),
-          );
-        }
-        if (compressTypes?.includes('gzip')) {
-          compressPlugins.push(
-            viteCompressPlugin({ deleteOriginFile: false, ext: '.gz' }),
-          );
-        }
-        return compressPlugins;
-      },
-    },
-    {
       condition: !!html,
       plugins: () => [viteHtmlPlugin(typeof html === 'object' ? html : {})],
-    },
-    {
-      condition: isBuild && importmap,
-      plugins: () => {
-        return [viteImportMapPlugin(importmapOptions)];
-      },
     },
     {
       condition: isBuild && extraAppConfig,
       plugins: async () => [
         await viteExtraAppConfigPlugin({ isBuild: true, root: process.cwd() }),
       ],
-    },
-    {
-      condition: archiver,
-      plugins: async () => {
-        return [await viteArchiverPlugin(archiverPluginOptions)];
-      },
     },
     {
       condition: dayjs,
@@ -253,11 +197,8 @@ export { viteCssLayerPlugin } from './css-layer';
 export {
   loadApplicationPlugins,
   loadLibraryPlugins,
-  viteArchiverPlugin,
-  viteCompressPlugin,
   viteDayjsPlugin,
   viteDtsPlugin,
   viteHtmlPlugin,
   viteVisualizerPlugin,
-  viteVxeTableImportsPlugin,
 };

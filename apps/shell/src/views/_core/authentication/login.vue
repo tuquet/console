@@ -129,7 +129,6 @@ function handleGitHubLogin() {
       :loading="authStore.loginLoading"
       :show-code-login="false"
       :show-forget-password="true"
-      :show-qrcode-login="false"
       :show-register="false"
       :show-third-party-login="true"
       @submit="handleLogin"

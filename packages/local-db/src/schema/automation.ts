@@ -1,6 +1,14 @@
 import { relations } from 'drizzle-orm';
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
+const syncAuditColumns = () => ({
+  tenantId: text('tenant_id'),
+  lastSyncedAt: text('last_synced_at'),
+  deletedAt: text('deleted_at'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
 // 1. Workflows (Automations & AST Graphs)
 export const workflows = sqliteTable(
   'workflows',
@@ -22,11 +30,7 @@ export const workflows = sqliteTable(
       .default({})
       .notNull(),
     isActive: integer('is_active', { mode: 'boolean' }).default(true).notNull(),
-    tenantId: text('tenant_id'),
-    lastSyncedAt: text('last_synced_at'),
-    deletedAt: text('deleted_at'),
-    createdAt: text('created_at').notNull(),
-    updatedAt: text('updated_at').notNull(),
+    ...syncAuditColumns(),
   },
   (table) => [
     index('idx_workflows_is_active').on(table.isActive),
@@ -49,11 +53,7 @@ export const proxies = sqliteTable(
     password: text('password'),
     countryCode: text('country_code'),
     isActive: integer('is_active', { mode: 'boolean' }).default(true).notNull(),
-    tenantId: text('tenant_id'),
-    lastSyncedAt: text('last_synced_at'),
-    deletedAt: text('deleted_at'),
-    createdAt: text('created_at').notNull(),
-    updatedAt: text('updated_at').notNull(),
+    ...syncAuditColumns(),
   },
   (table) => [
     index('idx_proxies_is_active').on(table.isActive),
@@ -90,11 +90,7 @@ export const browserProfiles = sqliteTable(
     isLocked: integer('is_locked', { mode: 'boolean' })
       .default(false)
       .notNull(),
-    tenantId: text('tenant_id'),
-    lastSyncedAt: text('last_synced_at'),
-    deletedAt: text('deleted_at'),
-    createdAt: text('created_at').notNull(),
-    updatedAt: text('updated_at').notNull(),
+    ...syncAuditColumns(),
   },
   (table) => [
     index('idx_browser_profiles_proxy').on(table.proxyId),

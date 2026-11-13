@@ -62,11 +62,9 @@ import {
 
 import { useFullscreen, useMagicKeys, whenever } from '@vueuse/core';
 
-import { GlobalSearch } from '../global-search';
 import { LockScreenModal } from '../lock-screen';
 import LogoutConfirmation from '../logout-confirmation.vue';
 import { Notification } from '../notification';
-import { Preferences } from '../preferences';
 import { TimezoneButton } from '../timezone';
 
 interface Props {
@@ -141,7 +139,6 @@ const emit = defineEmits<{ clearPreferencesAndLogout: []; logout: [] }>();
 const {
   globalLogoutShortcutKey,
   globalLockScreenShortcutKey,
-  globalSearchShortcutKey,
   isDark,
   preferencesButtonPosition,
   isMobile,
@@ -154,8 +151,6 @@ const logoutOpen = ref(false);
 
 const refTrigger = useTemplateRef('refTrigger');
 const refContent = useTemplateRef('refContent');
-const refPreferences = useTemplateRef('refPreferences');
-const refGlobalSearch = useTemplateRef('refGlobalSearch');
 const refTimezone = useTemplateRef('refTimezone');
 
 const [openPopover, hoverWatcher] = useHoverToggle(
@@ -284,10 +279,10 @@ function handleSubmitLogout() {
   logoutOpen.value = false;
 }
 
-// Settings - open preferences drawer
+// Settings - open singleton preferences modal
 function handleOpenSettings() {
   openPopover.value = false;
-  refPreferences.value?.open();
+  window.dispatchEvent(new CustomEvent('open-preferences'));
 }
 
 // Refresh current page
@@ -296,9 +291,14 @@ function handleRefresh() {
   refresh();
 }
 
-// Search - trigger GlobalSearch modal without closing dropdown
+// Search - trigger singleton GlobalSearch modal
 function handleGlobalSearch() {
-  refGlobalSearch.value?.open();
+  openPopover.value = false;
+  window.dispatchEvent(
+    new CustomEvent('open-command-palette', {
+      detail: { mode: 'navigation', initialValue: '' },
+    }),
+  );
 }
 
 // Theme toggle
@@ -395,21 +395,6 @@ onMounted(() => {
     v-if="showLogoutInDropdown"
     v-model:open="logoutOpen"
     @confirm="handleSubmitLogout"
-  />
-
-  <Preferences
-    v-if="showPreferencesInDropdown"
-    ref="refPreferences"
-    :show-button="false"
-    @clear-preferences-and-logout="emit('clearPreferencesAndLogout')"
-  />
-
-  <GlobalSearch
-    v-if="showGlobalSearchInDropdown"
-    ref="refGlobalSearch"
-    :enable-shortcut-key="globalSearchShortcutKey"
-    :menus="accessStore.accessMenus"
-    :show-button="false"
   />
 
   <TimezoneButton

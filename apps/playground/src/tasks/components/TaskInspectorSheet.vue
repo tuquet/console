@@ -52,15 +52,17 @@ const PROGRESS_STEPS = [0, 25, 50, 75, 100] as const;
 
 const touched = ref(false);
 
-const form = reactive<TaskDraft>({
-  title: '',
-  status: 'in progress',
-  priority: 'medium',
-  label: 'feature',
+const DEFAULT_FORM: TaskDraft = {
   assignee: 'linh',
   favorite: false,
+  label: 'feature',
+  priority: 'medium',
   progress: 50,
-});
+  status: 'in progress',
+  title: '',
+};
+
+const form = reactive<TaskDraft>({ ...DEFAULT_FORM });
 
 const selectedStatus = computed(() =>
   statuses.find((item) => item.value === form.status),
@@ -89,21 +91,17 @@ watch(
     if (!isOpen) return;
     touched.value = false;
     if (currentMode === 'edit' && currentTask) {
-      form.title = currentTask.title;
-      form.status = currentTask.status;
-      form.priority = currentTask.priority;
-      form.label = currentTask.label;
-      form.assignee = currentTask.assignee;
-      form.favorite = currentTask.favorite;
-      form.progress = snapToStep(currentTask.progress);
+      Object.assign(form, {
+        assignee: currentTask.assignee,
+        favorite: currentTask.favorite,
+        label: currentTask.label,
+        priority: currentTask.priority,
+        progress: snapToStep(currentTask.progress),
+        status: currentTask.status,
+        title: currentTask.title,
+      });
     } else {
-      form.title = '';
-      form.status = 'in progress';
-      form.priority = 'medium';
-      form.label = 'feature';
-      form.assignee = 'linh';
-      form.favorite = false;
-      form.progress = 50;
+      Object.assign(form, DEFAULT_FORM);
     }
   },
   { immediate: true },

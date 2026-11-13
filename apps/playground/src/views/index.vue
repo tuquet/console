@@ -5,14 +5,33 @@ import { computed, ref } from 'vue';
 
 import { useKernel } from '@operon/kernel';
 
-import { Badge, Button } from '@operon-core/shadcn-ui';
+import {
+  Badge,
+  Button,
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@operon-core/shadcn-ui';
 
-import { Cloud, Cpu, Download, ListTodo, RotateCcw } from '@lucide/vue';
+import {
+  Cloud,
+  Cpu,
+  Download,
+  ListTodo,
+  RotateCcw,
+  SearchX,
+} from '@lucide/vue';
 
+import { DataTable } from '../components/data-table';
+import { $t } from '../locales';
 import { tasksToCsv, usePlaygroundStore } from '../stores/sample';
 import { createTaskColumns } from '../tasks/components/columns';
-import DataTable from '../tasks/components/DataTable.vue';
 import TaskInspectorSheet from '../tasks/components/TaskInspectorSheet.vue';
+import TasksTableBulkBar from '../tasks/components/TasksTableBulkBar.vue';
+import TasksTableMetrics from '../tasks/components/TasksTableMetrics.vue';
+import TasksTableToolbar from '../tasks/components/TasksTableToolbar.vue';
 
 defineOptions({ name: 'PlaygroundOverviewView' });
 
@@ -23,19 +42,31 @@ const isCloud = computed(() => kernel.auth.hasCloudAuth);
 const copiedId = ref<null | string>(null);
 let copyTimer: ReturnType<typeof setTimeout> | undefined;
 
+const favoritesOnly = ref(false);
+const visibleTasks = computed(() =>
+  favoritesOnly.value
+    ? store.tasks.filter((task) => task.favorite)
+    : store.tasks,
+);
+
 const inspectorOpen = ref(false);
 const inspectorMode = ref<'create' | 'edit'>('edit');
-const activeTask = ref<null | Task>(null);
+const activeTaskId = ref<null | string>(null);
+const activeTask = computed<null | Task>(() =>
+  activeTaskId.value
+    ? (store.tasks.find((t) => t.id === activeTaskId.value) ?? null)
+    : null,
+);
 
 function openCreateSheet() {
   inspectorMode.value = 'create';
-  activeTask.value = null;
+  activeTaskId.value = null;
   inspectorOpen.value = true;
 }
 
 function openInspectSheet(task: Task) {
   inspectorMode.value = 'edit';
-  activeTask.value = task;
+  activeTaskId.value = task.id;
   inspectorOpen.value = true;
 }
 
@@ -93,15 +124,20 @@ function handleDeleteSingle(id: string) {
 }
 
 function handleBulkUpdate(
-  ids: string[],
+  selectedRows: Task[],
   patch: Partial<Pick<Task, 'assignee' | 'label' | 'priority' | 'status'>>,
 ) {
+  const ids = selectedRows.map((t) => t.id);
+  if (ids.length === 0) return;
   const updated = store.bulkUpdate(ids, patch);
   kernel.events.notify('success', `Updated ${updated} selected task(s)`);
 }
 
-function handleBulkDelete(ids: string[]) {
+function handleBulkDelete(selectedRows: Task[], clearSelection: () => void) {
+  const ids = selectedRows.map((t) => t.id);
+  if (ids.length === 0) return;
   const deleted = store.deleteTasks(ids);
+  clearSelection();
   kernel.events.notify('info', `Deleted ${deleted} task(s)`);
 }
 
@@ -144,7 +180,9 @@ const columns = createTaskColumns(
       <div class="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
         <div class="flex items-center gap-2">
           <ListTodo class="text-primary size-4" />
-          <h2 class="text-base font-semibold tracking-tight">Tasks</h2>
+          <h2 class="text-base font-semibold tracking-tight">
+            {{ $t('playground.title') }}
+          </h2>
           <Badge
             variant="outline"
             class="px-1.5 py-0 text-[11px] font-normal"
@@ -156,11 +194,15 @@ const columns = createTaskColumns(
           >
             <Cloud v-if="isCloud" class="mr-1 size-3" />
             <Cpu v-else class="mr-1 size-3" />
-            {{ isCloud ? 'Cloud Synced' : 'Local Workspace' }}
+            {{
+              isCloud
+                ? $t('playground.cloud_synced')
+                : $t('playground.local_workspace')
+            }}
           </Badge>
         </div>
         <span class="text-muted-foreground hidden text-xs md:inline">
-          · Track, prioritize, and coordinate engineering issues
+          · {{ $t('playground.description') }}
         </span>
       </div>
 
@@ -172,7 +214,7 @@ const columns = createTaskColumns(
           @click="handleExportCsv(store.tasks)"
         >
           <Download class="mr-1.5 size-3.5 opacity-70" />
-          Export CSV
+          {{ $t('playground.export_csv') }}
         </Button>
         <Button
           size="sm"
@@ -181,23 +223,75 @@ const columns = createTaskColumns(
           @click="handleReset"
         >
           <RotateCcw class="mr-1.5 size-3.5 opacity-70" />
-          Reset
+          {{ $t('playground.reset_btn') }}
         </Button>
       </div>
     </div>
 
-    <!-- Main Enterprise Data Table -->
+    <!-- Reusable Generic DataTable Composed with Domain Slots -->
     <DataTable
       :columns="columns"
-      :data="store.tasks"
-      :metrics="store.metrics"
-      @create="openCreateSheet"
-      @inspect="openInspectSheet"
-      @bulk-update="handleBulkUpdate"
-      @bulk-delete="handleBulkDelete"
-      @export-csv="handleExportCsv"
-      @export-json="handleExportJson"
-    />
+      :data="visibleTasks"
+      row-key="id"
+      enable-row-selection
+      interactive-rows
+      :initial-column-visibility="{ label: false }"
+      :empty-title="$t('playground.empty_title')"
+      :empty-description="$t('playground.empty_description')"
+      @row-click="openInspectSheet"
+      @reset-filters="favoritesOnly = false"
+    >
+      <template #header="{ table }">
+        <TasksTableMetrics :table="table" :metrics="store.metrics" />
+      </template>
+
+      <template
+        #toolbar="{ table, density, setDensity, isFiltered, resetFilters }"
+      >
+        <TasksTableToolbar
+          :table="table"
+          :density="density"
+          :is-filtered="isFiltered"
+          v-model:favorites-only="favoritesOnly"
+          @update:density="setDensity"
+          @reset="resetFilters"
+          @create="openCreateSheet"
+        />
+      </template>
+
+      <template #empty="{ resetFilters }">
+        <Empty class="min-h-[240px]">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SearchX class="text-muted-foreground size-5" />
+            </EmptyMedia>
+            <EmptyTitle>No matching tasks</EmptyTitle>
+            <EmptyDescription>
+              No tasks match your current search or filter criteria.
+            </EmptyDescription>
+          </EmptyHeader>
+          <Button
+            variant="outline"
+            size="sm"
+            class="mt-4"
+            @click="resetFilters"
+          >
+            Clear all filters
+          </Button>
+        </Empty>
+      </template>
+
+      <template #footer="{ selectedRows, clearSelection }">
+        <TasksTableBulkBar
+          :selected-tasks="selectedRows"
+          @bulk-update="(patch) => handleBulkUpdate(selectedRows, patch)"
+          @bulk-delete="handleBulkDelete(selectedRows, clearSelection)"
+          @export-csv="handleExportCsv(selectedRows)"
+          @export-json="handleExportJson(selectedRows)"
+          @clear="clearSelection"
+        />
+      </template>
+    </DataTable>
 
     <!-- Slide-Over Inspector / Creator -->
     <TaskInspectorSheet

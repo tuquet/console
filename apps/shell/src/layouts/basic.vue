@@ -19,6 +19,7 @@ import { openWindow } from '@operon/utils';
 
 import { LogIn } from '@lucide/vue';
 
+import LocalBridgeNotice from '#/components/common/local-bridge-notice.vue';
 import WorkspaceSelector from '#/components/common/workspace-selector.vue';
 import { $t } from '#/locales';
 import { useAuthStore } from '#/store';
@@ -239,28 +240,11 @@ watch(
   <BasicLayout
     :avatar="isAuthenticated ? avatar : undefined"
     :text="isAuthenticated ? userStore.userInfo?.realName : undefined"
-    :sidebar-logo-visible="isAuthenticated || preferences.logo.enable"
     @clear-preferences-and-logout="handleLogout"
     @logout="handleLogout"
   >
-    <template
-      v-if="isAuthenticated || preferences.logo.enable"
-      #logo="{ collapsed }"
-    >
-      <WorkspaceSelector v-if="isAuthenticated" :collapsed="collapsed" />
-      <div
-        v-else
-        class="flex items-center gap-2.5 px-3 py-2"
-        :class="{ 'justify-center': collapsed || !preferences.logo.showText }"
-      >
-        <img src="/logo.svg" class="size-7 shrink-0" alt="Operon" />
-        <span
-          v-if="!collapsed && preferences.logo.showText"
-          class="truncate font-semibold text-foreground text-sm tracking-tight"
-        >
-          Operon
-        </span>
-      </div>
+    <template v-if="isAuthenticated" #sidebar-header="{ collapsed }">
+      <WorkspaceSelector :collapsed="collapsed" />
     </template>
     <template #user-dropdown>
       <UserDropdown
@@ -297,6 +281,7 @@ watch(
       />
     </template>
     <template #extra>
+      <LocalBridgeNotice />
       <AuthenticationLoginExpiredModal
         v-model:open="accessStore.loginExpired"
         :avatar

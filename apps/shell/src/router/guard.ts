@@ -1,4 +1,4 @@
-import type { Router } from 'vue-router';
+import type { RouteLocationNormalized, Router } from 'vue-router';
 
 import { LOGIN_PATH } from '@operon/constants';
 import { preferences } from '@operon/preferences';
@@ -15,20 +15,18 @@ import { useAuthStore } from '#/store';
 import { isDesktop } from '#/utils/platform';
 import { sanitizeRedirectPath } from '#/utils/security';
 
-import { generateAccess } from './access';
+import { bootstrapLocalOperatorSession, generateAccess } from './access';
 
 /**
  * Common router guards configuration
  * @param router
  */
 function setupCommonGuard(router: Router) {
-  // Track loaded page paths
   const loadedPaths = new Set<string>();
 
   router.beforeEach((to) => {
     to.meta.loaded = loadedPaths.has(to.path);
 
-    // Page loading progress bar
     if (!to.meta.loaded && preferences.transition.progress) {
       startProgress();
     }
@@ -36,14 +34,115 @@ function setupCommonGuard(router: Router) {
   });
 
   router.afterEach((to) => {
-    // Record page as loaded to avoid repeating entry animations
     loadedPaths.add(to.path);
 
-    // Stop page loading progress bar
     if (preferences.transition.progress) {
       stopProgress();
     }
   });
+}
+
+function resolveRouteWithFallback(
+  router: Router,
+  targetPath: string,
+  fallbackPath: string,
+) {
+  let resolved = router.resolve(targetPath);
+  if (resolved.name === 'FallbackNotFound' || resolved.matched.length === 0) {
+    resolved = router.resolve(fallbackPath);
+  }
+  return { ...resolved, replace: true };
+}
+
+function requiresCloudAccess(to: RouteLocationNormalized): boolean {
+  return Boolean(
+    (to.meta as undefined | { requiresCloud?: boolean })?.requiresCloud ||
+    to.matched.some(
+      (record) =>
+        (record.meta as undefined | { requiresCloud?: boolean })?.requiresCloud,
+    ) ||
+    to.path.startsWith('/system') ||
+    to.path.startsWith('/tenants'),
+  );
+}
+
+function handleCoreRouteNavigation(
+  to: RouteLocationNormalized,
+  isDesktopMode: boolean,
+) {
+  const accessStore = useAccessStore();
+  const userStore = useUserStore();
+
+  if (to.path === LOGIN_PATH) {
+    if (accessStore.accessToken) {
+      const rawRedirect = to.query?.redirect as string | undefined;
+      const defaultHome =
+        userStore.userInfo?.homePath || preferences.app.defaultHomePath;
+      return sanitizeRedirectPath(rawRedirect, defaultHome);
+    }
+    if (isDesktopMode) {
+      // In desktop local-first mode, avoid locking into full login page; navigate to default home
+      return preferences.app.defaultHomePath;
+    }
+  }
+  return true;
+}
+
+async function handleUnauthenticatedNavigation(
+  to: RouteLocationNormalized,
+  router: Router,
+  isDesktopMode: boolean,
+) {
+  const accessStore = useAccessStore();
+  const userStore = useUserStore();
+
+  if (!accessStore.isAccessChecked) {
+    await bootstrapLocalOperatorSession(router, accessRoutes);
+    const fallbackHome =
+      userStore.userInfo?.homePath ||
+      preferences.app.defaultHomePath ||
+      (isDesktopMode ? '/automation/overview' : '/dashboard/analytics');
+    const targetPath =
+      to.path === '/' || to.path === LOGIN_PATH ? fallbackHome : to.fullPath;
+    return resolveRouteWithFallback(router, targetPath, fallbackHome);
+  }
+
+  // Cloud-only features on Desktop trigger optional login modal
+  if (isDesktopMode && requiresCloudAccess(to)) {
+    accessStore.setLoginExpired(true);
+    return false;
+  }
+
+  return true;
+}
+
+function resolvePostAuthRedirect(
+  to: RouteLocationNormalized,
+  from: RouteLocationNormalized,
+  defaultHomePath: string,
+): string {
+  let redirectPath = (
+    to.path === preferences.app.defaultHomePath ? defaultHomePath : to.fullPath
+  ) as string;
+
+  if (from.query?.redirect) {
+    try {
+      const fromRedirect = decodeURIComponent(from.query.redirect as string)
+        .trim()
+        .replace(/^#+/, '');
+      if (
+        fromRedirect &&
+        !fromRedirect.startsWith('/auth/login') &&
+        fromRedirect.startsWith('/')
+      ) {
+        redirectPath = fromRedirect;
+      }
+    } catch {
+      // Ignore malformed redirect query parameter
+    }
+  }
+
+  return redirectPath;
 }
 
 /**
@@ -57,7 +156,7 @@ function setupAccessGuard(router: Router) {
     const authStore = useAuthStore();
     const isDesktopMode = isDesktop();
 
-    // If an accessToken exists but its JWT exp has passed, attempt silent refresh first
+    // Attempt silent refresh first if an existing JWT accessToken is expired
     if (accessStore.accessToken && isJwtTokenExpired(accessStore.accessToken)) {
       const refreshedToken = await tryRefreshSupabaseToken();
       if (!refreshedToken) {
@@ -70,180 +169,49 @@ function setupAccessGuard(router: Router) {
 
     // Core routes bypass access interceptor
     if (coreRouteNames.includes(to.name as string)) {
-      if (to.path === LOGIN_PATH) {
-        if (accessStore.accessToken) {
-          const rawRedirect = to.query?.redirect as string | undefined;
-          const defaultHome =
-            userStore.userInfo?.homePath || preferences.app.defaultHomePath;
-          const redirectTarget = rawRedirect
-            ? sanitizeRedirectPath(rawRedirect, defaultHome)
-            : defaultHome;
-          return redirectTarget;
-        }
-        if (isDesktopMode) {
-          // In desktop local-first mode, avoid locking into full login page; navigate to default home
-          return preferences.app.defaultHomePath;
-        }
-      }
-      return true;
+      return handleCoreRouteNavigation(to, isDesktopMode);
     }
 
-    // Check accessToken
+    // Unauthenticated navigation (both Web and Desktop operate without mandatory login)
     if (!accessStore.accessToken) {
-      // Explicitly allowed without access authentication
       if (to.meta.ignoreAccess) {
         return true;
       }
-
-      // Desktop local-first mode: unauthenticated users are Local Operators
-      if (isDesktopMode) {
-        if (!accessStore.isAccessChecked) {
-          if (!userStore.userInfo) {
-            userStore.setUserInfo({
-              avatar: preferences.app.defaultAvatar || '',
-              homePath: '/automation/overview',
-              realName: 'Local Operator',
-              roles: ['local_operator'],
-              userId: 'local-operator',
-              username: 'operator',
-            });
-          }
-          const { accessibleMenus, accessibleRoutes } = await generateAccess({
-            roles: ['local_operator'],
-            router,
-            routes: accessRoutes,
-          });
-          accessStore.setAccessMenus(accessibleMenus);
-          accessStore.setAccessRoutes(accessibleRoutes);
-          accessStore.setIsAccessChecked(true);
-
-          const fallbackHome =
-            userStore.userInfo?.homePath ||
-            preferences.app.defaultHomePath ||
-            '/automation/overview';
-          let targetPath =
-            to.path === '/' || to.path === LOGIN_PATH
-              ? fallbackHome
-              : to.fullPath;
-          let resolved = router.resolve(targetPath);
-          if (
-            resolved.name === 'FallbackNotFound' ||
-            resolved.matched.length === 0
-          ) {
-            targetPath = fallbackHome;
-            resolved = router.resolve(targetPath);
-          }
-          return { ...resolved, replace: true };
-        }
-
-        // Cloud-only features on Desktop trigger optional login modal
-        const requiresCloud = Boolean(
-          (to.meta as undefined | { requiresCloud?: boolean })?.requiresCloud ||
-          to.matched.some(
-            (record) =>
-              (record.meta as undefined | { requiresCloud?: boolean })
-                ?.requiresCloud,
-          ) ||
-          to.path.startsWith('/system') ||
-          to.path.startsWith('/tenants') ||
-          to.path.startsWith('/commerce'),
-        );
-        if (requiresCloud) {
-          accessStore.setLoginExpired(true);
-          return false;
-        }
-
-        return true;
-      }
-
-      if (
-        preferences.app.loginExpiredMode === 'modal' &&
-        accessStore.isAccessChecked
-      ) {
-        accessStore.setLoginExpired(true);
-        return false;
-      }
-
-      // Unauthorized on Web: redirect to login page
-      if (to.fullPath !== LOGIN_PATH) {
-        return {
-          path: LOGIN_PATH,
-          // Omit redirect query if navigating to default home
-          query:
-            to.fullPath === preferences.app.defaultHomePath
-              ? {}
-              : { redirect: encodeURIComponent(to.fullPath) },
-          // Retain intended target to redirect after login
-          replace: true,
-        };
-      }
-      return to;
+      return handleUnauthenticatedNavigation(to, router, isDesktopMode);
     }
 
-    // Check if dynamic routes have already been generated
     if (accessStore.isAccessChecked) {
       return true;
     }
 
-    // Generate route table with user roles
+    // Generate route table with authenticated user roles
     let userInfo = userStore.userInfo;
     if (!userInfo) {
       try {
         userInfo = await authStore.fetchUserInfo();
       } catch {
         await authStore.logout(false);
-        return { path: LOGIN_PATH, replace: true };
+        return true;
       }
     }
-    const userRoles = userInfo.roles ?? [];
 
-    // Generate accessible menus and routes
     const { accessibleMenus, accessibleRoutes } = await generateAccess({
-      roles: userRoles,
+      roles: userInfo.roles ?? [],
       router,
-      // Routes displayed in menu but redirected to 403 on access if forbidden
       routes: accessRoutes,
     });
 
-    // Save accessible menus and routes
     accessStore.setAccessMenus(accessibleMenus);
     accessStore.setAccessRoutes(accessibleRoutes);
     accessStore.setIsAccessChecked(true);
 
-    let redirectPath = (
-      to.path === preferences.app.defaultHomePath
-        ? userInfo.homePath || preferences.app.defaultHomePath
-        : to.fullPath
-    ) as string;
+    const fallbackHome =
+      userInfo.homePath ||
+      preferences.app.defaultHomePath ||
+      '/automation/overview';
+    const redirectPath = resolvePostAuthRedirect(to, from, fallbackHome);
 
-    if (from.query?.redirect) {
-      try {
-        const fromRedirect = decodeURIComponent(from.query.redirect as string)
-          .trim()
-          .replace(/^#+/, '');
-        if (
-          fromRedirect &&
-          !fromRedirect.startsWith('/auth/login') &&
-          fromRedirect.startsWith('/')
-        ) {
-          redirectPath = fromRedirect;
-        }
-      } catch {}
-    }
-
-    let resolved = router.resolve(redirectPath);
-    if (resolved.name === 'FallbackNotFound' || resolved.matched.length === 0) {
-      redirectPath =
-        userInfo.homePath ||
-        preferences.app.defaultHomePath ||
-        '/automation/overview';
-      resolved = router.resolve(redirectPath);
-    }
-
-    return {
-      ...resolved,
-      replace: true,
-    };
+    return resolveRouteWithFallback(router, redirectPath, fallbackHome);
   });
 }
 
@@ -257,9 +225,7 @@ function createRouterGuard(router: Router) {
     await useAuthStore().handleSessionExpired();
   });
 
-  /** Common */
   setupCommonGuard(router);
-  /** Access control */
   setupAccessGuard(router);
 }
 

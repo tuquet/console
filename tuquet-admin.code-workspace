@@ -121,10 +121,6 @@
       "path": "packages/effects/layouts"
     },
     {
-      "name": "@operon/plugins",
-      "path": "packages/effects/plugins"
-    },
-    {
       "name": "@operon/request",
       "path": "packages/effects/request"
     },

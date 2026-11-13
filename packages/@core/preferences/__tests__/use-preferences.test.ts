@@ -26,7 +26,6 @@ describe('usePreferences - anti-lockout safeguards', () => {
     expect(preferencesButtonPosition.value).toEqual({
       fixed: false,
       header: true,
-      sidebarBottom: false,
       userDropdown: false,
     });
 
@@ -40,7 +39,6 @@ describe('usePreferences - anti-lockout safeguards', () => {
     expect(preferencesButtonPosition.value).toEqual({
       fixed: true,
       header: false,
-      sidebarBottom: false,
       userDropdown: false,
     });
   });
@@ -62,7 +60,6 @@ describe('usePreferences - anti-lockout safeguards', () => {
     expect(preferencesButtonPosition.value).toEqual({
       fixed: true,
       header: false,
-      sidebarBottom: false,
       userDropdown: false,
     });
   });
@@ -84,7 +81,6 @@ describe('usePreferences - anti-lockout safeguards', () => {
     expect(preferencesButtonPosition.value).toEqual({
       fixed: true,
       header: false,
-      sidebarBottom: false,
       userDropdown: false,
     });
   });
@@ -106,9 +102,34 @@ describe('usePreferences - anti-lockout safeguards', () => {
     expect(preferencesButtonPosition.value).toEqual({
       fixed: false,
       header: false,
-      sidebarBottom: false,
       userDropdown: false,
     });
+  });
+
+  it('migrates legacy sidebar-bottom cached position and header-mixed-nav layout on init', async () => {
+    const { PreferenceManager } = await import('../src/preferences');
+    const manager = new PreferenceManager();
+    (manager as any).loadFromCache = async () => ({
+      app: {
+        layout: 'header-mixed-nav',
+        preferencesButtonPosition: 'sidebar-bottom',
+      },
+      logo: {
+        enable: false,
+        fit: 'contain',
+        logoMode: 'icon',
+        showText: false,
+      },
+      sidebar: { extraCollapse: true },
+      theme: { semiDarkSidebarSub: true },
+    });
+    await manager.initPreferences({ namespace: 'test-migrate' });
+
+    expect(manager.getPreferences().app.preferencesButtonPosition).toBe('auto');
+    expect(manager.getPreferences().app.layout).toBe('sidebar-nav');
+    expect('enable' in manager.getPreferences().logo).toBe(false);
+    expect('extraCollapse' in manager.getPreferences().sidebar).toBe(false);
+    expect('semiDarkSidebarSub' in manager.getPreferences().theme).toBe(false);
   });
 
   it('does not produce diffPreference when only isMobile is toggled', () => {

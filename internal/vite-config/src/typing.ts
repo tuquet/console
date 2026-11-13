@@ -10,32 +10,6 @@ import type {
 import type { Options as PwaPluginOptions } from 'vite-plugin-pwa';
 
 /**
- * ImportMap configuration interface
- * @description Configure module import maps with support for custom import paths and scopes
- * @example
- * ```typescript
- * {
- *   imports: {
- *     'vue': 'https://unpkg.com/vue@3.2.47/dist/vue.esm-browser.js'
- *   },
- *   scopes: {
- *     'https://site.com/': {
- *       'vue': 'https://unpkg.com/vue@3.2.47/dist/vue.esm-browser.js'
- *     }
- *   }
- * }
- * ```
- */
-interface IImportMap {
-  /** Module import map */
-  imports?: Record<string, string>;
-  /** Scope-specific import map */
-  scopes?: {
-    [scope: string]: Record<string, string>;
-  };
-}
-
-/**
  * Print plugin configuration options
  * @description Configure console print output
  */
@@ -55,81 +29,10 @@ interface PrintPluginOptions {
 }
 
 /**
- * Nitro Mock plugin configuration options
- * @description Configure Nitro Mock server behavior
- */
-interface NitroMockPluginOptions {
-  /**
-   * Mock server package name
-   * @default '@vbenjs/nitro-mock'
-   */
-  mockServerPackage?: string;
-
-  /**
-   * Mock server port
-   * @default 3000
-   */
-  port?: number;
-
-  /**
-   * Whether to print mock logs
-   * @default false
-   */
-  verbose?: boolean;
-}
-
-/**
- * Archiver plugin configuration options
- * @description Configure build artifact compression and archiving
- */
-interface ArchiverPluginOptions {
-  /**
-   * Output filename
-   * @default 'dist'
-   */
-  name?: string;
-  /**
-   * Output directory
-   * @default '.'
-   */
-  outputDir?: string;
-}
-
-/**
  * HTML plugin configuration
  * @description Configure HTML minification behavior based on transformIndexHtml
  */
 type HtmlPluginOptions = HtmlMinifierOptions;
-
-/**
- * ImportMap plugin configuration
- * @description Configure CDN module imports
- */
-interface ImportmapPluginOptions {
-  /**
-   * CDN provider
-   * @default 'jspm.io'
-   * @description Supports esm.sh and jspm.io CDN providers
-   */
-  defaultProvider?: 'esm.sh' | 'jspm.io';
-  /**
-   * ImportMap configuration array
-   * @description Configure packages to import from CDN
-   * @example
-   * ```typescript
-   * [
-   *   { name: 'vue' },
-   *   { name: 'pinia', range: '^2.0.0' }
-   * ]
-   * ```
-   */
-  importmap?: Array<{ name: string; range?: string }>;
-  /**
-   * Manual ImportMap configuration
-   * @description Custom ImportMap configuration
-   */
-  inputMap?: IImportMap;
-}
 
 /**
  * Conditional plugin configuration
@@ -192,29 +95,6 @@ interface CommonPluginOptions {
  */
 interface ApplicationPluginOptions extends CommonPluginOptions {
   /**
-   * Whether to enable archive compression
-   * @default false
-   * @description When enabled, generates a zip file in the output directory
-   */
-  archiver?: boolean;
-  /**
-   * Archiver plugin configuration
-   * @description Configure compression and archiving behavior
-   */
-  archiverPluginOptions?: ArchiverPluginOptions;
-  /**
-   * Whether to enable compression
-   * @default false
-   * @description Supports gzip and brotli compression
-   */
-  compress?: boolean;
-  /**
-   * Compression type
-   * @default ['gzip']
-   * @description Optional compression types
-   */
-  compressTypes?: ('brotli' | 'gzip')[];
-  /**
    * Whether to enable dayjs plugin
    * @default true
    */
@@ -236,15 +116,6 @@ interface ApplicationPluginOptions extends CommonPluginOptions {
    */
   i18n?: boolean;
   /**
-   * Whether to enable ImportMap CDN
-   * @default false
-   */
-  importmap?: boolean;
-  /**
-   * ImportMap plugin configuration
-   */
-  importmapOptions?: ImportmapPluginOptions;
-  /**
    * Whether to inject application loading animation
    * @default true
    */
@@ -259,15 +130,6 @@ interface ApplicationPluginOptions extends CommonPluginOptions {
    * @default true
    */
   license?: boolean;
-  /**
-   * Whether to enable Nitro Mock
-   * @default false
-   */
-  nitroMock?: boolean;
-  /**
-   * Nitro Mock plugin configuration
-   */
-  nitroMockOptions?: NitroMockPluginOptions;
   /**
    * Whether to enable console print output
    * @default false
@@ -286,11 +148,6 @@ interface ApplicationPluginOptions extends CommonPluginOptions {
    * PWA plugin configuration
    */
   pwaOptions?: Partial<PwaPluginOptions>;
-  /**
-   * Whether to enable VXE Table lazy loading
-   * @default false
-   */
-  vxeTableLazyImport?: boolean;
 }
 
 /**
@@ -348,17 +205,13 @@ type VbenViteConfig = Promise<UserConfig> | UserConfig | UserConfigFnPromise;
 
 export type {
   ApplicationPluginOptions,
-  ArchiverPluginOptions,
   CommonPluginOptions,
   ConditionPlugin,
   DefineApplicationOptions,
   DefineConfig,
   DefineLibraryOptions,
   HtmlPluginOptions,
-  IImportMap,
-  ImportmapPluginOptions,
   LibraryPluginOptions,
-  NitroMockPluginOptions,
   PrintPluginOptions,
   VbenViteConfig,
 };

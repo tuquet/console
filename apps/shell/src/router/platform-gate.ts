@@ -2,6 +2,8 @@ import type { RouteRecordRaw } from 'vue-router';
 
 import type { AppPlatform } from '#/utils/platform';
 
+import { filterRouteTree } from './route-filter';
+
 export type RoutePlatform = 'all' | 'desktop' | 'web';
 
 /**
@@ -19,32 +21,10 @@ export function filterRoutesByPlatform(
   routes: RouteRecordRaw[],
   platform: AppPlatform,
 ): RouteRecordRaw[] {
-  if (!Array.isArray(routes) || routes.length === 0) {
-    return [];
-  }
-
-  const result: RouteRecordRaw[] = [];
-
-  for (const route of routes) {
+  return filterRouteTree(routes, (route) => {
     const routePlatform =
       (route.meta as undefined | { platform?: RoutePlatform })?.platform ??
       'all';
-
-    if (routePlatform !== 'all' && routePlatform !== platform) {
-      continue;
-    }
-
-    const cloned = { ...route };
-    if (Array.isArray(cloned.children) && cloned.children.length > 0) {
-      cloned.children = filterRoutesByPlatform(cloned.children, platform);
-      if (cloned.children.length === 0 && !cloned.component) {
-        // Prune empty parent route
-        continue;
-      }
-    }
-
-    result.push(cloned);
-  }
-
-  return result;
+    return routePlatform === 'all' || routePlatform === platform;
+  });
 }

@@ -164,4 +164,47 @@ describe('release publication transaction', () => {
     expect(fetch).not.toHaveBeenCalled();
     expect(mocks.writeState).not.toHaveBeenCalled();
   });
+  it('succeeds under Actions GITHUB_TOKEN when immutable-releases returns 403 and verifies release.immutable', async () => {
+    const implementation = mocks.github.getMockImplementation();
+    mocks.github.mockImplementation(async (path, options) => {
+      if (path === 'immutable-releases') {
+        throw new Error(
+          'GitHub GET immutable-releases: 403 Resource not accessible by integration',
+        );
+      }
+      return implementation(path, options);
+    });
+    await publish(directory);
+    expect(mocks.writeState).toHaveBeenCalledOnce();
+  });
+  it('rejects mutable published releases even when immutable-releases precheck returned 403', async () => {
+    mocks.github.mockImplementation(async (path, options) => {
+      if (path === 'immutable-releases') {
+        throw new Error(
+          'GitHub GET immutable-releases: 403 Resource not accessible by integration',
+        );
+      }
+      if (path.startsWith('releases/tags/')) return null;
+      if (path.startsWith('git/ref/'))
+        return {
+          object: { type: 'commit', sha: manifest.source.consoleCommit },
+        };
+      if (path === 'releases/generate-notes') return { body: 'Release notes' };
+      if (path === 'releases') return release;
+      if (path === 'releases/42' && options?.method === 'PATCH') {
+        release = {
+          ...release,
+          draft: false,
+          immutable: false,
+          assets,
+          published_at: manifest.builtAt,
+        };
+        return release;
+      }
+      if (path === 'releases/42') return release;
+      throw new Error(`Unexpected API path ${path}`);
+    });
+    await expect(publish(directory)).rejects.toThrow('unexpectedly mutable');
+    expect(mocks.writeState).not.toHaveBeenCalled();
+  });
 });

@@ -65,11 +65,7 @@ const defaultPreferences: Preferences = {
   },
 
   logo: {
-    enable: true,
-    fit: 'contain',
     source: 'https://unpkg.com/@vbenjs/static-source@0.1.7/source/logo-v1.webp',
-    showText: true,
-    logoMode: 'icon',
   },
   navigation: {
     accordion: true,
@@ -93,7 +89,6 @@ const defaultPreferences: Preferences = {
     draggable: true,
     enable: true,
     expandOnHover: true,
-    extraCollapse: false,
     extraCollapsedWidth: 60,
     fixedButton: true,
     hidden: false,
@@ -126,7 +121,6 @@ const defaultPreferences: Preferences = {
     fontSize: 16,
     semiDarkHeader: false,
     semiDarkSidebar: false,
-    semiDarkSidebarSub: false,
   },
   transition: {
     enable: true,

@@ -1,19 +1,10 @@
 import type { App } from 'vue';
 
-import { computed, createApp, defineComponent, h, nextTick, ref } from 'vue';
+import { createApp, defineComponent, h, nextTick, ref } from 'vue';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import LayoutSidebar from '../components/layout-sidebar.vue';
-
-vi.mock('@operon-core/composables', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('@operon-core/composables')>();
-  return {
-    ...actual,
-    useScrollLock: () => computed({ get: () => false, set: () => {} }),
-  };
-});
 
 vi.mock('../hooks/use-sidebar-drag', async (importOriginal) => {
   const actual =
@@ -47,13 +38,8 @@ function mountSidebar(options: MountOptions = {}) {
         collapse: collapse.value,
         expandOnHover: false,
         expandOnHovering: false,
-        extraCollapse: false,
-        extraVisible: false,
         theme: 'dark',
-        themeSub: 'dark',
         width: 180,
-        headerHeight: 50,
-        extraWidth: 60,
         isMobile: options.isMobile ?? false,
         'onUpdate:collapse': onUpdateCollapse,
       }),
@@ -134,5 +120,62 @@ describe('layout-sidebar mobile hover guard (#8274)', () => {
 
     expect(collapseWrites).toContain(false);
     expect(onUpdateCollapse).toHaveBeenCalledWith(false);
+  });
+
+  it('renders header and footer slots in flex regions with collapsed state', () => {
+    const Consumer = defineComponent(
+      () => () =>
+        h(
+          LayoutSidebar,
+          {
+            collapse: true,
+            theme: 'dark',
+            width: 60,
+          },
+          {
+            header: ({ collapsed }: { collapsed?: boolean }) =>
+              h('div', { id: 'test-header' }, String(collapsed)),
+            default: () => h('div', { id: 'test-main' }, 'menu'),
+            footer: ({ collapsed }: { collapsed?: boolean }) =>
+              h('div', { id: 'test-footer' }, String(collapsed)),
+          },
+        ),
+    );
+    const host = document.createElement('div');
+    document.body.append(host);
+    activeApp = createApp(Consumer);
+    activeApp.mount(host);
+
+    const headerRegion = document.querySelector(
+      '[data-layout-region="sidebar-header"] #test-header',
+    );
+    const footerRegion = document.querySelector(
+      '[data-layout-region="sidebar-footer"] #test-footer',
+    );
+    expect(headerRegion?.textContent).toBe('true');
+    expect(footerRegion?.textContent).toBe('true');
+  });
+
+  it('spreads collapse and pin buttons with justify-between when expanded without custom footer', () => {
+    const Consumer = defineComponent(
+      () => () =>
+        h(LayoutSidebar, {
+          collapse: false,
+          showCollapseButton: true,
+          showFixedButton: true,
+          theme: 'dark',
+          width: 210,
+        }),
+    );
+    const host = document.createElement('div');
+    document.body.append(host);
+    activeApp = createApp(Consumer);
+    activeApp.mount(host);
+
+    const footerRegion = document.querySelector(
+      '[data-layout-region="sidebar-footer"]',
+    );
+    expect(footerRegion?.className).toContain('justify-between');
+    expect(footerRegion?.querySelectorAll('button')).toHaveLength(2);
   });
 });

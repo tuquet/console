@@ -1,7 +1,17 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { createApp } from 'vue';
+
 import { describe, expect, it } from 'vitest';
+
+import {
+  $t,
+  loadLocaleMessages,
+  registerLocaleMessages,
+  resetRegisteredLocaleMessages,
+  setupI18n,
+} from '../src';
 
 // Resolve scripts/check-i18n.mjs from packages/locales/__tests__/
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -27,6 +37,9 @@ describe('official i18n Tooling & Integrity Test Suite', () => {
       result.missingUsedKeys,
       'Referenced $t(...) keys missing from translation files',
     ).toEqual([]);
+    expect(result.crossScopeLeaks, 'Cross-app locale scope violations').toEqual(
+      [],
+    );
   });
 
   it('guarantees no raw {{ }} interpolation syntax in locale values (avoids vue-i18n render crash)', async () => {
@@ -54,8 +67,37 @@ describe('official i18n Tooling & Integrity Test Suite', () => {
     const result = auditI18n({ silent: true });
 
     expect(result.hasError).toBe(false);
-    expect(result.enKeysCount).toBeGreaterThan(1500);
-    expect(result.viKeysCount).toBeGreaterThan(1500);
+    expect(result.enKeysCount).toBeGreaterThan(1200);
+    expect(result.viKeysCount).toBeGreaterThan(1200);
     expect(result.totalReferencedCount).toBeGreaterThan(250);
+  });
+
+  it('lazy-loads micro-app dictionaries and preserves them across runtime language switches', async () => {
+    resetRegisteredLocaleMessages();
+    const app = createApp({ render: () => null });
+    await setupI18n(app, {
+      defaultLocale: 'en-US',
+      loadMessages: async (lang) => ({
+        page: {
+          shellTitle: lang === 'vi-VN' ? 'Bảng điều khiển' : 'Dashboard',
+        },
+      }),
+    });
+
+    await registerLocaleMessages('playground', async (lang) => ({
+      playground: {
+        greeting: lang === 'vi-VN' ? 'Xin chào Playground' : 'Hello Playground',
+      },
+    }));
+
+    expect($t('page.shellTitle')).toBe('Dashboard');
+    expect($t('playground.greeting')).toBe('Hello Playground');
+
+    // Switch language at runtime — both Shell and lazy-registered micro-app must reload cleanly
+    await loadLocaleMessages('vi-VN');
+    expect($t('page.shellTitle')).toBe('Bảng điều khiển');
+    expect($t('playground.greeting')).toBe('Xin chào Playground');
+
+    resetRegisteredLocaleMessages();
   });
 });

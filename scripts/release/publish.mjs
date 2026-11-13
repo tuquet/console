@@ -9,8 +9,13 @@ import { auditEvent, register } from './state.mjs';
 
 export async function publish(directory) {
   const manifest = await verifyReleaseDirectory(directory);
-  const immutability = await github('immutable-releases');
-  if (!immutability.enabled)
+  // Actions GITHUB_TOKEN cannot hold Administration:read (403 on immutable-releases);
+  // post-publish `release.immutable` below still enforces immutability via Contents:read.
+  const immutability = await github('immutable-releases').catch((error) => {
+    if (error instanceof Error && error.message.includes(': 403 ')) return null;
+    throw error;
+  });
+  if (immutability && !immutability.enabled)
     throw new Error('Enable GitHub release immutability before publishing');
   const releases = await github(
     `releases/tags/${encodeURIComponent(manifest.tag)}`,

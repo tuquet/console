@@ -85,6 +85,128 @@ export function buildSupabaseProfileHeaders(
   return { 'Content-Profile': schema };
 }
 
+async function resolveSupabaseAuthToken(
+  accessStore: ReturnType<typeof useAccessStore>,
+  options: SupabaseRequestOptions,
+): Promise<null | string | undefined> {
+  const token = options._retryToken ?? accessStore.accessToken;
+  if (!options.skipAuth && token && isJwtTokenExpired(token)) {
+    const refreshedToken = await tryRefreshSupabaseToken();
+    if (refreshedToken) {
+      return refreshedToken;
+    }
+    await handleSupabaseUnauthorized();
+    throw createAuthError('JWT expired', 401);
+  }
+  return token;
+}
+
+function buildSupabaseRequestHeaders(
+  anonKey: string,
+  options: SupabaseRequestOptions,
+  token: null | string | undefined,
+): Record<string, string> {
+  const headers: Record<string, string> = {
+    apikey: anonKey,
+    'Content-Type': 'application/json',
+    ...buildSupabaseProfileHeaders(options.schema, options.method),
+    ...(options.headers as Record<string, string>),
+  };
+
+  if (options.preferRepresentation) {
+    headers.Prefer = 'return=representation';
+  }
+
+  if (!options.skipAuth && token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+}
+
+function recordNetworkBreadcrumb(
+  startTime: number,
+  method: string,
+  status: number,
+  url: string,
+): void {
+  const durationMs = startTime
+    ? Math.round(performance.now() - startTime)
+    : undefined;
+  addNetworkBreadcrumb({ durationMs, method, status, url });
+}
+
+function extractSupabaseErrorMessage(
+  errorJson: Record<string, any>,
+  fallback: string,
+): string {
+  return (
+    errorJson.message ||
+    errorJson.msg ||
+    errorJson.error_description ||
+    fallback
+  );
+}
+
+async function handleSupabaseErrorResponse<T>(
+  response: Response,
+  path: string,
+  options: SupabaseRequestOptions,
+  token: null | string | undefined,
+  accessStore: ReturnType<typeof useAccessStore>,
+): Promise<T> {
+  const errorJson = (await response.json().catch(() => ({}))) as Record<
+    string,
+    any
+  >;
+  const method = options.method || 'GET';
+
+  if (!options.skipAuth && isUnauthorizedResponse(response.status, errorJson)) {
+    if (!options._isRetry) {
+      const latestToken = accessStore.accessToken;
+      const refreshedToken =
+        latestToken && latestToken !== token && !isJwtTokenExpired(latestToken)
+          ? latestToken
+          : await tryRefreshSupabaseToken();
+      if (refreshedToken) {
+        return supabaseRequest<T>(path, {
+          ...options,
+          _isRetry: true,
+          _retryToken: refreshedToken,
+        });
+      }
+    }
+
+    if (token) {
+      await handleSupabaseUnauthorized();
+    }
+    throw createAuthError(
+      extractSupabaseErrorMessage(errorJson, 'JWT expired'),
+      response.status,
+    );
+  }
+
+  const apiError = new KernelApiError(
+    extractSupabaseErrorMessage(
+      errorJson,
+      $t('authentication.supabaseRequestFailed', { status: response.status }),
+    ),
+    response.status,
+  );
+  if (!options.suppressErrorCapture) {
+    captureError(apiError, {
+      errorCode: errorJson.code || errorJson.error_code,
+      errorDetails: errorJson.details || errorJson.hint,
+      method,
+      path,
+      phase: 'supabase_rest',
+      schema: options.schema || 'public',
+      status: response.status,
+    });
+  }
+  throw apiError;
+}
+
 /**
  * Universal Supabase HTTP Request client adhering to Dependency Inversion (DIP)
  * Centralizes auth headers, proactive/reactive JWT refresh, 401 interception,
@@ -96,78 +218,31 @@ export async function supabaseRequest<T = any>(
 ): Promise<T> {
   const { anonKey, supabaseUrl } = getSupabaseConfig();
   const accessStore = useAccessStore();
-  let token = options._retryToken ?? accessStore.accessToken;
-
-  // 1. Proactive JWT expiry check to avoid unnecessary 401 network errors
-  if (!options.skipAuth && token && isJwtTokenExpired(token)) {
-    const refreshedToken = await tryRefreshSupabaseToken();
-    if (refreshedToken) {
-      token = refreshedToken;
-    } else {
-      // Only notify unauthorized handler if an existing session actually expired
-      if (token) {
-        await handleSupabaseUnauthorized();
-      }
-      throw createAuthError('JWT expired', 401);
-    }
-  }
+  const token = await resolveSupabaseAuthToken(accessStore, options);
 
   const url = path.startsWith('http') ? path : `${supabaseUrl}${path}`;
-
   const {
-    _isRetry,
-    _retryToken,
-    preferRepresentation,
+    _isRetry: _,
+    _retryToken: __,
+    preferRepresentation: ___,
     schema,
-    skipAuth,
+    skipAuth: ____,
     suppressErrorCapture,
     ...fetchInit
   } = options;
-
-  const headers: Record<string, string> = {
-    apikey: anonKey,
-    'Content-Type': 'application/json',
-    ...buildSupabaseProfileHeaders(schema, fetchInit.method),
-    ...(fetchInit.headers as Record<string, string>),
-  };
-
-  if (preferRepresentation) {
-    headers.Prefer = 'return=representation';
-  }
-
-  if (!skipAuth && token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
+  const method = fetchInit.method || 'GET';
+  const headers = buildSupabaseRequestHeaders(anonKey, options, token);
 
   let response: Response;
   const startTime = typeof performance === 'undefined' ? 0 : performance.now();
   try {
-    response = await fetch(url, {
-      ...fetchInit,
-      headers,
-    });
-    const durationMs = startTime
-      ? Math.round(performance.now() - startTime)
-      : undefined;
-    addNetworkBreadcrumb({
-      durationMs,
-      method: fetchInit.method || 'GET',
-      status: response.status,
-      url,
-    });
+    response = await fetch(url, { ...fetchInit, headers });
+    recordNetworkBreadcrumb(startTime, method, response.status, url);
   } catch (error) {
-    const durationMs = startTime
-      ? Math.round(performance.now() - startTime)
-      : undefined;
-    addNetworkBreadcrumb({
-      durationMs,
-      method: fetchInit.method || 'GET',
-      status: 0,
-      url,
-    });
+    recordNetworkBreadcrumb(startTime, method, 0, url);
     if (!suppressErrorCapture) {
       captureError(error, {
-        method: fetchInit.method || 'GET',
+        method,
         path,
         phase: 'supabase_network',
         schema: schema || 'public',
@@ -177,62 +252,13 @@ export async function supabaseRequest<T = any>(
   }
 
   if (!response.ok) {
-    const errorJson = (await response.json().catch(() => ({}))) as Record<
-      string,
-      any
-    >;
-
-    // 2. Reactive 401 / JWT expired interceptor with single retry after token refresh
-    if (!skipAuth && isUnauthorizedResponse(response.status, errorJson)) {
-      if (!_isRetry) {
-        const latestToken = accessStore.accessToken;
-        const refreshedToken =
-          latestToken &&
-          latestToken !== token &&
-          !isJwtTokenExpired(latestToken)
-            ? latestToken
-            : await tryRefreshSupabaseToken();
-        if (refreshedToken) {
-          return supabaseRequest<T>(path, {
-            ...options,
-            _isRetry: true,
-            _retryToken: refreshedToken,
-          });
-        }
-      }
-
-      // Only notify unauthorized handler if an existing session actually expired
-      if (token) {
-        await handleSupabaseUnauthorized();
-      }
-      throw createAuthError(
-        errorJson.message ||
-          errorJson.msg ||
-          errorJson.error_description ||
-          'JWT expired',
-        response.status,
-      );
-    }
-
-    const apiError = new KernelApiError(
-      errorJson.message ||
-        errorJson.msg ||
-        errorJson.error_description ||
-        $t('authentication.supabaseRequestFailed', { status: response.status }),
-      response.status,
+    return handleSupabaseErrorResponse<T>(
+      response,
+      path,
+      options,
+      token,
+      accessStore,
     );
-    if (!suppressErrorCapture) {
-      captureError(apiError, {
-        errorCode: errorJson.code || errorJson.error_code,
-        errorDetails: errorJson.details || errorJson.hint,
-        method: fetchInit.method || 'GET',
-        path,
-        phase: 'supabase_rest',
-        schema: schema || 'public',
-        status: response.status,
-      });
-    }
-    throw apiError;
   }
 
   if (response.status === 204) {

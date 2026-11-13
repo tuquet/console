@@ -58,7 +58,6 @@ import {
   GlobalShortcutKeys,
   Header,
   Layout,
-  Logo,
   Navigation,
   Radius,
   Sidebar,
@@ -131,7 +130,6 @@ const themeFontSize = defineModel<number | undefined>('themeFontSize', {
   default: undefined,
 });
 const themeSemiDarkSidebar = defineModel<boolean>('themeSemiDarkSidebar');
-const themeSemiDarkSidebarSub = defineModel<boolean>('themeSemiDarkSidebarSub');
 const themeSemiDarkHeader = defineModel<boolean>('themeSemiDarkHeader');
 
 const sidebarEnable = defineModel<boolean>('sidebarEnable');
@@ -198,12 +196,6 @@ const navigationStyleType = defineModel<NavigationStyleType | undefined>(
 );
 const navigationSplit = defineModel<boolean>('navigationSplit');
 const navigationAccordion = defineModel<boolean>('navigationAccordion');
-
-const logoEnable = defineModel<boolean>('logoEnable');
-const logoShowText = defineModel<boolean>('logoShowText');
-const logoLogoMode = defineModel<'full' | 'icon' | undefined>('logoLogoMode', {
-  default: undefined,
-});
 
 const footerEnable = defineModel<boolean>('footerEnable');
 const footerFixed = defineModel<boolean>('footerFixed');
@@ -435,7 +427,6 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model="themeMode"
                 v-model:theme-semi-dark-header="themeSemiDarkHeader"
                 v-model:theme-semi-dark-sidebar="themeSemiDarkSidebar"
-                v-model:theme-semi-dark-sidebar-sub="themeSemiDarkSidebarSub"
               />
             </Block>
             <Block :title="$t('preferences.theme.builtin.title')">
@@ -470,14 +461,6 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
             </Block>
             <Block :title="$t('preferences.content')">
               <Content v-model="appContentCompact" />
-            </Block>
-
-            <Block :title="$t('preferences.logo.title')">
-              <Logo
-                v-model:logo-enable="logoEnable"
-                v-model:logo-show-text="logoShowText"
-                v-model:logo-mode="logoLogoMode"
-              />
             </Block>
 
             <Block :title="$t('preferences.sidebar.title')">

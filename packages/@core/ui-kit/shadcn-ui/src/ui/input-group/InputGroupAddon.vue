@@ -10,7 +10,9 @@ const props = defineProps<{
 
 <template>
   <div
-    :class="cn('flex items-center px-3 text-muted-foreground ', props.class)"
+    :class="
+      cn('flex items-center px-3 text-sm text-muted-foreground', props.class)
+    "
   >
     <slot></slot>
   </div>

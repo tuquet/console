@@ -1,5 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+import { setupAppLocales } from './locales';
+
 /**
  * Manifest definitions for @operon/playground
  */
@@ -7,6 +9,7 @@ export const playgroundManifest = {
   id: 'playground',
   name: 'Playground',
   defaultPath: 'overview',
+  setupLocales: setupAppLocales,
   routes(t: (key: string) => string): RouteRecordRaw[] {
     return [
       {

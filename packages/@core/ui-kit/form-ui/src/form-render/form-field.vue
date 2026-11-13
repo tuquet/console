@@ -24,12 +24,13 @@ import {
 import { ChevronsDown, CircleAlert } from '@operon-core/icons';
 import {
   Button,
+  Collapsible,
+  CollapsibleContent,
   FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormMessage,
-  VbenCollapsible,
   VbenRenderContent,
   VbenTooltip,
 } from '@operon-core/shadcn-ui';
@@ -572,8 +573,8 @@ onUnmounted(() => {
           </template>
         </FormLabel>
         <div class="flex-auto overflow-hidden p-px">
-          <VbenCollapsible :show-trigger="false" v-model:open="collapseOpen">
-            <template #collapsibleContent>
+          <Collapsible v-model:open="collapseOpen" :unmount-on-hide="false">
+            <CollapsibleContent>
               <div
                 :class="cn('relative flex w-full items-center', wrapperClass)"
               >
@@ -628,8 +629,8 @@ onUnmounted(() => {
                   <VbenRenderContent :content="suffix" />
                 </div>
               </div>
-            </template>
-          </VbenCollapsible>
+            </CollapsibleContent>
+          </Collapsible>
 
           <FormDescription v-if="description">
             <VbenRenderContent :content="description" />

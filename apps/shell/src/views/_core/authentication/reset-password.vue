@@ -7,12 +7,13 @@ import { $t } from '@operon/locales';
 import { Button, Input, Label, toast } from '@operon-core/shadcn-ui';
 
 import { updatePassword } from '#/api/core/auth';
-import { captureError } from '#/utils/bugsink';
+import { useAsyncAction } from '#/composables';
+import { validateNewPassword } from '#/utils/security';
 
 defineOptions({ name: 'ResetPassword' });
 
 const router = useRouter();
-const loading = ref(false);
+const { executeAction, isLoading: loading } = useAsyncAction();
 const recoveryToken = ref('');
 const password = ref('');
 const confirmPassword = ref('');
@@ -26,30 +27,23 @@ onMounted(() => {
 });
 
 async function handleSubmit() {
-  if (!password.value) {
-    toast.warning($t('authentication.newPasswordRequired'));
-    return;
-  }
-  if (password.value.length < 6) {
-    toast.warning($t('authentication.passwordMinLength'));
-    return;
-  }
-  if (password.value !== confirmPassword.value) {
-    toast.warning($t('authentication.confirmPasswordTip'));
+  const errorKey = validateNewPassword(password.value, confirmPassword.value);
+  if (errorKey) {
+    toast.warning($t(errorKey));
     return;
   }
 
-  try {
-    loading.value = true;
-    await updatePassword(password.value, recoveryToken.value);
-    toast.success($t('authentication.passwordResetSuccess'));
-    router.push('/auth/login');
-  } catch (error: any) {
-    captureError(error, { view: 'ResetPassword' });
-    toast.error(error.message || $t('authentication.passwordResetFailed'));
-  } finally {
-    loading.value = false;
-  }
+  await executeAction(
+    async () => {
+      await updatePassword(password.value, recoveryToken.value);
+      router.push('/auth/login');
+    },
+    {
+      errorFallback: $t('authentication.passwordResetFailed'),
+      success: $t('authentication.passwordResetSuccess'),
+      tracking: { action: 'updatePassword', view: 'ResetPassword' },
+    },
+  );
 }
 </script>
 

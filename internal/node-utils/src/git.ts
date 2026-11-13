@@ -2,8 +2,6 @@ import path from 'node:path';
 
 import { execa } from 'execa';
 
-export * from '@changesets/git';
-
 /**
  * Get staged files
  */
@@ -37,4 +35,8 @@ async function getStagedFiles(): Promise<string[]> {
   }
 }
 
-export { getStagedFiles };
+async function gitAdd(pathToFile: string, cwd: string): Promise<void> {
+  await execa('git', ['add', pathToFile], { cwd });
+}
+
+export { getStagedFiles, gitAdd };

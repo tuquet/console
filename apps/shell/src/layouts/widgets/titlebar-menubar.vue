@@ -22,19 +22,15 @@ import {
 } from '#/adapter/desktop';
 import { checkAndNotifyUpdate } from '#/adapter/desktop/updater';
 import { useAppVersion } from '#/composables/use-app-version';
+import { openCommandPalette } from '#/composables/use-global-search';
 import { $t } from '#/locales';
 
 defineOptions({ name: 'TitlebarMenubar' });
 
 const { version } = useAppVersion();
 
-// Keyboard shortcut is registered by App for both web and desktop.
-function openCommandPalette() {
-  window.dispatchEvent(
-    new CustomEvent('open-command-palette', {
-      detail: { mode: 'command', initialValue: '>' },
-    }),
-  );
+function handleOpenCommandPalette() {
+  openCommandPalette('command');
 }
 
 // ── Keyboard shortcut labels (OS-aware) ────────────────────────────────────
@@ -76,7 +72,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
         {{ $t('page.app.menu_workspace') }}
       </MenubarTrigger>
       <MenubarContent class="min-w-[220px]">
-        <MenubarItem @select="openCommandPalette">
+        <MenubarItem @select="handleOpenCommandPalette">
           {{ $t('page.app.menu_command_palette') }}
           <MenubarShortcut>{{ mod }}+Shift+P</MenubarShortcut>
         </MenubarItem>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ThemeModeType } from '@operon/types';
 
-import { useId, watch } from 'vue';
+import { useId } from 'vue';
 
 import { $t } from '@operon/locales';
 import { usePreferences } from '@operon/preferences';
@@ -24,19 +24,9 @@ defineOptions({
 
 const modelValue = defineModel<string>({ default: 'auto' });
 const themeSemiDarkSidebar = defineModel<boolean>('themeSemiDarkSidebar');
-const themeSemiDarkSidebarSub = defineModel<boolean>('themeSemiDarkSidebarSub');
 const themeSemiDarkHeader = defineModel<boolean>('themeSemiDarkHeader');
 
 const { layout } = usePreferences();
-
-watch(
-  () => themeSemiDarkSidebar.value,
-  () => {
-    if (!themeSemiDarkSidebar.value) {
-      themeSemiDarkSidebarSub.value = themeSemiDarkSidebar.value;
-    }
-  },
-);
 
 const themeId = useId();
 const THEME_PRESET: ThemeModeType[] = ['light', 'dark', 'auto'];
@@ -88,18 +78,6 @@ function nameView(name: string) {
       :tip="$t('preferences.theme.darkSidebarTip')"
     >
       {{ $t('preferences.theme.darkSidebar') }}
-    </SwitchItem>
-    <SwitchItem
-      v-model="themeSemiDarkSidebarSub"
-      :disabled="
-        modelValue === 'dark' ||
-        (layout !== 'header-mixed-nav' &&
-          (layout as any) !== 'sidebar-mixed-nav') ||
-        !themeSemiDarkSidebar
-      "
-      :tip="$t('preferences.theme.darkSidebarSubTip')"
-    >
-      {{ $t('preferences.theme.darkSidebarSub') }}
     </SwitchItem>
     <SwitchItem v-model="themeSemiDarkHeader" :disabled="modelValue === 'dark'">
       {{ $t('preferences.theme.darkHeader') }}

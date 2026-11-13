@@ -178,6 +178,50 @@ export function initEarlyErrorInterception() {
   );
 }
 
+function redactSentryEvent(event: Sentry.ErrorEvent): Sentry.ErrorEvent {
+  event.tags = {
+    ...event.tags,
+    app: 'operon-admin',
+  };
+
+  if (event.request?.url) {
+    event.request.url = sanitizeUrl(event.request.url);
+  }
+
+  if (event.breadcrumbs) {
+    for (const b of event.breadcrumbs) {
+      if (b.data?.url && typeof b.data.url === 'string') {
+        b.data.url = sanitizeUrl(b.data.url);
+      }
+    }
+  }
+
+  return event;
+}
+
+function dispatchTelemetryEvent(item: BufferedEvent): void {
+  if (item.type === 'error' && item.error !== undefined) {
+    Sentry.captureException(item.error, { extra: item.context });
+  } else if (item.type === 'message' && item.message) {
+    Sentry.captureMessage(item.message, {
+      extra: item.context,
+      level: item.level,
+    });
+  }
+}
+
+function flushEarlyBuffer(): void {
+  while (earlyBuffer.length > 0) {
+    const item = earlyBuffer.shift();
+    if (!item) break;
+    try {
+      dispatchTelemetryEvent(item);
+    } catch {
+      // Fail-safe
+    }
+  }
+}
+
 /**
  * Initialize Bugsink (Sentry-compatible) error logging for Vue 3 application
  */
@@ -238,49 +282,12 @@ export function initBugsink(
         'Failed to fetch dynamically imported module',
       ],
       beforeSend(event) {
-        // Tag events specifically as Admin client
-        event.tags = {
-          ...event.tags,
-          app: 'operon-admin',
-        };
-
-        // Redact any sensitive tokens from URL
-        if (event.request?.url) {
-          event.request.url = sanitizeUrl(event.request.url);
-        }
-
-        // Redact sensitive URLs from breadcrumbs
-        if (event.breadcrumbs) {
-          for (const b of event.breadcrumbs) {
-            if (b.data?.url && typeof b.data.url === 'string') {
-              b.data.url = sanitizeUrl(b.data.url);
-            }
-          }
-        }
-
-        return event;
+        return redactSentryEvent(event);
       },
     });
 
     isInitialized = true;
-
-    // Drain any events queued before initialization completed
-    while (earlyBuffer.length > 0) {
-      const item = earlyBuffer.shift();
-      if (!item) break;
-      try {
-        if (item.type === 'error' && item.error) {
-          Sentry.captureException(item.error, { extra: item.context });
-        } else if (item.type === 'message' && item.message) {
-          Sentry.captureMessage(item.message, {
-            extra: item.context,
-            level: item.level,
-          });
-        }
-      } catch {
-        // Fail-safe
-      }
-    }
+    flushEarlyBuffer();
 
     if (router) {
       router.onError((error, to, from) => {
@@ -322,14 +329,13 @@ export function captureError(error: unknown, context?: Record<string, any>) {
       capturedErrors.add(error);
     }
 
+    const event: BufferedEvent = { context, error, type: 'error' };
     if (!isInitialized) {
-      earlyBuffer.push({ context, error, type: 'error' });
+      earlyBuffer.push(event);
       return;
     }
 
-    Sentry.captureException(error, {
-      extra: context,
-    });
+    dispatchTelemetryEvent(event);
   } catch {
     // Fail-safe: error logging must never crash the UI
   }
@@ -348,15 +354,13 @@ export function captureMessage(
       return;
     }
 
+    const event: BufferedEvent = { context, level, message, type: 'message' };
     if (!isInitialized) {
-      earlyBuffer.push({ context, level, message, type: 'message' });
+      earlyBuffer.push(event);
       return;
     }
 
-    Sentry.captureMessage(message, {
-      extra: context,
-      level,
-    });
+    dispatchTelemetryEvent(event);
   } catch {
     // Fail-safe
   }

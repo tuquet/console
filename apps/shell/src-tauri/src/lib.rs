@@ -1,5 +1,3 @@
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_window_state::StateFlags;
 
@@ -36,12 +34,6 @@ pub fn log_to_file(level: &str, message: &str) {
     {
         let _ = file.write_all(line.as_bytes());
     }
-}
-
-/// Tracks whether Tauri owns the in-process daemon or is attached to an external CLI daemon
-#[derive(Clone)]
-pub struct DaemonOwnership {
-    pub is_embedded: Arc<AtomicBool>,
 }
 
 #[tauri::command]
@@ -93,65 +85,9 @@ async fn append_log(level: String, message: String) -> Result<(), String> {
     Ok(())
 }
 
-/// Spawns the embedded Operon Daemon API in the background if port 8765 is not already active
-fn spawn_embedded_daemon_if_needed(ownership: DaemonOwnership) {
-    tauri::async_runtime::spawn(async move {
-        let daemon_port: u16 = 8765;
-        let health_url = format!("http://127.0.0.1:{}/api/v1/health", daemon_port);
-
-        // Probe port 8765 first with 800ms timeout
-        let client = reqwest::Client::builder()
-            .timeout(std::time::Duration::from_millis(800))
-            .build();
-
-        let already_running = if let Ok(cli) = client {
-            match cli.get(&health_url).send().await {
-                Ok(resp) => resp.status().is_success(),
-                Err(_) => false,
-            }
-        } else {
-            false
-        };
-
-        if already_running {
-            let msg = format!("Active Daemon detected on 127.0.0.1:{}. Attaching as client (external ownership).", daemon_port);
-            println!("[tauri::daemon] {}", msg);
-            log_to_file("INFO", &format!("[daemon] {}", msg));
-            ownership.is_embedded.store(false, Ordering::SeqCst);
-        } else {
-            let msg = format!("Spawning in-process Daemon API on 127.0.0.1:{}...", daemon_port);
-            println!("[tauri::daemon] {}", msg);
-            log_to_file("INFO", &format!("[daemon] {}", msg));
-            ownership.is_embedded.store(true, Ordering::SeqCst);
-            // Run server in-process (detach=false, cloud=false, claim=false)
-            if let Err(e) = operon::commands::worker::supervisor::run_server(
-                Some("127.0.0.1".into()),
-                Some(daemon_port),
-                false,
-                None,
-                None,
-                false,
-                false,
-            )
-            .await
-            {
-                let err_msg = format!("Embedded daemon server exited: {}", e);
-                eprintln!("[tauri::daemon] {}", err_msg);
-                log_to_file("ERROR", &format!("[daemon] {}", err_msg));
-            }
-        }
-    });
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let ownership = DaemonOwnership {
-        is_embedded: Arc::new(AtomicBool::new(false)),
-    };
-    let ownership_shutdown = ownership.clone();
-
     let app = tauri::Builder::default()
-        .manage(ownership.clone())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
@@ -193,9 +129,6 @@ pub fn run() {
 
             // Setup system tray
             let _ = tray::setup_tray(app.handle());
-
-            // Auto-start or attach to embedded Daemon API on port 8765
-            spawn_embedded_daemon_if_needed(ownership);
 
             // Build main window with strict navigation security guard
             let app_handle = app.handle().clone();
@@ -250,18 +183,7 @@ pub fn run() {
 
     app.run(move |_app_handle, event| {
         if let tauri::RunEvent::ExitRequested { .. } = event {
-            log_to_file("INFO", "Operon exit requested, cleaning up...");
-            let is_embedded = ownership_shutdown.is_embedded.load(Ordering::SeqCst);
-            if is_embedded {
-                println!("[tauri::shutdown] Desktop app exiting (Embedded Daemon Owner). Reaping child browser and daemon resources...");
-                log_to_file("INFO", "[daemon] Stopping in-process daemon...");
-                tauri::async_runtime::block_on(async {
-                    let _ = operon::commands::worker::supervisor::stop_daemon(true).await;
-                });
-            } else {
-                println!("[tauri::shutdown] Desktop app exiting in Client Mode. External CLI Daemon remains intact.");
-                log_to_file("INFO", "[daemon] External CLI daemon remains intact.");
-            }
+            log_to_file("INFO", "Operon desktop shell exiting.");
         }
     });
 }
