@@ -6,6 +6,7 @@ import type {
 } from '@operon/types';
 
 import { generateAccessible } from '@operon/access';
+import { DEFAULT_HOME_PATH } from '@operon/constants';
 import { preferences } from '@operon/preferences';
 import { useAccessStore, useUserStore } from '@operon/stores';
 
@@ -15,7 +16,7 @@ import { getAllMenusApi } from '#/api';
 import { listInstalledPlugins } from '#/api/core/access';
 import { BasicLayout, IFrameView } from '#/layouts';
 import { $t } from '#/locales';
-import { getPlatform, isDesktop } from '#/utils/platform';
+import { getPlatform } from '#/utils/platform';
 
 import { filterRoutesByPlatform } from './platform-gate';
 import { filterRoutesByPlugins } from './plugin-gate';
@@ -64,14 +65,11 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
   };
 
   const platform = getPlatform();
-  const isDesktopMode = isDesktop();
   const accessStore = useAccessStore();
   const isAuthenticated = Boolean(accessStore.accessToken);
 
-  // Canonical plugins: In desktop (Tauri) local-first mode, identity, operon, and vault are always active
-  let installedPlugins: string[] = isDesktopMode
-    ? ['identity', 'operon', 'vault']
-    : ['identity'];
+  // Canonical plugins: both Desktop and Web operate with daemon; always include operon + vault
+  let installedPlugins: string[] = ['identity', 'operon', 'vault'];
 
   try {
     const fetched = await listInstalledPlugins();
@@ -91,10 +89,11 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
     platform,
   );
 
-  // 2. Filter out cloud-only routes when unauthenticated on Desktop
-  const authFilteredRoutes = isDesktopMode
-    ? filterRoutesByCloudAuth(platformFilteredRoutes, isAuthenticated)
-    : platformFilteredRoutes;
+  // 2. Filter out cloud-only routes when unauthenticated (both platforms)
+  const authFilteredRoutes = filterRoutesByCloudAuth(
+    platformFilteredRoutes,
+    isAuthenticated,
+  );
 
   // 3. Filter remaining routes by installed plugins
   const filteredRoutes = filterRoutesByPlugins(
@@ -132,9 +131,7 @@ async function bootstrapLocalOperatorSession(
   if (!userStore.userInfo) {
     userStore.setUserInfo({
       avatar: preferences.app.defaultAvatar || '',
-      homePath:
-        preferences.app.defaultHomePath ||
-        (isDesktop() ? '/automation/overview' : '/dashboard/analytics'),
+      homePath: preferences.app.defaultHomePath || DEFAULT_HOME_PATH,
       realName: 'Local Operator',
       roles: ['local_operator'],
       userId: 'local-operator',

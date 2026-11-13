@@ -6,6 +6,12 @@ import type { SupportedLanguagesType } from '@operon-core/typings';
 export const LOGIN_PATH = '/auth/login';
 
 /**
+ * Default home path for all platforms (Web & Desktop).
+ * Starter Page: install/status operon daemon, onboarding checklist, module unlock.
+ */
+export const DEFAULT_HOME_PATH = '/dashboard/overview';
+
+/**
  * Universal sentinel value for "All" filter options across VbenForm / VxeGrid selects
  */
 export const FILTER_ALL = 'all' as const;

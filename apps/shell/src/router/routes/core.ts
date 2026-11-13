@@ -1,10 +1,9 @@
 import type { RouteRecordRaw } from 'vue-router';
 
-import { LOGIN_PATH } from '@operon/constants';
+import { DEFAULT_HOME_PATH, LOGIN_PATH } from '@operon/constants';
 import { preferences } from '@operon/preferences';
 
 import { $t } from '#/locales';
-import { isDesktop } from '#/utils/platform';
 
 const BasicLayout = () => import('#/layouts/basic.vue');
 const AuthPageLayout = () => import('#/layouts/auth.vue');
@@ -36,12 +35,7 @@ const coreRoutes: RouteRecordRaw[] = [
     },
     name: 'Root',
     path: '/',
-    redirect: () => {
-      return (
-        preferences.app.defaultHomePath ||
-        (isDesktop() ? '/automation/overview' : '/dashboard/analytics')
-      );
-    },
+    redirect: () => preferences.app.defaultHomePath || DEFAULT_HOME_PATH,
     children: [
       {
         component: () => import('#/views/_core/profile/index.vue'),
