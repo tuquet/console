@@ -1,4 +1,4 @@
-name: Release
+name: 'Release: desktop binaries'
 
 on:
   push:
