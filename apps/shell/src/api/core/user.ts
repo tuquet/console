@@ -1,5 +1,6 @@
 import type { UserInfo } from '@operon/types';
 
+import { DEFAULT_HOME_PATH } from '@operon/constants';
 import { useAccessStore } from '@operon/stores';
 
 import { getEffectiveAccess } from './access';
@@ -42,7 +43,7 @@ export async function getCurrentUser(): Promise<UserInfo> {
   return {
     avatar,
     desc: user.email || 'Administrator',
-    homePath: '/dashboard/analytics',
+    homePath: DEFAULT_HOME_PATH,
     realName,
     roles,
     token,

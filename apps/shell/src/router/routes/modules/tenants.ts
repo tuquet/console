@@ -8,8 +8,9 @@ export default defineMicroAppRouteModule({
   meta: {
     authority: ['superadmin', 'tenants:read'],
     hideChildrenInMenu: true,
-    platform: 'web',
+    platform: 'all',
     plugin: 'identity',
+    requiresCloud: true,
   },
   name: 'TenantsRoot',
   redirectToDefault: false,

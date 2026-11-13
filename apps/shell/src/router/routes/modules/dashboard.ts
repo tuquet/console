@@ -1,5 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
 
+import { DEFAULT_HOME_PATH } from '@operon/constants';
+
 import { $t } from '#/locales';
 
 const routes: RouteRecordRaw[] = [
@@ -8,14 +10,24 @@ const routes: RouteRecordRaw[] = [
       hideChildrenInMenu: true,
       icon: 'lucide:layout-dashboard',
       order: -1,
-      platform: 'web',
+      platform: 'all',
       plugin: 'identity',
       title: $t('page.dashboard.title'),
     },
     name: 'Dashboard',
     path: '/dashboard',
-    redirect: '/dashboard/analytics',
+    redirect: DEFAULT_HOME_PATH,
     children: [
+      {
+        name: 'Overview',
+        path: 'overview',
+        component: () => import('#/views/dashboard/overview/index.vue'),
+        meta: {
+          affixTab: true,
+          icon: 'lucide:home',
+          title: $t('page.dashboard.overview'),
+        },
+      },
       {
         name: 'Analytics',
         path: 'analytics',

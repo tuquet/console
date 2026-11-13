@@ -1,6 +1,5 @@
+import { DEFAULT_HOME_PATH } from '@operon/constants';
 import { defineOverridesPreferences } from '@operon/preferences';
-
-import { isDesktop } from '#/utils/platform';
 
 /**
  * @description Project preferences configuration
@@ -10,9 +9,7 @@ import { isDesktop } from '#/utils/platform';
 export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
-    defaultHomePath: isDesktop()
-      ? '/automation/overview'
-      : '/dashboard/analytics',
+    defaultHomePath: DEFAULT_HOME_PATH,
     enablePreferences: true,
     enableRefreshToken: true,
     locale: 'en-US',

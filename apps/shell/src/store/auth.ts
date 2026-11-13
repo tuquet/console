@@ -5,7 +5,7 @@ import type { Recordable, UserInfo } from '@operon/types';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { LOGIN_PATH } from '@operon/constants';
+import { DEFAULT_HOME_PATH, LOGIN_PATH } from '@operon/constants';
 import { preferences } from '@operon/preferences';
 import {
   resetAllStores,
@@ -30,7 +30,6 @@ import { router as appRouter } from '#/router';
 import { bootstrapLocalOperatorSession, generateAccess } from '#/router/access';
 import { accessRoutes } from '#/router/routes';
 import { captureError, setBugsinkUser } from '#/utils/bugsink';
-import { isDesktop } from '#/utils/platform';
 import { sanitizeRedirectPath } from '#/utils/security';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -106,15 +105,13 @@ export const useAuthStore = defineStore('auth', () => {
       if (accessToken) {
         userInfo = await commitSessionTokens(accessToken, refreshToken);
 
-        if (isDesktop()) {
-          const { accessibleMenus, accessibleRoutes } = await generateAccess({
-            roles: userInfo?.roles || ['superadmin'],
-            router,
-            routes: accessRoutes,
-          });
-          accessStore.setAccessMenus(accessibleMenus);
-          accessStore.setAccessRoutes(accessibleRoutes);
-        }
+        const { accessibleMenus, accessibleRoutes } = await generateAccess({
+          roles: userInfo?.roles || ['superadmin'],
+          router,
+          routes: accessRoutes,
+        });
+        accessStore.setAccessMenus(accessibleMenus);
+        accessStore.setAccessRoutes(accessibleRoutes);
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
@@ -174,9 +171,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessStore.setLoginExpired(false);
 
     await bootstrapLocalOperatorSession(router, accessRoutes);
-    const defaultHome =
-      preferences.app.defaultHomePath ||
-      (isDesktop() ? '/automation/overview' : '/dashboard/analytics');
+    const defaultHome = preferences.app.defaultHomePath || DEFAULT_HOME_PATH;
     if (redirect || router.currentRoute.value.path === LOGIN_PATH) {
       await router.replace(defaultHome);
     }
