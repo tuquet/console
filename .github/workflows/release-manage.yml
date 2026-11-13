@@ -1,4 +1,4 @@
-name: "Maintenance: manage releases"
+name: 'Maintenance: manage releases'
 
 on:
   workflow_dispatch:

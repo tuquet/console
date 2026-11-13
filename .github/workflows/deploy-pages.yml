@@ -1,4 +1,4 @@
-name: "Deploy: console pages"
+name: 'Deploy: console pages'
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: "Preview: desktop"
+name: 'Preview: desktop'
 
 on:
   pull_request:
