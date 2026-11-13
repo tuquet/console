@@ -192,6 +192,9 @@
     "moduleRequiresBridge": "Requires Operon",
     "moduleRequiresCloud": "Requires Cloud sign-in",
     "moduleUnlocked": "Open",
-    "moduleLocked": "Install Operon to unlock"
+    "moduleLocked": "Install Operon to unlock",
+    "moduleAnalyticsDesc": "Platform metrics, tenant growth, and operational analytics",
+    "modulePlaygroundDesc": "Interactive sandbox for testing automation workflows and nodes",
+    "moduleWorkspacesDesc": "Manage workspaces, organizations, and team accounts"
   }
 }

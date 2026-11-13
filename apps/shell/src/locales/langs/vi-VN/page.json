@@ -192,6 +192,9 @@
     "moduleRequiresBridge": "Yêu cầu Operon",
     "moduleRequiresCloud": "Yêu cầu đăng nhập Cloud",
     "moduleUnlocked": "Mở",
-    "moduleLocked": "Cài Operon để mở khóa"
+    "moduleLocked": "Cài Operon để mở khóa",
+    "moduleAnalyticsDesc": "Chỉ số nền tảng, tăng trưởng workspace và phân tích vận hành",
+    "modulePlaygroundDesc": "Môi trường thử nghiệm tương tác cho quy trình tự động hoá",
+    "moduleWorkspacesDesc": "Quản lý workspaces, tổ chức và tài khoản nhóm"
   }
 }
