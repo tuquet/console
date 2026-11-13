@@ -156,5 +156,15 @@
     "menu_zoom_out": "Thu nhỏ",
     "menu_reset_zoom": "Đặt lại Zoom",
     "menu_window": "Cửa sổ"
+  },
+  "localBridge": {
+    "title": "Cần tải Operon Local Bridge",
+    "description": "Hãy tải và chạy dịch vụ Operon trên máy (127.0.0.1:{port}) để hoàn tất điều khiển.",
+    "download": "Tải Service",
+    "retry": "Kiểm tra lại",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép lệnh cài đặt",
+    "copyFailed": "Không thể sao chép lệnh",
+    "offlinePill": "Local Bridge Offline"
   }
 }

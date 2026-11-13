@@ -36,24 +36,30 @@ export function getCanonicalSqlitePath(domain?: string): string {
   return path.join(dataDir, fileName);
 }
 
+const DOMAIN_SCHEMAS: Record<string, Record<string, unknown>> = {
+  automation: automationSchema,
+  system: systemSchema,
+  tenants: tenantsSchema,
+};
+
 /**
  * Returns the default schema bundle associated with a domain.
  */
 export function getDomainSchema(domain: string) {
-  switch (domain.toLowerCase()) {
-    case 'automation': {
-      return automationSchema;
-    }
-    case 'system': {
-      return systemSchema;
-    }
-    case 'tenants': {
-      return tenantsSchema;
-    }
-    default: {
-      return fullSchema;
-    }
-  }
+  return DOMAIN_SCHEMAS[domain.toLowerCase()] ?? fullSchema;
+}
+
+function createDrizzleClient<TSchema extends Record<string, unknown>>(
+  schema: TSchema,
+  envKey: string,
+  domain?: string,
+  customUrl?: string,
+): OperonDb<TSchema> {
+  const defaultPath = getCanonicalSqlitePath(domain);
+  const fileUrl = `file:${defaultPath.replaceAll('\\', '/')}`;
+  const url = customUrl || process.env[envKey] || fileUrl;
+  const client = createClient({ url });
+  return drizzle(client, { schema });
 }
 
 /**
@@ -67,13 +73,12 @@ export function getDomainDb<
   customUrl?: string,
 ): OperonDb<TSchema> {
   const schemaToUse = (customSchema || getDomainSchema(domain)) as TSchema;
-  const defaultPath = getCanonicalSqlitePath(domain);
-  const fileUrl = `file:${defaultPath.replaceAll('\\', '/')}`;
-  const envKey = `OPERON_${domain.toUpperCase()}_SQLITE_URL`;
-  const url = customUrl || process.env[envKey] || fileUrl;
-
-  const client = createClient({ url });
-  return drizzle(client, { schema: schemaToUse });
+  return createDrizzleClient(
+    schemaToUse,
+    `OPERON_${domain.toUpperCase()}_SQLITE_URL`,
+    domain,
+    customUrl,
+  );
 }
 
 /**
@@ -81,12 +86,23 @@ export function getDomainDb<
  * Backward compatible with existing Operon code.
  */
 export function getLocalDb(customUrl?: string): OperonDb<typeof fullSchema> {
-  const defaultPath = getCanonicalSqlitePath();
-  const fileUrl = `file:${defaultPath.replaceAll('\\', '/')}`;
-  const url = customUrl || process.env.OPERON_SQLITE_URL || fileUrl;
+  return createDrizzleClient(
+    fullSchema,
+    'OPERON_SQLITE_URL',
+    undefined,
+    customUrl,
+  );
+}
 
-  const client = createClient({ url });
-  return drizzle(client, { schema: fullSchema });
+async function hasSqliteTable(
+  client: Client,
+  tableName: string,
+): Promise<boolean> {
+  const res = await client.execute({
+    sql: "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+    args: [tableName],
+  });
+  return res.rows.length > 0;
 }
 
 /**
@@ -94,14 +110,11 @@ export function getLocalDb(customUrl?: string): OperonDb<typeof fullSchema> {
  */
 async function ensureLegacyCompatibility(client: Client): Promise<void> {
   try {
-    const tableRes = await client.execute(
-      "SELECT name FROM sqlite_master WHERE type='table' AND name='jobs'",
-    );
-    if (tableRes.rows.length > 0) {
+    if (await hasSqliteTable(client, 'jobs')) {
       const pragmaRes = await client.execute('PRAGMA table_info(jobs)');
       const existingCols = new Set(pragmaRes.rows.map((r: any) => r.name));
 
-      const missingCols: Array<{ name: string; ddl: string }> = [
+      const missingCols: Array<{ ddl: string; name: string }> = [
         { name: 'workflow_id', ddl: 'text' },
         { name: 'profile_id', ddl: 'text' },
         { name: 'device_id', ddl: 'text' },
@@ -120,6 +133,15 @@ async function ensureLegacyCompatibility(client: Client): Promise<void> {
     }
   } catch {
     // Non-fatal if legacy check or column addition fails
+  }
+}
+
+async function migrateLegacyBrowsersTable(client: Client): Promise<void> {
+  if (await hasSqliteTable(client, 'browsers')) {
+    await client.execute(`
+      INSERT OR IGNORE INTO browser_profiles (id, name, user_agent, timezone, created_at, updated_at)
+      SELECT id, name, user_agent, timezone, created_at, updated_at FROM browsers;
+    `);
   }
 }
 
@@ -148,17 +170,8 @@ export async function runLocalMigrations<T extends Record<string, unknown>>(
       migrationsFolder: targetFolder,
     });
 
-    // Post-migration: seamlessly migrate legacy browsers table to browser_profiles if needed
     if (client && typeof client.execute === 'function') {
-      const legacyBrowsers = await client.execute(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='browsers'",
-      );
-      if (legacyBrowsers.rows.length > 0) {
-        await client.execute(`
-          INSERT OR IGNORE INTO browser_profiles (id, name, user_agent, timezone, created_at, updated_at)
-          SELECT id, name, user_agent, timezone, created_at, updated_at FROM browsers;
-        `);
-      }
+      await migrateLegacyBrowsersTable(client);
     }
   } catch (error) {
     console.error('[Local-DB] Failed to apply local SQLite migrations:', error);

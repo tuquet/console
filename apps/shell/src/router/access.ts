@@ -1,4 +1,4 @@
-import type { RouteRecordRaw } from 'vue-router';
+import type { Router, RouteRecordRaw } from 'vue-router';
 
 import type {
   ComponentRecordType,
@@ -7,7 +7,7 @@ import type {
 
 import { generateAccessible } from '@operon/access';
 import { preferences } from '@operon/preferences';
-import { useAccessStore } from '@operon/stores';
+import { useAccessStore, useUserStore } from '@operon/stores';
 
 import { toast } from '@operon-core/shadcn-ui';
 
@@ -119,4 +119,37 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
   });
 }
 
-export { generateAccess };
+/**
+ * Initialize a local-first operator session and register accessible routes/menus.
+ */
+async function bootstrapLocalOperatorSession(
+  router: Router,
+  routes: RouteRecordRaw[],
+) {
+  const accessStore = useAccessStore();
+  const userStore = useUserStore();
+
+  if (!userStore.userInfo) {
+    userStore.setUserInfo({
+      avatar: preferences.app.defaultAvatar || '',
+      homePath:
+        preferences.app.defaultHomePath ||
+        (isDesktop() ? '/automation/overview' : '/dashboard/analytics'),
+      realName: 'Local Operator',
+      roles: ['local_operator'],
+      userId: 'local-operator',
+      username: 'operator',
+    });
+  }
+
+  const { accessibleMenus, accessibleRoutes } = await generateAccess({
+    roles: ['local_operator'],
+    router,
+    routes,
+  });
+  accessStore.setAccessMenus(accessibleMenus);
+  accessStore.setAccessRoutes(accessibleRoutes);
+  accessStore.setIsAccessChecked(true);
+}
+
+export { bootstrapLocalOperatorSession, generateAccess };

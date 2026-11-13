@@ -43,6 +43,13 @@ const emit = defineEmits<{
   'update:favoritesOnly': [value: boolean];
 }>();
 
+const FACET_FILTERS = [
+  { columnId: 'status', options: statuses, title: 'Status' },
+  { columnId: 'priority', options: priorities, title: 'Priority' },
+  { columnId: 'label', options: labels, title: 'Label' },
+  { columnId: 'assignee', options: assignees, title: 'Assignee' },
+] as const;
+
 const searchWrapperRef = ref<HTMLElement | null>(null);
 
 const searchQuery = computed(
@@ -109,30 +116,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleGlobalSlash));
         </InputGroup>
       </div>
 
-      <DataTableFacetedFilter
-        v-if="table.getColumn('status')"
-        :column="table.getColumn('status')"
-        title="Status"
-        :options="statuses"
-      />
-      <DataTableFacetedFilter
-        v-if="table.getColumn('priority')"
-        :column="table.getColumn('priority')"
-        title="Priority"
-        :options="priorities"
-      />
-      <DataTableFacetedFilter
-        v-if="table.getColumn('label')"
-        :column="table.getColumn('label')"
-        title="Label"
-        :options="labels"
-      />
-      <DataTableFacetedFilter
-        v-if="table.getColumn('assignee')"
-        :column="table.getColumn('assignee')"
-        title="Assignee"
-        :options="assignees"
-      />
+      <template v-for="facet in FACET_FILTERS" :key="facet.columnId">
+        <DataTableFacetedFilter
+          v-if="table.getColumn(facet.columnId)"
+          :column="table.getColumn(facet.columnId)"
+          :title="facet.title"
+          :options="facet.options"
+        />
+      </template>
 
       <Button
         variant="outline"

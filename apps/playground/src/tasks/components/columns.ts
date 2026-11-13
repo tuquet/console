@@ -1,4 +1,4 @@
-import type { Ref } from 'vue';
+import type { Component, Ref, VNode } from 'vue';
 
 import type { DataTableFeatures } from '../../components/data-table';
 import type { Task } from '../data/schema';
@@ -26,6 +26,51 @@ const columnHelper = createColumnHelper<DataTableFeatures, Task>();
 
 const priorityRank = new Map(priorities.map((p) => [p.value, p.rank]));
 const assigneeMap = new Map(assignees.map((a) => [a.value, a]));
+const labelMap = new Map(labels.map((l) => [l.value, l]));
+const statusMap = new Map(statuses.map((s) => [s.value, s]));
+const priorityMap = new Map(priorities.map((p) => [p.value, p]));
+
+const includesFilterFn = (
+  row: { getValue: (id: string) => unknown },
+  id: string,
+  value: string[],
+) => value.includes(String(row.getValue(id)));
+
+function stopPropagationWrap(className: string, children: VNode[]) {
+  return h(
+    'div',
+    {
+      class: className,
+      onClick: (e: MouseEvent) => e.stopPropagation(),
+    },
+    children,
+  );
+}
+
+function renderLabelBadge(value: string, extraClass?: string) {
+  const label = labelMap.get(value);
+  if (!label) return null;
+  return h(
+    Badge,
+    {
+      variant: 'outline',
+      class: cn('rounded-sm', extraClass, label.badgeClass),
+    },
+    () => label.label,
+  );
+}
+
+function renderIconLabel(
+  item: undefined | { icon: Component; label: string },
+  containerClass: string,
+  iconClass: string,
+) {
+  if (!item) return null;
+  return h('div', { class: containerClass }, [
+    h(item.icon, { class: iconClass }),
+    h('span', item.label),
+  ]);
+}
 
 export function createTaskColumns(
   actions: RowActionCallbacks,
@@ -36,39 +81,25 @@ export function createTaskColumns(
       id: 'select',
       meta: { class: 'w-10 pl-3.5 pr-1' },
       header: ({ table }) =>
-        h(
-          'div',
-          {
-            class: 'flex items-center',
-            onClick: (e: MouseEvent) => e.stopPropagation(),
-          },
-          [
-            h(Checkbox, {
-              modelValue:
-                table.getIsAllPageRowsSelected() ||
-                (table.getIsSomePageRowsSelected() && 'indeterminate'),
-              'onUpdate:modelValue': (value: 'indeterminate' | boolean) =>
-                table.toggleAllPageRowsSelected(!!value),
-              ariaLabel: 'Select all',
-            }),
-          ],
-        ),
+        stopPropagationWrap('flex items-center', [
+          h(Checkbox, {
+            modelValue:
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate'),
+            'onUpdate:modelValue': (value: 'indeterminate' | boolean) =>
+              table.toggleAllPageRowsSelected(!!value),
+            ariaLabel: 'Select all',
+          }),
+        ]),
       cell: ({ row }) =>
-        h(
-          'div',
-          {
-            class: 'flex items-center',
-            onClick: (e: MouseEvent) => e.stopPropagation(),
-          },
-          [
-            h(Checkbox, {
-              modelValue: row.getIsSelected(),
-              'onUpdate:modelValue': (value: 'indeterminate' | boolean) =>
-                row.toggleSelected(!!value),
-              ariaLabel: 'Select row',
-            }),
-          ],
-        ),
+        stopPropagationWrap('flex items-center', [
+          h(Checkbox, {
+            modelValue: row.getIsSelected(),
+            'onUpdate:modelValue': (value: 'indeterminate' | boolean) =>
+              row.toggleSelected(!!value),
+            ariaLabel: 'Select row',
+          }),
+        ]),
       enableSorting: false,
       enableHiding: false,
     }),
@@ -82,58 +113,49 @@ export function createTaskColumns(
         const isCopied = copiedId.value === id;
         const isFav = row.original.favorite;
 
-        return h(
-          'div',
-          {
-            class: 'flex items-center gap-1',
-            onClick: (e: MouseEvent) => e.stopPropagation(),
-          },
-          [
-            h(
-              'button',
-              {
-                type: 'button',
-                title: isFav ? 'Unpin favorite' : 'Pin favorite',
+        return stopPropagationWrap('flex items-center gap-1', [
+          h(
+            'button',
+            {
+              type: 'button',
+              title: isFav ? 'Unpin favorite' : 'Pin favorite',
+              class: cn(
+                'hover:bg-muted rounded-sm p-0.5 transition-opacity',
+                isFav ? 'opacity-100' : 'opacity-20 group-hover/row:opacity-80',
+              ),
+              onClick: () => actions.onToggleFavorite(id),
+            },
+            [
+              h(Star, {
                 class: cn(
-                  'hover:bg-muted rounded-sm p-0.5 transition-opacity',
+                  'size-3.5 transition-colors',
                   isFav
-                    ? 'opacity-100'
-                    : 'opacity-20 group-hover/row:opacity-80',
+                    ? 'fill-amber-400 text-amber-400'
+                    : 'text-muted-foreground',
                 ),
-                onClick: () => actions.onToggleFavorite(id),
-              },
-              [
-                h(Star, {
-                  class: cn(
-                    'size-3.5 transition-colors',
-                    isFav
-                      ? 'fill-amber-400 text-amber-400'
-                      : 'text-muted-foreground',
-                  ),
-                }),
-              ],
-            ),
-            h(
-              'button',
-              {
-                type: 'button',
-                title: 'Copy task ID',
-                class:
-                  'group/id text-muted-foreground hover:bg-muted hover:text-foreground inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 font-mono text-xs transition-colors',
-                onClick: () => actions.onCopyId(id),
-              },
-              [
-                h('span', id),
-                isCopied
-                  ? h(Check, { class: 'size-3 text-emerald-500' })
-                  : h(Copy, {
-                      class:
-                        'size-3 opacity-0 transition-opacity group-hover/id:opacity-70',
-                    }),
-              ],
-            ),
-          ],
-        );
+              }),
+            ],
+          ),
+          h(
+            'button',
+            {
+              type: 'button',
+              title: 'Copy task ID',
+              class:
+                'group/id text-muted-foreground hover:bg-muted hover:text-foreground inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 font-mono text-xs transition-colors',
+              onClick: () => actions.onCopyId(id),
+            },
+            [
+              h('span', id),
+              isCopied
+                ? h(Check, { class: 'size-3 text-emerald-500' })
+                : h(Copy, {
+                    class:
+                      'size-3 opacity-0 transition-opacity group-hover/id:opacity-70',
+                  }),
+            ],
+          ),
+        ]);
       },
       enableHiding: false,
     }),
@@ -142,23 +164,12 @@ export function createTaskColumns(
       meta: { class: 'min-w-[280px]' },
       header: ({ column }) =>
         h(DataTableColumnHeader, { column, title: 'Title' }),
-      cell: ({ row }) => {
-        const label = labels.find((item) => item.value === row.original.label);
-
-        return h('div', { class: 'flex items-center gap-2' }, [
-          label
-            ? h(
-                Badge,
-                {
-                  variant: 'outline',
-                  class: cn(
-                    'shrink-0 rounded-sm px-1.5 py-0 text-[11px] font-medium',
-                    label.badgeClass,
-                  ),
-                },
-                () => label.label,
-              )
-            : null,
+      cell: ({ row }) =>
+        h('div', { class: 'flex items-center gap-2' }, [
+          renderLabelBadge(
+            row.original.label,
+            'shrink-0 px-1.5 py-0 text-[11px] font-medium',
+          ),
           h(
             'span',
             {
@@ -167,8 +178,7 @@ export function createTaskColumns(
             },
             row.original.title,
           ),
-        ]);
-      },
+        ]),
       filterFn: (row, _id, rawQuery) => {
         const q = String(rawQuery ?? '')
           .trim()
@@ -188,19 +198,8 @@ export function createTaskColumns(
       meta: { class: 'w-[100px]' },
       header: ({ column }) =>
         h(DataTableColumnHeader, { column, title: 'Label' }),
-      cell: ({ row }) => {
-        const label = labels.find((item) => item.value === row.original.label);
-        if (!label) return null;
-        return h(
-          Badge,
-          {
-            variant: 'outline',
-            class: cn('rounded-sm text-xs', label.badgeClass),
-          },
-          () => label.label,
-        );
-      },
-      filterFn: (row, id, value: string[]) => value.includes(row.getValue(id)),
+      cell: ({ row }) => renderLabelBadge(row.original.label, 'text-xs'),
+      filterFn: includesFilterFn,
     }),
 
     columnHelper.accessor('status', {
@@ -208,26 +207,17 @@ export function createTaskColumns(
       header: ({ column }) =>
         h(DataTableColumnHeader, { column, title: 'Status' }),
       cell: ({ row }) => {
-        const status = statuses.find(
-          (item) => item.value === row.getValue('status'),
-        );
-        if (!status) return null;
-
-        return h(
-          'div',
-          {
-            class: cn(
-              'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap',
-              status.pillClass,
-            ),
-          },
-          [
-            h(status.icon, { class: 'size-3 shrink-0' }),
-            h('span', status.label),
-          ],
+        const status = statusMap.get(row.getValue('status'));
+        return renderIconLabel(
+          status,
+          cn(
+            'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap',
+            status?.pillClass,
+          ),
+          'size-3 shrink-0',
         );
       },
-      filterFn: (row, id, value: string[]) => value.includes(row.getValue(id)),
+      filterFn: includesFilterFn,
     }),
 
     columnHelper.accessor('priority', {
@@ -235,23 +225,14 @@ export function createTaskColumns(
       header: ({ column }) =>
         h(DataTableColumnHeader, { column, title: 'Priority' }),
       cell: ({ row }) => {
-        const priority = priorities.find(
-          (item) => item.value === row.getValue('priority'),
-        );
-        if (!priority) return null;
-
-        return h(
-          'div',
-          {
-            class: cn(
-              'inline-flex items-center gap-1.5 text-xs whitespace-nowrap',
-              priority.textClass,
-            ),
-          },
-          [
-            h(priority.icon, { class: 'size-3.5 shrink-0' }),
-            h('span', priority.label),
-          ],
+        const priority = priorityMap.get(row.getValue('priority'));
+        return renderIconLabel(
+          priority,
+          cn(
+            'inline-flex items-center gap-1.5 text-xs whitespace-nowrap',
+            priority?.textClass,
+          ),
+          'size-3.5 shrink-0',
         );
       },
       sortFn: (rowA, rowB) => {
@@ -259,7 +240,7 @@ export function createTaskColumns(
         const rankB = priorityRank.get(rowB.original.priority) ?? 0;
         return rankA - rankB;
       },
-      filterFn: (row, id, value: string[]) => value.includes(row.getValue(id)),
+      filterFn: includesFilterFn,
     }),
 
     columnHelper.accessor('assignee', {
@@ -294,7 +275,7 @@ export function createTaskColumns(
           ],
         );
       },
-      filterFn: (row, id, value: string[]) => value.includes(row.getValue(id)),
+      filterFn: includesFilterFn,
     }),
 
     columnHelper.accessor('progress', {
@@ -337,14 +318,9 @@ export function createTaskColumns(
       id: 'actions',
       meta: { class: 'w-11 pr-3 text-right' },
       cell: ({ row }) =>
-        h(
-          'div',
-          {
-            class: 'flex justify-end',
-            onClick: (e: MouseEvent) => e.stopPropagation(),
-          },
-          [h(TasksTableRowActions, { row, actions })],
-        ),
+        stopPropagationWrap('flex justify-end', [
+          h(TasksTableRowActions, { row, actions }),
+        ]),
       enableHiding: false,
     }),
   ]);

@@ -7,16 +7,10 @@ import { useRouter } from 'vue-router';
 import {
   Badge,
   Button,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   Empty,
   EmptyDescription,
   EmptyHeader,
   Input,
-  Label,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -31,9 +25,10 @@ import {
   Settings,
 } from '@lucide/vue';
 
-import { TENANT_PLAN } from '#/api/core/tenant';
 import { $t } from '#/locales';
 import { useWorkspaceStore } from '#/store/workspace';
+
+import WorkspaceCreateDialog from './workspace-create-dialog.vue';
 
 defineOptions({ name: 'WorkspaceSelector' });
 
@@ -51,10 +46,6 @@ const workspaceStore = useWorkspaceStore();
 const isOpen = ref(false);
 const searchQuery = ref('');
 const isCreateModalOpen = ref(false);
-const newWorkspaceName = ref('');
-const newWorkspaceSlug = ref('');
-const newWorkspacePlan = ref<string>(TENANT_PLAN.PRO);
-const isSubmitting = ref(false);
 
 onMounted(() => {
   workspaceStore.fetchWorkspaces();
@@ -86,39 +77,7 @@ function handleManageWorkspaces() {
 
 function openCreateModal() {
   isOpen.value = false;
-  newWorkspaceName.value = '';
-  newWorkspaceSlug.value = '';
-  newWorkspacePlan.value = TENANT_PLAN.PRO;
   isCreateModalOpen.value = true;
-}
-
-function handleNameInput(e: Event) {
-  const target = e.target as HTMLInputElement;
-  newWorkspaceName.value = target.value;
-  // Automatically generate slug from name
-  newWorkspaceSlug.value = target.value
-    .toLowerCase()
-    .trim()
-    .replaceAll(/[^\w\s-]/g, '')
-    .replaceAll(/[\s_-]+/g, '-')
-    .replaceAll(/^-+|-+$/g, '');
-}
-
-async function handleCreateWorkspace() {
-  if (!newWorkspaceName.value.trim()) return;
-  try {
-    isSubmitting.value = true;
-    await workspaceStore.createWorkspace({
-      name: newWorkspaceName.value.trim(),
-      slug:
-        newWorkspaceSlug.value.trim() ||
-        newWorkspaceName.value.toLowerCase().trim().replaceAll(/\s+/g, '-'),
-      plan: newWorkspacePlan.value,
-    });
-    isCreateModalOpen.value = false;
-  } finally {
-    isSubmitting.value = false;
-  }
 }
 </script>
 
@@ -299,86 +258,6 @@ async function handleCreateWorkspace() {
       </PopoverContent>
     </Popover>
 
-    <!-- Quick Create Workspace Dialog -->
-    <Dialog v-model:open="isCreateModalOpen">
-      <DialogContent class="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{{ $t('page.workspace.create_workspace') }}</DialogTitle>
-        </DialogHeader>
-
-        <div class="grid gap-3.5 py-3">
-          <div class="grid gap-1.5">
-            <Label class="text-foreground">
-              {{ $t('page.workspace.col_name') }}
-            </Label>
-            <Input
-              :value="newWorkspaceName"
-              placeholder="e.g. Acme Corp"
-              class="h-9"
-              @input="handleNameInput"
-            />
-          </div>
-
-          <div class="grid gap-1.5">
-            <Label class="text-foreground">
-              {{ $t('page.workspace.col_slug') }}
-            </Label>
-            <Input
-              v-model="newWorkspaceSlug"
-              placeholder="e.g. acme-corp"
-              class="h-9"
-            />
-          </div>
-
-          <div class="grid gap-1.5">
-            <Label class="text-foreground">
-              {{ $t('page.workspace.col_plan') }}
-            </Label>
-            <div class="grid grid-cols-3 gap-2">
-              <Button
-                v-for="plan in [
-                  TENANT_PLAN.FREE,
-                  TENANT_PLAN.PRO,
-                  TENANT_PLAN.ENTERPRISE,
-                ]"
-                :key="plan"
-                type="button"
-                variant="outline"
-                class="h-auto rounded-md border p-2 text-center transition-colors capitalize"
-                :class="
-                  newWorkspacePlan === plan
-                    ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15'
-                    : 'border-input hover:bg-muted text-foreground'
-                "
-                @click="newWorkspacePlan = plan"
-              >
-                {{ plan }}
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button
-            variant="outline"
-            size="sm"
-            @click="isCreateModalOpen = false"
-          >
-            {{ $t('common.cancel') }}
-          </Button>
-          <Button
-            size="sm"
-            :disabled="!newWorkspaceName.trim() || isSubmitting"
-            @click="handleCreateWorkspace"
-          >
-            {{
-              isSubmitting
-                ? $t('common.loading')
-                : $t('page.workspace.create_btn')
-            }}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <WorkspaceCreateDialog v-model:open="isCreateModalOpen" />
   </div>
 </template>

@@ -2,19 +2,17 @@
 import type { VbenFormSchema } from '@operon/common-ui';
 import type { Recordable } from '@operon/types';
 
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 
 import { AuthenticationForgetPassword, z } from '@operon/common-ui';
 import { $t } from '@operon/locales';
 
-import { toast } from '@operon-core/shadcn-ui';
-
 import { resetPassword } from '#/api/core/auth';
-import { captureError } from '#/utils/bugsink';
+import { useAsyncAction } from '#/composables';
 
 defineOptions({ name: 'ForgetPassword' });
 
-const loading = ref(false);
+const { executeAction, isLoading: loading } = useAsyncAction();
 
 const formSchema = computed((): VbenFormSchema[] => {
   return [
@@ -34,16 +32,11 @@ const formSchema = computed((): VbenFormSchema[] => {
 });
 
 async function handleSubmit(values: Recordable<any>) {
-  try {
-    loading.value = true;
-    await resetPassword(values.email);
-    toast.success($t('authentication.resetLinkSent'));
-  } catch (error: any) {
-    captureError(error, { view: 'ForgetPassword' });
-    toast.error(error.message || $t('authentication.resetLinkFailed'));
-  } finally {
-    loading.value = false;
-  }
+  await executeAction(() => resetPassword(values.email), {
+    errorFallback: $t('authentication.resetLinkFailed'),
+    success: $t('authentication.resetLinkSent'),
+    tracking: { action: 'resetPassword', view: 'ForgetPassword' },
+  });
 }
 </script>
 

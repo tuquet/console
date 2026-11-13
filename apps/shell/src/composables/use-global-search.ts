@@ -21,3 +21,18 @@ export function registerGlobalSearchOpener(fn: () => void): void {
 export function openGlobalSearch(): void {
   _openFn?.();
 }
+
+/** Dispatches the global command palette event in command (`>`) or navigation mode. */
+export function openCommandPalette(
+  mode: 'command' | 'navigation' = 'command',
+): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent('open-command-palette', {
+      detail: {
+        initialValue: mode === 'command' ? '>' : '',
+        mode,
+      },
+    }),
+  );
+}

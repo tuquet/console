@@ -34,24 +34,24 @@ export class TauriNotificationDriver implements NotificationDriver {
 
 export class WebNotificationDriver implements NotificationDriver {
   async send(options: NotificationOptions): Promise<boolean> {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      return false;
+    }
+
     const { body, title } = options;
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      try {
-        if (Notification.permission === 'granted') {
-          const _n = new Notification(title, { body });
-          void _n;
-          return true;
-        } else if (Notification.permission !== 'denied') {
-          const permission = await Notification.requestPermission();
-          if (permission === 'granted') {
-            const _n = new Notification(title, { body });
-            void _n;
-            return true;
-          }
-        }
-      } catch {
-        // Ignored in non-secure or restricted contexts
+    try {
+      let granted = Notification.permission === 'granted';
+      if (!granted && Notification.permission !== 'denied') {
+        granted = (await Notification.requestPermission()) === 'granted';
       }
+
+      if (granted) {
+        const _n = new Notification(title, { body });
+        void _n;
+        return true;
+      }
+    } catch {
+      // Ignored in non-secure or restricted contexts
     }
     return false;
   }

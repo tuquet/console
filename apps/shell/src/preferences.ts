@@ -16,7 +16,7 @@ export const overridesPreferences = defineOverridesPreferences({
     enablePreferences: true,
     enableRefreshToken: true,
     locale: 'en-US',
-    loginExpiredMode: isDesktop() ? 'modal' : 'page',
+    loginExpiredMode: 'modal',
     name: 'Operon',
     authPageLayout: 'panel-right',
     layout: 'sidebar-nav',

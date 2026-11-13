@@ -1,3 +1,5 @@
+import type { Router } from 'vue-router';
+
 import type { Recordable, UserInfo } from '@operon/types';
 
 import { ref } from 'vue';
@@ -25,7 +27,7 @@ import {
 } from '#/api';
 import { $t } from '#/locales';
 import { router as appRouter } from '#/router';
-import { generateAccess } from '#/router/access';
+import { bootstrapLocalOperatorSession, generateAccess } from '#/router/access';
 import { accessRoutes } from '#/router/routes';
 import { captureError, setBugsinkUser } from '#/utils/bugsink';
 import { isDesktop } from '#/utils/platform';
@@ -38,6 +40,53 @@ export const useAuthStore = defineStore('auth', () => {
   const router = useRouter() || appRouter;
 
   const loginLoading = ref(false);
+
+  async function commitSessionTokens(
+    accessToken: string,
+    refreshToken?: null | string,
+  ): Promise<null | UserInfo> {
+    accessStore.setAccessToken(accessToken);
+    if (refreshToken) {
+      accessStore.setRefreshToken(refreshToken);
+    }
+
+    const [userInfo, accessCodes] = await Promise.all([
+      fetchUserInfo(),
+      getAccessCodes(),
+    ]);
+
+    if (userInfo) {
+      userStore.setUserInfo(userInfo);
+      setBugsinkUser(userInfo);
+    }
+    accessStore.setAccessCodes(accessCodes);
+    return userInfo;
+  }
+
+  async function completeOAuthSession(options: {
+    accessToken: string;
+    redirect?: null | string;
+    refreshToken?: null | string;
+    targetRouter?: Router;
+  }): Promise<null | UserInfo> {
+    const userInfo = await commitSessionTokens(
+      options.accessToken,
+      options.refreshToken,
+    );
+
+    toast.success($t('authentication.loginSuccessDesc'), {
+      description: $t('authentication.githubLoginSuccess'),
+      duration: 3000,
+    });
+
+    const defaultHome = userInfo?.homePath || preferences.app.defaultHomePath;
+    const targetPath = options.redirect
+      ? sanitizeRedirectPath(options.redirect, defaultHome)
+      : defaultHome;
+
+    await (options.targetRouter || router).push(targetPath);
+    return userInfo;
+  }
 
   /**
    * Asynchronously handle the login process
@@ -55,22 +104,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       // On successful accessToken retrieval
       if (accessToken) {
-        accessStore.setAccessToken(accessToken);
-        if (refreshToken) {
-          accessStore.setRefreshToken(refreshToken);
-        }
-
-        // Fetch user info and store into accessStore
-        const [fetchUserInfoResult, accessCodes] = await Promise.all([
-          fetchUserInfo(),
-          getAccessCodes(),
-        ]);
-
-        userInfo = fetchUserInfoResult;
-
-        userStore.setUserInfo(userInfo);
-        setBugsinkUser(userInfo);
-        accessStore.setAccessCodes(accessCodes);
+        userInfo = await commitSessionTokens(accessToken, refreshToken);
 
         if (isDesktop()) {
           const { accessibleMenus, accessibleRoutes } = await generateAccess({
@@ -139,72 +173,25 @@ export const useAuthStore = defineStore('auth', () => {
     resetAllStores();
     accessStore.setLoginExpired(false);
 
-    if (isDesktop()) {
-      userStore.setUserInfo({
-        avatar: preferences.app.defaultAvatar || '',
-        homePath: '/automation/overview',
-        realName: 'Local Operator',
-        roles: ['local_operator'],
-        userId: 'local-operator',
-        username: 'operator',
-      });
-      const { accessibleMenus, accessibleRoutes } = await generateAccess({
-        roles: ['local_operator'],
-        router,
-        routes: accessRoutes,
-      });
-      accessStore.setAccessMenus(accessibleMenus);
-      accessStore.setAccessRoutes(accessibleRoutes);
-      accessStore.setIsAccessChecked(true);
-      await router.replace('/automation/overview');
-      return;
+    await bootstrapLocalOperatorSession(router, accessRoutes);
+    const defaultHome =
+      preferences.app.defaultHomePath ||
+      (isDesktop() ? '/automation/overview' : '/dashboard/analytics');
+    if (redirect || router.currentRoute.value.path === LOGIN_PATH) {
+      await router.replace(defaultHome);
     }
-
-    // On the login page the current route is the login page itself, so carrying it as
-    // `redirect` would nest one more encoded layer on every repeat.
-    const currentRoute = router.currentRoute.value;
-    const alreadyOnLogin = currentRoute.path === LOGIN_PATH;
-
-    // Redirect to login page carrying previous target route if applicable
-    await router.replace({
-      path: LOGIN_PATH,
-      query:
-        redirect && !alreadyOnLogin
-          ? { redirect: encodeURIComponent(currentRoute.fullPath) }
-          : {},
-    });
   }
 
   /**
    * Single canonical handler when both accessToken and refreshToken are expired/invalid.
-   * Respects `preferences.app.loginExpiredMode` ('modal' vs 'page').
+   * Both Web and Desktop allow unauthenticated sessions; login remains strictly user-initiated.
    */
   async function handleSessionExpired(): Promise<'modal' | 'redirect'> {
     clearAccessCache();
     setBugsinkUser(null);
     accessStore.setAccessToken(null);
     accessStore.setRefreshToken(null);
-
-    // In desktop local-first mode, login is strictly user-initiated — never auto-bringup modal
-    if (isDesktop()) {
-      return 'modal';
-    }
-
-    if (
-      preferences.app.loginExpiredMode === 'modal' &&
-      accessStore.isAccessChecked
-    ) {
-      accessStore.setLoginExpired(true);
-      return 'modal';
-    }
-
-    toast.warning($t('authentication.loginAgainTitle'), {
-      description: $t('authentication.loginAgainSubTitle'),
-      duration: 4000,
-    });
-
-    await logout(true);
-    return 'redirect';
+    return 'modal';
   }
 
   async function fetchUserInfo() {
@@ -223,6 +210,8 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     $reset,
     authLogin,
+    commitSessionTokens,
+    completeOAuthSession,
     fetchUserInfo,
     handleSessionExpired,
     loginLoading,

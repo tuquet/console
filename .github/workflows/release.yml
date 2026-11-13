@@ -34,7 +34,6 @@ jobs:
           persist-credentials: false
       - uses: ./console/.github/actions/setup-desktop
         with:
-          operon-deploy-key: ${{ secrets.OPERON_DEPLOY_KEY }}
           save-cache: 'true'
           cache-bundler-tools: 'true'
       - name: Verify checkout and prepare release identity

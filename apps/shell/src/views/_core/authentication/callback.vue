@@ -3,8 +3,6 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { $t } from '@operon/locales';
-import { preferences } from '@operon/preferences';
-import { useAccessStore, useUserStore } from '@operon/stores';
 
 import {
   Button,
@@ -15,22 +13,22 @@ import {
   CardHeader,
   CardTitle,
   Spinner,
-  toast,
 } from '@operon-core/shadcn-ui';
 
 import { Copy, ExternalLink, Laptop } from '@lucide/vue';
 
-import { getAccessCodes } from '#/api';
 import { useClipboard } from '#/composables';
 import { useAuthStore } from '#/store';
 import { captureError, captureMessage } from '#/utils/bugsink';
-import { sanitizeRedirectPath } from '#/utils/security';
+
+import {
+  buildDesktopAuthCallbackUrl,
+  launchProtocolViaIframe,
+} from './desktop-protocol';
 
 defineOptions({ name: 'AuthCallback' });
 
 const router = useRouter();
-const accessStore = useAccessStore();
-const userStore = useUserStore();
 const authStore = useAuthStore();
 const { copyToClipboard, isCopied } = useClipboard();
 
@@ -60,28 +58,11 @@ async function handleContinueOnWeb() {
   isDesktopBridge.value = false;
 
   try {
-    accessStore.setAccessToken(cachedAccessToken.value);
-    if (cachedRefreshToken.value) {
-      accessStore.setRefreshToken(cachedRefreshToken.value);
-    }
-
-    const [userInfo, accessCodes] = await Promise.all([
-      authStore.fetchUserInfo(),
-      getAccessCodes(),
-    ]);
-
-    if (userInfo) {
-      userStore.setUserInfo(userInfo);
-    }
-    accessStore.setAccessCodes(accessCodes);
-
-    toast.success($t('authentication.loginSuccessDesc'), {
-      description: $t('authentication.githubLoginSuccess'),
-      duration: 3000,
+    await authStore.completeOAuthSession({
+      accessToken: cachedAccessToken.value,
+      refreshToken: cachedRefreshToken.value || undefined,
+      targetRouter: router,
     });
-
-    const defaultHome = userInfo?.homePath || preferences.app.defaultHomePath;
-    await router.push(defaultHome);
   } catch (error: any) {
     captureError(error, {
       phase: 'continue_on_web',
@@ -139,15 +120,15 @@ onMounted(async () => {
       if (isDesktopTarget) {
         loading.value = false;
         isDesktopBridge.value = true;
-        const targetDeepLink = `operon://auth/callback?token=${encodeURIComponent(accessToken)}${refreshToken ? `&refresh_token=${encodeURIComponent(refreshToken)}` : ''}`;
+        const targetDeepLink = buildDesktopAuthCallbackUrl({
+          refreshToken: refreshToken || undefined,
+          token: accessToken,
+        });
         deepLinkUrl.value = targetDeepLink;
 
         // Automatically trigger protocol handler
         try {
-          const iframe = document.createElement('iframe');
-          iframe.style.display = 'none';
-          iframe.src = targetDeepLink;
-          document.body.append(iframe);
+          launchProtocolViaIframe(targetDeepLink);
 
           setTimeout(() => {
             window.location.href = targetDeepLink;
@@ -159,35 +140,12 @@ onMounted(async () => {
       }
 
       // Standard Web SPA Authentication
-      accessStore.setAccessToken(accessToken);
-      if (refreshToken) {
-        accessStore.setRefreshToken(refreshToken);
-      }
-
-      // Load user profile & access codes
-      const [userInfo, accessCodes] = await Promise.all([
-        authStore.fetchUserInfo(),
-        getAccessCodes(),
-      ]);
-
-      if (userInfo) {
-        userStore.setUserInfo(userInfo);
-      }
-      accessStore.setAccessCodes(accessCodes);
-
-      toast.success($t('authentication.loginSuccessDesc'), {
-        description: $t('authentication.githubLoginSuccess'),
-        duration: 3000,
+      await authStore.completeOAuthSession({
+        accessToken,
+        redirect: searchParams.get('redirect') || params.get('redirect'),
+        refreshToken,
+        targetRouter: router,
       });
-
-      const rawRedirect =
-        searchParams.get('redirect') || params.get('redirect');
-      const defaultHome = userInfo?.homePath || preferences.app.defaultHomePath;
-      const targetPath = rawRedirect
-        ? sanitizeRedirectPath(rawRedirect, defaultHome)
-        : defaultHome;
-
-      await router.push(targetPath);
       return;
     }
 

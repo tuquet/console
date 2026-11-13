@@ -28,7 +28,6 @@ jobs:
           persist-credentials: false
       - uses: ./console/.github/actions/setup-desktop
         with:
-          operon-deploy-key: ${{ secrets.OPERON_DEPLOY_KEY }}
           save-cache: ${{ github.ref == 'refs/heads/main' }}
       - name: Build preview without release signing credentials
         working-directory: console/apps/shell

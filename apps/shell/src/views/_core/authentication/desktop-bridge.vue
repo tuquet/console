@@ -24,10 +24,15 @@ import {
 
 import { CheckCircle2, Laptop } from '@lucide/vue';
 
-import { listTenants } from '#/api';
 import { useClipboard } from '#/composables';
+import { useWorkspaceStore } from '#/store/workspace';
 import { captureError } from '#/utils/bugsink';
 import { validateDesktopBridgePort } from '#/utils/security';
+
+import {
+  buildDesktopAuthCallbackUrl,
+  launchProtocolViaIframe,
+} from './desktop-protocol';
 
 defineOptions({ name: 'DesktopBridge' });
 
@@ -35,6 +40,7 @@ const route = useRoute();
 const router = useRouter();
 const accessStore = useAccessStore();
 const userStore = useUserStore();
+const workspaceStore = useWorkspaceStore();
 const { copyToClipboard, isCopied } = useClipboard();
 
 // Query parameters from Desk app
@@ -65,39 +71,40 @@ const tenantOptions = ref<{ label: string; value: string }[]>([]);
 
 async function loadTenants() {
   if (!accessStore.accessToken) return;
-  try {
-    const list = await listTenants();
-    if (list && list.length > 0) {
-      tenantOptions.value = list.map((t) => ({
-        label: `${t.name} · ${t.slug}`,
-        value: t.id,
-      }));
-      selectedTenant.value = tenantOptions.value[0]?.value || '';
-    }
-  } catch (error) {
-    captureError(error, { phase: 'loadTenants', view: 'DesktopBridge' });
+  const list = await workspaceStore.fetchWorkspaces();
+  if (list.length > 0) {
+    tenantOptions.value = list.map((t) => ({
+      label: `${t.name} · ${t.slug}`,
+      value: t.id,
+    }));
+    selectedTenant.value = tenantOptions.value[0]?.value || '';
+    return;
   }
 
-  if (tenantOptions.value.length === 0) {
-    tenantOptions.value = [
-      {
-        label: $t('authentication.desktopDefaultWorkspace'),
-        value: 'default-workspace',
-      },
-    ];
-    selectedTenant.value = 'default-workspace';
-  }
+  tenantOptions.value = [
+    {
+      label: $t('authentication.desktopDefaultWorkspace'),
+      value: 'default-workspace',
+    },
+  ];
+  selectedTenant.value = 'default-workspace';
 }
 
 const loading = ref(false);
 const isAuthorized = ref(false);
 const errorMessage = ref('');
 
-const deepLinkUrl = computed(() => {
-  const token = accessStore.accessToken || '';
-  const refreshToken = accessStore.refreshToken || '';
-  return `operon://auth/callback?token=${encodeURIComponent(token)}&refresh_token=${encodeURIComponent(refreshToken)}&state=${encodeURIComponent(state.value)}&tenant_id=${encodeURIComponent(selectedTenant.value)}&machine_name=${encodeURIComponent(machineName.value)}`;
-});
+const authPayload = computed(() => ({
+  machineName: machineName.value,
+  refreshToken: accessStore.refreshToken || '',
+  state: state.value,
+  tenantId: selectedTenant.value,
+  token: accessStore.accessToken || '',
+}));
+
+const deepLinkUrl = computed(() =>
+  buildDesktopAuthCallbackUrl(authPayload.value),
+);
 
 function goToLogin() {
   const currentUrl = encodeURIComponent(window.location.href);
@@ -114,30 +121,19 @@ async function handleAuthorize() {
   errorMessage.value = '';
 
   try {
-    const payload = {
-      token: accessStore.accessToken || '',
-      refreshToken: accessStore.refreshToken || '',
-      state: state.value,
-      tenantId: selectedTenant.value,
-      machineName: machineName.value,
-    };
-
     try {
       if (validatedPort.value !== null) {
         await fetch(`http://127.0.0.1:${port.value}/api/v1/auth/callback`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(authPayload.value),
         });
       }
     } catch {
       // Loopback may fallback to custom URI protocol
     }
 
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = deepLinkUrl.value;
-    document.body.append(iframe);
+    launchProtocolViaIframe(deepLinkUrl.value);
 
     setTimeout(() => {
       isAuthorized.value = true;
@@ -160,15 +156,7 @@ const tokenBundleLabel = computed(() =>
 );
 
 function handleCopyTokenBundle() {
-  const bundle = btoa(
-    JSON.stringify({
-      token: accessStore.accessToken || '',
-      refreshToken: accessStore.refreshToken || '',
-      tenantId: selectedTenant.value,
-      state: state.value,
-      machineName: machineName.value,
-    }),
-  );
+  const bundle = btoa(JSON.stringify(authPayload.value));
   copyToClipboard(bundle, tokenBundleLabel.value);
 }
 

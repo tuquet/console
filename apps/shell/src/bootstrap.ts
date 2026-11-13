@@ -16,6 +16,33 @@ import App from './app.vue';
 import { router } from './router';
 import { addBreadcrumb, initBugsink, setBugsinkTag } from './utils/bugsink';
 
+function registerEnvironmentTelemetry(): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const isPwa = window.matchMedia('(display-mode: standalone)').matches;
+  setBugsinkTag('pwa', isPwa ? 'true' : 'false');
+  setBugsinkTag('screen', `${window.innerWidth}x${window.innerHeight}`);
+  setBugsinkTag('online', navigator.onLine ? 'true' : 'false');
+
+  const handleConnectivity = (
+    online: boolean,
+    level: 'info' | 'warning',
+    message: string,
+  ) => {
+    setBugsinkTag('online', online ? 'true' : 'false');
+    addBreadcrumb({ category: 'network', level, message });
+  };
+
+  window.addEventListener('online', () =>
+    handleConnectivity(true, 'info', 'Browser connection restored (online)'),
+  );
+  window.addEventListener('offline', () =>
+    handleConnectivity(false, 'warning', 'Browser connection lost (offline)'),
+  );
+}
+
 async function bootstrap(namespace: string) {
   // Initialize component adapter
   await initComponentAdapter();
@@ -51,32 +78,7 @@ async function bootstrap(namespace: string) {
 
   // Initialize Bugsink (Sentry-compatible) error tracking
   initBugsink(app, router);
-
-  if (typeof window !== 'undefined') {
-    // Hardware and environment tags
-    const isPwa = window.matchMedia('(display-mode: standalone)').matches;
-    setBugsinkTag('pwa', isPwa ? 'true' : 'false');
-    setBugsinkTag('screen', `${window.innerWidth}x${window.innerHeight}`);
-    setBugsinkTag('online', navigator.onLine ? 'true' : 'false');
-
-    window.addEventListener('online', () => {
-      setBugsinkTag('online', 'true');
-      addBreadcrumb({
-        category: 'network',
-        level: 'info',
-        message: 'Browser connection restored (online)',
-      });
-    });
-
-    window.addEventListener('offline', () => {
-      setBugsinkTag('online', 'false');
-      addBreadcrumb({
-        category: 'network',
-        level: 'warning',
-        message: 'Browser connection lost (offline)',
-      });
-    });
-  }
+  registerEnvironmentTelemetry();
 
   // Register access control directives
   registerAccessDirective(app);

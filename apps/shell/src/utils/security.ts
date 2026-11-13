@@ -87,3 +87,22 @@ export function isSafeRedirectPath(rawPath?: unknown): boolean {
   if (typeof rawPath !== 'string') return false;
   return sanitizeRedirectPath(rawPath, '__INVALID__') !== '__INVALID__';
 }
+
+/**
+ * Validates new password + confirmation and returns an i18n error key if invalid.
+ */
+export function validateNewPassword(
+  password: string,
+  confirmPassword: string,
+): null | string {
+  if (!password) {
+    return 'authentication.newPasswordRequired';
+  }
+  if (password.length < 6) {
+    return 'authentication.passwordMinLength';
+  }
+  if (password !== confirmPassword) {
+    return 'authentication.confirmPasswordTip';
+  }
+  return null;
+}

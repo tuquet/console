@@ -19,6 +19,7 @@ import { openWindow } from '@operon/utils';
 
 import { LogIn } from '@lucide/vue';
 
+import LocalBridgeNotice from '#/components/common/local-bridge-notice.vue';
 import WorkspaceSelector from '#/components/common/workspace-selector.vue';
 import { $t } from '#/locales';
 import { useAuthStore } from '#/store';
@@ -280,6 +281,7 @@ watch(
       />
     </template>
     <template #extra>
+      <LocalBridgeNotice />
       <AuthenticationLoginExpiredModal
         v-model:open="accessStore.loginExpired"
         :avatar

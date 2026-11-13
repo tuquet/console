@@ -1,11 +1,26 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
-import { useKernel } from '@operon/kernel';
+import {
+  getLocalBridgeInstallInfo,
+  useKernel,
+  useLocalBridgeHeartbeat,
+} from '@operon/kernel';
 
 import { Badge, Button, toast } from '@operon-core/shadcn-ui';
 
-import { CheckCircle2, Cloud, Cpu, Layers, Sparkles } from '@lucide/vue';
+import {
+  Activity,
+  CheckCircle2,
+  Cloud,
+  Copy,
+  Cpu,
+  Download,
+  Layers,
+  RefreshCw,
+  Sparkles,
+  WifiOff,
+} from '@lucide/vue';
 
 import { useSampleStore } from '../stores/sample';
 
@@ -13,8 +28,21 @@ defineOptions({ name: 'AutomationStarterView' });
 
 const kernel = useKernel();
 const sampleStore = useSampleStore();
+const bridge = useLocalBridgeHeartbeat({ intervalMs: 5000 });
 
 const isCloud = computed(() => kernel.auth.hasCloudAuth);
+const installInfo = getLocalBridgeInstallInfo();
+const installCommand = computed(() => installInfo.command);
+const releasesUrl = installInfo.releasesUrl;
+
+async function copyInstallCommand() {
+  try {
+    await navigator.clipboard.writeText(installCommand.value);
+    toast.success('Copied install command to clipboard');
+  } catch {
+    toast.error('Failed to copy command');
+  }
+}
 
 function handleNotify() {
   const msg = `Notification triggered from Micro-App! Counter: ${sampleStore.counter}`;
@@ -63,8 +91,116 @@ function handleNotify() {
       </div>
     </div>
 
-    <!-- Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <!-- Local Bridge Heartbeat Gate -->
+    <div
+      v-if="bridge.status.value === 'checking'"
+      class="rounded-xl border border-border bg-card p-8 text-center shadow-xs"
+    >
+      <Activity class="size-8 text-primary mx-auto mb-3 animate-pulse" />
+      <h3 class="text-base font-semibold text-foreground">
+        Checking Local Bridge...
+      </h3>
+      <p class="text-sm text-muted-foreground mt-1">
+        Probing Operon daemon at
+        <code class="font-mono text-xs"
+          >http://127.0.0.1:{{ bridge.port }}/api/v1/health</code
+        >
+      </p>
+    </div>
+
+    <div
+      v-else-if="!bridge.isHealthy.value"
+      class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-6 shadow-xs"
+    >
+      <div class="flex flex-col gap-4">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        >
+          <div class="flex items-start gap-3">
+            <WifiOff class="size-6 text-amber-500 shrink-0 mt-0.5" />
+            <div>
+              <h3 class="text-base font-semibold text-foreground">
+                Local Bridge Offline
+              </h3>
+              <p class="text-sm text-muted-foreground mt-1">
+                Operon service is not responding on
+                <code class="font-mono text-xs"
+                  >127.0.0.1:{{ bridge.port }}</code
+                >. Install and start the local service to unlock automation
+                controls.
+              </p>
+              <p
+                v-if="bridge.error.value"
+                class="text-xs text-amber-500/90 mt-1.5 font-mono"
+              >
+                Last probe: {{ bridge.error.value }}
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <Button
+              size="sm"
+              variant="outline"
+              as="a"
+              :href="releasesUrl"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Download class="size-3.5 mr-1.5" />
+              Download Service
+            </Button>
+            <Button size="sm" variant="outline" @click="bridge.checkNow()">
+              <RefreshCw class="size-3.5 mr-1.5" />
+              Retry Heartbeat
+            </Button>
+          </div>
+        </div>
+        <div
+          class="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-background/80 px-3 py-2"
+        >
+          <code class="text-xs font-mono text-foreground truncate">{{
+            installCommand
+          }}</code>
+          <Button
+            size="sm"
+            variant="ghost"
+            class="shrink-0 h-7 px-2"
+            @click="copyInstallCommand"
+          >
+            <Copy class="size-3.5 mr-1" />
+            Copy
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards Grid (rendered only when Local Bridge is healthy) -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <!-- Local Bridge Status Banner -->
+      <div
+        class="md:col-span-2 flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3"
+      >
+        <div class="flex items-center gap-2.5 text-xs">
+          <CheckCircle2 class="size-4 text-emerald-500" />
+          <span class="font-medium text-foreground">
+            Local Bridge Connected
+          </span>
+          <span class="text-muted-foreground font-mono">
+            127.0.0.1:{{ bridge.port }}
+          </span>
+          <Badge
+            v-if="bridge.health.value?.version"
+            variant="secondary"
+            class="text-[11px] font-mono"
+          >
+            v{{ bridge.health.value.version }}
+          </Badge>
+        </div>
+        <Button size="sm" variant="ghost" @click="bridge.checkNow()">
+          <RefreshCw class="size-3.5 mr-1" />
+          Check
+        </Button>
+      </div>
       <!-- Kernel Context Card -->
       <div class="rounded-xl border border-border bg-card p-5 shadow-xs">
         <div class="flex items-center justify-between pb-3">

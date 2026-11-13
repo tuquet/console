@@ -126,6 +126,7 @@ export async function handleSupabaseUnauthorized(): Promise<void> {
     }
 
     if (
+      hadToken &&
       typeof window !== 'undefined' &&
       !window.location.pathname.startsWith('/auth/login')
     ) {

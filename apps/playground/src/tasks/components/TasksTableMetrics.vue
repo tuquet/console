@@ -22,7 +22,74 @@ interface TasksTableMetricsProps {
   table: VueTable<DataTableFeatures, Task>;
 }
 
+type MetricPresetKey = 'all' | 'done' | 'high' | 'in-progress';
+
+interface MetricCardConfig {
+  activeClass: string;
+  columnId?: 'priority' | 'status';
+  filterValue?: string;
+  icon: unknown;
+  iconClass: string;
+  key: MetricPresetKey;
+  label: string;
+  showProgress?: boolean;
+  subtext: () => string;
+  value: () => number | string;
+}
+
 const props = defineProps<TasksTableMetricsProps>();
+
+function sharePercent(count: number): number {
+  return props.metrics.total > 0
+    ? Math.round((count / props.metrics.total) * 100)
+    : 0;
+}
+
+const metricCards: MetricCardConfig[] = [
+  {
+    key: 'all',
+    label: 'All Issues',
+    icon: Layers,
+    iconClass: 'text-muted-foreground',
+    activeClass: 'border-foreground/25 after:bg-primary shadow-2xs',
+    value: () => props.metrics.total,
+    subtext: () => 'Active queue',
+  },
+  {
+    key: 'in-progress',
+    label: 'In Progress',
+    icon: Timer,
+    iconClass: 'text-sky-500',
+    activeClass: 'border-sky-500/40 shadow-2xs after:bg-sky-500',
+    columnId: 'status',
+    filterValue: 'in progress',
+    value: () => props.metrics.inProgress,
+    subtext: () => `${sharePercent(props.metrics.inProgress)}% of total`,
+  },
+  {
+    key: 'high',
+    label: 'High Priority',
+    icon: Flame,
+    iconClass: 'text-rose-500',
+    activeClass: 'border-rose-500/40 shadow-2xs after:bg-rose-500',
+    columnId: 'priority',
+    filterValue: 'high',
+    value: () => props.metrics.highPriority,
+    subtext: () => `${sharePercent(props.metrics.highPriority)}% urgent`,
+  },
+  {
+    key: 'done',
+    label: 'Completed',
+    icon: CheckCircle2,
+    iconClass: 'text-emerald-500',
+    activeClass: 'border-emerald-500/40 shadow-2xs after:bg-emerald-500',
+    columnId: 'status',
+    filterValue: 'done',
+    showProgress: true,
+    value: () => `${props.metrics.completionRate}%`,
+    subtext: () => `${props.metrics.done}/${props.metrics.total}`,
+  },
+];
 
 const activeFilterKey = computed(() => {
   const filters = props.table.atoms.columnFilters.get();
@@ -30,43 +97,20 @@ const activeFilterKey = computed(() => {
   const first = filters.length === 1 ? filters[0] : undefined;
   if (first) {
     const val = Array.isArray(first.value) ? first.value : [];
-    if (first.id === 'status' && val.length === 1 && val[0] === 'in progress') {
-      return 'in-progress';
-    }
-    if (first.id === 'priority' && val.length === 1 && val[0] === 'high') {
-      return 'high';
-    }
-    if (first.id === 'status' && val.length === 1 && val[0] === 'done') {
-      return 'done';
-    }
+    const matched = metricCards.find(
+      (c) =>
+        c.columnId === first.id && val.length === 1 && val[0] === c.filterValue,
+    );
+    if (matched) return matched.key;
   }
   return 'custom';
 });
 
-const inProgressShare = computed(() =>
-  props.metrics.total > 0
-    ? Math.round((props.metrics.inProgress / props.metrics.total) * 100)
-    : 0,
-);
-
-const highPriorityShare = computed(() =>
-  props.metrics.total > 0
-    ? Math.round((props.metrics.highPriority / props.metrics.total) * 100)
-    : 0,
-);
-
-function applyPreset(preset: 'all' | 'done' | 'high' | 'in-progress') {
-  if (preset === 'all' || activeFilterKey.value === preset) {
-    props.table.resetColumnFilters();
-    return;
-  }
+function applyPreset(card: MetricCardConfig) {
+  const shouldClear = card.key === 'all' || activeFilterKey.value === card.key;
   props.table.resetColumnFilters();
-  if (preset === 'in-progress') {
-    props.table.getColumn('status')?.setFilterValue(['in progress']);
-  } else if (preset === 'high') {
-    props.table.getColumn('priority')?.setFilterValue(['high']);
-  } else if (preset === 'done') {
-    props.table.getColumn('status')?.setFilterValue(['done']);
+  if (!shouldClear && card.columnId && card.filterValue) {
+    props.table.getColumn(card.columnId)?.setFilterValue([card.filterValue]);
   }
 }
 </script>
@@ -74,118 +118,43 @@ function applyPreset(preset: 'all' | 'done' | 'high' | 'in-progress') {
 <template>
   <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
     <button
+      v-for="card in metricCards"
+      :key="card.key"
       type="button"
       :class="
         cn(
           'bg-card relative flex flex-col justify-between overflow-hidden rounded-lg border px-4 py-3 text-left transition-all focus-visible:outline-hidden',
-          activeFilterKey === 'all'
-            ? 'border-foreground/25 after:bg-primary shadow-2xs after:absolute after:inset-x-0 after:bottom-0 after:h-0.5'
+          activeFilterKey === card.key
+            ? cn(
+                card.activeClass,
+                'after:absolute after:inset-x-0 after:bottom-0 after:h-0.5',
+              )
             : 'border-border/70 hover:border-border hover:bg-accent/20',
         )
       "
-      @click="applyPreset('all')"
+      @click="applyPreset(card)"
     >
       <div class="flex items-center justify-between">
         <span class="text-muted-foreground text-xs font-medium">
-          All Issues
+          {{ card.label }}
         </span>
-        <Layers class="text-muted-foreground size-3.5" />
+        <component :is="card.icon" class="size-3.5" :class="card.iconClass" />
       </div>
-      <div class="mt-2 flex items-baseline justify-between gap-2">
+      <div
+        class="mt-2 flex justify-between"
+        :class="
+          card.showProgress ? 'items-center gap-3' : 'items-baseline gap-2'
+        "
+      >
         <span
           class="text-foreground font-mono text-xl font-semibold tracking-tight"
         >
-          {{ metrics.total }}
+          {{ card.value() }}
         </span>
-        <span class="text-muted-foreground font-mono text-[11px]">
-          Active queue
-        </span>
-      </div>
-    </button>
-
-    <button
-      type="button"
-      :class="
-        cn(
-          'bg-card relative flex flex-col justify-between overflow-hidden rounded-lg border px-4 py-3 text-left transition-all focus-visible:outline-hidden',
-          activeFilterKey === 'in-progress'
-            ? 'border-sky-500/40 shadow-2xs after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-sky-500'
-            : 'border-border/70 hover:border-border hover:bg-accent/20',
-        )
-      "
-      @click="applyPreset('in-progress')"
-    >
-      <div class="flex items-center justify-between">
-        <span class="text-muted-foreground text-xs font-medium">
-          In Progress
-        </span>
-        <Timer class="size-3.5 text-sky-500" />
-      </div>
-      <div class="mt-2 flex items-baseline justify-between gap-2">
-        <span
-          class="text-foreground font-mono text-xl font-semibold tracking-tight"
+        <div
+          v-if="card.showProgress"
+          class="flex flex-1 items-center justify-end gap-2"
         >
-          {{ metrics.inProgress }}
-        </span>
-        <span class="text-muted-foreground font-mono text-[11px]">
-          {{ inProgressShare }}% of total
-        </span>
-      </div>
-    </button>
-
-    <button
-      type="button"
-      :class="
-        cn(
-          'bg-card relative flex flex-col justify-between overflow-hidden rounded-lg border px-4 py-3 text-left transition-all focus-visible:outline-hidden',
-          activeFilterKey === 'high'
-            ? 'border-rose-500/40 shadow-2xs after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-rose-500'
-            : 'border-border/70 hover:border-border hover:bg-accent/20',
-        )
-      "
-      @click="applyPreset('high')"
-    >
-      <div class="flex items-center justify-between">
-        <span class="text-muted-foreground text-xs font-medium">
-          High Priority
-        </span>
-        <Flame class="size-3.5 text-rose-500" />
-      </div>
-      <div class="mt-2 flex items-baseline justify-between gap-2">
-        <span
-          class="text-foreground font-mono text-xl font-semibold tracking-tight"
-        >
-          {{ metrics.highPriority }}
-        </span>
-        <span class="text-muted-foreground font-mono text-[11px]">
-          {{ highPriorityShare }}% urgent
-        </span>
-      </div>
-    </button>
-
-    <button
-      type="button"
-      :class="
-        cn(
-          'bg-card relative flex flex-col justify-between overflow-hidden rounded-lg border px-4 py-3 text-left transition-all focus-visible:outline-hidden',
-          activeFilterKey === 'done'
-            ? 'border-emerald-500/40 shadow-2xs after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-emerald-500'
-            : 'border-border/70 hover:border-border hover:bg-accent/20',
-        )
-      "
-      @click="applyPreset('done')"
-    >
-      <div class="flex items-center justify-between">
-        <span class="text-muted-foreground text-xs font-medium">Completed</span>
-        <CheckCircle2 class="size-3.5 text-emerald-500" />
-      </div>
-      <div class="mt-2 flex items-center justify-between gap-3">
-        <span
-          class="text-foreground font-mono text-xl font-semibold tracking-tight"
-        >
-          {{ metrics.completionRate }}%
-        </span>
-        <div class="flex flex-1 items-center justify-end gap-2">
           <Progress
             :model-value="metrics.completionRate"
             class="h-1.5 max-w-16"
@@ -193,9 +162,12 @@ function applyPreset(preset: 'all' | 'done' | 'high' | 'in-progress') {
           <span
             class="text-muted-foreground font-mono text-[11px] whitespace-nowrap"
           >
-            {{ metrics.done }}/{{ metrics.total }}
+            {{ card.subtext() }}
           </span>
         </div>
+        <span v-else class="text-muted-foreground font-mono text-[11px]">
+          {{ card.subtext() }}
+        </span>
       </div>
     </button>
   </div>

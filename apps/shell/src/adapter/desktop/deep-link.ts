@@ -109,41 +109,15 @@ export async function initDesktopAuthHandling(): Promise<() => void> {
 
   return setupDeepLinkListener(async (payload) => {
     try {
-      const { useAccessStore, useUserStore } = await import('@operon/stores');
-      const { preferences } = await import('@operon/preferences');
-      const { toast } = await import('@operon-core/shadcn-ui');
-      const { $t } = await import('@operon/locales');
-      const { getAccessCodes } = await import('#/api');
       const { useAuthStore } = await import('#/store');
       const { router } = await import('#/router');
 
-      const accessStore = useAccessStore();
-      const userStore = useUserStore();
       const authStore = useAuthStore();
-
-      accessStore.setAccessToken(payload.token);
-      if (payload.refreshToken) {
-        accessStore.setRefreshToken(payload.refreshToken);
-      }
-
-      // Fetch user profile and permissions
-      const [userInfo, accessCodes] = await Promise.all([
-        authStore.fetchUserInfo(),
-        getAccessCodes(),
-      ]);
-
-      if (userInfo) {
-        userStore.setUserInfo(userInfo);
-      }
-      accessStore.setAccessCodes(accessCodes);
-
-      toast.success($t('authentication.loginSuccessDesc'), {
-        description: $t('authentication.githubLoginSuccess'),
-        duration: 3000,
+      await authStore.completeOAuthSession({
+        accessToken: payload.token,
+        refreshToken: payload.refreshToken,
+        targetRouter: router,
       });
-
-      const defaultHome = userInfo?.homePath || preferences.app.defaultHomePath;
-      await router.push(defaultHome);
     } catch (error) {
       console.error('[Desktop DeepLink Auth] Error resolving session:', error);
     }

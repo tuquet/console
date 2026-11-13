@@ -26,42 +26,32 @@ import {
   TabsList,
   TabsTrigger,
   Textarea,
-  toast,
 } from '@operon-core/shadcn-ui';
 
 import {
   ArrowLeft,
-  Building2,
   Check,
-  CheckCircle2,
   Copy,
-  KeyRound,
-  Lock,
   Mail,
   RefreshCw,
   Save,
-  ShieldCheck,
   User,
 } from '@lucide/vue';
 
-import {
-  getActiveTenantId,
-  getCurrentUser,
-  updateUserPassword,
-  updateUserProfile,
-} from '#/api';
-import CliSnippetCard from '#/components/common/cli-snippet-card.vue';
-import { useClipboard } from '#/composables';
-import { captureError } from '#/utils/bugsink';
+import { getActiveTenantId, getCurrentUser, updateUserProfile } from '#/api';
+import { useAsyncAction, useClipboard } from '#/composables';
+
+import ProfileSecurityTab from './components/profile-security-tab.vue';
+import ProfileWorkspaceTab from './components/profile-workspace-tab.vue';
 
 defineOptions({ name: 'Profile' });
 
 const router = useRouter();
 const userStore = useUserStore();
 
-const loading = ref(false);
-const savingProfile = ref(false);
-const savingPassword = ref(false);
+const { executeAction: runFetchProfile, isLoading: loading } = useAsyncAction();
+const { executeAction: runSaveProfile, isLoading: savingProfile } =
+  useAsyncAction();
 
 const { copyToClipboard, isCopied } = useClipboard();
 
@@ -71,10 +61,6 @@ const avatarUrl = ref('');
 const bio = ref('');
 const email = ref('');
 const userId = ref('');
-
-// Password form states
-const newPassword = ref('');
-const confirmPassword = ref('');
 
 // Active Workspace ID
 const activeTenantId = ref('');
@@ -92,77 +78,47 @@ const initials = computed(() => {
 });
 
 async function fetchProfile() {
-  try {
-    loading.value = true;
-    const res = await getCurrentUser();
-    if (res) {
-      fullName.value = res.realName || '';
-      avatarUrl.value = res.avatar || '';
-      bio.value = (res as any).bio || '';
-      email.value = (res as any).email || '';
-      userId.value = res.userId || '';
-    }
-  } catch (error: any) {
-    captureError(error, { action: 'fetchProfile', view: 'Profile' });
-    toast.error($t('profile.loadProfileError', { error: error.message || '' }));
-  } finally {
-    loading.value = false;
-  }
+  await runFetchProfile(
+    async () => {
+      const res = await getCurrentUser();
+      if (res) {
+        fullName.value = res.realName || '';
+        avatarUrl.value = res.avatar || '';
+        bio.value = (res as any).bio || '';
+        email.value = (res as any).email || '';
+        userId.value = res.userId || '';
+      }
+    },
+    {
+      errorFallback: $t('profile.loadProfileError', { error: '' }),
+      tracking: { action: 'fetchProfile', view: 'Profile' },
+    },
+  );
 }
 
 async function handleSaveProfile() {
   if (!userId.value) return;
-  try {
-    savingProfile.value = true;
-    await updateUserProfile({
-      avatar_url: avatarUrl.value,
-      full_name: fullName.value,
-      introduction: bio.value,
-    });
-    userStore.setUserInfo({
-      userId: userId.value,
-      username: email.value || 'admin',
-      roles: userStore.userInfo?.roles ?? ['admin'],
-      avatar: avatarUrl.value,
-      realName: fullName.value,
-    });
-    toast.success($t('profile.saveProfileSuccess'));
-  } catch (error: any) {
-    captureError(error, { action: 'handleSaveProfile', view: 'Profile' });
-    toast.error($t('profile.saveProfileError', { error: error.message || '' }));
-  } finally {
-    savingProfile.value = false;
-  }
-}
-
-async function handleSavePassword() {
-  if (!newPassword.value) {
-    toast.warning($t('authentication.newPasswordRequired'));
-    return;
-  }
-  if (newPassword.value.length < 6) {
-    toast.warning($t('authentication.passwordMinLength'));
-    return;
-  }
-  if (newPassword.value !== confirmPassword.value) {
-    toast.warning($t('authentication.confirmPasswordTip'));
-    return;
-  }
-
-  try {
-    savingPassword.value = true;
-    await updateUserPassword(newPassword.value);
-    toast.success($t('profile.changePasswordSuccess'));
-    newPassword.value = '';
-    confirmPassword.value = '';
-  } catch (error: any) {
-    captureError(error, { action: 'handleSavePassword', view: 'Profile' });
-    toast.error(
-      $t('profile.changePasswordError', { error: error.message || '' }),
-    );
-  } finally {
-    savingPassword.value = false;
-  }
+  await runSaveProfile(
+    async () => {
+      await updateUserProfile({
+        avatar_url: avatarUrl.value,
+        full_name: fullName.value,
+        introduction: bio.value,
+      });
+      userStore.setUserInfo({
+        userId: userId.value,
+        username: email.value || 'admin',
+        roles: userStore.userInfo?.roles ?? ['admin'],
+        avatar: avatarUrl.value,
+        realName: fullName.value,
+      });
+    },
+    {
+      errorFallback: $t('profile.saveProfileError', { error: '' }),
+      success: $t('profile.saveProfileSuccess'),
+      tracking: { action: 'handleSaveProfile', view: 'Profile' },
+    },
+  );
 }
 
 onMounted(async () => {
@@ -367,177 +323,12 @@ onMounted(async () => {
 
         <!-- Tab 2: Security -->
         <TabsContent value="security">
-          <div class="max-w-2xl flex flex-col gap-6 pt-1">
-            <div>
-              <h3 class="text-base font-semibold text-foreground">
-                {{ $t('profile.changePasswordTitle') }}
-              </h3>
-              <p class="text-muted-foreground">
-                {{ $t('profile.changePasswordDesc') }}
-              </p>
-            </div>
-
-            <div class="w-full flex flex-col gap-4">
-              <div class="flex flex-col gap-1.5">
-                <Label for="profile-new-password">{{
-                  $t('authentication.newPassword')
-                }}</Label>
-                <InputGroup class="h-10 w-full">
-                  <InputGroupAddon>
-                    <Lock class="size-4 text-muted-foreground" />
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    id="profile-new-password"
-                    v-model="newPassword"
-                    type="password"
-                    :placeholder="$t('profile.min6CharsPlaceholder')"
-                  />
-                </InputGroup>
-              </div>
-
-              <div class="flex flex-col gap-1.5">
-                <Label for="profile-confirm-password">{{
-                  $t('authentication.confirmPassword')
-                }}</Label>
-                <InputGroup class="h-10 w-full">
-                  <InputGroupAddon>
-                    <Lock class="size-4 text-muted-foreground" />
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    id="profile-confirm-password"
-                    v-model="confirmPassword"
-                    type="password"
-                    :placeholder="$t('authentication.reenterNewPassword')"
-                  />
-                </InputGroup>
-              </div>
-
-              <div>
-                <Button
-                  class="flex items-center gap-2 h-10 mt-1"
-                  :disabled="savingPassword"
-                  @click="handleSavePassword"
-                >
-                  <KeyRound class="size-4" />
-                  <span>{{
-                    savingPassword
-                      ? $t('profile.saving')
-                      : $t('profile.savePassword')
-                  }}</span>
-                </Button>
-              </div>
-            </div>
-
-            <!-- Security Overview Cards -->
-            <div class="border-t border-border/40 pt-5 flex flex-col gap-4">
-              <h4 class="font-semibold text-foreground">
-                {{ $t('profile.securityStatusTitle') }}
-              </h4>
-
-              <div
-                class="rounded-lg border border-border/60 p-4 flex items-center justify-between"
-              >
-                <div class="flex items-center gap-3">
-                  <div
-                    class="flex size-9 items-center justify-center rounded-lg bg-success/10 text-success"
-                  >
-                    <ShieldCheck class="size-5" />
-                  </div>
-                  <div>
-                    <div class="text-foreground">
-                      {{ $t('profile.mfaTitle') }}
-                    </div>
-                    <div class="text-muted-foreground">
-                      {{ $t('profile.mfaDesc') }}
-                    </div>
-                  </div>
-                </div>
-                <Badge
-                  variant="outline"
-                  class="bg-muted text-muted-foreground border-border"
-                >
-                  {{ $t('profile.mfaReady') }}
-                </Badge>
-              </div>
-
-              <div
-                class="rounded-lg border border-border/60 p-4 flex items-center justify-between"
-              >
-                <div class="flex items-center gap-3">
-                  <div
-                    class="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary"
-                  >
-                    <CheckCircle2 class="size-5" />
-                  </div>
-                  <div>
-                    <div class="text-foreground">
-                      {{ $t('profile.sessionTitle') }}
-                    </div>
-                    <div class="text-muted-foreground">
-                      {{ $t('profile.sessionDesc') }}
-                    </div>
-                  </div>
-                </div>
-                <Badge
-                  variant="outline"
-                  class="bg-success/10 text-success border-success/30"
-                >
-                  {{ $t('common.active') }}
-                </Badge>
-              </div>
-            </div>
-          </div>
+          <ProfileSecurityTab />
         </TabsContent>
 
         <!-- Tab 3: Workspace -->
         <TabsContent value="workspace">
-          <div class="max-w-2xl flex flex-col gap-5 pt-1">
-            <div>
-              <h3 class="text-base font-semibold text-foreground">
-                {{ $t('profile.activeWorkspaceTitle') }}
-              </h3>
-              <p class="text-muted-foreground">
-                {{ $t('profile.activeWorkspaceDesc') }}
-              </p>
-            </div>
-
-            <div
-              class="rounded-xl border border-border/60 bg-muted/20 p-5 flex flex-col gap-3"
-            >
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <Building2 class="size-4.5 text-primary" />
-                  <span class="font-semibold text-foreground">{{
-                    $t('profile.currentWorkspace')
-                  }}</span>
-                </div>
-                <Badge
-                  variant="outline"
-                  class="bg-primary/10 text-primary border-primary/30"
-                >
-                  {{ $t('common.active') }}
-                </Badge>
-              </div>
-              <div class="text-muted-foreground">
-                ID: {{ activeTenantId || $t('profile.noWorkspaceSelected') }}
-              </div>
-              <div class="pt-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  @click="router.push('/tenants')"
-                >
-                  {{ $t('profile.viewAllWorkspaces') }}
-                </Button>
-              </div>
-            </div>
-
-            <!-- CLI Command -->
-            <CliSnippetCard
-              command="operon login"
-              :label="$t('profile.cliPairingCommand')"
-            />
-          </div>
+          <ProfileWorkspaceTab :active-tenant-id="activeTenantId" />
         </TabsContent>
       </Tabs>
     </div>

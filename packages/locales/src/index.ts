@@ -12,6 +12,10 @@ const $t = i18n.global.t;
 const $te = i18n.global.te;
 
 export {
+  createMicroAppLocales,
+  type CreateMicroAppLocalesOptions,
+} from './micro-app';
+export {
   $t,
   $te,
   i18n,

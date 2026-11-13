@@ -156,5 +156,15 @@
     "menu_zoom_out": "Zoom Out",
     "menu_reset_zoom": "Reset Zoom",
     "menu_window": "Window"
+  },
+  "localBridge": {
+    "title": "Operon Local Bridge Required",
+    "description": "Download and run the local Operon service (127.0.0.1:{port}) to complete device control.",
+    "download": "Download Service",
+    "retry": "Retry",
+    "copy": "Copy",
+    "copied": "Install command copied",
+    "copyFailed": "Failed to copy command",
+    "offlinePill": "Local Bridge Offline"
   }
 }

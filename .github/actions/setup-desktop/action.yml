@@ -1,10 +1,7 @@
 name: Setup desktop build environment
-description: Checkout pinned Operon subsystem, configure Node/pnpm/Rust toolchains, and restore build caches
+description: Configure Node/pnpm/Rust toolchains and restore desktop build caches
 
 inputs:
-  operon-deploy-key:
-    description: SSH deploy key used to checkout tuquet/operon
-    required: true
   save-cache:
     description: Whether to save Cargo build cache at job completion
     required: false
@@ -21,21 +18,7 @@ runs:
       id: pins
       shell: pwsh
       run: |
-        "revision=$((Get-Content console/subsystem.json -Raw | ConvertFrom-Json).revision)" >> $env:GITHUB_OUTPUT
         "rust=$((Get-Content console/release/config.json -Raw | ConvertFrom-Json).rustToolchain)" >> $env:GITHUB_OUTPUT
-    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      with:
-        repository: tuquet/operon
-        ref: ${{ steps.pins.outputs.revision }}
-        ssh-key: ${{ inputs.operon-deploy-key }}
-        path: operon
-        persist-credentials: false
-    - name: Normalize pinned operon file timestamps for Cargo cache
-      shell: pwsh
-      run: |
-        $commitTime = [DateTimeOffset]::Parse((git -C operon show -s --format=%cI HEAD)).UtcDateTime
-        Get-ChildItem -Path operon -Force | Where-Object { $_.Name -ne '.git' } | Get-ChildItem -Recurse -File -Force | ForEach-Object { $_.LastWriteTimeUtc = $commitTime }
-        Get-ChildItem -Path operon -File -Force | ForEach-Object { $_.LastWriteTimeUtc = $commitTime }
     - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
       with:
         package_json_file: console/package.json
@@ -53,7 +36,6 @@ runs:
         workspaces: console/apps/shell/src-tauri -> target
         shared-key: windows-desktop-x64
         cache-workspace-crates: true
-        key: operon-${{ steps.pins.outputs.revision }}
         save-if: ${{ inputs.save-cache }}
     - name: Cache Tauri bundler tools
       if: inputs.cache-bundler-tools == 'true'

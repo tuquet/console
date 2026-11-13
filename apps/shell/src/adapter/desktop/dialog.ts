@@ -18,21 +18,31 @@ export interface OpenDialogOptions {
   title?: string;
 }
 
+async function runTauriDialog<T>(
+  actionName: string,
+  runner: (
+    plugin: typeof import('@tauri-apps/plugin-dialog'),
+  ) => Promise<null | T>,
+): Promise<null | T> {
+  if (!isTauriEnvironment()) {
+    return null;
+  }
+  try {
+    const plugin = await import('@tauri-apps/plugin-dialog');
+    return await runner(plugin);
+  } catch (error) {
+    console.warn(`[Desktop Dialog] ${actionName} error:`, error);
+    return null;
+  }
+}
+
 /**
  * Prompts native file save dialog, returning selected file path.
  */
 export async function showSaveDialog(
   options: SaveDialogOptions = {},
 ): Promise<null | string> {
-  if (isTauriEnvironment()) {
-    try {
-      const { save } = await import('@tauri-apps/plugin-dialog');
-      return await save(options);
-    } catch (error) {
-      console.warn('[Desktop Dialog] Save error:', error);
-    }
-  }
-  return null;
+  return runTauriDialog('Save', ({ save }) => save(options));
 }
 
 /**
@@ -41,13 +51,5 @@ export async function showSaveDialog(
 export async function showOpenDialog(
   options: OpenDialogOptions = {},
 ): Promise<null | string | string[]> {
-  if (isTauriEnvironment()) {
-    try {
-      const { open } = await import('@tauri-apps/plugin-dialog');
-      return await open(options);
-    } catch (error) {
-      console.warn('[Desktop Dialog] Open error:', error);
-    }
-  }
-  return null;
+  return runTauriDialog('Open', ({ open }) => open(options));
 }

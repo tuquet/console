@@ -1,22 +1,17 @@
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { ChevronRight, Copy, Minus, Square, X } from '@lucide/vue';
+import { ChevronRight } from '@lucide/vue';
 
-import {
-  closeWindow,
-  isWindowMaximized,
-  minimizeWindow,
-  toggleMaximizeWindow,
-} from '#/adapter/desktop';
+import { toggleMaximizeWindow } from '#/adapter/desktop';
 import { $t } from '#/locales';
+
+import WindowControls from './window-controls.vue';
 
 defineOptions({ name: 'DashboardTitlebar' });
 
 const route = useRoute();
-const isMaximized = ref(false);
-let checkInterval: null | ReturnType<typeof setInterval> = null;
 
 const currentTitle = computed(() => {
   const titleKey = route.meta?.title as string | undefined;
@@ -25,28 +20,9 @@ const currentTitle = computed(() => {
   return titleKey.includes('.') ? $t(titleKey) : titleKey;
 });
 
-async function handleMinimize() {
-  await minimizeWindow();
-}
-
 async function handleToggleMaximize() {
-  const state = await toggleMaximizeWindow();
-  isMaximized.value = state;
+  await toggleMaximizeWindow();
 }
-
-async function handleClose() {
-  await closeWindow();
-}
-
-onMounted(async () => {
-  isMaximized.value = await isWindowMaximized();
-});
-
-onUnmounted(() => {
-  if (checkInterval) {
-    clearInterval(checkInterval);
-  }
-});
 </script>
 
 <template>
@@ -98,37 +74,7 @@ onUnmounted(() => {
     <!-- Center: Large drag region -->
     <div class="flex-1 h-full mx-4" data-tauri-drag-region></div>
 
-    <!-- Right: Shadcn Slate Window control buttons -->
-    <div class="flex items-center gap-1 shrink-0">
-      <button
-        type="button"
-        class="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none"
-        :title="$t('common.windowMinimize')"
-        @click="handleMinimize"
-      >
-        <Minus class="size-3.5" />
-      </button>
-
-      <button
-        type="button"
-        class="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none"
-        :title="
-          isMaximized ? $t('common.windowRestore') : $t('common.windowMaximize')
-        "
-        @click="handleToggleMaximize"
-      >
-        <Copy v-if="isMaximized" class="size-3 -rotate-90" />
-        <Square v-else class="size-3" />
-      </button>
-
-      <button
-        type="button"
-        class="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive hover:text-destructive-foreground focus:outline-none"
-        :title="$t('common.windowClose')"
-        @click="handleClose"
-      >
-        <X class="size-3.5" />
-      </button>
-    </div>
+    <!-- Right: Shared window control buttons -->
+    <WindowControls />
   </header>
 </template>
