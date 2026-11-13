@@ -6,6 +6,7 @@ export default defineMicroAppRouteModule({
   appId: 'system',
   manifest: systemManifest,
   meta: {
+    platform: 'all',
     plugin: 'identity',
     requiresCloud: true,
   },
