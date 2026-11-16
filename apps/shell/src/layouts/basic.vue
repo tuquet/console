@@ -40,6 +40,13 @@ const menus = computed(() => {
   const baseMenus = [
     {
       handler: () => {
+        router.push({ name: 'Welcome' });
+      },
+      icon: 'lucide:sparkles',
+      text: $t('page.welcome.title'),
+    },
+    {
+      handler: () => {
         openWindow('https://docs.operon.com', {
           target: '_blank',
         });

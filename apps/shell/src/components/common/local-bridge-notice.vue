@@ -20,7 +20,9 @@ const bridge = useLocalBridgeHeartbeat({ intervalMs: 5000 });
 const installInfo = getLocalBridgeInstallInfo();
 const minimized = ref(false);
 
-const isOverviewPage = computed(() => route?.path === '/dashboard/overview');
+const isOverviewPage = computed(
+  () => route?.path === '/dashboard/overview' || route?.path === '/welcome',
+);
 
 async function copyCommand() {
   try {

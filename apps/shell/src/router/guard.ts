@@ -13,6 +13,7 @@ import {
 import { accessRoutes, coreRouteNames } from '#/router/routes';
 import { useAuthStore } from '#/store';
 import { sanitizeRedirectPath } from '#/utils/security';
+import { shouldShowWelcomeOnStartup } from '#/utils/welcome';
 
 import { bootstrapLocalOperatorSession, generateAccess } from './access';
 
@@ -89,8 +90,12 @@ async function handleUnauthenticatedNavigation(
       userStore.userInfo?.homePath ||
       preferences.app.defaultHomePath ||
       DEFAULT_HOME_PATH;
-    const targetPath =
-      to.path === '/' || to.path === LOGIN_PATH ? fallbackHome : to.fullPath;
+    let targetPath = to.fullPath;
+    if (to.path === '/') {
+      targetPath = shouldShowWelcomeOnStartup() ? '/welcome' : fallbackHome;
+    } else if (to.path === LOGIN_PATH) {
+      targetPath = fallbackHome;
+    }
     return resolveRouteWithFallback(router, targetPath, fallbackHome);
   }
 
