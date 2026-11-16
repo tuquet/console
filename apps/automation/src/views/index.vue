@@ -66,9 +66,7 @@ function handleNotify() {
       <div>
         <div class="flex items-center gap-2.5">
           <Layers class="size-6 text-primary" />
-          <h2 class="text-xl font-semibold tracking-tight">
-            Automation Micro-App
-          </h2>
+          <h2 class="text-xl font-semibold tracking-tight">Automation</h2>
           <Badge
             variant="outline"
             :class="
@@ -84,8 +82,7 @@ function handleNotify() {
           </Badge>
         </div>
         <p class="text-sm text-muted-foreground mt-1">
-          Clean Micro-Frontend Boilerplate running independently or mounted in
-          Host Shell.
+          Manage and run your browser automation tasks.
         </p>
       </div>
 
@@ -104,13 +101,10 @@ function handleNotify() {
     >
       <Activity class="size-8 text-primary mx-auto mb-3 animate-pulse" />
       <h3 class="text-base font-semibold text-foreground">
-        Checking Local Bridge...
+        Connecting to Operon...
       </h3>
       <p class="text-sm text-muted-foreground mt-1">
-        Probing Operon daemon at
-        <code class="font-mono text-xs"
-          >http://127.0.0.1:{{ bridge.port }}/api/v1/health</code
-        >
+        Checking if Operon is running on your computer.
       </p>
     </div>
 
@@ -126,14 +120,11 @@ function handleNotify() {
             <WifiOff class="size-6 text-amber-500 shrink-0 mt-0.5" />
             <div>
               <h3 class="text-base font-semibold text-foreground">
-                Local Bridge Offline
+                Operon Offline
               </h3>
               <p class="text-sm text-muted-foreground mt-1">
-                Operon service is not responding on
-                <code class="font-mono text-xs"
-                  >127.0.0.1:{{ bridge.port }}</code
-                >. Install and start the local service to unlock automation
-                controls.
+                Operon is not running on your computer. Install and start Operon
+                to unlock automation controls.
               </p>
               <p
                 v-if="bridge.error.value"
@@ -162,11 +153,11 @@ function handleNotify() {
               rel="noreferrer"
             >
               <Download class="size-3.5 mr-1.5" />
-              Download Service
+              Download Operon
             </Button>
             <Button size="sm" variant="outline" @click="bridge.checkNow()">
               <RefreshCw class="size-3.5 mr-1.5" />
-              Retry Heartbeat
+              Retry
             </Button>
           </div>
         </div>
@@ -197,12 +188,7 @@ function handleNotify() {
       >
         <div class="flex items-center gap-2.5 text-xs">
           <CheckCircle2 class="size-4 text-emerald-500" />
-          <span class="font-medium text-foreground">
-            Local Bridge Connected
-          </span>
-          <span class="text-muted-foreground font-mono">
-            127.0.0.1:{{ bridge.port }}
-          </span>
+          <span class="font-medium text-foreground"> Operon Connected </span>
           <Badge
             v-if="bridge.health.value?.version"
             variant="secondary"

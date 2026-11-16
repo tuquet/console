@@ -189,7 +189,7 @@ function isLocked(mod: ModuleItem) {
                 {{ $t('page.overview.daemonStatus') }}
               </CardTitle>
               <p class="text-xs text-muted-foreground">
-                {{ $t('page.overview.daemonPort', { port: bridge.port }) }}
+                {{ $t('page.overview.daemonPort') }}
               </p>
             </div>
           </div>

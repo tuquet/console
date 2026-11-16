@@ -62,7 +62,7 @@ async function copyCommand() {
               {{ $t('page.localBridge.title') }}
             </h4>
             <p class="text-xs text-muted-foreground mt-1">
-              {{ $t('page.localBridge.description', { port: bridge.port }) }}
+              {{ $t('page.localBridge.description') }}
             </p>
           </div>
         </div>

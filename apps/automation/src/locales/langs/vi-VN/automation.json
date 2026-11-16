@@ -153,7 +153,7 @@
     "metric_active_jobs": "Tác vụ đang chạy",
     "metric_jobs_unit": "Tác vụ",
     "metric_active_jobs_desc": "Phiên tự động hóa nền tảng",
-    "metric_loopback_port": "Cổng daemon local",
+    "metric_loopback_port": "Cổng kết nối",
     "process_supervisor": "Process supervisor",
     "online": "Trực tuyến",
     "standby": "Chờ kết nối",
@@ -216,6 +216,6 @@
     "not_enrolled": "Chưa kết nối Cloud",
     "remote_count": "trên cloud",
     "empty": "Chưa có credential nào. Thêm mới hoặc Tải về từ Cloud.",
-    "daemon_offline": "Không kết nối được CLI daemon (127.0.0.1:8765). Hãy chạy `opn worker start`."
+    "daemon_offline": "Không kết nối được với Operon trên máy. Hãy chạy `opn worker start`."
   }
 }

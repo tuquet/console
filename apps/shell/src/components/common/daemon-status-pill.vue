@@ -37,33 +37,25 @@ function goToOverview() {
   <div class="border-t border-border/50 p-2">
     <button
       type="button"
-      :title="`Operon Daemon (:${bridge.port}) — ${statusLabel}`"
+      :title="`Operon — ${statusLabel}`"
       class="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors hover:bg-accent/60"
-      :class="props.collapsed ? 'justify-center px-0' : 'justify-between'"
+      :class="props.collapsed ? 'justify-center px-0' : ''"
       @click="goToOverview"
     >
-      <div class="flex min-w-0 items-center gap-2">
-        <Loader2
-          v-if="isChecking"
-          class="size-3.5 shrink-0 animate-spin text-muted-foreground"
-        />
-        <Activity
-          v-else-if="isHealthy"
-          class="size-3.5 shrink-0 text-emerald-500"
-        />
-        <WifiOff v-else class="size-3.5 shrink-0 text-amber-500" />
-        <span
-          v-if="!props.collapsed"
-          class="truncate font-medium text-foreground"
-        >
-          {{ statusLabel }}
-        </span>
-      </div>
+      <Loader2
+        v-if="isChecking"
+        class="size-3.5 shrink-0 animate-spin text-muted-foreground"
+      />
+      <Activity
+        v-else-if="isHealthy"
+        class="size-3.5 shrink-0 text-emerald-500"
+      />
+      <WifiOff v-else class="size-3.5 shrink-0 text-amber-500" />
       <span
         v-if="!props.collapsed"
-        class="shrink-0 font-mono text-[10px] text-muted-foreground"
+        class="truncate font-medium text-foreground"
       >
-        :{{ bridge.port }}
+        {{ statusLabel }}
       </span>
     </button>
   </div>

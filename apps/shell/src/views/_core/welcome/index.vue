@@ -92,12 +92,12 @@ const fiveW1H = computed(() => [
   { key: $t('page.welcome.whoLabel'), value: $t('page.welcome.whoText') },
   {
     key: $t('page.welcome.whereLabel'),
-    value: $t('page.welcome.whereText', { port: bridge.port }),
+    value: $t('page.welcome.whereText'),
   },
   { key: $t('page.welcome.whenLabel'), value: $t('page.welcome.whenText') },
   {
     key: $t('page.welcome.howLabel'),
-    value: $t('page.welcome.howText', { port: bridge.port }),
+    value: $t('page.welcome.howText'),
   },
 ]);
 
@@ -283,7 +283,7 @@ async function copyInstallCommand() {
                   {{ $t('page.welcome.step2Title') }}
                 </p>
                 <p class="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  {{ $t('page.welcome.step2Desc', { port: bridge.port }) }}
+                  {{ $t('page.welcome.step2Desc') }}
                 </p>
               </div>
 
