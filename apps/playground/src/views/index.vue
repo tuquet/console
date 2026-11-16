@@ -6,7 +6,6 @@ import { computed, ref } from 'vue';
 import { useKernel } from '@operon/kernel';
 
 import {
-  Badge,
   Button,
   Empty,
   EmptyDescription,
@@ -15,14 +14,7 @@ import {
   EmptyTitle,
 } from '@operon-core/shadcn-ui';
 
-import {
-  Cloud,
-  Cpu,
-  Download,
-  ListTodo,
-  RotateCcw,
-  SearchX,
-} from '@lucide/vue';
+import { Download, ListTodo, RotateCcw, SearchX } from '@lucide/vue';
 
 import { DataTable } from '../components/data-table';
 import { $t } from '../locales';
@@ -38,7 +30,6 @@ defineOptions({ name: 'PlaygroundOverviewView' });
 const kernel = useKernel();
 const store = usePlaygroundStore();
 
-const isCloud = computed(() => kernel.auth.hasCloudAuth);
 const copiedId = ref<null | string>(null);
 let copyTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -172,38 +163,14 @@ const columns = createTaskColumns(
 </script>
 
 <template>
-  <div class="flex min-h-full flex-col gap-3.5 px-5 pt-4 pb-16">
+  <div class="flex flex-col gap-3.5 p-4 sm:p-5">
     <!-- Compact Single-Line Page Header -->
-    <div
-      class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center"
-    >
-      <div class="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-        <div class="flex items-center gap-2">
-          <ListTodo class="text-primary size-4" />
-          <h2 class="text-base font-semibold tracking-tight">
-            {{ $t('playground.title') }}
-          </h2>
-          <Badge
-            variant="outline"
-            class="px-1.5 py-0 text-[11px] font-normal"
-            :class="
-              isCloud
-                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                : 'border-border bg-muted/40 text-muted-foreground'
-            "
-          >
-            <Cloud v-if="isCloud" class="mr-1 size-3" />
-            <Cpu v-else class="mr-1 size-3" />
-            {{
-              isCloud
-                ? $t('playground.cloud_synced')
-                : $t('playground.local_workspace')
-            }}
-          </Badge>
-        </div>
-        <span class="text-muted-foreground hidden text-xs md:inline">
-          · {{ $t('playground.description') }}
-        </span>
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <ListTodo class="text-primary size-4" />
+        <h2 class="text-base font-semibold tracking-tight">
+          {{ $t('playground.title') }}
+        </h2>
       </div>
 
       <div class="flex items-center gap-2">
