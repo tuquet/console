@@ -278,7 +278,7 @@ async function copyInstallCommand() {
               class="mt-0.5 size-4 shrink-0 text-emerald-500"
             />
             <Terminal v-else class="mt-0.5 size-4 shrink-0 text-primary" />
-            <div class="min-w-0 flex-1 space-y-3">
+            <div class="flex min-w-0 flex-1 flex-col gap-3">
               <div>
                 <p class="text-sm font-medium text-foreground">
                   {{ $t('page.welcome.step2Title') }}
@@ -359,7 +359,7 @@ async function copyInstallCommand() {
                 isHealthy ? 'text-emerald-500' : 'text-muted-foreground/40'
               "
             />
-            <div class="min-w-0 flex-1 space-y-3">
+            <div class="flex min-w-0 flex-1 flex-col gap-3">
               <div>
                 <p class="text-sm font-medium text-foreground">
                   {{ $t('page.welcome.step3Title') }}

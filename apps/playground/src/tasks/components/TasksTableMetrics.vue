@@ -6,7 +6,7 @@ import type { Task } from '../data/schema';
 
 import { computed } from 'vue';
 
-import { Progress } from '@operon-core/shadcn-ui';
+import { Button, Progress } from '@operon-core/shadcn-ui';
 import { cn } from '@operon-core/shared/utils';
 
 import { CheckCircle2, Flame, Layers, Timer } from '@lucide/vue';
@@ -117,13 +117,14 @@ function applyPreset(card: MetricCardConfig) {
 
 <template>
   <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-    <button
+    <Button
       v-for="card in metricCards"
       :key="card.key"
       type="button"
+      variant="outline"
       :class="
         cn(
-          'bg-card relative flex flex-col justify-between overflow-hidden rounded-lg border px-4 py-3 text-left transition-all focus-visible:outline-hidden',
+          'bg-card relative flex h-auto w-full flex-col items-stretch justify-between overflow-hidden rounded-lg border px-4 py-3 text-left font-normal whitespace-normal transition-all',
           activeFilterKey === card.key
             ? cn(
                 card.activeClass,
@@ -169,6 +170,6 @@ function applyPreset(card: MetricCardConfig) {
           {{ card.subtext() }}
         </span>
       </div>
-    </button>
+    </Button>
   </div>
 </template>

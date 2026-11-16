@@ -102,15 +102,17 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleGlobalSlash));
             @update:model-value="setSearch"
           />
           <InputGroupAddon class="absolute right-0 px-2">
-            <button
+            <Button
               v-if="searchQuery"
               type="button"
-              class="hover:bg-muted hover:text-foreground rounded-sm p-0.5"
+              variant="ghost"
+              size="icon"
+              class="size-5 rounded-sm"
               title="Clear search"
               @click="setSearch('')"
             >
               <X class="size-3.5" />
-            </button>
+            </Button>
             <Kbd v-else class="pointer-events-none text-[10px]">/</Kbd>
           </InputGroupAddon>
         </InputGroup>

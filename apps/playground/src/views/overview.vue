@@ -81,35 +81,37 @@ function triggerDemoToast() {
 <template>
   <div class="flex flex-col gap-6 p-4 sm:p-6">
     <!-- Hero / Core Message -->
-    <div
-      class="flex flex-col gap-4 rounded-xl border border-border/60 bg-card p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between sm:p-6"
-    >
-      <div class="min-w-0 space-y-1.5">
-        <div class="flex items-center gap-2">
-          <Layers class="size-5 text-primary" />
-          <Badge variant="secondary" class="text-xs">
-            {{ $t('playground.overview_badge') }}
-          </Badge>
+    <Card class="border-border/60 py-0 shadow-xs">
+      <CardContent
+        class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+      >
+        <div class="flex min-w-0 flex-col gap-1.5">
+          <div class="flex items-center gap-2">
+            <Layers class="size-5 text-primary" />
+            <Badge variant="secondary" class="text-xs">
+              {{ $t('playground.overview_badge') }}
+            </Badge>
+          </div>
+          <h1 class="text-xl font-semibold tracking-tight text-foreground">
+            {{ $t('playground.overview_title') }}
+          </h1>
+          <p class="max-w-2xl text-sm text-muted-foreground leading-relaxed">
+            {{ $t('playground.overview_description') }}
+          </p>
         </div>
-        <h1 class="text-xl font-semibold tracking-tight text-foreground">
-          {{ $t('playground.overview_title') }}
-        </h1>
-        <p class="max-w-2xl text-sm text-muted-foreground leading-relaxed">
-          {{ $t('playground.overview_description') }}
-        </p>
-      </div>
 
-      <div class="flex shrink-0 flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" @click="triggerDemoToast">
-          <Bell class="mr-1.5 size-3.5" />
-          {{ $t('playground.overview_cta_toast') }}
-        </Button>
-        <Button size="sm" @click="openTasksDemo">
-          {{ $t('playground.overview_cta_tasks') }}
-          <ArrowRight class="ml-1.5 size-3.5" />
-        </Button>
-      </div>
-    </div>
+        <div class="flex shrink-0 flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" @click="triggerDemoToast">
+            <Bell class="mr-1.5 size-3.5" />
+            {{ $t('playground.overview_cta_toast') }}
+          </Button>
+          <Button size="sm" @click="openTasksDemo">
+            {{ $t('playground.overview_cta_tasks') }}
+            <ArrowRight class="ml-1.5 size-3.5" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
 
     <!-- Common Components Catalog -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
