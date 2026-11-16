@@ -30,15 +30,15 @@ describe('VbenLogo — Built-in Theme Inline SVG & Fallback', () => {
     expect(svg?.getAttribute('height')).toBe('32');
 
     const html = svg?.outerHTML ?? '';
-    expect(html).toContain('hsl(var(--chart-4, var(--primary)))');
-    expect(html).toContain('hsl(var(--chart-1, var(--primary)))');
-    expect(html).toContain('hsl(var(--chart-3, var(--primary)))');
+    expect(html).toContain('#52525B');
+    expect(html).toContain('#3F3F46');
+    expect(html).toContain('#FAFAFA');
     expect(html).toContain('hsl(var(--primary) / 0.22)');
     expect(container.textContent).toContain('Admin');
     unmount();
   });
 
-  it('renders crisp white porcelain gradient stops when theme is dark', () => {
+  it('renders dark high-contrast palette when theme is dark', () => {
     const { container, unmount } = mountLogo({
       src: '/logo.svg',
       text: 'Admin',
@@ -48,10 +48,10 @@ describe('VbenLogo — Built-in Theme Inline SVG & Fallback', () => {
     const svg = container.querySelector('svg[data-specter-logo="true"]');
     expect(svg).not.toBeNull();
     const html = svg?.outerHTML ?? '';
-    expect(html).toContain('#FAFAFA');
+    expect(html).toContain('#FFFFFF');
     expect(html).toContain('#E4E4E7');
-    expect(html).toContain('#A1A1AA');
-    expect(html).toContain('rgb(228 228 231 / 0.15)');
+    expect(html).toContain('#09090B');
+    expect(html).toContain('rgb(228 228 231 / 0.16)');
     unmount();
   });
 

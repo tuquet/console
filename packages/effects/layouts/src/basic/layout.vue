@@ -23,6 +23,8 @@ import { VbenAdminLayout } from '@operon-core/layout-ui';
 import { VbenBackTop } from '@operon-core/shadcn-ui';
 import { ELEMENT_ID_LAYOUT_SCROLL } from '@operon-core/shared/constants';
 
+import { useFullscreen } from '@vueuse/core';
+
 import {
   Breadcrumb,
   CheckUpdates,
@@ -33,9 +35,16 @@ import { LayoutContent, LayoutContentSpinner } from './content';
 import { Copyright } from './copyright';
 import { LayoutFooter } from './footer';
 import { LayoutHeader } from './header';
+import HeaderWidget from './header/header-widget.vue';
 import { LayoutMenu, useMixedMenu } from './menu';
 import { LayoutTabbar } from './tabbar';
 import { useLayoutScroll } from './use-layout-scroll';
+import {
+  buildOrderedZoneSlots,
+  buildWidgetConfigMap,
+  openGlobalSearchCommand,
+  toggleSidebarHidden,
+} from './widget-zones';
 
 defineOptions({ name: 'BasicLayout' });
 
@@ -57,6 +66,7 @@ interface Props {
 }
 
 const slots: SetupContext['slots'] = useSlots();
+const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
 
 const {
   globalSearchShortcutKey,
@@ -64,6 +74,7 @@ const {
   isHeaderNav,
   isMixedNav,
   isMobile,
+  isSideMode,
   layout,
   preferencesButtonPosition,
   theme,
@@ -148,6 +159,27 @@ watch(i18n.global.locale, refreshAll, { flush: 'post' });
 // Refresh page when timezone updates
 watch(() => timezoneStore.timezone, refreshAll, { flush: 'post' });
 
+const isSidebarRendered = computed(
+  () =>
+    !isMobile.value &&
+    isSideMode.value &&
+    sidebarVisible.value &&
+    !preferences.sidebar.hidden,
+);
+
+const sidebarHeaderSlots = computed(() => {
+  const configMap = buildWidgetConfigMap({
+    fallbackSidebarHeaderToLeft: !isSidebarRendered.value,
+    isMobile: isMobile.value,
+    showPreferencesInHeader: preferencesButtonPosition.value.header,
+  });
+  return buildOrderedZoneSlots(
+    preferences.widget.order,
+    configMap,
+    'sidebar-header',
+  );
+});
+
 const headerSlots = computed(() => {
   return Object.keys(slots).filter((key) => key.startsWith('header-'));
 });
@@ -204,13 +236,36 @@ const headerSlots = computed(() => {
     "
   >
     <!-- Sidebar header -->
-    <template v-if="$slots['sidebar-header']" #sidebar-header="{ collapsed }">
-      <slot :collapsed="collapsed" name="sidebar-header"></slot>
+    <template
+      v-if="$slots['sidebar-header'] || sidebarHeaderSlots.length > 0"
+      #sidebar-header="{ collapsed }"
+    >
+      <div
+        class="flex w-full min-w-0 items-center gap-1"
+        :class="collapsed ? 'flex-col justify-center' : ''"
+      >
+        <HeaderWidget
+          v-for="slotName in sidebarHeaderSlots"
+          :key="slotName"
+          v-show="
+            !collapsed || slotName === 'logo' || slotName === 'sidebar-toggle'
+          "
+          :name="slotName"
+          :is-fullscreen="isFullscreen"
+          :global-search-shortcut-key="globalSearchShortcutKey"
+          @open-global-search="openGlobalSearchCommand"
+          @toggle-fullscreen="toggleFullscreen"
+          @toggle-sidebar="toggleSidebarHidden"
+          @refresh="refreshAll"
+        />
+        <slot :collapsed="collapsed" name="sidebar-header"></slot>
+      </div>
     </template>
     <!-- Header area -->
     <template #header>
       <LayoutHeader
         :avatar="avatar"
+        :sidebar-rendered="isSidebarRendered"
         :theme="theme"
         :text="text"
         @clear-preferences-and-logout="clearPreferencesAndLogout"

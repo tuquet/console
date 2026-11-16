@@ -499,9 +499,10 @@ $namespace: vben;
   }
 
   &.is-rounded {
-    --menu-item-margin-x: 8px;
+    --menu-item-margin-x: 4px;
+    --menu-item-padding-x: 8px;
     --menu-item-collapse-margin-x: 6px;
-    --menu-item-radius: 8px;
+    --menu-item-radius: calc(var(--radius) - 2px);
   }
 
   &.is-horizontal:not(.is-rounded) {

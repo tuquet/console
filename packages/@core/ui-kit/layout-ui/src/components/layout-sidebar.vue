@@ -238,11 +238,11 @@ onUnmounted(() => {
       data-layout-region="sidebar"
       :inert="!show || width === 0"
       :style="style"
-      class="fixed left-0 top-0 h-full"
+      class="fixed left-0 top-0 h-full text-foreground"
       :class="[
         theme,
         {
-          'border-r border-border bg-sidebar transition-[clip-path,transform] duration-300 ease-out':
+          'bg-sidebar transition-[clip-path,transform] duration-300 ease-out':
             !isMobile,
         },
       ]"
@@ -250,13 +250,13 @@ onUnmounted(() => {
       @mouseleave="handleMouseleave"
     >
       <div
-        class="flex h-full flex-col border-r border-border bg-sidebar"
+        class="flex h-full flex-col bg-sidebar"
         :style="{ width: `${width}px` }"
       >
         <div
           v-if="slots.header"
           data-layout-region="sidebar-header"
-          class="flex min-h-[50px] shrink-0 items-center border-b border-border"
+          class="flex min-h-[50px] shrink-0 items-center"
           :class="collapse ? 'justify-center px-1.5 py-2' : 'px-2 py-1.5'"
         >
           <slot name="header" :collapsed="collapse"></slot>
@@ -269,7 +269,7 @@ onUnmounted(() => {
         <div
           v-if="showFooter"
           data-layout-region="sidebar-footer"
-          class="flex min-h-[42px] shrink-0 items-center gap-1.5 border-t border-border py-1.5"
+          class="flex min-h-[42px] shrink-0 items-center gap-1.5 py-1.5"
           :class="
             collapse
               ? 'flex-col justify-center px-1.5'

@@ -20,7 +20,7 @@ const modelValue = defineModel<string | undefined>({ default: undefined });
     :class="{
       'pointer-events-none opacity-50': disabled,
     }"
-    class="flex w-full items-center justify-between rounded-md p-2 hover:bg-accent"
+    class="flex w-full items-center justify-between rounded-md p-2"
   >
     <span>
       <slot></slot>
@@ -28,7 +28,6 @@ const modelValue = defineModel<string | undefined>({ default: undefined });
     <ToggleGroup
       v-model="modelValue"
       :disabled="disabled"
-      class="gap-2"
       size="sm"
       type="single"
       variant="outline"

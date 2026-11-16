@@ -380,6 +380,14 @@
   --header: 240 10% 9.5%;
 }
 
+[data-theme='neutral'] .dark,
+[data-theme='zinc'] .dark,
+[data-theme='slate'] .dark,
+[data-theme='gray'] .dark {
+  --primary: 0 0% 98%;
+  --primary-foreground: 0 0% 9%;
+}
+
 .dark[data-theme='neutral'],
 [data-theme='neutral'] .dark {
   --background: 0 0% 3.9%;

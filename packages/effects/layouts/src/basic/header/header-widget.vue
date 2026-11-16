@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
@@ -12,7 +13,7 @@ import {
   Search,
 } from '@operon/icons';
 import { $t } from '@operon/locales';
-import { preferences } from '@operon/preferences';
+import { preferences, usePreferences } from '@operon/preferences';
 import { isWindowsOs } from '@operon/utils';
 
 import { Button, VbenLogo } from '@operon-core/shadcn-ui';
@@ -41,6 +42,10 @@ defineEmits<{
 }>();
 
 const router = useRouter();
+const { isDark } = usePreferences();
+const logoTheme = computed(() =>
+  isDark.value || preferences.theme.semiDarkHeader ? 'dark' : 'light',
+);
 </script>
 
 <template>
@@ -49,9 +54,10 @@ const router = useRouter();
     :src="preferences.logo.source"
     :src-dark="preferences.logo.sourceDark"
     :text="preferences.app.name"
-    :logo-size="22"
+    :theme="logoTheme"
+    :logo-size="26"
     collapsed
-    class="cursor-pointer"
+    class="cursor-pointer px-1.5"
     @click="router.push(preferences.app.defaultHomePath)"
   />
 

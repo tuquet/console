@@ -40,7 +40,7 @@ const style = computed((): CSSProperties => {
   <footer
     :style="style"
     data-layout-region="footer"
-    class="bottom-0 right-0 w-full shrink-0 border-t border-border bg-card/90 backdrop-blur-sm transition-all duration-200"
+    class="bottom-0 right-0 w-full shrink-0 bg-card/90 backdrop-blur-sm transition-all duration-200"
   >
     <slot></slot>
   </footer>

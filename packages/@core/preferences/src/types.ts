@@ -350,13 +350,15 @@ type WidgetPositionType =
   | 'header-left'
   | 'header-right'
   | 'none'
+  | 'sidebar-header'
   | 'user-dropdown';
 
 type HeaderWidgetPositionType =
   | 'header'
   | 'header-left'
   | 'header-right'
-  | 'none';
+  | 'none'
+  | 'sidebar-header';
 
 interface WidgetPreferences {
   /** Breadcrumb widget position */

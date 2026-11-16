@@ -58,7 +58,7 @@ const style = computed((): CSSProperties => {
   <header
     :class="theme"
     :style="style"
-    class="top-0 flex w-full flex-[0_0_auto] items-center border-b border-border bg-header px-3 transition-[margin-top] duration-200"
+    class="top-0 flex w-full flex-[0_0_auto] items-center bg-header px-3 text-foreground transition-[margin-top] duration-200"
   >
     <div
       v-if="slots['toggle-button']"

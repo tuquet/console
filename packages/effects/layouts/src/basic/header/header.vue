@@ -2,17 +2,19 @@
 import { computed, onMounted, onUnmounted, ref, useSlots } from 'vue';
 
 import { useRefresh } from '@operon/hooks';
-import {
-  preferences,
-  updatePreferences,
-  usePreferences,
-} from '@operon/preferences';
+import { preferences, usePreferences } from '@operon/preferences';
 import { useAccessStore } from '@operon/stores';
 
 import { useFullscreen, useMagicKeys, whenever } from '@vueuse/core';
 
 import { LockScreenModal } from '../../widgets';
 import LogoutConfirmation from '../../widgets/logout-confirmation.vue';
+import {
+  buildOrderedZoneSlots,
+  buildWidgetConfigMap,
+  openGlobalSearchCommand,
+  toggleSidebarHidden,
+} from '../widget-zones';
 import HeaderWidget from './header-widget.vue';
 
 interface Props {
@@ -20,6 +22,10 @@ interface Props {
    * Avatar
    */
   avatar?: string;
+  /**
+   * Whether the desktop sidebar is currently visible
+   */
+  sidebarRendered?: boolean;
   /**
    * Logo theme
    */
@@ -34,8 +40,9 @@ defineOptions({
   name: 'LayoutHeader',
 });
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   avatar: '',
+  sidebarRendered: true,
   theme: 'light',
   text: '',
 });
@@ -62,12 +69,6 @@ const { refresh } = useRefresh();
 
 function isHeaderPosition(pos?: string): boolean {
   return pos === 'header' || pos === 'header-left' || pos === 'header-right';
-}
-
-function resolveHeaderZone(pos?: string): 'left' | 'right' | null {
-  if (pos === 'header-left') return 'left';
-  if (pos === 'header' || pos === 'header-right') return 'right';
-  return null;
 }
 
 const showLockInHeader = computed(
@@ -142,111 +143,24 @@ if (logoutKey) {
 
 type SlotItem = { index: number; name: string };
 
-const widgetConfigMap = computed<
-  Record<string, { slotName: string; zone: 'left' | 'right' | null }>
->(() => {
-  const prefZone = preferencesButtonPosition.value.header
-    ? resolveHeaderZone(
-        (preferences.app.preferencesButtonPosition as string) === 'header-left'
-          ? 'header-left'
-          : 'header-right',
-      )
-    : null;
-
-  return {
-    logo: {
-      slotName: 'logo',
-      zone: preferences.widget.logo
-        ? resolveHeaderZone(preferences.widget.logoButtonPosition)
-        : null,
-    },
-    sidebarToggle: {
-      slotName: 'sidebar-toggle',
-      zone:
-        !isMobile.value && preferences.widget.sidebarToggle
-          ? resolveHeaderZone(preferences.widget.sidebarToggleButtonPosition)
-          : null,
-    },
-    breadcrumb: {
-      slotName: 'breadcrumb',
-      zone: resolveHeaderZone(preferences.widget.breadcrumbButtonPosition),
-    },
-    globalSearch: {
-      slotName: 'global-search',
-      zone: preferences.widget.globalSearch
-        ? resolveHeaderZone(preferences.widget.globalSearchButtonPosition)
-        : null,
-    },
-    preferences: {
-      slotName: 'preferences',
-      zone: prefZone,
-    },
-    themeToggle: {
-      slotName: 'theme-toggle',
-      zone: preferences.widget.themeToggle
-        ? resolveHeaderZone(preferences.widget.themeToggleButtonPosition)
-        : null,
-    },
-    languageToggle: {
-      slotName: 'language-toggle',
-      zone: preferences.widget.languageToggle
-        ? resolveHeaderZone(preferences.widget.languageToggleButtonPosition)
-        : null,
-    },
-    timezone: {
-      slotName: 'timezone',
-      zone: preferences.widget.timezone
-        ? resolveHeaderZone(preferences.widget.timezoneButtonPosition)
-        : null,
-    },
-    fullscreen: {
-      slotName: 'fullscreen',
-      zone: preferences.widget.fullscreen
-        ? resolveHeaderZone(preferences.widget.fullscreenButtonPosition)
-        : null,
-    },
-    refresh: {
-      slotName: 'refresh',
-      zone: preferences.widget.refresh
-        ? resolveHeaderZone(preferences.widget.refreshButtonPosition)
-        : null,
-    },
-    notification: {
-      slotName: 'notification',
-      zone: preferences.widget.notification
-        ? resolveHeaderZone(preferences.widget.notificationButtonPosition)
-        : null,
-    },
-    lockScreenBtn: {
-      slotName: 'lock-screen-btn',
-      zone: preferences.widget.lockScreen
-        ? resolveHeaderZone(preferences.widget.lockScreenButtonPosition)
-        : null,
-    },
-    logoutBtn: {
-      slotName: 'logout-btn',
-      zone: resolveHeaderZone(preferences.widget.logoutButtonPosition),
-    },
-    userDropdown: {
-      slotName: 'user-dropdown',
-      zone: resolveHeaderZone(preferences.widget.userDropdownButtonPosition),
-    },
-  };
-});
+const widgetConfigMap = computed(() =>
+  buildWidgetConfigMap({
+    fallbackSidebarHeaderToLeft: !props.sidebarRendered,
+    isMobile: isMobile.value,
+    showPreferencesInHeader: preferencesButtonPosition.value.header,
+  }),
+);
 
 function buildZoneSlots(targetZone: 'left' | 'right'): SlotItem[] {
-  const list: SlotItem[] = [];
   const prefix = targetZone === 'left' ? 'header-left' : 'header-right';
-
-  for (const key of preferences.widget.order) {
-    const entry = widgetConfigMap.value[key];
-    if (entry?.zone === targetZone) {
-      list.push({
-        index: REFERENCE_VALUE + list.length,
-        name: entry.slotName,
-      });
-    }
-  }
+  const list: SlotItem[] = buildOrderedZoneSlots(
+    preferences.widget.order,
+    widgetConfigMap.value,
+    targetZone,
+  ).map((name, idx) => ({
+    index: REFERENCE_VALUE + idx,
+    name,
+  }));
 
   Object.keys(slots).forEach((key) => {
     if (key.startsWith(prefix)) {
@@ -266,22 +180,6 @@ function nextIndex(list: Array<SlotItem>) {
   const index =
     list.length > 0 ? Math.max(...list.map((item) => item.index)) : 0;
   return index + 1;
-}
-
-function toggleSidebar() {
-  updatePreferences({
-    sidebar: {
-      hidden: !preferences.sidebar.hidden,
-    },
-  });
-}
-
-function openGlobalSearch() {
-  window.dispatchEvent(
-    new CustomEvent('open-command-palette', {
-      detail: { mode: 'navigation', initialValue: '' },
-    }),
-  );
 }
 
 onMounted(() => {
@@ -325,12 +223,12 @@ onMounted(() => {
           :name="slot.name"
           :is-fullscreen="isFullscreen"
           :global-search-shortcut-key="globalSearchShortcutKey"
-          @open-global-search="openGlobalSearch"
+          @open-global-search="openGlobalSearchCommand"
           @toggle-fullscreen="toggleFullscreen"
           @open-lock="handleOpenLock"
           @logout="handleLogout"
           @refresh="refresh"
-          @toggle-sidebar="toggleSidebar"
+          @toggle-sidebar="toggleSidebarHidden"
         />
       </slot>
     </template>
@@ -356,12 +254,12 @@ onMounted(() => {
           :name="slot.name"
           :is-fullscreen="isFullscreen"
           :global-search-shortcut-key="globalSearchShortcutKey"
-          @open-global-search="openGlobalSearch"
+          @open-global-search="openGlobalSearchCommand"
           @toggle-fullscreen="toggleFullscreen"
           @open-lock="handleOpenLock"
           @logout="handleLogout"
           @refresh="refresh"
-          @toggle-sidebar="toggleSidebar"
+          @toggle-sidebar="toggleSidebarHidden"
         />
       </slot>
     </template>

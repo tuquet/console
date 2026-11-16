@@ -18,7 +18,7 @@ import type { SegmentedItem } from '@operon-core/shadcn-ui';
 import { computed, ref } from 'vue';
 
 import {
-  ChevronDown,
+  Bell,
   Keyboard,
   LayoutTemplate,
   LogIn,
@@ -41,9 +41,6 @@ import {
   Button,
   Card,
   CardContent,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
   Dialog,
   DialogContent,
   DialogFooter,
@@ -370,19 +367,24 @@ const tabs = computed((): SegmentedItem[] => {
       value: 'general',
     },
     {
+      icon: LayoutTemplate,
+      label: $t('preferences.application'),
+      value: 'application',
+    },
+    {
       icon: Palette,
       label: $t('preferences.appearance'),
       value: 'appearance',
     },
     {
-      icon: LayoutTemplate,
-      label: $t('preferences.layout'),
-      value: 'layout',
-    },
-    {
       icon: Keyboard,
       label: $t('preferences.shortcutKeys.title'),
       value: 'shortcutKey',
+    },
+    {
+      icon: Bell,
+      label: $t('preferences.widget.notification'),
+      value: 'notifications',
     },
   ];
 });
@@ -465,13 +467,13 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
             </p>
             <TabsList
               :aria-label="$t('preferences.title')"
-              class="h-auto min-w-full justify-start gap-1 md:w-full md:flex-col md:items-stretch"
+              class="h-auto min-w-full justify-start gap-0.5 bg-transparent p-0 md:w-full md:flex-col md:items-stretch"
             >
               <TabsTrigger
                 v-for="tab in tabs"
                 :key="tab.value"
                 :value="tab.value"
-                class="h-9 shrink-0 gap-2 md:w-full md:flex-none md:justify-start"
+                class="h-9 shrink-0 gap-2 rounded-lg px-2.5 text-muted-foreground hover:bg-accent/50 hover:text-foreground data-[state=active]:bg-accent data-[state=active]:text-foreground data-[state=active]:shadow-none md:w-full md:flex-none md:justify-start"
               >
                 <component :is="tab.icon" />
                 {{ tab.label }}
@@ -544,7 +546,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
             </Block>
           </TabsContent>
           <TabsContent
-            value="layout"
+            value="application"
             class="mx-auto flex max-w-3xl flex-col gap-2 px-4 py-4 md:px-8 md:py-6"
           >
             <Block :title="$t('preferences.layout')">
@@ -648,59 +650,42 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 "
               />
             </Block>
-            <Collapsible v-slot="{ open: isOtherOpen }" class="py-4">
-              <CollapsibleTrigger
-                class="flex w-full cursor-pointer items-center justify-between text-sm font-semibold text-foreground"
-              >
-                <span>{{ $t('preferences.other') }}</span>
-                <ChevronDown
-                  class="size-4 text-muted-foreground transition-transform duration-200"
-                  :class="{ 'rotate-180': isOtherOpen }"
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent class="pt-4">
-                <Block :title="$t('preferences.tabbar.title')">
-                  <Tabbar
-                    v-model:tabbar-draggable="tabbarDraggable"
-                    v-model:tabbar-enable="tabbarEnable"
-                    v-model:tabbar-max-count="tabbarMaxCount"
-                    v-model:tabbar-middle-click-to-close="
-                      tabbarMiddleClickToClose
-                    "
-                    v-model:tabbar-persist="tabbarPersist"
-                    v-model:tabbar-show-icon="tabbarShowIcon"
-                    v-model:tabbar-show-maximize="tabbarShowMaximize"
-                    v-model:tabbar-show-more="tabbarShowMore"
-                    v-model:tabbar-show-refresh="tabbarShowRefresh"
-                    v-model:tabbar-style-type="tabbarStyleType"
-                    v-model:tabbar-visit-history="tabbarVisitHistory"
-                    v-model:tabbar-wheelable="tabbarWheelable"
-                  />
-                </Block>
-                <Block :title="$t('preferences.footer.title')">
-                  <Footer
-                    v-model:footer-enable="footerEnable"
-                    v-model:footer-fixed="footerFixed"
-                  />
-                </Block>
-                <Block
-                  v-if="copyrightSettingShow"
-                  :title="$t('preferences.copyright.title')"
-                >
-                  <Copyright
-                    v-model:copyright-company-name="copyrightCompanyName"
-                    v-model:copyright-company-site-link="
-                      copyrightCompanySiteLink
-                    "
-                    v-model:copyright-date="copyrightDate"
-                    v-model:copyright-enable="copyrightEnable"
-                    v-model:copyright-icp="copyrightIcp"
-                    v-model:copyright-icp-link="copyrightIcpLink"
-                    :disabled="!footerEnable"
-                  />
-                </Block>
-              </CollapsibleContent>
-            </Collapsible>
+            <Block :title="$t('preferences.tabbar.title')">
+              <Tabbar
+                v-model:tabbar-draggable="tabbarDraggable"
+                v-model:tabbar-enable="tabbarEnable"
+                v-model:tabbar-max-count="tabbarMaxCount"
+                v-model:tabbar-middle-click-to-close="tabbarMiddleClickToClose"
+                v-model:tabbar-persist="tabbarPersist"
+                v-model:tabbar-show-icon="tabbarShowIcon"
+                v-model:tabbar-show-maximize="tabbarShowMaximize"
+                v-model:tabbar-show-more="tabbarShowMore"
+                v-model:tabbar-show-refresh="tabbarShowRefresh"
+                v-model:tabbar-style-type="tabbarStyleType"
+                v-model:tabbar-visit-history="tabbarVisitHistory"
+                v-model:tabbar-wheelable="tabbarWheelable"
+              />
+            </Block>
+            <Block :title="$t('preferences.footer.title')">
+              <Footer
+                v-model:footer-enable="footerEnable"
+                v-model:footer-fixed="footerFixed"
+              />
+            </Block>
+            <Block
+              v-if="copyrightSettingShow"
+              :title="$t('preferences.copyright.title')"
+            >
+              <Copyright
+                v-model:copyright-company-name="copyrightCompanyName"
+                v-model:copyright-company-site-link="copyrightCompanySiteLink"
+                v-model:copyright-date="copyrightDate"
+                v-model:copyright-enable="copyrightEnable"
+                v-model:copyright-icp="copyrightIcp"
+                v-model:copyright-icp-link="copyrightIcpLink"
+                :disabled="!footerEnable"
+              />
+            </Block>
           </TabsContent>
           <TabsContent
             value="shortcutKey"
@@ -738,6 +723,16 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:transition-name="transitionName"
                 v-model:transition-progress="transitionProgress"
               />
+            </Block>
+          </TabsContent>
+          <TabsContent
+            value="notifications"
+            class="mx-auto flex max-w-3xl flex-col gap-2 px-4 py-4 md:px-8 md:py-6"
+          >
+            <Block :title="$t('preferences.widget.notification')">
+              <p class="text-xs text-muted-foreground">
+                {{ $t('preferences.widget.notification') }}
+              </p>
             </Block>
           </TabsContent>
           <TabsContent

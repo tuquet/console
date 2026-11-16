@@ -62,7 +62,6 @@ const slots = useSlots();
 <template>
   <div
     :class="{
-      'hover:bg-accent': !slots.tip,
       'pointer-events-none opacity-50': disabled,
     }"
     class="my-1 flex w-full items-center justify-between rounded-md px-2 py-1"
@@ -95,7 +94,6 @@ const slots = useSlots();
       :disabled="disabled"
       variant="outline"
       size="sm"
-      class="gap-2"
     >
       <ToggleGroupItem
         v-for="item in items"

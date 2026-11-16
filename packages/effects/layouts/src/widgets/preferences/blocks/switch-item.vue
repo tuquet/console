@@ -34,7 +34,7 @@ const slots = useSlots();
     :class="{
       'pointer-events-none opacity-50': disabled,
     }"
-    class="my-1 flex w-full items-center justify-between rounded-md px-2 py-2.5 hover:bg-accent"
+    class="my-1 flex w-full items-center justify-between rounded-md px-2 py-2.5"
   >
     <span class="flex items-center">
       <Label :for="id"><slot></slot></Label>

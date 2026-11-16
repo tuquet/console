@@ -122,6 +122,10 @@ const isHeaderOverlayModeActive = computed(
     !isFullContent.value,
 );
 
+const isContentFramed = computed(
+  () => !props.isMobile && !isFullContent.value && props.headerVisible,
+);
+
 const headerHasShadow = computed(() => scrollY.value > 20);
 
 const headerWrapperHeight = computed(() => {
@@ -508,6 +512,11 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
     :data-sidebar-collapsed="activeSidebarCollapse"
     class="relative flex h-full min-h-0 w-full overflow-hidden"
   >
+    <div
+      aria-hidden="true"
+      :class="sidebarTheme"
+      class="pointer-events-none absolute inset-0 bg-sidebar"
+    ></div>
     <LayoutSidebar
       v-if="sidebarEnableState"
       v-model:draggable="sidebarDraggable"
@@ -583,13 +592,24 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
             <slot name="header"></slot>
           </LayoutHeader>
 
-          <LayoutTabbar
-            v-if="tabbarEnable"
-            :height="tabbarHeight"
-            :style="tabbarStyle"
-          >
-            <slot name="tabbar"></slot>
-          </LayoutTabbar>
+          <div v-if="tabbarEnable" :style="tabbarStyle" class="shrink-0">
+            <div
+              :class="{
+                'mx-2 overflow-hidden rounded-t-xl border-x border-t border-border':
+                  isContentFramed && headerFixed,
+              }"
+            >
+              <LayoutTabbar
+                :height="
+                  isContentFramed && headerFixed
+                    ? tabbarHeight - 1
+                    : tabbarHeight
+                "
+              >
+                <slot name="tabbar"></slot>
+              </LayoutTabbar>
+            </div>
+          </div>
         </div>
       </Teleport>
 
@@ -598,7 +618,12 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
         ref="contentRef"
         data-layout-region="scroll"
         :style="layoutScrollStyle"
-        class="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-background-deep"
+        class="vben-layout-scroll flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-background-deep"
+        :class="{
+          'mx-2 mb-2 border-border': isContentFramed,
+          'rounded-xl border': isContentFramed && !tabbarEnable,
+          'rounded-b-xl border-x border-b': isContentFramed && tabbarEnable,
+        }"
       >
         <div :id="idLayoutStaticHeader" class="contents"></div>
 
@@ -661,5 +686,30 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
   .mobile-sidebar-mask-leave-active {
     transition-duration: 0ms;
   }
+}
+</style>
+
+<style scoped>
+.vben-layout-scroll {
+  scrollbar-color: hsl(var(--muted-foreground) / 25%) transparent;
+  scrollbar-width: thin;
+}
+
+.vben-layout-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.vben-layout-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.vben-layout-scroll::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 25%);
+  border-radius: 9999px;
+}
+
+.vben-layout-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 45%);
 }
 </style>

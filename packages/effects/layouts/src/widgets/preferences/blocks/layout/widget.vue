@@ -89,6 +89,10 @@ const headerOnlyPositionItems = computed((): SelectOption[] => [
 
 const buttonPositionItems = computed((): SelectOption[] => [
   {
+    label: $t('preferences.widget.sidebarHeader'),
+    value: 'sidebar-header',
+  },
+  {
     label: $t('preferences.widget.headerLeft'),
     value: 'header-left',
   },
@@ -129,11 +133,16 @@ const preferencesPositionItems = computed((): SelectOption[] => [
   },
 ]);
 
-const headerOnlyKeys = new Set([
-  'breadcrumb',
-  'logo',
-  'sidebarToggle',
-  'userDropdown',
+const sidebarAndHeaderOnlyKeys = new Set(['logo', 'sidebarToggle']);
+
+const headerOnlyKeys = new Set(['breadcrumb', 'userDropdown']);
+
+const sidebarHeaderOnlyPositionItems = computed((): SelectOption[] => [
+  {
+    label: $t('preferences.widget.sidebarHeader'),
+    value: 'sidebar-header',
+  },
+  ...headerOnlyPositionItems.value,
 ]);
 
 const labelMap: Record<string, string> = {
@@ -174,6 +183,8 @@ function getModelMap() {
 
 function resolvePositionItems(key: string) {
   if (key === 'preferences') return preferencesPositionItems.value;
+  if (sidebarAndHeaderOnlyKeys.has(key))
+    return sidebarHeaderOnlyPositionItems.value;
   if (headerOnlyKeys.has(key)) return headerOnlyPositionItems.value;
   return undefined;
 }
