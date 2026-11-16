@@ -6,6 +6,7 @@ export default defineMicroAppRouteModule({
   appId: 'playground',
   manifest: playgroundManifest,
   meta: {
+    hideInMenu: !import.meta.env.DEV,
     platform: 'all',
     plugin: 'operon',
   },

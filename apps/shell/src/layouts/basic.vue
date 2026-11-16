@@ -17,6 +17,7 @@ import { preferences, usePreferences } from '@operon/preferences';
 import { useAccessStore, useUserStore } from '@operon/stores';
 import { openWindow } from '@operon/utils';
 
+import DaemonStatusPill from '#/components/common/daemon-status-pill.vue';
 import LocalBridgeNotice from '#/components/common/local-bridge-notice.vue';
 import WorkspaceSelector from '#/components/common/workspace-selector.vue';
 import { $t } from '#/locales';
@@ -186,6 +187,9 @@ watch(
   >
     <template v-if="isAuthenticated" #sidebar-header="{ collapsed }">
       <WorkspaceSelector :collapsed="collapsed" />
+    </template>
+    <template #sidebar-footer="{ collapsed }">
+      <DaemonStatusPill :collapsed="collapsed" />
     </template>
     <template #user-dropdown>
       <UserDropdown
