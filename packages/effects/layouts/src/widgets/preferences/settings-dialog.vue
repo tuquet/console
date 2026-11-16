@@ -159,8 +159,7 @@ const sidebarAutoActivateChild = defineModel<boolean>(
   'sidebarAutoActivateChild',
 );
 const sidebarExpandOnHover = defineModel<boolean>('sidebarExpandOnHover');
-const sidebarCollapsedButton = defineModel<boolean>('sidebarCollapsedButton');
-const sidebarFixedButton = defineModel<boolean>('sidebarFixedButton');
+const widgetSidebarToggle = defineModel<boolean>('widgetSidebarToggle');
 const headerEnable = defineModel<boolean>('headerEnable');
 const headerMode = defineModel<LayoutHeaderModeType | undefined>('headerMode', {
   default: undefined,
@@ -385,6 +384,23 @@ const tabs = computed((): SegmentedItem[] => {
   ];
 });
 
+const sidebarToggleEnabled = computed({
+  get: () =>
+    !!widgetSidebarToggle.value &&
+    widgetSidebarToggleButtonPosition.value !== 'none',
+  set: (value: boolean) => {
+    widgetSidebarToggle.value = value;
+    if (!value) {
+      widgetSidebarToggleButtonPosition.value = 'none';
+    } else if (
+      !widgetSidebarToggleButtonPosition.value ||
+      widgetSidebarToggleButtonPosition.value === 'none'
+    ) {
+      widgetSidebarToggleButtonPosition.value = 'header-left';
+    }
+  },
+});
+
 const showBreadcrumbConfig = computed(() => {
   return !isFullContent.value && preferences.header.enable;
 });
@@ -538,13 +554,12 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
               <Sidebar
                 v-model:sidebar-auto-activate-child="sidebarAutoActivateChild"
                 v-model:sidebar-collapsed="sidebarCollapsed"
-                v-model:sidebar-collapsed-button="sidebarCollapsedButton"
                 v-model:sidebar-collapsed-show-title="sidebarCollapsedShowTitle"
                 v-model:sidebar-draggable="sidebarDraggable"
                 v-model:sidebar-enable="sidebarEnable"
                 v-model:sidebar-expand-on-hover="sidebarExpandOnHover"
-                v-model:sidebar-fixed-button="sidebarFixedButton"
                 v-model:sidebar-width="sidebarWidth"
+                v-model:widget-sidebar-toggle="sidebarToggleEnabled"
                 :current-layout="appLayout"
                 :disabled="!isSideMode"
               />
@@ -611,6 +626,13 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 "
                 v-model:widget-sidebar-toggle-button-position="
                   widgetSidebarToggleButtonPosition
+                "
+                @update:widget-sidebar-toggle-button-position="
+                  (pos) => {
+                    if (pos !== undefined) {
+                      widgetSidebarToggle = pos !== 'none';
+                    }
+                  }
                 "
                 v-model:widget-theme-toggle-button-position="
                   widgetThemeToggleButtonPosition
