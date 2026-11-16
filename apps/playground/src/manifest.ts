@@ -15,12 +15,23 @@ export const playgroundManifest = {
       {
         name: 'PlaygroundOverview',
         path: 'overview',
-        component: () => import('./views/index.vue'),
+        component: () => import('./views/overview.vue'),
         meta: {
           authority: ['superadmin', 'local_operator'],
           icon: 'lucide:layers',
           plugin: 'operon',
           title: t('page.playground.overview'),
+        },
+      },
+      {
+        name: 'PlaygroundTasks',
+        path: 'tasks',
+        component: () => import('./views/index.vue'),
+        meta: {
+          authority: ['superadmin', 'local_operator'],
+          icon: 'lucide:list-todo',
+          plugin: 'operon',
+          title: t('page.playground.tasks'),
         },
       },
     ];

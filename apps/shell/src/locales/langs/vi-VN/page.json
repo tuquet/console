@@ -56,7 +56,8 @@
   },
   "playground": {
     "title": "Playground",
-    "overview": "Tổng quan"
+    "overview": "Tổng quan",
+    "tasks": "Tác vụ"
   },
   "analytics": {
     "title": "Phân tích nền tảng",

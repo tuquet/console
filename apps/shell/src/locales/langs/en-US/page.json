@@ -56,7 +56,8 @@
   },
   "playground": {
     "title": "Playground",
-    "overview": "Overview"
+    "overview": "Overview",
+    "tasks": "Tasks"
   },
   "analytics": {
     "title": "Platform analytics",
