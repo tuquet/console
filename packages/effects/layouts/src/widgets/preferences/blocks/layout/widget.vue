@@ -16,6 +16,18 @@ defineOptions({
 
 const widgetOrder = defineModel<string[]>('widgetOrder', { required: true });
 
+const widgetLogoButtonPosition = defineModel<string | undefined>(
+  'widgetLogoButtonPosition',
+  { default: undefined },
+);
+const widgetBreadcrumbButtonPosition = defineModel<string | undefined>(
+  'widgetBreadcrumbButtonPosition',
+  { default: undefined },
+);
+const widgetUserDropdownButtonPosition = defineModel<string | undefined>(
+  'widgetUserDropdownButtonPosition',
+  { default: undefined },
+);
 const widgetGlobalSearchButtonPosition = defineModel<string | undefined>(
   'widgetGlobalSearchButtonPosition',
   { default: undefined },
@@ -56,10 +68,29 @@ const appPreferencesButtonPosition = defineModel<
   PreferencesButtonPositionType | undefined
 >('appPreferencesButtonPosition', { default: undefined });
 
+const headerOnlyPositionItems = computed((): SelectOption[] => [
+  {
+    label: $t('preferences.widget.headerLeft'),
+    value: 'header-left',
+  },
+  {
+    label: $t('preferences.widget.headerRight'),
+    value: 'header-right',
+  },
+  {
+    label: $t('common.notShow'),
+    value: 'none',
+  },
+]);
+
 const buttonPositionItems = computed((): SelectOption[] => [
   {
-    label: $t('preferences.widget.header'),
-    value: 'header',
+    label: $t('preferences.widget.headerLeft'),
+    value: 'header-left',
+  },
+  {
+    label: $t('preferences.widget.headerRight'),
+    value: 'header-right',
   },
   {
     label: $t('preferences.widget.userDropdown'),
@@ -71,11 +102,6 @@ const buttonPositionItems = computed((): SelectOption[] => [
   },
 ]);
 
-/**
- * Dedicated position options for preferences button:
- * Preserves auto/fixed for smart fallback in use-preferences.ts
- * (switches header/fixed on mobile or fullscreen to prevent access lockout)
- */
 const preferencesPositionItems = computed((): SelectOption[] => [
   {
     label: $t('preferences.position.auto'),
@@ -99,20 +125,11 @@ const preferencesPositionItems = computed((): SelectOption[] => [
   },
 ]);
 
-const positionMap: Record<string, string> = {
-  globalSearch: 'widgetGlobalSearchButtonPosition',
-  preferences: 'appPreferencesButtonPosition',
-  themeToggle: 'widgetThemeToggleButtonPosition',
-  languageToggle: 'widgetLanguageToggleButtonPosition',
-  timezone: 'widgetTimezoneButtonPosition',
-  fullscreen: 'widgetFullscreenButtonPosition',
-  refresh: 'widgetRefreshButtonPosition',
-  notification: 'widgetNotificationButtonPosition',
-  lockScreenBtn: 'widgetLockScreenButtonPosition',
-  logoutBtn: 'widgetLogoutButtonPosition',
-};
+const headerOnlyKeys = new Set(['breadcrumb', 'logo', 'userDropdown']);
 
 const labelMap: Record<string, string> = {
+  logo: 'preferences.widget.logo',
+  breadcrumb: 'preferences.widget.breadcrumb',
   globalSearch: 'preferences.widget.globalSearch',
   preferences: 'preferences.title',
   themeToggle: 'preferences.widget.themeToggle',
@@ -123,61 +140,59 @@ const labelMap: Record<string, string> = {
   notification: 'preferences.widget.notification',
   lockScreenBtn: 'ui.widgets.lockScreen.title',
   logoutBtn: 'common.logout',
+  userDropdown: 'preferences.widget.userDropdown',
 };
+
+function getModelMap() {
+  return {
+    logo: widgetLogoButtonPosition,
+    breadcrumb: widgetBreadcrumbButtonPosition,
+    globalSearch: widgetGlobalSearchButtonPosition,
+    preferences: appPreferencesButtonPosition,
+    themeToggle: widgetThemeToggleButtonPosition,
+    languageToggle: widgetLanguageToggleButtonPosition,
+    timezone: widgetTimezoneButtonPosition,
+    fullscreen: widgetFullscreenButtonPosition,
+    refresh: widgetRefreshButtonPosition,
+    notification: widgetNotificationButtonPosition,
+    lockScreenBtn: widgetLockScreenButtonPosition,
+    logoutBtn: widgetLogoutButtonPosition,
+    userDropdown: widgetUserDropdownButtonPosition,
+  } as Record<string, any>;
+}
+
+function resolvePositionItems(key: string) {
+  if (key === 'preferences') return preferencesPositionItems.value;
+  if (headerOnlyKeys.has(key)) return headerOnlyPositionItems.value;
+  return undefined;
+}
 
 const draggableItems = computed(() =>
   (widgetOrder.value ?? []).map((key) => ({
     key,
     label: $t(labelMap[key] ?? key),
     position: getPosition(key),
-    positionItems:
-      key === 'preferences' ? preferencesPositionItems.value : undefined,
+    positionItems: resolvePositionItems(key),
   })),
 );
 
-function getPosition(
-  key: string,
-): 'auto' | 'fixed' | 'header' | 'none' | 'user-dropdown' {
-  const modelName = positionMap[key];
-  if (!modelName) return 'none';
-  const modelMap: Record<string, any> = {
-    widgetGlobalSearchButtonPosition,
-    widgetFullscreenButtonPosition,
-    widgetLanguageToggleButtonPosition,
-    widgetNotificationButtonPosition,
-    widgetThemeToggleButtonPosition,
-    widgetLockScreenButtonPosition,
-    widgetLogoutButtonPosition,
-    widgetRefreshButtonPosition,
-    widgetTimezoneButtonPosition,
-    appPreferencesButtonPosition,
-  };
-  return modelMap[modelName]?.value ?? 'none';
+function getPosition(key: string) {
+  const raw = getModelMap()[key]?.value ?? 'none';
+  if (key !== 'preferences' && raw === 'header') {
+    return 'header-right';
+  }
+  return raw;
 }
 
 function handleUpdateOrder(keys: string[]) {
   widgetOrder.value = keys;
 }
 
-function handleUpdatePosition(
-  key: string,
-  position: 'auto' | 'fixed' | 'header' | 'none' | 'user-dropdown',
-) {
-  const modelName = positionMap[key];
-  if (!modelName) return;
-  const modelMap: Record<string, any> = {
-    widgetGlobalSearchButtonPosition,
-    widgetFullscreenButtonPosition,
-    widgetLanguageToggleButtonPosition,
-    widgetNotificationButtonPosition,
-    widgetThemeToggleButtonPosition,
-    widgetLockScreenButtonPosition,
-    widgetLogoutButtonPosition,
-    widgetRefreshButtonPosition,
-    widgetTimezoneButtonPosition,
-    appPreferencesButtonPosition,
-  };
-  modelMap[modelName].value = position;
+function handleUpdatePosition(key: string, position: string) {
+  const model = getModelMap()[key];
+  if (model) {
+    model.value = position;
+  }
 }
 </script>
 

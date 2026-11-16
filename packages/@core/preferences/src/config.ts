@@ -129,6 +129,7 @@ const defaultPreferences: Preferences = {
     progress: true,
   },
   widget: {
+    breadcrumbButtonPosition: 'header-left',
     fullscreen: true,
     fullscreenButtonPosition: 'header',
     globalSearch: true,
@@ -137,6 +138,8 @@ const defaultPreferences: Preferences = {
     languageToggleButtonPosition: 'header',
     lockScreen: true,
     lockScreenButtonPosition: 'header',
+    logo: true,
+    logoButtonPosition: 'header-left',
     logoutButtonPosition: 'header',
     notification: true,
     notificationButtonPosition: 'header',
@@ -149,6 +152,8 @@ const defaultPreferences: Preferences = {
     timezoneButtonPosition: 'header',
     userDropdownButtonPosition: 'header',
     order: [
+      'logo',
+      'breadcrumb',
       'globalSearch',
       'preferences',
       'themeToggle',
@@ -159,6 +164,7 @@ const defaultPreferences: Preferences = {
       'notification',
       'lockScreenBtn',
       'logoutBtn',
+      'userDropdown',
     ],
   },
 };

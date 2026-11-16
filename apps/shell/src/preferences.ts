@@ -54,10 +54,12 @@ export const overridesPreferences = defineOverridesPreferences({
     radius: '0.5',
   },
   widget: {
+    breadcrumbButtonPosition: 'header-left',
     fullscreenButtonPosition: 'none',
     globalSearchButtonPosition: 'none',
     languageToggleButtonPosition: 'none',
     lockScreenButtonPosition: 'none',
+    logoButtonPosition: 'header-left',
     logoutButtonPosition: 'none',
     notificationButtonPosition: 'none',
     refreshButtonPosition: 'none',
@@ -65,6 +67,8 @@ export const overridesPreferences = defineOverridesPreferences({
     timezoneButtonPosition: 'none',
     userDropdownButtonPosition: 'none',
     order: [
+      'logo',
+      'breadcrumb',
       'logoutBtn',
       'lockScreenBtn',
       'fullscreen',
@@ -75,6 +79,7 @@ export const overridesPreferences = defineOverridesPreferences({
       'timezone',
       'themeToggle',
       'globalSearch',
+      'userDropdown',
     ],
   },
 });

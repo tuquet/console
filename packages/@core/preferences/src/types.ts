@@ -345,47 +345,66 @@ interface TransitionPreferences {
   progress: boolean;
 }
 
+type WidgetPositionType =
+  | 'header'
+  | 'header-left'
+  | 'header-right'
+  | 'none'
+  | 'user-dropdown';
+
+type HeaderWidgetPositionType =
+  | 'header'
+  | 'header-left'
+  | 'header-right'
+  | 'none';
+
 interface WidgetPreferences {
+  /** Breadcrumb widget position */
+  breadcrumbButtonPosition: HeaderWidgetPositionType;
   /** Whether fullscreen widget is enabled */
   fullscreen: boolean;
   /** Fullscreen button position */
-  fullscreenButtonPosition: 'header' | 'none' | 'user-dropdown';
+  fullscreenButtonPosition: WidgetPositionType;
   /** Whether global search widget is enabled */
   globalSearch: boolean;
   /** Global search button position */
-  globalSearchButtonPosition: 'header' | 'none' | 'user-dropdown';
+  globalSearchButtonPosition: WidgetPositionType;
   /** Whether language toggle widget is enabled */
   languageToggle: boolean;
   /** Language toggle button position */
-  languageToggleButtonPosition: 'header' | 'none' | 'user-dropdown';
+  languageToggleButtonPosition: WidgetPositionType;
   /** Whether lockscreen widget is enabled */
   lockScreen: boolean;
   /** Lockscreen button position */
-  lockScreenButtonPosition: 'header' | 'none' | 'user-dropdown';
+  lockScreenButtonPosition: WidgetPositionType;
+  /** Whether logo widget is visible in header */
+  logo: boolean;
+  /** Logo widget position */
+  logoButtonPosition: HeaderWidgetPositionType;
   /** Logout button position */
-  logoutButtonPosition: 'header' | 'none' | 'user-dropdown';
+  logoutButtonPosition: WidgetPositionType;
   /** Whether notification widget is visible */
   notification: boolean;
   /** Notification button position */
-  notificationButtonPosition: 'header' | 'none' | 'user-dropdown';
+  notificationButtonPosition: WidgetPositionType;
   /** Widgets ordering */
   order: readonly string[];
   /** Show refresh button */
   refresh: boolean;
   /** Refresh button position */
-  refreshButtonPosition: 'header' | 'none' | 'user-dropdown';
+  refreshButtonPosition: WidgetPositionType;
   /** Whether sidebar toggle widget is visible */
   sidebarToggle: boolean;
   /** Whether theme toggle widget is visible */
   themeToggle: boolean;
   /** Theme toggle button position */
-  themeToggleButtonPosition: 'header' | 'none' | 'user-dropdown';
+  themeToggleButtonPosition: WidgetPositionType;
   /** Whether timezone widget is visible */
   timezone: boolean;
   /** Timezone button position */
-  timezoneButtonPosition: 'header' | 'none' | 'user-dropdown';
+  timezoneButtonPosition: WidgetPositionType;
   /** User dropdown position */
-  userDropdownButtonPosition: 'header' | 'none';
+  userDropdownButtonPosition: HeaderWidgetPositionType;
 }
 
 interface Preferences {

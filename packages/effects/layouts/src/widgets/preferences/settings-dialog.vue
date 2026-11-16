@@ -240,6 +240,18 @@ const shortcutKeysGlobalLockScreen = defineModel<boolean>(
   'shortcutKeysGlobalLockScreen',
 );
 
+const widgetLogoButtonPosition = defineModel<string | undefined>(
+  'widgetLogoButtonPosition',
+  { default: undefined },
+);
+const widgetBreadcrumbButtonPosition = defineModel<string | undefined>(
+  'widgetBreadcrumbButtonPosition',
+  { default: undefined },
+);
+const widgetUserDropdownButtonPosition = defineModel<string | undefined>(
+  'widgetUserDropdownButtonPosition',
+  { default: undefined },
+);
 const widgetGlobalSearchButtonPosition = defineModel<string | undefined>(
   'widgetGlobalSearchButtonPosition',
   { default: undefined },
@@ -589,6 +601,9 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:app-preferences-button-position="
                   appPreferencesButtonPosition
                 "
+                v-model:widget-breadcrumb-button-position="
+                  widgetBreadcrumbButtonPosition
+                "
                 v-model:widget-fullscreen-button-position="
                   widgetFullscreenButtonPosition
                 "
@@ -601,6 +616,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:widget-lock-screen-button-position="
                   widgetLockScreenButtonPosition
                 "
+                v-model:widget-logo-button-position="widgetLogoButtonPosition"
                 v-model:widget-logout-button-position="
                   widgetLogoutButtonPosition
                 "
@@ -613,6 +629,9 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 "
                 v-model:widget-theme-toggle-button-position="
                   widgetThemeToggleButtonPosition
+                "
+                v-model:widget-user-dropdown-button-position="
+                  widgetUserDropdownButtonPosition
                 "
                 v-model:widget-timezone-button-position="
                   widgetTimezoneButtonPosition

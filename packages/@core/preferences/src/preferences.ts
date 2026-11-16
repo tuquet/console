@@ -150,6 +150,12 @@ class PreferenceManager {
     // to bloat with duplicate keys on every update.
     // Deduplicate here after loading cache, preserving first occurrence.
     this.sanitizeCachedArray(cachedPreferences, 'widget', 'order');
+    if (Array.isArray(cachedPreferences.widget?.order)) {
+      const order = cachedPreferences.widget.order as string[];
+      if (!order.includes('breadcrumb')) order.unshift('breadcrumb');
+      if (!order.includes('logo')) order.unshift('logo');
+      if (!order.includes('userDropdown')) order.push('userDropdown');
+    }
     if (cachedPreferences.app) {
       const cachedApp = cachedPreferences.app as Record<string, unknown>;
       delete cachedApp.isMobile;

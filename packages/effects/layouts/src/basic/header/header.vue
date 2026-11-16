@@ -2,32 +2,14 @@
 import { computed, onMounted, onUnmounted, ref, useSlots } from 'vue';
 
 import { useRefresh } from '@operon/hooks';
-import {
-  LockKeyhole,
-  LogOut,
-  Maximize,
-  Minimize,
-  RotateCw,
-  Search,
-} from '@operon/icons';
-import { $t } from '@operon/locales';
 import { preferences, usePreferences } from '@operon/preferences';
 import { useAccessStore } from '@operon/stores';
-import { isWindowsOs } from '@operon/utils';
-
-import { Button } from '@operon-core/shadcn-ui';
 
 import { useFullscreen, useMagicKeys, whenever } from '@vueuse/core';
 
-import {
-  LanguageToggle,
-  LockScreenModal,
-  Notification,
-  PreferencesButton,
-  ThemeToggle,
-  TimezoneButton,
-} from '../../widgets';
+import { LockScreenModal } from '../../widgets';
 import LogoutConfirmation from '../../widgets/logout-confirmation.vue';
+import HeaderWidget from './header-widget.vue';
 
 interface Props {
   /**
@@ -73,14 +55,24 @@ const {
 const slots = useSlots();
 const { refresh } = useRefresh();
 
+function isHeaderPosition(pos?: string): boolean {
+  return pos === 'header' || pos === 'header-left' || pos === 'header-right';
+}
+
+function resolveHeaderZone(pos?: string): 'left' | 'right' | null {
+  if (pos === 'header-left') return 'left';
+  if (pos === 'header' || pos === 'header-right') return 'right';
+  return null;
+}
+
 const showLockInHeader = computed(
   () =>
     preferences.widget.lockScreen &&
-    preferences.widget.lockScreenButtonPosition === 'header',
+    isHeaderPosition(preferences.widget.lockScreenButtonPosition),
 );
 
-const showLogoutInHeader = computed(
-  () => preferences.widget.logoutButtonPosition === 'header',
+const showLogoutInHeader = computed(() =>
+  isHeaderPosition(preferences.widget.logoutButtonPosition),
 );
 
 const enableLockScreenShortcutKey = computed(() => {
@@ -143,119 +135,123 @@ if (logoutKey) {
   });
 }
 
-/**
- * Slot list item type
- */
 type SlotItem = { index: number; name: string };
 
-const rightSlots = computed(() => {
-  const list: Array<SlotItem> = [];
+const widgetConfigMap = computed<
+  Record<string, { slotName: string; zone: 'left' | 'right' | null }>
+>(() => {
+  const prefZone = preferencesButtonPosition.value.header
+    ? resolveHeaderZone(
+        (preferences.app.preferencesButtonPosition as string) === 'header-left'
+          ? 'header-left'
+          : 'header-right',
+      )
+    : null;
 
-  // Iterate by widget.order and check if each widget should display in header
-  const widgetChecks: Record<string, { slotName: string; visible: boolean }> = {
+  return {
+    logo: {
+      slotName: 'logo',
+      zone: preferences.widget.logo
+        ? resolveHeaderZone(preferences.widget.logoButtonPosition)
+        : null,
+    },
+    breadcrumb: {
+      slotName: 'breadcrumb',
+      zone: preferences.breadcrumb.enable
+        ? resolveHeaderZone(preferences.widget.breadcrumbButtonPosition)
+        : null,
+    },
     globalSearch: {
-      visible:
-        preferences.widget.globalSearch &&
-        preferences.widget.globalSearchButtonPosition === 'header',
       slotName: 'global-search',
+      zone: preferences.widget.globalSearch
+        ? resolveHeaderZone(preferences.widget.globalSearchButtonPosition)
+        : null,
     },
     preferences: {
-      visible: preferencesButtonPosition.value.header,
       slotName: 'preferences',
+      zone: prefZone,
     },
     themeToggle: {
-      visible:
-        preferences.widget.themeToggle &&
-        preferences.widget.themeToggleButtonPosition === 'header',
       slotName: 'theme-toggle',
+      zone: preferences.widget.themeToggle
+        ? resolveHeaderZone(preferences.widget.themeToggleButtonPosition)
+        : null,
     },
     languageToggle: {
-      visible:
-        preferences.widget.languageToggle &&
-        preferences.widget.languageToggleButtonPosition === 'header',
       slotName: 'language-toggle',
+      zone: preferences.widget.languageToggle
+        ? resolveHeaderZone(preferences.widget.languageToggleButtonPosition)
+        : null,
     },
     timezone: {
-      visible:
-        preferences.widget.timezone &&
-        preferences.widget.timezoneButtonPosition === 'header',
       slotName: 'timezone',
+      zone: preferences.widget.timezone
+        ? resolveHeaderZone(preferences.widget.timezoneButtonPosition)
+        : null,
     },
     fullscreen: {
-      visible:
-        preferences.widget.fullscreen &&
-        preferences.widget.fullscreenButtonPosition === 'header',
       slotName: 'fullscreen',
+      zone: preferences.widget.fullscreen
+        ? resolveHeaderZone(preferences.widget.fullscreenButtonPosition)
+        : null,
     },
     refresh: {
-      visible:
-        preferences.widget.refresh &&
-        preferences.widget.refreshButtonPosition === 'header',
       slotName: 'refresh',
+      zone: preferences.widget.refresh
+        ? resolveHeaderZone(preferences.widget.refreshButtonPosition)
+        : null,
     },
     notification: {
-      visible:
-        preferences.widget.notification &&
-        preferences.widget.notificationButtonPosition === 'header',
       slotName: 'notification',
+      zone: preferences.widget.notification
+        ? resolveHeaderZone(preferences.widget.notificationButtonPosition)
+        : null,
     },
     lockScreenBtn: {
-      visible:
-        preferences.widget.lockScreen &&
-        preferences.widget.lockScreenButtonPosition === 'header',
       slotName: 'lock-screen-btn',
+      zone: preferences.widget.lockScreen
+        ? resolveHeaderZone(preferences.widget.lockScreenButtonPosition)
+        : null,
     },
     logoutBtn: {
-      visible: preferences.widget.logoutButtonPosition === 'header',
       slotName: 'logout-btn',
+      zone: resolveHeaderZone(preferences.widget.logoutButtonPosition),
+    },
+    userDropdown: {
+      slotName: 'user-dropdown',
+      zone: resolveHeaderZone(preferences.widget.userDropdownButtonPosition),
     },
   };
+});
+
+function buildZoneSlots(targetZone: 'left' | 'right'): SlotItem[] {
+  const list: SlotItem[] = [];
+  const prefix = targetZone === 'left' ? 'header-left' : 'header-right';
 
   for (const key of preferences.widget.order) {
-    const check = widgetChecks[key];
-    if (check?.visible) {
-      list.push({ index: REFERENCE_VALUE + list.length, name: check.slotName });
+    const entry = widgetConfigMap.value[key];
+    if (entry?.zone === targetZone) {
+      list.push({
+        index: REFERENCE_VALUE + list.length,
+        name: entry.slotName,
+      });
     }
   }
 
-  // Append user custom slots (header-right-N) at the end
   Object.keys(slots).forEach((key) => {
-    if (key.startsWith('header-right')) {
+    if (key.startsWith(prefix)) {
       const slotIndex = Number(key.split('-')[2]);
       const index = Number.isNaN(slotIndex) ? nextIndex(list) : slotIndex;
       list.push({ index, name: key });
     }
   });
-  // Append user dropdown after the configured widgets unless hidden.
-  if (preferences.widget.userDropdownButtonPosition !== 'none') {
-    const userDropdownIndex = Math.min(1000, nextIndex(list));
-    list.push({ index: userDropdownIndex, name: 'user-dropdown' });
-  }
 
-  // Sort by index to maintain slot order
   return list.toSorted((a, b) => a.index - b.index);
-});
+}
 
-const leftSlots = computed(() => {
-  const list: Array<SlotItem> = [];
+const leftSlots = computed(() => buildZoneSlots('left'));
+const rightSlots = computed(() => buildZoneSlots('right'));
 
-  Object.keys(slots).forEach((key) => {
-    // Adapt slot name, e.g. first slot name: header-left-1
-    if (key.startsWith('header-left')) {
-      // Extract third placeholder number; assign fallback sort index if not a number
-      const slotIndex = Number(key.split('-')[2]);
-      const index = Number.isNaN(slotIndex) ? nextIndex(list) : slotIndex;
-      list.push({ index, name: key });
-    }
-  });
-  // Sort by index to maintain slot order
-  return list.toSorted((a, b) => a.index - b.index);
-});
-
-/**
- * Get next index value in list (for sorting)
- * @param list List
- */
 function nextIndex(list: Array<SlotItem>) {
   const index =
     list.length > 0 ? Math.max(...list.map((item) => item.index)) : 0;
@@ -298,32 +294,29 @@ onMounted(() => {
     @confirm="handleSubmitLogout"
   />
 
-  <template
-    v-for="slot in leftSlots.filter((item) => item.index < REFERENCE_VALUE)"
-    :key="slot.name"
-  >
-    <slot :name="slot.name">
-      <template v-if="slot.name === 'refresh'">
-        <Button
-          class="my-0 mr-1 rounded-md"
-          @click="refresh"
-          variant="ghost"
-          size="icon"
-        >
-          <RotateCw />
-        </Button>
-      </template>
-    </slot>
-  </template>
-  <div class="hidden h-full items-center lg:flex">
-    <slot name="breadcrumb"></slot>
+  <div class="flex h-full min-w-0 shrink-0 items-center">
+    <template v-for="slot in leftSlots" :key="slot.name">
+      <div
+        v-if="slot.name === 'breadcrumb'"
+        class="hidden h-full items-center lg:flex"
+      >
+        <slot name="breadcrumb"></slot>
+      </div>
+      <slot v-else :name="slot.name">
+        <HeaderWidget
+          :name="slot.name"
+          :is-fullscreen="isFullscreen"
+          :global-search-shortcut-key="globalSearchShortcutKey"
+          @open-global-search="openGlobalSearch"
+          @toggle-fullscreen="toggleFullscreen"
+          @open-lock="handleOpenLock"
+          @logout="handleLogout"
+          @refresh="refresh"
+        />
+      </slot>
+    </template>
   </div>
-  <template
-    v-for="slot in leftSlots.filter((item) => item.index > REFERENCE_VALUE)"
-    :key="slot.name"
-  >
-    <slot :name="slot.name"></slot>
-  </template>
+
   <div
     :class="`menu-align-${preferences.header.menuAlign}`"
     class="flex h-full min-w-0 flex-1 items-center"
@@ -333,94 +326,23 @@ onMounted(() => {
   <div class="flex-1 h-full min-w-8"></div>
   <div class="flex h-full min-w-0 shrink-0 items-center">
     <template v-for="slot in rightSlots" :key="slot.name">
-      <slot :name="slot.name">
-        <template v-if="slot.name === 'global-search'">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            class="mr-1"
-            :title="$t('ui.widgets.search.title')"
-            :aria-label="$t('ui.widgets.search.title')"
-            :aria-keyshortcuts="
-              globalSearchShortcutKey
-                ? isWindowsOs()
-                  ? 'Control+K'
-                  : 'Meta+K'
-                : undefined
-            "
-            @click="openGlobalSearch"
-          >
-            <Search />
-          </Button>
-        </template>
-
-        <template v-else-if="slot.name === 'preferences'">
-          <PreferencesButton class="mr-1 hidden md:flex" />
-        </template>
-        <template v-else-if="slot.name === 'theme-toggle'">
-          <ThemeToggle class="mr-1 hidden md:flex" />
-        </template>
-        <template v-else-if="slot.name === 'language-toggle'">
-          <LanguageToggle class="mr-1 hidden md:flex" />
-        </template>
-        <template v-else-if="slot.name === 'fullscreen'">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            class="mr-1 hidden md:flex"
-            :title="$t('preferences.widget.fullscreen')"
-            :aria-label="$t('preferences.widget.fullscreen')"
-            :aria-pressed="isFullscreen"
-            @click="toggleFullscreen"
-          >
-            <Minimize v-if="isFullscreen" />
-            <Maximize v-else />
-          </Button>
-        </template>
-        <template v-else-if="slot.name === 'timezone'">
-          <TimezoneButton class="mr-1 hidden md:flex" />
-        </template>
-        <template v-else-if="slot.name === 'lock-screen-btn'">
-          <Button
-            class="mr-1 hidden md:flex"
-            :aria-label="$t('ui.widgets.lockScreen.title')"
-            :title="$t('ui.widgets.lockScreen.title')"
-            @click="handleOpenLock"
-            variant="ghost"
-            size="icon"
-          >
-            <LockKeyhole />
-          </Button>
-        </template>
-        <template v-else-if="slot.name === 'logout-btn'">
-          <Button
-            class="mr-1 hidden md:flex"
-            :aria-label="$t('common.logout')"
-            :title="$t('common.logout')"
-            @click="handleLogout"
-            variant="ghost"
-            size="icon"
-          >
-            <LogOut />
-          </Button>
-        </template>
-        <template v-else-if="slot.name === 'notification'">
-          <Notification class="mr-1" />
-        </template>
-        <template v-else-if="slot.name === 'refresh'">
-          <Button
-            class="my-0 mr-1 rounded-md"
-            :aria-label="$t('preferences.widget.refresh')"
-            :title="$t('preferences.widget.refresh')"
-            @click="refresh"
-            variant="ghost"
-            size="icon"
-          >
-            <RotateCw />
-          </Button>
-        </template>
+      <div
+        v-if="slot.name === 'breadcrumb'"
+        class="hidden h-full items-center lg:flex"
+      >
+        <slot name="breadcrumb"></slot>
+      </div>
+      <slot v-else :name="slot.name">
+        <HeaderWidget
+          :name="slot.name"
+          :is-fullscreen="isFullscreen"
+          :global-search-shortcut-key="globalSearchShortcutKey"
+          @open-global-search="openGlobalSearch"
+          @toggle-fullscreen="toggleFullscreen"
+          @open-lock="handleOpenLock"
+          @logout="handleLogout"
+          @refresh="refresh"
+        />
       </slot>
     </template>
   </div>
