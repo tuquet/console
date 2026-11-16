@@ -226,9 +226,11 @@ const rightSlots = computed(() => {
       list.push({ index, name: key });
     }
   });
-  // Append user dropdown after the configured widgets.
-  const userDropdownIndex = Math.min(1000, nextIndex(list));
-  list.push({ index: userDropdownIndex, name: 'user-dropdown' });
+  // Append user dropdown after the configured widgets unless hidden.
+  if (preferences.widget.userDropdownButtonPosition !== 'none') {
+    const userDropdownIndex = Math.min(1000, nextIndex(list));
+    list.push({ index: userDropdownIndex, name: 'user-dropdown' });
+  }
 
   // Sort by index to maintain slot order
   return list.toSorted((a, b) => a.index - b.index);

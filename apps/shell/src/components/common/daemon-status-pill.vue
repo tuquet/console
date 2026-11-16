@@ -1,11 +1,5 @@
 <script lang="ts" setup>
-import { computed } from 'vue';
-import { useRouter } from 'vue-router';
-
-import { DEFAULT_HOME_PATH } from '@operon/constants';
-import { useLocalBridgeHeartbeat } from '@operon/kernel';
-
-import { Activity, Loader2, WifiOff } from '@lucide/vue';
+import { Settings } from '@lucide/vue';
 
 import { $t } from '#/locales';
 
@@ -15,21 +9,8 @@ const props = withDefaults(defineProps<{ collapsed?: boolean }>(), {
   collapsed: false,
 });
 
-const router = useRouter();
-const bridge = useLocalBridgeHeartbeat({ intervalMs: 5000 });
-
-const isHealthy = computed(() => bridge.status.value === 'healthy');
-const isChecking = computed(() => bridge.status.value === 'checking');
-
-const statusLabel = computed(() => {
-  if (isChecking.value) return $t('page.overview.daemonChecking');
-  return isHealthy.value
-    ? $t('page.overview.daemonHealthy')
-    : $t('page.overview.daemonOffline');
-});
-
-function goToOverview() {
-  void router.push(DEFAULT_HOME_PATH);
+function openSettings() {
+  window.dispatchEvent(new CustomEvent('open-preferences'));
 }
 </script>
 
@@ -37,25 +18,14 @@ function goToOverview() {
   <div class="border-t border-border/50 p-2">
     <button
       type="button"
-      :title="`Operon — ${statusLabel}`"
-      class="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors hover:bg-accent/60"
+      :title="$t('preferences.settingsTitle')"
+      class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
       :class="props.collapsed ? 'justify-center px-0' : ''"
-      @click="goToOverview"
+      @click="openSettings"
     >
-      <Loader2
-        v-if="isChecking"
-        class="size-3.5 shrink-0 animate-spin text-muted-foreground"
-      />
-      <Activity
-        v-else-if="isHealthy"
-        class="size-3.5 shrink-0 text-emerald-500"
-      />
-      <WifiOff v-else class="size-3.5 shrink-0 text-amber-500" />
-      <span
-        v-if="!props.collapsed"
-        class="truncate font-medium text-foreground"
-      >
-        {{ statusLabel }}
+      <Settings class="size-4 shrink-0" />
+      <span v-if="!props.collapsed" class="truncate font-medium">
+        {{ $t('preferences.settingsTitle') }}
       </span>
     </button>
   </div>

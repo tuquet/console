@@ -158,6 +158,7 @@ exports[`defaultPreferences immutability test > should not modify the config obj
     "themeToggleButtonPosition": "header",
     "timezone": true,
     "timezoneButtonPosition": "header",
+    "userDropdownButtonPosition": "header",
   },
 }
 `;

@@ -384,6 +384,8 @@ interface WidgetPreferences {
   timezone: boolean;
   /** Timezone button position */
   timezoneButtonPosition: 'header' | 'none' | 'user-dropdown';
+  /** User dropdown position */
+  userDropdownButtonPosition: 'header' | 'none';
 }
 
 interface Preferences {
