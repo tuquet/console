@@ -5,7 +5,6 @@ import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { AuthenticationLoginExpiredModal } from '@operon/common-ui';
-import { DEFAULT_HOME_PATH } from '@operon/constants';
 import { useWatermark } from '@operon/hooks';
 import { BookOpenText, SvgGithubIcon } from '@operon/icons';
 import {
@@ -14,17 +13,9 @@ import {
   Notification,
   UserDropdown,
 } from '@operon/layouts';
-import {
-  preferences,
-  updatePreferences,
-  usePreferences,
-} from '@operon/preferences';
+import { preferences, usePreferences } from '@operon/preferences';
 import { useAccessStore, useUserStore } from '@operon/stores';
 import { openWindow } from '@operon/utils';
-
-import { Button, VbenLogo } from '@operon-core/shadcn-ui';
-
-import { PanelLeft } from '@lucide/vue';
 
 import DaemonStatusPill from '#/components/common/daemon-status-pill.vue';
 import LocalBridgeNotice from '#/components/common/local-bridge-notice.vue';
@@ -194,38 +185,8 @@ watch(
     @clear-preferences-and-logout="handleLogout"
     @logout="handleLogout"
   >
-    <template #sidebar-header="{ collapsed }">
-      <div class="flex flex-col gap-2 px-1 py-1">
-        <div
-          class="flex items-center"
-          :class="collapsed ? 'justify-center' : 'justify-between px-1'"
-        >
-          <button
-            v-if="!collapsed"
-            type="button"
-            class="flex items-center gap-2 rounded-md p-1 transition-colors hover:bg-accent/60"
-            @click="router.push(DEFAULT_HOME_PATH)"
-          >
-            <VbenLogo
-              :src="preferences.logo.source"
-              :src-dark="preferences.logo.sourceDark"
-              :text="preferences.app.name"
-              :logo-size="22"
-              collapsed
-            />
-          </button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            class="size-7 text-muted-foreground hover:text-foreground"
-            @click="updatePreferences({ sidebar: { collapsed: !collapsed } })"
-          >
-            <PanelLeft class="size-4" />
-          </Button>
-        </div>
-        <WorkspaceSelector v-if="isAuthenticated" :collapsed="collapsed" />
-      </div>
+    <template v-if="isAuthenticated" #sidebar-header="{ collapsed }">
+      <WorkspaceSelector :collapsed="collapsed" />
     </template>
     <template #sidebar-footer="{ collapsed }">
       <DaemonStatusPill :collapsed="collapsed" />
