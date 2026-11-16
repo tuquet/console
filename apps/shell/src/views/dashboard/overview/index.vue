@@ -332,14 +332,16 @@ function isLocked(mod: ModuleItem) {
           {{ $t('page.overview.modulesTitle') }}
         </p>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          <button
+          <Button
             v-for="mod in modules"
             :key="mod.path"
-            class="group relative flex flex-col gap-2 rounded-xl border p-4 text-left transition-all"
+            type="button"
+            variant="outline"
+            class="group relative h-auto flex-col items-stretch justify-start gap-2 rounded-xl p-4 text-left whitespace-normal transition-all"
             :class="
               isLocked(mod)
-                ? 'cursor-not-allowed border-border/40 bg-muted/20 opacity-60'
-                : 'cursor-pointer border-border/60 bg-card hover:border-border hover:shadow-sm'
+                ? 'border-border/40 bg-muted/20 opacity-60'
+                : 'border-border/60 bg-card hover:border-border hover:bg-card hover:shadow-sm'
             "
             :disabled="isLocked(mod)"
             @click="openModule(mod)"
@@ -382,7 +384,7 @@ function isLocked(mod: ModuleItem) {
                 {{ mod.description }}
               </p>
             </div>
-          </button>
+          </Button>
         </div>
         <p class="mt-3 text-[11px] text-muted-foreground">
           {{ $t('page.overview.modulesDesc') }}

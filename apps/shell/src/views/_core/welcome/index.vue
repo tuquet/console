@@ -154,11 +154,12 @@ async function copyInstallCommand() {
             {{ $t('page.welcome.startTitle') }}
           </h2>
           <div class="flex flex-col gap-1">
-            <button
+            <Button
               v-for="item in startActions"
               :key="item.title"
               type="button"
-              class="group flex items-start gap-3 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-accent/60"
+              variant="ghost"
+              class="group h-auto w-full items-start justify-start gap-3 rounded-lg px-2.5 py-2 text-left font-normal whitespace-normal hover:bg-accent/60"
               @click="item.action"
             >
               <component
@@ -175,7 +176,7 @@ async function copyInstallCommand() {
                   {{ item.description }}
                 </p>
               </div>
-            </button>
+            </Button>
           </div>
         </section>
 

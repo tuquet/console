@@ -39,6 +39,8 @@ import { useAccessStore, useUserStore } from '@operon/stores';
 import {
   Badge,
   Button,
+  Card,
+  CardContent,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -47,6 +49,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Separator,
   Tabs,
   TabsContent,
   TabsList,
@@ -476,12 +479,12 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
             </TabsList>
           </div>
 
-          <div
-            class="shrink-0 md:mt-auto md:border-t md:border-border/50 md:pt-2"
-          >
-            <button
+          <div class="shrink-0 md:mt-auto">
+            <Separator class="mb-2 hidden md:block" />
+            <Button
               type="button"
-              class="flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2 py-1.5 text-left transition-colors hover:bg-accent/60 md:py-2"
+              variant="ghost"
+              class="h-auto w-full justify-start gap-2.5 rounded-lg border border-transparent px-2 py-1.5 text-left font-normal hover:bg-accent/60 md:py-2"
               :class="{
                 'bg-accent/70 border-border/50': activeTab === 'account',
               }"
@@ -499,7 +502,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                   {{ accountDesc }}
                 </p>
               </div>
-            </button>
+            </Button>
           </div>
         </nav>
         <div class="min-h-0 min-w-0 flex-1 overflow-y-auto">
@@ -750,71 +753,73 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
               </p>
             </div>
 
-            <div
-              class="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-card/50 p-4"
+            <Card
+              class="rounded-xl border-border/60 bg-card/50 py-0 shadow-none"
             >
-              <div class="flex min-w-0 items-center gap-3">
-                <VbenAvatar :src="accountAvatar" class="size-11 shrink-0" />
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <p class="truncate text-sm font-medium text-foreground">
-                      {{ accountName }}
-                    </p>
-                    <Badge variant="outline" class="text-[10px]">
+              <CardContent class="flex items-center justify-between gap-4 p-4">
+                <div class="flex min-w-0 items-center gap-3">
+                  <VbenAvatar :src="accountAvatar" class="size-11 shrink-0" />
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                      <p class="truncate text-sm font-medium text-foreground">
+                        {{ accountName }}
+                      </p>
+                      <Badge variant="outline" class="text-[10px]">
+                        {{
+                          isAuthenticated
+                            ? 'Cloud'
+                            : $t('preferences.account.localSession')
+                        }}
+                      </Badge>
+                    </div>
+                    <p class="mt-0.5 truncate text-xs text-muted-foreground">
                       {{
                         isAuthenticated
-                          ? 'Cloud'
-                          : $t('preferences.account.localSession')
+                          ? $t('preferences.account.connectedDesc')
+                          : $t('preferences.account.localOnlyDesc')
                       }}
-                    </Badge>
+                    </p>
                   </div>
-                  <p class="mt-0.5 truncate text-xs text-muted-foreground">
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card class="rounded-xl border-border/60 py-0 shadow-none">
+              <CardContent class="flex items-center justify-between gap-4 p-4">
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-foreground">
+                    {{ $t('preferences.account.cloudSession') }}
+                  </p>
+                  <p class="mt-0.5 text-xs text-muted-foreground">
                     {{
                       isAuthenticated
-                        ? $t('preferences.account.connectedDesc')
+                        ? accountDesc
                         : $t('preferences.account.localOnlyDesc')
                     }}
                   </p>
                 </div>
-              </div>
-            </div>
-
-            <div
-              class="flex items-center justify-between gap-4 rounded-xl border border-border/60 p-4"
-            >
-              <div class="min-w-0">
-                <p class="text-sm font-medium text-foreground">
-                  {{ $t('preferences.account.cloudSession') }}
-                </p>
-                <p class="mt-0.5 text-xs text-muted-foreground">
-                  {{
-                    isAuthenticated
-                      ? accountDesc
-                      : $t('preferences.account.localOnlyDesc')
-                  }}
-                </p>
-              </div>
-              <Button
-                v-if="isAuthenticated"
-                variant="outline"
-                size="sm"
-                class="shrink-0 gap-1.5"
-                @click="handleAccountSignOut"
-              >
-                <LogOut class="size-3.5" />
-                {{ $t('preferences.account.signOut') }}
-              </Button>
-              <Button
-                v-else
-                variant="default"
-                size="sm"
-                class="shrink-0 gap-1.5"
-                @click="handleAccountSignIn"
-              >
-                <LogIn class="size-3.5" />
-                {{ $t('preferences.account.signIn') }}
-              </Button>
-            </div>
+                <Button
+                  v-if="isAuthenticated"
+                  variant="outline"
+                  size="sm"
+                  class="shrink-0 gap-1.5"
+                  @click="handleAccountSignOut"
+                >
+                  <LogOut class="size-3.5" />
+                  {{ $t('preferences.account.signOut') }}
+                </Button>
+                <Button
+                  v-else
+                  variant="default"
+                  size="sm"
+                  class="shrink-0 gap-1.5"
+                  @click="handleAccountSignIn"
+                >
+                  <LogIn class="size-3.5" />
+                  {{ $t('preferences.account.signIn') }}
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
         </div>
       </Tabs>

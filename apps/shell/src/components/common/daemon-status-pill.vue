@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { Button } from '@operon-core/shadcn-ui';
+
 import { Settings } from '@lucide/vue';
 
 import { $t } from '#/locales';
@@ -15,18 +17,20 @@ function openSettings() {
 </script>
 
 <template>
-  <div class="border-t border-border/50 p-2">
-    <button
+  <div>
+    <Button
       type="button"
+      variant="ghost"
+      :size="props.collapsed ? 'icon' : 'sm'"
       :title="$t('preferences.settingsTitle')"
-      class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
-      :class="props.collapsed ? 'justify-center px-0' : ''"
+      class="w-full gap-2.5 text-xs text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+      :class="props.collapsed ? 'justify-center px-0' : 'justify-start px-2.5'"
       @click="openSettings"
     >
       <Settings class="size-4 shrink-0" />
       <span v-if="!props.collapsed" class="truncate font-medium">
         {{ $t('preferences.settingsTitle') }}
       </span>
-    </button>
+    </Button>
   </div>
 </template>
