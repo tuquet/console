@@ -152,8 +152,8 @@ function setupAccessGuard(router: Router) {
       }
     }
 
-    // Core routes bypass access interceptor
-    if (coreRouteNames.includes(to.name as string)) {
+    // Core routes bypass access interceptor (Welcome still needs sidebar menus bootstrapped)
+    if (to.name !== 'Welcome' && coreRouteNames.includes(to.name as string)) {
       return handleCoreRouteNavigation(to);
     }
 
