@@ -163,7 +163,7 @@ const columns = createTaskColumns(
 </script>
 
 <template>
-  <div class="flex flex-col gap-3.5 p-4 sm:p-5">
+  <div class="flex h-full min-h-0 flex-col gap-3.5 overflow-hidden p-4 sm:p-5">
     <!-- Compact Single-Line Page Header -->
     <div class="flex items-center justify-between gap-2">
       <div class="flex items-center gap-2">
@@ -197,6 +197,7 @@ const columns = createTaskColumns(
 
     <!-- Reusable Generic DataTable Composed with Domain Slots -->
     <DataTable
+      class="min-h-0 flex-1"
       :columns="columns"
       :data="visibleTasks"
       row-key="id"

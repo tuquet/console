@@ -283,7 +283,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="flex flex-col gap-3.5">
+  <div class="flex min-h-0 flex-1 flex-col gap-3.5">
     <slot name="header" :table="table"></slot>
 
     <slot
@@ -296,7 +296,7 @@ defineExpose({
     ></slot>
 
     <div
-      class="bg-card border-border overflow-hidden rounded-lg border shadow-2xs"
+      class="bg-card border-border min-h-0 flex-1 overflow-auto rounded-lg border shadow-2xs"
     >
       <Table>
         <TableHeader class="bg-muted/35">
