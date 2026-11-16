@@ -216,7 +216,10 @@ const headerSlots = computed(() => {
         @clear-preferences-and-logout="clearPreferencesAndLogout"
         @logout="handleLogout"
       >
-        <template v-if="!showHeaderNav" #breadcrumb>
+        <template
+          v-if="preferences.widget.breadcrumbButtonPosition !== 'none'"
+          #breadcrumb
+        >
           <Breadcrumb
             :hide-when-only-one="preferences.breadcrumb.hideOnlyOne"
             :show-home="preferences.breadcrumb.showHome"

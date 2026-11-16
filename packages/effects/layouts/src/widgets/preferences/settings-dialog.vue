@@ -299,12 +299,9 @@ const {
   diffPreference,
   isDark,
   isFullContent,
-  isHeaderNav,
-  isHeaderSidebarNav,
   isMixedNav,
   preferencesExtension,
   isSideMode,
-  isSideNav,
 } = usePreferences();
 const { copy } = useClipboard({ legacy: true });
 
@@ -385,12 +382,7 @@ const tabs = computed((): SegmentedItem[] => {
 });
 
 const showBreadcrumbConfig = computed(() => {
-  return (
-    !isFullContent.value &&
-    !isMixedNav.value &&
-    !isHeaderNav.value &&
-    preferences.header.enable
-  );
+  return !isFullContent.value && preferences.header.enable;
 });
 
 async function handleCopy() {
@@ -427,7 +419,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
       :aria-describedby="undefined"
       :open="open"
       modal
-      class="flex h-[88vh] max-h-[88vh] w-[min(1100px,96vw)] max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-none"
+      class="flex h-[88vh] max-h-[88vh] w-[min(1100px,96vw)] max-w-none select-text flex-col gap-0 overflow-hidden p-0 sm:max-w-none [&_[data-slot=label]]:select-text"
       @close="open = false"
     >
       <DialogHeader class="shrink-0 border-b border-border px-6 py-4 pr-12">
@@ -579,10 +571,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:breadcrumb-show-home="breadcrumbShowHome"
                 v-model:breadcrumb-show-icon="breadcrumbShowIcon"
                 v-model:breadcrumb-style-type="breadcrumbStyleType"
-                :disabled="
-                  !showBreadcrumbConfig ||
-                  !(isSideNav || isMixedNav || isHeaderSidebarNav)
-                "
+                :disabled="!showBreadcrumbConfig"
               />
             </Block>
             <Block :title="$t('preferences.widget.title')">
