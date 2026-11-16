@@ -5,7 +5,7 @@
   --background: 0 0% 3.9%;
 
   /* Main content background color */
-  --background-deep: 0 0% 3.9%;
+  --background-deep: 0 0% 2.5%;
   --foreground: 0 0% 98%;
 
   /* Background color for <Card /> */
@@ -110,12 +110,12 @@
 
   /* =============component & UI============= */
 
-  --sidebar: 222.34deg 10.43% 12.27%;
+  --sidebar: 222.34deg 10.43% 14.5%;
   --sidebar-deep: 220deg 13.06% 9%;
   --menu: var(--sidebar);
 
   /* header */
-  --header: 222.34deg 10.43% 12.27%;
+  --header: 222.34deg 10.43% 14.5%;
 
   color-scheme: dark;
 }
@@ -141,9 +141,9 @@
   --border: 215 27.9% 16.9%;
   --input: 215 27.9% 16.9%;
   --ring: 263.4 70% 50.4%;
-  --sidebar: 224 71.4% 4.1%;
-  --sidebar-deep: 224 71.4% 4.1%;
-  --header: 224 71.4% 4.1%;
+  --sidebar: 224 71.4% 9.5%;
+  --sidebar-deep: 224 71.4% 7%;
+  --header: 224 71.4% 9.5%;
 }
 
 .dark[data-theme='pink'],
@@ -167,9 +167,9 @@
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
   --ring: 346.8 77.2% 49.8%;
-  --sidebar: 20 14.3% 4.1%;
-  --sidebar-deep: 20 14.3% 4.1%;
-  --header: 20 14.3% 4.1%;
+  --sidebar: 20 14.3% 9.5%;
+  --sidebar-deep: 20 14.3% 7%;
+  --header: 20 14.3% 9.5%;
 }
 
 .dark[data-theme='rose'],
@@ -193,9 +193,9 @@
   --border: 0 0% 14.9%;
   --input: 0 0% 14.9%;
   --ring: 0 72.2% 50.6%;
-  --sidebar: 0 0% 3.9%;
-  --sidebar-deep: 0 0% 3.9%;
-  --header: 0 0% 3.9%;
+  --sidebar: 0 0% 9.5%;
+  --sidebar-deep: 0 0% 7%;
+  --header: 0 0% 9.5%;
 }
 
 .dark[data-theme='sky-blue'],
@@ -219,9 +219,9 @@
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 224.3 76.3% 48%;
-  --sidebar: 222.2 84% 4.9%;
-  --sidebar-deep: 222.2 84% 4.9%;
-  --header: 222.2 84% 4.9%;
+  --sidebar: 222.2 84% 10%;
+  --sidebar-deep: 222.2 84% 7.5%;
+  --header: 222.2 84% 10%;
 }
 
 .dark[data-theme='deep-blue'],
@@ -245,9 +245,9 @@
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 224.3 76.3% 48%;
-  --sidebar: 222.2 84% 4.9%;
-  --sidebar-deep: 222.2 84% 4.9%;
-  --header: 222.2 84% 4.9%;
+  --sidebar: 222.2 84% 10%;
+  --sidebar-deep: 222.2 84% 7.5%;
+  --header: 222.2 84% 10%;
 }
 
 .dark[data-theme='green'],
@@ -271,9 +271,9 @@
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
   --ring: 142.4 71.8% 29.2%;
-  --sidebar: 20 14.3% 4.1%;
-  --sidebar-deep: 20 14.3% 4.1%;
-  --header: 20 14.3% 4.1%;
+  --sidebar: 20 14.3% 9.5%;
+  --sidebar-deep: 20 14.3% 7%;
+  --header: 20 14.3% 9.5%;
 }
 
 .dark[data-theme='deep-green'],
@@ -297,9 +297,9 @@
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
   --ring: 142.4 71.8% 29.2%;
-  --sidebar: 20 14.3% 4.1%;
-  --sidebar-deep: 20 14.3% 4.1%;
-  --header: 20 14.3% 4.1%;
+  --sidebar: 20 14.3% 9.5%;
+  --sidebar-deep: 20 14.3% 7%;
+  --header: 20 14.3% 9.5%;
 }
 
 .dark[data-theme='orange'],
@@ -323,9 +323,9 @@
   --border: 12 6.5% 15.1%;
   --input: 12 6.5% 15.1%;
   --ring: 20.5 90.2% 48.2%;
-  --sidebar: 20 14.3% 4.1%;
-  --sidebar-deep: 20 14.3% 4.1%;
-  --header: 20 14.3% 4.1%;
+  --sidebar: 20 14.3% 9.5%;
+  --sidebar-deep: 20 14.3% 7%;
+  --header: 20 14.3% 9.5%;
 }
 
 .dark[data-theme='yellow'],
@@ -349,9 +349,9 @@
   --border: 12 6.5% 15.1%;
   --input: 12 6.5% 15.1%;
   --ring: 35.5 91.7% 32.9%;
-  --sidebar: 20 14.3% 4.1%;
-  --sidebar-deep: 20 14.3% 4.1%;
-  --header: 20 14.3% 4.1%;
+  --sidebar: 20 14.3% 9.5%;
+  --sidebar-deep: 20 14.3% 7%;
+  --header: 20 14.3% 9.5%;
 }
 
 .dark[data-theme='zinc'],
@@ -375,9 +375,9 @@
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
   --ring: 240 5.2% 33.9%;
-  --sidebar: 240 10% 3.9%;
-  --sidebar-deep: 240 10% 3.9%;
-  --header: 240 10% 3.9%;
+  --sidebar: 240 10% 9.5%;
+  --sidebar-deep: 240 10% 7%;
+  --header: 240 10% 9.5%;
 }
 
 .dark[data-theme='neutral'],
@@ -401,9 +401,9 @@
   --border: 0 0% 14.9%;
   --input: 0 0% 14.9%;
   --ring: 0 0% 32.2%;
-  --sidebar: 0 0% 3.9%;
-  --sidebar-deep: 0 0% 3.9%;
-  --header: 0 0% 3.9%;
+  --sidebar: 0 0% 9.5%;
+  --sidebar-deep: 0 0% 7%;
+  --header: 0 0% 9.5%;
 }
 
 .dark[data-theme='slate'],
@@ -427,9 +427,9 @@
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 215.3 19.3% 34.5%;
-  --sidebar: 222.2 84% 4.9%;
-  --sidebar-deep: 222.2 84% 4.9%;
-  --header: 222.2 84% 4.9%;
+  --sidebar: 222.2 84% 10%;
+  --sidebar-deep: 222.2 84% 7.5%;
+  --header: 222.2 84% 10%;
 }
 
 .dark[data-theme='gray'],
@@ -453,7 +453,7 @@
   --border: 215 27.9% 16.9%;
   --input: 215 27.9% 16.9%;
   --ring: 215 13.8% 34.1%;
-  --sidebar: 224 71.4% 4.1%;
-  --sidebar-deep: 224 71.4% 4.1%;
-  --header: 224 71.4% 4.1%;
+  --sidebar: 224 71.4% 9.5%;
+  --sidebar-deep: 224 71.4% 7%;
+  --header: 224 71.4% 9.5%;
 }
