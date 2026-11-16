@@ -157,9 +157,7 @@ const widgetConfigMap = computed<
     },
     breadcrumb: {
       slotName: 'breadcrumb',
-      zone: preferences.breadcrumb.enable
-        ? resolveHeaderZone(preferences.widget.breadcrumbButtonPosition)
-        : null,
+      zone: resolveHeaderZone(preferences.widget.breadcrumbButtonPosition),
     },
     globalSearch: {
       slotName: 'global-search',

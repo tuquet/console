@@ -166,7 +166,6 @@ const headerMenuAlign = defineModel<LayoutHeaderMenuAlignType | undefined>(
   { default: undefined },
 );
 
-const breadcrumbEnable = defineModel<boolean>('breadcrumbEnable');
 const breadcrumbShowIcon = defineModel<boolean>('breadcrumbShowIcon');
 const breadcrumbShowHome = defineModel<boolean>('breadcrumbShowHome');
 const breadcrumbStyleType = defineModel<BreadcrumbStyleType | undefined>(
@@ -567,9 +566,11 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 :disabled-navigation-split="!isMixedNav"
               />
             </Block>
-            <Block :title="$t('preferences.breadcrumb.title')">
+            <Block
+              v-if="widgetBreadcrumbButtonPosition !== 'none'"
+              :title="$t('preferences.breadcrumb.title')"
+            >
               <Breadcrumb
-                v-model:breadcrumb-enable="breadcrumbEnable"
                 v-model:breadcrumb-hide-only-one="breadcrumbHideOnlyOne"
                 v-model:breadcrumb-show-home="breadcrumbShowHome"
                 v-model:breadcrumb-show-icon="breadcrumbShowIcon"
