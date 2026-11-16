@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 import {
   getLocalBridgeInstallInfo,
@@ -11,6 +12,7 @@ import { Badge, Button, toast } from '@operon-core/shadcn-ui';
 
 import {
   Activity,
+  ArrowLeft,
   CheckCircle2,
   Cloud,
   Copy,
@@ -26,9 +28,13 @@ import { useSampleStore } from '../stores/sample';
 
 defineOptions({ name: 'AutomationStarterView' });
 
+const router = useRouter();
 const kernel = useKernel();
 const sampleStore = useSampleStore();
 const bridge = useLocalBridgeHeartbeat({ intervalMs: 5000 });
+const hasOverviewRoute = computed(
+  () => router.resolve('/dashboard/overview').matched.length > 0,
+);
 
 const isCloud = computed(() => kernel.auth.hasCloudAuth);
 const installInfo = getLocalBridgeInstallInfo();
@@ -137,7 +143,16 @@ function handleNotify() {
               </p>
             </div>
           </div>
-          <div class="flex items-center gap-2 shrink-0">
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <Button
+              v-if="hasOverviewRoute"
+              size="sm"
+              variant="default"
+              @click="router.push('/dashboard/overview')"
+            >
+              <ArrowLeft class="size-3.5 mr-1.5" />
+              Getting Started
+            </Button>
             <Button
               size="sm"
               variant="outline"

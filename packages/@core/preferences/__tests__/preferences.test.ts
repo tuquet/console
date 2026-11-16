@@ -351,6 +351,27 @@ describe('preferences', () => {
     expect(preferenceManager.getPreferences().theme.mode).toBe('light');
   });
 
+  it('migrates legacy cached defaultHomePath values to /dashboard/overview', async () => {
+    const namespace = 'migrate-home-path';
+    const storageKey = `${namespace}-preferences`;
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        expiry: null,
+        value: { app: { defaultHomePath: '/automation/overview' } },
+      }),
+    );
+
+    await preferenceManager.initPreferences({
+      namespace,
+      overrides: { app: { defaultHomePath: '/dashboard/overview' } },
+    });
+
+    expect(preferenceManager.getPreferences().app.defaultHomePath).toBe(
+      '/dashboard/overview',
+    );
+  });
+
   it('initializes custom preferences extension with default values', async () => {
     const extension = {
       fields: [

@@ -159,6 +159,12 @@ class PreferenceManager {
       if (cachedApp.layout === 'header-mixed-nav') {
         cachedApp.layout = 'sidebar-nav';
       }
+      if (
+        cachedApp.defaultHomePath === '/automation/overview' ||
+        cachedApp.defaultHomePath === '/dashboard/analytics'
+      ) {
+        delete cachedApp.defaultHomePath;
+      }
     }
     if (cachedPreferences.sidebar) {
       delete (cachedPreferences.sidebar as Record<string, unknown>)
