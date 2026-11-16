@@ -69,7 +69,7 @@ const style = computed((): CSSProperties => {
       <slot name="toggle-button"> </slot>
     </div>
 
-    <div class="flex h-full min-w-0 flex-1 items-center">
+    <div class="flex h-full min-w-0 flex-1 items-center gap-2">
       <slot></slot>
     </div>
   </header>
