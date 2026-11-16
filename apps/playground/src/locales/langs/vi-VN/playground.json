@@ -14,7 +14,7 @@
   "overview_cta_toast": "Thử Shell Toast",
   "overview_toast_message": "Đã gửi thông báo qua useKernel().events.notify()",
   "overview_guide_title": "Nguyên tắc sử dụng",
-  "overview_guide_1": "Dùng UI primitives từ @operon-core/shadcn-ui (Button, Card, Badge, Dialog, Sheet) để đồng bộ theme và design tokens.",
+  "overview_guide_1": "Dùng UI primitives từ {'@'}operon-core/shadcn-ui (Button, Card, Badge, Dialog, Sheet) để đồng bộ theme và design tokens.",
   "overview_guide_2": "Dùng generic DataTable cho các bảng có tìm kiếm, bộ lọc đa chiều, phân trang, xuất CSV và Sheet chi tiết.",
   "overview_guide_3": "Giao tiếp thông báo, phiên đăng nhập và workspace qua useKernel() thay vì import trực tiếp store của shell.",
   "overview_card_datatable_title": "DataTable & Bộ lọc",
@@ -22,8 +22,8 @@
   "overview_card_primitives_title": "UI Primitives",
   "overview_card_primitives_desc": "Bộ component shadcn-vue chuẩn hóa, đồng bộ biến màu semantic Tailwind v4.",
   "overview_card_overlays_title": "Overlays & Form",
-  "overview_card_overlays_desc": "Dialog, Drawer/Sheet và schema form chuẩn từ @operon-core/popup-ui & form-ui.",
+  "overview_card_overlays_desc": "Dialog, Drawer/Sheet và schema form chuẩn từ {'@'}operon-core/popup-ui & form-ui.",
   "overview_card_kernel_title": "Tích hợp Kernel",
-  "overview_card_kernel_desc": "Gửi thông báo toast, đọc trạng thái auth và kết nối local daemon qua @operon/kernel.",
+  "overview_card_kernel_desc": "Gửi thông báo toast, đọc trạng thái auth và kết nối local daemon qua {'@'}operon/kernel.",
   "overview_card_action_view": "Xem demo thực tế"
 }

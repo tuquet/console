@@ -14,7 +14,7 @@
   "overview_cta_toast": "Test Shell Toast",
   "overview_toast_message": "Notification sent via useKernel().events.notify()",
   "overview_guide_title": "Adoption Guidelines",
-  "overview_guide_1": "Use @operon-core/shadcn-ui primitives (Button, Card, Badge, Dialog, Sheet) for consistent styling and theme tokens.",
+  "overview_guide_1": "Use {'@'}operon-core/shadcn-ui primitives (Button, Card, Badge, Dialog, Sheet) for consistent styling and theme tokens.",
   "overview_guide_2": "Use the generic DataTable wrapper for searchable, filterable, paginated tables with CSV export and row selection.",
   "overview_guide_3": "Consume host notifications, auth, and active workspace via useKernel() instead of importing shell stores directly.",
   "overview_card_datatable_title": "DataTable & Filters",
@@ -22,8 +22,8 @@
   "overview_card_primitives_title": "UI Primitives",
   "overview_card_primitives_desc": "Accessible shadcn-vue components styled with Tailwind v4 semantic design tokens.",
   "overview_card_overlays_title": "Overlays & Forms",
-  "overview_card_overlays_desc": "Standardized Dialog, Drawer/Sheet, and schema-driven forms from @operon-core/popup-ui & form-ui.",
+  "overview_card_overlays_desc": "Standardized Dialog, Drawer/Sheet, and schema-driven forms from {'@'}operon-core/popup-ui & form-ui.",
   "overview_card_kernel_title": "Kernel Integration",
-  "overview_card_kernel_desc": "Cross-app toast events, auth identity, and local daemon bridge via @operon/kernel.",
+  "overview_card_kernel_desc": "Cross-app toast events, auth identity, and local daemon bridge via {'@'}operon/kernel.",
   "overview_card_action_view": "View live demo"
 }
