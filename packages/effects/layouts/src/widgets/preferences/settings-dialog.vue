@@ -24,7 +24,6 @@ import {
   LogOut,
   Palette,
   Settings,
-  User,
 } from '@operon/icons';
 import { $t, loadLocaleMessages } from '@operon/locales';
 import {
@@ -367,11 +366,6 @@ const tabs = computed((): SegmentedItem[] => {
       label: $t('preferences.shortcutKeys.title'),
       value: 'shortcutKey',
     },
-    {
-      icon: User,
-      label: $t('preferences.account.title'),
-      value: 'account',
-    },
   ];
 });
 
@@ -422,7 +416,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
       @close="open = false"
     >
       <DialogHeader class="shrink-0 border-b border-border px-6 py-4 pr-12">
-        <DialogTitle>{{ $t('preferences.settingsDescription') }}</DialogTitle>
+        <DialogTitle>{{ $t('preferences.settingsTitle') }}</DialogTitle>
       </DialogHeader>
 
       <Tabs
@@ -431,9 +425,9 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
         class="min-h-0 w-full flex-1 gap-0 overflow-hidden md:flex-row"
       >
         <nav
-          class="shrink-0 overflow-x-auto border-b border-border p-2 md:flex md:w-52 md:flex-col md:justify-between md:border-b-0 md:border-r md:py-4"
+          class="flex shrink-0 items-center justify-between gap-2 overflow-x-auto border-b border-border p-2 md:w-52 md:flex-col md:items-stretch md:border-b-0 md:border-r md:py-4"
         >
-          <div>
+          <div class="min-w-0 flex-1 md:flex-none">
             <p
               class="mb-2 hidden px-2 text-xs font-medium text-muted-foreground md:block"
             >
@@ -455,24 +449,31 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
             </TabsList>
           </div>
 
-          <button
-            type="button"
-            class="mt-3 hidden w-full items-center gap-2.5 rounded-lg border border-transparent px-2 py-2 text-left transition-colors hover:bg-accent/60 md:flex"
-            :class="{
-              'bg-accent/70 border-border/50': activeTab === 'account',
-            }"
-            @click="activeTab = 'account'"
+          <div
+            class="shrink-0 md:mt-auto md:border-t md:border-border/50 md:pt-2"
           >
-            <VbenAvatar :src="accountAvatar" class="size-8 shrink-0" />
-            <div class="min-w-0 flex-1 leading-tight">
-              <p class="truncate text-xs font-medium text-foreground">
-                {{ accountName }}
-              </p>
-              <p class="truncate text-[11px] text-muted-foreground">
-                {{ accountDesc }}
-              </p>
-            </div>
-          </button>
+            <button
+              type="button"
+              class="flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2 py-1.5 text-left transition-colors hover:bg-accent/60 md:py-2"
+              :class="{
+                'bg-accent/70 border-border/50': activeTab === 'account',
+              }"
+              @click="activeTab = 'account'"
+            >
+              <VbenAvatar
+                :src="accountAvatar"
+                class="size-7 shrink-0 md:size-8"
+              />
+              <div class="hidden min-w-0 flex-1 leading-tight md:block">
+                <p class="truncate text-xs font-medium text-foreground">
+                  {{ accountName }}
+                </p>
+                <p class="truncate text-[11px] text-muted-foreground">
+                  {{ accountDesc }}
+                </p>
+              </div>
+            </button>
+          </div>
         </nav>
         <div class="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <TabsContent

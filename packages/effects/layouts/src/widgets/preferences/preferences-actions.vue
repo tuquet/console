@@ -9,12 +9,12 @@ defineEmits<{ reset: []; copy: []; clear: [] }>();
 </script>
 
 <template>
-  <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-    <div class="flex flex-wrap gap-2">
+  <div class="flex w-full items-center justify-between gap-2">
+    <div class="flex items-center gap-1.5">
       <Button
         type="button"
         size="sm"
-        variant="outline"
+        variant="ghost"
         :disabled="!canReset"
         @click="$emit('reset')"
       >
@@ -25,7 +25,7 @@ defineEmits<{ reset: []; copy: []; clear: [] }>();
         v-if="showCopy"
         type="button"
         size="sm"
-        variant="outline"
+        variant="ghost"
         :disabled="!canReset"
         @click="$emit('copy')"
       >
@@ -36,8 +36,8 @@ defineEmits<{ reset: []; copy: []; clear: [] }>();
     <Button
       type="button"
       size="sm"
-      variant="destructive"
-      class="sm:ml-auto"
+      variant="ghost"
+      class="text-destructive hover:bg-destructive/10 hover:text-destructive"
       @click="$emit('clear')"
     >
       <LogOut data-icon="inline-start" />
