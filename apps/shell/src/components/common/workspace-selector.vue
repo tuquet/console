@@ -4,6 +4,8 @@ import type { Tenant } from '#/api/core/tenant';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { useAccessStore } from '@operon/stores';
+
 import {
   Badge,
   Button,
@@ -41,7 +43,10 @@ interface Props {
 }
 
 const router = useRouter();
+const accessStore = useAccessStore();
 const workspaceStore = useWorkspaceStore();
+
+const isAuthenticated = computed(() => Boolean(accessStore.accessToken));
 
 const isOpen = ref(false);
 const searchQuery = ref('');
@@ -78,6 +83,11 @@ function handleManageWorkspaces() {
 function openCreateModal() {
   isOpen.value = false;
   isCreateModalOpen.value = true;
+}
+
+function openSettings() {
+  isOpen.value = false;
+  window.dispatchEvent(new CustomEvent('open-preferences'));
 }
 </script>
 
@@ -162,99 +172,120 @@ function openCreateModal() {
         :side="props.collapsed ? 'right' : 'bottom'"
         :side-offset="6"
       >
-        <!-- Search Bar -->
-        <div class="flex items-center border-b border-border px-3 py-2">
-          <Search class="mr-2 size-3.5 shrink-0 text-muted-foreground" />
-          <Input
-            v-model="searchQuery"
-            type="text"
-            data-testid="workspace-search-input"
-            :placeholder="$t('page.workspace.selector_search')"
-            class="h-6 w-full border-0 bg-transparent px-2.5 py-1 shadow-none focus-visible:ring-0 placeholder:text-muted-foreground text-foreground"
-          />
+        <div
+          v-if="!isAuthenticated"
+          class="flex flex-col items-center gap-2.5 px-4 py-5 text-center"
+        >
+          <p class="text-xs text-muted-foreground leading-relaxed">
+            {{ $t('page.workspace.local_mode_hint') }}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            class="h-8 gap-1.5 text-xs"
+            @click="openSettings"
+          >
+            <Settings class="size-3.5" />
+            {{ $t('page.workspace.open_settings') }}
+          </Button>
         </div>
 
-        <!-- Workspaces List -->
-        <div class="max-h-60 overflow-y-auto p-1.5 flex flex-col gap-0.5">
-          <div
-            class="px-2 py-1 font-semibold uppercase tracking-wider text-muted-foreground"
-          >
-            {{ $t('page.workspace.tenants_label') }}
+        <template v-else>
+          <!-- Search Bar -->
+          <div class="flex items-center border-b border-border px-3 py-2">
+            <Search class="mr-2 size-3.5 shrink-0 text-muted-foreground" />
+            <Input
+              v-model="searchQuery"
+              type="text"
+              data-testid="workspace-search-input"
+              :placeholder="$t('page.workspace.selector_search')"
+              class="h-6 w-full border-0 bg-transparent px-2.5 py-1 shadow-none focus-visible:ring-0 placeholder:text-muted-foreground text-foreground"
+            />
           </div>
 
-          <Button
-            v-for="ws in filteredWorkspaces"
-            :key="ws.id"
-            type="button"
-            variant="ghost"
-            class="flex h-auto w-full items-center justify-between rounded-sm px-2 py-1.5 text-left transition-colors"
-            :class="
-              ws.id === activeWorkspace?.id
-                ? 'bg-accent  text-accent-foreground'
-                : 'hover:bg-muted/70 text-foreground'
-            "
-            @click="handleSelectWorkspace(ws)"
-          >
-            <div class="flex items-center gap-2 min-w-0">
-              <div
-                class="flex size-6 shrink-0 items-center justify-center rounded-sm border border-border/60 bg-muted/60 font-semibold text-foreground"
-              >
-                {{ ws.name.charAt(0).toUpperCase() }}
-              </div>
-              <div class="flex flex-col min-w-0 leading-tight">
-                <span class="truncate">{{ ws.name }}</span>
-                <span class="truncate text-muted-foreground">
-                  {{ ws.slug }}
-                </span>
-              </div>
+          <!-- Workspaces List -->
+          <div class="max-h-60 overflow-y-auto p-1.5 flex flex-col gap-0.5">
+            <div
+              class="px-2 py-1 font-semibold uppercase tracking-wider text-muted-foreground"
+            >
+              {{ $t('page.workspace.tenants_label') }}
             </div>
 
-            <div class="flex items-center gap-1.5 shrink-0 ml-2">
-              <Badge variant="outline" class="px-1 py-0 capitalize">
-                {{ ws.metadata?.plan || 'Pro' }}
-              </Badge>
-              <Check
-                v-if="ws.id === activeWorkspace?.id"
-                class="size-3.5 text-primary"
-              />
-            </div>
-          </Button>
+            <Button
+              v-for="ws in filteredWorkspaces"
+              :key="ws.id"
+              type="button"
+              variant="ghost"
+              class="flex h-auto w-full items-center justify-between rounded-sm px-2 py-1.5 text-left transition-colors"
+              :class="
+                ws.id === activeWorkspace?.id
+                  ? 'bg-accent  text-accent-foreground'
+                  : 'hover:bg-muted/70 text-foreground'
+              "
+              @click="handleSelectWorkspace(ws)"
+            >
+              <div class="flex items-center gap-2 min-w-0">
+                <div
+                  class="flex size-6 shrink-0 items-center justify-center rounded-sm border border-border/60 bg-muted/60 font-semibold text-foreground"
+                >
+                  {{ ws.name.charAt(0).toUpperCase() }}
+                </div>
+                <div class="flex flex-col min-w-0 leading-tight">
+                  <span class="truncate">{{ ws.name }}</span>
+                  <span class="truncate text-muted-foreground">
+                    {{ ws.slug }}
+                  </span>
+                </div>
+              </div>
 
-          <Empty
-            v-if="filteredWorkspaces.length === 0"
-            class="border-none py-5"
-          >
-            <EmptyHeader>
-              <EmptyDescription>
-                {{ $t('page.workspace.no_workspaces_found') }}
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        </div>
+              <div class="flex items-center gap-1.5 shrink-0 ml-2">
+                <Badge variant="outline" class="px-1 py-0 capitalize">
+                  {{ ws.metadata?.plan || 'Pro' }}
+                </Badge>
+                <Check
+                  v-if="ws.id === activeWorkspace?.id"
+                  class="size-3.5 text-primary"
+                />
+              </div>
+            </Button>
 
-        <!-- Quick Actions Footer -->
-        <div
-          class="border-t border-border p-1 bg-muted/20 flex flex-col gap-0.5"
-        >
-          <Button
-            type="button"
-            variant="ghost"
-            class="flex h-auto w-full items-center justify-start gap-2 rounded-sm px-2 py-1.5 text-left text-foreground transition-colors hover:bg-muted/70"
-            @click="handleManageWorkspaces"
+            <Empty
+              v-if="filteredWorkspaces.length === 0"
+              class="border-none py-5"
+            >
+              <EmptyHeader>
+                <EmptyDescription>
+                  {{ $t('page.workspace.no_workspaces_found') }}
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </div>
+
+          <!-- Quick Actions Footer -->
+          <div
+            class="border-t border-border p-1 bg-muted/20 flex flex-col gap-0.5"
           >
-            <Settings class="size-3.5 text-muted-foreground" />
-            <span>{{ $t('page.workspace.manage_workspaces') }}</span>
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            class="flex h-auto w-full items-center justify-start gap-2 rounded-sm px-2 py-1.5 text-left text-primary transition-colors hover:bg-primary/10 hover:text-primary"
-            @click="openCreateModal"
-          >
-            <Plus class="size-3.5" />
-            <span>{{ $t('page.workspace.create_workspace') }}</span>
-          </Button>
-        </div>
+            <Button
+              type="button"
+              variant="ghost"
+              class="flex h-auto w-full items-center justify-start gap-2 rounded-sm px-2 py-1.5 text-left text-foreground transition-colors hover:bg-muted/70"
+              @click="handleManageWorkspaces"
+            >
+              <Settings class="size-3.5 text-muted-foreground" />
+              <span>{{ $t('page.workspace.manage_workspaces') }}</span>
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              class="flex h-auto w-full items-center justify-start gap-2 rounded-sm px-2 py-1.5 text-left text-primary transition-colors hover:bg-primary/10 hover:text-primary"
+              @click="openCreateModal"
+            >
+              <Plus class="size-3.5" />
+              <span>{{ $t('page.workspace.create_workspace') }}</span>
+            </Button>
+          </div>
+        </template>
       </PopoverContent>
     </Popover>
 

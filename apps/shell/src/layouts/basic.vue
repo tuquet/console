@@ -17,8 +17,6 @@ import { preferences, usePreferences } from '@operon/preferences';
 import { useAccessStore, useUserStore } from '@operon/stores';
 import { openWindow } from '@operon/utils';
 
-import { LogIn } from '@lucide/vue';
-
 import LocalBridgeNotice from '#/components/common/local-bridge-notice.vue';
 import WorkspaceSelector from '#/components/common/workspace-selector.vue';
 import { $t } from '#/locales';
@@ -73,16 +71,7 @@ const menus = computed(() => {
     ];
   }
 
-  return [
-    {
-      handler: () => {
-        openLoginModal();
-      },
-      icon: LogIn,
-      text: $t('authentication.login') || 'Sign In',
-    },
-    ...baseMenus,
-  ];
+  return baseMenus;
 });
 
 const avatar = computed(() => {
@@ -90,10 +79,6 @@ const avatar = computed(() => {
 });
 
 const isAuthenticated = computed(() => Boolean(accessStore.accessToken));
-
-function openLoginModal() {
-  accessStore.setLoginExpired(true);
-}
 
 async function handleLogout() {
   await authStore.logout(false);
@@ -234,6 +219,12 @@ watch(
       <AuthenticationLoginExpiredModal
         v-model:open="accessStore.loginExpired"
         :avatar
+        :title="
+          isAuthenticated ? undefined : $t('authentication.cloudSignInTitle')
+        "
+        :sub-title="
+          isAuthenticated ? undefined : $t('authentication.cloudSignInSubTitle')
+        "
       >
         <LoginForm />
       </AuthenticationLoginExpiredModal>

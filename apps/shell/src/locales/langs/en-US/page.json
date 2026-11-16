@@ -138,6 +138,8 @@
     "create_success": "Workspace created: {name}",
     "create_failed": "Failed to create workspace",
     "fetch_failed": "Failed to load workspaces",
+    "local_mode_hint": "Local mode · Sign in via Settings to sync workspaces",
+    "open_settings": "Open Settings",
     "switched_to": "Switched to workspace: {name}",
     "selector_search": "Search workspaces...",
     "manage_workspaces": "Manage Workspaces",

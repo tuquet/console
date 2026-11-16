@@ -58,6 +58,8 @@
   "google": "Google",
   "loginAgainTitle": "Vui lòng đăng nhập lại",
   "loginAgainSubTitle": "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.",
+  "cloudSignInTitle": "Đăng nhập Operon Cloud",
+  "cloudSignInSubTitle": "Kết nối tài khoản để đồng bộ workspaces và cài đặt Cloud.",
   "missingAccessToken": "Chưa đăng nhập: thiếu accessToken",
   "invalidTokenSub": "Token không hợp lệ: thiếu sub",
   "supabaseRequestFailed": "Lỗi yêu cầu Supabase ({status})",

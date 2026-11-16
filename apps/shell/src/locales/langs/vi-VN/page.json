@@ -138,6 +138,8 @@
     "create_success": "Tạo thành công workspace: {name}",
     "create_failed": "Tạo workspace thất bại",
     "fetch_failed": "Không thể tải danh sách workspace",
+    "local_mode_hint": "Chế độ cục bộ · Đăng nhập trong Cài đặt để đồng bộ workspace",
+    "open_settings": "Mở Cài đặt",
     "switched_to": "Đã chuyển sang workspace: {name}",
     "selector_search": "Tìm kiếm workspace...",
     "manage_workspaces": "Quản lý Workspaces",

@@ -278,5 +278,16 @@
     "inter": "Inter (Mặc định)",
     "roboto": "Roboto",
     "systemUi": "System UI"
+  },
+  "account": {
+    "title": "Tài khoản",
+    "description": "Quản lý phiên đăng nhập Operon Cloud và danh tính đồng bộ.",
+    "cloudSession": "Phiên Cloud",
+    "connectedDesc": "Đã đăng nhập và đồng bộ với Operon Cloud.",
+    "localOnlyDesc": "Đang hoạt động ở chế độ cục bộ, chưa kết nối tài khoản Cloud.",
+    "localOperator": "Local Operator",
+    "localSession": "Phiên cục bộ",
+    "signIn": "Đăng nhập",
+    "signOut": "Đăng xuất"
   }
 }

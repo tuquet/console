@@ -58,6 +58,8 @@
   "google": "Google",
   "loginAgainTitle": "Please sign in again",
   "loginAgainSubTitle": "Your session has expired. Please sign in again.",
+  "cloudSignInTitle": "Sign in to Operon Cloud",
+  "cloudSignInSubTitle": "Connect your account to sync workspaces and cloud settings.",
   "missingAccessToken": "Unauthenticated: missing accessToken",
   "invalidTokenSub": "Invalid token: missing sub",
   "supabaseRequestFailed": "Supabase request failed ({status})",

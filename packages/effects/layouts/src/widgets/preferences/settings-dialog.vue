@@ -17,7 +17,15 @@ import type { SegmentedItem } from '@operon-core/shadcn-ui';
 
 import { computed, ref } from 'vue';
 
-import { Keyboard, LayoutTemplate, Palette, Settings } from '@operon/icons';
+import {
+  Keyboard,
+  LayoutTemplate,
+  LogIn,
+  LogOut,
+  Palette,
+  Settings,
+  User,
+} from '@operon/icons';
 import { $t, loadLocaleMessages } from '@operon/locales';
 import {
   clearCache,
@@ -26,8 +34,11 @@ import {
   updateCustomPreferences,
   usePreferences,
 } from '@operon/preferences';
+import { useAccessStore, useUserStore } from '@operon/stores';
 
 import {
+  Badge,
+  Button,
   Dialog,
   DialogContent,
   DialogFooter,
@@ -37,6 +48,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  VbenAvatar,
 } from '@operon-core/shadcn-ui';
 import { globalShareState } from '@operon-core/shared/global-state';
 
@@ -305,6 +317,34 @@ const mergedDiffPreference = computed(() => {
   return Object.keys(result).length > 0 ? result : undefined;
 });
 
+const accessStore = useAccessStore();
+const userStore = useUserStore();
+
+const isAuthenticated = computed(() => Boolean(accessStore.accessToken));
+const accountName = computed(() =>
+  isAuthenticated.value
+    ? userStore.userInfo?.realName || userStore.userInfo?.username || 'User'
+    : $t('preferences.account.localOperator'),
+);
+const accountDesc = computed(() =>
+  isAuthenticated.value
+    ? userStore.userInfo?.username || ''
+    : $t('preferences.account.localSession'),
+);
+const accountAvatar = computed(
+  () => userStore.userInfo?.avatar || preferences.app.defaultAvatar,
+);
+
+function handleAccountSignIn() {
+  open.value = false;
+  accessStore.setLoginExpired(true);
+}
+
+function handleAccountSignOut() {
+  open.value = false;
+  emit('clearPreferencesAndLogout');
+}
+
 const tabs = computed((): SegmentedItem[] => {
   return [
     {
@@ -326,6 +366,11 @@ const tabs = computed((): SegmentedItem[] => {
       icon: Keyboard,
       label: $t('preferences.shortcutKeys.title'),
       value: 'shortcutKey',
+    },
+    {
+      icon: User,
+      label: $t('preferences.account.title'),
+      value: 'account',
     },
   ];
 });
@@ -386,27 +431,48 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
         class="min-h-0 w-full flex-1 gap-0 overflow-hidden md:flex-row"
       >
         <nav
-          class="shrink-0 overflow-x-auto border-b border-border p-2 md:w-52 md:border-b-0 md:border-r md:py-4"
+          class="shrink-0 overflow-x-auto border-b border-border p-2 md:flex md:w-52 md:flex-col md:justify-between md:border-b-0 md:border-r md:py-4"
         >
-          <p
-            class="mb-2 hidden px-2 text-xs font-medium text-muted-foreground md:block"
-          >
-            {{ $t('preferences.title') }}
-          </p>
-          <TabsList
-            :aria-label="$t('preferences.title')"
-            class="h-auto min-w-full justify-start gap-1 md:w-full md:flex-col md:items-stretch"
-          >
-            <TabsTrigger
-              v-for="tab in tabs"
-              :key="tab.value"
-              :value="tab.value"
-              class="h-9 shrink-0 gap-2 md:w-full md:flex-none md:justify-start"
+          <div>
+            <p
+              class="mb-2 hidden px-2 text-xs font-medium text-muted-foreground md:block"
             >
-              <component :is="tab.icon" />
-              {{ tab.label }}
-            </TabsTrigger>
-          </TabsList>
+              {{ $t('preferences.title') }}
+            </p>
+            <TabsList
+              :aria-label="$t('preferences.title')"
+              class="h-auto min-w-full justify-start gap-1 md:w-full md:flex-col md:items-stretch"
+            >
+              <TabsTrigger
+                v-for="tab in tabs"
+                :key="tab.value"
+                :value="tab.value"
+                class="h-9 shrink-0 gap-2 md:w-full md:flex-none md:justify-start"
+              >
+                <component :is="tab.icon" />
+                {{ tab.label }}
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <button
+            type="button"
+            class="mt-3 hidden w-full items-center gap-2.5 rounded-lg border border-transparent px-2 py-2 text-left transition-colors hover:bg-accent/60 md:flex"
+            :class="{
+              'bg-accent/70 border-border/50': activeTab === 'account',
+            }"
+            @click="activeTab = 'account'"
+          >
+            <VbenAvatar :src="accountAvatar" class="size-8 shrink-0" />
+            <div class="min-w-0 flex-1 leading-tight">
+              <p class="truncate text-xs font-medium text-foreground">
+                {{ accountName }}
+              </p>
+              <p class="truncate text-[11px] text-muted-foreground">
+                {{ accountDesc }}
+              </p>
+            </div>
+          </button>
         </nav>
         <div class="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <TabsContent
@@ -610,6 +676,85 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:transition-progress="transitionProgress"
               />
             </Block>
+          </TabsContent>
+          <TabsContent
+            value="account"
+            class="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-4 md:px-8 md:py-6"
+          >
+            <div>
+              <h3 class="text-base font-semibold text-foreground">
+                {{ $t('preferences.account.title') }}
+              </h3>
+              <p class="mt-0.5 text-xs text-muted-foreground">
+                {{ $t('preferences.account.description') }}
+              </p>
+            </div>
+
+            <div
+              class="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-card/50 p-4"
+            >
+              <div class="flex min-w-0 items-center gap-3">
+                <VbenAvatar :src="accountAvatar" class="size-11 shrink-0" />
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <p class="truncate text-sm font-medium text-foreground">
+                      {{ accountName }}
+                    </p>
+                    <Badge variant="outline" class="text-[10px]">
+                      {{
+                        isAuthenticated
+                          ? 'Cloud'
+                          : $t('preferences.account.localSession')
+                      }}
+                    </Badge>
+                  </div>
+                  <p class="mt-0.5 truncate text-xs text-muted-foreground">
+                    {{
+                      isAuthenticated
+                        ? $t('preferences.account.connectedDesc')
+                        : $t('preferences.account.localOnlyDesc')
+                    }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="flex items-center justify-between gap-4 rounded-xl border border-border/60 p-4"
+            >
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-foreground">
+                  {{ $t('preferences.account.cloudSession') }}
+                </p>
+                <p class="mt-0.5 text-xs text-muted-foreground">
+                  {{
+                    isAuthenticated
+                      ? accountDesc
+                      : $t('preferences.account.localOnlyDesc')
+                  }}
+                </p>
+              </div>
+              <Button
+                v-if="isAuthenticated"
+                variant="outline"
+                size="sm"
+                class="shrink-0 gap-1.5"
+                @click="handleAccountSignOut"
+              >
+                <LogOut class="size-3.5" />
+                {{ $t('preferences.account.signOut') }}
+              </Button>
+              <Button
+                v-else
+                variant="default"
+                size="sm"
+                class="shrink-0 gap-1.5"
+                @click="handleAccountSignIn"
+              >
+                <LogIn class="size-3.5" />
+                {{ $t('preferences.account.signIn') }}
+              </Button>
+            </div>
           </TabsContent>
         </div>
       </Tabs>

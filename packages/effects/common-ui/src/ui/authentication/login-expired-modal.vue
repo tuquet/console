@@ -10,6 +10,8 @@ import { Button, Slot, VbenAvatar } from '@operon-core/shadcn-ui';
 
 interface Props extends AuthenticationProps {
   avatar?: string;
+  subTitle?: string;
+  title?: string;
   zIndex?: number;
 }
 
@@ -19,6 +21,8 @@ defineOptions({
 
 const props = withDefaults(defineProps<Props>(), {
   avatar: '',
+  subTitle: '',
+  title: '',
   zIndex: 0,
 });
 
@@ -102,8 +106,8 @@ function calcZIndex() {
         :show-forget-password="false"
         :show-register="false"
         :show-remember-me="false"
-        :sub-title="$t('authentication.loginAgainSubTitle')"
-        :title="$t('authentication.loginAgainTitle')"
+        :sub-title="props.subTitle || $t('authentication.loginAgainSubTitle')"
+        :title="props.title || $t('authentication.loginAgainTitle')"
       >
         <slot> </slot>
       </Slot>

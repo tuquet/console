@@ -278,5 +278,16 @@
     "inter": "Inter (Default)",
     "roboto": "Roboto",
     "systemUi": "System UI"
+  },
+  "account": {
+    "title": "Account",
+    "description": "Manage your Operon Cloud session and sync identity.",
+    "cloudSession": "Cloud Session",
+    "connectedDesc": "Signed in and synced with Operon Cloud.",
+    "localOnlyDesc": "Operating in local-first mode without a Cloud account.",
+    "localOperator": "Local Operator",
+    "localSession": "Local Session",
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
   }
 }
