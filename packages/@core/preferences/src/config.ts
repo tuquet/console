@@ -146,6 +146,7 @@ const defaultPreferences: Preferences = {
     refresh: true,
     refreshButtonPosition: 'header',
     sidebarToggle: true,
+    sidebarToggleButtonPosition: 'header-left',
     themeToggle: true,
     themeToggleButtonPosition: 'header',
     timezone: true,
@@ -153,6 +154,7 @@ const defaultPreferences: Preferences = {
     userDropdownButtonPosition: 'header',
     order: [
       'logo',
+      'sidebarToggle',
       'breadcrumb',
       'globalSearch',
       'preferences',

@@ -63,11 +63,13 @@ export const overridesPreferences = defineOverridesPreferences({
     logoutButtonPosition: 'none',
     notificationButtonPosition: 'none',
     refreshButtonPosition: 'none',
+    sidebarToggleButtonPosition: 'header-left',
     themeToggleButtonPosition: 'none',
     timezoneButtonPosition: 'none',
     userDropdownButtonPosition: 'none',
     order: [
       'logo',
+      'sidebarToggle',
       'breadcrumb',
       'logoutBtn',
       'lockScreenBtn',

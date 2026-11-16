@@ -2,7 +2,11 @@
 import { computed, onMounted, onUnmounted, ref, useSlots } from 'vue';
 
 import { useRefresh } from '@operon/hooks';
-import { preferences, usePreferences } from '@operon/preferences';
+import {
+  preferences,
+  updatePreferences,
+  usePreferences,
+} from '@operon/preferences';
 import { useAccessStore } from '@operon/stores';
 
 import { useFullscreen, useMagicKeys, whenever } from '@vueuse/core';
@@ -50,6 +54,7 @@ const {
   globalLockScreenShortcutKey,
   globalLogoutShortcutKey,
   globalSearchShortcutKey,
+  isMobile,
   preferencesButtonPosition,
 } = usePreferences();
 const slots = useSlots();
@@ -155,6 +160,13 @@ const widgetConfigMap = computed<
         ? resolveHeaderZone(preferences.widget.logoButtonPosition)
         : null,
     },
+    sidebarToggle: {
+      slotName: 'sidebar-toggle',
+      zone:
+        !isMobile.value && preferences.widget.sidebarToggle
+          ? resolveHeaderZone(preferences.widget.sidebarToggleButtonPosition)
+          : null,
+    },
     breadcrumb: {
       slotName: 'breadcrumb',
       zone: resolveHeaderZone(preferences.widget.breadcrumbButtonPosition),
@@ -256,6 +268,14 @@ function nextIndex(list: Array<SlotItem>) {
   return index + 1;
 }
 
+function toggleSidebar() {
+  updatePreferences({
+    sidebar: {
+      hidden: !preferences.sidebar.hidden,
+    },
+  });
+}
+
 function openGlobalSearch() {
   window.dispatchEvent(
     new CustomEvent('open-command-palette', {
@@ -310,6 +330,7 @@ onMounted(() => {
           @open-lock="handleOpenLock"
           @logout="handleLogout"
           @refresh="refresh"
+          @toggle-sidebar="toggleSidebar"
         />
       </slot>
     </template>
@@ -340,6 +361,7 @@ onMounted(() => {
           @open-lock="handleOpenLock"
           @logout="handleLogout"
           @refresh="refresh"
+          @toggle-sidebar="toggleSidebar"
         />
       </slot>
     </template>

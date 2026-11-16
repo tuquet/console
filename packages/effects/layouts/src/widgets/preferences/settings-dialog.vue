@@ -247,6 +247,10 @@ const widgetLogoButtonPosition = defineModel<string | undefined>(
   'widgetLogoButtonPosition',
   { default: undefined },
 );
+const widgetSidebarToggleButtonPosition = defineModel<string | undefined>(
+  'widgetSidebarToggleButtonPosition',
+  { default: undefined },
+);
 const widgetBreadcrumbButtonPosition = defineModel<string | undefined>(
   'widgetBreadcrumbButtonPosition',
   { default: undefined },
@@ -604,6 +608,9 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:widget-order="widgetOrder"
                 v-model:widget-refresh-button-position="
                   widgetRefreshButtonPosition
+                "
+                v-model:widget-sidebar-toggle-button-position="
+                  widgetSidebarToggleButtonPosition
                 "
                 v-model:widget-theme-toggle-button-position="
                   widgetThemeToggleButtonPosition

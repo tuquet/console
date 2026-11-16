@@ -144,6 +144,7 @@ exports[`defaultPreferences immutability test > should not modify the config obj
     "notificationButtonPosition": "header",
     "order": [
       "logo",
+      "sidebarToggle",
       "breadcrumb",
       "globalSearch",
       "preferences",
@@ -160,6 +161,7 @@ exports[`defaultPreferences immutability test > should not modify the config obj
     "refresh": true,
     "refreshButtonPosition": "header",
     "sidebarToggle": true,
+    "sidebarToggleButtonPosition": "header-left",
     "themeToggle": true,
     "themeToggleButtonPosition": "header",
     "timezone": true,

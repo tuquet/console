@@ -395,6 +395,8 @@ interface WidgetPreferences {
   refreshButtonPosition: WidgetPositionType;
   /** Whether sidebar toggle widget is visible */
   sidebarToggle: boolean;
+  /** Sidebar toggle button position */
+  sidebarToggleButtonPosition: HeaderWidgetPositionType;
   /** Whether theme toggle widget is visible */
   themeToggle: boolean;
   /** Theme toggle button position */

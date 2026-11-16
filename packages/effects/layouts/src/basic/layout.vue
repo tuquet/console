@@ -169,7 +169,7 @@ const headerSlots = computed(() => {
     :header-hidden="preferences.header.hidden"
     :header-mode="preferences.header.mode"
     :header-theme="headerTheme"
-    :header-toggle-sidebar-button="preferences.widget.sidebarToggle"
+    :header-toggle-sidebar-button="false"
     :header-visible="preferences.header.enable"
     :is-mobile="preferences.app.isMobile"
     :layout="layout"

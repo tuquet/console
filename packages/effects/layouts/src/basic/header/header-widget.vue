@@ -6,6 +6,8 @@ import {
   LogOut,
   Maximize,
   Minimize,
+  PanelLeft,
+  PanelLeftOpen,
   RotateCw,
   Search,
 } from '@operon/icons';
@@ -35,6 +37,7 @@ defineEmits<{
   openLock: [];
   refresh: [];
   toggleFullscreen: [];
+  toggleSidebar: [];
 }>();
 
 const router = useRouter();
@@ -51,6 +54,22 @@ const router = useRouter();
     class="mr-1 cursor-pointer"
     @click="router.push(preferences.app.defaultHomePath)"
   />
+
+  <Button
+    v-else-if="name === 'sidebar-toggle'"
+    type="button"
+    variant="ghost"
+    size="icon"
+    class="my-0 mr-1 size-8 rounded-md"
+    data-layout-action="toggle-sidebar"
+    :title="$t('preferences.widget.sidebarToggle')"
+    :aria-label="$t('preferences.widget.sidebarToggle')"
+    :aria-pressed="!preferences.sidebar.hidden"
+    @click="$emit('toggleSidebar')"
+  >
+    <PanelLeftOpen v-if="preferences.sidebar.hidden" class="size-5" />
+    <PanelLeft v-else class="size-5" />
+  </Button>
 
   <Button
     v-else-if="name === 'global-search'"

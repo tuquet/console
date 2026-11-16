@@ -20,6 +20,10 @@ const widgetLogoButtonPosition = defineModel<string | undefined>(
   'widgetLogoButtonPosition',
   { default: undefined },
 );
+const widgetSidebarToggleButtonPosition = defineModel<string | undefined>(
+  'widgetSidebarToggleButtonPosition',
+  { default: undefined },
+);
 const widgetBreadcrumbButtonPosition = defineModel<string | undefined>(
   'widgetBreadcrumbButtonPosition',
   { default: undefined },
@@ -125,10 +129,16 @@ const preferencesPositionItems = computed((): SelectOption[] => [
   },
 ]);
 
-const headerOnlyKeys = new Set(['breadcrumb', 'logo', 'userDropdown']);
+const headerOnlyKeys = new Set([
+  'breadcrumb',
+  'logo',
+  'sidebarToggle',
+  'userDropdown',
+]);
 
 const labelMap: Record<string, string> = {
   logo: 'preferences.widget.logo',
+  sidebarToggle: 'preferences.widget.sidebarToggle',
   breadcrumb: 'preferences.widget.breadcrumb',
   globalSearch: 'preferences.widget.globalSearch',
   preferences: 'preferences.title',
@@ -146,6 +156,7 @@ const labelMap: Record<string, string> = {
 function getModelMap() {
   return {
     logo: widgetLogoButtonPosition,
+    sidebarToggle: widgetSidebarToggleButtonPosition,
     breadcrumb: widgetBreadcrumbButtonPosition,
     globalSearch: widgetGlobalSearchButtonPosition,
     preferences: appPreferencesButtonPosition,
