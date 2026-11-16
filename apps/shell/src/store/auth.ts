@@ -39,6 +39,11 @@ export const useAuthStore = defineStore('auth', () => {
   const router = useRouter() || appRouter;
 
   const loginLoading = ref(false);
+  const pendingRedirectPath = ref<null | string>(null);
+
+  function setPendingRedirect(path: null | string) {
+    pendingRedirectPath.value = path;
+  }
 
   async function commitSessionTokens(
     accessToken: string,
@@ -115,8 +120,12 @@ export const useAuthStore = defineStore('auth', () => {
 
         if (accessStore.loginExpired) {
           accessStore.setLoginExpired(false);
-          // Reload current route view so tables/metrics re-fetch with the new token
-          await tabbarStore.refresh(router);
+          const nextPath = pendingRedirectPath.value;
+          pendingRedirectPath.value = null;
+          // Navigate to pending cloud-protected route or refresh current view with new token
+          await (nextPath && nextPath !== router.currentRoute.value.fullPath
+            ? router.push(sanitizeRedirectPath(nextPath, DEFAULT_HOME_PATH))
+            : tabbarStore.refresh(router));
         } else if (onSuccess) {
           await onSuccess?.();
         } else {
@@ -200,6 +209,7 @@ export const useAuthStore = defineStore('auth', () => {
     clearAccessCache();
     setBugsinkUser(null);
     loginLoading.value = false;
+    pendingRedirectPath.value = null;
   }
 
   return {
@@ -211,5 +221,6 @@ export const useAuthStore = defineStore('auth', () => {
     handleSessionExpired,
     loginLoading,
     logout,
+    setPendingRedirect,
   };
 });

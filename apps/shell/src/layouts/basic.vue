@@ -25,58 +25,7 @@ import { $t } from '#/locales';
 import { useAuthStore } from '#/store';
 import LoginForm from '#/views/_core/authentication/login.vue';
 
-const notifications = ref<NotificationItem[]>([
-  {
-    avatar: 'https://operon.com/icons/cli.svg',
-    date: '10m ago',
-    id: 1,
-    isRead: true,
-    message: 'System performance reports are now available.',
-    title: 'Received 14 new reports',
-  },
-  {
-    avatar: 'https://operon.com/icons/cli.svg',
-    date: '1h ago',
-    id: 2,
-    isRead: false,
-    message: 'Mentioned you in fleet cluster status.',
-    title: 'Alex replied to your thread',
-  },
-  {
-    id: 3,
-    avatar: 'https://avatar.vercel.sh/1',
-    date: '2024-01-01',
-    isRead: false,
-    message: 'Reviewed your recent configuration changes.',
-    title: 'Sarah commented on your workspace',
-  },
-  {
-    id: 4,
-    avatar: 'https://avatar.vercel.sh/satori',
-    date: '1 day ago',
-    isRead: false,
-    message: 'Node healthcheck scheduled for this evening.',
-    title: 'Scheduled maintenance reminder',
-  },
-  {
-    id: 5,
-    avatar: 'https://avatar.vercel.sh/satori',
-    date: '1 day ago',
-    isRead: false,
-    message: 'Quick link to overview workspace dashboard.',
-    title: 'Navigate to Workspace',
-    link: '/tenants',
-  },
-  {
-    id: 6,
-    avatar: 'https://avatar.vercel.sh/satori',
-    date: '1 day ago',
-    isRead: false,
-    message: 'Explore documentation and operational guides.',
-    title: 'Documentation',
-    link: 'https://docs.operon.com',
-  },
-]);
+const notifications = ref<NotificationItem[]>([]);
 
 const router = useRouter();
 const userStore = useUserStore();

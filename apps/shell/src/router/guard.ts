@@ -157,6 +157,7 @@ function setupAccessGuard(router: Router) {
         return true;
       }
       if (requiresCloudAccess(to)) {
+        authStore.setPendingRedirect(to.fullPath);
         accessStore.setLoginExpired(true);
         return false;
       }

@@ -43,6 +43,7 @@ const router = useRouter();
 const bridge = useLocalBridgeHeartbeat({ intervalMs: 5000 });
 const installInfo = getLocalBridgeInstallInfo();
 const copiedCommand = ref(false);
+const hasInitiatedInstall = ref(false);
 
 const isHealthy = computed(() => bridge.status.value === 'healthy');
 const isChecking = computed(() => bridge.status.value === 'checking');
@@ -51,6 +52,7 @@ async function copyInstallCommand() {
   try {
     await navigator.clipboard.writeText(installInfo.command);
     copiedCommand.value = true;
+    hasInitiatedInstall.value = true;
     toast.success($t('page.overview.installCopied'));
     setTimeout(() => {
       copiedCommand.value = false;
@@ -114,7 +116,7 @@ const modules = computed<ModuleItem[]>(() => [
 
 const checklistSteps = computed(() => [
   {
-    done: isHealthy.value,
+    done: hasInitiatedInstall.value || isHealthy.value,
     label: $t('page.overview.checklistStep1'),
   },
   {
@@ -126,6 +128,14 @@ const checklistSteps = computed(() => [
     label: $t('page.overview.checklistStep3'),
   },
 ]);
+
+const checklistProgress = computed(() =>
+  Math.round(
+    (checklistSteps.value.filter((step) => step.done).length /
+      checklistSteps.value.length) *
+      100,
+  ),
+);
 
 function openModule(mod: ModuleItem) {
   if (mod.requiresBridge && !isHealthy.value) return;
@@ -262,6 +272,7 @@ function isLocked(mod: ModuleItem) {
               target="_blank"
               rel="noreferrer"
               class="h-8 gap-1.5 text-xs"
+              @click="hasInitiatedInstall = true"
             >
               <Download class="size-3.5" />
               {{ $t('page.overview.installDownload') }}
@@ -307,7 +318,7 @@ function isLocked(mod: ModuleItem) {
             </div>
           </div>
           <Progress
-            :model-value="isHealthy ? 100 : 0"
+            :model-value="checklistProgress"
             class="mt-4 h-1.5 transition-all duration-500"
           />
         </CardContent>

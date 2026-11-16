@@ -43,19 +43,15 @@ export interface LocalBridgeHeartbeatOptions {
   timeoutMs?: number;
 }
 
-/**
- * Polls the device-local Operon daemon (`GET /api/v1/health`) on loopback
- * to determine whether the local bridge is healthy and ready for UI interaction.
- */
-export function useLocalBridgeHeartbeat(
-  options: LocalBridgeHeartbeatOptions = {},
-) {
-  const kernel = useKernel();
-  const port = options.port ?? kernel.api.daemonPort ?? 8765;
-  const intervalMs = options.intervalMs ?? 5000;
-  const timeoutMs = options.timeoutMs ?? 2000;
-  const autoStart = options.autoStart ?? true;
+type BridgeMonitor = ReturnType<typeof createBridgeMonitor>;
 
+const bridgeMonitors = new Map<number, BridgeMonitor>();
+
+function createBridgeMonitor(
+  port: number,
+  intervalMs: number,
+  timeoutMs: number,
+) {
   const status = ref<LocalBridgeStatus>('checking');
   const health = ref<LocalBridgeHealth | null>(null);
   const lastCheckedAt = ref<null | number>(null);
@@ -65,8 +61,12 @@ export function useLocalBridgeHeartbeat(
 
   let timer: null | ReturnType<typeof setInterval> = null;
   let activeController: AbortController | null = null;
+  let subscriberCount = 0;
 
-  async function checkNow(): Promise<boolean> {
+  async function checkNow(manual = true): Promise<boolean> {
+    if (manual || lastCheckedAt.value === null) {
+      status.value = 'checking';
+    }
     activeController?.abort();
     const controller = new AbortController();
     activeController = controller;
@@ -114,9 +114,9 @@ export function useLocalBridgeHeartbeat(
 
   function start() {
     if (timer) return;
-    void checkNow();
+    void checkNow(false);
     timer = setInterval(() => {
-      void checkNow();
+      void checkNow(false);
     }, intervalMs);
   }
 
@@ -129,9 +129,18 @@ export function useLocalBridgeHeartbeat(
     activeController = null;
   }
 
-  if (autoStart) {
-    onMounted(() => start());
-    onUnmounted(() => stop());
+  function retain() {
+    subscriberCount += 1;
+    if (subscriberCount === 1) {
+      start();
+    }
+  }
+
+  function release() {
+    subscriberCount = Math.max(0, subscriberCount - 1);
+    if (subscriberCount === 0) {
+      stop();
+    }
   }
 
   return {
@@ -141,8 +150,48 @@ export function useLocalBridgeHeartbeat(
     isHealthy,
     lastCheckedAt,
     port,
+    release,
+    retain,
     start,
     status,
     stop,
+  };
+}
+
+/**
+ * Polls the device-local Operon daemon (`GET /api/v1/health`) on loopback
+ * to determine whether the local bridge is healthy and ready for UI interaction.
+ * Shares a singleton monitor per daemon port so multiple UI surfaces stay in sync.
+ */
+export function useLocalBridgeHeartbeat(
+  options: LocalBridgeHeartbeatOptions = {},
+) {
+  const kernel = useKernel();
+  const port = options.port ?? kernel.api.daemonPort ?? 8765;
+  const intervalMs = options.intervalMs ?? 5000;
+  const timeoutMs = options.timeoutMs ?? 2000;
+  const autoStart = options.autoStart ?? true;
+
+  let monitor = bridgeMonitors.get(port);
+  if (!monitor) {
+    monitor = createBridgeMonitor(port, intervalMs, timeoutMs);
+    bridgeMonitors.set(port, monitor);
+  }
+
+  if (autoStart) {
+    onMounted(() => monitor.retain());
+    onUnmounted(() => monitor.release());
+  }
+
+  return {
+    checkNow: monitor.checkNow,
+    error: monitor.error,
+    health: monitor.health,
+    isHealthy: monitor.isHealthy,
+    lastCheckedAt: monitor.lastCheckedAt,
+    port: monitor.port,
+    start: monitor.start,
+    status: monitor.status,
+    stop: monitor.stop,
   };
 }

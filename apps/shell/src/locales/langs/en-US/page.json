@@ -186,7 +186,7 @@
     "checklistTitle": "Quick Setup",
     "checklistStep1": "Install Operon CLI (opn) using the command above",
     "checklistStep2": "Start the daemon: opn start",
-    "checklistStep3": "Reload this page to confirm connection",
+    "checklistStep3": "Wait for automatic connection (or click Retry)",
     "modulesTitle": "Modules",
     "modulesDesc": "Modules become available once the local service is connected.",
     "moduleRequiresBridge": "Requires Operon",
