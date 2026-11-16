@@ -18,6 +18,7 @@ import type { SegmentedItem } from '@operon-core/shadcn-ui';
 import { computed, ref } from 'vue';
 
 import {
+  ChevronDown,
   Keyboard,
   LayoutTemplate,
   LogIn,
@@ -38,6 +39,9 @@ import { useAccessStore, useUserStore } from '@operon/stores';
 import {
   Badge,
   Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
   Dialog,
   DialogContent,
   DialogFooter,
@@ -581,22 +585,6 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 "
               />
             </Block>
-            <Block :title="$t('preferences.tabbar.title')">
-              <Tabbar
-                v-model:tabbar-draggable="tabbarDraggable"
-                v-model:tabbar-enable="tabbarEnable"
-                v-model:tabbar-max-count="tabbarMaxCount"
-                v-model:tabbar-middle-click-to-close="tabbarMiddleClickToClose"
-                v-model:tabbar-persist="tabbarPersist"
-                v-model:tabbar-show-icon="tabbarShowIcon"
-                v-model:tabbar-show-maximize="tabbarShowMaximize"
-                v-model:tabbar-show-more="tabbarShowMore"
-                v-model:tabbar-show-refresh="tabbarShowRefresh"
-                v-model:tabbar-style-type="tabbarStyleType"
-                v-model:tabbar-visit-history="tabbarVisitHistory"
-                v-model:tabbar-wheelable="tabbarWheelable"
-              />
-            </Block>
             <Block :title="$t('preferences.widget.title')">
               <Widget
                 v-model:app-preferences-button-position="
@@ -639,26 +627,59 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 "
               />
             </Block>
-            <Block :title="$t('preferences.footer.title')">
-              <Footer
-                v-model:footer-enable="footerEnable"
-                v-model:footer-fixed="footerFixed"
-              />
-            </Block>
-            <Block
-              v-if="copyrightSettingShow"
-              :title="$t('preferences.copyright.title')"
-            >
-              <Copyright
-                v-model:copyright-company-name="copyrightCompanyName"
-                v-model:copyright-company-site-link="copyrightCompanySiteLink"
-                v-model:copyright-date="copyrightDate"
-                v-model:copyright-enable="copyrightEnable"
-                v-model:copyright-icp="copyrightIcp"
-                v-model:copyright-icp-link="copyrightIcpLink"
-                :disabled="!footerEnable"
-              />
-            </Block>
+            <Collapsible v-slot="{ open: isOtherOpen }" class="py-4">
+              <CollapsibleTrigger
+                class="flex w-full cursor-pointer items-center justify-between text-sm font-semibold text-foreground"
+              >
+                <span>{{ $t('preferences.other') }}</span>
+                <ChevronDown
+                  class="size-4 text-muted-foreground transition-transform duration-200"
+                  :class="{ 'rotate-180': isOtherOpen }"
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent class="pt-4">
+                <Block :title="$t('preferences.tabbar.title')">
+                  <Tabbar
+                    v-model:tabbar-draggable="tabbarDraggable"
+                    v-model:tabbar-enable="tabbarEnable"
+                    v-model:tabbar-max-count="tabbarMaxCount"
+                    v-model:tabbar-middle-click-to-close="
+                      tabbarMiddleClickToClose
+                    "
+                    v-model:tabbar-persist="tabbarPersist"
+                    v-model:tabbar-show-icon="tabbarShowIcon"
+                    v-model:tabbar-show-maximize="tabbarShowMaximize"
+                    v-model:tabbar-show-more="tabbarShowMore"
+                    v-model:tabbar-show-refresh="tabbarShowRefresh"
+                    v-model:tabbar-style-type="tabbarStyleType"
+                    v-model:tabbar-visit-history="tabbarVisitHistory"
+                    v-model:tabbar-wheelable="tabbarWheelable"
+                  />
+                </Block>
+                <Block :title="$t('preferences.footer.title')">
+                  <Footer
+                    v-model:footer-enable="footerEnable"
+                    v-model:footer-fixed="footerFixed"
+                  />
+                </Block>
+                <Block
+                  v-if="copyrightSettingShow"
+                  :title="$t('preferences.copyright.title')"
+                >
+                  <Copyright
+                    v-model:copyright-company-name="copyrightCompanyName"
+                    v-model:copyright-company-site-link="
+                      copyrightCompanySiteLink
+                    "
+                    v-model:copyright-date="copyrightDate"
+                    v-model:copyright-enable="copyrightEnable"
+                    v-model:copyright-icp="copyrightIcp"
+                    v-model:copyright-icp-link="copyrightIcpLink"
+                    :disabled="!footerEnable"
+                  />
+                </Block>
+              </CollapsibleContent>
+            </Collapsible>
           </TabsContent>
           <TabsContent
             value="shortcutKey"

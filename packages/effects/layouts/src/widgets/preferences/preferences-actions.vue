@@ -9,8 +9,8 @@ defineEmits<{ reset: []; copy: []; clear: [] }>();
 </script>
 
 <template>
-  <div class="flex w-full items-center justify-between gap-2">
-    <div class="flex items-center gap-1.5">
+  <div class="flex w-full flex-wrap items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center gap-1.5">
       <Button
         type="button"
         size="sm"
