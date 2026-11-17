@@ -73,30 +73,42 @@ function openCreateModal() {
         :aria-expanded="open"
         :aria-label="activeWorkspace?.name || $t('page.workspace.not_selected')"
         data-testid="workspace-selector-trigger-collapsed"
-        class="size-8 shrink-0 rounded-md"
+        class="size-9 shrink-0 rounded-md"
         :title="activeWorkspace?.name || $t('page.workspace.not_selected')"
       >
-        <span class="size-4 rounded-full bg-primary/80"></span>
+        <span
+          class="flex size-6 items-center justify-center rounded-md bg-primary/15 text-sm font-semibold text-primary"
+        >
+          {{ activeWorkspace?.name?.charAt(0)?.toUpperCase() || '?' }}
+        </span>
       </Button>
 
       <Button
         v-else
         type="button"
         variant="outline"
-        size="sm"
         role="combobox"
         :aria-expanded="open"
         :aria-label="$t('preferences.widget.workspaceSelector')"
         data-testid="workspace-selector-trigger"
-        class="h-8 min-w-0 flex-1 justify-between gap-2 px-2.5 font-normal"
+        class="h-9 min-w-0 flex-1 justify-between gap-2 px-2 font-normal"
       >
         <span class="flex min-w-0 items-center gap-2">
-          <span class="size-4 shrink-0 rounded-full bg-primary/80"></span>
-          <span class="truncate text-xs font-medium text-foreground">
-            {{ activeWorkspace?.name || $t('page.workspace.not_selected') }}
+          <span
+            class="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/15 text-sm font-semibold text-primary"
+          >
+            {{ activeWorkspace?.name?.charAt(0)?.toUpperCase() || '?' }}
+          </span>
+          <span class="flex min-w-0 flex-col text-left leading-tight">
+            <span class="truncate text-xs font-semibold text-foreground">
+              {{ activeWorkspace?.name || $t('page.workspace.not_selected') }}
+            </span>
+            <span class="truncate text-[10px] text-muted-foreground">
+              {{ activeWorkspace?.slug || 'local' }}
+            </span>
           </span>
         </span>
-        <ChevronsUpDown class="size-3.5 shrink-0 opacity-50" />
+        <ChevronsUpDown class="size-4 shrink-0 opacity-50" />
       </Button>
     </PopoverTrigger>
 
