@@ -179,6 +179,23 @@ const sidebarMarginTop = computed(() => {
 });
 
 /**
+ * Sidebar padding top — pushes sidebar-header below the fixed main header
+ */
+const sidebarPaddingTop = computed(() => {
+  const { headerHeight, headerVisible, isMobile } = props;
+  if (
+    isMixedNav.value ||
+    isMobile ||
+    !headerVisible ||
+    !headerFixed.value ||
+    isFullContent.value
+  ) {
+    return 0;
+  }
+  return headerHeight;
+});
+
+/**
  * Dynamically get sidebar width
  */
 const getSidebarWidth = computed(() => {
@@ -530,6 +547,7 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
       :expanded-width="sidebarWidth"
       :is-mobile="isMobile"
       :margin-top="sidebarMarginTop"
+      :padding-top="sidebarPaddingTop"
       :show="showSidebar"
       :theme="sidebarTheme"
       :width="getSidebarWidth"
