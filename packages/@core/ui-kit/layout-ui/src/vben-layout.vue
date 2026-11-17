@@ -595,7 +595,7 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
           <div v-if="tabbarEnable" :style="tabbarStyle" class="shrink-0">
             <div
               :class="{
-                'mx-2 overflow-hidden rounded-t-xl border-x border-t border-border':
+                'mx-3 overflow-hidden rounded-t-xl border-x border-t border-border':
                   isContentFramed && headerFixed,
               }"
             >
@@ -620,7 +620,7 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
         :style="layoutScrollStyle"
         class="vben-layout-scroll flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-background-deep"
         :class="{
-          'mx-2 mb-2 border-border': isContentFramed,
+          'mx-3 mb-3 border-border': isContentFramed,
           'rounded-xl border': isContentFramed && !tabbarEnable,
           'rounded-b-xl border-x border-b': isContentFramed && tabbarEnable,
         }"

@@ -257,7 +257,7 @@ onUnmounted(() => {
           v-if="slots.header"
           data-layout-region="sidebar-header"
           class="flex min-h-[50px] shrink-0 items-center"
-          :class="collapse ? 'justify-center px-1.5 py-2' : 'px-2 py-1.5'"
+          :class="collapse ? 'justify-center px-1.5 py-2' : 'px-3 py-1.5'"
         >
           <slot name="header" :collapsed="collapse"></slot>
         </div>
@@ -271,9 +271,7 @@ onUnmounted(() => {
           data-layout-region="sidebar-footer"
           class="flex min-h-[42px] shrink-0 items-center gap-1.5 py-1.5"
           :class="
-            collapse
-              ? 'flex-col justify-center px-1.5'
-              : 'justify-between px-2.5'
+            collapse ? 'flex-col justify-center px-1.5' : 'justify-between px-3'
           "
         >
           <template v-if="slots.footer">
