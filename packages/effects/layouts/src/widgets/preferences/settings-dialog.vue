@@ -460,11 +460,6 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
           class="flex shrink-0 items-center justify-between gap-2 overflow-x-auto border-b border-border p-2 md:w-52 md:flex-col md:items-stretch md:border-b-0 md:border-r md:py-4"
         >
           <div class="min-w-0 flex-1 md:flex-none">
-            <p
-              class="mb-2 hidden px-2 text-xs font-medium text-muted-foreground md:block"
-            >
-              {{ $t('preferences.title') }}
-            </p>
             <TabsList
               :aria-label="$t('preferences.title')"
               class="h-auto min-w-full justify-start gap-0.5 bg-transparent p-0 md:w-full md:flex-col md:items-stretch"
@@ -551,8 +546,6 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
           >
             <Block :title="$t('preferences.layout')">
               <Layout v-model="appLayout" />
-            </Block>
-            <Block :title="$t('preferences.content')">
               <Content v-model="appContentCompact" />
             </Block>
             <Block :title="$t('preferences.sidebar.title')">
@@ -705,7 +698,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
             value="general"
             class="mx-auto flex max-w-3xl flex-col gap-2 px-4 py-4 md:px-8 md:py-6"
           >
-            <Block :title="$t('preferences.general')">
+            <Block>
               <General
                 v-model:app-dynamic-title="appDynamicTitle"
                 v-model:app-enable-check-updates="appEnableCheckUpdates"

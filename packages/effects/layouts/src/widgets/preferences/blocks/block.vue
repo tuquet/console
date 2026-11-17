@@ -14,7 +14,7 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <section class="py-5 border-b border-border last:border-b-0">
-    <h3 class="mb-4 text-sm font-semibold text-foreground">
+    <h3 v-if="title" class="mb-4 text-sm font-semibold text-foreground">
       {{ title }}
     </h3>
     <slot></slot>
