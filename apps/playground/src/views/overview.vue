@@ -14,16 +14,7 @@ import {
   CardTitle,
 } from '@operon-core/shadcn-ui';
 
-import {
-  ArrowRight,
-  Bell,
-  Blocks,
-  CheckCircle2,
-  Cpu,
-  Layers,
-  PanelRight,
-  Table2,
-} from '@lucide/vue';
+import { ArrowRight, Bell, Layers, Table2 } from '@lucide/vue';
 
 import { $t } from '../locales';
 
@@ -32,41 +23,23 @@ defineOptions({ name: 'PlaygroundOverview' });
 const router = useRouter();
 const kernel = useKernel();
 
-const componentGroups = computed(() => [
+const existingDemos = computed(() => [
   {
-    actionable: true,
-    badge: 'apps/playground/components/data-table',
+    actionLabel: $t('playground.overview_card_action_view'),
+    badge: 'apps/playground/src/tasks',
     description: $t('playground.overview_card_datatable_desc'),
     icon: Table2,
+    onClick: openTasksDemo,
     title: $t('playground.overview_card_datatable_title'),
   },
   {
-    actionable: false,
-    badge: '@operon-core/shadcn-ui',
-    description: $t('playground.overview_card_primitives_desc'),
-    icon: Blocks,
-    title: $t('playground.overview_card_primitives_title'),
-  },
-  {
-    actionable: false,
-    badge: '@operon-core/popup-ui & form-ui',
-    description: $t('playground.overview_card_overlays_desc'),
-    icon: PanelRight,
-    title: $t('playground.overview_card_overlays_title'),
-  },
-  {
-    actionable: false,
+    actionLabel: $t('playground.overview_card_action_toast'),
     badge: '@operon/kernel',
-    description: $t('playground.overview_card_kernel_desc'),
-    icon: Cpu,
-    title: $t('playground.overview_card_kernel_title'),
+    description: $t('playground.overview_card_toast_desc'),
+    icon: Bell,
+    onClick: triggerDemoToast,
+    title: $t('playground.overview_card_toast_title'),
   },
-]);
-
-const guidelines = computed(() => [
-  $t('playground.overview_guide_1'),
-  $t('playground.overview_guide_2'),
-  $t('playground.overview_guide_3'),
 ]);
 
 function openTasksDemo() {
@@ -113,14 +86,13 @@ function triggerDemoToast() {
       </CardContent>
     </Card>
 
-    <!-- Common Components Catalog -->
+    <!-- Implemented Demos -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
       <Card
-        v-for="group in componentGroups"
-        :key="group.title"
-        class="border-border/60 shadow-xs transition-colors"
-        :class="group.actionable ? 'cursor-pointer hover:border-border' : ''"
-        @click="group.actionable && openTasksDemo()"
+        v-for="item in existingDemos"
+        :key="item.title"
+        class="cursor-pointer border-border/60 shadow-xs transition-colors hover:border-border"
+        @click="item.onClick()"
       >
         <CardHeader class="pb-3">
           <div class="flex items-start justify-between gap-2">
@@ -128,50 +100,29 @@ function triggerDemoToast() {
               <div
                 class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
               >
-                <component :is="group.icon" class="size-4" />
+                <component :is="item.icon" class="size-4" />
               </div>
               <CardTitle class="text-sm font-semibold">
-                {{ group.title }}
+                {{ item.title }}
               </CardTitle>
             </div>
             <Badge variant="outline" class="font-mono text-[10px]">
-              {{ group.badge }}
+              {{ item.badge }}
             </Badge>
           </div>
           <CardDescription class="pt-1.5 text-xs leading-relaxed">
-            {{ group.description }}
+            {{ item.description }}
           </CardDescription>
         </CardHeader>
-        <CardContent v-if="group.actionable" class="pt-0">
+        <CardContent class="pt-0">
           <span
             class="inline-flex items-center gap-1 text-xs font-medium text-primary"
           >
-            {{ $t('playground.overview_card_action_view') }}
+            {{ item.actionLabel }}
             <ArrowRight class="size-3" />
           </span>
         </CardContent>
       </Card>
     </div>
-
-    <!-- Adoption Guidelines -->
-    <Card class="border-border/60 shadow-xs">
-      <CardHeader class="pb-3">
-        <CardTitle class="text-sm font-semibold">
-          {{ $t('playground.overview_guide_title') }}
-        </CardTitle>
-      </CardHeader>
-      <CardContent class="pt-0">
-        <ul class="flex flex-col gap-2.5">
-          <li
-            v-for="(item, index) in guidelines"
-            :key="index"
-            class="flex items-start gap-2.5 text-xs text-muted-foreground"
-          >
-            <CheckCircle2 class="mt-0.5 size-4 shrink-0 text-emerald-500" />
-            <span>{{ item }}</span>
-          </li>
-        </ul>
-      </CardContent>
-    </Card>
   </div>
 </template>
