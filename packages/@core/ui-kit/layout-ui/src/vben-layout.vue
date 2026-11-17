@@ -179,16 +179,19 @@ const sidebarMarginTop = computed(() => {
 });
 
 /**
- * Sidebar padding top — pushes sidebar-header below the fixed main header
+ * Sidebar padding top — pushes sidebar-header below the fixed main header.
+ * Mirrors headerWrapperHeight logic: only adds headerHeight when header
+ * is actually occupying vertical space (visible and not hidden).
  */
 const sidebarPaddingTop = computed(() => {
-  const { headerHeight, headerVisible, isMobile } = props;
+  const { headerHeight, headerHidden, headerVisible, isMobile } = props;
   if (
     isMixedNav.value ||
     isMobile ||
-    !headerVisible ||
     !headerFixed.value ||
-    isFullContent.value
+    isFullContent.value ||
+    !headerVisible ||
+    headerHidden
   ) {
     return 0;
   }
