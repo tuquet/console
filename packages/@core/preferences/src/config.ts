@@ -152,8 +152,10 @@ const defaultPreferences: Preferences = {
     timezone: true,
     timezoneButtonPosition: 'header',
     userDropdownButtonPosition: 'header',
+    workspaceSelectorButtonPosition: 'none',
     order: [
       'logo',
+      'workspaceSelector',
       'sidebarToggle',
       'breadcrumb',
       'globalSearch',

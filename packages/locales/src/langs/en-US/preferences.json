@@ -213,6 +213,7 @@
     "headerRight": "Header Right",
     "sidebarHeader": "Sidebar Header",
     "logo": "Logo",
+    "workspaceSelector": "Select workspace",
     "breadcrumb": "Breadcrumb",
     "userDropdown": "User menu",
     "hidden": "Hidden",

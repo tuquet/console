@@ -244,20 +244,28 @@ const headerSlots = computed(() => {
         class="flex w-full min-w-0 items-center gap-1"
         :class="collapsed ? 'flex-col justify-center' : ''"
       >
-        <HeaderWidget
-          v-for="slotName in sidebarHeaderSlots"
-          :key="slotName"
-          v-show="
-            !collapsed || slotName === 'logo' || slotName === 'sidebar-toggle'
-          "
-          :name="slotName"
-          :is-fullscreen="isFullscreen"
-          :global-search-shortcut-key="globalSearchShortcutKey"
-          @open-global-search="openGlobalSearchCommand"
-          @toggle-fullscreen="toggleFullscreen"
-          @toggle-sidebar="toggleSidebarHidden"
-          @refresh="refreshAll"
-        />
+        <template v-for="slotName in sidebarHeaderSlots" :key="slotName">
+          <slot
+            v-if="
+              slotName === 'workspace-selector' && $slots['workspace-selector']
+            "
+            :collapsed="collapsed"
+            name="workspace-selector"
+          ></slot>
+          <HeaderWidget
+            v-else
+            v-show="
+              !collapsed || slotName === 'logo' || slotName === 'sidebar-toggle'
+            "
+            :name="slotName"
+            :is-fullscreen="isFullscreen"
+            :global-search-shortcut-key="globalSearchShortcutKey"
+            @open-global-search="openGlobalSearchCommand"
+            @toggle-fullscreen="toggleFullscreen"
+            @toggle-sidebar="toggleSidebarHidden"
+            @refresh="refreshAll"
+          />
+        </template>
         <slot :collapsed="collapsed" name="sidebar-header"></slot>
       </div>
     </template>
@@ -295,6 +303,9 @@ const headerSlots = computed(() => {
         </template>
         <template #user-dropdown>
           <slot name="user-dropdown"></slot>
+        </template>
+        <template v-if="$slots['workspace-selector']" #workspace-selector>
+          <slot :collapsed="false" name="workspace-selector"></slot>
         </template>
         <template #notification>
           <slot name="notification"></slot>

@@ -154,6 +154,14 @@ class PreferenceManager {
       const order = cachedPreferences.widget.order as string[];
       if (!order.includes('breadcrumb')) order.unshift('breadcrumb');
       if (!order.includes('logo')) order.unshift('logo');
+      if (!order.includes('workspaceSelector')) {
+        const logoIndex = order.indexOf('logo');
+        order.splice(
+          logoIndex === -1 ? 0 : logoIndex + 1,
+          0,
+          'workspaceSelector',
+        );
+      }
       if (!order.includes('sidebarToggle')) {
         const logoIndex = order.indexOf('logo');
         order.splice(logoIndex === -1 ? 0 : logoIndex + 1, 0, 'sidebarToggle');

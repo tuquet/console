@@ -64,11 +64,13 @@ export const overridesPreferences = defineOverridesPreferences({
     sidebarToggleButtonPosition: 'header-left',
     timezoneButtonPosition: 'none',
     userDropdownButtonPosition: 'none',
+    workspaceSelectorButtonPosition: 'sidebar-header',
     languageToggleButtonPosition: 'header-right',
     notificationButtonPosition: 'header-right',
     themeToggleButtonPosition: 'header-right',
     order: [
       'logo',
+      'workspaceSelector',
       'sidebarToggle',
       'globalSearch',
       'breadcrumb',

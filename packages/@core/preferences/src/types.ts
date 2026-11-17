@@ -409,6 +409,8 @@ interface WidgetPreferences {
   timezoneButtonPosition: WidgetPositionType;
   /** User dropdown position */
   userDropdownButtonPosition: HeaderWidgetPositionType;
+  /** Workspace selector widget position */
+  workspaceSelectorButtonPosition: HeaderWidgetPositionType;
 }
 
 interface Preferences {

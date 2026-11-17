@@ -114,6 +114,7 @@
     "total_workspaces": "Tổng workspace",
     "tenants_count": "Tổng workspace",
     "tenants_label": "Tenants",
+    "local_workspace": "Workspace cục bộ",
     "selected": "Đang chọn",
     "not_selected": "Chưa chọn",
     "current_workspace": "Workspace đang chọn",

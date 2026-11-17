@@ -185,8 +185,8 @@ watch(
     @clear-preferences-and-logout="handleLogout"
     @logout="handleLogout"
   >
-    <template v-if="isAuthenticated" #sidebar-header="{ collapsed }">
-      <WorkspaceSelector :collapsed="collapsed" />
+    <template #workspace-selector="{ collapsed }">
+      <WorkspaceSelector :collapsed="Boolean(collapsed)" />
     </template>
     <template #sidebar-footer="{ collapsed }">
       <DaemonStatusPill :collapsed="collapsed" />

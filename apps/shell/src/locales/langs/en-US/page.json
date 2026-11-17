@@ -114,6 +114,7 @@
     "total_workspaces": "Total workspaces",
     "tenants_count": "Total workspaces",
     "tenants_label": "Tenants",
+    "local_workspace": "Local Workspace",
     "selected": "Selected",
     "not_selected": "None",
     "current_workspace": "Selected workspace",

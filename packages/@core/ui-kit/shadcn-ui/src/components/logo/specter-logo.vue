@@ -37,10 +37,10 @@ const isDark = computed(() => props.theme === 'dark');
         :id="`${logoUid}-blur`"
         color-interpolation-filters="sRGB"
         filterUnits="userSpaceOnUse"
-        height="440"
-        width="440"
-        x="-20"
-        y="-20"
+        height="400"
+        width="400"
+        x="0"
+        y="0"
       >
         <feFlood flood-opacity="0" result="BackgroundImageFix" />
         <feBlend
@@ -49,16 +49,16 @@ const isDark = computed(() => props.theme === 'dark');
           mode="normal"
           result="shape"
         />
-        <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="20" />
+        <feGaussianBlur result="effect1_foregroundBlur" stdDeviation="16" />
       </filter>
 
       <linearGradient
         :id="`${logoUid}-body`"
         gradientUnits="userSpaceOnUse"
-        x1="136"
-        x2="304"
-        y1="24"
-        y2="376"
+        x1="112"
+        x2="310"
+        y1="14"
+        y2="386"
       >
         <stop
           :stop-color="isDark ? '#FFFFFF' : '#52525B'"
@@ -86,32 +86,32 @@ const isDark = computed(() => props.theme === 'dark');
         class="specter-halo"
         cx="200"
         cy="200"
-        r="144"
+        r="136"
       />
     </g>
 
     <path
       :fill="`url(#${logoUid}-body)`"
-      d="M200 24C279.529 24 344 88.471 344 168V336C344 358.091 326.091 376 304 376C276 376 280 346 252 346C224 346 228 376 200 376C172 376 176 346 148 346C120 346 124 376 96 376C73.909 376 56 358.091 56 336V168C56 88.471 120.471 24 200 24Z"
+      d="M200 14C294.993 14 372 91.007 372 186V342C372 366.301 352.301 386 328 386C296 386 296 351 264 351C232 351 232 386 200 386C168 386 168 351 136 351C104 351 104 386 72 386C47.699 386 28 366.301 28 342V186C28 91.007 105.007 14 200 14Z"
     />
 
     <rect
       :fill="isDark ? '#09090B' : '#FAFAFA'"
       class="specter-eye"
-      height="54"
-      rx="24"
-      width="48"
-      x="122"
-      y="147"
+      height="64"
+      rx="28"
+      width="56"
+      x="112"
+      y="154"
     />
     <rect
       :fill="isDark ? '#09090B' : '#FAFAFA'"
       class="specter-eye"
-      height="54"
-      rx="24"
-      width="48"
-      x="230"
-      y="147"
+      height="64"
+      rx="28"
+      width="56"
+      x="232"
+      y="154"
     />
   </svg>
 </template>

@@ -57,7 +57,7 @@ const logoTheme = computed(() =>
     :theme="logoTheme"
     :logo-size="26"
     collapsed
-    class="cursor-pointer px-1.5"
+    class="cursor-pointer"
     @click="router.push(preferences.app.defaultHomePath)"
   />
 

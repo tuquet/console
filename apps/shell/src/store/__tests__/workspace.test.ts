@@ -51,13 +51,14 @@ describe('useWorkspaceStore Pinia store TDD suite', () => {
     expect(store.activeWorkspace?.name).toBe('Tenant One');
   });
 
-  it('fetchWorkspaces returns empty array and skips listTenants when unauthenticated', async () => {
+  it('fetchWorkspaces returns local workspace and skips listTenants when unauthenticated', async () => {
     const accessStore = useAccessStore();
     accessStore.setAccessToken(null);
     const store = useWorkspaceStore();
     const result = await store.fetchWorkspaces();
-    expect(result).toEqual([]);
-    expect(store.workspaces).toEqual([]);
+    expect(result.length).toBeGreaterThanOrEqual(1);
+    expect(store.workspaces[0]?.id).toBe('local-default');
+    expect(store.activeWorkspace?.id).toBe('local-default');
   });
 
   it('setWorkspace updates active workspace and dispatches custom event', () => {

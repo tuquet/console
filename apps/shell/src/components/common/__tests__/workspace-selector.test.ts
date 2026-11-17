@@ -84,6 +84,54 @@ vi.mock('@operon-core/shadcn-ui', () => ({
       return () => h('button', { class: 'button-stub' }, slots.default?.());
     },
   }),
+  Command: defineComponent({
+    name: 'Command',
+    setup(_props, { slots }) {
+      return () => h('div', { class: 'command-stub' }, slots.default?.());
+    },
+  }),
+  CommandEmpty: defineComponent({
+    name: 'CommandEmpty',
+    setup(_props, { slots }) {
+      return () => h('div', { class: 'command-empty-stub' }, slots.default?.());
+    },
+  }),
+  CommandGroup: defineComponent({
+    name: 'CommandGroup',
+    setup(_props, { slots }) {
+      return () => h('div', { class: 'command-group-stub' }, slots.default?.());
+    },
+  }),
+  CommandInput: defineComponent({
+    name: 'CommandInput',
+    props: ['placeholder'],
+    setup(props) {
+      return () =>
+        h('input', {
+          class: 'command-input-stub',
+          placeholder: props.placeholder,
+        });
+    },
+  }),
+  CommandItem: defineComponent({
+    name: 'CommandItem',
+    props: ['value'],
+    setup(_props, { slots }) {
+      return () => h('div', { class: 'command-item-stub' }, slots.default?.());
+    },
+  }),
+  CommandList: defineComponent({
+    name: 'CommandList',
+    setup(_props, { slots }) {
+      return () => h('div', { class: 'command-list-stub' }, slots.default?.());
+    },
+  }),
+  CommandSeparator: defineComponent({
+    name: 'CommandSeparator',
+    setup() {
+      return () => h('hr', { class: 'command-separator-stub' });
+    },
+  }),
   Dialog: defineComponent({
     name: 'Dialog',
     setup(_props, { slots }) {
