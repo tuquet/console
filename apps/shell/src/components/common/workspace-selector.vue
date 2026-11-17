@@ -3,6 +3,7 @@ import type { Tenant } from '#/api/core/tenant';
 
 import { computed, onMounted, ref, watch } from 'vue';
 
+import { preferences } from '@operon/preferences';
 import { useAccessStore } from '@operon/stores';
 
 import {
@@ -73,7 +74,7 @@ function openCreateModal() {
         :aria-expanded="open"
         :aria-label="activeWorkspace?.name || $t('page.workspace.not_selected')"
         data-testid="workspace-selector-trigger-collapsed"
-        class="size-9 shrink-0 rounded-md"
+        class="size-9 shrink-0 rounded-md shadow-none"
         :title="activeWorkspace?.name || $t('page.workspace.not_selected')"
       >
         <span
@@ -91,7 +92,8 @@ function openCreateModal() {
         :aria-expanded="open"
         :aria-label="$t('preferences.widget.workspaceSelector')"
         data-testid="workspace-selector-trigger"
-        class="h-9 min-w-0 flex-1 justify-between gap-2 px-2 font-normal"
+        class="h-9 min-w-0 flex-1 justify-between gap-2 px-2 font-normal shadow-none"
+        :style="{ minWidth: `${preferences.sidebar.width - 20}px` }"
       >
         <span class="flex min-w-0 items-center gap-2">
           <span
@@ -113,7 +115,7 @@ function openCreateModal() {
     </PopoverTrigger>
 
     <PopoverContent
-      class="z-popup w-[220px] p-0"
+      class="z-popup p-0 shadow-none"
       align="start"
       :side="props.collapsed ? 'right' : 'bottom'"
       :side-offset="6"

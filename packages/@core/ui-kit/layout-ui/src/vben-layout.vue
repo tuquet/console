@@ -174,25 +174,27 @@ const sidebarEnableState = computed(() => {
  * Sidebar distance from top
  */
 const sidebarMarginTop = computed(() => {
-  const { headerHeight, isMobile } = props;
-  return isMixedNav.value && !isMobile ? headerHeight : 0;
+  const { headerHeight, headerHidden, headerVisible, isMobile } = props;
+  const headerTakesSpace = headerVisible && !headerHidden;
+  return isMixedNav.value && !isMobile && headerTakesSpace ? headerHeight : 0;
 });
 
 /**
- * Sidebar padding top — pushes sidebar-header below the fixed main header
+ * Sidebar padding top — sidebar content starts at the same y as the page
+ * content area. Uses headerWrapperHeight (header + tabbar) so the first
+ * sidebar item and the first content item are flush at the top.
  */
 const sidebarPaddingTop = computed(() => {
-  const { headerHeight, headerVisible, isMobile } = props;
   if (
     isMixedNav.value ||
-    isMobile ||
-    !headerVisible ||
+    props.isMobile ||
     !headerFixed.value ||
     isFullContent.value
   ) {
     return 0;
   }
-  return headerHeight;
+  // headerWrapperHeight already accounts for headerVisible/headerHidden/tabbarEnable
+  return headerWrapperHeight.value;
 });
 
 /**

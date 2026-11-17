@@ -10,6 +10,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
   Label,
+  Separator,
   toast,
 } from '@operon-core/shadcn-ui';
 
@@ -111,7 +112,8 @@ async function handleSavePassword() {
     </div>
 
     <!-- Security Overview Cards -->
-    <div class="border-t border-border/40 pt-5 flex flex-col gap-4">
+    <Separator class="my-1" />
+    <div class="flex flex-col gap-4">
       <h4 class="font-semibold text-foreground">
         {{ $t('profile.securityStatusTitle') }}
       </h4>

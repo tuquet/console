@@ -169,7 +169,7 @@ const isSidebarRendered = computed(
 
 const sidebarHeaderSlots = computed(() => {
   const configMap = buildWidgetConfigMap({
-    fallbackSidebarHeaderToLeft: !isSidebarRendered.value,
+    fallbackSidebarHeaderToLeft: false,
     isMobile: isMobile.value,
     showPreferencesInHeader: preferencesButtonPosition.value.header,
   });

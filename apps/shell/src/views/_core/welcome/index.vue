@@ -15,6 +15,7 @@ import {
   Checkbox,
   Label,
   Progress,
+  Separator,
   toast,
 } from '@operon-core/shadcn-ui';
 
@@ -383,9 +384,8 @@ async function copyInstallCommand() {
     </div>
 
     <!-- VS Code-style Startup Checkbox Footer -->
-    <div
-      class="flex items-center justify-between border-t border-border/50 pt-4"
-    >
+    <Separator />
+    <div class="flex items-center justify-between pt-4">
       <div class="flex items-center gap-2">
         <Checkbox
           id="welcome-startup-checkbox"

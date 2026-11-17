@@ -145,7 +145,7 @@ type SlotItem = { index: number; name: string };
 
 const widgetConfigMap = computed(() =>
   buildWidgetConfigMap({
-    fallbackSidebarHeaderToLeft: !props.sidebarRendered,
+    fallbackSidebarHeaderToLeft: false,
     isMobile: isMobile.value,
     showPreferencesInHeader: preferencesButtonPosition.value.header,
   }),
@@ -210,7 +210,7 @@ onMounted(() => {
     @confirm="handleSubmitLogout"
   />
 
-  <div class="flex h-full min-w-0 shrink-0 items-center gap-1">
+  <div class="flex h-full min-w-0 shrink-0 items-center gap-3">
     <template v-for="slot in leftSlots" :key="slot.name">
       <div
         v-if="slot.name === 'breadcrumb'"

@@ -80,8 +80,8 @@ async function handleSubmit() {
         <DialogTitle>{{ $t('page.workspace.create_workspace') }}</DialogTitle>
       </DialogHeader>
 
-      <div class="grid gap-3.5 py-3">
-        <div class="grid gap-1.5">
+      <div class="flex flex-col gap-3.5 py-3">
+        <div class="flex flex-col gap-1.5">
           <Label class="text-foreground">
             {{ $t('page.workspace.col_name') }}
           </Label>
@@ -93,14 +93,14 @@ async function handleSubmit() {
           />
         </div>
 
-        <div class="grid gap-1.5">
+        <div class="flex flex-col gap-1.5">
           <Label class="text-foreground">
             {{ $t('page.workspace.col_slug') }}
           </Label>
           <Input v-model="slug" placeholder="e.g. acme-corp" class="h-9" />
         </div>
 
-        <div class="grid gap-1.5">
+        <div class="flex flex-col gap-1.5">
           <Label class="text-foreground">
             {{ $t('page.workspace.col_plan') }}
           </Label>

@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
   Progress,
+  Separator,
   toast,
 } from '@operon-core/shadcn-ui';
 
@@ -232,7 +233,8 @@ function isLocked(mod: ModuleItem) {
 
       <!-- Install guide — only when offline -->
       <CardContent v-if="!isHealthy && !isChecking" class="pt-0">
-        <div class="mt-1 border-t border-border/50 pt-4">
+        <Separator class="mb-4" />
+        <div>
           <p class="mb-2 text-xs font-medium text-foreground">
             {{ $t('page.overview.installTitle') }}
           </p>
