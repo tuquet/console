@@ -24,7 +24,7 @@ function openSettings() {
       :size="props.collapsed ? 'icon' : 'sm'"
       :title="$t('preferences.settingsTitle')"
       class="w-full gap-2.5 text-xs text-muted-foreground hover:bg-accent/60 hover:text-foreground"
-      :class="props.collapsed ? 'justify-center px-0' : 'justify-start px-2.5'"
+      :class="props.collapsed ? 'justify-center px-0' : 'justify-start px-2'"
       @click="openSettings"
     >
       <Settings class="size-4 shrink-0" />
