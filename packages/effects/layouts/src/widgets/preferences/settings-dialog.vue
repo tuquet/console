@@ -258,8 +258,8 @@ const widgetUserDropdownButtonPosition = defineModel<string | undefined>(
   'widgetUserDropdownButtonPosition',
   { default: undefined },
 );
-const widgetWorkspaceSelectorButtonPosition = defineModel<string | undefined>(
-  'widgetWorkspaceSelectorButtonPosition',
+const widgetTenantSelectorButtonPosition = defineModel<string | undefined>(
+  'widgetTenantSelectorButtonPosition',
   { default: undefined },
 );
 const widgetGlobalSearchButtonPosition = defineModel<string | undefined>(
@@ -642,8 +642,8 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:widget-user-dropdown-button-position="
                   widgetUserDropdownButtonPosition
                 "
-                v-model:widget-workspace-selector-button-position="
-                  widgetWorkspaceSelectorButtonPosition
+                v-model:widget-tenant-selector-button-position="
+                  widgetTenantSelectorButtonPosition
                 "
                 v-model:widget-timezone-button-position="
                   widgetTimezoneButtonPosition

@@ -144,7 +144,7 @@ exports[`defaultPreferences immutability test > should not modify the config obj
     "notificationButtonPosition": "header",
     "order": [
       "logo",
-      "workspaceSelector",
+      "tenantSelector",
       "sidebarToggle",
       "breadcrumb",
       "globalSearch",
@@ -163,12 +163,12 @@ exports[`defaultPreferences immutability test > should not modify the config obj
     "refreshButtonPosition": "header",
     "sidebarToggle": true,
     "sidebarToggleButtonPosition": "header-left",
+    "tenantSelectorButtonPosition": "none",
     "themeToggle": true,
     "themeToggleButtonPosition": "header",
     "timezone": true,
     "timezoneButtonPosition": "header",
     "userDropdownButtonPosition": "header",
-    "workspaceSelectorButtonPosition": "none",
   },
 }
 `;

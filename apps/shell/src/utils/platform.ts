@@ -1,5 +1,7 @@
+import type { NotificationPlatform } from '@operon/kernel';
+
 /**
- * Single Source of Truth for Platform Detection across Web & Desktop (Tauri).
+ * Single Source of Truth for Platform Detection across Web, PWA & Desktop (Tauri).
  */
 
 export type AppPlatform = 'desktop' | 'web';
@@ -14,6 +16,37 @@ export function isTauriEnvironment(): boolean {
     typeof window !== 'undefined' &&
     ('__TAURI_INTERNALS__' in window || '__TAURI__' in window)
   );
+}
+
+/**
+ * Checks if running as an installed standalone PWA (outside Tauri).
+ */
+export function isPwaEnvironment(): boolean {
+  if (isTauriEnvironment() || typeof window === 'undefined') {
+    return false;
+  }
+  const isStandaloneDisplay =
+    typeof window.matchMedia === 'function' &&
+    (window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: window-controls-overlay)').matches);
+  const isIosStandalone =
+    'navigator' in window &&
+    (window.navigator as Navigator & { standalone?: boolean }).standalone ===
+      true;
+  return isStandaloneDisplay || isIosStandalone;
+}
+
+/**
+ * Resolves the active notification runtime platform across Web, PWA, and Tauri.
+ */
+export function getNotificationPlatform(): NotificationPlatform {
+  if (isTauriEnvironment()) {
+    return 'tauri';
+  }
+  if (isPwaEnvironment()) {
+    return 'pwa';
+  }
+  return 'web';
 }
 
 /**

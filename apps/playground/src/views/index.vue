@@ -134,7 +134,7 @@ function handleBulkDelete(selectedRows: Task[], clearSelection: () => void) {
 
 function handleReset() {
   store.resetTasks();
-  kernel.events.notify('info', 'Tasks synced to workspace baseline');
+  kernel.events.notify('info', 'Tasks synced to tenant baseline');
 }
 
 const columns = createTaskColumns(

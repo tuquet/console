@@ -222,7 +222,7 @@ function handleTabChange(
           </Button>
         </div>
         <p class="text-sm text-muted-foreground">
-          Displaying users within the currently selected workspace.
+          Displaying users within the currently selected tenant.
         </p>
         <div class="divide-y divide-border rounded-lg border border-border">
           <div class="flex items-center justify-between p-3">
@@ -265,7 +265,7 @@ function handleTabChange(
               {{
                 role === 'superadmin'
                   ? 'Unrestricted root access'
-                  : 'Scoped workspace access'
+                  : 'Scoped tenant access'
               }}
             </p>
           </div>

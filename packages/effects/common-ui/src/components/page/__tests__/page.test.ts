@@ -141,4 +141,46 @@ describe('page.vue', () => {
     expect(wrapper.text()).toContain('Description Slot Content');
     expect(wrapper.html()).not.toContain('Test Description');
   });
+
+  it('renders custom #loading slot when loading is true and switches to default slot when false', async () => {
+    const wrapper = mount(Page, {
+      props: {
+        loading: true,
+        title: 'Status Page',
+      },
+      slots: {
+        default: '<p>Ready Content</p>',
+        loading: '<p>Skeleton Loading</p>',
+      },
+    });
+
+    expect(wrapper.text()).toContain('Status Page');
+    expect(wrapper.find('[data-layout-region="page-loading"]').exists()).toBe(
+      true,
+    );
+    expect(wrapper.text()).toContain('Skeleton Loading');
+    expect(wrapper.text()).not.toContain('Ready Content');
+
+    await wrapper.setProps({ loading: false });
+
+    expect(wrapper.find('[data-layout-region="page-loading"]').exists()).toBe(
+      false,
+    );
+    expect(wrapper.text()).toContain('Ready Content');
+  });
+
+  it('renders built-in spinner overlay when loading is true without #loading slot', () => {
+    const wrapper = mount(Page, {
+      props: {
+        loading: true,
+        loadingText: 'Checking local services...',
+      },
+      slots: {
+        default: '<p>Main Content</p>',
+      },
+    });
+
+    expect(wrapper.text()).toContain('Main Content');
+    expect(wrapper.text()).toContain('Checking local services...');
+  });
 });

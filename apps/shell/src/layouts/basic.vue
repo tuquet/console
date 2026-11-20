@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { NotificationItem } from '@operon/layouts';
 
-import { computed, ref, watch } from 'vue';
+import { computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { AuthenticationLoginExpiredModal } from '@operon/common-ui';
@@ -19,23 +19,21 @@ import { openWindow } from '@operon/utils';
 
 import DaemonStatusPill from '#/components/common/daemon-status-pill.vue';
 import LocalBridgeNotice from '#/components/common/local-bridge-notice.vue';
-import WorkspaceSelector from '#/components/common/workspace-selector.vue';
+import TenantSelector from '#/components/common/tenant-selector.vue';
 import { $t } from '#/locales';
-import { useAuthStore } from '#/store';
+import { useAuthStore, useNotificationStore } from '#/store';
 import LoginForm from '#/views/_core/authentication/login.vue';
-
-const notifications = ref<NotificationItem[]>([]);
 
 const router = useRouter();
 const userStore = useUserStore();
 const authStore = useAuthStore();
 const accessStore = useAccessStore();
+const notificationStore = useNotificationStore();
 const { destroyWatermark, updateWatermark } = useWatermark();
 const { isDark } = usePreferences();
 
-const showDot = computed(() =>
-  notifications.value.some((item) => !item.isRead),
-);
+const notifications = computed(() => notificationStore.items);
+const showDot = computed(() => notificationStore.hasUnread);
 
 const menus = computed(() => {
   const baseMenus = [
@@ -93,22 +91,19 @@ async function handleLogout() {
 }
 
 function handleNoticeClear() {
-  notifications.value = [];
+  notificationStore.clear();
 }
 
 function markRead(id: number | string) {
-  const item = notifications.value.find((item) => item.id === id);
-  if (item) {
-    item.isRead = true;
-  }
+  notificationStore.markRead(id);
 }
 
 function remove(id: number | string) {
-  notifications.value = notifications.value.filter((item) => item.id !== id);
+  notificationStore.remove(id);
 }
 
 function handleMakeAll() {
-  notifications.value.forEach((item) => (item.isRead = true));
+  notificationStore.markAllRead();
 }
 
 const viewAll = () => {};
@@ -185,8 +180,8 @@ watch(
     @clear-preferences-and-logout="handleLogout"
     @logout="handleLogout"
   >
-    <template #workspace-selector="{ collapsed }">
-      <WorkspaceSelector :collapsed="Boolean(collapsed)" />
+    <template #tenant-selector="{ collapsed }">
+      <TenantSelector :collapsed="Boolean(collapsed)" />
     </template>
     <template #sidebar-footer="{ collapsed }">
       <DaemonStatusPill :collapsed="collapsed" />

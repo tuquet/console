@@ -1,10 +1,12 @@
 import type { RouteLocationNormalized, Router } from 'vue-router';
 
 import { DEFAULT_HOME_PATH, LOGIN_PATH } from '@operon/constants';
+import { getLocalBridgeStatus } from '@operon/kernel';
 import { preferences } from '@operon/preferences';
 import { useAccessStore, useUserStore } from '@operon/stores';
 import { startProgress, stopProgress } from '@operon/utils';
 
+import { isTauriEnvironment } from '#/adapter/desktop';
 import {
   isJwtTokenExpired,
   setSupabaseUnauthorizedHandler,
@@ -13,7 +15,12 @@ import {
 import { accessRoutes, coreRouteNames } from '#/router/routes';
 import { useAuthStore } from '#/store';
 import { sanitizeRedirectPath } from '#/utils/security';
-import { shouldShowWelcomeOnStartup } from '#/utils/welcome';
+import {
+  buildWelcomeLocation,
+  hasLocalBridgeSeen,
+  markLocalBridgeSeen,
+  saveWelcomeRedirect,
+} from '#/utils/welcome';
 
 import { bootstrapLocalOperatorSession, generateAccess } from './access';
 
@@ -91,9 +98,7 @@ async function handleUnauthenticatedNavigation(
       preferences.app.defaultHomePath ||
       DEFAULT_HOME_PATH;
     let targetPath = to.fullPath;
-    if (to.path === '/') {
-      targetPath = shouldShowWelcomeOnStartup() ? '/welcome' : fallbackHome;
-    } else if (to.path === LOGIN_PATH) {
+    if (to.path === '/' || to.path === LOGIN_PATH) {
       targetPath = fallbackHome;
     }
     return resolveRouteWithFallback(router, targetPath, fallbackHome);
@@ -152,8 +157,26 @@ function setupAccessGuard(router: Router) {
       }
     }
 
-    // Core routes bypass access interceptor (Welcome still needs sidebar menus bootstrapped)
-    if (to.name !== 'Welcome' && coreRouteNames.includes(to.name as string)) {
+    const bridgeStatus = getLocalBridgeStatus();
+    if (bridgeStatus === 'healthy') {
+      markLocalBridgeSeen();
+    }
+
+    // Redirect first-time Web/PWA visitors to standalone Welcome when local Operon is offline
+    const isWelcomeExempt =
+      to.path === '/welcome' || to.path.startsWith('/auth');
+    if (
+      !isTauriEnvironment() &&
+      !isWelcomeExempt &&
+      bridgeStatus === 'offline' &&
+      !hasLocalBridgeSeen()
+    ) {
+      saveWelcomeRedirect(to.fullPath);
+      return buildWelcomeLocation(to.fullPath);
+    }
+
+    // Core routes bypass access interceptor
+    if (coreRouteNames.includes(to.name as string)) {
       return handleCoreRouteNavigation(to);
     }
 

@@ -9,7 +9,7 @@ import { Building2 } from '@lucide/vue';
 
 import CliSnippetCard from '#/components/common/cli-snippet-card.vue';
 
-defineOptions({ name: 'ProfileWorkspaceTab' });
+defineOptions({ name: 'ProfileTenantTab' });
 
 defineProps<{
   activeTenantId: string;
@@ -22,10 +22,10 @@ const router = useRouter();
   <div class="max-w-2xl flex flex-col gap-5 pt-1">
     <div>
       <h3 class="text-base font-semibold text-foreground">
-        {{ $t('profile.activeWorkspaceTitle') }}
+        {{ $t('profile.activeTenantTitle') }}
       </h3>
       <p class="text-muted-foreground">
-        {{ $t('profile.activeWorkspaceDesc') }}
+        {{ $t('profile.activeTenantDesc') }}
       </p>
     </div>
 
@@ -36,7 +36,7 @@ const router = useRouter();
         <div class="flex items-center gap-2">
           <Building2 class="size-4.5 text-primary" />
           <span class="font-semibold text-foreground">{{
-            $t('profile.currentWorkspace')
+            $t('profile.currentTenant')
           }}</span>
         </div>
         <Badge
@@ -47,11 +47,11 @@ const router = useRouter();
         </Badge>
       </div>
       <div class="text-muted-foreground">
-        ID: {{ activeTenantId || $t('profile.noWorkspaceSelected') }}
+        ID: {{ activeTenantId || $t('profile.noTenantSelected') }}
       </div>
       <div class="pt-2">
         <Button size="sm" variant="outline" @click="router.push('/tenants')">
-          {{ $t('profile.viewAllWorkspaces') }}
+          {{ $t('profile.viewAllTenants') }}
         </Button>
       </div>
     </div>

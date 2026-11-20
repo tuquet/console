@@ -8,10 +8,9 @@ import {
   useLocalBridgeHeartbeat,
 } from '@operon/kernel';
 
-import { Badge, Button, toast } from '@operon-core/shadcn-ui';
+import { Badge, Button, Skeleton, toast } from '@operon-core/shadcn-ui';
 
 import {
-  Activity,
   ArrowLeft,
   CheckCircle2,
   Cloud,
@@ -19,6 +18,7 @@ import {
   Cpu,
   Download,
   Layers,
+  Loader2,
   RefreshCw,
   Sparkles,
   WifiOff,
@@ -32,6 +32,8 @@ const router = useRouter();
 const kernel = useKernel();
 const sampleStore = useSampleStore();
 const bridge = useLocalBridgeHeartbeat({ intervalMs: 5000 });
+const isChecking = computed(() => bridge.status.value === 'checking');
+const isInitialChecking = bridge.isInitialChecking;
 const hasOverviewRoute = computed(
   () => router.resolve('/dashboard/overview').matched.length > 0,
 );
@@ -95,23 +97,41 @@ function handleNotify() {
     </div>
 
     <!-- Local Bridge Heartbeat Gate -->
-    <div
-      v-if="bridge.status.value === 'checking'"
-      class="rounded-xl border border-border bg-card p-8 text-center shadow-xs"
-    >
-      <Activity class="size-8 text-primary mx-auto mb-3 animate-pulse" />
-      <h3 class="text-base font-semibold text-foreground">
-        Connecting to Operon...
-      </h3>
-      <p class="text-sm text-muted-foreground mt-1">
-        Checking if Operon is running on your computer.
-      </p>
-    </div>
+    <Transition name="automation-fade" mode="out-in">
+      <div
+        v-if="isInitialChecking"
+        key="automation-loading"
+        class="grid grid-cols-1 gap-5 md:grid-cols-2"
+      >
+        <div
+          class="md:col-span-2 flex items-center justify-between rounded-xl border border-border/60 bg-card px-4 py-3"
+        >
+          <div class="flex items-center gap-2.5 text-xs text-muted-foreground">
+            <Loader2 class="size-4 animate-spin text-primary" />
+            <span>Checking local Operon service...</span>
+          </div>
+          <Skeleton class="h-7 w-16 rounded-md" />
+        </div>
+        <div
+          v-for="idx in 2"
+          :key="idx"
+          class="flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-5"
+        >
+          <div class="flex items-center justify-between">
+            <Skeleton class="h-4 w-32" />
+            <Skeleton class="size-4 rounded-full" />
+          </div>
+          <Skeleton class="h-3.5 w-full" />
+          <Skeleton class="h-3.5 w-4/5" />
+          <Skeleton class="h-3.5 w-3/5" />
+        </div>
+      </div>
 
-    <div
-      v-else-if="!bridge.isHealthy.value"
-      class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-6 shadow-xs"
-    >
+      <div
+        v-else-if="!bridge.isHealthy.value"
+        key="automation-offline"
+        class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-6 shadow-xs"
+      >
       <div class="flex flex-col gap-4">
         <div
           class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
@@ -155,8 +175,16 @@ function handleNotify() {
               <Download class="size-3.5 mr-1.5" />
               Download Operon
             </Button>
-            <Button size="sm" variant="outline" @click="bridge.checkNow()">
-              <RefreshCw class="size-3.5 mr-1.5" />
+            <Button
+              size="sm"
+              variant="outline"
+              :disabled="isChecking"
+              @click="bridge.checkNow()"
+            >
+              <RefreshCw
+                class="size-3.5 mr-1.5"
+                :class="{ 'animate-spin': isChecking }"
+              />
               Retry
             </Button>
           </div>
@@ -181,7 +209,11 @@ function handleNotify() {
     </div>
 
     <!-- Cards Grid (rendered only when Local Bridge is healthy) -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div
+      v-else
+      key="automation-healthy"
+      class="grid grid-cols-1 md:grid-cols-2 gap-5"
+    >
       <!-- Local Bridge Status Banner -->
       <div
         class="md:col-span-2 flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3"
@@ -197,8 +229,16 @@ function handleNotify() {
             v{{ bridge.health.value.version }}
           </Badge>
         </div>
-        <Button size="sm" variant="ghost" @click="bridge.checkNow()">
-          <RefreshCw class="size-3.5 mr-1" />
+        <Button
+          size="sm"
+          variant="ghost"
+          :disabled="isChecking"
+          @click="bridge.checkNow()"
+        >
+          <RefreshCw
+            class="size-3.5 mr-1"
+            :class="{ 'animate-spin': isChecking }"
+          />
           Check
         </Button>
       </div>
@@ -266,5 +306,25 @@ function handleNotify() {
         </div>
       </div>
     </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.automation-fade-enter-active,
+.automation-fade-leave-active {
+  transition: opacity 150ms ease;
+}
+
+.automation-fade-enter-from,
+.automation-fade-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .automation-fade-enter-active,
+  .automation-fade-leave-active {
+    transition-duration: 0ms;
+  }
+}
+</style>

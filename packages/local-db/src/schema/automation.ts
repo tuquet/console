@@ -61,6 +61,22 @@ export const proxies = sqliteTable(
   ],
 );
 
+export interface BrowserFingerprintConfig {
+  acceptLang?: string;
+  deviceMemoryGb?: number;
+  devicePixelRatio?: number;
+  hardwareConcurrency?: number;
+  lang?: string;
+  noiseLevel?: 'aggressive' | 'balanced' | 'off' | 'subtle';
+  osPlatform?: string;
+  osVersion?: string;
+  screenHeight?: number;
+  screenWidth?: number;
+  seed?: number;
+  webrtcMode?: 'default' | 'disabled' | 'proxy_shielded';
+  [key: string]: unknown;
+}
+
 // 3. Browser Profiles (Isolated Stealth Fingerprints & Sessions)
 export const browserProfiles = sqliteTable(
   'browser_profiles',
@@ -76,7 +92,7 @@ export const browserProfiles = sqliteTable(
     timezone: text('timezone'),
     browserType: text('browser_type').default('Chromium').notNull(),
     fingerprint: text('fingerprint', { mode: 'json' })
-      .$type<Record<string, unknown>>()
+      .$type<BrowserFingerprintConfig>()
       .default({})
       .notNull(),
     cookies: text('cookies', { mode: 'json' })

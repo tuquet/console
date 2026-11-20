@@ -68,19 +68,19 @@ const kpiCards = computed<KpiCardItem[]>(() => {
   return [
     {
       badgeClass: 'shrink-0 bg-primary/10 text-primary hover:bg-primary/15',
-      badgeTestId: 'kpi-workspaces-status',
+      badgeTestId: 'kpi-tenants-status',
       badgeText:
         tenants.activeCount === tenants.total
-          ? $t('page.analytics.active_workspaces')
+          ? $t('page.analytics.active_tenants')
           : `${tenants.activeCount} ${$t('page.analytics.active')}`,
       badgeVariant: 'secondary',
-      cardTestId: 'kpi-card-workspaces',
+      cardTestId: 'kpi-card-tenants',
       icon: Building2,
       iconWrapperClass: 'bg-primary/10 text-primary',
-      label: $t('page.analytics.metric_workspaces'),
+      label: $t('page.analytics.metric_tenants'),
       showLoadingDash: true,
       value: tenants.total,
-      valueTestId: 'kpi-workspaces-total',
+      valueTestId: 'kpi-tenants-total',
     },
     {
       badgeClass: 'shrink-0 text-muted-foreground',

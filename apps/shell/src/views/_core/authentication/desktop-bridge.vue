@@ -25,7 +25,7 @@ import {
 import { CheckCircle2, Laptop } from '@lucide/vue';
 
 import { useClipboard } from '#/composables';
-import { useWorkspaceStore } from '#/store/workspace';
+import { useTenantStore } from '#/store/tenant';
 import { captureError } from '#/utils/bugsink';
 import { validateDesktopBridgePort } from '#/utils/security';
 
@@ -40,7 +40,7 @@ const route = useRoute();
 const router = useRouter();
 const accessStore = useAccessStore();
 const userStore = useUserStore();
-const workspaceStore = useWorkspaceStore();
+const tenantStore = useTenantStore();
 const { copyToClipboard, isCopied } = useClipboard();
 
 // Query parameters from Desk app
@@ -71,7 +71,7 @@ const tenantOptions = ref<{ label: string; value: string }[]>([]);
 
 async function loadTenants() {
   if (!accessStore.accessToken) return;
-  const list = await workspaceStore.fetchWorkspaces();
+  const list = await tenantStore.fetchTenants();
   if (list.length > 0) {
     tenantOptions.value = list.map((t) => ({
       label: `${t.name} · ${t.slug}`,
@@ -83,11 +83,11 @@ async function loadTenants() {
 
   tenantOptions.value = [
     {
-      label: $t('authentication.desktopDefaultWorkspace'),
-      value: 'default-workspace',
+      label: $t('authentication.desktopDefaultTenant'),
+      value: 'local-default',
     },
   ];
-  selectedTenant.value = 'default-workspace';
+  selectedTenant.value = 'local-default';
 }
 
 const loading = ref(false);
@@ -283,7 +283,7 @@ onMounted(() => {
 
           <div>
             <span class="text-muted-foreground block mb-2">{{
-              $t('term.workspace')
+              $t('term.tenant')
             }}</span>
             <Select v-model="selectedTenant">
               <SelectTrigger class="w-full bg-background">

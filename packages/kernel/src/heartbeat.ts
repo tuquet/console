@@ -58,6 +58,9 @@ function createBridgeMonitor(
   const lastError = ref<null | string>(null);
 
   const isHealthy = computed(() => status.value === 'healthy');
+  const isInitialChecking = computed(
+    () => status.value === 'checking' && lastCheckedAt.value === null,
+  );
 
   let timer: null | ReturnType<typeof setInterval> = null;
   let activeController: AbortController | null = null;
@@ -148,6 +151,7 @@ function createBridgeMonitor(
     error: lastError,
     health,
     isHealthy,
+    isInitialChecking,
     lastCheckedAt,
     port,
     release,
@@ -156,6 +160,13 @@ function createBridgeMonitor(
     status,
     stop,
   };
+}
+
+/**
+ * Returns the latest cached status for the local Operon bridge monitor on `port`.
+ */
+export function getLocalBridgeStatus(port = 8765): LocalBridgeStatus {
+  return bridgeMonitors.get(port)?.status.value ?? 'checking';
 }
 
 /**
@@ -188,6 +199,7 @@ export function useLocalBridgeHeartbeat(
     error: monitor.error,
     health: monitor.health,
     isHealthy: monitor.isHealthy,
+    isInitialChecking: monitor.isInitialChecking,
     lastCheckedAt: monitor.lastCheckedAt,
     port: monitor.port,
     start: monitor.start,

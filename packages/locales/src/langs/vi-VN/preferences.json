@@ -213,7 +213,7 @@
     "headerRight": "Phải tiêu đề",
     "sidebarHeader": "Đầu thanh bên",
     "logo": "Logo",
-    "workspaceSelector": "Chọn workspace",
+    "tenantSelector": "Chọn tenant",
     "breadcrumb": "Điều hướng (Breadcrumb)",
     "userDropdown": "Menu người dùng",
     "hidden": "Ẩn",
@@ -231,13 +231,13 @@
         "tip": "Mở rộng biểu mẫu dữ liệu toàn màn hình."
       },
       "tenantMode": {
-        "label": "Chế độ workspace",
+        "label": "Chế độ tenant",
         "options": {
           "single": {
-            "label": "Đơn workspace"
+            "label": "Đơn tenant"
           },
           "multi": {
-            "label": "Đa workspace"
+            "label": "Đa tenant"
           }
         }
       },
@@ -259,13 +259,13 @@
         "tip": "Mở rộng biểu mẫu dữ liệu toàn màn hình."
       },
       "tenantMode": {
-        "label": "Chế độ workspace",
+        "label": "Chế độ tenant",
         "options": {
           "single": {
-            "label": "Đơn workspace"
+            "label": "Đơn tenant"
           },
           "multi": {
-            "label": "Đa workspace"
+            "label": "Đa tenant"
           }
         }
       },

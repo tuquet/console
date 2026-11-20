@@ -29,6 +29,14 @@ export interface CreateTenantInput {
   slug: string;
 }
 
+export interface UpdateTenantInput {
+  metadata?: Record<string, any>;
+  name?: string;
+  plan?: string;
+  slug?: string;
+  status?: TenantStatus;
+}
+
 const ACTIVE_TENANT_KEY = STORAGE_KEYS.ACTIVE_TENANT_ID;
 
 export function getActiveTenantId(): string {
@@ -79,7 +87,57 @@ export async function createTenant(data: CreateTenantInput): Promise<Tenant> {
   return created;
 }
 
+/**
+ * Update an existing Cloud workspace / tenant
+ */
+export async function updateTenant(
+  id: string,
+  data: UpdateTenantInput,
+): Promise<Tenant> {
+  const payload: Record<string, any> = {
+    updated_at: new Date().toISOString(),
+  };
+  if (data.name !== undefined) payload.name = data.name;
+  if (data.slug !== undefined) payload.slug = data.slug;
+  if (data.status !== undefined) payload.status = data.status;
+  if (data.plan !== undefined || data.metadata !== undefined) {
+    payload.metadata = {
+      ...data.metadata,
+      ...(data.plan ? { plan: data.plan } : {}),
+    };
+  }
+
+  const result = await supabaseRequest<Tenant | Tenant[]>(
+    `/rest/v1/tenants?id=eq.${encodeURIComponent(id)}`,
+    {
+      body: JSON.stringify(payload),
+      method: 'PATCH',
+      preferRepresentation: true,
+    },
+  );
+
+  const updated = Array.isArray(result) ? result[0] : result;
+  if (!updated) {
+    throw new Error('Failed to update tenant: empty response from server');
+  }
+  return updated;
+}
+
+/**
+ * Permanently delete a Cloud workspace / tenant
+ */
+export async function deleteTenant(id: string): Promise<void> {
+  await supabaseRequest(
+    `/rest/v1/tenants?id=eq.${encodeURIComponent(id)}`,
+    {
+      method: 'DELETE',
+    },
+  );
+}
+
 export const tenantsApi = {
   create: createTenant,
+  delete: deleteTenant,
   list: listTenants,
+  update: updateTenant,
 };

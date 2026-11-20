@@ -1,6 +1,4 @@
 {
-  "workspace": "Workspace",
-  "workspaces": "Workspace",
   "workflow": "Quy trình",
   "workflows": "Quy trình",
   "device": "Thiết bị",
@@ -28,8 +26,8 @@
   "auditLogs": "Nhật ký kiểm toán",
   "user": "Người dùng",
   "users": "Người dùng",
-  "tenant": "Workspace",
-  "tenants": "Workspace",
+  "tenant": "Tenant",
+  "tenants": "Tenants",
   "member": "Thành viên",
   "members": "Thành viên",
   "job": "Tác vụ",

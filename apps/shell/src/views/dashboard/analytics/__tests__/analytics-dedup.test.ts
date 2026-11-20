@@ -120,28 +120,28 @@ describe('enterprise UI information deduplication (SPEC-ui-information-deduplica
     await new Promise((resolve) => setTimeout(resolve, 20));
     await nextTick();
 
-    const workspacesCard = container.querySelector(
-      '[data-testid="kpi-card-workspaces"]',
+    const tenantsCard = container.querySelector(
+      '[data-testid="kpi-card-tenants"]',
     );
-    expect(workspacesCard).not.toBeNull();
+    expect(tenantsCard).not.toBeNull();
 
     // Primary total is 3, and status pill shows active label without repeating '3' when activeCount === total
     const totalEl = container.querySelector(
-      '[data-testid="kpi-workspaces-total"]',
+      '[data-testid="kpi-tenants-total"]',
     );
     const statusEl = container.querySelector(
-      '[data-testid="kpi-workspaces-status"]',
+      '[data-testid="kpi-tenants-status"]',
     );
     expect(totalEl?.textContent?.trim()).toBe('3');
     expect(statusEl?.textContent?.trim()).toBe(
-      'page.analytics.active_workspaces',
+      'page.analytics.active_tenants',
     );
 
     // Does not echo 'plan_pro' or 'plan_free' inside the KPI card (owned by PlansChart)
-    expect(workspacesCard?.textContent).not.toContain(
+    expect(tenantsCard?.textContent).not.toContain(
       'page.analytics.plan_pro',
     );
-    expect(workspacesCard?.textContent).not.toContain(
+    expect(tenantsCard?.textContent).not.toContain(
       'page.analytics.plan_free',
     );
 

@@ -61,5 +61,42 @@ export function createMockKernel(
       },
       ...overrides?.events,
     },
+    notifications: {
+      platform: 'web',
+      push: async (payload) => {
+        console.warn(
+          `[MockKernel Push - ${(payload.severity ?? 'info').toUpperCase()}]: ${payload.title}`,
+          payload.body ?? '',
+        );
+      },
+      getPermission: async () => 'default',
+      requestPermission: async () => 'default',
+      ...overrides?.notifications,
+    },
+    tenant: {
+      activeId: 'local-default',
+      activeName: 'Local Tenant',
+      activeSlug: 'local',
+      isLoading: false,
+      items: [
+        {
+          avatarUrl: null,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          createdBy: 'local',
+          id: 'local-default',
+          metadata: { plan: 'local' },
+          name: 'Local Tenant',
+          plan: 'local',
+          slug: 'local',
+          status: 'active',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+      refresh: async () => [],
+      switchTenant: (id: string) => {
+        console.warn(`[MockKernel] switchTenant called: ${id}`);
+      },
+      ...overrides?.tenant,
+    },
   };
 }

@@ -4,7 +4,6 @@ import { DEFAULT_HOME_PATH, LOGIN_PATH } from '@operon/constants';
 import { preferences } from '@operon/preferences';
 
 import { $t } from '#/locales';
-import { shouldShowWelcomeOnStartup } from '#/utils/welcome';
 
 const BasicLayout = () => import('#/layouts/basic.vue');
 const AuthPageLayout = () => import('#/layouts/auth.vue');
@@ -36,22 +35,8 @@ const coreRoutes: RouteRecordRaw[] = [
     },
     name: 'Root',
     path: '/',
-    redirect: () =>
-      shouldShowWelcomeOnStartup()
-        ? '/welcome'
-        : preferences.app.defaultHomePath || DEFAULT_HOME_PATH,
+    redirect: () => preferences.app.defaultHomePath || DEFAULT_HOME_PATH,
     children: [
-      {
-        component: () => import('#/views/_core/welcome/index.vue'),
-        meta: {
-          hideInBreadcrumb: true,
-          hideInMenu: true,
-          icon: 'lucide:sparkles',
-          title: $t('page.welcome.title'),
-        },
-        name: 'Welcome',
-        path: 'welcome',
-      },
       {
         component: () => import('#/views/_core/profile/index.vue'),
         meta: {
@@ -64,6 +49,18 @@ const coreRoutes: RouteRecordRaw[] = [
         path: 'profile',
       },
     ],
+  },
+  {
+    component: () => import('#/views/_core/welcome/index.vue'),
+    meta: {
+      hideInBreadcrumb: true,
+      hideInMenu: true,
+      hideInTab: true,
+      ignoreAccess: true,
+      title: $t('page.welcome.title'),
+    },
+    name: 'Welcome',
+    path: '/welcome',
   },
   {
     component: AuthPageLayout,

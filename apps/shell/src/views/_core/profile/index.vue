@@ -42,7 +42,7 @@ import { getActiveTenantId, getCurrentUser, updateUserProfile } from '#/api';
 import { useAsyncAction, useClipboard } from '#/composables';
 
 import ProfileSecurityTab from './components/profile-security-tab.vue';
-import ProfileWorkspaceTab from './components/profile-workspace-tab.vue';
+import ProfileTenantTab from './components/profile-tenant-tab.vue';
 
 defineOptions({ name: 'Profile' });
 
@@ -226,8 +226,8 @@ onMounted(async () => {
           <TabsTrigger value="security">
             {{ $t('profile.tabSecurity') }}
           </TabsTrigger>
-          <TabsTrigger value="workspace">
-            {{ $t('profile.tabWorkspace') }}
+          <TabsTrigger value="tenant">
+            {{ $t('profile.tabTenant') }}
           </TabsTrigger>
         </TabsList>
 
@@ -326,9 +326,9 @@ onMounted(async () => {
           <ProfileSecurityTab />
         </TabsContent>
 
-        <!-- Tab 3: Workspace -->
-        <TabsContent value="workspace">
-          <ProfileWorkspaceTab :active-tenant-id="activeTenantId" />
+        <!-- Tab 3: Tenant -->
+        <TabsContent value="tenant">
+          <ProfileTenantTab :active-tenant-id="activeTenantId" />
         </TabsContent>
       </Tabs>
     </div>

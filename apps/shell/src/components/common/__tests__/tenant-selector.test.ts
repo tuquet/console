@@ -7,9 +7,9 @@ import { useAccessStore } from '@operon/stores';
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useWorkspaceStore } from '#/store/workspace';
+import { useTenantStore } from '#/store/tenant';
 
-import WorkspaceSelector from '../workspace-selector.vue';
+import TenantSelector from '../tenant-selector.vue';
 
 // Mock dependencies
 const mockPush = vi.fn();
@@ -31,7 +31,7 @@ const mockTenants = [
     avatar_url: null,
     created_at: '2026-01-01',
     created_by: null,
-    id: 'ws-1',
+    id: 'tenant-1',
     metadata: { plan: 'pro' },
     name: 'Acme Corp',
     slug: 'acme-corp',
@@ -42,7 +42,7 @@ const mockTenants = [
     avatar_url: null,
     created_at: '2026-01-02',
     created_by: null,
-    id: 'ws-2',
+    id: 'tenant-2',
     metadata: { plan: 'free' },
     name: 'Staging Lab',
     slug: 'staging-lab',
@@ -58,7 +58,7 @@ vi.mock('#/api/core/tenant', () => ({
     PRO: 'pro',
   },
   createTenant: vi.fn(async (data) => ({
-    id: 'ws-new',
+    id: 'tenant-new',
     name: data.name,
     slug: data.slug,
     metadata: { plan: data.plan || 'pro' },
@@ -66,9 +66,11 @@ vi.mock('#/api/core/tenant', () => ({
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   })),
-  getActiveTenantId: vi.fn(() => 'ws-1'),
+  deleteTenant: vi.fn(),
+  getActiveTenantId: vi.fn(() => 'tenant-1'),
   listTenants: vi.fn(async () => mockTenants),
   setActiveTenantId: vi.fn(),
+  updateTenant: vi.fn(),
 }));
 
 vi.mock('@operon-core/shadcn-ui', () => ({
@@ -215,30 +217,36 @@ vi.mock('@operon-core/shadcn-ui', () => ({
         h('div', { class: 'popover-trigger-stub' }, slots.default?.());
     },
   }),
+  Skeleton: defineComponent({
+    name: 'Skeleton',
+    setup() {
+      return () => h('div', { class: 'skeleton-stub' });
+    },
+  }),
   toast: {
     error: vi.fn(),
     success: vi.fn(),
   },
 }));
 
-describe('workspace selector component', () => {
+describe('tenant selector component', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
   });
 
-  it('mounts and renders active workspace information', async () => {
+  it('mounts and renders active tenant information', async () => {
     const pinia = createPinia();
     setActivePinia(pinia);
     const accessStore = useAccessStore(pinia);
     accessStore.setAccessToken('mock-token');
-    const store = useWorkspaceStore(pinia);
-    store.workspaces = [...mockTenants];
-    store.activeWorkspaceId = 'ws-1';
+    const store = useTenantStore(pinia);
+    store.tenants = [...mockTenants];
+    store.activeTenantId = 'tenant-1';
 
     const container = document.createElement('div');
     document.body.append(container);
-    const app = createApp(WorkspaceSelector);
+    const app = createApp(TenantSelector);
     app.use(pinia);
 
     try {
@@ -246,10 +254,13 @@ describe('workspace selector component', () => {
       await nextTick();
 
       const trigger = container.querySelector(
-        '[data-testid="workspace-selector-trigger"]',
+        '[data-testid="tenant-selector-trigger"]',
       );
       expect(trigger).not.toBeNull();
       expect(container.textContent).toContain('Acme Corp');
+      expect(
+        container.querySelector('[data-testid="tenant-selector-manage"]'),
+      ).not.toBeNull();
     } finally {
       app.unmount();
       container.remove();
@@ -261,13 +272,13 @@ describe('workspace selector component', () => {
     setActivePinia(pinia);
     const accessStore = useAccessStore(pinia);
     accessStore.setAccessToken('mock-token');
-    const store = useWorkspaceStore(pinia);
-    store.workspaces = [...mockTenants];
-    store.activeWorkspaceId = 'ws-1';
+    const store = useTenantStore(pinia);
+    store.tenants = [...mockTenants];
+    store.activeTenantId = 'tenant-1';
 
     const container = document.createElement('div');
     document.body.append(container);
-    const app = createApp(WorkspaceSelector, { collapsed: true });
+    const app = createApp(TenantSelector, { collapsed: true });
     app.use(pinia);
 
     try {
@@ -275,11 +286,11 @@ describe('workspace selector component', () => {
       await nextTick();
 
       const collapsedTrigger = container.querySelector(
-        '[data-testid="workspace-selector-trigger-collapsed"]',
+        '[data-testid="tenant-selector-trigger-collapsed"]',
       );
       expect(collapsedTrigger).not.toBeNull();
       expect(
-        container.querySelector('[data-testid="workspace-selector-trigger"]'),
+        container.querySelector('[data-testid="tenant-selector-trigger"]'),
       ).toBeNull();
     } finally {
       app.unmount();
@@ -287,15 +298,15 @@ describe('workspace selector component', () => {
     }
   });
 
-  it('switches active workspace when selected in store', async () => {
-    const store = useWorkspaceStore();
-    store.workspaces = [...mockTenants];
-    store.activeWorkspaceId = 'ws-1';
+  it('switches active tenant when selected in store', async () => {
+    const store = useTenantStore();
+    store.tenants = [...mockTenants];
+    store.activeTenantId = 'tenant-1';
 
-    expect(store.activeWorkspace?.name).toBe('Acme Corp');
+    expect(store.activeTenant?.name).toBe('Acme Corp');
 
-    store.setWorkspace('ws-2');
-    expect(store.activeWorkspaceId).toBe('ws-2');
-    expect(store.activeWorkspace?.name).toBe('Staging Lab');
+    store.setTenant('tenant-2');
+    expect(store.activeTenantId).toBe('tenant-2');
+    expect(store.activeTenant?.name).toBe('Staging Lab');
   });
 });

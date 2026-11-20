@@ -247,10 +247,10 @@ const headerSlots = computed(() => {
         <template v-for="slotName in sidebarHeaderSlots" :key="slotName">
           <slot
             v-if="
-              slotName === 'workspace-selector' && $slots['workspace-selector']
+              slotName === 'tenant-selector' && $slots['tenant-selector']
             "
             :collapsed="collapsed"
-            name="workspace-selector"
+            name="tenant-selector"
           ></slot>
           <HeaderWidget
             v-else
@@ -304,8 +304,8 @@ const headerSlots = computed(() => {
         <template #user-dropdown>
           <slot name="user-dropdown"></slot>
         </template>
-        <template v-if="$slots['workspace-selector']" #workspace-selector>
-          <slot :collapsed="false" name="workspace-selector"></slot>
+        <template v-if="$slots['tenant-selector']" #tenant-selector>
+          <slot :collapsed="false" name="tenant-selector"></slot>
         </template>
         <template #notification>
           <slot name="notification"></slot>

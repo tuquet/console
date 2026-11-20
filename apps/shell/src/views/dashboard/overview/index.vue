@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { Page } from '@operon/common-ui';
 import {
   getLocalBridgeInstallInfo,
   useLocalBridgeHeartbeat,
@@ -16,6 +17,7 @@ import {
   CardTitle,
   Progress,
   Separator,
+  Skeleton,
   toast,
 } from '@operon-core/shadcn-ui';
 
@@ -48,6 +50,7 @@ const hasInitiatedInstall = ref(false);
 
 const isHealthy = computed(() => bridge.status.value === 'healthy');
 const isChecking = computed(() => bridge.status.value === 'checking');
+const isInitialChecking = bridge.isInitialChecking;
 
 async function copyInstallCommand() {
   try {
@@ -98,7 +101,7 @@ const modules = computed<ModuleItem[]>(() => [
     requiresCloud: false,
   },
   {
-    description: $t('page.overview.moduleWorkspacesDesc'),
+    description: $t('page.overview.moduleTenantsDesc'),
     icon: Users,
     name: $t('page.tenants.title'),
     path: '/tenants',
@@ -149,18 +152,78 @@ function isLocked(mod: ModuleItem) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 p-3 sm:gap-6 sm:p-5">
-    <!-- Header -->
-    <div class="min-w-0">
-      <h1
-        class="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-      >
-        {{ $t('page.overview.title') }}
-      </h1>
-      <p class="mt-0.5 truncate text-xs text-muted-foreground sm:text-sm">
-        {{ $t('page.overview.description') }}
-      </p>
-    </div>
+  <Page
+    :auto-content-height="false"
+    :description="$t('page.overview.description')"
+    :loading="isInitialChecking"
+    :title="$t('page.overview.title')"
+    content-class="flex flex-col gap-4 p-3 sm:gap-6 sm:p-5"
+    header-class="border-b-0 bg-transparent px-3 pt-3 pb-0 sm:px-5 sm:pt-5"
+  >
+    <template #loading>
+      <!-- Daemon Status Card Skeleton -->
+      <Card class="border-border/60 shadow-xs">
+        <CardHeader class="pb-4">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <div
+                class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+              >
+                <Loader2 class="size-4 animate-spin" />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <Skeleton class="h-4 w-32" />
+                <Skeleton class="h-3 w-40" />
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <Badge variant="outline" class="text-muted-foreground">
+                {{ $t('page.overview.daemonChecking') }}
+              </Badge>
+              <Skeleton class="h-8 w-20 rounded-md" />
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <!-- Checklist Card Skeleton -->
+        <Card class="border-border/60 shadow-xs">
+          <CardHeader class="pb-3">
+            <Skeleton class="h-4 w-28" />
+          </CardHeader>
+          <CardContent class="flex flex-col gap-3 pt-0">
+            <div v-for="idx in 3" :key="idx" class="flex items-center gap-2.5">
+              <Skeleton class="size-4 shrink-0 rounded-full" />
+              <Skeleton class="h-3.5 w-full max-w-[210px]" />
+            </div>
+            <Skeleton class="mt-1 h-1.5 w-full rounded-full" />
+          </CardContent>
+        </Card>
+
+        <!-- Modules Grid Skeleton -->
+        <div class="lg:col-span-2">
+          <Skeleton class="mb-3 h-3.5 w-24" />
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div
+              v-for="idx in 5"
+              :key="idx"
+              class="flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-4"
+            >
+              <div class="flex items-center justify-between gap-2">
+                <Skeleton class="size-7 rounded-lg" />
+                <Skeleton class="h-5 w-20 rounded-full" />
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <Skeleton class="h-4 w-28" />
+                <Skeleton class="h-3 w-full" />
+                <Skeleton class="h-3 w-3/4" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
 
     <!-- Daemon Status Card -->
     <Card
@@ -393,5 +456,5 @@ function isLocked(mod: ModuleItem) {
         </p>
       </div>
     </div>
-  </div>
+  </Page>
 </template>

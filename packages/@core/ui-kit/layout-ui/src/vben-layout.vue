@@ -240,6 +240,10 @@ const showSidebar = computed(() => {
   return isSideMode.value && sidebarEnable.value && !props.sidebarHidden;
 });
 
+const isContentFlushLeft = computed(
+  () => isContentFramed.value && isMixedNav.value && showSidebar.value,
+);
+
 /**
  * Mask visibility
  */
@@ -615,7 +619,9 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
           <div v-if="tabbarEnable" :style="tabbarStyle" class="shrink-0">
             <div
               :class="{
-                'mx-3 overflow-hidden rounded-t-xl border-x border-t border-border':
+                'mr-3': isContentFlushLeft && headerFixed,
+                'mx-3': isContentFramed && headerFixed && !isContentFlushLeft,
+                'overflow-hidden rounded-t-xl border-x border-t border-border':
                   isContentFramed && headerFixed,
               }"
             >
@@ -640,7 +646,9 @@ const layoutStaticHeaderTarget = `#${idLayoutStaticHeader}`;
         :style="layoutScrollStyle"
         class="vben-layout-scroll flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto bg-background-deep"
         :class="{
-          'mx-3 mb-3 border-border': isContentFramed,
+          'mb-3 border-border': isContentFramed,
+          'mr-3': isContentFlushLeft,
+          'mx-3': isContentFramed && !isContentFlushLeft,
           'rounded-xl border': isContentFramed && !tabbarEnable,
           'rounded-b-xl border-x border-b': isContentFramed && tabbarEnable,
         }"

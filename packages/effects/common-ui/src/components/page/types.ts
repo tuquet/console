@@ -20,4 +20,19 @@ export interface PageProps {
    * @default false
    */
   footerFixed?: boolean;
+  /**
+   * Show loading state in the page content area.
+   * Renders `#loading` slot when provided, or the default spinner overlay otherwise.
+   * @default false
+   */
+  loading?: boolean;
+  /**
+   * Optional loading caption for the default spinner overlay.
+   */
+  loadingText?: string;
+  /**
+   * Minimum delay (ms) before showing the default spinner overlay.
+   * @default 50
+   */
+  minLoadingTime?: number;
 }

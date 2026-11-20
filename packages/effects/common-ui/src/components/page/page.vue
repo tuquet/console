@@ -3,8 +3,9 @@ import type { StyleValue } from 'vue';
 
 import type { PageProps } from './types';
 
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 
+import { VbenLoading } from '@operon-core/shadcn-ui';
 import { cn } from '@operon-core/shared/utils';
 
 defineOptions({
@@ -15,7 +16,21 @@ const {
   autoContentHeight = true,
   heightOffset = 0,
   footerFixed = false,
+  loading = false,
+  loadingText = '',
+  minLoadingTime = 50,
 } = defineProps<PageProps>();
+
+const hasUsedSpinner = ref(Boolean(loading));
+
+watch(
+  () => loading,
+  (isLoading) => {
+    if (isLoading) {
+      hasUsedSpinner.value = true;
+    }
+  },
+);
 
 const contentStyle = computed<StyleValue>(() => {
   if (!autoContentHeight) {
@@ -86,13 +101,44 @@ const contentStyle = computed<StyleValue>(() => {
           autoContentHeight
             ? 'min-h-0 flex-1 flex flex-col overflow-y-auto'
             : 'flex-1',
-          'p-4',
+          'relative p-4',
           contentClass,
         )
       "
       :style="contentStyle"
     >
-      <slot></slot>
+      <Transition
+        v-if="$slots.loading"
+        name="page-loading-fade"
+        mode="out-in"
+      >
+        <div
+          v-if="loading"
+          key="page-loading"
+          data-layout-region="page-loading"
+          class="flex min-h-0 flex-1 flex-col"
+          style="gap: inherit"
+        >
+          <slot name="loading"></slot>
+        </div>
+        <div
+          v-else
+          key="page-ready"
+          class="flex min-h-0 flex-1 flex-col"
+          style="gap: inherit"
+        >
+          <slot></slot>
+        </div>
+      </Transition>
+      <template v-else>
+        <slot></slot>
+        <VbenLoading
+          v-if="hasUsedSpinner"
+          :min-loading-time="minLoadingTime"
+          :spinning="loading"
+          :text="loadingText"
+        />
+      </template>
     </div>
     <div
       v-if="$slots.footer"
@@ -108,3 +154,22 @@ const contentStyle = computed<StyleValue>(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.page-loading-fade-enter-active,
+.page-loading-fade-leave-active {
+  transition: opacity 150ms ease;
+}
+
+.page-loading-fade-enter-from,
+.page-loading-fade-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loading-fade-enter-active,
+  .page-loading-fade-leave-active {
+    transition-duration: 0ms;
+  }
+}
+</style>
