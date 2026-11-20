@@ -3,8 +3,8 @@
   "product": "operon-console",
   "channels": {
     "nightly": {
-      "tag": "v5.8.0-nightly.32.1",
-      "updatedAt": "2026-11-13T07:11:00.620Z",
+      "tag": "v5.8.0-nightly.34.1",
+      "updatedAt": "2026-11-20T10:49:13.719Z",
       "updatedBy": "tuquet"
     }
   },
@@ -52,6 +52,50 @@
           }
         }
       }
+    },
+    "v5.8.0-nightly.34.1": {
+      "version": "5.8.0-nightly.34.1",
+      "channel": "nightly",
+      "status": "published",
+      "githubReleaseId": 452572489,
+      "publishedAt": "2026-11-20T10:49:12Z",
+      "source": {
+        "consoleCommit": "5426c4ed3660b87df507d52b89e743e77437e496",
+        "operonCommit": "da95077c6ffcb7812312af76daad8b813628e12a"
+      },
+      "manifestUrl": "https://github.com/tuquet/console/releases/download/v5.8.0-nightly.34.1/release-manifest.json",
+      "artifacts": [
+        {
+          "name": "Operon-5.8.0-nightly.34.1-windows-x86_64-setup.exe",
+          "kind": "installer",
+          "platform": "windows-x86_64",
+          "size": 6122352,
+          "sha256": "d94c3d0a192b5d520101a1897ddeab039d90ec08e857b10e204e3723d314face",
+          "url": "https://github.com/tuquet/console/releases/download/v5.8.0-nightly.34.1/Operon-5.8.0-nightly.34.1-windows-x86_64-setup.exe",
+          "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUREdibEtGS2RmaGhCTENZUUtGdU5JTlMvNzNBU1JUeEx0M3N0TnIrSWtWbythYWZVR2w2aXNaTzFlRXNRb01oeGMwRzRDK2w1NlI2L2JCMEgvUVJKKzUrUTVIbjJhd0FJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk1MTcxNzEyCWZpbGU6T3Blcm9uXzUuOC4wLW5pZ2h0bHkuMzQuMV94NjQtc2V0dXAuZXhlCXZlcnNpb246NS44LjAtbmlnaHRseS4zNC4xCll5QVlDL1N0R2VJTlEvb0xoL0MwMjRQWTFHbEVPK2dNS1lqOHNtWitYUkd0UWZWc0RXWDh3cTlrWktUbWdVKzhGTzdYa2hkTkl6VnQrMVJ1V3cvaURRPT0K",
+          "githubAssetId": 771458239
+        },
+        {
+          "name": "Operon-5.8.0-nightly.34.1-windows-x86_64-portable.zip",
+          "kind": "portable",
+          "platform": "windows-x86_64",
+          "size": 7456079,
+          "sha256": "c2c484615f8463a8685c53082ce2eebdfa60dfc66999633994e5f869a5cf4a9b",
+          "url": "https://github.com/tuquet/console/releases/download/v5.8.0-nightly.34.1/Operon-5.8.0-nightly.34.1-windows-x86_64-portable.zip",
+          "githubAssetId": 771458161
+        }
+      ],
+      "updater": {
+        "version": "5.8.0-nightly.34.1",
+        "notes": "Operon 5.8.0-nightly.34.1. See the GitHub release for changes.",
+        "pub_date": "2026-11-20T10:46:30.983Z",
+        "platforms": {
+          "windows-x86_64": {
+            "url": "https://github.com/tuquet/console/releases/download/v5.8.0-nightly.34.1/Operon-5.8.0-nightly.34.1-windows-x86_64-setup.exe",
+            "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUREdibEtGS2RmaGhCTENZUUtGdU5JTlMvNzNBU1JUeEx0M3N0TnIrSWtWbythYWZVR2w2aXNaTzFlRXNRb01oeGMwRzRDK2w1NlI2L2JCMEgvUVJKKzUrUTVIbjJhd0FJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk1MTcxNzEyCWZpbGU6T3Blcm9uXzUuOC4wLW5pZ2h0bHkuMzQuMV94NjQtc2V0dXAuZXhlCXZlcnNpb246NS44LjAtbmlnaHRseS4zNC4xCll5QVlDL1N0R2VJTlEvb0xoL0MwMjRQWTFHbEVPK2dNS1lqOHNtWitYUkd0UWZWc0RXWDh3cTlrWktUbWdVKzhGTzdYa2hkTkl6VnQrMVJ1V3cvaURRPT0K"
+          }
+        }
+      }
     }
   },
   "history": [
@@ -74,6 +118,21 @@
       "action": "promote",
       "channel": "nightly",
       "tag": "v5.8.0-nightly.32.1"
+    },
+    {
+      "at": "2026-11-20T10:49:13.719Z",
+      "actor": "tuquet",
+      "runUrl": "https://github.com/tuquet/console/actions/runs/44721362059",
+      "action": "register",
+      "tag": "v5.8.0-nightly.34.1"
+    },
+    {
+      "at": "2026-11-20T10:49:13.719Z",
+      "actor": "tuquet",
+      "runUrl": "https://github.com/tuquet/console/actions/runs/44721362059",
+      "action": "promote",
+      "channel": "nightly",
+      "tag": "v5.8.0-nightly.34.1"
     }
   ]
 }
