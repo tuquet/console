@@ -2,6 +2,8 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { useNotificationStore } from '../notification';
+
 const { sendDesktopNotificationMock, toastMock } = vi.hoisted(() => ({
   sendDesktopNotificationMock: vi.fn().mockResolvedValue(true),
   toastMock: {
@@ -35,8 +37,6 @@ Object.defineProperty(globalThis, 'localStorage', {
   },
   writable: true,
 });
-
-import { useNotificationStore } from '../notification';
 
 describe('useNotificationStore', () => {
   beforeEach(() => {
@@ -91,14 +91,17 @@ describe('useNotificationStore', () => {
 
     expect(store.unreadCount).toBe(2);
 
-    store.markRead(first!.id);
+    expect(first).toBeDefined();
+    if (!first) return;
+
+    store.markRead(first.id);
     expect(store.unreadCount).toBe(1);
 
     store.markAllRead();
     expect(store.unreadCount).toBe(0);
     expect(store.hasUnread).toBe(false);
 
-    store.remove(first!.id);
+    store.remove(first.id);
     expect(store.items).toHaveLength(1);
 
     store.clear();

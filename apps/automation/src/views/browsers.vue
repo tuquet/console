@@ -389,10 +389,7 @@ async function handleAutoDetect() {
     </div>
 
     <!-- Loading Skeleton on Initial Heartbeat -->
-    <div
-      v-if="bridge.isInitialChecking.value"
-      class="flex flex-col gap-4"
-    >
+    <div v-if="bridge.isInitialChecking.value" class="flex flex-col gap-4">
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card v-for="idx in 4" :key="idx" class="border-border p-4">
           <Skeleton class="h-3.5 w-24" />
@@ -534,11 +531,21 @@ async function handleAutoDetect() {
               })
             }}
           </span>
-          <Button size="sm" variant="outline" class="h-7 text-xs" @click="handleBatchLaunch">
+          <Button
+            size="sm"
+            variant="outline"
+            class="h-7 text-xs"
+            @click="handleBatchLaunch"
+          >
             <Play class="mr-1 size-3" />
             <span>{{ $t('automation.overview.browser_batch_run_btn') }}</span>
           </Button>
-          <Button size="sm" variant="outline" class="h-7 text-xs" @click="handleBatchStop">
+          <Button
+            size="sm"
+            variant="outline"
+            class="h-7 text-xs"
+            @click="handleBatchStop"
+          >
             <Square class="mr-1 size-3" />
             <span>{{ $t('automation.overview.browser_batch_stop_btn') }}</span>
           </Button>
@@ -641,9 +648,13 @@ async function handleAutoDetect() {
                       {{ profile.tenantId }}
                     </Badge>
                   </div>
-                  <div class="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
+                  <div
+                    class="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground"
+                  >
                     <span>{{ profile.id }}</span>
-                    <span v-if="profile.groupName">• {{ profile.groupName }}</span>
+                    <span v-if="profile.groupName"
+                      >• {{ profile.groupName }}</span
+                    >
                   </div>
                 </div>
               </TableCell>
@@ -675,7 +686,9 @@ async function handleAutoDetect() {
               </TableCell>
 
               <TableCell>
-                <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <div
+                  class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                >
                   <Laptop class="size-3.5 shrink-0" />
                   <span class="capitalize">
                     {{ profile.fingerprintConfig?.osPlatform || 'windows' }}
@@ -695,7 +708,11 @@ async function handleAutoDetect() {
                 >
                   {{ profile.proxy }}
                 </span>
-                <Badge v-else variant="outline" class="text-[11px] text-muted-foreground">
+                <Badge
+                  v-else
+                  variant="outline"
+                  class="text-[11px] text-muted-foreground"
+                >
                   {{ $t('automation.browsers.direct_badge') }}
                 </Badge>
               </TableCell>
@@ -739,7 +756,9 @@ async function handleAutoDetect() {
                     <DropdownMenuContent align="end" class="w-44">
                       <DropdownMenuItem @select="openInspectSheet(profile)">
                         <Eye class="mr-2 size-3.5" />
-                        <span>{{ $t('automation.browsers.action_inspect') }}</span>
+                        <span>{{
+                          $t('automation.browsers.action_inspect')
+                        }}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem @select="openEditModal(profile)">
                         <Pencil class="mr-2 size-3.5" />
@@ -775,7 +794,9 @@ async function handleAutoDetect() {
                       >
                         <Unlink class="mr-2 size-3.5" />
                         <span>
-                          {{ $t('automation.overview.browser_batch_unbind_btn') }}
+                          {{
+                            $t('automation.overview.browser_batch_unbind_btn')
+                          }}
                         </span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />

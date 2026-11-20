@@ -133,17 +133,11 @@ describe('enterprise UI information deduplication (SPEC-ui-information-deduplica
       '[data-testid="kpi-tenants-status"]',
     );
     expect(totalEl?.textContent?.trim()).toBe('3');
-    expect(statusEl?.textContent?.trim()).toBe(
-      'page.analytics.active_tenants',
-    );
+    expect(statusEl?.textContent?.trim()).toBe('page.analytics.active_tenants');
 
     // Does not echo 'plan_pro' or 'plan_free' inside the KPI card (owned by PlansChart)
-    expect(tenantsCard?.textContent).not.toContain(
-      'page.analytics.plan_pro',
-    );
-    expect(tenantsCard?.textContent).not.toContain(
-      'page.analytics.plan_free',
-    );
+    expect(tenantsCard?.textContent).not.toContain('page.analytics.plan_pro');
+    expect(tenantsCard?.textContent).not.toContain('page.analytics.plan_free');
 
     // Fleet card shows port :8765 as primary metric without repeating Desktop Bridge in Infrastructure Services
     const fleetPortEl = container.querySelector(

@@ -24,12 +24,7 @@ import {
   Skeleton,
 } from '@operon-core/shadcn-ui';
 
-import {
-  Building2,
-  Check,
-  ChevronsUpDown,
-  PlusCircle,
-} from '@lucide/vue';
+import { Building2, Check, ChevronsUpDown, PlusCircle } from '@lucide/vue';
 
 import { $t } from '#/locales';
 import { useTenantStore } from '#/store/tenant';
@@ -159,17 +154,11 @@ function openManageTenants() {
           >
             {{ activeTenant?.name?.charAt(0)?.toUpperCase() || '?' }}
           </span>
-          <span
-            v-if="isLoading"
-            class="flex min-w-0 flex-col gap-1 text-left"
-          >
+          <span v-if="isLoading" class="flex min-w-0 flex-col gap-1 text-left">
             <Skeleton class="h-3 w-24" />
             <Skeleton class="h-2.5 w-14" />
           </span>
-          <span
-            v-else
-            class="flex min-w-0 flex-col text-left leading-tight"
-          >
+          <span v-else class="flex min-w-0 flex-col text-left leading-tight">
             <span class="truncate text-xs font-semibold text-foreground">
               {{ activeTenant?.name || $t('page.tenant.not_selected') }}
             </span>

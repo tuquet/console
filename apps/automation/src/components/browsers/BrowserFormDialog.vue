@@ -24,13 +24,7 @@ import {
   SelectValue,
 } from '@operon-core/shadcn-ui';
 
-import {
-  AlertTriangle,
-  Dices,
-  Loader2,
-  RotateCcw,
-  Wifi,
-} from '@lucide/vue';
+import { AlertTriangle, Dices, Loader2, RotateCcw, Wifi } from '@lucide/vue';
 
 import { $t } from '../../locales';
 import { useBrowsersStore } from '../../stores/browsers';
@@ -152,7 +146,8 @@ async function handleProbeProxy() {
   try {
     probeResult.value = await store.probeProxy(clean);
   } catch (error: any) {
-    errorMessage.value = error?.message || $t('automation.overview.browser_action_failed');
+    errorMessage.value =
+      error?.message || $t('automation.overview.browser_action_failed');
   } finally {
     probing.value = false;
   }
@@ -230,7 +225,8 @@ async function submitForm(restartAfterSave = false) {
 
     open.value = false;
   } catch (error: any) {
-    errorMessage.value = error?.message || $t('automation.overview.browser_action_failed');
+    errorMessage.value =
+      error?.message || $t('automation.overview.browser_action_failed');
   } finally {
     submitting.value = false;
   }
@@ -283,7 +279,9 @@ async function submitForm(restartAfterSave = false) {
           </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-3 border-t border-border/60 pt-3 sm:grid-cols-3">
+        <div
+          class="grid grid-cols-1 gap-3 border-t border-border/60 pt-3 sm:grid-cols-3"
+        >
           <div class="flex flex-col gap-1.5">
             <Label>{{ $t('automation.browsers.field_os') }}</Label>
             <Select
@@ -337,7 +335,11 @@ async function submitForm(restartAfterSave = false) {
           <div class="flex flex-col gap-1.5 sm:col-span-2">
             <Label>{{ $t('automation.browsers.field_seed') }}</Label>
             <div class="flex items-center gap-2">
-              <Input v-model.number="seed" type="number" class="font-mono text-xs" />
+              <Input
+                v-model.number="seed"
+                type="number"
+                class="font-mono text-xs"
+              />
               <Button
                 type="button"
                 variant="outline"

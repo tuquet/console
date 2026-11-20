@@ -152,7 +152,9 @@ export class PwaNotificationDriver implements NotificationDriver {
         await registration.showNotification(options.title, {
           badge: options.badge,
           body: options.body,
-          data: options.link ? { link: options.link, ...options.data } : options.data,
+          data: options.link
+            ? { link: options.link, ...options.data }
+            : options.data,
           icon: options.icon ?? '/pwa-192x192.png',
           silent: options.silent,
           tag: options.tag,

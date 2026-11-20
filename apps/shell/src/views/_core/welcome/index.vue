@@ -266,10 +266,7 @@ async function copyInstallCommand() {
               v-else-if="isChecking"
               class="size-3 animate-spin text-primary"
             />
-            <span
-              v-else
-              class="size-1.5 rounded-full bg-amber-500"
-            ></span>
+            <span v-else class="size-1.5 rounded-full bg-amber-500"></span>
             <span v-if="isInitialChecking">Checking device…</span>
             <span v-else-if="isHealthy">
               Connected{{
@@ -309,7 +306,9 @@ async function copyInstallCommand() {
     </header>
 
     <!-- Main Landing Content -->
-    <main class="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-16 px-4 py-12 sm:px-6 sm:py-16">
+    <main
+      class="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-16 px-4 py-12 sm:px-6 sm:py-16"
+    >
       <!-- Hero Section -->
       <section class="mx-auto flex max-w-2xl flex-col items-center text-center">
         <Badge
@@ -346,9 +345,7 @@ async function copyInstallCommand() {
               <Skeleton class="h-10 w-44 rounded-lg" />
               <Skeleton class="h-10 w-32 rounded-lg" />
             </div>
-            <div
-              class="w-full rounded-xl border border-border/60 bg-card p-4"
-            >
+            <div class="w-full rounded-xl border border-border/60 bg-card p-4">
               <div class="flex items-center justify-between gap-2">
                 <Skeleton class="h-3.5 w-32" />
                 <Skeleton class="h-6 w-16 rounded-md" />
@@ -435,10 +432,14 @@ async function copyInstallCommand() {
             </div>
 
             <!-- Quick Install Terminal Box -->
-            <Card class="w-full border-border/70 bg-card/80 text-left shadow-none">
+            <Card
+              class="w-full border-border/70 bg-card/80 text-left shadow-none"
+            >
               <CardContent class="flex flex-col gap-3 p-4">
                 <div class="flex items-center justify-between gap-2">
-                  <div class="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div
+                    class="flex items-center gap-2 text-xs text-muted-foreground"
+                  >
                     <Terminal class="size-3.5 text-primary" />
                     <span class="font-medium text-foreground">
                       Or install with one command
@@ -465,14 +466,18 @@ async function copyInstallCommand() {
                 <div
                   class="overflow-x-auto rounded-lg border border-border/60 bg-background px-3 py-2.5"
                 >
-                  <code class="whitespace-nowrap font-mono text-xs text-foreground">
+                  <code
+                    class="whitespace-nowrap font-mono text-xs text-foreground"
+                  >
                     {{ installInfo.command }}
                   </code>
                 </div>
 
                 <p class="text-xs text-muted-foreground">
                   Already installed? Start it with
-                  <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground">
+                  <code
+                    class="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground"
+                  >
                     opn worker start
                   </code>
                   — this page checks every 5 seconds.
@@ -488,7 +493,9 @@ async function copyInstallCommand() {
       <!-- How It Works -->
       <section class="flex flex-col gap-5">
         <div class="flex flex-col gap-1 text-center">
-          <h2 class="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+          <h2
+            class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
+          >
             How it works
           </h2>
           <p class="text-xs text-muted-foreground sm:text-sm">

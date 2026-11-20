@@ -121,20 +121,22 @@ export function createHostKernel(router?: Router): KernelContext {
     requestPermission: () => notificationStore.requestPermission(),
   };
 
-function mapTenantToKernelRecord(t: Tenant): KernelTenantRecord {
-  return {
-    avatarUrl: t.avatar_url ?? null,
-    createdAt: t.created_at,
-    createdBy: t.created_by ?? null,
-    id: t.id,
-    metadata: t.metadata,
-    name: t.name,
-    plan: String(t.metadata?.plan || (t.id.startsWith('local-') ? 'local' : 'free')),
-    slug: t.slug,
-    status: t.status,
-    updatedAt: t.updated_at,
-  };
-}
+  function mapTenantToKernelRecord(t: Tenant): KernelTenantRecord {
+    return {
+      avatarUrl: t.avatar_url ?? null,
+      createdAt: t.created_at,
+      createdBy: t.created_by ?? null,
+      id: t.id,
+      metadata: t.metadata,
+      name: t.name,
+      plan: String(
+        t.metadata?.plan || (t.id.startsWith('local-') ? 'local' : 'free'),
+      ),
+      slug: t.slug,
+      status: t.status,
+      updatedAt: t.updated_at,
+    };
+  }
 
   const tenant = reactive({
     get activeId() {

@@ -79,7 +79,10 @@ async function copyText(text: string) {
     await navigator.clipboard.writeText(text);
     kernel.events.notify('success', $t('common.copied'));
   } catch {
-    kernel.events.notify('error', $t('automation.overview.browser_action_failed'));
+    kernel.events.notify(
+      'error',
+      $t('automation.overview.browser_action_failed'),
+    );
   }
 }
 
@@ -220,7 +223,9 @@ async function handleClone() {
           </TabsList>
 
           <TabsContent value="overview" class="mt-3 flex flex-col gap-3">
-            <div class="flex flex-col gap-2 rounded-lg border border-border p-3 text-xs">
+            <div
+              class="flex flex-col gap-2 rounded-lg border border-border p-3 text-xs"
+            >
               <div class="flex items-center justify-between gap-2">
                 <span class="text-muted-foreground">
                   {{ $t('automation.browsers.detail_tenant') }}
@@ -254,7 +259,9 @@ async function handleClone() {
                   {{ $t('automation.browsers.detail_cdp_ws') }}
                 </span>
                 <div class="flex items-center gap-1.5">
-                  <code class="flex-1 truncate rounded bg-muted px-2 py-1 font-mono text-[11px]">
+                  <code
+                    class="flex-1 truncate rounded bg-muted px-2 py-1 font-mono text-[11px]"
+                  >
                     {{ profile.wsUrl }}
                   </code>
                   <Button
@@ -310,7 +317,9 @@ async function handleClone() {
           </TabsContent>
 
           <TabsContent value="fingerprint" class="mt-3">
-            <div class="grid grid-cols-2 gap-2 rounded-lg border border-border p-3 text-xs">
+            <div
+              class="grid grid-cols-2 gap-2 rounded-lg border border-border p-3 text-xs"
+            >
               <div>
                 <div class="text-muted-foreground">OS</div>
                 <div class="font-medium capitalize">
@@ -341,7 +350,9 @@ async function handleClone() {
               <div>
                 <div class="text-muted-foreground">WebRTC</div>
                 <div class="font-medium">
-                  {{ profile.fingerprintConfig?.webrtcMode || 'proxy_shielded' }}
+                  {{
+                    profile.fingerprintConfig?.webrtcMode || 'proxy_shielded'
+                  }}
                 </div>
               </div>
               <div>

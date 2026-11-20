@@ -170,9 +170,7 @@ async function handleSubmit() {
         </Button>
         <Button type="button" :disabled="isSubmitting" @click="handleSubmit">
           {{
-            isSubmitting
-              ? $t('common.loading')
-              : $t('page.tenant.create_btn')
+            isSubmitting ? $t('common.loading') : $t('page.tenant.create_btn')
           }}
         </Button>
       </DialogFooter>

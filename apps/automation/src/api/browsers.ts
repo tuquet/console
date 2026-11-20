@@ -172,14 +172,11 @@ export function createBrowserApi(api: KernelApiContext) {
       ),
 
     batchDelete: (ids: string[], force = false) =>
-      api.localDaemonFetch<BatchDeleteResult>(
-        '/api/v1/browsers/batch/delete',
-        {
-          body: JSON.stringify({ force, ids }),
-          headers: JSON_HEADERS,
-          method: 'POST',
-        },
-      ),
+      api.localDaemonFetch<BatchDeleteResult>('/api/v1/browsers/batch/delete', {
+        body: JSON.stringify({ force, ids }),
+        headers: JSON_HEADERS,
+        method: 'POST',
+      }),
 
     clone: (id: string, input: CloneBrowserInput) =>
       api.localDaemonFetch<BrowserProfileRecord>(

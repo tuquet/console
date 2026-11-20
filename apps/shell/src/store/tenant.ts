@@ -109,8 +109,7 @@ export const useTenantStore = defineStore('tenant', () => {
 
   function ensureValidActiveTenant() {
     const currentActiveExists = tenants.value.some(
-      (t) =>
-        t.id === activeTenantId.value && t.status === TENANT_STATUS.ACTIVE,
+      (t) => t.id === activeTenantId.value && t.status === TENANT_STATUS.ACTIVE,
     );
     if (!currentActiveExists && tenants.value.length > 0) {
       const fallback =
@@ -253,7 +252,8 @@ export const useTenantStore = defineStore('tenant', () => {
       throw new Error($t('page.tenant.not_found'));
     }
 
-    const nextName = patch.name === undefined ? existing.name : patch.name.trim();
+    const nextName =
+      patch.name === undefined ? existing.name : patch.name.trim();
     const nextSlug =
       patch.slug === undefined ? existing.slug : normalizeSlug(patch.slug);
     if (nextName.length < 2 || nextSlug.length < 2) {

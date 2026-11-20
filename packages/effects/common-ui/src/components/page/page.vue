@@ -107,11 +107,7 @@ const contentStyle = computed<StyleValue>(() => {
       "
       :style="contentStyle"
     >
-      <Transition
-        v-if="$slots.loading"
-        name="page-loading-fade"
-        mode="out-in"
-      >
+      <Transition v-if="$slots.loading" name="page-loading-fade" mode="out-in">
         <div
           v-if="loading"
           key="page-loading"

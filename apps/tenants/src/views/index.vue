@@ -202,8 +202,7 @@ async function handleConfirmDelete() {
     await tenantsStore.deleteTenant(deletingTarget.value.id);
     deleteOpen.value = false;
   } catch (error: any) {
-    deleteError.value =
-      error?.message || $t('tenants.tenant_delete_failed');
+    deleteError.value = error?.message || $t('tenants.tenant_delete_failed');
   } finally {
     isDeleting.value = false;
   }
@@ -352,7 +351,9 @@ function navigateToDetail(id: string) {
           <SelectItem value="all">{{ $t('tenants.status_all') }}</SelectItem>
           <SelectItem value="active">{{ $t('common.active') }}</SelectItem>
           <SelectItem value="archived">Archived</SelectItem>
-          <SelectItem value="suspended">{{ $t('common.suspended') }}</SelectItem>
+          <SelectItem value="suspended">
+            {{ $t('common.suspended') }}
+          </SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -543,7 +544,9 @@ function navigateToDetail(id: string) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="active">{{ $t('common.active') }}</SelectItem>
+                <SelectItem value="active">
+                  {{ $t('common.active') }}
+                </SelectItem>
                 <SelectItem value="archived">Archived</SelectItem>
                 <SelectItem value="suspended">
                   {{ $t('common.suspended') }}

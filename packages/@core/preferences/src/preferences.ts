@@ -156,11 +156,7 @@ class PreferenceManager {
       if (!order.includes('logo')) order.unshift('logo');
       if (!order.includes('tenantSelector')) {
         const logoIndex = order.indexOf('logo');
-        order.splice(
-          logoIndex === -1 ? 0 : logoIndex + 1,
-          0,
-          'tenantSelector',
-        );
+        order.splice(logoIndex === -1 ? 0 : logoIndex + 1, 0, 'tenantSelector');
       }
       if (!order.includes('sidebarToggle')) {
         const logoIndex = order.indexOf('logo');

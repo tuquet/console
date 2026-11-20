@@ -44,10 +44,12 @@ export function getNotificationDriver(): NotificationDriver {
     return customNotificationDriver;
   }
   const platform = getNotificationPlatform();
-  if (!cachedDrivers[platform]) {
-    cachedDrivers[platform] = createDriverForPlatform(platform);
+  let driver = cachedDrivers[platform];
+  if (!driver) {
+    driver = createDriverForPlatform(platform);
+    cachedDrivers[platform] = driver;
   }
-  return cachedDrivers[platform]!;
+  return driver;
 }
 
 /**

@@ -39,7 +39,9 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
   let eventSource: EventSource | null = null;
   let refreshTimer: null | ReturnType<typeof setTimeout> = null;
 
-  const activeTenantId = computed(() => kernel.tenant.activeId || 'local-default');
+  const activeTenantId = computed(
+    () => kernel.tenant.activeId || 'local-default',
+  );
 
   const filteredItems = computed(() => {
     const q = searchQuery.value.trim().toLowerCase();
@@ -51,7 +53,9 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
       if (proxyFilter.value === 'proxied' && !hasProxy) return false;
       if (proxyFilter.value === 'direct' && hasProxy) return false;
 
-      const os = (item.fingerprintConfig?.osPlatform || 'windows').toLowerCase();
+      const os = (
+        item.fingerprintConfig?.osPlatform || 'windows'
+      ).toLowerCase();
       if (platformFilter.value !== 'all' && os !== platformFilter.value) {
         return false;
       }
@@ -107,11 +111,9 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
   }
 
   function toggleSelected(id: string) {
-    if (selectedIds.value.includes(id)) {
-      selectedIds.value = selectedIds.value.filter((item) => item !== id);
-    } else {
-      selectedIds.value = [...selectedIds.value, id];
-    }
+    selectedIds.value = selectedIds.value.includes(id)
+      ? selectedIds.value.filter((item) => item !== id)
+      : [...selectedIds.value, id];
   }
 
   function toggleSelectAllFiltered() {
@@ -136,6 +138,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
       loading.value = true;
     }
     error.value = null;
+    let loadErrorMessage: null | string = null;
     try {
       const list = await api.list({
         scope: scopeMode.value,
@@ -156,10 +159,13 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
         }
       }
       return items.value;
-    } catch (err: any) {
-      error.value = err?.message || 'Failed to load browser profiles';
+    } catch (error: any) {
+      loadErrorMessage = error?.message || 'Failed to load browser profiles';
       return items.value;
     } finally {
+      if (loadErrorMessage) {
+        error.value = loadErrorMessage;
+      }
       if (!silent) {
         loading.value = false;
       }
@@ -275,7 +281,8 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
       await fetchBrowsers(true);
       if (detailTarget.value?.id === id) {
         detailTarget.value =
-          scopeMode.value === 'tenant' && targetTenantId !== activeTenantId.value
+          scopeMode.value === 'tenant' &&
+          targetTenantId !== activeTenantId.value
             ? null
             : moved;
       }
@@ -376,7 +383,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
       eventSource = new EventSource(
         `http://127.0.0.1:${kernel.api.daemonPort}/api/v1/events`,
       );
-      eventSource.onmessage = (evt) => {
+      eventSource.addEventListener('message', (evt) => {
         try {
           const data = JSON.parse(evt.data);
           if (
@@ -391,7 +398,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
         } catch {
           // ignore keepalive / non-JSON frames
         }
-      };
+      });
     } catch {
       // ignore SSE connection errors while offline
     }

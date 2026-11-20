@@ -57,7 +57,7 @@ describe('cross-platform notification drivers (web / pwa / tauri)', () => {
     });
   });
 
-  describe('WebNotificationDriver', () => {
+  describe('webNotificationDriver', () => {
     it('dispatches Notification when granted', async () => {
       const ctorSpy = vi.fn();
       const MockNotification = vi.fn().mockImplementation(function (
@@ -100,7 +100,7 @@ describe('cross-platform notification drivers (web / pwa / tauri)', () => {
     });
   });
 
-  describe('PwaNotificationDriver', () => {
+  describe('pwaNotificationDriver', () => {
     it('uses ServiceWorkerRegistration.showNotification when available', async () => {
       const showNotification = vi.fn().mockResolvedValue(undefined);
       const MockNotification = vi.fn() as any;
@@ -138,7 +138,7 @@ describe('cross-platform notification drivers (web / pwa / tauri)', () => {
     });
   });
 
-  describe('TauriNotificationDriver', () => {
+  describe('tauriNotificationDriver', () => {
     it('reports unsupported outside Tauri environment', async () => {
       const driver = new TauriNotificationDriver();
       expect(driver.platform).toBe('tauri');

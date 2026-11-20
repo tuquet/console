@@ -2,10 +2,7 @@
 import { onMounted, provide, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import {
-  KERNEL_INJECTION_KEY,
-  useLocalBridgeHeartbeat,
-} from '@operon/kernel';
+import { KERNEL_INJECTION_KEY, useLocalBridgeHeartbeat } from '@operon/kernel';
 import { usePreferences } from '@operon/preferences';
 
 import {

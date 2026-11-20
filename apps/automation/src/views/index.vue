@@ -132,180 +132,184 @@ function handleNotify() {
         key="automation-offline"
         class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-6 shadow-xs"
       >
-      <div class="flex flex-col gap-4">
-        <div
-          class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-        >
-          <div class="flex items-start gap-3">
-            <WifiOff class="size-6 text-amber-500 shrink-0 mt-0.5" />
-            <div>
-              <h3 class="text-base font-semibold text-foreground">
-                Operon Offline
-              </h3>
-              <p class="text-sm text-muted-foreground mt-1">
-                Operon is not running on your computer. Install and start Operon
-                to unlock automation controls.
-              </p>
-              <p
-                v-if="bridge.error.value"
-                class="text-xs text-amber-500/90 mt-1.5 font-mono"
+        <div class="flex flex-col gap-4">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          >
+            <div class="flex items-start gap-3">
+              <WifiOff class="size-6 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <h3 class="text-base font-semibold text-foreground">
+                  Operon Offline
+                </h3>
+                <p class="text-sm text-muted-foreground mt-1">
+                  Operon is not running on your computer. Install and start
+                  Operon to unlock automation controls.
+                </p>
+                <p
+                  v-if="bridge.error.value"
+                  class="text-xs text-amber-500/90 mt-1.5 font-mono"
+                >
+                  Last probe: {{ bridge.error.value }}
+                </p>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+              <Button
+                v-if="hasOverviewRoute"
+                size="sm"
+                variant="default"
+                @click="router.push('/dashboard/overview')"
               >
-                Last probe: {{ bridge.error.value }}
-              </p>
+                <ArrowLeft class="size-3.5 mr-1.5" />
+                Getting Started
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                as="a"
+                :href="releasesUrl"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Download class="size-3.5 mr-1.5" />
+                Download Operon
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                :disabled="isChecking"
+                @click="bridge.checkNow()"
+              >
+                <RefreshCw
+                  class="size-3.5 mr-1.5"
+                  :class="{ 'animate-spin': isChecking }"
+                />
+                Retry
+              </Button>
             </div>
           </div>
-          <div class="flex flex-wrap items-center gap-2 shrink-0">
-            <Button
-              v-if="hasOverviewRoute"
-              size="sm"
-              variant="default"
-              @click="router.push('/dashboard/overview')"
-            >
-              <ArrowLeft class="size-3.5 mr-1.5" />
-              Getting Started
-            </Button>
+          <div
+            class="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-background/80 px-3 py-2"
+          >
+            <code class="text-xs font-mono text-foreground truncate">{{
+              installCommand
+            }}</code>
             <Button
               size="sm"
-              variant="outline"
-              as="a"
-              :href="releasesUrl"
-              target="_blank"
-              rel="noreferrer"
+              variant="ghost"
+              class="shrink-0 h-7 px-2"
+              @click="copyInstallCommand"
             >
-              <Download class="size-3.5 mr-1.5" />
-              Download Operon
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              :disabled="isChecking"
-              @click="bridge.checkNow()"
-            >
-              <RefreshCw
-                class="size-3.5 mr-1.5"
-                :class="{ 'animate-spin': isChecking }"
-              />
-              Retry
+              <Copy class="size-3.5 mr-1" />
+              Copy
             </Button>
           </div>
         </div>
+      </div>
+
+      <!-- Cards Grid (rendered only when Local Bridge is healthy) -->
+      <div
+        v-else
+        key="automation-healthy"
+        class="grid grid-cols-1 md:grid-cols-2 gap-5"
+      >
+        <!-- Local Bridge Status Banner -->
         <div
-          class="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-background/80 px-3 py-2"
+          class="md:col-span-2 flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3"
         >
-          <code class="text-xs font-mono text-foreground truncate">{{
-            installCommand
-          }}</code>
+          <div class="flex items-center gap-2.5 text-xs">
+            <CheckCircle2 class="size-4 text-emerald-500" />
+            <span class="font-medium text-foreground"> Operon Connected </span>
+            <Badge
+              v-if="bridge.health.value?.version"
+              variant="secondary"
+              class="text-[11px] font-mono"
+            >
+              v{{ bridge.health.value.version }}
+            </Badge>
+          </div>
           <Button
             size="sm"
             variant="ghost"
-            class="shrink-0 h-7 px-2"
-            @click="copyInstallCommand"
+            :disabled="isChecking"
+            @click="bridge.checkNow()"
           >
-            <Copy class="size-3.5 mr-1" />
-            Copy
+            <RefreshCw
+              class="size-3.5 mr-1"
+              :class="{ 'animate-spin': isChecking }"
+            />
+            Check
           </Button>
         </div>
-      </div>
-    </div>
+        <!-- Kernel Context Card -->
+        <div class="rounded-xl border border-border bg-card p-5 shadow-xs">
+          <div class="flex items-center justify-between pb-3">
+            <h3 class="text-sm font-semibold text-foreground">
+              Kernel Context
+            </h3>
+            <CheckCircle2 class="size-4 text-emerald-500" />
+          </div>
+          <div class="flex flex-col gap-2 text-xs text-muted-foreground">
+            <div class="flex justify-between py-1 border-b border-border/30">
+              <span>User ID:</span>
+              <span class="font-mono text-foreground">{{
+                kernel.auth.userId || 'N/A'
+              }}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-border/30">
+              <span>Username:</span>
+              <span class="font-mono text-foreground">{{
+                kernel.auth.username || 'operator'
+              }}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-border/30">
+              <span>Cloud Auth:</span>
+              <span
+                :class="isCloud ? 'text-emerald-500' : 'text-zinc-400'"
+                class="font-medium"
+              >
+                {{ isCloud ? 'Authenticated' : 'Offline / Local' }}
+              </span>
+            </div>
+            <div class="flex justify-between py-1">
+              <span>Roles:</span>
+              <span class="font-mono text-foreground">{{
+                kernel.auth.roles?.join(', ') || 'local_operator'
+              }}</span>
+            </div>
+          </div>
+        </div>
 
-    <!-- Cards Grid (rendered only when Local Bridge is healthy) -->
-    <div
-      v-else
-      key="automation-healthy"
-      class="grid grid-cols-1 md:grid-cols-2 gap-5"
-    >
-      <!-- Local Bridge Status Banner -->
-      <div
-        class="md:col-span-2 flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3"
-      >
-        <div class="flex items-center gap-2.5 text-xs">
-          <CheckCircle2 class="size-4 text-emerald-500" />
-          <span class="font-medium text-foreground"> Operon Connected </span>
-          <Badge
-            v-if="bridge.health.value?.version"
-            variant="secondary"
-            class="text-[11px] font-mono"
-          >
-            v{{ bridge.health.value.version }}
-          </Badge>
-        </div>
-        <Button
-          size="sm"
-          variant="ghost"
-          :disabled="isChecking"
-          @click="bridge.checkNow()"
-        >
-          <RefreshCw
-            class="size-3.5 mr-1"
-            :class="{ 'animate-spin': isChecking }"
-          />
-          Check
-        </Button>
-      </div>
-      <!-- Kernel Context Card -->
-      <div class="rounded-xl border border-border bg-card p-5 shadow-xs">
-        <div class="flex items-center justify-between pb-3">
-          <h3 class="text-sm font-semibold text-foreground">Kernel Context</h3>
-          <CheckCircle2 class="size-4 text-emerald-500" />
-        </div>
-        <div class="flex flex-col gap-2 text-xs text-muted-foreground">
-          <div class="flex justify-between py-1 border-b border-border/30">
-            <span>User ID:</span>
-            <span class="font-mono text-foreground">{{
-              kernel.auth.userId || 'N/A'
-            }}</span>
+        <!-- Local Pinia Store Card -->
+        <div class="rounded-xl border border-border bg-card p-5 shadow-xs">
+          <div class="flex items-center justify-between pb-3">
+            <h3 class="text-sm font-semibold text-foreground">
+              Local Micro-Store (Pinia)
+            </h3>
+            <Badge variant="secondary" class="text-xs font-mono">
+              automation:sample
+            </Badge>
           </div>
-          <div class="flex justify-between py-1 border-b border-border/30">
-            <span>Username:</span>
-            <span class="font-mono text-foreground">{{
-              kernel.auth.username || 'operator'
-            }}</span>
-          </div>
-          <div class="flex justify-between py-1 border-b border-border/30">
-            <span>Cloud Auth:</span>
-            <span
-              :class="isCloud ? 'text-emerald-500' : 'text-zinc-400'"
-              class="font-medium"
+          <p class="text-xs text-muted-foreground mb-4">
+            State is completely isolated and namespaced. When embedded, it joins
+            the Shell Pinia tree without ID collisions.
+          </p>
+          <div class="flex items-center gap-3">
+            <div
+              class="text-2xl font-bold font-mono px-3 py-1 bg-muted rounded-md"
             >
-              {{ isCloud ? 'Authenticated' : 'Offline / Local' }}
-            </span>
-          </div>
-          <div class="flex justify-between py-1">
-            <span>Roles:</span>
-            <span class="font-mono text-foreground">{{
-              kernel.auth.roles?.join(', ') || 'local_operator'
-            }}</span>
+              {{ sampleStore.counter }}
+            </div>
+            <Button size="sm" @click="sampleStore.increment">
+              Increment
+            </Button>
+            <Button size="sm" variant="ghost" @click="sampleStore.reset">
+              Reset
+            </Button>
           </div>
         </div>
       </div>
-
-      <!-- Local Pinia Store Card -->
-      <div class="rounded-xl border border-border bg-card p-5 shadow-xs">
-        <div class="flex items-center justify-between pb-3">
-          <h3 class="text-sm font-semibold text-foreground">
-            Local Micro-Store (Pinia)
-          </h3>
-          <Badge variant="secondary" class="text-xs font-mono">
-            automation:sample
-          </Badge>
-        </div>
-        <p class="text-xs text-muted-foreground mb-4">
-          State is completely isolated and namespaced. When embedded, it joins
-          the Shell Pinia tree without ID collisions.
-        </p>
-        <div class="flex items-center gap-3">
-          <div
-            class="text-2xl font-bold font-mono px-3 py-1 bg-muted rounded-md"
-          >
-            {{ sampleStore.counter }}
-          </div>
-          <Button size="sm" @click="sampleStore.increment"> Increment </Button>
-          <Button size="sm" variant="ghost" @click="sampleStore.reset">
-            Reset
-          </Button>
-        </div>
-      </div>
-    </div>
     </Transition>
   </div>
 </template>

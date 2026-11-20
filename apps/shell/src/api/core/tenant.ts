@@ -127,12 +127,9 @@ export async function updateTenant(
  * Permanently delete a Cloud workspace / tenant
  */
 export async function deleteTenant(id: string): Promise<void> {
-  await supabaseRequest(
-    `/rest/v1/tenants?id=eq.${encodeURIComponent(id)}`,
-    {
-      method: 'DELETE',
-    },
-  );
+  await supabaseRequest(`/rest/v1/tenants?id=eq.${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
 }
 
 export const tenantsApi = {

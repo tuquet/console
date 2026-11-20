@@ -246,9 +246,7 @@ const headerSlots = computed(() => {
       >
         <template v-for="slotName in sidebarHeaderSlots" :key="slotName">
           <slot
-            v-if="
-              slotName === 'tenant-selector' && $slots['tenant-selector']
-            "
+            v-if="slotName === 'tenant-selector' && $slots['tenant-selector']"
             :collapsed="collapsed"
             name="tenant-selector"
           ></slot>

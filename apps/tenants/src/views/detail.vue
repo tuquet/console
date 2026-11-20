@@ -149,9 +149,7 @@ async function copyTenantId() {
           </h1>
           <p class="font-mono text-xs text-muted-foreground">
             ID: {{ tenantId }}
-            <template v-if="tenant?.slug">
-              | Slug: {{ tenant.slug }}
-            </template>
+            <template v-if="tenant?.slug"> | Slug: {{ tenant.slug }} </template>
           </p>
         </div>
       </div>
