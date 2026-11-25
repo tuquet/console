@@ -27,6 +27,7 @@
     }
   },
   "dependencies": {
+    "@lucide/vue": "catalog:",
     "@operon-core/design": "workspace:*",
     "@operon-core/form-ui": "workspace:*",
     "@operon-core/popup-ui": "workspace:*",
@@ -38,6 +39,7 @@
     "@operon/icons": "workspace:*",
     "@operon/locales": "workspace:*",
     "@operon/types": "workspace:*",
+    "@tanstack/vue-table": "catalog:",
     "@vueuse/core": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:"

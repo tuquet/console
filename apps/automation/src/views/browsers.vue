@@ -3,53 +3,28 @@ import type { BrowserProfileRecord } from '../api/browsers';
 
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
+import { DataTable } from '@operon/common-ui';
 import { useKernel, useLocalBridgeHeartbeat } from '@operon/kernel';
 
 import {
   Badge,
   Button,
   Card,
-  Checkbox,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
   Skeleton,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from '@operon-core/shadcn-ui';
 
 import {
-  CheckCircle2,
-  CopyPlus,
-  Eye,
   FileSpreadsheet,
   Globe,
-  Laptop,
-  Loader2,
-  MoreHorizontal,
-  Pencil,
-  Play,
   Plus,
   RefreshCw,
-  Search,
+  SearchX,
   Sparkles,
-  Square,
-  Star,
-  Trash2,
-  Unlink,
-  Wifi,
   WifiOff,
 } from '@lucide/vue';
 
@@ -57,6 +32,10 @@ import BrowserDeleteDialog from '../components/browsers/BrowserDeleteDialog.vue'
 import BrowserDetailSheet from '../components/browsers/BrowserDetailSheet.vue';
 import BrowserFormDialog from '../components/browsers/BrowserFormDialog.vue';
 import BrowserImportCsvDialog from '../components/browsers/BrowserImportCsvDialog.vue';
+import BrowsersTableBulkBar from '../components/browsers/BrowsersTableBulkBar.vue';
+import BrowsersTableMetrics from '../components/browsers/BrowsersTableMetrics.vue';
+import BrowsersTableToolbar from '../components/browsers/BrowsersTableToolbar.vue';
+import { createBrowserColumns } from '../components/browsers/columns';
 import { $t } from '../locales';
 import { useBrowsersStore } from '../stores/browsers';
 
@@ -73,6 +52,7 @@ const importOpen = ref(false);
 const deleteOpen = ref(false);
 const deleteTargets = ref<BrowserProfileRecord[]>([]);
 const deleteLoading = ref(false);
+let clearSelectionFn: (() => void) | null = null;
 
 const activeTenantName = computed(
   () => kernel.tenant.activeName || store.activeTenantId,
@@ -118,13 +98,18 @@ async function openInspectSheet(profile: BrowserProfileRecord) {
 }
 
 function openSingleDelete(profile: BrowserProfileRecord) {
+  clearSelectionFn = null;
   deleteTargets.value = [profile];
   deleteOpen.value = true;
 }
 
-function openBatchDelete() {
-  if (store.selectedProfiles.length === 0) return;
-  deleteTargets.value = [...store.selectedProfiles];
+function openBatchDelete(
+  rows: BrowserProfileRecord[],
+  clearSelection: () => void,
+) {
+  if (rows.length === 0) return;
+  clearSelectionFn = clearSelection;
+  deleteTargets.value = [...rows];
   deleteOpen.value = true;
 }
 
@@ -140,7 +125,12 @@ async function handleConfirmDelete(force: boolean) {
         $t('automation.browsers.deleted_success', { name: target.name }),
       );
     } else {
-      const res = await store.batchRemoveSelected(force);
+      const res = await store.batchRemoveSelected(
+        force,
+        deleteTargets.value.map((p) => p.id),
+      );
+      clearSelectionFn?.();
+      clearSelectionFn = null;
       kernel.events.notify(
         res.deleted.length > 0 ? 'success' : 'warning',
         `${res.deleted.length} deleted, ${res.skipped.length} skipped`,
@@ -260,8 +250,8 @@ async function handleProbeRow(profile: BrowserProfileRecord) {
   }
 }
 
-async function handleBatchLaunch() {
-  const { started, total } = await store.batchLaunchSelected();
+async function handleBatchLaunch(rows: BrowserProfileRecord[]) {
+  const { started, total } = await store.batchLaunchSelected(rows);
   if (total === 0) {
     kernel.events.notify(
       'info',
@@ -278,8 +268,8 @@ async function handleBatchLaunch() {
   );
 }
 
-async function handleBatchStop() {
-  const { stopped, total } = await store.batchStopSelected();
+async function handleBatchStop(rows: BrowserProfileRecord[]) {
+  const { stopped, total } = await store.batchStopSelected(rows);
   if (total === 0) {
     kernel.events.notify(
       'info',
@@ -306,31 +296,41 @@ async function handleAutoDetect() {
     );
   }
 }
+
+const columns = createBrowserColumns(
+  {
+    onDelete: openSingleDelete,
+    onDuplicate: handleDuplicate,
+    onEdit: openEditModal,
+    onInspect: openInspectSheet,
+    onProbeProxy: handleProbeRow,
+    onSetDefault: handleSetDefault,
+    onToggleRun: handleToggleRun,
+    onUnbind: handleUnbind,
+  },
+  {
+    isMutating: (id) => store.isMutating(id),
+    scopeMode: computed(() => store.scopeMode),
+  },
+);
 </script>
 
 <template>
-  <div class="flex flex-col gap-5 p-4 sm:p-6">
+  <div class="flex h-full min-h-0 flex-col gap-3.5 overflow-hidden p-4 sm:p-5">
     <!-- Top Header -->
-    <div
-      class="flex flex-col justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-xs sm:flex-row sm:items-center"
-    >
-      <div class="flex flex-col gap-1">
-        <div class="flex flex-wrap items-center gap-2">
-          <Globe class="size-5 text-primary" />
-          <h1 class="text-lg font-semibold tracking-tight text-foreground">
-            {{ $t('automation.browsers.title') }}
-          </h1>
-          <Badge variant="outline" class="font-mono text-[11px]">
-            {{ activeTenantName }}
-          </Badge>
-        </div>
-        <p class="text-xs text-muted-foreground sm:text-sm">
-          {{ $t('automation.browsers.subtitle') }}
-        </p>
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div class="flex flex-wrap items-center gap-2">
+        <Globe class="text-primary size-4" />
+        <h2 class="text-base font-semibold tracking-tight">
+          {{ $t('automation.browsers.title') }}
+        </h2>
+        <Badge variant="outline" class="font-mono text-[11px]">
+          {{ activeTenantName }}
+        </Badge>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <div class="flex rounded-md border border-border bg-muted/30 p-0.5">
+        <div class="border-border bg-muted/30 flex rounded-md border p-0.5">
           <Button
             type="button"
             size="sm"
@@ -354,7 +354,7 @@ async function handleAutoDetect() {
         <Button
           variant="outline"
           size="sm"
-          class="gap-1.5 shadow-none"
+          class="h-8 gap-1.5 text-xs shadow-none"
           :disabled="!bridge.isHealthy.value || store.loading"
           @click="store.fetchBrowsers()"
         >
@@ -368,7 +368,7 @@ async function handleAutoDetect() {
         <Button
           variant="outline"
           size="sm"
-          class="gap-1.5 shadow-none"
+          class="h-8 gap-1.5 text-xs shadow-none"
           :disabled="!bridge.isHealthy.value"
           @click="importOpen = true"
         >
@@ -378,7 +378,7 @@ async function handleAutoDetect() {
 
         <Button
           size="sm"
-          class="gap-1.5"
+          class="h-8 gap-1.5 text-xs"
           :disabled="!bridge.isHealthy.value"
           @click="openCreateModal"
         >
@@ -409,10 +409,10 @@ async function handleAutoDetect() {
       <div class="flex items-start gap-3">
         <WifiOff class="mt-0.5 size-6 shrink-0 text-amber-500" />
         <div>
-          <h3 class="text-base font-semibold text-foreground">
+          <h3 class="text-foreground text-base font-semibold">
             {{ $t('automation.browsers.offline_title') }}
           </h3>
-          <p class="mt-1 text-sm text-muted-foreground">
+          <p class="text-muted-foreground mt-1 text-sm">
             {{ $t('automation.browsers.offline_desc') }}
           </p>
         </div>
@@ -422,400 +422,85 @@ async function handleAutoDetect() {
       </Button>
     </Card>
 
-    <template v-else>
-      <!-- KPI Strip -->
-      <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Card class="border-border bg-card p-4 shadow-none">
-          <div class="text-xs text-muted-foreground">
-            {{ $t('automation.browsers.kpi_total') }}
-          </div>
-          <div class="mt-1 text-2xl font-bold text-foreground">
-            {{ store.stats.total }}
-          </div>
-        </Card>
-        <Card class="border-border bg-card p-4 shadow-none">
-          <div class="text-xs text-muted-foreground">
-            {{ $t('automation.browsers.kpi_running') }}
-          </div>
-          <div class="mt-1 text-2xl font-bold text-emerald-500">
-            {{ store.stats.running }}
-          </div>
-        </Card>
-        <Card class="border-border bg-card p-4 shadow-none">
-          <div class="text-xs text-muted-foreground">
-            {{ $t('automation.browsers.kpi_proxied') }}
-          </div>
-          <div class="mt-1 text-2xl font-bold text-foreground">
-            {{ store.stats.proxied }}
-          </div>
-        </Card>
-        <Card class="border-border bg-card p-4 shadow-none">
-          <div class="text-xs text-muted-foreground">
-            {{ $t('automation.browsers.kpi_direct') }}
-          </div>
-          <div class="mt-1 text-2xl font-bold text-muted-foreground">
-            {{ store.stats.direct }}
-          </div>
-        </Card>
-      </div>
+    <DataTable
+      v-else
+      class="min-h-0 flex-1"
+      :columns="columns"
+      :data="store.items"
+      :loading="store.loading"
+      row-key="id"
+      enable-row-selection
+      interactive-rows
+      @row-click="openInspectSheet"
+    >
+      <template #header="{ table }">
+        <BrowsersTableMetrics :table="table" :stats="store.stats" />
+      </template>
 
-      <!-- Filters & Batch Bar -->
-      <div class="flex flex-wrap items-center justify-between gap-2.5">
-        <div class="flex flex-1 flex-wrap items-center gap-2">
-          <div class="relative min-w-[220px] flex-1 sm:max-w-xs">
-            <Search
-              class="pointer-events-none absolute top-2.5 left-2.5 size-4 text-muted-foreground"
-            />
-            <Input
-              v-model="store.searchQuery"
-              :placeholder="$t('automation.browsers.search_placeholder')"
-              class="h-9 pl-8"
-            />
-          </div>
-
-          <Select v-model="store.statusFilter">
-            <SelectTrigger class="h-9 w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                {{ $t('automation.browsers.status_all') }}
-              </SelectItem>
-              <SelectItem value="online">
-                {{ $t('automation.browsers.status_online') }}
-              </SelectItem>
-              <SelectItem value="offline">
-                {{ $t('automation.browsers.status_offline') }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select v-model="store.proxyFilter">
-            <SelectTrigger class="h-9 w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                {{ $t('automation.browsers.proxy_all') }}
-              </SelectItem>
-              <SelectItem value="proxied">
-                {{ $t('automation.overview.browser_filter_proxied') }}
-              </SelectItem>
-              <SelectItem value="direct">
-                {{ $t('automation.overview.browser_filter_direct') }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select v-model="store.platformFilter">
-            <SelectTrigger class="h-9 w-[130px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All OS</SelectItem>
-              <SelectItem value="windows">Windows</SelectItem>
-              <SelectItem value="macos">macOS</SelectItem>
-              <SelectItem value="linux">Linux</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div
-          v-if="store.stats.selected > 0"
-          class="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-1.5"
-        >
-          <span class="text-xs font-medium text-primary">
-            {{
-              $t('automation.browsers.selected_count', {
-                count: store.stats.selected,
-              })
-            }}
-          </span>
-          <Button
-            size="sm"
-            variant="outline"
-            class="h-7 text-xs"
-            @click="handleBatchLaunch"
-          >
-            <Play class="mr-1 size-3" />
-            <span>{{ $t('automation.overview.browser_batch_run_btn') }}</span>
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            class="h-7 text-xs"
-            @click="handleBatchStop"
-          >
-            <Square class="mr-1 size-3" />
-            <span>{{ $t('automation.overview.browser_batch_stop_btn') }}</span>
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            class="h-7 text-xs"
-            @click="openBatchDelete"
-          >
-            <Trash2 class="mr-1 size-3" />
-            <span>{{ $t('automation.browsers.batch_delete') }}</span>
-          </Button>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <Card
-        v-if="!store.loading && store.filteredItems.length === 0"
-        class="flex flex-col items-center justify-center gap-3 border-border p-10 text-center shadow-none"
+      <template
+        #toolbar="{ table, density, setDensity, isFiltered, resetFilters }"
       >
-        <Globe class="size-8 text-muted-foreground/60" />
-        <p class="text-sm font-semibold text-foreground">
-          {{ $t('automation.browsers.empty_title') }}
-        </p>
-        <p class="max-w-md text-xs text-muted-foreground">
-          {{ $t('automation.browsers.empty_desc') }}
-        </p>
-        <div class="mt-2 flex flex-wrap justify-center gap-2">
-          <Button size="sm" @click="openCreateModal">
-            <Plus class="mr-1.5 size-3.5" />
-            <span>{{ $t('automation.browsers.new_profile') }}</span>
-          </Button>
-          <Button size="sm" variant="outline" @click="importOpen = true">
-            <FileSpreadsheet class="mr-1.5 size-3.5" />
-            <span>{{ $t('automation.browsers.import_csv') }}</span>
-          </Button>
-          <Button size="sm" variant="outline" @click="handleAutoDetect">
-            <Sparkles class="mr-1.5 size-3.5" />
-            <span>{{ $t('automation.browsers.auto_detect') }}</span>
-          </Button>
-        </div>
-      </Card>
+        <BrowsersTableToolbar
+          :table="table"
+          :density="density"
+          :is-filtered="isFiltered"
+          @update:density="setDensity"
+          @reset="resetFilters"
+        />
+      </template>
 
-      <!-- Profiles Table -->
-      <Card v-else class="overflow-hidden border-border bg-card shadow-none">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead class="w-10">
-                <Checkbox
-                  :model-value="store.allFilteredSelected"
-                  @update:model-value="store.toggleSelectAllFiltered()"
-                />
-              </TableHead>
-              <TableHead>{{ $t('automation.browsers.col_profile') }}</TableHead>
-              <TableHead>{{ $t('automation.browsers.col_status') }}</TableHead>
-              <TableHead>
-                {{ $t('automation.browsers.col_fingerprint') }}
-              </TableHead>
-              <TableHead>{{ $t('automation.browsers.col_proxy') }}</TableHead>
-              <TableHead>
-                {{ $t('automation.browsers.col_extensions') }}
-              </TableHead>
-              <TableHead class="text-right">
-                {{ $t('automation.browsers.col_actions') }}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow v-for="profile in store.filteredItems" :key="profile.id">
-              <TableCell>
-                <Checkbox
-                  :model-value="store.selectedIds.includes(profile.id)"
-                  @update:model-value="store.toggleSelected(profile.id)"
-                />
-              </TableCell>
+      <template #empty="{ resetFilters }">
+        <Empty class="min-h-[240px]">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SearchX
+                v-if="store.items.length > 0"
+                class="text-muted-foreground size-5"
+              />
+              <Globe v-else class="text-muted-foreground size-5" />
+            </EmptyMedia>
+            <EmptyTitle>
+              {{ $t('automation.browsers.empty_title') }}
+            </EmptyTitle>
+            <EmptyDescription>
+              {{ $t('automation.browsers.empty_desc') }}
+            </EmptyDescription>
+          </EmptyHeader>
+          <div class="mt-4 flex flex-wrap justify-center gap-2">
+            <Button
+              v-if="store.items.length > 0"
+              size="sm"
+              variant="outline"
+              @click="resetFilters"
+            >
+              Reset
+            </Button>
+            <Button size="sm" @click="openCreateModal">
+              <Plus class="mr-1.5 size-3.5" />
+              <span>{{ $t('automation.browsers.new_profile') }}</span>
+            </Button>
+            <Button size="sm" variant="outline" @click="importOpen = true">
+              <FileSpreadsheet class="mr-1.5 size-3.5" />
+              <span>{{ $t('automation.browsers.import_csv') }}</span>
+            </Button>
+            <Button size="sm" variant="outline" @click="handleAutoDetect">
+              <Sparkles class="mr-1.5 size-3.5" />
+              <span>{{ $t('automation.browsers.auto_detect') }}</span>
+            </Button>
+          </div>
+        </Empty>
+      </template>
 
-              <TableCell>
-                <div class="flex flex-col gap-0.5">
-                  <div class="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      class="font-medium text-foreground hover:underline"
-                      @click="openInspectSheet(profile)"
-                    >
-                      {{ profile.name }}
-                    </button>
-                    <Badge
-                      v-if="profile.isDefault"
-                      variant="secondary"
-                      class="px-1.5 py-0 text-[10px]"
-                    >
-                      {{ $t('automation.browsers.default_badge') }}
-                    </Badge>
-                    <Badge
-                      v-if="store.scopeMode === 'all'"
-                      variant="outline"
-                      class="px-1.5 py-0 font-mono text-[10px]"
-                    >
-                      {{ profile.tenantId }}
-                    </Badge>
-                  </div>
-                  <div
-                    class="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground"
-                  >
-                    <span>{{ profile.id }}</span>
-                    <span v-if="profile.groupName"
-                      >• {{ profile.groupName }}</span
-                    >
-                  </div>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <div class="flex items-center gap-1.5">
-                  <Badge
-                    variant="outline"
-                    :class="
-                      profile.isOnline
-                        ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500'
-                        : 'text-muted-foreground'
-                    "
-                  >
-                    <CheckCircle2 v-if="profile.isOnline" class="mr-1 size-3" />
-                    {{
-                      profile.isOnline
-                        ? $t('automation.browsers.running_badge')
-                        : $t('automation.browsers.idle_badge')
-                    }}
-                  </Badge>
-                  <span
-                    v-if="profile.debuggingPort"
-                    class="font-mono text-[11px] text-muted-foreground"
-                  >
-                    :{{ profile.debuggingPort }}
-                  </span>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <div
-                  class="flex items-center gap-1.5 text-xs text-muted-foreground"
-                >
-                  <Laptop class="size-3.5 shrink-0" />
-                  <span class="capitalize">
-                    {{ profile.fingerprintConfig?.osPlatform || 'windows' }}
-                  </span>
-                  <span>·</span>
-                  <span>
-                    {{ profile.fingerprintConfig?.hardwareConcurrency || 8 }}c /
-                    {{ profile.fingerprintConfig?.deviceMemoryGb || 16 }}GB
-                  </span>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <span
-                  v-if="profile.proxy"
-                  class="font-mono text-xs text-foreground"
-                >
-                  {{ profile.proxy }}
-                </span>
-                <Badge
-                  v-else
-                  variant="outline"
-                  class="text-[11px] text-muted-foreground"
-                >
-                  {{ $t('automation.browsers.direct_badge') }}
-                </Badge>
-              </TableCell>
-
-              <TableCell>
-                <Badge variant="outline" class="font-mono text-[11px]">
-                  {{ profile.extensions.length }}
-                </Badge>
-              </TableCell>
-
-              <TableCell class="text-right">
-                <div class="flex items-center justify-end gap-1">
-                  <Button
-                    size="sm"
-                    :variant="profile.isOnline ? 'destructive' : 'outline'"
-                    class="h-7 gap-1 px-2.5 text-xs shadow-none"
-                    :disabled="store.isMutating(profile.id)"
-                    @click="handleToggleRun(profile)"
-                  >
-                    <Loader2
-                      v-if="store.isMutating(profile.id)"
-                      class="size-3 animate-spin"
-                    />
-                    <Square v-else-if="profile.isOnline" class="size-3" />
-                    <Play v-else class="size-3" />
-                    <span>
-                      {{
-                        profile.isOnline
-                          ? $t('automation.browsers.action_stop')
-                          : $t('automation.browsers.action_run')
-                      }}
-                    </span>
-                  </Button>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger as-child>
-                      <Button size="icon" variant="ghost" class="size-7">
-                        <MoreHorizontal class="size-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" class="w-44">
-                      <DropdownMenuItem @select="openInspectSheet(profile)">
-                        <Eye class="mr-2 size-3.5" />
-                        <span>{{
-                          $t('automation.browsers.action_inspect')
-                        }}</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem @select="openEditModal(profile)">
-                        <Pencil class="mr-2 size-3.5" />
-                        <span>{{ $t('common.edit') }}</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        v-if="profile.proxy"
-                        @select="handleProbeRow(profile)"
-                      >
-                        <Wifi class="mr-2 size-3.5" />
-                        <span>
-                          {{ $t('automation.browsers.action_probe_proxy') }}
-                        </span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        :disabled="profile.isDefault"
-                        @select="handleSetDefault(profile)"
-                      >
-                        <Star class="mr-2 size-3.5" />
-                        <span>
-                          {{ $t('automation.browsers.action_set_default') }}
-                        </span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem @select="handleDuplicate(profile)">
-                        <CopyPlus class="mr-2 size-3.5" />
-                        <span>
-                          {{ $t('automation.browsers.action_duplicate') }}
-                        </span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        :disabled="profile.isOnline"
-                        @select="handleUnbind(profile)"
-                      >
-                        <Unlink class="mr-2 size-3.5" />
-                        <span>
-                          {{
-                            $t('automation.overview.browser_batch_unbind_btn')
-                          }}
-                        </span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        class="text-destructive focus:text-destructive"
-                        @select="openSingleDelete(profile)"
-                      >
-                        <Trash2 class="mr-2 size-3.5" />
-                        <span>{{ $t('common.delete') }}</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </Card>
-    </template>
+      <template #footer="{ selectedRows, clearSelection }">
+        <BrowsersTableBulkBar
+          :selected-browsers="selectedRows"
+          @batch-launch="handleBatchLaunch(selectedRows)"
+          @batch-stop="handleBatchStop(selectedRows)"
+          @batch-delete="openBatchDelete(selectedRows, clearSelection)"
+          @clear="clearSelection"
+        />
+      </template>
+    </DataTable>
 
     <BrowserFormDialog
       v-model:open="formOpen"

@@ -1,10 +1,13 @@
 import type { Component, Ref, VNode } from 'vue';
 
-import type { DataTableFeatures } from '../../components/data-table';
+import type { DataTableFeatures } from '@operon/common-ui';
+
 import type { Task } from '../data/schema';
 import type { RowActionCallbacks } from './TasksTableRowActions.vue';
 
 import { h } from 'vue';
+
+import { DataTableColumnHeader } from '@operon/common-ui';
 
 import {
   Avatar,
@@ -18,7 +21,6 @@ import { cn } from '@operon-core/shared/utils';
 import { Check, Copy, Star } from '@lucide/vue';
 import { createColumnHelper } from '@tanstack/vue-table';
 
-import { DataTableColumnHeader } from '../../components/data-table';
 import { assignees, labels, priorities, statuses } from '../data/data';
 import TasksTableRowActions from './TasksTableRowActions.vue';
 

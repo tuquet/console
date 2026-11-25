@@ -1,0 +1,105 @@
+import { createApp, h, nextTick, reactive, ref } from 'vue';
+
+import { createPinia } from 'pinia';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import AutomationBrowsersView from '../browsers.vue';
+
+const mockFetch = vi.fn();
+const mockTenantState = reactive({
+  activeId: 'local-default',
+  activeName: 'Local Tenant',
+  activeSlug: 'local',
+  isLoading: false,
+  items: [],
+});
+
+vi.mock('@operon/kernel', () => ({
+  useKernel: () => ({
+    api: { daemonPort: 8765, localDaemonFetch: mockFetch },
+    events: { navigate: vi.fn(), notify: vi.fn(), openLoginModal: vi.fn() },
+    tenant: mockTenantState,
+  }),
+  useLocalBridgeHeartbeat: () => ({
+    checkNow: vi.fn(),
+    isHealthy: ref(true),
+    isInitialChecking: ref(false),
+  }),
+}));
+
+const sampleBrowsers = [
+  {
+    createdAt: '2026-01-01T00:00:00Z',
+    extensions: ['automation'],
+    fingerprintConfig: {
+      deviceMemoryGb: 16,
+      hardwareConcurrency: 8,
+      osPlatform: 'windows',
+      seed: 101,
+    },
+    groupName: 'marketing',
+    id: 'prf_1',
+    isDefault: true,
+    isOnline: false,
+    name: 'Marketing Profile',
+    proxy: 'socks5://127.0.0.1:1080',
+    startupFlags: [],
+    tags: ['sea'],
+    tenantId: 'local-default',
+    timezone: 'UTC',
+    updatedAt: '2026-01-01T00:00:00Z',
+    userAgent: null,
+  },
+  {
+    createdAt: '2026-01-02T00:00:00Z',
+    extensions: ['automation'],
+    fingerprintConfig: {
+      deviceMemoryGb: 8,
+      hardwareConcurrency: 4,
+      osPlatform: 'macos',
+      seed: 202,
+    },
+    groupName: 'qa',
+    id: 'prf_2',
+    isDefault: false,
+    isOnline: true,
+    name: 'QA Running',
+    proxy: null,
+    startupFlags: [],
+    tags: ['vip'],
+    tenantId: 'local-default',
+    timezone: 'UTC',
+    updatedAt: '2026-01-02T00:00:00Z',
+    userAgent: null,
+  },
+];
+
+describe('automation browsers view with shared DataTable', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue(sampleBrowsers);
+  });
+
+  it('mounts KPI preset cards, DataTable toolbar, pagination, and profile rows', async () => {
+    const errors: unknown[] = [];
+    const host = document.createElement('div');
+    document.body.append(host);
+
+    const app = createApp({ render: () => h(AutomationBrowsersView) });
+    app.use(createPinia());
+    app.config.errorHandler = (err) => errors.push(err);
+    app.mount(host);
+
+    await nextTick();
+    await nextTick();
+
+    expect(errors).toEqual([]);
+    expect(host.querySelectorAll('tbody tr').length).toBe(2);
+    expect(host.textContent).toContain('Marketing Profile');
+    expect(host.textContent).toContain('QA Running');
+    expect(host.textContent).toContain('Rows per page');
+
+    app.unmount();
+    host.remove();
+  });
+});

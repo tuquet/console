@@ -318,8 +318,10 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     }
   }
 
-  async function batchLaunchSelected() {
-    const offline = selectedProfiles.value.filter((b) => !b.isOnline);
+  async function batchLaunchSelected(targets?: BrowserProfileRecord[]) {
+    const offline = (targets ?? selectedProfiles.value).filter(
+      (b) => !b.isOnline,
+    );
     let started = 0;
     for (const profile of offline) {
       try {
@@ -332,8 +334,10 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     return { started, total: offline.length };
   }
 
-  async function batchStopSelected() {
-    const running = selectedProfiles.value.filter((b) => b.isOnline);
+  async function batchStopSelected(targets?: BrowserProfileRecord[]) {
+    const running = (targets ?? selectedProfiles.value).filter(
+      (b) => b.isOnline,
+    );
     let stopped = 0;
     for (const profile of running) {
       try {
@@ -346,8 +350,8 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     return { stopped, total: running.length };
   }
 
-  async function batchRemoveSelected(force = false) {
-    const ids = [...selectedIds.value];
+  async function batchRemoveSelected(force = false, targetIds?: string[]) {
+    const ids = targetIds ? [...targetIds] : [...selectedIds.value];
     if (ids.length === 0) {
       return { deleted: [], errors: [], skipped: [] };
     }

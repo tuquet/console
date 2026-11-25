@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import type { VueTable } from '@tanstack/vue-table';
 
-import type {
-  DataTableDensity,
-  DataTableFeatures,
-} from '../../components/data-table';
+import type { DataTableDensity, DataTableFeatures } from '@operon/common-ui';
+
 import type { Task } from '../data/schema';
 
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+
+import {
+  DataTableDensityToggle,
+  DataTableFacetedFilter,
+  DataTableViewOptions,
+} from '@operon/common-ui';
 
 import {
   Button,
@@ -20,11 +24,6 @@ import { cn } from '@operon-core/shared/utils';
 
 import { Plus, Search, Star, X } from '@lucide/vue';
 
-import {
-  DataTableDensityToggle,
-  DataTableFacetedFilter,
-  DataTableViewOptions,
-} from '../../components/data-table';
 import { assignees, labels, priorities, statuses } from '../data/data';
 
 interface TasksTableToolbarProps {

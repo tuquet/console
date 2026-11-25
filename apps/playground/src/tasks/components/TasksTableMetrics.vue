@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { VueTable } from '@tanstack/vue-table';
 
-import type { DataTableFeatures } from '../../components/data-table';
+import type { DataTableFeatures } from '@operon/common-ui';
+
 import type { Task } from '../data/schema';
 
 import { computed } from 'vue';

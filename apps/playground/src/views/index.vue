@@ -3,6 +3,7 @@ import type { Task, TaskDraft } from '../tasks/data/schema';
 
 import { computed, ref } from 'vue';
 
+import { DataTable } from '@operon/common-ui';
 import { useKernel } from '@operon/kernel';
 
 import {
@@ -16,7 +17,6 @@ import {
 
 import { Download, ListTodo, RotateCcw, SearchX } from '@lucide/vue';
 
-import { DataTable } from '../components/data-table';
 import { $t } from '../locales';
 import { tasksToCsv, usePlaygroundStore } from '../stores/sample';
 import { createTaskColumns } from '../tasks/components/columns';
