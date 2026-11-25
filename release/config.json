@@ -1,5 +1,5 @@
 {
-  "repository": "tuquet/console",
+  "repository": "tuquet/operon",
   "stateBranch": "release-state",
   "platforms": ["windows-x86_64"],
   "nightlyRetention": {

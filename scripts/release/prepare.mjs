@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { appendFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -10,7 +11,6 @@ import {
   isMain,
   parseVersion,
   product,
-  readJson,
   root,
   syncVersion,
   writeJson,
@@ -20,7 +20,7 @@ export function releaseIdentity({ version, ref, runNumber, attempt = '1' }) {
   parseVersion(version);
   if (ref.startsWith('refs/tags/')) {
     const tag = ref.slice('refs/tags/'.length);
-    if (tag !== `v${version}` || channelFor(version) === 'nightly')
+    if (tag !== `console-v${version}` || channelFor(version) === 'nightly')
       throw new Error(
         'Release tag must match the committed stable/beta product version',
       );
@@ -32,7 +32,7 @@ export function releaseIdentity({ version, ref, runNumber, attempt = '1' }) {
     throw new Error('Nightly builds require a numeric run number and attempt');
   const base = parseVersion(version).core.join('.');
   const nightly = `${base}-nightly.${runNumber}.${attempt}`;
-  return { version: nightly, tag: `v${nightly}`, channel: 'nightly' };
+  return { version: nightly, tag: `console-v${nightly}`, channel: 'nightly' };
 }
 
 if (isMain(import.meta.url)) {
@@ -45,21 +45,25 @@ if (isMain(import.meta.url)) {
     runNumber: process.env.GITHUB_RUN_NUMBER ?? '',
     attempt: process.env.GITHUB_RUN_ATTEMPT,
   });
+  const umbrellaRoot = resolve(root, '..');
+  const umbrellaGit = (...args) =>
+    execFileSync('git', args, { cwd: umbrellaRoot, encoding: 'utf8' }).trim();
   const commit = git('rev-parse', 'HEAD');
-  git('merge-base', '--is-ancestor', 'HEAD', 'origin/main');
-  if (commit !== process.env.GITHUB_SHA)
+  const operonCommit = umbrellaGit('rev-parse', 'HEAD');
+  umbrellaGit('merge-base', '--is-ancestor', 'HEAD', 'origin/main');
+  if (operonCommit !== process.env.GITHUB_SHA)
     throw new Error('Checked out source does not match triggering commit');
-  if (git('status', '--porcelain'))
+  if (git('status', '--porcelain') || umbrellaGit('status', '--porcelain'))
     throw new Error('Release preparation requires a clean source checkout');
   const directory = resolve(root, '.temp/release');
   mkdirSync(directory, { recursive: true });
   const context = {
     ...identity,
     commit,
+    operonCommit,
     builtAt: new Date().toISOString(),
     runUrl: `https://github.com/${config.repository}/actions/runs/${process.env.GITHUB_RUN_ID}`,
     repository: config.repository,
-    subsystem: readJson('subsystem.json'),
   };
   syncVersion(identity.version);
   writeJson('.temp/release/context.json', context);

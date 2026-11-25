@@ -44,17 +44,14 @@ export async function publish(directory) {
       const annotated = await github(`git/tags/${object.sha}`);
       object = annotated.object;
     }
-    if (
-      object.type !== 'commit' ||
-      object.sha !== manifest.source.consoleCommit
-    )
+    if (object.type !== 'commit' || object.sha !== manifest.source.operonCommit)
       throw new Error('Git tag points to a different source commit');
   } else {
     await github('git/refs', {
       method: 'POST',
       body: {
         ref: `refs/tags/${manifest.tag}`,
-        sha: manifest.source.consoleCommit,
+        sha: manifest.source.operonCommit,
       },
     });
   }
@@ -63,14 +60,14 @@ export async function publish(directory) {
       method: 'POST',
       body: {
         tag_name: manifest.tag,
-        target_commitish: manifest.source.consoleCommit,
+        target_commitish: manifest.source.operonCommit,
       },
     });
     release = await github('releases', {
       method: 'POST',
       body: {
         tag_name: manifest.tag,
-        target_commitish: manifest.source.consoleCommit,
+        target_commitish: manifest.source.operonCommit,
         name: `Operon ${manifest.version}`,
         body: `${notes.body}\n\nBuild: ${manifest.build.runUrl}`,
         draft: true,
@@ -117,7 +114,8 @@ export async function publish(directory) {
       method: 'PATCH',
       body: {
         draft: false,
-        make_latest: manifest.channel === 'stable' ? 'true' : 'false',
+        // Keep /releases/latest reserved for the `opn` CLI installers; Tauri updater reads release-state feeds.
+        make_latest: 'false',
       },
     });
   // Refetch to include all uploaded assets and the authoritative publication time.

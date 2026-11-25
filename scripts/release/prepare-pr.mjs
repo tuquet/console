@@ -46,7 +46,7 @@ if (isMain(import.meta.url)) {
       head: branch,
       base: 'main',
       draft: false,
-      body: `Prepare product version **${version}**. After merging and passing quality checks, tag the merged commit as v${version} to build the signed release. Nightlies continue automatically from main.`,
+      body: `Prepare product version **${version}**. After merging and passing quality checks, tag the merged commit as console-v${version} to build the signed release. Nightlies continue automatically from main.`,
     },
   });
   console.log(pr.html_url);
@@ -55,7 +55,7 @@ if (isMain(import.meta.url)) {
       process.env.GITHUB_STEP_SUMMARY,
       `Release PR: ${pr.html_url}\n`,
     );
-  await github('actions/workflows/quality.yml/dispatches', {
+  await github('actions/workflows/console-quality.yml/dispatches', {
     method: 'POST',
     body: { ref: branch },
   });

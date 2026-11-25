@@ -42,7 +42,7 @@ export function validateManifest(manifest) {
   if (
     manifest.schemaVersion !== 1 ||
     manifest.product !== 'operon-console' ||
-    manifest.tag !== `v${manifest.version}` ||
+    manifest.tag !== `console-v${manifest.version}` ||
     manifest.channel !== channelFor(manifest.version)
   )
     throw new Error('Invalid release manifest identity');
@@ -237,7 +237,7 @@ export async function packageRelease({
     notes: `Operon ${context.version}. See the GitHub release for changes.`,
     source: {
       consoleCommit: context.commit,
-      operonCommit: context.subsystem.revision,
+      operonCommit: context.operonCommit ?? context.subsystem?.revision,
     },
     build: {
       runUrl: context.runUrl,

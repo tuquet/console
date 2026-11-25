@@ -55,7 +55,7 @@ function signingFixture(payload, algorithm = 'ED') {
 }
 
 function manifestFixture(version = '5.8.1') {
-  const tag = `v${version}`;
+  const tag = `console-v${version}`;
   return {
     schemaVersion: 1,
     product: 'operon-console',
@@ -126,12 +126,12 @@ describe('release versions', () => {
   });
   it('requires tags to match committed product versions', () => {
     expect(() =>
-      releaseIdentity({ version: '5.8.1', ref: 'refs/tags/v5.8.2' }),
+      releaseIdentity({ version: '5.8.1', ref: 'refs/tags/console-v5.8.2' }),
     ).toThrow(/.+/);
     expect(
       releaseIdentity({
         version: '5.9.0-beta.1',
-        ref: 'refs/tags/v5.9.0-beta.1',
+        ref: 'refs/tags/console-v5.9.0-beta.1',
       }).channel,
     ).toBe('beta');
   });
@@ -159,24 +159,26 @@ describe('release channel lifecycle', () => {
     const state = emptyState();
     registered(state, '5.8.2');
     registered(state, '5.8.1', 2);
-    expect(state.channels.stable.tag).toBe('v5.8.2');
+    expect(state.channels.stable.tag).toBe('console-v5.8.2');
     expect(Object.keys(state.releases)).toHaveLength(2);
   });
   it('does not advertise prereleases to stable users', () => {
     const state = emptyState();
     registered(state, '5.9.0-beta.1');
-    expect(() => promote(state, 'stable', 'v5.9.0-beta.1', event)).toThrow(
-      /.+/,
-    );
+    expect(() =>
+      promote(state, 'stable', 'console-v5.9.0-beta.1', event),
+    ).toThrow(/.+/);
     expect(state.channels.stable).toBeUndefined();
   });
   it('revokes a release from every channel and cannot silently reinstate it', () => {
     const state = emptyState();
     registered(state, '5.8.1');
-    promote(state, 'beta', 'v5.8.1', event);
-    revoke(state, 'v5.8.1', 'Startup failure', event);
+    promote(state, 'beta', 'console-v5.8.1', event);
+    revoke(state, 'console-v5.8.1', 'Startup failure', event);
     expect(state.channels).toEqual({});
-    expect(() => promote(state, 'stable', 'v5.8.1', event)).toThrow(/.+/);
+    expect(() => promote(state, 'stable', 'console-v5.8.1', event)).toThrow(
+      /.+/,
+    );
     expect(() => registered(state, '5.8.1')).toThrow(/.+/);
     expect(state.history.at(-1).reason).toBe('Startup failure');
   });
@@ -184,8 +186,10 @@ describe('release channel lifecycle', () => {
     const state = emptyState();
     registered(state, '5.8.1');
     registered(state, '5.8.2', 2);
-    expect(() => promote(state, 'stable', 'v5.8.1', event)).toThrow(/.+/);
-    expect(() => revoke(state, 'v5.8.2', '', event)).toThrow(/.+/);
+    expect(() => promote(state, 'stable', 'console-v5.8.1', event)).toThrow(
+      /.+/,
+    );
+    expect(() => revoke(state, 'console-v5.8.2', '', event)).toThrow(/.+/);
   });
   it('never prunes stable, beta, pinned or recently published releases', () => {
     const state = emptyState();
@@ -193,10 +197,11 @@ describe('release channel lifecycle', () => {
     registered(state, '5.9.0-beta.1', 2);
     registered(state, '5.9.0-nightly.1.1', 3);
     registered(state, '5.9.0-nightly.2.1', 4);
-    state.releases['v5.9.0-nightly.1.1'].publishedAt = '2026-01-01T00:00:00Z';
+    state.releases['console-v5.9.0-nightly.1.1'].publishedAt =
+      '2026-01-01T00:00:00Z';
     expect(
       retentionCandidates(state, { keep: 1, days: 30 }, Date.parse(event.at)),
-    ).toEqual(['v5.9.0-nightly.1.1']);
+    ).toEqual(['console-v5.9.0-nightly.1.1']);
   });
 });
 
@@ -304,7 +309,7 @@ describe('signed release artifacts', () => {
     await writeFile(join(directory, 'checksums.sha256'), checksums.join('\n'));
     await expect(
       verifyReleaseDirectory(directory, signing.publicKey),
-    ).resolves.toMatchObject({ tag: 'v5.8.1' });
+    ).resolves.toMatchObject({ tag: 'console-v5.8.1' });
     await writeFile(join(directory, 'stale.exe'), 'old build');
     await expect(
       verifyReleaseDirectory(directory, signing.publicKey),

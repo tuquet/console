@@ -37,7 +37,7 @@ beforeEach(async () => {
     schemaVersion: 1,
     product: 'operon-console',
     version: '5.8.1',
-    tag: 'v5.8.1',
+    tag: 'console-v5.8.1',
     channel: 'stable',
     builtAt: '2026-11-10T00:00:00Z',
     notes: 'Release',
@@ -93,7 +93,7 @@ beforeEach(async () => {
     if (path === 'immutable-releases') return { enabled: true };
     if (path.startsWith('releases/tags/')) return null;
     if (path.startsWith('git/ref/'))
-      return { object: { type: 'commit', sha: manifest.source.consoleCommit } };
+      return { object: { type: 'commit', sha: manifest.source.operonCommit } };
     if (path === 'releases/generate-notes') return { body: 'Release notes' };
     if (path === 'releases') return release;
     if (path === 'releases/42' && options?.method === 'PATCH') {
@@ -128,10 +128,15 @@ afterEach(async () => {
 describe('release publication transaction', () => {
   it('publishes only after every asset is uploaded and registers after publication', async () => {
     await publish(directory);
+    const patchCall = mocks.github.mock.calls.find(
+      ([path, options]) =>
+        path === 'releases/42' && options?.method === 'PATCH',
+    );
+    expect(patchCall[1].body.make_latest).toBe('false');
     expect(mocks.writeState).toHaveBeenCalledOnce();
     const state = mocks.writeState.mock.calls[0][1];
-    expect(state.channels.stable.tag).toBe('v5.8.1');
-    expect(state.releases['v5.8.1'].githubReleaseId).toBe(42);
+    expect(state.channels.stable.tag).toBe('console-v5.8.1');
+    expect(state.releases['console-v5.8.1'].githubReleaseId).toBe(42);
   });
   it('leaves a draft and channel untouched when GitHub reports the wrong digest', async () => {
     vi.stubGlobal(
@@ -187,7 +192,7 @@ describe('release publication transaction', () => {
       if (path.startsWith('releases/tags/')) return null;
       if (path.startsWith('git/ref/'))
         return {
-          object: { type: 'commit', sha: manifest.source.consoleCommit },
+          object: { type: 'commit', sha: manifest.source.operonCommit },
         };
       if (path === 'releases/generate-notes') return { body: 'Release notes' };
       if (path === 'releases') return release;
