@@ -163,6 +163,19 @@ async function handleClone() {
         <SheetDescription class="font-mono text-xs">
           {{ profile.id }}
         </SheetDescription>
+        <div
+          v-if="profile.tags.length > 0"
+          class="flex flex-wrap items-center gap-1 pt-1"
+        >
+          <Badge
+            v-for="tag in profile.tags"
+            :key="tag"
+            variant="outline"
+            class="px-1.5 py-0 font-mono text-[10px]"
+          >
+            #{{ tag }}
+          </Badge>
+        </div>
       </SheetHeader>
 
       <div v-if="profile" class="mt-5 flex flex-col gap-4">

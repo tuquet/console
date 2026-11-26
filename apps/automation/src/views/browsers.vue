@@ -356,6 +356,17 @@ const columns = createBrowserColumns(
           size="sm"
           class="h-8 gap-1.5 text-xs shadow-none"
           :disabled="!bridge.isHealthy.value || store.loading"
+          @click="handleAutoDetect"
+        >
+          <Sparkles class="size-3.5" />
+          <span>{{ $t('automation.browsers.auto_detect') }}</span>
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          class="h-8 gap-1.5 text-xs shadow-none"
+          :disabled="!bridge.isHealthy.value || store.loading"
           @click="store.fetchBrowsers()"
         >
           <RefreshCw

@@ -140,11 +140,28 @@ export function createBrowserColumns(
             'div',
             {
               class:
-                'text-muted-foreground flex items-center gap-1.5 font-mono text-[11px]',
+                'text-muted-foreground flex flex-wrap items-center gap-1.5 font-mono text-[11px]',
             },
             [
               h('span', profile.id),
               profile.groupName ? h('span', `• ${profile.groupName}`) : null,
+              ...profile.tags.slice(0, 3).map((tag) =>
+                h(
+                  Badge,
+                  {
+                    variant: 'outline',
+                    class: 'px-1 py-0 text-[10px] font-normal',
+                  },
+                  () => `#${tag}`,
+                ),
+              ),
+              profile.tags.length > 3
+                ? h(
+                    'span',
+                    { class: 'text-[10px]' },
+                    `+${profile.tags.length - 3}`,
+                  )
+                : null,
             ],
           ),
         ]);
