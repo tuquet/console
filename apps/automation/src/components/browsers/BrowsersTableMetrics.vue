@@ -28,12 +28,19 @@ const props = defineProps<Props>();
 
 type PresetKey = 'all' | 'direct' | 'proxied' | 'running';
 
+function sharePercent(count: number): number {
+  return props.stats.total > 0
+    ? Math.round((count / props.stats.total) * 100)
+    : 0;
+}
+
 const cards = computed(() => [
   {
     key: 'all' as PresetKey,
     label: $t('automation.browsers.kpi_total'),
     icon: Globe,
     value: props.stats.total,
+    subtext: `${props.stats.running}/${props.stats.total}`,
   },
   {
     key: 'running' as PresetKey,
@@ -42,6 +49,7 @@ const cards = computed(() => [
     columnId: 'status',
     filterValue: 'online',
     value: props.stats.running,
+    subtext: `${sharePercent(props.stats.running)}%`,
   },
   {
     key: 'proxied' as PresetKey,
@@ -50,6 +58,7 @@ const cards = computed(() => [
     columnId: 'proxy',
     filterValue: 'proxied',
     value: props.stats.proxied,
+    subtext: `${sharePercent(props.stats.proxied)}%`,
   },
   {
     key: 'direct' as PresetKey,
@@ -58,6 +67,7 @@ const cards = computed(() => [
     columnId: 'proxy',
     filterValue: 'direct',
     value: props.stats.direct,
+    subtext: `${sharePercent(props.stats.direct)}%`,
   },
 ]);
 
@@ -98,7 +108,7 @@ function applyPreset(card: (typeof cards.value)[number]) {
       <Card
         :class="
           cn(
-            'relative overflow-hidden px-4 py-3 transition-colors',
+            'relative gap-0 overflow-hidden px-4 py-3 shadow-none transition-colors',
             activeKey === card.key
               ? 'border-primary bg-accent/40 after:bg-primary after:absolute after:inset-x-0 after:bottom-0 after:h-0.5'
               : 'hover:border-border hover:bg-accent/20',
@@ -121,8 +131,13 @@ function applyPreset(card: (typeof cards.value)[number]) {
             "
           />
         </div>
-        <div class="text-foreground mt-2 font-mono text-2xl font-semibold">
-          {{ card.value }}
+        <div class="mt-2 flex items-baseline justify-between gap-2">
+          <span class="text-foreground font-mono text-2xl font-semibold">
+            {{ card.value }}
+          </span>
+          <span class="text-muted-foreground font-mono text-xs">
+            {{ card.subtext }}
+          </span>
         </div>
       </Card>
     </button>
