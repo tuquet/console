@@ -7,7 +7,7 @@ import type { BrowserProfileRecord } from '../../api/browsers';
 
 import { computed } from 'vue';
 
-import { Button } from '@operon-core/shadcn-ui';
+import { Card } from '@operon-core/shadcn-ui';
 import { cn } from '@operon-core/shared/utils';
 
 import { CheckCircle2, Globe, Shield, Wifi } from '@lucide/vue';
@@ -33,16 +33,12 @@ const cards = computed(() => [
     key: 'all' as PresetKey,
     label: $t('automation.browsers.kpi_total'),
     icon: Globe,
-    iconClass: 'text-muted-foreground',
-    activeClass: 'border-foreground/25 after:bg-primary shadow-2xs',
     value: props.stats.total,
   },
   {
     key: 'running' as PresetKey,
     label: $t('automation.browsers.kpi_running'),
     icon: CheckCircle2,
-    iconClass: 'text-emerald-500',
-    activeClass: 'border-emerald-500/40 shadow-2xs after:bg-emerald-500',
     columnId: 'status',
     filterValue: 'online',
     value: props.stats.running,
@@ -51,8 +47,6 @@ const cards = computed(() => [
     key: 'proxied' as PresetKey,
     label: $t('automation.browsers.kpi_proxied'),
     icon: Shield,
-    iconClass: 'text-sky-500',
-    activeClass: 'border-sky-500/40 shadow-2xs after:bg-sky-500',
     columnId: 'proxy',
     filterValue: 'proxied',
     value: props.stats.proxied,
@@ -61,8 +55,6 @@ const cards = computed(() => [
     key: 'direct' as PresetKey,
     label: $t('automation.browsers.kpi_direct'),
     icon: Wifi,
-    iconClass: 'text-muted-foreground',
-    activeClass: 'border-foreground/25 after:bg-muted-foreground shadow-2xs',
     columnId: 'proxy',
     filterValue: 'direct',
     value: props.stats.direct,
@@ -95,33 +87,44 @@ function applyPreset(card: (typeof cards.value)[number]) {
 
 <template>
   <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-    <Button
+    <button
       v-for="card in cards"
       :key="card.key"
       type="button"
-      variant="outline"
-      :class="
-        cn(
-          'bg-card relative flex h-auto w-full flex-col items-stretch justify-between overflow-hidden rounded-lg border px-4 py-3 text-left font-normal whitespace-normal transition-all',
-          activeKey === card.key
-            ? cn(
-                card.activeClass,
-                'after:absolute after:inset-x-0 after:bottom-0 after:h-0.5',
-              )
-            : 'border-border/70 hover:border-border hover:bg-accent/20',
-        )
-      "
+      class="focus-visible:ring-ring rounded-lg text-left focus-visible:ring-1 focus-visible:outline-none"
+      :aria-pressed="activeKey === card.key"
       @click="applyPreset(card)"
     >
-      <div class="flex items-center justify-between">
-        <span class="text-muted-foreground text-xs font-medium">
-          {{ card.label }}
-        </span>
-        <component :is="card.icon" class="size-3.5" :class="card.iconClass" />
-      </div>
-      <div class="text-foreground mt-2 font-mono text-2xl font-semibold">
-        {{ card.value }}
-      </div>
-    </Button>
+      <Card
+        :class="
+          cn(
+            'relative overflow-hidden px-4 py-3 transition-colors',
+            activeKey === card.key
+              ? 'border-primary bg-accent/40 after:bg-primary after:absolute after:inset-x-0 after:bottom-0 after:h-0.5'
+              : 'hover:border-border hover:bg-accent/20',
+          )
+        "
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-muted-foreground text-xs font-medium">
+            {{ card.label }}
+          </span>
+          <component
+            :is="card.icon"
+            :class="
+              cn(
+                'size-3.5',
+                activeKey === card.key
+                  ? 'text-primary'
+                  : 'text-muted-foreground',
+              )
+            "
+          />
+        </div>
+        <div class="text-foreground mt-2 font-mono text-2xl font-semibold">
+          {{ card.value }}
+        </div>
+      </Card>
+    </button>
   </div>
 </template>
