@@ -5,8 +5,8 @@ import { computed, watch } from 'vue';
 
 import { $t } from '@operon/locales';
 
-import { useVbenModal } from '@operon-core/popup-ui';
-import { Button, Slot, VbenAvatar } from '@operon-core/shadcn-ui';
+import { useOperonModal } from '@operon-core/popup-ui';
+import { Button, OperonAvatar, Slot } from '@operon-core/shadcn-ui';
 
 interface Props extends AuthenticationProps {
   avatar?: string;
@@ -33,7 +33,7 @@ function closeModal() {
   modalApi.close();
 }
 
-const [Modal, modalApi] = useVbenModal({
+const [Modal, modalApi] = useOperonModal({
   onCancel() {
     closeModal();
   },
@@ -101,7 +101,7 @@ function calcZIndex() {
       :z-index="getZIndex"
       class="relative border-none px-10 py-6 text-center shadow-xl sm:w-150 sm:rounded-2xl md:h-[unset]"
     >
-      <VbenAvatar :src="avatar" class="mx-auto mb-6 size-20" />
+      <OperonAvatar :src="avatar" class="mx-auto mb-6 size-20" />
       <Slot
         :show-forget-password="false"
         :show-register="false"

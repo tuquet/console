@@ -6,7 +6,7 @@ import { ELEMENT_ID_MAIN_CONTENT } from '@operon-core/shared/constants';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useVbenDrawer } from '../use-drawer';
+import { useOperonDrawer } from '../use-drawer';
 
 vi.mock('@operon-core/preferences', () => ({
   usePreferences: () => ({
@@ -23,7 +23,7 @@ async function mountPreopenedDrawer() {
   document.body.append(mainContent);
 
   const Consumer = defineComponent(() => {
-    const [Drawer, drawerApi] = useVbenDrawer({ appendToMain: true });
+    const [Drawer, drawerApi] = useOperonDrawer({ appendToMain: true });
     drawerApi.open();
     return () => h(Drawer);
   });
@@ -44,7 +44,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('vben drawer', () => {
+describe('operon drawer', () => {
   it('mounts an initially open drawer directly in the main content', async () => {
     const mainContent = await mountPreopenedDrawer();
     const dialog = document.querySelector('[role="dialog"]');

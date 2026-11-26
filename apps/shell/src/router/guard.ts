@@ -1,7 +1,7 @@
 import type { RouteLocationNormalized, Router } from 'vue-router';
 
 import { DEFAULT_HOME_PATH, LOGIN_PATH } from '@operon/constants';
-import { getLocalBridgeStatus } from '@operon/kernel';
+import { getDaemonStatus } from '@operon/kernel';
 import { preferences } from '@operon/preferences';
 import { useAccessStore, useUserStore } from '@operon/stores';
 import { startProgress, stopProgress } from '@operon/utils';
@@ -17,8 +17,8 @@ import { useAuthStore } from '#/store';
 import { sanitizeRedirectPath } from '#/utils/security';
 import {
   buildWelcomeLocation,
-  hasLocalBridgeSeen,
-  markLocalBridgeSeen,
+  hasDaemonSeen,
+  markDaemonSeen,
   saveWelcomeRedirect,
 } from '#/utils/welcome';
 
@@ -157,9 +157,9 @@ function setupAccessGuard(router: Router) {
       }
     }
 
-    const bridgeStatus = getLocalBridgeStatus();
-    if (bridgeStatus === 'healthy') {
-      markLocalBridgeSeen();
+    const daemonStatus = getDaemonStatus();
+    if (daemonStatus === 'healthy') {
+      markDaemonSeen();
     }
 
     // Redirect first-time Web/PWA visitors to standalone Welcome when local Operon is offline
@@ -168,8 +168,8 @@ function setupAccessGuard(router: Router) {
     if (
       !isTauriEnvironment() &&
       !isWelcomeExempt &&
-      bridgeStatus === 'offline' &&
-      !hasLocalBridgeSeen()
+      daemonStatus === 'offline' &&
+      !hasDaemonSeen()
     ) {
       saveWelcomeRedirect(to.fullPath);
       return buildWelcomeLocation(to.fullPath);

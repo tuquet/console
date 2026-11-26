@@ -1,8 +1,8 @@
 import type { Router } from 'vue-router';
 
-import type { KernelContext, KernelTenantRecord } from '@operon/kernel';
+import type { KernelContext, KernelWorkspaceRecord } from '@operon/kernel';
 
-import type { Tenant } from '#/api/core/tenant';
+import type { Workspace } from '#/api/core/workspace';
 
 import { reactive } from 'vue';
 
@@ -11,20 +11,20 @@ import { useAccessStore, useUserStore } from '@operon/stores';
 
 import { toast } from '@operon-core/shadcn-ui';
 
-import { getActiveTenantId, hasCloudAuth, supabaseRequest } from '#/api';
+import { getActiveWorkspaceId, hasCloudAuth, supabaseRequest } from '#/api';
 import { useNotificationStore } from '#/store/notification';
-import { useTenantStore } from '#/store/tenant';
+import { useWorkspaceStore } from '#/store/workspace';
 
-const DEFAULT_LOCAL_TENANT_ID = 'local-default';
+const DEFAULT_LOCAL_WORKSPACE_ID = 'local-default';
 
 /**
- * Creates the real Host Kernel Context wired into Workstation's runtime.
+ * Creates the real Host Kernel Context wired into Desktop's runtime.
  */
 export function createHostKernel(router?: Router): KernelContext {
   const accessStore = useAccessStore();
   const userStore = useUserStore();
   const notificationStore = useNotificationStore();
-  const tenantStore = useTenantStore();
+  const workspaceStore = useWorkspaceStore();
 
   const auth = reactive({
     get accessToken() {
@@ -41,8 +41,8 @@ export function createHostKernel(router?: Router): KernelContext {
         ? userStore.userRoles
         : ['local_operator'];
     },
-    get tenantId() {
-      return tenantStore.activeTenantId || getActiveTenantId() || null;
+    get workspaceId() {
+      return workspaceStore.activeWorkspaceId || getActiveWorkspaceId() || null;
     },
     get userId() {
       return userStore.userInfo?.userId || 'local-operator';
@@ -121,7 +121,7 @@ export function createHostKernel(router?: Router): KernelContext {
     requestPermission: () => notificationStore.requestPermission(),
   };
 
-  function mapTenantToKernelRecord(t: Tenant): KernelTenantRecord {
+  function mapWorkspaceToKernelRecord(t: Workspace): KernelWorkspaceRecord {
     return {
       avatarUrl: t.avatar_url ?? null,
       createdAt: t.created_at,
@@ -138,45 +138,47 @@ export function createHostKernel(router?: Router): KernelContext {
     };
   }
 
-  const tenant = reactive({
+  const workspace = reactive({
     get activeId() {
       return (
-        tenantStore.activeTenantId ||
-        getActiveTenantId() ||
-        DEFAULT_LOCAL_TENANT_ID
+        workspaceStore.activeWorkspaceId ||
+        getActiveWorkspaceId() ||
+        DEFAULT_LOCAL_WORKSPACE_ID
       );
     },
     get activeName() {
-      return tenantStore.activeTenant?.name || null;
+      return workspaceStore.activeWorkspace?.name || null;
     },
     get activeSlug() {
-      return tenantStore.activeTenant?.slug || null;
+      return workspaceStore.activeWorkspace?.slug || null;
     },
-    createTenant: async (input: {
+    createWorkspace: async (input: {
       name: string;
       plan?: string;
       slug: string;
     }) => {
-      const created = await tenantStore.createTenant(input);
-      return mapTenantToKernelRecord(created);
+      const created = await workspaceStore.createWorkspace(input);
+      return mapWorkspaceToKernelRecord(created);
     },
-    deleteTenant: async (id: string) => {
-      await tenantStore.deleteTenant(id);
+    deleteWorkspace: async (id: string) => {
+      await workspaceStore.deleteWorkspace(id);
     },
     get isLoading() {
-      return tenantStore.isLoading;
+      return workspaceStore.isLoading;
     },
     get items() {
-      return tenantStore.tenants.map((t) => mapTenantToKernelRecord(t));
+      return workspaceStore.workspaces.map((t) =>
+        mapWorkspaceToKernelRecord(t),
+      );
     },
     refresh: async (force?: boolean) => {
-      const list = await tenantStore.fetchTenants(force);
-      return list.map((t) => mapTenantToKernelRecord(t));
+      const list = await workspaceStore.fetchWorkspaces(force);
+      return list.map((t) => mapWorkspaceToKernelRecord(t));
     },
-    switchTenant: (id: string) => {
-      tenantStore.setTenant(id);
+    switchWorkspace: (id: string) => {
+      workspaceStore.setWorkspace(id);
     },
-    updateTenant: async (
+    updateWorkspace: async (
       id: string,
       patch: {
         name?: string;
@@ -185,8 +187,8 @@ export function createHostKernel(router?: Router): KernelContext {
         status?: 'active' | 'archived' | 'suspended';
       },
     ) => {
-      const updated = await tenantStore.updateTenant(id, patch);
-      return mapTenantToKernelRecord(updated);
+      const updated = await workspaceStore.updateWorkspace(id, patch);
+      return mapWorkspaceToKernelRecord(updated);
     },
   });
 
@@ -195,6 +197,6 @@ export function createHostKernel(router?: Router): KernelContext {
     auth,
     events,
     notifications,
-    tenant,
+    workspace,
   };
 }

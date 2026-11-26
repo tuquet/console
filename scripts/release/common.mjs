@@ -90,12 +90,12 @@ export function syncVersion(version, { canonical = false } = {}) {
   );
   const lockPath = resolve(root, 'apps/shell/src-tauri/Cargo.lock');
   const lock = readFileSync(lockPath, 'utf8');
-  if (!/name = "workstation"\r?\nversion = "/.test(lock))
-    throw new Error('workstation entry missing from Cargo.lock');
+  if (!/name = "desktop"\r?\nversion = "/.test(lock))
+    throw new Error('desktop entry missing from Cargo.lock');
   writeFileSync(
     lockPath,
     lock.replace(
-      /(name = "workstation"\r?\nversion = ")[^"]+("\r?$)/m,
+      /(name = "desktop"\r?\nversion = ")[^"]+("\r?$)/m,
       `$1${version}$2`,
     ),
   );
@@ -116,7 +116,7 @@ export function assertVersions() {
   const lock = readFileSync(
     resolve(root, 'apps/shell/src-tauri/Cargo.lock'),
     'utf8',
-  ).match(/name = "workstation"\r?\nversion = "([^"]+)"/)?.[1];
+  ).match(/name = "desktop"\r?\nversion = "([^"]+)"/)?.[1];
   for (const [file, version] of [
     ...values,
     ['Cargo.toml', cargo],

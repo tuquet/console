@@ -2,12 +2,12 @@ import { createApp, h } from 'vue';
 
 import { describe, expect, it } from 'vitest';
 
-import VbenLogo from '../logo.vue';
+import OperonLogo from '../logo.vue';
 
 function mountLogo(props: Record<string, unknown>) {
   const container = document.createElement('div');
   const app = createApp({
-    render: () => h(VbenLogo, props as any),
+    render: () => h(OperonLogo, props as any),
   });
   app.mount(container);
   return {
@@ -16,7 +16,7 @@ function mountLogo(props: Record<string, unknown>) {
   };
 }
 
-describe('VbenLogo — Built-in Theme Inline SVG & Fallback', () => {
+describe('OperonLogo — Built-in Theme Inline SVG & Fallback', () => {
   it('renders an inline theme-reactive SVG when src is default /logo.svg or empty', () => {
     const { container, unmount } = mountLogo({
       src: '/logo.svg',
@@ -24,7 +24,7 @@ describe('VbenLogo — Built-in Theme Inline SVG & Fallback', () => {
       logoSize: 32,
     });
 
-    const svg = container.querySelector('svg[data-specter-logo="true"]');
+    const svg = container.querySelector('svg[data-operon-logo="true"]');
     expect(svg).not.toBeNull();
     expect(svg?.getAttribute('width')).toBe('32');
     expect(svg?.getAttribute('height')).toBe('32');
@@ -45,7 +45,7 @@ describe('VbenLogo — Built-in Theme Inline SVG & Fallback', () => {
       theme: 'dark',
     });
 
-    const svg = container.querySelector('svg[data-specter-logo="true"]');
+    const svg = container.querySelector('svg[data-operon-logo="true"]');
     expect(svg).not.toBeNull();
     const html = svg?.outerHTML ?? '';
     expect(html).toContain('#FFFFFF');
@@ -58,22 +58,22 @@ describe('VbenLogo — Built-in Theme Inline SVG & Fallback', () => {
   it('renders inline SVG for /logo-app.svg as well', () => {
     const { container, unmount } = mountLogo({
       src: '/logo-app.svg',
-      text: 'Specter',
+      text: 'Operon',
     });
 
     expect(
-      container.querySelector('svg[data-specter-logo="true"]'),
+      container.querySelector('svg[data-operon-logo="true"]'),
     ).not.toBeNull();
     unmount();
   });
 
-  it('falls back to VbenAvatar when a custom external image URL is passed', () => {
+  it('falls back to OperonAvatar when a custom external image URL is passed', () => {
     const { container, unmount } = mountLogo({
       src: 'https://example.com/custom-brand.png',
       text: 'Custom Brand',
     });
 
-    expect(container.querySelector('svg[data-specter-logo="true"]')).toBeNull();
+    expect(container.querySelector('svg[data-operon-logo="true"]')).toBeNull();
     unmount();
   });
 
@@ -85,7 +85,7 @@ describe('VbenLogo — Built-in Theme Inline SVG & Fallback', () => {
     });
 
     expect(
-      container.querySelector('svg[data-specter-logo="true"]'),
+      container.querySelector('svg[data-operon-logo="true"]'),
     ).not.toBeNull();
     expect(container.textContent).not.toContain('Admin');
     unmount();

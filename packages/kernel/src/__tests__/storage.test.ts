@@ -37,8 +37,8 @@ describe('scoped Storage & Prefix Helper (@operon/kernel)', () => {
     expect(createStorageKey('operon-system', 'user_pref')).toBe(
       'operon:system:user_pref',
     );
-    expect(createStorageKey('tenants', 'active_workspace')).toBe(
-      'operon:tenants:active_workspace',
+    expect(createStorageKey('workspaces', 'active_workspace')).toBe(
+      'operon:workspaces:active_workspace',
     );
   });
 
@@ -56,7 +56,7 @@ describe('scoped Storage & Prefix Helper (@operon/kernel)', () => {
   });
 
   it('createScopedStorage handles JSON objects and primitives cleanly', () => {
-    const storage = createScopedStorage('tenants', mockStorage);
+    const storage = createScopedStorage('workspaces', mockStorage);
     storage.setItem('config', { id: 123, enabled: true });
 
     expect(storage.getItem('config')).toEqual({ id: 123, enabled: true });

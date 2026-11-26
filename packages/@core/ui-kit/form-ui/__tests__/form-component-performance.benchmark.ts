@@ -6,8 +6,8 @@ import { nextTick } from 'vue';
 import { afterAll, bench, describe } from 'vitest';
 import { z } from 'zod';
 
-import { setupVbenForm } from '../src/config';
-import { useVbenForm } from '../src/use-vben-form';
+import { setupOperonForm } from '../src/config';
+import { useOperonForm } from '../src/use-operon-form';
 import { TestInput } from './benchmark-fixtures';
 
 const BENCHMARK_OPTIONS = { time: 750, warmupTime: 150 } as const;
@@ -37,21 +37,21 @@ function createFlatValues(prefix: string) {
   );
 }
 
-setupVbenForm({ config: {}, rules: {} });
+setupOperonForm({ config: {}, rules: {} });
 
 const flatSchema = createFlatSchema(FIELD_COUNT);
-const [FlatForm, flatFormApi] = useVbenForm<Record<string, string>>({
+const [FlatForm, flatFormApi] = useOperonForm<Record<string, string>>({
   schema: flatSchema,
   showDefaultActions: false,
 });
 const flatWrapper = mount(FlatForm);
 
-const [ValidationForm, validationFormApi] = useVbenForm<Record<string, string>>(
-  {
-    schema: createFlatSchema(FIELD_COUNT, true),
-    showDefaultActions: false,
-  },
-);
+const [ValidationForm, validationFormApi] = useOperonForm<
+  Record<string, string>
+>({
+  schema: createFlatSchema(FIELD_COUNT, true),
+  showDefaultActions: false,
+});
 const validationWrapper = mount(ValidationForm);
 
 const dependencySchema: FormSchema[] = [
@@ -74,12 +74,12 @@ const dependencySchema: FormSchema[] = [
     label: `Dependent ${index}`,
   })),
 ];
-const [DependencyForm, dependencyFormApi] = useVbenForm<Record<string, string>>(
-  {
-    schema: dependencySchema,
-    showDefaultActions: false,
-  },
-);
+const [DependencyForm, dependencyFormApi] = useOperonForm<
+  Record<string, string>
+>({
+  schema: dependencySchema,
+  showDefaultActions: false,
+});
 const dependencyWrapper = mount(DependencyForm);
 
 await flushPromises();
@@ -107,7 +107,7 @@ describe('form render performance', () => {
   bench(
     'initialize, mount, and unmount 50 fields',
     async () => {
-      const [Form] = useVbenForm<Record<string, string>>({
+      const [Form] = useOperonForm<Record<string, string>>({
         schema: createFlatSchema(MOUNT_FIELD_COUNT),
         showDefaultActions: false,
       });

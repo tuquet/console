@@ -33,8 +33,8 @@ describe('platform Route & Guard Policy (Desktop Local-First vs Web Cloud-Centra
         meta: { platform: 'all' },
       } as unknown as RouteRecordRaw,
       {
-        name: 'Tenants',
-        path: '/tenants',
+        name: 'Workspaces',
+        path: '/workspaces',
         meta: { platform: 'web' },
       } as unknown as RouteRecordRaw,
       {
@@ -51,7 +51,7 @@ describe('platform Route & Guard Policy (Desktop Local-First vs Web Cloud-Centra
       expect(routeNames).toContain('Automation');
       expect(routeNames).toContain('Secrets');
       expect(routeNames).not.toContain('Dashboard');
-      expect(routeNames).not.toContain('Tenants');
+      expect(routeNames).not.toContain('Workspaces');
       expect(routeNames).not.toContain('Commerce');
     });
 
@@ -60,7 +60,7 @@ describe('platform Route & Guard Policy (Desktop Local-First vs Web Cloud-Centra
       const routeNames = webRoutes.map((r) => r.name);
 
       expect(routeNames).toContain('Dashboard');
-      expect(routeNames).toContain('Tenants');
+      expect(routeNames).toContain('Workspaces');
       expect(routeNames).toContain('Commerce');
       expect(routeNames).toContain('Automation');
       expect(routeNames).toContain('Secrets');

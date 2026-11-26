@@ -2,23 +2,23 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 import { useKernel } from './tokens';
 
-export type LocalBridgeStatus = 'checking' | 'healthy' | 'offline';
+export type DaemonStatus = 'checking' | 'healthy' | 'offline';
 
-export interface LocalBridgeHealth {
+export interface DaemonHealth {
   message: string;
   status: string;
   version: string;
 }
 
-export interface LocalBridgeInstallInfo {
+export interface DaemonInstallInfo {
   command: string;
   platform: 'unix' | 'windows';
   releasesUrl: string;
 }
 
-export function getLocalBridgeInstallInfo(
+export function getDaemonInstallInfo(
   repo = 'tuquet/operon',
-): LocalBridgeInstallInfo {
+): DaemonInstallInfo {
   const isWindows =
     typeof navigator !== 'undefined' &&
     navigator.userAgent.toLowerCase().includes('windows');
@@ -32,7 +32,7 @@ export function getLocalBridgeInstallInfo(
   };
 }
 
-export interface LocalBridgeHeartbeatOptions {
+export interface DaemonHeartbeatOptions {
   /** Start polling automatically on mount (default: true) */
   autoStart?: boolean;
   /** Polling interval in milliseconds (default: 5000) */
@@ -43,17 +43,17 @@ export interface LocalBridgeHeartbeatOptions {
   timeoutMs?: number;
 }
 
-type BridgeMonitor = ReturnType<typeof createBridgeMonitor>;
+type DaemonMonitor = ReturnType<typeof createDaemonMonitor>;
 
-const bridgeMonitors = new Map<number, BridgeMonitor>();
+const daemonMonitors = new Map<number, DaemonMonitor>();
 
-function createBridgeMonitor(
+function createDaemonMonitor(
   port: number,
   intervalMs: number,
   timeoutMs: number,
 ) {
-  const status = ref<LocalBridgeStatus>('checking');
-  const health = ref<LocalBridgeHealth | null>(null);
+  const status = ref<DaemonStatus>('checking');
+  const health = ref<DaemonHealth | null>(null);
   const lastCheckedAt = ref<null | number>(null);
   const lastError = ref<null | string>(null);
 
@@ -83,7 +83,7 @@ function createBridgeMonitor(
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }
-      const data = (await res.json()) as LocalBridgeHealth;
+      const data = (await res.json()) as DaemonHealth;
       if (data?.status !== 'ok') {
         throw new Error(
           `Unexpected daemon status: ${data?.status ?? 'unknown'}`,
@@ -163,30 +163,28 @@ function createBridgeMonitor(
 }
 
 /**
- * Returns the latest cached status for the local Operon bridge monitor on `port`.
+ * Returns the latest cached status for the device-local Operon daemon monitor on `port`.
  */
-export function getLocalBridgeStatus(port = 8765): LocalBridgeStatus {
-  return bridgeMonitors.get(port)?.status.value ?? 'checking';
+export function getDaemonStatus(port = 8765): DaemonStatus {
+  return daemonMonitors.get(port)?.status.value ?? 'checking';
 }
 
 /**
  * Polls the device-local Operon daemon (`GET /api/v1/health`) on loopback
- * to determine whether the local bridge is healthy and ready for UI interaction.
+ * to determine whether the daemon is healthy and ready for UI interaction.
  * Shares a singleton monitor per daemon port so multiple UI surfaces stay in sync.
  */
-export function useLocalBridgeHeartbeat(
-  options: LocalBridgeHeartbeatOptions = {},
-) {
+export function useDaemonHeartbeat(options: DaemonHeartbeatOptions = {}) {
   const kernel = useKernel();
   const port = options.port ?? kernel.api.daemonPort ?? 8765;
   const intervalMs = options.intervalMs ?? 5000;
   const timeoutMs = options.timeoutMs ?? 2000;
   const autoStart = options.autoStart ?? true;
 
-  let monitor = bridgeMonitors.get(port);
+  let monitor = daemonMonitors.get(port);
   if (!monitor) {
-    monitor = createBridgeMonitor(port, intervalMs, timeoutMs);
-    bridgeMonitors.set(port, monitor);
+    monitor = createDaemonMonitor(port, intervalMs, timeoutMs);
+    daemonMonitors.set(port, monitor);
   }
 
   if (autoStart) {

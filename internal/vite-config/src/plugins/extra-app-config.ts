@@ -14,7 +14,7 @@ interface PluginOptions {
 }
 
 const GLOBAL_CONFIG_FILE_NAME = '_app-config';
-const VBEN_ADMIN_PRO_APP_CONF = '_VBEN_ADMIN_PRO_APP_CONF_';
+const OPERON_ADMIN_PRO_APP_CONF = '_OPERON_ADMIN_PRO_APP_CONF_';
 
 /**
  * Extract configuration files and inject them into project
@@ -72,12 +72,12 @@ async function viteExtraAppConfigPlugin({
 
 async function getConfigSource() {
   const config = await loadEnv();
-  const windowVariable = `window.${VBEN_ADMIN_PRO_APP_CONF}`;
+  const windowVariable = `window.${OPERON_ADMIN_PRO_APP_CONF}`;
   // Ensure variable cannot be modified
   let source = `${windowVariable}=${JSON.stringify(config)};`;
   source += `
     Object.freeze(${windowVariable});
-    Object.defineProperty(window, "${VBEN_ADMIN_PRO_APP_CONF}", {
+    Object.defineProperty(window, "${OPERON_ADMIN_PRO_APP_CONF}", {
       configurable: false,
       writable: false,
     });

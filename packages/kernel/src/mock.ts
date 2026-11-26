@@ -15,7 +15,7 @@ export function createMockKernel(
       accessToken: null,
       hasCloudAuth: false,
       userId: 'local-operator',
-      tenantId: null,
+      workspaceId: null,
       roles: ['local_operator'],
       isSuperadmin: false,
       username: 'operator',
@@ -73,9 +73,9 @@ export function createMockKernel(
       requestPermission: async () => 'default',
       ...overrides?.notifications,
     },
-    tenant: {
+    workspace: {
       activeId: 'local-default',
-      activeName: 'Local Tenant',
+      activeName: 'Local Workspace',
       activeSlug: 'local',
       isLoading: false,
       items: [
@@ -85,7 +85,7 @@ export function createMockKernel(
           createdBy: 'local',
           id: 'local-default',
           metadata: { plan: 'local' },
-          name: 'Local Tenant',
+          name: 'Local Workspace',
           plan: 'local',
           slug: 'local',
           status: 'active',
@@ -93,10 +93,10 @@ export function createMockKernel(
         },
       ],
       refresh: async () => [],
-      switchTenant: (id: string) => {
-        console.warn(`[MockKernel] switchTenant called: ${id}`);
+      switchWorkspace: (id: string) => {
+        console.warn(`[MockKernel] switchWorkspace called: ${id}`);
       },
-      ...overrides?.tenant,
+      ...overrides?.workspace,
     },
   };
 }

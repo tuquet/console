@@ -124,7 +124,7 @@ const customConfig: Linter.Config[] = [
       ],
     },
   },
-  ...['automation', 'system', 'tenants'].map((app): Linter.Config => ({
+  ...['automation', 'system', 'workspaces'].map((app): Linter.Config => ({
     files: [`apps/${app}/**/*`],
     rules: {
       'no-restricted-imports': [
@@ -136,7 +136,7 @@ const customConfig: Linter.Config[] = [
               message: 'Use the public module entry point.',
             },
             {
-              group: ['shell', 'automation', 'system', 'tenants'].flatMap(
+              group: ['shell', 'automation', 'system', 'workspaces'].flatMap(
                 (target) =>
                   target === app
                     ? []
@@ -171,11 +171,11 @@ const customConfig: Linter.Config[] = [
                 '@operon/shell',
                 '@operon/system',
                 '@operon/automation',
-                '@operon/tenants',
+                '@operon/workspaces',
                 '@operon/shell/**',
                 '@operon/system/**',
                 '@operon/automation/**',
-                '@operon/tenants/**',
+                '@operon/workspaces/**',
               ],
               message: 'Shared packages must not import applications.',
             },

@@ -24,7 +24,7 @@
     "dev:desktop": "pnpm -F @operon/shell run tauri:dev",
     "dev:automation": "pnpm -F @operon/automation run dev",
     "dev:system": "pnpm -F @operon/system run dev",
-    "dev:tenants": "pnpm -F @operon/tenants run dev",
+    "dev:workspaces": "pnpm -F @operon/workspaces run dev",
     "dev:web": "pnpm -F @operon/shell run dev",
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=3072 turbo build --concurrency=1",
     "build:shell": "pnpm -F @operon/shell run build",
@@ -32,7 +32,7 @@
     "build:desktop:exe": "pnpm -F @operon/shell run tauri:build:exe",
     "build:automation": "pnpm -F @operon/automation run build",
     "build:system": "pnpm -F @operon/system run build",
-    "build:tenants": "pnpm -F @operon/tenants run build",
+    "build:workspaces": "pnpm -F @operon/workspaces run build",
     "build:analyze": "turbo build:analyze --concurrency=1",
     "build:local": "bash ./scripts/build-local.sh",
     "preview": "turbo-run preview",
@@ -75,8 +75,8 @@
     "prepare": "is-ci || pnpm exec lefthook install --force || true",
     "preinstall": "npx only-allow pnpm",
     "postinstall": "pnpm -r run --if-present stub",
-    "build:playground": "pnpm -F @operon/playground run build",
-    "dev:playground": "pnpm -F @operon/playground run dev"
+    "build:tasks": "pnpm -F @operon/tasks run build",
+    "dev:tasks": "pnpm -F @operon/tasks run dev"
   },
   "devDependencies": {
     "@operon/commitlint-config": "workspace:*",

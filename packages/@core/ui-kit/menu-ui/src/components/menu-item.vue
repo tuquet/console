@@ -4,7 +4,7 @@ import type { MenuItemProps, MenuItemRegistered } from '../types';
 import { computed, onBeforeUnmount, onMounted, reactive, useSlots } from 'vue';
 
 import { useNamespace } from '@operon-core/composables';
-import { VbenIcon, VbenTooltip } from '@operon-core/shadcn-ui';
+import { OperonIcon, OperonTooltip } from '@operon-core/shadcn-ui';
 import { isHttpUrl } from '@operon-core/shared/utils';
 
 import qs from 'qs';
@@ -107,14 +107,14 @@ onBeforeUnmount(() => {
       role="menuitem"
       @click.prevent.stop="handleClick"
     >
-      <VbenTooltip
+      <OperonTooltip
         v-if="showTooltip"
         :content-class="[rootMenu.theme]"
         side="right"
       >
         <template #trigger>
           <div :class="[nsMenu.be('tooltip', 'trigger')]">
-            <VbenIcon :class="nsMenu.e('icon')" :icon="menuIcon" fallback />
+            <OperonIcon :class="nsMenu.e('icon')" :icon="menuIcon" fallback />
             <slot></slot>
             <span v-if="collapseShowTitle" :class="nsMenu.e('name')">
               <slot name="title"></slot>
@@ -122,14 +122,14 @@ onBeforeUnmount(() => {
           </div>
         </template>
         <slot name="title"></slot>
-      </VbenTooltip>
+      </OperonTooltip>
       <div v-show="!showTooltip" :class="[e('content')]">
         <MenuBadge
           v-if="rootMenu.props.mode !== 'horizontal'"
           class="right-2"
           v-bind="props"
         />
-        <VbenIcon :class="nsMenu.e('icon')" :icon="menuIcon" />
+        <OperonIcon :class="nsMenu.e('icon')" :icon="menuIcon" />
         <slot></slot>
         <span v-if="$slots.title" :class="nsMenu.e('name')">
           <slot name="title"></slot>

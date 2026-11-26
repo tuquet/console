@@ -16,7 +16,7 @@ const INITIAL_ANALYTICS_DATA: RealAnalyticsData = {
     latencyMs: 20,
     status: 'healthy',
   },
-  tenants: {
+  workspaces: {
     activeCount: 0,
     growth: [],
     items: [],
@@ -39,34 +39,41 @@ export function useAnalyticsMetrics() {
   );
 
   const totalPlans = computed(() => {
-    const { enterprise, free, pro } = analyticsData.value.tenants.planBreakdown;
+    const { enterprise, free, pro } =
+      analyticsData.value.workspaces.planBreakdown;
     return enterprise + free + pro || 1;
   });
 
   const proPlanPercent = computed(() =>
-    toPercent(analyticsData.value.tenants.planBreakdown.pro, totalPlans.value),
+    toPercent(
+      analyticsData.value.workspaces.planBreakdown.pro,
+      totalPlans.value,
+    ),
   );
   const freePlanPercent = computed(() =>
-    toPercent(analyticsData.value.tenants.planBreakdown.free, totalPlans.value),
+    toPercent(
+      analyticsData.value.workspaces.planBreakdown.free,
+      totalPlans.value,
+    ),
   );
   const entPlanPercent = computed(() =>
     toPercent(
-      analyticsData.value.tenants.planBreakdown.enterprise,
+      analyticsData.value.workspaces.planBreakdown.enterprise,
       totalPlans.value,
     ),
   );
 
   const plansChartData = computed(() => [
     {
-      count: analyticsData.value.tenants.planBreakdown.pro,
+      count: analyticsData.value.workspaces.planBreakdown.pro,
       plan: $t('page.analytics.plan_pro') || 'Pro',
     },
     {
-      count: analyticsData.value.tenants.planBreakdown.free,
+      count: analyticsData.value.workspaces.planBreakdown.free,
       plan: $t('page.analytics.plan_free') || 'Free',
     },
     {
-      count: analyticsData.value.tenants.planBreakdown.enterprise,
+      count: analyticsData.value.workspaces.planBreakdown.enterprise,
       plan: $t('page.analytics.plan_enterprise') || 'Enterprise',
     },
   ]);

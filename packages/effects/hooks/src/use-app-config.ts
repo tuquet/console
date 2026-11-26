@@ -1,6 +1,6 @@
 import type {
   ApplicationConfig,
-  VbenAdminProAppConfigRaw,
+  OperonAdminProAppConfigRaw,
 } from '@operon/types/global';
 
 /**
@@ -10,10 +10,10 @@ export function useAppConfig(
   env: Record<string, any>,
   isProduction: boolean,
 ): ApplicationConfig {
-  // In production, directly use window._VBEN_ADMIN_PRO_APP_CONF_ global variable
+  // In production, directly use window._OPERON_ADMIN_PRO_APP_CONF_ global variable
   const config = isProduction
-    ? window._VBEN_ADMIN_PRO_APP_CONF_
-    : (env as VbenAdminProAppConfigRaw);
+    ? window._OPERON_ADMIN_PRO_APP_CONF_
+    : (env as OperonAdminProAppConfigRaw);
 
   const {
     VITE_GLOB_API_URL,

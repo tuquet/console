@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { VbenFormSchema } from '@operon/common-ui';
+import type { OperonFormSchema } from '@operon/common-ui';
 import type { Recordable } from '@operon/types';
 
 import { computed, h, ref } from 'vue';
@@ -11,10 +11,10 @@ defineOptions({ name: 'Register' });
 
 const loading = ref(false);
 
-const formSchema = computed((): VbenFormSchema[] => {
+const formSchema = computed((): OperonFormSchema[] => {
   return [
     {
-      component: 'VbenInput',
+      component: 'OperonInput',
       componentProps: {
         placeholder: $t('authentication.usernameTip'),
       },
@@ -23,7 +23,7 @@ const formSchema = computed((): VbenFormSchema[] => {
       rules: z.string().min(1, { message: $t('authentication.usernameTip') }),
     },
     {
-      component: 'VbenInputPassword',
+      component: 'OperonInputPassword',
       componentProps: {
         autocomplete: 'new-password',
         passwordStrength: true,
@@ -39,7 +39,7 @@ const formSchema = computed((): VbenFormSchema[] => {
       rules: z.string().min(1, { message: $t('authentication.passwordTip') }),
     },
     {
-      component: 'VbenInputPassword',
+      component: 'OperonInputPassword',
       componentProps: {
         autocomplete: 'new-password',
         placeholder: $t('authentication.confirmPassword'),
@@ -62,7 +62,7 @@ const formSchema = computed((): VbenFormSchema[] => {
       label: $t('authentication.confirmPassword'),
     },
     {
-      component: 'VbenCheckbox',
+      component: 'OperonCheckbox',
       fieldName: 'agreePolicy',
       renderComponentContent: () => ({
         default: () =>
@@ -71,7 +71,7 @@ const formSchema = computed((): VbenFormSchema[] => {
             h(
               'a',
               {
-                class: 'vben-link ml-1 ',
+                class: 'operon-link ml-1 ',
                 href: '',
               },
               `${$t('authentication.privacyPolicy')} & ${$t('authentication.terms')}`,

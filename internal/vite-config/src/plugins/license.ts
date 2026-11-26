@@ -26,8 +26,8 @@ async function viteLicensePlugin(
         const copyrightText = `/*!
   * Admin
   * Version: ${version}
-  * Author: vben
-  * Copyright (C) 2024 Vben
+  * Author: operon
+  * Copyright (C) 2024 Operon
   * License: MIT License
   * Description: ${description}
   * Date Created: ${date}

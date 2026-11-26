@@ -51,8 +51,8 @@ describe('sanitizeRedirectPath & isSafeRedirectPath', () => {
     expect(sanitizeRedirectPath('/dashboard/analytics')).toBe(
       '/dashboard/analytics',
     );
-    expect(sanitizeRedirectPath('/tenants?tab=members')).toBe(
-      '/tenants?tab=members',
+    expect(sanitizeRedirectPath('/workspaces?tab=members')).toBe(
+      '/workspaces?tab=members',
     );
     expect(sanitizeRedirectPath('/workspace/settings#general')).toBe(
       '/workspace/settings#general',
@@ -64,7 +64,7 @@ describe('sanitizeRedirectPath & isSafeRedirectPath', () => {
     expect(sanitizeRedirectPath('#/dashboard/analytics')).toBe(
       '/dashboard/analytics',
     );
-    expect(sanitizeRedirectPath('##/tenants')).toBe('/tenants');
+    expect(sanitizeRedirectPath('##/workspaces')).toBe('/workspaces');
   });
 
   it('should block protocol-relative URLs (//evil.com)', () => {

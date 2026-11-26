@@ -6,17 +6,17 @@ import type { TabConfig, TabsProps } from '../../types';
 import { computed } from 'vue';
 
 import { Pin, X } from '@operon-core/icons';
-import { VbenContextMenu, VbenIcon } from '@operon-core/shadcn-ui';
+import { OperonContextMenu, OperonIcon } from '@operon-core/shadcn-ui';
 
 interface Props extends TabsProps {}
 
 defineOptions({
-  name: 'VbenTabs',
+  name: 'OperonTabs',
 
   inheritAttrs: false,
 });
 const props = withDefaults(defineProps<Props>(), {
-  contentClass: 'vben-tabs-content',
+  contentClass: 'operon-tabs-content',
   contextMenus: () => [],
   tabs: () => [],
 });
@@ -103,7 +103,7 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
         @click="active = tab.key"
         @mousedown="onMouseDown($event, tab)"
       >
-        <VbenContextMenu
+        <OperonContextMenu
           :handler-data="tab"
           :menus="contextMenus"
           :modal="false"
@@ -131,7 +131,7 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
             <div
               class="mx-3 mr-4 flex h-full items-center overflow-hidden rounded-tl-[5px] rounded-tr-[5px] pr-3 text-accent-foreground transition-all duration-300 group-[.is-active]:text-primary group-[.is-active]:dark:text-primary"
             >
-              <VbenIcon
+              <OperonIcon
                 v-if="showIcon"
                 :icon="tab.icon"
                 class="mr-2 flex size-4 items-center overflow-hidden group-hover:animate-[shrink_0.3s_ease-in-out]"
@@ -143,7 +143,7 @@ function onMouseDown(e: MouseEvent, tab: TabConfig) {
               </span>
             </div>
           </div>
-        </VbenContextMenu>
+        </OperonContextMenu>
       </div>
     </TransitionGroup>
   </div>

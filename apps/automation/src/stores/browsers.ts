@@ -4,6 +4,7 @@ import type {
   CreateBrowserInput,
   PatchBrowserPatch,
   ProbeProxyResult,
+  RuntimeReleaseItem,
   StartSessionInput,
 } from '../api/browsers';
 
@@ -15,7 +16,7 @@ import { defineStore } from 'pinia';
 
 import { createBrowserApi } from '../api/browsers';
 
-export type ScopeMode = 'all' | 'tenant';
+export type ScopeMode = 'all' | 'workspace';
 
 export const useBrowsersStore = defineStore('automation:browsers', () => {
   const kernel = useKernel();
@@ -27,7 +28,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
   const detailTarget = ref<BrowserProfileRecord | null>(null);
   const detailLoading = ref(false);
 
-  const scopeMode = ref<ScopeMode>('tenant');
+  const scopeMode = ref<ScopeMode>('workspace');
   const searchQuery = ref('');
   const statusFilter = ref<'all' | 'offline' | 'online'>('all');
   const proxyFilter = ref<'all' | 'direct' | 'proxied'>('all');
@@ -35,12 +36,18 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
 
   const selectedIds = ref<string[]>([]);
   const mutatingIds = ref<string[]>([]);
+  const runtimes = ref<RuntimeReleaseItem[]>([]);
+  const activeRuntimeVersion = ref('');
+  const runtimesLoading = ref(false);
+  const runtimeProgress = ref<
+    Record<string, { error?: string; percent: number; stage: string }>
+  >({});
 
   let eventSource: EventSource | null = null;
   let refreshTimer: null | ReturnType<typeof setTimeout> = null;
 
-  const activeTenantId = computed(
-    () => kernel.tenant.activeId || 'local-default',
+  const activeWorkspaceId = computed(
+    () => kernel.workspace.activeId || 'local-default',
   );
 
   const filteredItems = computed(() => {
@@ -142,8 +149,8 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     try {
       const list = await api.list({
         scope: scopeMode.value,
-        tenantId:
-          scopeMode.value === 'tenant' ? activeTenantId.value : undefined,
+        workspaceId:
+          scopeMode.value === 'workspace' ? activeWorkspaceId.value : undefined,
       });
       items.value = Array.isArray(list) ? list : [];
 
@@ -186,7 +193,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
   async function createProfile(input: CreateBrowserInput) {
     const res = await api.create({
       ...input,
-      tenantId: input.tenantId || activeTenantId.value,
+      workspaceId: input.workspaceId || activeWorkspaceId.value,
     });
     await fetchBrowsers(true);
     return res;
@@ -274,15 +281,15 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     }
   }
 
-  async function moveProfileToTenant(id: string, targetTenantId: string) {
+  async function moveProfileToWorkspace(id: string, targetWorkspaceId: string) {
     setMutating(id, true);
     try {
-      const moved = await api.move(id, { targetTenantId });
+      const moved = await api.move(id, { targetWorkspaceId });
       await fetchBrowsers(true);
       if (detailTarget.value?.id === id) {
         detailTarget.value =
-          scopeMode.value === 'tenant' &&
-          targetTenantId !== activeTenantId.value
+          scopeMode.value === 'workspace' &&
+          targetWorkspaceId !== activeWorkspaceId.value
             ? null
             : moved;
       }
@@ -361,7 +368,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
   }
 
   async function importCsv(csvString: string) {
-    const res = await api.importCsv(csvString, activeTenantId.value);
+    const res = await api.importCsv(csvString, activeWorkspaceId.value);
     if (res.imported > 0) {
       await fetchBrowsers(true);
     }
@@ -372,6 +379,38 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     const list = await api.autoDetect();
     await fetchBrowsers(true);
     return list;
+  }
+
+  async function fetchRuntimes() {
+    runtimesLoading.value = true;
+    try {
+      const res = await api.listRuntimes();
+      runtimes.value = res.releases;
+      activeRuntimeVersion.value = res.activeVersion;
+      return res;
+    } finally {
+      runtimesLoading.value = false;
+    }
+  }
+
+  async function installRuntime(version: string) {
+    runtimeProgress.value = {
+      ...runtimeProgress.value,
+      [version]: { percent: 10, stage: 'downloading' },
+    };
+    return await api.installRuntime(version);
+  }
+
+  async function useRuntime(version: string) {
+    const res = await api.useRuntime(version);
+    await fetchRuntimes();
+    return res;
+  }
+
+  async function deleteRuntime(version: string) {
+    const res = await api.deleteRuntime(version);
+    await fetchRuntimes();
+    return res;
   }
 
   function scheduleSilentRefresh() {
@@ -390,12 +429,24 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
       eventSource.addEventListener('message', (evt) => {
         try {
           const data = JSON.parse(evt.data);
-          if (
+          if (data?.type === 'runtime_download_progress' && data?.version) {
+            runtimeProgress.value = {
+              ...runtimeProgress.value,
+              [data.version]: {
+                error: data.error,
+                percent: Number(data.percent ?? 0),
+                stage: String(data.stage ?? 'downloading'),
+              },
+            };
+            if (data.stage === 'ready') {
+              void fetchRuntimes();
+            }
+          } else if (
             data?.type === 'browser_changed' ||
             data?.type === 'browser_online' ||
             data?.type === 'browser_offline' ||
             data?.type === 'settings_updated' ||
-            data?.type === 'tenant_switched'
+            data?.type === 'workspace_switched'
           ) {
             scheduleSilentRefresh();
           }
@@ -419,10 +470,10 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     }
   }
 
-  watch(activeTenantId, () => {
+  watch(activeWorkspaceId, () => {
     clearSelection();
     detailTarget.value = null;
-    if (scopeMode.value === 'tenant') {
+    if (scopeMode.value === 'workspace') {
       void fetchBrowsers();
     }
   });
@@ -433,7 +484,8 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
   });
 
   return {
-    activeTenantId,
+    activeRuntimeVersion,
+    activeWorkspaceId,
     allFilteredSelected,
     autoDetect,
     batchLaunchSelected,
@@ -442,25 +494,31 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     clearSelection,
     cloneProfile,
     createProfile,
+    deleteRuntime,
     detailLoading,
     detailTarget,
     error,
     fetchBrowsers,
+    fetchRuntimes,
     filteredItems,
     importCsv,
     inspectBrowser,
+    installRuntime,
     isMutating,
     items,
     launchProfile,
     loading,
     makeDefaultProfile,
-    moveProfileToTenant,
+    moveProfileToWorkspace,
     mutatingIds,
     patchProfile,
     platformFilter,
     probeProxy,
     proxyFilter,
     removeProfile,
+    runtimeProgress,
+    runtimes,
+    runtimesLoading,
     scopeMode,
     searchQuery,
     selectedIds,
@@ -474,5 +532,6 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     unbindProfile,
     unsubscribeEvents,
     updateExtensions,
+    useRuntime,
   };
 });

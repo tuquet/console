@@ -10,6 +10,9 @@ import { $t } from '@operon/locales';
 import {
   Button,
   Input,
+  OperonIcon,
+  OperonIconButton,
+  OperonPopover,
   Pagination,
   PaginationContent,
   PaginationEllipsis,
@@ -18,9 +21,6 @@ import {
   PaginationLast,
   PaginationNext,
   PaginationPrevious,
-  VbenIcon,
-  VbenIconButton,
-  VbenPopover,
 } from '@operon-core/shadcn-ui';
 import { isFunction } from '@operon-core/shared/utils';
 
@@ -161,7 +161,7 @@ const getBindAttrs = computed(() => {
 defineExpose({ toggleOpenState, open, close });
 </script>
 <template>
-  <VbenPopover
+  <OperonPopover
     v-model:open="visible"
     :content-props="{ align: 'end', alignOffset: -11, sideOffset: 8 }"
     content-class="p-0 pt-3 w-full"
@@ -181,7 +181,7 @@ defineExpose({ toggleOpenState, open, close });
           v-bind="getBindAttrs"
         >
           <template #[iconSlot]>
-            <VbenIcon
+            <OperonIcon
               :icon="currentSelect || Grip"
               class="size-4"
               aria-hidden="true"
@@ -198,14 +198,14 @@ defineExpose({ toggleOpenState, open, close });
             :aria-label="$t('ui.iconPicker.placeholder')"
             aria-expanded="visible"
           />
-          <VbenIcon
+          <OperonIcon
             :icon="currentSelect || Grip"
             class="absolute top-1 right-1 size-6"
             aria-hidden="true"
           />
         </div>
       </template>
-      <VbenIcon
+      <OperonIcon
         :icon="currentSelect || Grip"
         v-else
         class="size-4"
@@ -228,20 +228,20 @@ defineExpose({ toggleOpenState, open, close });
 
     <template v-if="paginationList.length > 0">
       <div class="grid max-h-90 w-full grid-cols-6 justify-items-center">
-        <VbenIconButton
+        <OperonIconButton
           v-for="(item, index) in paginationList"
           :key="index"
           :tooltip="item"
           tooltip-side="top"
           @click="handleClick(item)"
         >
-          <VbenIcon
+          <OperonIcon
             :class="{
               'text-primary transition-all': currentSelect === item,
             }"
             :icon="item"
           />
-        </VbenIconButton>
+        </OperonIconButton>
       </div>
       <div
         v-if="total >= pageSize"
@@ -294,5 +294,5 @@ defineExpose({ toggleOpenState, open, close });
         <div class="mt-1">{{ $t('common.noData') }}</div>
       </div>
     </template>
-  </VbenPopover>
+  </OperonPopover>
 </template>

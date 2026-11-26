@@ -11,7 +11,7 @@ import { useTitle } from '@vueuse/core';
 import { $t, setupI18n } from '#/locales';
 
 import { initComponentAdapter } from './adapter/component';
-import { initSetupVbenForm } from './adapter/form';
+import { initSetupOperonForm } from './adapter/form';
 import App from './app.vue';
 import { router } from './router';
 import { addBreadcrumb, initBugsink, setBugsinkTag } from './utils/bugsink';
@@ -48,7 +48,7 @@ async function bootstrap(namespace: string) {
   await initComponentAdapter();
 
   // Initialize form components
-  await initSetupVbenForm();
+  await initSetupOperonForm();
 
   // Set default modal configuration
   // setDefaultModalProps({

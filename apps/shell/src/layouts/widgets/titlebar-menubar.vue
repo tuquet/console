@@ -64,12 +64,12 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
       </MenubarContent>
     </MenubarMenu>
 
-    <!-- ── Tenant ────────────────────────────────────────────────────── -->
+    <!-- ── Workspace ────────────────────────────────────────────────────── -->
     <MenubarMenu>
       <MenubarTrigger
         class="h-7 px-2.5 text-xs font-medium cursor-default text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
       >
-        {{ $t('page.app.menu_tenant') }}
+        {{ $t('page.app.menu_workspace') }}
       </MenubarTrigger>
       <MenubarContent class="min-w-[220px]">
         <MenubarItem @select="handleOpenCommandPalette">

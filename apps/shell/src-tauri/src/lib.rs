@@ -3,8 +3,8 @@ use tauri_plugin_window_state::StateFlags;
 
 mod tray;
 
-/// Resolves the canonical Operon log file (~/.operon/logs/workstation.log)
-pub fn get_workstation_log_path() -> std::path::PathBuf {
+/// Resolves the canonical Operon log file (~/.operon/logs/desktop.log)
+pub fn get_desktop_log_path() -> std::path::PathBuf {
     let base = std::env::var("DATA_DIR")
         .ok()
         .filter(|d| !d.trim().is_empty())
@@ -15,12 +15,12 @@ pub fn get_workstation_log_path() -> std::path::PathBuf {
                 .unwrap_or_else(|_| ".".to_string());
             std::path::PathBuf::from(home).join(".operon")
         });
-    base.join("logs").join("workstation.log")
+    base.join("logs").join("desktop.log")
 }
 
-/// Appends a structured timestamped entry to workstation.log
+/// Appends a structured timestamped entry to desktop.log
 pub fn log_to_file(level: &str, message: &str) {
-    let log_path = get_workstation_log_path();
+    let log_path = get_desktop_log_path();
     if let Some(parent) = log_path.parent() {
         let _ = std::fs::create_dir_all(parent);
     }
@@ -39,7 +39,7 @@ pub fn log_to_file(level: &str, message: &str) {
 #[tauri::command]
 async fn get_app_environment(app: AppHandle) -> Result<serde_json::Value, String> {
     let package_info = app.package_info();
-    let log_path = get_workstation_log_path().to_string_lossy().to_string();
+    let log_path = get_desktop_log_path().to_string_lossy().to_string();
     Ok(serde_json::json!({
         "appName": package_info.name,
         "version": package_info.version.to_string(),
@@ -76,7 +76,7 @@ async fn open_devtools(window: tauri::WebviewWindow) -> Result<(), String> {
 
 #[tauri::command]
 async fn get_log_path() -> Result<String, String> {
-    Ok(get_workstation_log_path().to_string_lossy().to_string())
+    Ok(get_desktop_log_path().to_string_lossy().to_string())
 }
 
 #[tauri::command]
@@ -122,7 +122,7 @@ pub fn run() {
             append_log
         ])
         .setup(move |app| {
-            let log_path = get_workstation_log_path();
+            let log_path = get_desktop_log_path();
             log_to_file("INFO", &format!("Operon v{} starting on {} ({})",
                 app.package_info().version, std::env::consts::OS, std::env::consts::ARCH));
             log_to_file("INFO", &format!("Log sink initialized at: {}", log_path.display()));

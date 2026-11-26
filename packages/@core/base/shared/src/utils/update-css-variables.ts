@@ -8,7 +8,7 @@
  */
 function updateCSSVariables(
   variables: { [key: string]: string },
-  id = '__vben-styles__',
+  id = '__operon-styles__',
   selector = ':root',
 ): void {
   // Legacy implementation delayed stylesheet insertion with setTimeout; synchronous insertion

@@ -384,11 +384,11 @@ describe('preferences', () => {
         {
           component: 'select',
           defaultValue: 'single',
-          key: 'tenantMode',
-          label: 'Tenant Mode',
+          key: 'workspaceMode',
+          label: 'Workspace Mode',
           options: [
-            { label: 'Single Tenant', value: 'single' },
-            { label: 'Multi Tenant', value: 'multi' },
+            { label: 'Single Workspace', value: 'single' },
+            { label: 'Multi Workspace', value: 'multi' },
           ],
         },
       ],
@@ -404,7 +404,7 @@ describe('preferences', () => {
     expect(preferenceManager.getPreferencesExtension()).toEqual(extension);
     expect(preferenceManager.getCustomPreferences()).toEqual({
       enableWorkbench: true,
-      tenantMode: 'single',
+      workspaceMode: 'single',
     });
   });
 
@@ -513,11 +513,11 @@ describe('preferences', () => {
           {
             component: 'select',
             defaultValue: 'single',
-            key: 'tenantMode',
-            label: 'Tenant Mode',
+            key: 'workspaceMode',
+            label: 'Workspace Mode',
             options: [
-              { label: 'Single Tenant', value: 'single' },
-              { label: 'Multi Tenant', value: 'multi' },
+              { label: 'Single Workspace', value: 'single' },
+              { label: 'Multi Workspace', value: 'multi' },
             ],
           },
         ],
@@ -530,7 +530,7 @@ describe('preferences', () => {
 
     preferenceManager.updateCustomPreferences({
       enableWorkbench: 'true' as unknown as boolean,
-      tenantMode: 'unknown',
+      workspaceMode: 'unknown',
       unknownField: 'value',
     } as any);
 

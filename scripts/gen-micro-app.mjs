@@ -198,7 +198,7 @@ makeFile(
   'README.md',
   `# @operon/${name}
 
-${titleName} micro-app (\`${name}:*\` Pinia stores, \`src/manifest.ts\` routes, \`useKernel()\` host bridge).
+${titleName} micro-app (\`${name}:*\` Pinia stores, \`src/manifest.ts\` routes, \`useKernel()\` host kernel).
 
 \`\`\`sh
 pnpm dev:${name}   # Standalone mock-host sandbox (port ${nextPort})
@@ -474,8 +474,8 @@ function handleNotify() {
             <span class="font-mono text-foreground">{{ kernel.auth.userId || 'N/A' }}</span>
           </div>
           <div class="flex justify-between py-1 border-b border-border/30">
-            <span>Tenant ID:</span>
-            <span class="font-mono text-foreground">{{ kernel.auth.tenantId || 'N/A' }}</span>
+            <span>Workspace ID:</span>
+            <span class="font-mono text-foreground">{{ kernel.auth.workspaceId || 'N/A' }}</span>
           </div>
           <div class="flex justify-between py-1">
             <span>Roles:</span>

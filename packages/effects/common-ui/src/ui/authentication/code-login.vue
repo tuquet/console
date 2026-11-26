@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import type { Recordable } from '@operon/types';
 
-import type { VbenFormSchema } from '@operon-core/form-ui';
+import type { OperonFormSchema } from '@operon-core/form-ui';
 
 import { computed, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { $t } from '@operon/locales';
 
-import { useVbenForm } from '@operon-core/form-ui';
-import { VbenButton } from '@operon-core/shadcn-ui';
+import { useOperonForm } from '@operon-core/form-ui';
+import { OperonButton } from '@operon-core/shadcn-ui';
 
 import Title from './auth-title.vue';
 
 interface Props {
-  formSchema: VbenFormSchema[];
+  formSchema: OperonFormSchema[];
   /**
    * Whether in loading state
    */
@@ -60,7 +60,7 @@ const emit = defineEmits<{
 
 const router = useRouter();
 
-const [Form, formApi] = useVbenForm(
+const [Form, formApi] = useOperonForm(
   reactive({
     commonConfig: {
       hideLabel: true,
@@ -103,7 +103,7 @@ defineExpose({
       </template>
     </Title>
     <Form />
-    <VbenButton
+    <OperonButton
       :class="{
         'cursor-wait': loading,
       }"
@@ -114,14 +114,14 @@ defineExpose({
       <slot name="submitButtonText">
         {{ submitButtonText || $t('common.login') }}
       </slot>
-    </VbenButton>
-    <VbenButton
+    </OperonButton>
+    <OperonButton
       v-if="showBack"
       class="mt-4 w-full"
       variant="outline"
       @click="goToLogin()"
     >
       {{ $t('common.back') }}
-    </VbenButton>
+    </OperonButton>
   </div>
 </template>

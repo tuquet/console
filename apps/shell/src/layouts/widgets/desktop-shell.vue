@@ -16,7 +16,7 @@ const { height } = useElementSize(viewport);
       ref="viewport"
       data-layout-region="desktop-viewport"
       class="desktop-viewport relative min-h-0 flex-1"
-      :style="{ '--vben-viewport-height': `${height}px` }"
+      :style="{ '--operon-viewport-height': `${height}px` }"
     >
       <slot></slot>
     </div>

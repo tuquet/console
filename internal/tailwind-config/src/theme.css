@@ -18,7 +18,7 @@
 @source '../../../packages/';
 @source '../../../apps/';
 @source '../../../docs/';
-@source '../../../playground/';
+@source '../../../tasks/';
 @source '../../../node_modules/.pnpm/@operon+vue-ui*/**/*.mjs';
 @source '../../../../lib/packages/vue-ui/src/**/*.{vue,ts}';
 
@@ -377,7 +377,7 @@
   }
 
   html {
-    --vben-viewport-height: 100vh;
+    --operon-viewport-height: 100vh;
 
     @apply bg-background font-sans text-foreground;
 
@@ -391,7 +391,7 @@
     -webkit-tap-highlight-color: transparent;
 
     @supports (height: 1dvh) {
-      --vben-viewport-height: 100dvh;
+      --operon-viewport-height: 100dvh;
     }
   }
 
@@ -508,7 +508,7 @@
     @apply top-0 left-0 h-full w-full p-1 opacity-100 outline-primary;
   }
 
-  .vben-link {
+  .operon-link {
     @apply cursor-pointer text-primary hover:text-primary-hover active:text-primary-active;
   }
 

@@ -4,11 +4,11 @@ import type { Props } from './types';
 import { preferences } from '@operon-core/preferences';
 import {
   Card,
+  OperonAvatar,
   Separator,
   Tabs,
   TabsList,
   TabsTrigger,
-  VbenAvatar,
 } from '@operon-core/shadcn-ui';
 
 import { Page } from '../../components';
@@ -31,7 +31,7 @@ const tabsValue = defineModel<string | undefined>('modelValue', {
     <div class="flex size-full">
       <Card class="w-1/6 flex-none">
         <div class="mt-4 flex-col-center h-40 gap-4">
-          <VbenAvatar
+          <OperonAvatar
             :src="userInfo?.avatar ?? preferences.app.defaultAvatar"
             class="size-20"
           />

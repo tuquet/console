@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { VbenFormSchema } from '@operon/common-ui';
+import type { OperonFormSchema } from '@operon/common-ui';
 import type { Recordable } from '@operon/types';
 
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
@@ -22,10 +22,10 @@ const turnstileContainerRef = ref<HTMLDivElement | null>(null);
 const turnstileToken = ref<string>('');
 let widgetId: null | string = null;
 
-const formSchema = computed((): VbenFormSchema[] => {
+const formSchema = computed((): OperonFormSchema[] => {
   return [
     {
-      component: 'VbenInput',
+      component: 'OperonInput',
       componentProps: {
         autocomplete: 'username',
         placeholder: $t('authentication.emailTip'),
@@ -38,7 +38,7 @@ const formSchema = computed((): VbenFormSchema[] => {
         .email({ message: $t('authentication.emailValidErrorTip') }),
     },
     {
-      component: 'VbenInputPassword',
+      component: 'OperonInputPassword',
       componentProps: {
         autocomplete: 'current-password',
         placeholder: $t('authentication.passwordTip'),

@@ -1,8 +1,8 @@
 import type { SystemPlugin } from './system';
-import type { Tenant } from './tenant';
+import type { Workspace } from './workspace';
 
 import { listSystemPlugins } from './system';
-import { listTenants } from './tenant';
+import { listWorkspaces } from './workspace';
 
 export interface PlanBreakdown {
   enterprise: number;
@@ -32,10 +32,10 @@ export interface RealAnalyticsData {
     latencyMs: number;
     status: 'degraded' | 'healthy';
   };
-  tenants: {
+  workspaces: {
     activeCount: number;
     growth: GrowthPoint[];
-    items: Tenant[];
+    items: Workspace[];
     planBreakdown: PlanBreakdown;
     total: number;
   };
@@ -47,21 +47,21 @@ export interface RealAnalyticsData {
 export async function getRealAnalyticsData(): Promise<RealAnalyticsData> {
   const startTime = performance.now();
 
-  const [tenantsResult, pluginsResult] = await Promise.allSettled([
-    listTenants(),
+  const [workspacesResult, pluginsResult] = await Promise.allSettled([
+    listWorkspaces(),
     listSystemPlugins(),
   ]);
 
   const latencyMs = Math.round(performance.now() - startTime);
 
-  const tenants: Tenant[] =
-    tenantsResult.status === 'fulfilled' ? tenantsResult.value : [];
+  const workspaces: Workspace[] =
+    workspacesResult.status === 'fulfilled' ? workspacesResult.value : [];
   const plugins: SystemPlugin[] =
     pluginsResult.status === 'fulfilled' ? pluginsResult.value : [];
 
   // Plan breakdown
   const planBreakdown: PlanBreakdown = { enterprise: 0, free: 0, pro: 0 };
-  for (const t of tenants) {
+  for (const t of workspaces) {
     const plan = (t.metadata?.plan || 'pro').toLowerCase();
     if (plan.includes('enterprise')) {
       planBreakdown.enterprise += 1;
@@ -73,13 +73,13 @@ export async function getRealAnalyticsData(): Promise<RealAnalyticsData> {
   }
 
   // Growth timeline
-  const sortedTenants = tenants.toSorted(
+  const sortedWorkspaces = workspaces.toSorted(
     (a, b) =>
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
   );
 
   let cumulative = 0;
-  const growth: GrowthPoint[] = sortedTenants.map((t) => {
+  const growth: GrowthPoint[] = sortedWorkspaces.map((t) => {
     cumulative += 1;
     const dateFormatted = new Date(t.created_at).toLocaleDateString('vi-VN', {
       day: '2-digit',
@@ -112,12 +112,12 @@ export async function getRealAnalyticsData(): Promise<RealAnalyticsData> {
       latencyMs: Math.max(12, latencyMs),
       status: 'healthy',
     },
-    tenants: {
-      activeCount: tenants.filter((t) => t.status === 'active').length,
+    workspaces: {
+      activeCount: workspaces.filter((t) => t.status === 'active').length,
       growth,
-      items: tenants,
+      items: workspaces,
       planBreakdown,
-      total: tenants.length,
+      total: workspaces.length,
     },
   };
 }

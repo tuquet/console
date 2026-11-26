@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import type { Recordable } from '@operon/types';
 
-import type { VbenFormSchema } from '@operon-core/form-ui';
+import type { OperonFormSchema } from '@operon-core/form-ui';
 
 import { computed, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { $t } from '@operon/locales';
 
-import { useVbenForm } from '@operon-core/form-ui';
-import { VbenButton } from '@operon-core/shadcn-ui';
+import { useOperonForm } from '@operon-core/form-ui';
+import { OperonButton } from '@operon-core/shadcn-ui';
 
 import Title from './auth-title.vue';
 
 interface Props {
-  formSchema?: VbenFormSchema[];
+  formSchema?: OperonFormSchema[];
   /**
    * Whether in loading state
    */
@@ -54,7 +54,7 @@ const emit = defineEmits<{
   submit: [Recordable<any>];
 }>();
 
-const [Form, formApi] = useVbenForm(
+const [Form, formApi] = useOperonForm(
   reactive({
     commonConfig: {
       hideLabel: true,
@@ -98,7 +98,7 @@ defineExpose({
     </Title>
     <Form />
 
-    <VbenButton
+    <OperonButton
       :class="{
         'cursor-wait': loading,
       }"
@@ -110,10 +110,10 @@ defineExpose({
       <slot name="submitButtonText">
         {{ submitButtonText || $t('authentication.signUp') }}
       </slot>
-    </VbenButton>
+    </OperonButton>
     <div class="mt-4 text-center">
       {{ $t('authentication.alreadyHaveAccount') }}
-      <span class="vben-link" @click="goToLogin()">
+      <span class="operon-link" @click="goToLogin()">
         {{ $t('authentication.goToLogin') }}
       </span>
     </div>

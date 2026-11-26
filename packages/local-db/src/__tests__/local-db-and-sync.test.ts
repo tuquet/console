@@ -53,7 +53,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         name: 'Residential SOCKS5',
         port: 1080,
         protocol: 'socks5',
-        tenantId: 'tenant-test',
+        workspaceId: 'workspace-test',
         updatedAt: new Date().toISOString(),
       });
 
@@ -76,7 +76,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         name: 'TikTok Stealth Profile 1',
         proxyId: 'proxy-001',
         storageState: {},
-        tenantId: 'tenant-test',
+        workspaceId: 'workspace-test',
         timezone: 'Asia/Ho_Chi_Minh',
         updatedAt: nowIso,
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
@@ -243,7 +243,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
   });
 
   describe('part 2: cloud sync engine (push, pull, conflicts, tombstones)', () => {
-    const tenantId = 'tenant-test-uuid-456';
+    const workspaceId = 'workspace-test-uuid-456';
 
     it('pushes offline-created local profiles to Cloud and updates lastSyncedAt', async () => {
       const nowIso = new Date().toISOString();
@@ -252,7 +252,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         id: 'offline-prof-1',
         lastSyncedAt: null,
         name: 'Offline Created Profile',
-        tenantId,
+        workspaceId,
         updatedAt: nowIso,
       });
 
@@ -260,7 +260,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         .spyOn(requesterModule, 'supabaseRequest')
         .mockResolvedValueOnce({ status: 201 });
 
-      const result = await pushLocalBrowserProfilesToCloud(db, tenantId);
+      const result = await pushLocalBrowserProfilesToCloud(db, workspaceId);
 
       expect(result.errors).toHaveLength(0);
       expect(result.pushed).toBe(1);
@@ -285,7 +285,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         created_at: '2026-11-03T10:00:00.000Z',
         id: 'cloud-prof-99',
         name: 'Cloud Added Profile',
-        tenant_id: tenantId,
+        workspace_id: workspaceId,
         updated_at: '2026-11-03T10:00:00.000Z',
       };
 
@@ -293,7 +293,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         cloudProfile,
       ]);
 
-      const result = await pullCloudBrowserProfilesToLocal(db, tenantId);
+      const result = await pullCloudBrowserProfilesToLocal(db, workspaceId);
 
       expect(result.errors).toHaveLength(0);
       expect(result.pulled).toBe(1);
@@ -312,7 +312,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         id: 'conflict-prof-1',
         lastSyncedAt: '2026-11-03T10:00:00.000Z',
         name: 'Local Version (Old)',
-        tenantId,
+        workspaceId,
         updatedAt: '2026-11-03T10:00:00.000Z',
       });
 
@@ -320,7 +320,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         created_at: '2026-11-03T10:00:00.000Z',
         id: 'conflict-prof-1',
         name: 'Cloud Version (Newer)',
-        tenant_id: tenantId,
+        workspace_id: workspaceId,
         updated_at: '2026-11-03T11:00:00.000Z',
       };
 
@@ -328,7 +328,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         cloudNewer,
       ]);
 
-      const result = await pullCloudBrowserProfilesToLocal(db, tenantId);
+      const result = await pullCloudBrowserProfilesToLocal(db, workspaceId);
 
       expect(result.conflicts).toBe(1);
 
@@ -347,7 +347,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         id: 'tombstone-prof-1',
         lastSyncedAt: pastIso,
         name: 'Profile to Delete',
-        tenantId,
+        workspaceId,
         updatedAt: pastIso,
       });
 
@@ -355,7 +355,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
       await softDeleteBrowserProfile(db, 'tombstone-prof-1');
 
       // Verify excluded from active profiles query
-      const activeProfiles = await getActiveBrowserProfiles(db, tenantId);
+      const activeProfiles = await getActiveBrowserProfiles(db, workspaceId);
       expect(activeProfiles.map((p) => p.id)).not.toContain('tombstone-prof-1');
 
       // 2. Push sync propagates DELETE to Cloud
@@ -363,7 +363,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         .spyOn(requesterModule, 'supabaseRequest')
         .mockResolvedValueOnce({ status: 204 });
 
-      const pushRes = await pushLocalBrowserProfilesToCloud(db, tenantId);
+      const pushRes = await pushLocalBrowserProfilesToCloud(db, workspaceId);
       expect(pushRes.pushed).toBe(1);
       expect(mockSupabase).toHaveBeenCalledWith(
         expect.stringContaining(
@@ -381,14 +381,14 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         id: 'deleted-on-cloud-1',
         lastSyncedAt: nowIso,
         name: 'Profile deleted remotely',
-        tenantId,
+        workspaceId,
         updatedAt: nowIso,
       });
 
       // Cloud returns empty array (remote deletion)
       vi.spyOn(requesterModule, 'supabaseRequest').mockResolvedValueOnce([]);
 
-      const pullRes = await pullCloudBrowserProfilesToLocal(db, tenantId);
+      const pullRes = await pullCloudBrowserProfilesToLocal(db, workspaceId);
       expect(pullRes.pulled).toBe(1);
 
       // Verify local profile is now marked with deletedAt
@@ -399,14 +399,14 @@ describe('local-first sqlite & cloud sync verification suite', () => {
       expect(rows[0]?.deletedAt).not.toBeNull();
     });
 
-    it('strictly isolates profiles by tenant', async () => {
+    it('strictly isolates profiles by workspace', async () => {
       const nowIso = new Date().toISOString();
       await db.insert(schema.browserProfiles).values({
         createdAt: nowIso,
         id: 'prof-org-a',
         lastSyncedAt: null,
         name: 'Org A Profile',
-        tenantId: 'tenant-AAA',
+        workspaceId: 'workspace-AAA',
         updatedAt: nowIso,
       });
       await db.insert(schema.browserProfiles).values({
@@ -414,7 +414,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         id: 'prof-org-b',
         lastSyncedAt: null,
         name: 'Org B Profile',
-        tenantId: 'tenant-BBB',
+        workspaceId: 'workspace-BBB',
         updatedAt: nowIso,
       });
 
@@ -422,8 +422,11 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         status: 201,
       });
 
-      // Push only for tenant-AAA
-      const pushRes = await pushLocalBrowserProfilesToCloud(db, 'tenant-AAA');
+      // Push only for workspace-AAA
+      const pushRes = await pushLocalBrowserProfilesToCloud(
+        db,
+        'workspace-AAA',
+      );
       expect(pushRes.pushed).toBe(1);
 
       // Verify Org A was synced, Org B remains unsynced
@@ -449,7 +452,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         lastSyncedAt: null,
         name: 'Local Automation Workflow',
         nodes: [{ id: 'node-1', type: 'trigger' }],
-        tenantId,
+        workspaceId,
         updatedAt: nowIso,
         version: '1.0.0',
       });
@@ -466,7 +469,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
           is_active: true,
           name: 'Local Automation Workflow',
           nodes: [{ id: 'node-1', type: 'trigger' }],
-          tenant_id: tenantId,
+          workspace_id: workspaceId,
           updated_at: nowIso,
           version: '1.0.0',
         },
@@ -476,13 +479,13 @@ describe('local-first sqlite & cloud sync verification suite', () => {
           is_active: true,
           name: 'Cloud Team Workflow',
           nodes: [],
-          tenant_id: tenantId,
+          workspace_id: workspaceId,
           updated_at: nowIso,
           version: '1.0.0',
         },
       ]);
 
-      const result = await syncWorkflows(db, tenantId);
+      const result = await syncWorkflows(db, workspaceId);
       expect(result.pushed).toBe(1);
       expect(result.pulled).toBe(1);
 
@@ -502,7 +505,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
           id: 'partial-prof-1',
           lastSyncedAt: null,
           name: 'Profile 1 (Succeeds)',
-          tenantId,
+          workspaceId,
           updatedAt: nowIso,
         },
         {
@@ -510,7 +513,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
           id: 'partial-prof-2',
           lastSyncedAt: null,
           name: 'Profile 2 (Fails)',
-          tenantId,
+          workspaceId,
           updatedAt: nowIso,
         },
         {
@@ -518,7 +521,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
           id: 'partial-prof-3',
           lastSyncedAt: null,
           name: 'Profile 3 (Succeeds)',
-          tenantId,
+          workspaceId,
           updatedAt: nowIso,
         },
       ]);
@@ -528,7 +531,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         .mockRejectedValueOnce(new Error('Invalid payload validation error'))
         .mockResolvedValueOnce({ status: 201 });
 
-      const pushRes = await pushLocalBrowserProfilesToCloud(db, tenantId);
+      const pushRes = await pushLocalBrowserProfilesToCloud(db, workspaceId);
 
       expect(pushRes.pushed).toBe(2);
       expect(pushRes.errors).toHaveLength(1);
@@ -555,7 +558,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
     it('runs syncAll master orchestrator across all entities', async () => {
       vi.spyOn(requesterModule, 'supabaseRequest').mockResolvedValue([]);
 
-      const masterResult = await syncAll(db, tenantId);
+      const masterResult = await syncAll(db, workspaceId);
       expect(masterResult.profiles).toBeDefined();
       expect(masterResult.workflows).toBeDefined();
       expect(masterResult.profiles.errors).toHaveLength(0);
@@ -569,7 +572,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         id: 'fail-safe-prof',
         lastSyncedAt: null,
         name: 'Protected Profile',
-        tenantId,
+        workspaceId,
         updatedAt: nowIso,
       });
 
@@ -577,7 +580,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         new Error('Network connection timeout (503 Service Unavailable)'),
       );
 
-      const syncResult = await syncBrowserProfiles(db, tenantId);
+      const syncResult = await syncBrowserProfiles(db, workspaceId);
 
       expect(syncResult.pushed).toBe(0);
       expect(syncResult.errors.length).toBeGreaterThan(0);
@@ -598,18 +601,20 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         'automation.sqlite',
       );
       expect(getCanonicalSqlitePath('system')).toContain('system.sqlite');
-      expect(getCanonicalSqlitePath('tenants')).toContain('tenants.sqlite');
+      expect(getCanonicalSqlitePath('workspaces')).toContain(
+        'workspaces.sqlite',
+      );
       expect(getCanonicalSqlitePath()).toContain('operon.sqlite');
     });
 
     it('initializes domain-specific Drizzle clients with in-memory test databases', async () => {
       const autoDb = getDomainDb('automation', undefined, ':memory:');
       const sysDb = getDomainDb('system', undefined, ':memory:');
-      const tenantsDb = getDomainDb('tenants', undefined, ':memory:');
+      const workspacesDb = getDomainDb('workspaces', undefined, ':memory:');
 
       expect(autoDb).toBeDefined();
       expect(sysDb).toBeDefined();
-      expect(tenantsDb).toBeDefined();
+      expect(workspacesDb).toBeDefined();
     });
   });
 });

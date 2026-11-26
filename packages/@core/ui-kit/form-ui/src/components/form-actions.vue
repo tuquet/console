@@ -2,7 +2,7 @@
 import { computed, toRaw, unref, watch } from 'vue';
 
 import { useSimpleLocale } from '@operon-core/composables';
-import { VbenExpandableArrow } from '@operon-core/shadcn-ui';
+import { OperonExpandableArrow } from '@operon-core/shadcn-ui';
 import { cn, isFunction, triggerWindowResize } from '@operon-core/shared/utils';
 
 import { COMPONENT_MAP } from '../config';
@@ -167,13 +167,13 @@ defineExpose({
     <!-- Before expand/collapse button -->
     <slot name="expand-before"></slot>
 
-    <VbenExpandableArrow
+    <OperonExpandableArrow
       class="ml-[-0.3em]"
       v-if="rootProps.showCollapseButton"
       v-model:model-value="collapsed"
     >
       <span>{{ collapsed ? $t('expand') : $t('collapse') }}</span>
-    </VbenExpandableArrow>
+    </OperonExpandableArrow>
 
     <!-- After expand/collapse button -->
     <slot name="expand-after"></slot>

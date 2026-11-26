@@ -1,5 +1,5 @@
 import type { ExtendedModalApi, InferModalData } from '../modal';
-import type { createVbenModal, useVbenModal } from '../use-modal';
+import type { createOperonModal, useOperonModal } from '../use-modal';
 import type TypedModal from './fixtures/typed-modal.vue';
 
 import { describe, expectTypeOf, it } from 'vitest';
@@ -11,8 +11,8 @@ interface TypedModalData {
 
 type ModalData = null | TypedModalData;
 
-declare const createModal: typeof createVbenModal;
-declare const useModal: typeof useVbenModal;
+declare const createModal: typeof createOperonModal;
+declare const useModal: typeof useOperonModal;
 
 describe('modal public data types', () => {
   it('infers data from the connected component exposed api', () => {

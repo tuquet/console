@@ -4,7 +4,7 @@ export interface DeepLinkAuthPayload {
   machineName?: string;
   refreshToken?: string;
   state?: string;
-  tenantId?: string;
+  workspaceId?: string;
   token: string;
 }
 
@@ -32,10 +32,9 @@ export function parseDeepLinkAuthUrl(url: string): DeepLinkAuthPayload | null {
 
     return {
       machineName: params.get('machine_name') ?? undefined,
-      refreshToken:
-        params.get('refresh_token') ?? params.get('refreshToken') ?? undefined,
+      refreshToken: params.get('refresh_token') ?? undefined,
       state: params.get('state') ?? undefined,
-      tenantId: params.get('tenant_id') ?? params.get('tenantId') ?? undefined,
+      workspaceId: params.get('workspace_id') ?? undefined,
       token,
     };
   } catch {

@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
       fill="none"
       aria-hidden="true"
     >
-      <g filter="url(#specter-spline-spotlight)">
+      <g filter="url(#operon-spline-spotlight)">
         <ellipse
           cx="1924.71"
           cy="273.501"
@@ -157,7 +157,7 @@ onBeforeUnmount(() => {
       </g>
       <defs>
         <filter
-          id="specter-spline-spotlight"
+          id="operon-spline-spotlight"
           x="0.860352"
           y="0.838989"
           width="3785.16"

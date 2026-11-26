@@ -11,8 +11,8 @@ pnpm install --frozen-lockfile
 pnpm dev:web          # Full shell (port 5320)
 pnpm dev:automation   # Standalone mock-host apps (ports 5321..5324)
 pnpm dev:system
-pnpm dev:tenants
-pnpm dev:playground
+pnpm dev:workspaces
+pnpm dev:tasks
 ```
 
 ## Desktop (Windows)

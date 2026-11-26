@@ -1,10 +1,10 @@
 import type { LayoutType } from '@operon-core/typings';
 
-import type { VbenLayoutProps } from '../vben-layout';
+import type { OperonLayoutProps } from '../operon-layout';
 
 import { computed } from 'vue';
 
-export function useLayout(props: VbenLayoutProps) {
+export function useLayout(props: OperonLayoutProps) {
   const currentLayout = computed(() =>
     props.isMobile ? 'sidebar-nav' : (props.layout as LayoutType),
   );

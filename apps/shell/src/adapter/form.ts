@@ -1,16 +1,20 @@
 import type {
-  VbenFormProps as FormProps,
-  VbenFormSchema as FormSchema,
+  OperonFormProps as FormProps,
+  OperonFormSchema as FormSchema,
   FormValues,
 } from '@operon/common-ui';
 
 import type { ComponentPropsMap, ComponentType } from './component';
 
-import { setupVbenForm, useVbenForm as useForm, z } from '@operon/common-ui';
+import {
+  setupOperonForm,
+  useOperonForm as useForm,
+  z,
+} from '@operon/common-ui';
 import { $t } from '@operon/locales';
 
-async function initSetupVbenForm() {
-  setupVbenForm<ComponentType>({
+async function initSetupOperonForm() {
+  setupOperonForm<ComponentType>({
     config: {
       // @operon-core/shadcn-ui components follow Vue 3 standard v-model (modelValue / onUpdate:modelValue)
       baseModelPropName: 'modelValue',
@@ -37,7 +41,7 @@ async function initSetupVbenForm() {
   });
 }
 
-function useVbenForm<
+function useOperonForm<
   TFormValues extends FormValues = FormValues,
   TSubmitValues extends FormValues = TFormValues,
 >(
@@ -53,11 +57,11 @@ function useVbenForm<
   );
 }
 
-export { initSetupVbenForm, useVbenForm, z };
+export { initSetupOperonForm, useOperonForm, z };
 
-export type VbenFormSchema<TValues extends FormValues = FormValues> =
+export type OperonFormSchema<TValues extends FormValues = FormValues> =
   FormSchema<ComponentType, ComponentPropsMap, TValues>;
-export type VbenFormProps<
+export type OperonFormProps<
   TFormValues extends FormValues = FormValues,
   TSubmitValues extends FormValues = TFormValues,
 > = FormProps<ComponentType, ComponentPropsMap, TFormValues, TSubmitValues>;

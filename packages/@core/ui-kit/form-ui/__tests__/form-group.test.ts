@@ -8,8 +8,8 @@ import { defineComponent, h } from 'vue';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
-import { setupVbenForm } from '../src/config';
-import { useVbenForm } from '../src/use-vben-form';
+import { setupOperonForm } from '../src/config';
+import { useOperonForm } from '../src/use-operon-form';
 
 const wrappers: VueWrapper[] = [];
 
@@ -29,7 +29,7 @@ const TestInput = defineComponent({
 });
 
 beforeAll(() => {
-  setupVbenForm({ config: {} });
+  setupOperonForm({ config: {} });
 });
 
 afterEach(() => {
@@ -64,7 +64,7 @@ function getGroupState(wrapper: VueWrapper) {
 
 describe('form group rendering', () => {
   it('renders grouped fields as regular form fields', async () => {
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         { component: TestInput, fieldName: 'name', label: 'Name' },
         createContactGroup({ extra: 'Optional' }),
@@ -84,7 +84,7 @@ describe('form group rendering', () => {
   });
 
   it('toggles the group from its header and honors defaultCollapsed', async () => {
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [createContactGroup({ defaultCollapsed: true })],
     });
     const wrapper = mount(Form);
@@ -110,7 +110,7 @@ describe('form group rendering', () => {
   });
 
   it('keeps a non-collapsible group open despite defaultCollapsed', async () => {
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [
         createContactGroup({ collapsible: false, defaultCollapsed: true }),
       ],
@@ -125,7 +125,7 @@ describe('form group rendering', () => {
   });
 
   it('expands a collapsed group when one of its fields fails validation', async () => {
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         createContactGroup({
           children: [
@@ -157,7 +157,7 @@ describe('form group rendering', () => {
   });
 
   it('expands for validation errors in array descendants', async () => {
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         createContactGroup({
           children: [
@@ -194,7 +194,7 @@ describe('form group rendering', () => {
   });
 
   it('skips hidden groups and forwards field slots into groups', async () => {
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [
         createContactGroup(),
         {
@@ -223,7 +223,7 @@ describe('form group rendering', () => {
   });
 
   it('re-renders grouped fields after updateSchema', async () => {
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [createContactGroup()],
     });
     const wrapper = mount(Form);

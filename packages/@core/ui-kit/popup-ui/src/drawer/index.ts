@@ -1,7 +1,7 @@
 export type * from './drawer';
-export { default as VbenDrawer } from './drawer.vue';
+export { default as OperonDrawer } from './drawer.vue';
 export {
-  createVbenDrawer,
+  createOperonDrawer,
   setDefaultDrawerProps,
-  useVbenDrawer,
+  useOperonDrawer,
 } from './use-drawer';

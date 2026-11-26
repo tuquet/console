@@ -2,7 +2,7 @@ import type { ZodType } from 'zod';
 
 import type { Component, HtmlHTMLAttributes, Ref, UnwrapNestedRefs } from 'vue';
 
-import type { VbenButtonProps } from '@operon-core/shadcn-ui';
+import type { OperonButtonProps } from '@operon-core/shadcn-ui';
 import type { ClassType, MaybeComputedRef } from '@operon-core/typings';
 
 import type { FormApi } from './form-api';
@@ -46,13 +46,13 @@ export type FormLayout = 'horizontal' | 'inline' | 'vertical';
 
 export type BaseFormComponentType =
   | 'DefaultButton'
+  | 'OperonCheckbox'
+  | 'OperonFormFieldArray'
+  | 'OperonInput'
+  | 'OperonInputPassword'
+  | 'OperonPinInput'
+  | 'OperonSelect'
   | 'PrimaryButton'
-  | 'VbenCheckbox'
-  | 'VbenFormFieldArray'
-  | 'VbenInput'
-  | 'VbenInputPassword'
-  | 'VbenPinInput'
-  | 'VbenSelect'
   | (Record<never, never> & string);
 
 type Breakpoints = '2xl:' | '3xl:' | '' | 'lg:' | 'md:' | 'sm:' | 'xl:';
@@ -228,7 +228,7 @@ type KnownFormFieldName<TValues extends FormValues> =
     ? never
     : Exclude<Extract<keyof TValues, string>, ReservedFormSlotName>;
 
-export interface VbenFormActionSlotProps<
+export interface OperonFormActionSlotProps<
   TValues extends FormValues = FormValues,
   T extends BaseFormComponentType = BaseFormComponentType,
   P extends Record<string, any> = Record<never, never>,
@@ -238,27 +238,27 @@ export interface VbenFormActionSlotProps<
   values: TValues;
 }
 
-export interface VbenFormDefaultSlotProps<
+export interface OperonFormDefaultSlotProps<
   TValues extends FormValues = FormValues,
   T extends BaseFormComponentType = BaseFormComponentType,
   P extends Record<string, any> = Record<never, never>,
   TSubmitValues extends FormValues = TValues,
-> extends VbenFormActionSlotProps<TValues, T, P, TSubmitValues> {
+> extends OperonFormActionSlotProps<TValues, T, P, TSubmitValues> {
   shapes: FormShape[];
 }
 
-export interface VbenFormFieldSlotProps<
+export interface OperonFormFieldSlotProps<
   TValues extends FormValues = FormValues,
   TFieldName extends FormFieldName<TValues> = FormFieldName<TValues>,
   T extends BaseFormComponentType = BaseFormComponentType,
   P extends Record<string, any> = Record<never, never>,
   TSubmitValues extends FormValues = TValues,
-> extends VbenFormActionSlotProps<TValues, T, P, TSubmitValues> {
+> extends OperonFormActionSlotProps<TValues, T, P, TSubmitValues> {
   componentField: FormComponentField<
     FormFieldValue<TValues, TFieldName>,
     TFieldName
   >;
-  componentProps: VbenFormResolvedComponentProps<
+  componentProps: OperonFormResolvedComponentProps<
     FormFieldValue<TValues, TFieldName>,
     TFieldName
   >;
@@ -275,7 +275,7 @@ export interface VbenFormFieldSlotProps<
  */
 type LooseFieldValue<TValue> = unknown extends TValue ? any : TValue;
 
-export type VbenFormResolvedComponentProps<
+export type OperonFormResolvedComponentProps<
   TValue = unknown,
   TFieldName extends string = string,
 > = MaybeComponentProps & {
@@ -285,7 +285,7 @@ export type VbenFormResolvedComponentProps<
   'onUpdate:modelValue'?: (value: LooseFieldValue<TValue>) => void;
 };
 
-type VbenFormFieldSlots<
+type OperonFormFieldSlots<
   TValues extends FormValues,
   T extends BaseFormComponentType,
   P extends Record<string, any>,
@@ -295,7 +295,7 @@ type VbenFormFieldSlots<
     ? Record<
         string,
         | ((
-            props: VbenFormFieldSlotProps<
+            props: OperonFormFieldSlotProps<
               TValues,
               FormFieldName<TValues>,
               T,
@@ -307,7 +307,7 @@ type VbenFormFieldSlots<
       >
     : {
         [TFieldName in KnownFormFieldName<TValues>]?: (
-          props: VbenFormFieldSlotProps<
+          props: OperonFormFieldSlotProps<
             TValues,
             TFieldName,
             T,
@@ -317,37 +317,37 @@ type VbenFormFieldSlots<
         ) => any;
       };
 
-export type VbenFormSlots<
+export type OperonFormSlots<
   TValues extends FormValues = FormValues,
   T extends BaseFormComponentType = BaseFormComponentType,
   P extends Record<string, any> = Record<never, never>,
   TSubmitValues extends FormValues = TValues,
-> = VbenFormFieldSlots<TValues, T, P, TSubmitValues> & {
+> = OperonFormFieldSlots<TValues, T, P, TSubmitValues> & {
   default?: (
-    props: VbenFormDefaultSlotProps<TValues, T, P, TSubmitValues>,
+    props: OperonFormDefaultSlotProps<TValues, T, P, TSubmitValues>,
   ) => any;
   'expand-after'?: (
-    props: VbenFormActionSlotProps<TValues, T, P, TSubmitValues>,
+    props: OperonFormActionSlotProps<TValues, T, P, TSubmitValues>,
   ) => any;
   'expand-before'?: (
-    props: VbenFormActionSlotProps<TValues, T, P, TSubmitValues>,
+    props: OperonFormActionSlotProps<TValues, T, P, TSubmitValues>,
   ) => any;
   'reset-before'?: (
-    props: VbenFormActionSlotProps<TValues, T, P, TSubmitValues>,
+    props: OperonFormActionSlotProps<TValues, T, P, TSubmitValues>,
   ) => any;
   'submit-before'?: (
-    props: VbenFormActionSlotProps<TValues, T, P, TSubmitValues>,
+    props: OperonFormActionSlotProps<TValues, T, P, TSubmitValues>,
   ) => any;
 };
 
-export type VbenFormComponent<
+export type OperonFormComponent<
   TValues extends FormValues = FormValues,
   T extends BaseFormComponentType = BaseFormComponentType,
   P extends Record<string, any> = Record<never, never>,
   TSubmitValues extends FormValues = TValues,
 > = new () => {
-  $props: VbenFormProps<T, P, TValues, TSubmitValues>;
-  $slots: VbenFormSlots<TValues, T, P, TSubmitValues>;
+  $props: OperonFormProps<T, P, TValues, TSubmitValues>;
+  $slots: OperonFormSlots<TValues, T, P, TSubmitValues>;
 };
 
 export interface FormSchemaContext<TValues extends FormValues = FormValues> {
@@ -669,7 +669,7 @@ type FormArraySchema<
 > = FormSchemaBody<TValues> & {
   /** Built-in array editor props */
   arrayProps?: Omit<
-    VbenFormFieldArrayProps<T, P, TValues>,
+    OperonFormFieldArrayProps<T, P, TValues>,
     'disabled' | 'globalCommonConfig' | 'name' | 'schema'
   >;
   /** Array sub-field definitions */
@@ -745,9 +745,9 @@ export type FormSchema<
 > = FormFieldSchema<T, P, TValues> | FormGroupSchema<T, P, TValues>;
 
 /**
- * Component props for array editor (VbenFormFieldArray)
+ * Component props for array editor (OperonFormFieldArray)
  */
-export interface VbenFormFieldArrayProps<
+export interface OperonFormFieldArrayProps<
   T extends BaseFormComponentType = BaseFormComponentType,
   P extends Record<string, any> = Record<never, never>,
   TValues extends FormValues = FormValues,
@@ -895,13 +895,13 @@ export interface FormRenderProps<
   wrapperClass?: WrapperClassType;
 }
 
-export interface ActionButtonOptions extends VbenButtonProps {
+export interface ActionButtonOptions extends OperonButtonProps {
   [key: string]: any;
   content?: MaybeComputedRef<string>;
   show?: boolean;
 }
 
-export interface VbenFormProps<
+export interface OperonFormProps<
   T extends BaseFormComponentType = BaseFormComponentType,
   P extends Record<string, any> = Record<never, never>,
   TValues extends FormValues = FormValues,
@@ -1006,14 +1006,14 @@ export type ExtendedFormApi<
   P extends Record<string, any> = Record<never, never>,
   TSubmitValues extends FormValues = TValues,
 > = FormApi<TValues, T, P, TSubmitValues> & {
-  useStore: <TResult = NoInfer<VbenFormProps<T, P, TValues, TSubmitValues>>>(
+  useStore: <TResult = NoInfer<OperonFormProps<T, P, TValues, TSubmitValues>>>(
     selector?: (
-      state: NoInfer<VbenFormProps<T, P, TValues, TSubmitValues>>,
+      state: NoInfer<OperonFormProps<T, P, TValues, TSubmitValues>>,
     ) => TResult,
   ) => Readonly<Ref<TResult>>;
 };
 
-export interface VbenFormAdapterOptions<
+export interface OperonFormAdapterOptions<
   T extends BaseFormComponentType = BaseFormComponentType,
 > {
   config?: {

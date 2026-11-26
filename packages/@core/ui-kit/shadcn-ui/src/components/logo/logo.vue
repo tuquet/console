@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import { VbenAvatar } from '../avatar';
-import SpecterLogo from './specter-logo.vue';
+import { OperonAvatar } from '../avatar';
+import OperonLogoMark from './operon-logo.vue';
 
 interface Props {
   /**
@@ -54,7 +54,7 @@ interface Props {
 }
 
 defineOptions({
-  name: 'VbenLogo',
+  name: 'OperonLogo',
 });
 
 const props = withDefaults(defineProps<Props>(), {
@@ -85,7 +85,7 @@ const logoSrc = computed(() => {
 /**
  * Whether to render the inline theme-reactive SVG logo
  */
-const isBuiltinSpecterLogo = computed(() => {
+const isBuiltinOperonLogo = computed(() => {
   const s = logoSrc.value.trim();
   return (
     !s ||
@@ -139,8 +139,8 @@ const fullLogoStyle = computed(() => ({
       :href="href"
       class="flex h-full items-center overflow-hidden text-lg leading-normal transition-all duration-500"
     >
-      <SpecterLogo
-        v-if="isBuiltinSpecterLogo"
+      <OperonLogoMark
+        v-if="isBuiltinOperonLogo"
         :aria-label="text"
         :size="logoSize"
         :theme="theme"
@@ -155,7 +155,7 @@ const fullLogoStyle = computed(() => ({
         class="w-full"
       />
 
-      <VbenAvatar
+      <OperonAvatar
         v-else-if="logoSrc"
         :alt="text"
         :src="logoSrc"

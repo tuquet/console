@@ -300,11 +300,11 @@ export function initBugsink(
     }
 
     if (typeof window !== 'undefined') {
-      window.addEventListener('opn:tenant-changed', ((
-        event: CustomEvent<{ tenantId?: string }>,
+      window.addEventListener('opn:workspace-changed', ((
+        event: CustomEvent<{ workspaceId?: string }>,
       ) => {
-        if (event.detail?.tenantId) {
-          setBugsinkTag('tenant_id', event.detail.tenantId);
+        if (event.detail?.workspaceId) {
+          setBugsinkTag('workspace_id', event.detail.workspaceId);
         }
       }) as EventListener);
     }

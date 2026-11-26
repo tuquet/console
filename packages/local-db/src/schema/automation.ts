@@ -2,7 +2,7 @@ import { relations } from 'drizzle-orm';
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 const syncAuditColumns = () => ({
-  tenantId: text('tenant_id'),
+  workspaceId: text('workspace_id'),
   lastSyncedAt: text('last_synced_at'),
   deletedAt: text('deleted_at'),
   createdAt: text('created_at').notNull(),
@@ -34,7 +34,7 @@ export const workflows = sqliteTable(
   },
   (table) => [
     index('idx_workflows_is_active').on(table.isActive),
-    index('idx_workflows_tenant').on(table.tenantId),
+    index('idx_workflows_workspace').on(table.workspaceId),
   ],
 );
 
@@ -57,7 +57,7 @@ export const proxies = sqliteTable(
   },
   (table) => [
     index('idx_proxies_is_active').on(table.isActive),
-    index('idx_proxies_tenant').on(table.tenantId),
+    index('idx_proxies_workspace').on(table.workspaceId),
   ],
 );
 
@@ -111,7 +111,7 @@ export const browserProfiles = sqliteTable(
   (table) => [
     index('idx_browser_profiles_proxy').on(table.proxyId),
     index('idx_browser_profiles_locked').on(table.isLocked),
-    index('idx_browser_profiles_tenant').on(table.tenantId),
+    index('idx_browser_profiles_workspace').on(table.workspaceId),
   ],
 );
 

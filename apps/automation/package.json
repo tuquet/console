@@ -34,6 +34,7 @@
     "@operon/preferences": "workspace:*",
     "@operon/styles": "workspace:*",
     "@operon/types": "workspace:*",
+    "@tanstack/vue-query": "catalog:",
     "@tanstack/vue-table": "catalog:",
     "pinia": "catalog:",
     "vue": "catalog:",

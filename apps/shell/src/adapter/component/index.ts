@@ -1,5 +1,5 @@
 /**
- * Universal component adapter for Vben Form / Common UI
+ * Universal component adapter for Operon Form / Common UI
  * Powered by @operon-core/shadcn-ui
  */
 

@@ -1,1 +1,1 @@
-export { default as VbenCheckbox } from './checkbox.vue';
+export { default as OperonCheckbox } from './checkbox.vue';

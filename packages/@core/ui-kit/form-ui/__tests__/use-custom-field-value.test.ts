@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
 import { useCustomFieldValue } from '../src/use-custom-field-value';
-import { useVbenForm } from '../src/use-vben-form';
+import { useOperonForm } from '../src/use-operon-form';
 
 const wrappers: VueWrapper[] = [];
 
@@ -101,7 +101,7 @@ function mountTagForm(
     immediate?: boolean;
   } = {},
 ) {
-  const [Form, formApi] = useVbenForm({
+  const [Form, formApi] = useOperonForm({
     schema: [
       {
         component: Placeholder,
@@ -123,7 +123,7 @@ function mountTagForm(
 }
 
 function mountDeepTagForm() {
-  const [Form, formApi] = useVbenForm({
+  const [Form, formApi] = useOperonForm({
     schema: [
       {
         component: Placeholder,
@@ -144,7 +144,7 @@ function mountDeepTagForm() {
 }
 
 function mountBoundTagForm() {
-  const [Form, formApi] = useVbenForm({
+  const [Form, formApi] = useOperonForm({
     schema: [
       {
         component: Placeholder,
@@ -267,7 +267,7 @@ describe('useCustomFieldValue', () => {
 
   it('keeps the first getter when a field registers twice', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [
         {
           component: Placeholder,
@@ -296,7 +296,7 @@ describe('useCustomFieldValue', () => {
     await flushPromises();
 
     expect(warn).toHaveBeenCalledWith(
-      'useCustomFieldValue can only be used inside a VbenForm field item',
+      'useCustomFieldValue can only be used inside a OperonForm field item',
     );
     expect(wrapper.get('.tag-picker').attributes('data-field-name')).toBe('');
   });

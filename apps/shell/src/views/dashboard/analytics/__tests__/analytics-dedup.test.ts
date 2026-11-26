@@ -38,7 +38,7 @@ vi.mock('#/api', () => ({
       latencyMs: 20,
       status: 'healthy',
     },
-    tenants: {
+    workspaces: {
       activeCount: 3,
       growth: [],
       items: [],
@@ -120,32 +120,38 @@ describe('enterprise UI information deduplication (SPEC-ui-information-deduplica
     await new Promise((resolve) => setTimeout(resolve, 20));
     await nextTick();
 
-    const tenantsCard = container.querySelector(
-      '[data-testid="kpi-card-tenants"]',
+    const workspacesCard = container.querySelector(
+      '[data-testid="kpi-card-workspaces"]',
     );
-    expect(tenantsCard).not.toBeNull();
+    expect(workspacesCard).not.toBeNull();
 
     // Primary total is 3, and status pill shows active label without repeating '3' when activeCount === total
     const totalEl = container.querySelector(
-      '[data-testid="kpi-tenants-total"]',
+      '[data-testid="kpi-workspaces-total"]',
     );
     const statusEl = container.querySelector(
-      '[data-testid="kpi-tenants-status"]',
+      '[data-testid="kpi-workspaces-status"]',
     );
     expect(totalEl?.textContent?.trim()).toBe('3');
-    expect(statusEl?.textContent?.trim()).toBe('page.analytics.active_tenants');
+    expect(statusEl?.textContent?.trim()).toBe(
+      'page.analytics.active_workspaces',
+    );
 
     // Does not echo 'plan_pro' or 'plan_free' inside the KPI card (owned by PlansChart)
-    expect(tenantsCard?.textContent).not.toContain('page.analytics.plan_pro');
-    expect(tenantsCard?.textContent).not.toContain('page.analytics.plan_free');
+    expect(workspacesCard?.textContent).not.toContain(
+      'page.analytics.plan_pro',
+    );
+    expect(workspacesCard?.textContent).not.toContain(
+      'page.analytics.plan_free',
+    );
 
-    // Fleet card shows port :8765 as primary metric without repeating Desktop Bridge in Infrastructure Services
+    // Fleet card shows port :8765 as primary metric without repeating local daemon in Infrastructure Services
     const fleetPortEl = container.querySelector(
       '[data-testid="kpi-fleet-port"]',
     );
     expect(fleetPortEl?.textContent?.trim()).toContain('8765');
     expect(container.textContent).not.toContain(
-      'page.analytics.desktop_bridge',
+      'page.analytics.desktop_daemon',
     );
 
     app.unmount();

@@ -88,7 +88,7 @@ function handleTabChange(
           @click="
             notifyShell(
               'info',
-              `Active Tenant: ${kernel.auth.tenantId || 'Default'}`,
+              `Active Workspace: ${kernel.auth.workspaceId || 'Default'}`,
             )
           "
         >
@@ -132,7 +132,9 @@ function handleTabChange(
           >
           <Users class="size-4 text-blue-500" />
         </div>
-        <div class="mt-2 text-2xl font-bold text-foreground">Multi-Tenant</div>
+        <div class="mt-2 text-2xl font-bold text-foreground">
+          Multi-Workspace
+        </div>
         <div class="mt-1 text-xs text-muted-foreground">
           Current: {{ kernel.auth.username || 'Authenticated' }}
         </div>
@@ -201,10 +203,10 @@ function handleTabChange(
             </div>
             <div>
               <span class="text-xs text-muted-foreground"
-                >Current Tenant ID:</span
+                >Current Workspace ID:</span
               >
               <div class="font-mono text-xs text-foreground">
-                {{ kernel.auth.tenantId || 'None (Global Scope)' }}
+                {{ kernel.auth.workspaceId || 'None (Global Scope)' }}
               </div>
             </div>
           </div>
@@ -222,7 +224,7 @@ function handleTabChange(
           </Button>
         </div>
         <p class="text-sm text-muted-foreground">
-          Displaying users within the currently selected tenant.
+          Displaying users within the currently selected workspace.
         </p>
         <div class="divide-y divide-border rounded-lg border border-border">
           <div class="flex items-center justify-between p-3">
@@ -265,7 +267,7 @@ function handleTabChange(
               {{
                 role === 'superadmin'
                   ? 'Unrestricted root access'
-                  : 'Scoped tenant access'
+                  : 'Scoped workspace access'
               }}
             </p>
           </div>

@@ -12,7 +12,7 @@ export const LOGIN_PATH = '/auth/login';
 export const DEFAULT_HOME_PATH = '/dashboard/overview';
 
 /**
- * Universal sentinel value for "All" filter options across VbenForm / VxeGrid selects
+ * Universal sentinel value for "All" filter options across OperonForm / VxeGrid selects
  */
 export const FILTER_ALL = 'all' as const;
 export type FilterAll = typeof FILTER_ALL;

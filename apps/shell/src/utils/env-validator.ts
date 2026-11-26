@@ -1,5 +1,5 @@
 /**
- * Fast-Fail Environment Validator for Workstation
+ * Fast-Fail Environment Validator for Desktop
  * Enforces strict environment boundaries: No silent fallbacks to foreign production credentials.
  */
 

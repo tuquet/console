@@ -32,8 +32,8 @@ const widgetUserDropdownButtonPosition = defineModel<string | undefined>(
   'widgetUserDropdownButtonPosition',
   { default: undefined },
 );
-const widgetTenantSelectorButtonPosition = defineModel<string | undefined>(
-  'widgetTenantSelectorButtonPosition',
+const widgetWorkspaceSelectorButtonPosition = defineModel<string | undefined>(
+  'widgetWorkspaceSelectorButtonPosition',
   { default: undefined },
 );
 const widgetGlobalSearchButtonPosition = defineModel<string | undefined>(
@@ -140,7 +140,7 @@ const preferencesPositionItems = computed((): SelectOption[] => [
 const sidebarAndHeaderOnlyKeys = new Set([
   'logo',
   'sidebarToggle',
-  'tenantSelector',
+  'workspaceSelector',
 ]);
 
 const headerOnlyKeys = new Set(['breadcrumb', 'userDropdown']);
@@ -168,7 +168,7 @@ const labelMap: Record<string, string> = {
   lockScreenBtn: 'ui.widgets.lockScreen.title',
   logoutBtn: 'common.logout',
   userDropdown: 'preferences.widget.userDropdown',
-  tenantSelector: 'preferences.widget.tenantSelector',
+  workspaceSelector: 'preferences.widget.workspaceSelector',
 };
 
 function getModelMap() {
@@ -187,7 +187,7 @@ function getModelMap() {
     lockScreenBtn: widgetLockScreenButtonPosition,
     logoutBtn: widgetLogoutButtonPosition,
     userDropdown: widgetUserDropdownButtonPosition,
-    tenantSelector: widgetTenantSelectorButtonPosition,
+    workspaceSelector: widgetWorkspaceSelectorButtonPosition,
   } as Record<string, any>;
 }
 

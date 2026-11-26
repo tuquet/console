@@ -58,7 +58,7 @@ export interface DescriptionsProps {
   contentStyle?: CSSProperties;
   /** Action area located on right side of title */
   extra?: string;
-  /** Data-driven items; if omitted, reads VbenDescriptionsItem from default slot */
+  /** Data-driven items; if omitted, reads OperonDescriptionsItem from default slot */
   items?: DescriptionsItemType[];
   /** Unified label style */
   labelStyle?: CSSProperties;

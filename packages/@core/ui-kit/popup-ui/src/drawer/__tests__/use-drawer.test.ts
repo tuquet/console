@@ -6,7 +6,7 @@ import { createApp, defineComponent, h, nextTick, ref } from 'vue';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useVbenDrawer } from '../use-drawer';
+import { useOperonDrawer } from '../use-drawer';
 
 vi.mock('@operon-core/preferences', () => ({
   usePreferences: () => ({
@@ -16,7 +16,7 @@ vi.mock('@operon-core/preferences', () => ({
 
 vi.mock('../drawer.vue', () => ({
   default: {
-    name: 'VbenDrawerStub',
+    name: 'OperonDrawerStub',
     render: () => null,
   },
 }));
@@ -29,7 +29,7 @@ async function mountRebindingHarness() {
   const onOpenChange = vi.fn();
 
   const Consumer = defineComponent(() => {
-    const [Drawer, drawerApi] = useVbenDrawer();
+    const [Drawer, drawerApi] = useOperonDrawer();
     currentApi = drawerApi;
     return () => h(Drawer);
   });
@@ -38,7 +38,7 @@ async function mountRebindingHarness() {
     return () => h(Consumer, { key: consumerKey.value });
   });
 
-  const [ParentDrawer, parentApi] = useVbenDrawer({
+  const [ParentDrawer, parentApi] = useOperonDrawer({
     connectedComponent: ConnectedDrawer,
     onOpenChange,
     title: 'Parent drawer title',
@@ -70,7 +70,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('useVbenDrawer', () => {
+describe('useOperonDrawer', () => {
   it('rebinds the parent api when the consumer is recreated', async () => {
     const { consumerKey, getCurrentApi, onOpenChange, parentApi } =
       await mountRebindingHarness();

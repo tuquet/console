@@ -191,7 +191,7 @@ export async function packageRelease({
   );
   const binaryFiles = await readdir(binaryDirectory);
   const binaryNames = binaryFiles.filter((name) =>
-    ['Operon.exe', 'workstation.exe'].includes(name),
+    ['desktop.exe', 'Operon.exe'].includes(name),
   );
   if (binaryNames.length !== 1)
     throw new Error('Expected exactly one portable executable');
@@ -275,7 +275,7 @@ export async function packagePreview(binaryDirectory, outputDirectory) {
   await mkdir(outputDirectory, { recursive: false });
   const binaryFiles = await readdir(binaryDirectory);
   const candidates = binaryFiles.filter((name) =>
-    ['Operon.exe', 'workstation.exe'].includes(name),
+    ['desktop.exe', 'Operon.exe'].includes(name),
   );
   if (candidates.length !== 1)
     throw new Error('Expected one preview executable');

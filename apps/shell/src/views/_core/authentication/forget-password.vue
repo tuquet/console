@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { VbenFormSchema } from '@operon/common-ui';
+import type { OperonFormSchema } from '@operon/common-ui';
 import type { Recordable } from '@operon/types';
 
 import { computed } from 'vue';
@@ -14,10 +14,10 @@ defineOptions({ name: 'ForgetPassword' });
 
 const { executeAction, isLoading: loading } = useAsyncAction();
 
-const formSchema = computed((): VbenFormSchema[] => {
+const formSchema = computed((): OperonFormSchema[] => {
   return [
     {
-      component: 'VbenInput',
+      component: 'OperonInput',
       componentProps: {
         placeholder: $t('authentication.emailTip'),
       },

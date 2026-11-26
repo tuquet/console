@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { VbenAvatar } from '@operon-core/shadcn-ui';
+import { OperonAvatar } from '@operon-core/shadcn-ui';
 
 interface Props {
   avatar?: string;
@@ -15,7 +15,7 @@ withDefaults(defineProps<Props>(), {
 </script>
 <template>
   <div class="card-box p-4 py-6 lg:flex">
-    <VbenAvatar v-if="avatar" :src="avatar" class="size-20" />
+    <OperonAvatar v-if="avatar" :src="avatar" class="size-20" />
     <div
       v-if="$slots.title || $slots.description"
       class="flex flex-col justify-center md:mt-0 md:ml-6"

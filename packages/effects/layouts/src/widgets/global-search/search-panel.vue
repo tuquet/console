@@ -15,7 +15,7 @@ import {
   EmptyHeader,
   EmptyTitle,
   Kbd,
-  VbenIcon,
+  OperonIcon,
 } from '@operon-core/shadcn-ui';
 import { isHttpUrl } from '@operon-core/shared/utils';
 
@@ -346,7 +346,7 @@ useEventListener('mousemove', () => {
           >
             <!-- Left: Icon + Category + Highlighted Title -->
             <div class="flex min-w-0 flex-1 items-center gap-2.5">
-              <VbenIcon
+              <OperonIcon
                 :icon="item.icon"
                 fallback
                 class="size-4 shrink-0 text-muted-foreground group-hover:text-foreground transition-colors"

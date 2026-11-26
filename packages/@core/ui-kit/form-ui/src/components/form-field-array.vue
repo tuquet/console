@@ -6,9 +6,9 @@ import { computed } from 'vue';
 
 import { Plus, X } from '@operon-core/icons';
 import {
-  VbenButton,
-  VbenIconButton,
-  VbenRenderContent,
+  OperonButton,
+  OperonIconButton,
+  OperonRenderContent,
 } from '@operon-core/shadcn-ui';
 import { cn, get, set } from '@operon-core/shared/utils';
 
@@ -16,7 +16,7 @@ import { injectRenderFormProps } from '../form-render/context';
 import FormField from '../form-render/form-field.vue';
 import { createArrayChildSchema } from '../form-render/schema';
 
-defineOptions({ name: 'VbenFormFieldArray', inheritAttrs: false });
+defineOptions({ name: 'OperonFormFieldArray', inheritAttrs: false });
 
 const props = withDefaults(
   defineProps<{
@@ -68,7 +68,7 @@ const arrayPath = computed(() => props.name);
 const formRenderProps = injectRenderFormProps();
 const form = formRenderProps.form;
 if (!form) {
-  throw new Error('Form api is required in <VbenFormFieldArray />');
+  throw new Error('Form api is required in <OperonFormFieldArray />');
 }
 const formActions = form;
 const arrayLength = formActions.useSelector((state) => {
@@ -156,7 +156,7 @@ const normalizedRowSchemas = computed(() =>
           :key="col.fieldName"
           class="text-muted-foreground px-2 py-2 text-left"
         >
-          <VbenRenderContent :content="col.label" />
+          <OperonRenderContent :content="col.label" />
         </div>
         <div class="text-muted-foreground px-2 py-2 text-left">
           {{ actionText }}
@@ -183,7 +183,7 @@ const normalizedRowSchemas = computed(() =>
         >
           <div class="min-w-0 py-2 sm:px-2">
             <div class="text-muted-foreground mb-1 sm:hidden">
-              <VbenRenderContent :content="schema?.[childIndex]?.label" />
+              <OperonRenderContent :content="schema?.[childIndex]?.label" />
             </div>
             <FormField
               v-bind="childSchema"
@@ -193,14 +193,14 @@ const normalizedRowSchemas = computed(() =>
         </template>
 
         <div class="flex justify-end pt-1 sm:block sm:px-2 sm:py-3">
-          <VbenIconButton
+          <OperonIconButton
             type="button"
             :disabled="disabled || !canRemove"
             :on-click="() => removeRow(index)"
             class="text-muted-foreground hover:text-destructive"
           >
             <X class="size-4" />
-          </VbenIconButton>
+          </OperonIconButton>
         </div>
       </div>
 
@@ -212,7 +212,7 @@ const normalizedRowSchemas = computed(() =>
       </div>
     </div>
 
-    <VbenButton
+    <OperonButton
       variant="outline"
       size="sm"
       type="button"
@@ -222,6 +222,6 @@ const normalizedRowSchemas = computed(() =>
     >
       <Plus class="mr-1 size-4" />
       {{ addButtonText }}
-    </VbenButton>
+    </OperonButton>
   </div>
 </template>

@@ -1,7 +1,7 @@
 import type { Component } from 'vue';
 
 export interface MicroAppManifest<TRoute = any> {
-  /** Unique micro-app identifier (e.g. 'automation', 'system', 'tenants') */
+  /** Unique micro-app identifier (e.g. 'automation', 'system', 'workspaces') */
   id: string;
   /** Human-readable display name */
   name?: string;

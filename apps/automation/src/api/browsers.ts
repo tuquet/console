@@ -30,7 +30,7 @@ export interface BrowserProfileRecord {
   proxy?: null | string;
   startupFlags: string[];
   tags: string[];
-  tenantId: string;
+  workspaceId: string;
   timezone?: null | string;
   updatedAt: string;
   userAgent?: null | string;
@@ -43,10 +43,10 @@ export interface ListBrowsersParams {
   limit?: number;
   offset?: number;
   platform?: string;
-  scope?: 'all' | 'tenant';
+  scope?: 'all' | 'workspace';
   search?: string;
   status?: 'offline' | 'online';
-  tenantId?: string;
+  workspaceId?: string;
 }
 
 export interface CreateBrowserInput {
@@ -58,7 +58,7 @@ export interface CreateBrowserInput {
   proxy?: string;
   startupFlags?: string[];
   tags?: string[];
-  tenantId?: string;
+  workspaceId?: string;
   timezone?: string;
   userAgent?: string;
 }
@@ -114,11 +114,11 @@ export interface CloneBrowserInput {
   name?: string;
   newId?: string;
   preserveSeed?: boolean;
-  targetTenantId?: string;
+  targetWorkspaceId?: string;
 }
 
 export interface MoveBrowserInput {
-  targetTenantId: string;
+  targetWorkspaceId: string;
 }
 
 export interface ProbeProxyInput {
@@ -161,6 +161,28 @@ export interface ImportCsvResult {
   status: string;
 }
 
+export interface RuntimeReleaseItem {
+  channel: string;
+  installed: boolean;
+  isActive: boolean;
+  notes: string;
+  sizeMb?: null | number;
+  status: string;
+  tag: string;
+  version: string;
+}
+
+export interface ListRuntimesResult {
+  activeVersion: string;
+  releases: RuntimeReleaseItem[];
+}
+
+export interface RuntimeActionResult {
+  message: string;
+  success: boolean;
+  version: string;
+}
+
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export function createBrowserApi(api: KernelApiContext) {
@@ -195,21 +217,42 @@ export function createBrowserApi(api: KernelApiContext) {
         method: 'POST',
       }),
 
+    deleteRuntime: (version: string) =>
+      api.localDaemonFetch<RuntimeActionResult>(
+        `/api/v1/browsers/runtimes/${encodeURIComponent(version)}`,
+        { method: 'DELETE' },
+      ),
+
     detail: (id: string) =>
       api.localDaemonFetch<BrowserProfileRecord>(
         `/api/v1/browsers/${encodeURIComponent(id)}`,
       ),
 
-    importCsv: (csvString: string, tenantId?: string) =>
+    installRuntime: (version: string) =>
+      api.localDaemonFetch<RuntimeActionResult>(
+        `/api/v1/browsers/runtimes/${encodeURIComponent(version)}/install`,
+        { method: 'POST' },
+      ),
+
+    listRuntimes: () =>
+      api.localDaemonFetch<ListRuntimesResult>('/api/v1/browsers/runtimes'),
+
+    useRuntime: (version: string) =>
+      api.localDaemonFetch<RuntimeActionResult>(
+        `/api/v1/browsers/runtimes/${encodeURIComponent(version)}/use`,
+        { method: 'POST' },
+      ),
+
+    importCsv: (csvString: string, workspaceId?: string) =>
       api.localDaemonFetch<ImportCsvResult>('/api/v1/browsers/import-csv', {
-        body: JSON.stringify({ csvString, tenantId }),
+        body: JSON.stringify({ csvString, workspaceId }),
         headers: JSON_HEADERS,
         method: 'POST',
       }),
 
     list: (params: ListBrowsersParams = {}) => {
       const qs = new URLSearchParams();
-      if (params.tenantId) qs.set('tenantId', params.tenantId);
+      if (params.workspaceId) qs.set('workspaceId', params.workspaceId);
       if (params.scope) qs.set('scope', params.scope);
       if (params.search?.trim()) qs.set('search', params.search.trim());
       if (params.status) qs.set('status', params.status);

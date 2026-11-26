@@ -5,7 +5,7 @@ import { computed } from 'vue';
 
 import { ArrowUpToLine } from '@operon-core/icons';
 
-import { VbenButton } from '../button';
+import { OperonButton } from '../button';
 import { useBackTop } from './use-backtop';
 
 interface Props extends BacktopProps {}
@@ -29,7 +29,7 @@ const { handleClick, visible } = useBackTop(props);
 </script>
 <template>
   <transition name="fade-down">
-    <VbenButton
+    <OperonButton
       v-if="visible"
       :style="backTopStyle"
       class="data z-popup bg-background shadow-float hover:bg-heavy dark:bg-accent dark:hover:bg-heavy fixed bottom-10 size-10 rounded-full duration-500"
@@ -38,6 +38,6 @@ const { handleClick, visible } = useBackTop(props);
       @click="handleClick"
     >
       <ArrowUpToLine class="size-4" />
-    </VbenButton>
+    </OperonButton>
   </transition>
 </template>

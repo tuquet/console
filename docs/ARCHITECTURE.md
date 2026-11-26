@@ -7,7 +7,7 @@
 | Path | Owns |
 | --- | --- |
 | `apps/shell` | Auth, session, layout, top-level routes, access guards, desktop adapters, `@operon/kernel` host |
-| `apps/{automation,system,tenants,playground}` | Domain screens, `app:*` Pinia stores, child route manifests (`src/manifest.ts`) |
+| `apps/{automation,system,workspaces,tasks}` | Domain screens, `app:*` Pinia stores, child route manifests (`src/manifest.ts`) |
 | `packages/kernel` | Typed host contract (`useKernel()`, `KERNEL_INJECTION_KEY`), mock host, `KernelApiError` |
 | `packages/@core` | Base types, UI primitives, `shadcn-ui` |
 | `packages/effects` | Shared layouts, hooks, higher-level UI |
@@ -28,7 +28,7 @@ Enforced by `pnpm check:architecture`, `pnpm check:circular`, and ESLint:
 Tauri mounts `DesktopShell` once in `App` across all routes (including auth and errors); web renders `RouterView` directly:
 
 - **`window-titlebar`** (`DesktopTitlebar` + `WindowControls`): app identity, `data-tauri-drag-region`, update button, window buttons (excluded from drag region).
-- **`desktop-viewport`**: `min-height: 0` + `contain: layout` isolates fixed headers/sidebars/masks inside `vben-layout.vue` without titlebar offset math. `useElementSize` sets `--vben-viewport-height` for sub-titlebar overlays; `body`-teleported dialogs remain full-window.
+- **`desktop-viewport`**: `min-height: 0` + `contain: layout` isolates fixed headers/sidebars/masks inside `operon-layout.vue` without titlebar offset math. `useElementSize` sets `--operon-viewport-height` for sub-titlebar overlays; `body`-teleported dialogs remain full-window.
 
 ## Adding a screen or micro-app
 

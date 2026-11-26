@@ -5,8 +5,8 @@ import { defineComponent, h, nextTick } from 'vue';
 
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { COMPONENT_MAP, setupVbenForm } from '../src/config';
-import { useVbenForm } from '../src/use-vben-form';
+import { COMPONENT_MAP, setupOperonForm } from '../src/config';
+import { useOperonForm } from '../src/use-operon-form';
 
 const ElInput = defineComponent({
   name: 'ElInput',
@@ -54,7 +54,7 @@ const ProbeTreeSelect = defineComponent({
 });
 
 beforeAll(() => {
-  setupVbenForm({
+  setupOperonForm({
     config: {},
     rules: {},
   });
@@ -78,7 +78,7 @@ describe('issue #8214: form field named nodeName crashes TreeSelect render', () 
     const consoleError = vi
       .spyOn(console, 'error')
       .mockImplementation(() => {});
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [
         {
           component: ProbeTreeSelect,
@@ -133,7 +133,7 @@ describe('issue #8214: form field named nodeName crashes TreeSelect render', () 
     expect(Reflect.get(document.createElement('form'), 'nodeName')).toBe(
       'FORM',
     );
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [
         {
           component: ProbeTreeSelect,
@@ -168,7 +168,7 @@ describe('issue #8214: form field named nodeName crashes TreeSelect render', () 
     // coderabbit review boundary: when modelPropName is 'name', binds.name carries model data
     // (v-model semantics), and must not be stripped even if value matches <form> inherent property;
     // native attribute path is still blocked by conflictsWithFormProperty.
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [
         {
           component: ProbeTreeSelect,
@@ -193,7 +193,7 @@ describe('issue #8214: form field named nodeName crashes TreeSelect render', () 
   it('preserves componentProps.name when the component declares name as a semantic prop', async () => {
     // coderabbit review boundary: for component declaring name semantic prop, componentProps.name
     // is component prop rather than native fallthrough attribute, must not be stripped on conflict
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [
         {
           component: DeclaredNameComponent,
@@ -216,7 +216,7 @@ describe('issue #8214: form field named nodeName crashes TreeSelect render', () 
     // coderabbit review boundary: if component resolved from string name via componentMap declares
     // name semantic prop, it must likewise not be stripped (guard must inspect resolved FieldComponent)
     COMPONENT_MAP.NameDeclared = DeclaredNameComponent;
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [
         {
           component: 'NameDeclared',

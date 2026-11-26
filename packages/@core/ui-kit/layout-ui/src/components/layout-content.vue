@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<Props>(), {});
 
 const overlayViewportStyle: CSSProperties = {
   height:
-    'calc(var(--vben-viewport-height) - var(--vben-header-height, 0px) - var(--vben-footer-height, 0px))',
+    'calc(var(--operon-viewport-height) - var(--operon-header-height, 0px) - var(--operon-footer-height, 0px))',
 };
 
 const style = computed((): CSSProperties => {

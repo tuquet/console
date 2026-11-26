@@ -6,8 +6,8 @@ import { computed, ref } from 'vue';
 import { cn } from '@operon-core/shared/utils';
 
 import { Popover, PopoverContent, PopoverTrigger } from '../../ui';
-import { VbenButton } from '../button';
-import { VbenIcon } from '../icon';
+import { OperonButton } from '../button';
+import { OperonIcon } from '../icon';
 
 const props = defineProps<{ action: ActionItem }>();
 
@@ -48,7 +48,7 @@ function onCancel() {
   <!-- Popconfirm -->
   <Popover v-if="action.popConfirm" v-model:open="open">
     <PopoverTrigger as-child>
-      <VbenButton
+      <OperonButton
         :class="buttonClass"
         :disabled="action.disabled"
         :loading="action.loading"
@@ -56,32 +56,32 @@ function onCancel() {
         class="p-2"
         :variant="variant"
       >
-        <VbenIcon :icon="action.icon" v-if="action.icon" class="size-4" />
+        <OperonIcon :icon="action.icon" v-if="action.icon" class="size-4" />
         <span v-if="action.text">{{ action.text }}</span>
-      </VbenButton>
+      </OperonButton>
     </PopoverTrigger>
     <PopoverContent class="z-popup w-60" side="top">
       <div class="text-foreground mb-3">
         {{ action.popConfirm.title ?? 'Are you sure?' }}
       </div>
       <div class="flex justify-end gap-2">
-        <VbenButton size="default" variant="outline" @click="onCancel">
+        <OperonButton size="default" variant="outline" @click="onCancel">
           {{ action.popConfirm.cancelText ?? 'Cancel' }}
-        </VbenButton>
-        <VbenButton
+        </OperonButton>
+        <OperonButton
           :variant="action.danger ? 'destructive' : 'default'"
           size="default"
           class="p-2"
           @click="onConfirm"
         >
           {{ action.popConfirm.okText ?? 'OK' }}
-        </VbenButton>
+        </OperonButton>
       </div>
     </PopoverContent>
   </Popover>
 
   <!-- Standard button -->
-  <VbenButton
+  <OperonButton
     v-else
     :class="buttonClass"
     :disabled="action.disabled"
@@ -91,7 +91,7 @@ function onCancel() {
     :variant="variant"
     @click="onClick"
   >
-    <VbenIcon :icon="action.icon" v-if="action.icon" class="size-4" />
+    <OperonIcon :icon="action.icon" v-if="action.icon" class="size-4" />
     <span v-if="action.text">{{ action.text }}</span>
-  </VbenButton>
+  </OperonButton>
 </template>

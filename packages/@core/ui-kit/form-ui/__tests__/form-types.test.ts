@@ -11,13 +11,13 @@ import type {
   FormValidationResult,
   FormValuePatch,
   FormValueSnapshot,
-  VbenFormAdapterOptions,
-  VbenFormProps,
+  OperonFormAdapterOptions,
+  OperonFormProps,
 } from '../src/types';
 
 import { describe, expectTypeOf, it } from 'vitest';
 
-import { useVbenForm } from '../src/use-vben-form';
+import { useOperonForm } from '../src/use-operon-form';
 
 interface AccountFormValues {
   email: string;
@@ -49,7 +49,7 @@ describe('form public types', () => {
   });
 
   it('accepts both new and deprecated rule registration options', () => {
-    expectTypeOf<VbenFormAdapterOptions>().toMatchTypeOf<{
+    expectTypeOf<OperonFormAdapterOptions>().toMatchTypeOf<{
       defineRules?: Record<string, unknown>;
       rules?: Record<string, unknown>;
     }>();
@@ -90,7 +90,7 @@ describe('form public types', () => {
   });
 
   it('propagates form value types through public APIs and callbacks', () => {
-    const options: VbenFormProps<
+    const options: OperonFormProps<
       BaseFormComponentType,
       Record<never, never>,
       AccountFormValues
@@ -105,7 +105,7 @@ describe('form public types', () => {
       },
       schema: [],
     };
-    const [Form, formApi] = useVbenForm<AccountFormValues>(options);
+    const [Form, formApi] = useOperonForm<AccountFormValues>(options);
 
     expectTypeOf(formApi).toEqualTypeOf<ExtendedFormApi<AccountFormValues>>();
 
@@ -161,7 +161,7 @@ describe('form public types', () => {
       DefaultSlotProps['values']
     >().toEqualTypeOf<AccountFormValues>();
 
-    const [WideForm] = useVbenForm<Record<string, unknown>>({ schema: [] });
+    const [WideForm] = useOperonForm<Record<string, unknown>>({ schema: [] });
     type WideFormSlots = InstanceType<typeof WideForm>['$slots'];
     type WideFieldSlot = NonNullable<WideFormSlots['dynamic-field']>;
     type WideFieldSlotProps = Parameters<WideFieldSlot>[0];
@@ -181,7 +181,7 @@ describe('form public types', () => {
   });
 
   it('keeps form and submit values distinct with a codec', () => {
-    const options: VbenFormProps<
+    const options: OperonFormProps<
       BaseFormComponentType,
       Record<never, never>,
       AccountFormValues,
@@ -216,7 +216,7 @@ describe('form public types', () => {
       },
       schema: [],
     };
-    const [, formApi] = useVbenForm<
+    const [, formApi] = useOperonForm<
       AccountFormValues,
       BaseFormComponentType,
       Record<never, never>,
@@ -238,7 +238,7 @@ describe('form public types', () => {
   });
 
   it('infers submit values from an inline codec', () => {
-    const [, formApi] = useVbenForm({
+    const [, formApi] = useOperonForm({
       codec: {
         decode(values) {
           expectTypeOf(values).toEqualTypeOf<Readonly<AccountSubmitValues>>();
@@ -275,11 +275,13 @@ describe('form public types', () => {
   });
 
   it('discriminates group schemas from field schemas by type', () => {
-    const [, formApi] = useVbenForm<AccountFormValues>({
+    const [, formApi] = useOperonForm<AccountFormValues>({
       schema: [
-        { component: 'VbenInput', fieldName: 'email' },
+        { component: 'OperonInput', fieldName: 'email' },
         {
-          children: [{ component: 'VbenInput', fieldName: 'profile.nickname' }],
+          children: [
+            { component: 'OperonInput', fieldName: 'profile.nickname' },
+          ],
           defaultCollapsed: true,
           title: 'Profile',
           type: 'group',

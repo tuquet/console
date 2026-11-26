@@ -5,7 +5,7 @@ import { computed, useId } from 'vue';
 
 import { preferences, usePreferences } from '@operon/preferences';
 
-import { VbenLogo } from '@operon-core/shadcn-ui';
+import { OperonLogo } from '@operon-core/shadcn-ui';
 
 import { Copyright } from '../basic/copyright';
 import AuthenticationFormView from './form.vue';
@@ -31,7 +31,7 @@ const props = withDefaults(defineProps<Props>(), {
   logoDark: '',
   pageDescription: '',
   pageTitle: '',
-  sloganImage: '/illustrations/specter-waving.svg',
+  sloganImage: '/illustrations/operon-waving.svg',
   toolbar: true,
   toolbarList: () => ['color', 'language', 'layout', 'theme'],
   clickLogo: () => {},
@@ -56,7 +56,7 @@ const logoSrc = computed(() => {
 
 const isBuiltinSlogan = computed(() => {
   const s = (props.sloganImage || '').trim();
-  return !s || s.endsWith('/specter-waving.svg');
+  return !s || s.endsWith('/operon-waving.svg');
 });
 </script>
 
@@ -96,7 +96,7 @@ const isBuiltinSlogan = computed(() => {
         <div
           class="mt-4 ml-4 flex flex-1 items-center text-foreground sm:top-6 sm:left-6 lg:text-foreground"
         >
-          <VbenLogo
+          <OperonLogo
             :logo-size="42"
             :src="logo"
             :src-dark="logoDark"
@@ -127,7 +127,7 @@ const isBuiltinSlogan = computed(() => {
               v-if="isBuiltinSlogan"
               :aria-label="appName"
               class="h-64 w-2/5 animate-float object-contain"
-              data-specter-slogan="true"
+              data-operon-slogan="true"
               fill="none"
               role="img"
               viewBox="0 0 434 482"

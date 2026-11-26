@@ -6,7 +6,7 @@ import { ELEMENT_ID_MAIN_CONTENT } from '@operon-core/shared/constants';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useVbenModal } from '../use-modal';
+import { useOperonModal } from '../use-modal';
 
 vi.mock('@operon-core/preferences', () => ({
   usePreferences: () => ({
@@ -22,9 +22,9 @@ async function mountModal(options: { onClosed?: () => void } = {}) {
   mainContent.innerHTML = '<div><div></div></div>';
   document.body.append(mainContent);
 
-  let capturedApi: ReturnType<typeof useVbenModal>[1] | undefined;
+  let capturedApi: ReturnType<typeof useOperonModal>[1] | undefined;
   const Consumer = defineComponent(() => {
-    const [Modal, modalApi] = useVbenModal({
+    const [Modal, modalApi] = useOperonModal({
       appendToMain: true,
       draggable: true,
       title: 'Draggable modal',
@@ -57,7 +57,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('vben modal', () => {
+describe('operon modal', () => {
   it('mounts an open modal directly in the main content', async () => {
     const { mainContent } = await mountModal();
     const dialog = document.querySelector('[role="dialog"]');
@@ -113,7 +113,7 @@ describe('vben modal', () => {
     document.body.append(mainContent);
 
     const Consumer = defineComponent(() => {
-      const [Modal, modalApi] = useVbenModal({
+      const [Modal, modalApi] = useOperonModal({
         appendToMain: true,
         fullscreenButton: true,
         title: 'Slot modal',

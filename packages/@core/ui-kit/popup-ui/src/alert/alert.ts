@@ -86,7 +86,7 @@ export type AlertContext = {
 };
 
 export const [injectAlertContext, provideAlertContext] =
-  createContext<AlertContext>('VbenAlertContext');
+  createContext<AlertContext>('OperonAlertContext');
 
 /**
  * Get Alert context

@@ -58,8 +58,10 @@ catalog:
   '@tailwindcss/vite': ^4.3.3
   '@tanstack/store': ^0.11.0
   '@tanstack/vue-form': ^1.33.2
+  '@tanstack/vue-query': ^5.108.4
   '@tanstack/vue-store': ^0.11.0
   '@tanstack/vue-table': ^9.3.1
+  '@tanstack/vue-virtual': ^3.13.54
   '@tauri-apps/api': ^2.2.0
   '@tauri-apps/cli': ^2.2.0
   '@tauri-apps/plugin-deep-link': ^2.2.0

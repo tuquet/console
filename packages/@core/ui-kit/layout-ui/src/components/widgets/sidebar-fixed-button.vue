@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Pin, PinOff } from '@operon-core/icons';
-import { VbenButton } from '@operon-core/shadcn-ui';
+import { OperonButton } from '@operon-core/shadcn-ui';
 
 const expandOnHover = defineModel<boolean>('expandOnHover');
 const expandOnHovering = defineModel<boolean>('expandOnHovering');
@@ -16,7 +16,7 @@ function toggleFixed() {
 </script>
 
 <template>
-  <VbenButton
+  <OperonButton
     type="button"
     variant="ghost"
     size="icon"
@@ -28,5 +28,5 @@ function toggleFixed() {
   >
     <PinOff v-show="!expandOnHover" class="size-4" />
     <Pin v-show="expandOnHover" class="size-4" />
-  </VbenButton>
+  </OperonButton>
 </template>

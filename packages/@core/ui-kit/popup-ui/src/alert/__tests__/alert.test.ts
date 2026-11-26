@@ -64,7 +64,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('vben alert', () => {
+describe('operon alert', () => {
   it('closes and emits confirm once when the confirm button is clicked', async () => {
     const { onConfirm, onUpdateOpen, state } = await mountAlert();
     const button = [...document.querySelectorAll('button')].find(

@@ -5,7 +5,7 @@ import { DEFAULT_HOME_PATH } from '@operon/constants';
 import { sanitizeRedirectPath } from '#/utils/security';
 
 const WELCOME_DISMISSED_KEY = 'operon:welcome-dismissed';
-const BRIDGE_SEEN_KEY = 'operon:local-bridge-seen';
+const DAEMON_SEEN_KEY = 'operon:daemon-seen';
 const WELCOME_REDIRECT_KEY = 'operon:welcome-redirect';
 
 /**
@@ -35,21 +35,21 @@ export function setShowWelcomeOnStartup(show: boolean): void {
 /**
  * Returns true once this browser has successfully connected to a local Operon daemon.
  */
-export function hasLocalBridgeSeen(): boolean {
+export function hasDaemonSeen(): boolean {
   if (typeof window === 'undefined' || !window.localStorage) {
     return false;
   }
-  return window.localStorage.getItem(BRIDGE_SEEN_KEY) === 'true';
+  return window.localStorage.getItem(DAEMON_SEEN_KEY) === 'true';
 }
 
 /**
  * Marks that this browser has connected to a local Operon daemon before.
  */
-export function markLocalBridgeSeen(): void {
+export function markDaemonSeen(): void {
   if (typeof window === 'undefined' || !window.localStorage) {
     return;
   }
-  window.localStorage.setItem(BRIDGE_SEEN_KEY, 'true');
+  window.localStorage.setItem(DAEMON_SEEN_KEY, 'true');
 }
 
 function normalizeAppRedirect(rawPath: unknown): null | string {

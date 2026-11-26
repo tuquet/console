@@ -1,3 +1,3 @@
 export * from './auth';
 export * from './notification';
-export * from './tenant';
+export * from './workspace';

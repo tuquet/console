@@ -104,14 +104,14 @@ describe('useLayoutScroll', () => {
     const { afterHook, beforeGuard } = routerMock.getHooks();
 
     const fromRoute = {
-      path: '/tenants/detail/1',
-      fullPath: '/tenants/detail/1?tab=overview',
-      matched: [{ path: '/tenants/detail/1' }],
+      path: '/workspaces/detail/1',
+      fullPath: '/workspaces/detail/1?tab=overview',
+      matched: [{ path: '/workspaces/detail/1' }],
     } as any;
     const toRoute = {
-      path: '/tenants/detail/1',
-      fullPath: '/tenants/detail/1?tab=members',
-      matched: [{ path: '/tenants/detail/1' }],
+      path: '/workspaces/detail/1',
+      fullPath: '/workspaces/detail/1?tab=members',
+      matched: [{ path: '/workspaces/detail/1' }],
       hash: '',
     } as any;
 

@@ -12,8 +12,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '../../ui';
-import { VbenButton } from '../button';
-import { VbenIcon } from '../icon';
+import { OperonButton } from '../button';
+import { OperonIcon } from '../icon';
 
 const props = defineProps<{ action: ActionItem }>();
 const emit = defineEmits<{ confirm: [] }>();
@@ -74,7 +74,7 @@ function onCancel() {
         @select="preventDefault"
       >
         <div>
-          <VbenIcon v-if="action.icon" :icon="action.icon" class="size-4" />
+          <OperonIcon v-if="action.icon" :icon="action.icon" class="size-4" />
           {{ action.text }}
         </div>
       </DropdownMenuItem>
@@ -89,16 +89,16 @@ function onCancel() {
         {{ action.popConfirm.title ?? $t('confirmTitle') }}
       </div>
       <div class="flex justify-end gap-2">
-        <VbenButton size="sm" variant="outline" @click="onCancel">
+        <OperonButton size="sm" variant="outline" @click="onCancel">
           {{ action.popConfirm.cancelText ?? $t('cancel') }}
-        </VbenButton>
-        <VbenButton
+        </OperonButton>
+        <OperonButton
           :variant="action.danger ? 'destructive' : 'default'"
           size="sm"
           @click="onConfirm"
         >
           {{ action.popConfirm.okText ?? $t('confirm') }}
-        </VbenButton>
+        </OperonButton>
       </div>
     </PopoverContent>
   </Popover>
@@ -110,7 +110,7 @@ function onCancel() {
     :disabled="action.disabled"
     @click="onClick"
   >
-    <VbenIcon v-if="action.icon" :icon="action.icon" class="size-4" />
+    <OperonIcon v-if="action.icon" :icon="action.icon" class="size-4" />
     {{ action.text }}
   </DropdownMenuItem>
 </template>

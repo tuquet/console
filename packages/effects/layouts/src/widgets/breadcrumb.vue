@@ -15,7 +15,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-  VbenIcon,
+  OperonIcon,
 } from '@operon-core/shadcn-ui';
 
 import { resolveBreadcrumbMatches } from './breadcrumb-routes';
@@ -82,7 +82,7 @@ function handleSelect(path: string) {
         <BreadcrumbSeparator v-if="index > 0" />
         <BreadcrumbItem>
           <BreadcrumbPage v-if="index === breadcrumbs.length - 1">
-            <VbenIcon v-if="showIcon && item.icon" :icon="item.icon" />
+            <OperonIcon v-if="showIcon && item.icon" :icon="item.icon" />
             {{ item.title || $t('common.home') }}
           </BreadcrumbPage>
           <BreadcrumbLink
@@ -91,7 +91,7 @@ function handleSelect(path: string) {
             class="inline-flex items-center gap-1"
             @click.prevent="item.path && handleSelect(item.path)"
           >
-            <VbenIcon v-if="showIcon && item.icon" :icon="item.icon" />
+            <OperonIcon v-if="showIcon && item.icon" :icon="item.icon" />
             {{ item.title || $t('common.home') }}
           </BreadcrumbLink>
         </BreadcrumbItem>

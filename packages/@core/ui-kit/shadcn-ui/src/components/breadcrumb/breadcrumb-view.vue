@@ -20,17 +20,17 @@ const forward = useForwardPropsEmits(props, emit);
   <Breadcrumb
     v-if="styleType === 'normal'"
     v-bind="forward"
-    class="vben-breadcrumb"
+    class="operon-breadcrumb"
   />
   <BreadcrumbBackground
     v-if="styleType === 'background'"
     v-bind="forward"
-    class="vben-breadcrumb"
+    class="operon-breadcrumb"
   />
 </template>
 <style lang="scss" scoped>
 /** Fix issue where default styles of ol and ul are modified when Antd is imported globally */
-.vben-breadcrumb {
+.operon-breadcrumb {
   :deep(ol),
   :deep(ul) {
     margin-bottom: 0;

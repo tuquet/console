@@ -4,12 +4,12 @@ import type { AboutProps, DescriptionItem } from './about';
 import { h } from 'vue';
 
 import {
-  VBEN_DOC_URL,
-  VBEN_GITHUB_URL,
-  VBEN_PREVIEW_URL,
+  OPERON_DOC_URL,
+  OPERON_GITHUB_URL,
+  OPERON_PREVIEW_URL,
 } from '@operon/constants';
 
-import { VbenRenderContent } from '@operon-core/shadcn-ui';
+import { OperonRenderContent } from '@operon-core/shadcn-ui';
 
 import { Page } from '../../components';
 
@@ -27,7 +27,7 @@ withDefaults(defineProps<Props>(), {
 });
 
 declare global {
-  const __VBEN_ADMIN_METADATA__: {
+  const __OPERON_ADMIN_METADATA__: {
     authorEmail: string;
     authorName: string;
     authorUrl: string;
@@ -45,7 +45,7 @@ declare global {
 const renderLink = (href: string, text: string) =>
   h(
     'a',
-    { href, target: '_blank', class: 'vben-link' },
+    { href, target: '_blank', class: 'operon-link' },
     { default: () => text },
   );
 
@@ -60,9 +60,9 @@ const {
   license,
   version,
   // Global variables injected by vite inject-metadata plugin
-} = __VBEN_ADMIN_METADATA__ || {};
+} = __OPERON_ADMIN_METADATA__ || {};
 
-const vbenDescriptionItems: DescriptionItem[] = [
+const operonDescriptionItems: DescriptionItem[] = [
   {
     content: version,
     title: 'Version',
@@ -80,15 +80,15 @@ const vbenDescriptionItems: DescriptionItem[] = [
     title: 'Homepage',
   },
   {
-    content: renderLink(VBEN_DOC_URL, 'View'),
+    content: renderLink(OPERON_DOC_URL, 'View'),
     title: 'Documentation',
   },
   {
-    content: renderLink(VBEN_PREVIEW_URL, 'View'),
+    content: renderLink(OPERON_PREVIEW_URL, 'View'),
     title: 'Preview',
   },
   {
-    content: renderLink(VBEN_GITHUB_URL, 'View'),
+    content: renderLink(OPERON_GITHUB_URL, 'View'),
     title: 'Github',
   },
   {
@@ -115,7 +115,7 @@ const devDependenciesItems = Object.keys(devDependencies).map((key) => ({
   <Page :title="title">
     <template #description>
       <p class="mt-3 text-foreground">
-        <a :href="VBEN_GITHUB_URL" class="vben-link" target="_blank">
+        <a :href="OPERON_GITHUB_URL" class="operon-link" target="_blank">
           {{ name }}
         </a>
         {{ description }}
@@ -127,13 +127,13 @@ const devDependenciesItems = Object.keys(devDependencies).map((key) => ({
       </div>
       <div class="mt-4">
         <dl class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          <template v-for="item in vbenDescriptionItems" :key="item.title">
+          <template v-for="item in operonDescriptionItems" :key="item.title">
             <div class="border-t border-border px-4 py-6 sm:col-span-1 sm:px-0">
               <dt class="text-foreground">
                 {{ item.title }}
               </dt>
               <dd class="mt-1 text-foreground sm:mt-2">
-                <VbenRenderContent :content="item.content" />
+                <OperonRenderContent :content="item.content" />
               </dd>
             </div>
           </template>
@@ -153,7 +153,7 @@ const devDependenciesItems = Object.keys(devDependencies).map((key) => ({
                 {{ item.title }}
               </dt>
               <dd class="mt-1 text-foreground/80 sm:mt-2">
-                <VbenRenderContent :content="item.content" />
+                <OperonRenderContent :content="item.content" />
               </dd>
             </div>
           </template>
@@ -172,7 +172,7 @@ const devDependenciesItems = Object.keys(devDependencies).map((key) => ({
                 {{ item.title }}
               </dt>
               <dd class="mt-1 text-foreground/80 sm:mt-2">
-                <VbenRenderContent :content="item.content" />
+                <OperonRenderContent :content="item.content" />
               </dd>
             </div>
           </template>

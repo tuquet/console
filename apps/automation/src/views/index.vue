@@ -3,9 +3,9 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 import {
-  getLocalBridgeInstallInfo,
+  getDaemonInstallInfo,
+  useDaemonHeartbeat,
   useKernel,
-  useLocalBridgeHeartbeat,
 } from '@operon/kernel';
 
 import { Badge, Button, Skeleton, toast } from '@operon-core/shadcn-ui';
@@ -31,15 +31,15 @@ defineOptions({ name: 'AutomationStarterView' });
 const router = useRouter();
 const kernel = useKernel();
 const sampleStore = useSampleStore();
-const bridge = useLocalBridgeHeartbeat({ intervalMs: 5000 });
-const isChecking = computed(() => bridge.status.value === 'checking');
-const isInitialChecking = bridge.isInitialChecking;
+const daemon = useDaemonHeartbeat({ intervalMs: 5000 });
+const isChecking = computed(() => daemon.status.value === 'checking');
+const isInitialChecking = daemon.isInitialChecking;
 const hasOverviewRoute = computed(
   () => router.resolve('/dashboard/overview').matched.length > 0,
 );
 
 const isCloud = computed(() => kernel.auth.hasCloudAuth);
-const installInfo = getLocalBridgeInstallInfo();
+const installInfo = getDaemonInstallInfo();
 const installCommand = computed(() => installInfo.command);
 const releasesUrl = installInfo.releasesUrl;
 
@@ -128,7 +128,7 @@ function handleNotify() {
       </div>
 
       <div
-        v-else-if="!bridge.isHealthy.value"
+        v-else-if="!daemon.isHealthy.value"
         key="automation-offline"
         class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-6 shadow-xs"
       >
@@ -147,10 +147,10 @@ function handleNotify() {
                   Operon to unlock automation controls.
                 </p>
                 <p
-                  v-if="bridge.error.value"
+                  v-if="daemon.error.value"
                   class="text-xs text-amber-500/90 mt-1.5 font-mono"
                 >
-                  Last probe: {{ bridge.error.value }}
+                  Last probe: {{ daemon.error.value }}
                 </p>
               </div>
             </div>
@@ -179,7 +179,7 @@ function handleNotify() {
                 size="sm"
                 variant="outline"
                 :disabled="isChecking"
-                @click="bridge.checkNow()"
+                @click="daemon.checkNow()"
               >
                 <RefreshCw
                   class="size-3.5 mr-1.5"
@@ -208,13 +208,13 @@ function handleNotify() {
         </div>
       </div>
 
-      <!-- Cards Grid (rendered only when Local Bridge is healthy) -->
+      <!-- Cards Grid (rendered only when Daemon is healthy) -->
       <div
         v-else
         key="automation-healthy"
         class="grid grid-cols-1 md:grid-cols-2 gap-5"
       >
-        <!-- Local Bridge Status Banner -->
+        <!-- Daemon Status Banner -->
         <div
           class="md:col-span-2 flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3"
         >
@@ -222,18 +222,18 @@ function handleNotify() {
             <CheckCircle2 class="size-4 text-emerald-500" />
             <span class="font-medium text-foreground"> Operon Connected </span>
             <Badge
-              v-if="bridge.health.value?.version"
+              v-if="daemon.health.value?.version"
               variant="secondary"
               class="text-[11px] font-mono"
             >
-              v{{ bridge.health.value.version }}
+              v{{ daemon.health.value.version }}
             </Badge>
           </div>
           <Button
             size="sm"
             variant="ghost"
             :disabled="isChecking"
-            @click="bridge.checkNow()"
+            @click="daemon.checkNow()"
           >
             <RefreshCw
               class="size-3.5 mr-1"

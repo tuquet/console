@@ -2,7 +2,7 @@ import { createMemoryHistory, createRouter } from 'vue-router';
 
 import { automationManifest } from '@operon/automation';
 import { systemManifest } from '@operon/system';
-import { tenantsManifest } from '@operon/tenants';
+import { workspacesManifest } from '@operon/workspaces';
 
 import { describe, expect, it } from 'vitest';
 
@@ -26,17 +26,21 @@ describe('business application route integration', () => {
     },
   );
 
-  it.each(['', '/tenants'])(
-    'resolves named tenant navigation under %s',
+  it.each(['', '/workspaces'])(
+    'resolves named workspace navigation under %s',
     (prefix) => {
       const router = createRouter({
         history: createMemoryHistory(),
-        routes: [{ path: prefix || '/', children: tenantsManifest.routes(t) }],
+        routes: [
+          { path: prefix || '/', children: workspacesManifest.routes(t) },
+        ],
       });
-      expect(router.resolve({ name: 'Tenants' }).path).toBe(prefix || '/');
+      expect(router.resolve({ name: 'Workspaces' }).path).toBe(prefix || '/');
       expect(
-        router.resolve({ name: 'TenantDetail', params: { id: 'workspace-1' } })
-          .path,
+        router.resolve({
+          name: 'WorkspaceDetail',
+          params: { id: 'workspace-1' },
+        }).path,
       ).toBe(`${prefix}/workspace-1`);
     },
   );

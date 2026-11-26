@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { VbenLoading } from '@operon-core/shadcn-ui';
+import { OperonLoading } from '@operon-core/shadcn-ui';
 import { cn } from '@operon-core/shared/utils';
 
 interface LoadingProps {
@@ -26,7 +26,7 @@ const props = defineProps<LoadingProps>();
 <template>
   <div :class="cn('relative min-h-20', props.class)">
     <slot></slot>
-    <VbenLoading
+    <OperonLoading
       :min-loading-time="props.minLoadingTime"
       :spinning="props.spinning"
       :text="props.text"
@@ -34,6 +34,6 @@ const props = defineProps<LoadingProps>();
       <template v-if="$slots.icon" #icon>
         <slot name="icon"></slot>
       </template>
-    </VbenLoading>
+    </OperonLoading>
   </div>
 </template>

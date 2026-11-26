@@ -243,7 +243,7 @@ function createArrayFieldSchema(
 
   return {
     ...restSchema,
-    component: 'VbenFormFieldArray',
+    component: 'OperonFormFieldArray',
     componentProps: createArrayComponentProps(schema, options),
   };
 }
@@ -333,7 +333,7 @@ export function getFormArraySchemaChildren<TSchema = FormFieldSchema>(
 export function isFormArraySchema(schema: Partial<AnyFormFieldSchema>) {
   return (
     ('type' in schema && schema.type === 'array') ||
-    schema.component === 'VbenFormFieldArray' ||
+    schema.component === 'OperonFormFieldArray' ||
     getFormArraySchemaChildren(schema).length > 0
   );
 }

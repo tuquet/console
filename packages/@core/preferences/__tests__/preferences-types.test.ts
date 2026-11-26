@@ -6,7 +6,7 @@ import { updateCustomPreferences } from '../src';
 
 interface ProjectPreferences {
   defaultTableSize: number;
-  tenantMode: 'multi' | 'single';
+  workspaceMode: 'multi' | 'single';
 }
 
 describe('custom preferences types', () => {

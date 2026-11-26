@@ -52,7 +52,7 @@ describe('official i18n Tooling & Integrity Test Suite', () => {
     ).toEqual([]);
   });
 
-  it('guarantees no hardcoded Vietnamese strings leak into workstation code', async () => {
+  it('guarantees no hardcoded Vietnamese strings leak into desktop code', async () => {
     const { auditI18n } = await import(checkI18nPath);
     const result = auditI18n({ silent: true });
 
@@ -84,19 +84,19 @@ describe('official i18n Tooling & Integrity Test Suite', () => {
       }),
     });
 
-    await registerLocaleMessages('playground', async (lang) => ({
-      playground: {
-        greeting: lang === 'vi-VN' ? 'Xin chào Playground' : 'Hello Playground',
+    await registerLocaleMessages('tasks', async (lang) => ({
+      tasks: {
+        greeting: lang === 'vi-VN' ? 'Xin chào Tasks' : 'Hello Tasks',
       },
     }));
 
     expect($t('page.shellTitle')).toBe('Dashboard');
-    expect($t('playground.greeting')).toBe('Hello Playground');
+    expect($t('tasks.greeting')).toBe('Hello Tasks');
 
     // Switch language at runtime — both Shell and lazy-registered micro-app must reload cleanly
     await loadLocaleMessages('vi-VN');
     expect($t('page.shellTitle')).toBe('Bảng điều khiển');
-    expect($t('playground.greeting')).toBe('Xin chào Playground');
+    expect($t('tasks.greeting')).toBe('Xin chào Tasks');
 
     resetRegisteredLocaleMessages();
   });

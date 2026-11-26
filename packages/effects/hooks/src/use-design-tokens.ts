@@ -314,7 +314,7 @@ export function useElementPlusDesignTokens() {
         '--el-text-color-regular': getCssVariableValue('--foreground'),
       };
 
-      updateCSSVariables(variables, `__vben_design_styles__`);
+      updateCSSVariables(variables, `__operon_design_styles__`);
     },
     { immediate: true },
   );
@@ -332,15 +332,15 @@ export function useTDesignDesignTokens() {
   /**
    * Generate TDesign variables corresponding to a semantic color (semantic variant + 1-10 ramp).
    * TDesign color ramps: in light mode 1 is lightest and 10 is darkest; dark mode is inverted.
-   * Maps Vben 50-900 palettes according to active theme mode.
+   * Maps Operon 50-900 palettes according to active theme mode.
    * @param tdName TDesign color name, e.g. `brand`, `error`
-   * @param vbenName Vben color name, e.g. `primary`, `destructive`
+   * @param operonName Operon color name, e.g. `primary`, `destructive`
    */
-  const getColorTokens = (tdName: string, vbenName: string) => {
+  const getColorTokens = (tdName: string, operonName: string) => {
     const dark = isDark.value;
     const getColor = (level?: number) =>
       getCssVariableValue(
-        level === undefined ? `--${vbenName}` : `--${vbenName}-${level}`,
+        level === undefined ? `--${operonName}` : `--${operonName}-${level}`,
       );
 
     // Light mode: 1 is lightest, 10 is darkest; dark mode is inverted
@@ -414,7 +414,11 @@ export function useTDesignDesignTokens() {
         ? `:root[theme-mode='dark']`
         : `:root[theme-mode='light']`;
 
-      updateCSSVariables(variables, `__vben_design_tdesign_styles__`, selector);
+      updateCSSVariables(
+        variables,
+        `__operon_design_tdesign_styles__`,
+        selector,
+      );
     },
     { immediate: true },
   );

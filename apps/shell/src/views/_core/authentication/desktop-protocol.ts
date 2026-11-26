@@ -2,7 +2,7 @@ export interface DesktopAuthCallbackParams {
   machineName?: string;
   refreshToken?: string;
   state?: string;
-  tenantId?: string;
+  workspaceId?: string;
   token: string;
 }
 
@@ -16,8 +16,8 @@ export function buildDesktopAuthCallbackUrl(
   if (params.state !== undefined) {
     query.set('state', params.state);
   }
-  if (params.tenantId !== undefined) {
-    query.set('tenant_id', params.tenantId);
+  if (params.workspaceId !== undefined) {
+    query.set('workspace_id', params.workspaceId);
   }
   if (params.machineName !== undefined) {
     query.set('machine_name', params.machineName);

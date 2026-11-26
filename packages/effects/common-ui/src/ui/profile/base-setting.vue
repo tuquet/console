@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import type { Recordable } from '@operon/types';
 
-import type { VbenFormSchema } from '@operon-core/form-ui';
+import type { OperonFormSchema } from '@operon-core/form-ui';
 
 import { computed, reactive } from 'vue';
 
 import { $t } from '@operon/locales';
 
-import { useVbenForm } from '@operon-core/form-ui';
-import { VbenButton } from '@operon-core/shadcn-ui';
+import { useOperonForm } from '@operon-core/form-ui';
+import { OperonButton } from '@operon-core/shadcn-ui';
 
 interface Props {
-  formSchema?: VbenFormSchema[];
+  formSchema?: OperonFormSchema[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -22,7 +22,7 @@ const emit = defineEmits<{
   submit: [Recordable<any>];
 }>();
 
-const [Form, formApi] = useVbenForm(
+const [Form, formApi] = useOperonForm(
   reactive({
     commonConfig: {
       // All form fields
@@ -51,8 +51,8 @@ defineExpose({
 <template>
   <div @keydown.enter.prevent="handleSubmit">
     <Form />
-    <VbenButton type="submit" class="mt-4" @click="handleSubmit">
+    <OperonButton type="submit" class="mt-4" @click="handleSubmit">
       {{ $t('profile.updateBasicProfile') }}
-    </VbenButton>
+    </OperonButton>
   </div>
 </template>

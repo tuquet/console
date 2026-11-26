@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useVbenModal } from '../../use-modal';
+import { useOperonModal } from '../../use-modal';
 
 interface TypedModalData {
   id: number;
   mode: 'edit' | 'view';
 }
 
-const [, modalApi] = useVbenModal<TypedModalData | null>();
+const [, modalApi] = useOperonModal<TypedModalData | null>();
 
 defineExpose({ modalApi });
 </script>

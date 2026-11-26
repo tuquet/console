@@ -17,7 +17,7 @@ function readViewportHeight() {
 }
 
 /**
- * Only write --vben-viewport-height as pixel value when dvh is not supported.
+ * Only write --operon-viewport-height as pixel value when dvh is not supported.
  * When dvh is supported, keep CSS cascade 100vh -> 100dvh, avoiding freezing units into px via useCssVar.
  */
 export function useLayoutViewportHeight() {

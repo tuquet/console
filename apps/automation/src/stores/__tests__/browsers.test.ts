@@ -6,9 +6,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useBrowsersStore } from '../browsers';
 
 const mockFetch = vi.fn();
-const mockTenantState = reactive({
+const mockWorkspaceState = reactive({
   activeId: 'local-default',
-  activeName: 'Local Tenant',
+  activeName: 'Local Workspace',
   activeSlug: 'local',
   isLoading: false,
   items: [],
@@ -25,7 +25,7 @@ vi.mock('@operon/kernel', () => ({
       notify: vi.fn(),
       openLoginModal: vi.fn(),
     },
-    tenant: mockTenantState,
+    workspace: mockWorkspaceState,
   }),
 }));
 
@@ -47,7 +47,7 @@ const sampleBrowsers = [
     proxy: 'socks5://127.0.0.1:1080',
     startupFlags: [],
     tags: ['sea'],
-    tenantId: 'local-default',
+    workspaceId: 'local-default',
     timezone: 'UTC',
     updatedAt: '2026-01-01T00:00:00Z',
     userAgent: null,
@@ -69,7 +69,7 @@ const sampleBrowsers = [
     proxy: null,
     startupFlags: [],
     tags: ['vip'],
-    tenantId: 'local-default',
+    workspaceId: 'local-default',
     timezone: 'UTC',
     updatedAt: '2026-01-02T00:00:00Z',
     userAgent: null,
@@ -79,17 +79,17 @@ const sampleBrowsers = [
 describe('useBrowsersStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    mockTenantState.activeId = 'local-default';
+    mockWorkspaceState.activeId = 'local-default';
     vi.clearAllMocks();
     mockFetch.mockResolvedValue(sampleBrowsers);
   });
 
-  it('fetches tenant-scoped browsers and computes stats & filters', async () => {
+  it('fetches workspace-scoped browsers and computes stats & filters', async () => {
     const store = useBrowsersStore();
     await store.fetchBrowsers();
 
     expect(mockFetch).toHaveBeenCalledWith(
-      '/api/v1/browsers?tenantId=local-default&scope=tenant',
+      '/api/v1/browsers?workspaceId=local-default&scope=workspace',
     );
     expect(store.stats).toEqual({
       direct: 1,
@@ -107,20 +107,20 @@ describe('useBrowsersStore', () => {
     expect(store.filteredItems.map((b) => b.id)).toEqual(['prf_1']);
   });
 
-  it('reacts to kernel.tenant.activeId switches and clears selection', async () => {
+  it('reacts to kernel.workspace.activeId switches and clears selection', async () => {
     const store = useBrowsersStore();
     await store.fetchBrowsers();
     store.toggleSelected('prf_1');
     store.detailTarget = sampleBrowsers[0] ?? null;
     expect(store.selectedIds).toEqual(['prf_1']);
 
-    mockTenantState.activeId = 'tenant-alpha';
+    mockWorkspaceState.activeId = 'workspace-alpha';
     await nextTick();
 
     expect(store.selectedIds).toEqual([]);
     expect(store.detailTarget).toBeNull();
     expect(mockFetch).toHaveBeenLastCalledWith(
-      '/api/v1/browsers?tenantId=tenant-alpha&scope=tenant',
+      '/api/v1/browsers?workspaceId=workspace-alpha&scope=workspace',
     );
   });
 
@@ -130,7 +130,10 @@ describe('useBrowsersStore', () => {
 
     await store.createProfile({ name: 'New Profile' });
     expect(mockFetch).toHaveBeenCalledWith('/api/v1/browsers', {
-      body: JSON.stringify({ name: 'New Profile', tenantId: 'local-default' }),
+      body: JSON.stringify({
+        name: 'New Profile',
+        workspaceId: 'local-default',
+      }),
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
     });

@@ -6,7 +6,7 @@ import type { MenuItemRegistered, MenuProvider, SubMenuProps } from '../types';
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 
 import { useNamespace } from '@operon-core/composables';
-import { VbenHoverCard } from '@operon-core/shadcn-ui';
+import { OperonHoverCard } from '@operon-core/shadcn-ui';
 
 import {
   createSubMenuContext,
@@ -202,7 +202,7 @@ onBeforeUnmount(() => {
     @mouseleave="() => handleMouseleave()"
   >
     <template v-if="rootMenu.isMenuPopup">
-      <VbenHoverCard
+      <OperonHoverCard
         :content-class="[
           rootMenu.theme,
           nsMenu.e('popup-container'),
@@ -244,7 +244,7 @@ onBeforeUnmount(() => {
             <slot></slot>
           </ul>
         </div>
-      </VbenHoverCard>
+      </OperonHoverCard>
     </template>
 
     <template v-else>

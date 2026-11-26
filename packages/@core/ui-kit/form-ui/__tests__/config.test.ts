@@ -7,34 +7,34 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   COMPONENT_BIND_EVENT_MAP,
   COMPONENT_MAP,
-  setupVbenForm,
+  setupOperonForm,
 } from '../src/config';
 
-const builtInCheckbox = COMPONENT_MAP.VbenCheckbox;
+const builtInCheckbox = COMPONENT_MAP.OperonCheckbox;
 const componentMapReference = COMPONENT_MAP;
 const bindEventMapReference = COMPONENT_BIND_EVENT_MAP;
 
 function resetFormConfig() {
   globalShareState.setComponents({});
-  setupVbenForm({ config: {} });
+  setupOperonForm({ config: {} });
 }
 
 beforeEach(resetFormConfig);
 afterEach(resetFormConfig);
 
-describe('setupVbenForm', () => {
+describe('setupOperonForm', () => {
   it('rebuilds user mappings while preserving built-ins and record identity', () => {
     const FirstInput = defineComponent({});
     const SecondInput = defineComponent({});
 
     globalShareState.setComponents({ FirstInput });
-    setupVbenForm({ config: { baseModelPropName: 'value' } });
+    setupOperonForm({ config: { baseModelPropName: 'value' } });
 
     expect(COMPONENT_MAP.FirstInput).toBe(FirstInput);
     expect(COMPONENT_BIND_EVENT_MAP.FirstInput).toBe('value');
 
     globalShareState.setComponents({ SecondInput });
-    setupVbenForm({ config: {} });
+    setupOperonForm({ config: {} });
 
     expect(COMPONENT_MAP).toBe(componentMapReference);
     expect(COMPONENT_BIND_EVENT_MAP).toBe(bindEventMapReference);
@@ -42,15 +42,15 @@ describe('setupVbenForm', () => {
     expect(Reflect.has(COMPONENT_BIND_EVENT_MAP, 'FirstInput')).toBe(false);
     expect(COMPONENT_MAP.SecondInput).toBe(SecondInput);
     expect(COMPONENT_BIND_EVENT_MAP.SecondInput).toBeUndefined();
-    expect(COMPONENT_MAP.VbenCheckbox).toBe(builtInCheckbox);
-    expect(COMPONENT_BIND_EVENT_MAP.VbenCheckbox).toBe('checked');
+    expect(COMPONENT_MAP.OperonCheckbox).toBe(builtInCheckbox);
+    expect(COMPONENT_BIND_EVENT_MAP.OperonCheckbox).toBe('checked');
   });
 
   it('prefers component mappings over the base model prop name', () => {
     const CustomInput = defineComponent({});
     globalShareState.setComponents({ CustomInput });
 
-    setupVbenForm({
+    setupOperonForm({
       config: {
         baseModelPropName: 'value',
         modelPropNameMap: { CustomInput: 'checked' },

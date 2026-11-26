@@ -162,7 +162,7 @@ export function calcRows(
 }
 
 /** Mark component type as DescriptionsItem to facilitate identification from slot vnodes */
-export const DESCRIPTIONS_ITEM_NAME = 'VbenDescriptionsItem';
+export const DESCRIPTIONS_ITEM_NAME = 'OperonDescriptionsItem';
 
 function isItemVNode(node: VNode): boolean {
   const type = node.type as any;
@@ -186,7 +186,7 @@ function flattenVNodes(nodes: VNode[]): VNode[] {
 
 /**
  * Parse items from default slot vnodes, supporting
- * <VbenDescriptionsItem label="..." :span="2">content</VbenDescriptionsItem> syntax
+ * <OperonDescriptionsItem label="..." :span="2">content</OperonDescriptionsItem> syntax
  */
 export function parseItemsFromSlot(nodes: VNode[]): DescriptionsItemType[] {
   return flattenVNodes(nodes)

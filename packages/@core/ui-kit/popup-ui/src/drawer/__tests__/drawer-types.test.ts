@@ -1,5 +1,5 @@
 import type { ExtendedDrawerApi, InferDrawerData } from '../drawer';
-import type { createVbenDrawer, useVbenDrawer } from '../use-drawer';
+import type { createOperonDrawer, useOperonDrawer } from '../use-drawer';
 import type TypedDrawer from './fixtures/typed-drawer.vue';
 
 import { describe, expectTypeOf, it } from 'vitest';
@@ -11,8 +11,8 @@ interface TypedDrawerData {
 
 type DrawerData = null | TypedDrawerData;
 
-declare const createDrawer: typeof createVbenDrawer;
-declare const useDrawer: typeof useVbenDrawer;
+declare const createDrawer: typeof createOperonDrawer;
+declare const useDrawer: typeof useOperonDrawer;
 
 describe('drawer public data types', () => {
   it('infers data from the connected component exposed api', () => {

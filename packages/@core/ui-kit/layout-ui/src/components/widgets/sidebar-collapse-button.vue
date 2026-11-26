@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSimpleLocale } from '@operon-core/composables';
 import { ChevronsLeft, ChevronsRight } from '@operon-core/icons';
-import { VbenButton } from '@operon-core/shadcn-ui';
+import { OperonButton } from '@operon-core/shadcn-ui';
 
 const collapsed = defineModel<boolean>('collapsed');
 const { $t } = useSimpleLocale();
@@ -12,7 +12,7 @@ function handleCollapsed() {
 </script>
 
 <template>
-  <VbenButton
+  <OperonButton
     type="button"
     variant="ghost"
     size="icon"
@@ -24,5 +24,5 @@ function handleCollapsed() {
   >
     <ChevronsRight v-if="collapsed" class="size-4" />
     <ChevronsLeft v-else class="size-4" />
-  </VbenButton>
+  </OperonButton>
 </template>

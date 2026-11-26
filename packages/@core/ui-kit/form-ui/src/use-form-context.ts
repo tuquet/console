@@ -2,7 +2,7 @@ import type { ZodType } from 'zod';
 
 import type { ComputedRef } from 'vue';
 
-import type { ExtendedFormApi, FormActions, VbenFormProps } from './types';
+import type { ExtendedFormApi, FormActions, OperonFormProps } from './types';
 
 import { computed, toRaw, unref, useSlots } from 'vue';
 
@@ -27,13 +27,13 @@ import { getDefaultsForSchema } from 'zod-defaults';
 import { getFormFieldSchemas } from './form-render/schema';
 import { useFormRuntime } from './form-runtime';
 
-type ExtendFormProps = VbenFormProps & {
+type ExtendFormProps = OperonFormProps & {
   formApi?: ExtendedFormApi<any, any, any>;
 };
 
 export const [injectFormProps, provideFormProps] =
   createContext<[ComputedRef<ExtendFormProps> | ExtendFormProps, FormActions]>(
-    'VbenFormProps',
+    'OperonFormProps',
   );
 
 export const [injectComponentRefMap, provideComponentRefMap] =
@@ -80,7 +80,7 @@ function normalizeSchemaForDefaults(rule: ZodType): ZodType {
 }
 
 export function useFormInitial(
-  props: ComputedRef<VbenFormProps> | VbenFormProps,
+  props: ComputedRef<OperonFormProps> | OperonFormProps,
 ) {
   const slots = useSlots();
   const initialValues = generateInitialValues();

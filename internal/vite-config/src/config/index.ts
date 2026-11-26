@@ -1,4 +1,4 @@
-import type { DefineConfig, VbenViteConfig } from '../typing';
+import type { DefineConfig, OperonViteConfig } from '../typing';
 
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -12,7 +12,7 @@ export * from './library';
 function defineConfig(
   userConfigPromise?: DefineConfig,
   type: 'application' | 'auto' | 'library' = 'auto',
-): VbenViteConfig {
+): OperonViteConfig {
   let projectType = type;
 
   // Automatically determine type based on whether index.html exists in package

@@ -3,22 +3,22 @@ import type { Component } from 'vue';
 import type {
   BaseFormComponentType,
   FormCommonConfig,
-  VbenFormAdapterOptions,
+  OperonFormAdapterOptions,
 } from './types';
 
 import { h } from 'vue';
 
 import {
-  VbenButton,
-  VbenCheckbox,
-  Input as VbenInput,
-  VbenInputPassword,
-  VbenPinInput,
-  VbenSelect,
+  OperonButton,
+  OperonCheckbox,
+  Input as OperonInput,
+  OperonInputPassword,
+  OperonPinInput,
+  OperonSelect,
 } from '@operon-core/shadcn-ui';
 import { globalShareState } from '@operon-core/shared/global-state';
 
-import VbenFormFieldArray from './components/form-field-array.vue';
+import OperonFormFieldArray from './components/form-field-array.vue';
 import { warnDeprecatedOnce } from './deprecation';
 import { registerFormRules } from './rule-registry';
 
@@ -27,20 +27,20 @@ const DEFAULT_MODEL_PROP_NAME = 'modelValue';
 export const DEFAULT_FORM_COMMON_CONFIG: FormCommonConfig = {};
 
 const BUILT_IN_COMPONENT_MAP: Record<BaseFormComponentType, Component> = {
-  DefaultButton: h(VbenButton, { size: 'sm', variant: 'outline' }),
-  PrimaryButton: h(VbenButton, { size: 'sm', variant: 'default' }),
-  VbenCheckbox,
-  VbenFormFieldArray,
-  VbenInput,
-  VbenInputPassword,
-  VbenPinInput,
-  VbenSelect,
+  DefaultButton: h(OperonButton, { size: 'sm', variant: 'outline' }),
+  PrimaryButton: h(OperonButton, { size: 'sm', variant: 'default' }),
+  OperonCheckbox,
+  OperonFormFieldArray,
+  OperonInput,
+  OperonInputPassword,
+  OperonPinInput,
+  OperonSelect,
 };
 
 const BUILT_IN_COMPONENT_BIND_EVENT_MAP: Partial<
   Record<BaseFormComponentType, string>
 > = {
-  VbenCheckbox: 'checked',
+  OperonCheckbox: 'checked',
 };
 
 export const COMPONENT_MAP: Record<BaseFormComponentType, Component> = {
@@ -60,9 +60,9 @@ function replaceRecord<T extends object>(target: T, source: T) {
   Object.assign(target, source);
 }
 
-export function setupVbenForm<
+export function setupOperonForm<
   T extends BaseFormComponentType = BaseFormComponentType,
->(options: VbenFormAdapterOptions<T>) {
+>(options: OperonFormAdapterOptions<T>) {
   const { config, defineRules, rules } = options;
 
   const { changeEventFallback = false, emptyStateValue = undefined } =
@@ -75,8 +75,8 @@ export function setupVbenForm<
 
   if (defineRules) {
     warnDeprecatedOnce(
-      'setup-vben-form-define-rules',
-      '[Vben Form] `setupVbenForm({ defineRules })` is deprecated. Use `setupVbenForm({ rules })` instead.',
+      'setup-operon-form-define-rules',
+      '[Operon Form] `setupOperonForm({ defineRules })` is deprecated. Use `setupOperonForm({ rules })` instead.',
     );
     registerFormRules(defineRules);
   }

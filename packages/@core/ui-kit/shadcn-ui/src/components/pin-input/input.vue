@@ -4,7 +4,7 @@ import type { PinInputProps } from './types';
 import { computed, onBeforeUnmount, ref, useId, watch } from 'vue';
 
 import { PinInput, PinInputGroup, PinInputSlot } from '../../ui';
-import { VbenButton } from '../button';
+import { OperonButton } from '../button';
 
 defineOptions({
   inheritAttrs: false,
@@ -107,7 +107,7 @@ const pinType = 'text' as const;
           :index="index"
         />
       </PinInputGroup>
-      <VbenButton
+      <OperonButton
         :disabled="disabled"
         :loading="btnLoading"
         class="grow"
@@ -116,7 +116,7 @@ const pinType = 'text' as const;
         @click="handleSend"
       >
         {{ btnText }}
-      </VbenButton>
+      </OperonButton>
     </div>
   </PinInput>
 </template>

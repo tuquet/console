@@ -1,6 +1,6 @@
 # Operon Console
 
-Enterprise administration portal and Tauri v2 desktop workstation (Vue 3, Tailwind CSS, TypeScript).
+Enterprise administration portal and Tauri v2 desktop desktop (Vue 3, Tailwind CSS, TypeScript).
 
 ## Quick start
 

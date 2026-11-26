@@ -4,11 +4,11 @@ import { defineConfig as defineOxlintConfig } from 'oxlint';
 
 import { mergeOxlintConfigs, oxlintConfig } from './configs';
 
-type VbenOxlintConfig = Omit<OxlintConfig, 'extends'> & {
+type OperonOxlintConfig = Omit<OxlintConfig, 'extends'> & {
   extends?: OxlintConfig[];
 };
 
-function defineConfig(config: VbenOxlintConfig = {}) {
+function defineConfig(config: OperonOxlintConfig = {}) {
   const { extends: extendedConfigs = [], ...restConfig } = config;
 
   return defineOxlintConfig(
@@ -18,4 +18,4 @@ function defineConfig(config: VbenOxlintConfig = {}) {
 
 export { defineConfig, oxlintConfig };
 export * from './configs';
-export type { OxlintConfig, VbenOxlintConfig };
+export type { OperonOxlintConfig, OxlintConfig };

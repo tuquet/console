@@ -11,7 +11,7 @@ describe('application boundaries', () => {
     expect(
       violatesBoundary(
         String.raw`apps\system\src\view.ts`,
-        String.raw`apps\tenants\src`,
+        String.raw`apps\workspaces\src`,
       ),
     ).toBe(true);
     expect(violatesBoundary('packages/utils/src/index.ts', 'apps/shell')).toBe(
@@ -40,14 +40,14 @@ describe('application boundaries', () => {
   it('finds imports, re-exports, dynamic imports and import types inside Vue scripts', () => {
     const source = `<script setup lang="ts">
       import { api } from '../../shell/src/api';
-      export { item } from '@operon/tenants';
+      export { item } from '@operon/workspaces';
       const view = () => import('@operon/shell');
       type Host = import('@operon/shell').Host;
       const value = require('@operon/system');
     </script><template><p>import('@operon/ignored')</p></template>`;
     expect(importSpecifiers(source, 'view.vue')).toEqual([
       '../../shell/src/api',
-      '@operon/tenants',
+      '@operon/workspaces',
       '@operon/shell',
       '@operon/shell',
       '@operon/system',

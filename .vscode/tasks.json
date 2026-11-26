@@ -45,10 +45,10 @@
       "problemMatcher": []
     },
     {
-      "label": "local: <web> dev:tenants",
+      "label": "local: <web> dev:workspaces",
       "type": "shell",
       "command": "pnpm",
-      "args": ["run", "dev:tenants"],
+      "args": ["run", "dev:workspaces"],
       "isBackground": true,
       "presentation": {
         "reveal": "always",
@@ -58,10 +58,10 @@
       "problemMatcher": []
     },
     {
-      "label": "local: <web> dev:playground",
+      "label": "local: <web> dev:tasks",
       "type": "shell",
       "command": "pnpm",
-      "args": ["run", "dev:playground"],
+      "args": ["run", "dev:tasks"],
       "isBackground": true,
       "presentation": {
         "reveal": "always",

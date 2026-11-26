@@ -43,7 +43,7 @@ async function refresh() {
         registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
       }
     } catch (error) {
-      console.error('Failed to notify waiting service worker:', error);
+      console.error('Failed to notify waiting service daemon:', error);
     }
   }
   window.location.reload();

@@ -18,7 +18,7 @@ describe('form schema normalization', () => {
     }));
 
     const schema = createFormFieldSchema(
-      { component: 'VbenInput', fieldName: 'name' },
+      { component: 'OperonInput', fieldName: 'name' },
       { commonConfig: { componentProps } },
     );
 
@@ -30,7 +30,7 @@ describe('form schema normalization', () => {
 
   it('preserves common component props objects', () => {
     const schema = createFormFieldSchema(
-      { component: 'VbenInput', fieldName: 'name' },
+      { component: 'OperonInput', fieldName: 'name' },
       { commonConfig: { componentProps: { placeholder: 'Enter a name' } } },
     );
 
@@ -45,7 +45,7 @@ describe('form schema normalization', () => {
     }));
 
     const schema = createFormFieldSchema(
-      { component: 'VbenInput', fieldName: 'email' },
+      { component: 'OperonInput', fieldName: 'email' },
       { globalCommonConfig: { componentProps } },
     );
 
@@ -57,7 +57,7 @@ describe('form schema normalization', () => {
     const componentProps = vi.fn(() => ({ placeholder: 'Contact name' }));
 
     const schema = createArrayChildSchema(
-      { component: 'VbenInput', fieldName: 'name' },
+      { component: 'OperonInput', fieldName: 'name' },
       {
         arrayField: 'contacts',
         commonConfig: { componentProps },
@@ -79,18 +79,21 @@ describe('form schema normalization', () => {
 });
 
 describe('form group schema', () => {
-  const nameSchema: FormSchema = { component: 'VbenInput', fieldName: 'name' };
+  const nameSchema: FormSchema = {
+    component: 'OperonInput',
+    fieldName: 'name',
+  };
   const contactGroup: FormSchema = {
     children: [
-      { component: 'VbenInput', fieldName: 'email' },
-      { component: 'VbenInput', fieldName: 'phone' },
+      { component: 'OperonInput', fieldName: 'email' },
+      { component: 'OperonInput', fieldName: 'phone' },
     ],
     name: 'contact',
     title: 'Contact',
     type: 'group',
   };
   const tagsArray: FormSchema = {
-    children: [{ component: 'VbenInput', fieldName: 'label' }],
+    children: [{ component: 'OperonInput', fieldName: 'label' }],
     fieldName: 'tags',
     type: 'array',
   };

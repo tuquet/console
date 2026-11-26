@@ -19,5 +19,5 @@ Validated by `commitlint` via Lefthook (`pnpm commit` runs interactive `czg`):
 ```
 
 - **Types**: `feat` | `fix` | `perf` | `refactor` | `docs` | `style` | `test` | `build` | `ci` | `chore` | `types` | `revert`
-- **Scopes**: workspace package name (`@operon/shell`, `@operon/playground`, `@operon-core/shadcn-ui`, ...) or `project`, `style`, `lint`, `ci`, `dev`, `deploy`, `other`.
+- **Scopes**: workspace package name (`@operon/shell`, `@operon/tasks`, `@operon-core/shadcn-ui`, ...) or `project`, `style`, `lint`, `ci`, `dev`, `deploy`, `other`.
 - **Subject**: imperative, lowercase, no trailing period (`feat(@operon/shell): add update button`).

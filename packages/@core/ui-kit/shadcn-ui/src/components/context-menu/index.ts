@@ -1,3 +1,3 @@
-export { default as VbenContextMenu } from './context-menu.vue';
+export { default as OperonContextMenu } from './context-menu.vue';
 
 export type * from './interface';

@@ -6,7 +6,7 @@ import { $t, useI18n } from '@operon/locales';
 import { storeToRefs, useAccessStore } from '@operon/stores';
 
 import { useScrollLock } from '@operon-core/composables';
-import { useVbenForm, z } from '@operon-core/form-ui';
+import { useOperonForm, z } from '@operon-core/form-ui';
 import {
   Avatar,
   AvatarFallback,
@@ -43,7 +43,7 @@ const showUnlockForm = ref(false);
 const { lockScreenPassword } = storeToRefs(accessStore);
 
 const [Form, { getFieldComponentRef, getRawValues, setFieldError, validate }] =
-  useVbenForm(
+  useOperonForm(
     reactive({
       commonConfig: {
         hideLabel: true,
@@ -51,7 +51,7 @@ const [Form, { getFieldComponentRef, getRawValues, setFieldError, validate }] =
       },
       schema: computed(() => [
         {
-          component: 'VbenInputPassword' as const,
+          component: 'OperonInputPassword' as const,
           componentProps: {
             placeholder: $t('ui.widgets.lockScreen.placeholder'),
           },

@@ -2,7 +2,7 @@
 import { onMounted, provide, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { KERNEL_INJECTION_KEY, useLocalBridgeHeartbeat } from '@operon/kernel';
+import { KERNEL_INJECTION_KEY, useDaemonHeartbeat } from '@operon/kernel';
 import { usePreferences } from '@operon/preferences';
 
 import {
@@ -31,8 +31,8 @@ import DesktopShell from '#/layouts/widgets/desktop-shell.vue';
 import { $t } from '#/locales';
 import {
   buildWelcomeLocation,
-  hasLocalBridgeSeen,
-  markLocalBridgeSeen,
+  hasDaemonSeen,
+  markDaemonSeen,
   saveWelcomeRedirect,
 } from '#/utils/welcome';
 
@@ -45,7 +45,7 @@ provide(KERNEL_INJECTION_KEY, hostKernel);
 
 const { isDark } = usePreferences();
 const isDesktop = isTauriEnvironment();
-const bridge = useLocalBridgeHeartbeat({ intervalMs: 5000 });
+const daemon = useDaemonHeartbeat({ intervalMs: 5000 });
 
 const hasConnectedInSession = ref(false);
 const wasOfflinePrompted = ref(false);
@@ -55,12 +55,12 @@ const disconnectPromptDismissed = ref(false);
 useGlobalShortcuts(isDesktop);
 
 watch(
-  [bridge.status, () => route.path],
+  [daemon.status, () => route.path],
   ([status, currentPath]) => {
     if (status === 'healthy') {
-      markLocalBridgeSeen();
+      markDaemonSeen();
       if (wasOfflinePrompted.value) {
-        toast.success($t('page.localBridge.reconnected'));
+        toast.success($t('page.daemon.reconnected'));
       }
       hasConnectedInSession.value = true;
       wasOfflinePrompted.value = false;
@@ -79,7 +79,7 @@ watch(
     }
 
     // First-time visitor who has never connected to local Operon -> redirect & cache destination
-    if (!hasLocalBridgeSeen() && !hasConnectedInSession.value) {
+    if (!hasDaemonSeen() && !hasConnectedInSession.value) {
       saveWelcomeRedirect(route.fullPath);
       void router.replace(buildWelcomeLocation(route.fullPath));
       return;
@@ -97,7 +97,7 @@ watch(
 function handleStayAndRetry() {
   disconnectPromptOpen.value = false;
   disconnectPromptDismissed.value = true;
-  void bridge.checkNow();
+  void daemon.checkNow();
 }
 
 function handleOpenSetupPage() {
@@ -130,18 +130,18 @@ onMounted(async () => {
     <AlertDialogContent>
       <AlertDialogHeader>
         <AlertDialogTitle>
-          {{ $t('page.localBridge.disconnectTitle') }}
+          {{ $t('page.daemon.disconnectTitle') }}
         </AlertDialogTitle>
         <AlertDialogDescription>
-          {{ $t('page.localBridge.disconnectDescription') }}
+          {{ $t('page.daemon.disconnectDescription') }}
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
         <AlertDialogCancel @click="handleStayAndRetry">
-          {{ $t('page.localBridge.disconnectStay') }}
+          {{ $t('page.daemon.disconnectStay') }}
         </AlertDialogCancel>
         <AlertDialogAction @click="handleOpenSetupPage">
-          {{ $t('page.localBridge.disconnectOpenSetup') }}
+          {{ $t('page.daemon.disconnectOpenSetup') }}
         </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>

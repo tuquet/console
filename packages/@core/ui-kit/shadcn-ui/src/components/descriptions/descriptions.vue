@@ -16,7 +16,7 @@ import {
   useScreens,
 } from './use-descriptions';
 
-defineOptions({ name: 'VbenDescriptions' });
+defineOptions({ name: 'OperonDescriptions' });
 
 const props = withDefaults(defineProps<DescriptionsProps>(), {
   bordered: false,
@@ -35,7 +35,7 @@ const props = withDefaults(defineProps<DescriptionsProps>(), {
 const slots = useSlots();
 const screens = useScreens();
 
-// Prefer items; otherwise parse VbenDescriptionsItem from default slot
+// Prefer items; otherwise parse OperonDescriptionsItem from default slot
 const resolvedItems = computed<DescriptionsItemType[]>(() => {
   if (props.items && props.items.length > 0) return props.items;
   const nodes = (slots.default?.() ?? []) as VNode[];

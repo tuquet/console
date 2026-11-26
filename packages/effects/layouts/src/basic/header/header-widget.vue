@@ -16,7 +16,7 @@ import { $t } from '@operon/locales';
 import { preferences, usePreferences } from '@operon/preferences';
 import { isWindowsOs } from '@operon/utils';
 
-import { Button, VbenLogo } from '@operon-core/shadcn-ui';
+import { Button, OperonLogo } from '@operon-core/shadcn-ui';
 
 import {
   LanguageToggle,
@@ -49,7 +49,7 @@ const logoTheme = computed(() =>
 </script>
 
 <template>
-  <VbenLogo
+  <OperonLogo
     v-if="name === 'logo'"
     :src="preferences.logo.source"
     :src-dark="preferences.logo.sourceDark"

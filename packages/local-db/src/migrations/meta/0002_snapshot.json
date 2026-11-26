@@ -182,8 +182,8 @@
           "autoincrement": false,
           "default": false
         },
-        "tenant_id": {
-          "name": "tenant_id",
+        "workspace_id": {
+          "name": "workspace_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -229,9 +229,9 @@
           "columns": ["is_locked"],
           "isUnique": false
         },
-        "idx_browser_profiles_tenant": {
-          "name": "idx_browser_profiles_tenant",
-          "columns": ["tenant_id"],
+        "idx_browser_profiles_workspace": {
+          "name": "idx_browser_profiles_workspace",
+          "columns": ["workspace_id"],
           "isUnique": false
         }
       },
@@ -609,8 +609,8 @@
           "autoincrement": false,
           "default": true
         },
-        "tenant_id": {
-          "name": "tenant_id",
+        "workspace_id": {
+          "name": "workspace_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -651,9 +651,9 @@
           "columns": ["is_active"],
           "isUnique": false
         },
-        "idx_proxies_tenant": {
-          "name": "idx_proxies_tenant",
-          "columns": ["tenant_id"],
+        "idx_proxies_workspace": {
+          "name": "idx_proxies_workspace",
+          "columns": ["workspace_id"],
           "isUnique": false
         }
       },
@@ -757,8 +757,8 @@
           "autoincrement": false,
           "default": true
         },
-        "tenant_id": {
-          "name": "tenant_id",
+        "workspace_id": {
+          "name": "workspace_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -799,9 +799,9 @@
           "columns": ["is_active"],
           "isUnique": false
         },
-        "idx_workflows_tenant": {
-          "name": "idx_workflows_tenant",
-          "columns": ["tenant_id"],
+        "idx_workflows_workspace": {
+          "name": "idx_workflows_workspace",
+          "columns": ["workspace_id"],
           "isUnique": false
         }
       },

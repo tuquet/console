@@ -4,7 +4,7 @@ import type { DataTableFeatures } from '@operon/common-ui';
 
 import type { BrowserProfileRecord } from '../../api/browsers';
 import type { ScopeMode } from '../../stores/browsers';
-import type { BrowserRowCallbacks } from './BrowsersTableRowActions.vue';
+import type { BrowserRowCallbacks } from './browsers-table-row-actions.vue';
 
 import { h } from 'vue';
 
@@ -16,7 +16,7 @@ import { CheckCircle2, Laptop } from '@lucide/vue';
 import { createColumnHelper } from '@tanstack/vue-table';
 
 import { $t } from '../../locales';
-import BrowsersTableRowActions from './BrowsersTableRowActions.vue';
+import BrowsersTableRowActions from './browsers-table-row-actions.vue';
 
 const columnHelper = createColumnHelper<
   DataTableFeatures,

@@ -1,4 +1,4 @@
-export { default as VbenDescriptionsItem } from './descriptions-item.vue';
-export { default as VbenDescriptions } from './descriptions.vue';
+export { default as OperonDescriptionsItem } from './descriptions-item.vue';
+export { default as OperonDescriptions } from './descriptions.vue';
 
 export * from './types';

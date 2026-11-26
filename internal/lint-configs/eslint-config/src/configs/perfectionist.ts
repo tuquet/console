@@ -27,12 +27,12 @@ export async function perfectionist(): Promise<Linter.Config[]> {
             customGroups: [
               {
                 selector: 'type',
-                groupName: 'vben-core-type',
+                groupName: 'operon-core-type',
                 elementNamePattern: '^@operon-core/.+',
               },
               {
                 selector: 'type',
-                groupName: 'vben-type',
+                groupName: 'operon-type',
                 elementNamePattern: '^@operon/.+',
               },
               {
@@ -41,11 +41,11 @@ export async function perfectionist(): Promise<Linter.Config[]> {
                 elementNamePattern: ['^vue$', '^vue-.+', '^@vue/.+'],
               },
               {
-                groupName: 'vben',
+                groupName: 'operon',
                 elementNamePattern: '^@operon/.+',
               },
               {
-                groupName: 'vben-core',
+                groupName: 'operon-core',
                 elementNamePattern: '^@operon-core/.+',
               },
               {
@@ -57,14 +57,14 @@ export async function perfectionist(): Promise<Linter.Config[]> {
             groups: [
               ['type-external', 'type-builtin', 'type-import'],
               'vue-type',
-              'vben-type',
-              'vben-core-type',
+              'operon-type',
+              'operon-core-type',
               ['type-parent', 'type-sibling', 'type-index'],
               ['type-internal'],
               'value-builtin',
               'vue',
-              'vben',
-              'vben-core',
+              'operon',
+              'operon-core',
               'value-external',
               'value-internal',
               ['value-parent', 'value-sibling', 'value-index'],

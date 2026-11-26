@@ -22,7 +22,7 @@ interface Props {
 }
 
 defineOptions({
-  name: 'VbenLoading',
+  name: 'OperonLoading',
 });
 
 const props = withDefaults(defineProps<Props>(), {

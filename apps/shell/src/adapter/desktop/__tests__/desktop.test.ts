@@ -58,15 +58,15 @@ describe('desktop native adapter suite', () => {
   describe('deep linking url parser', () => {
     it('successfully parses valid SSO callback URL', () => {
       const raw =
-        'operon://auth/callback?token=test-jwt-token&refresh_token=test-refresh-token&state=xyz123&tenant_id=tenant-uuid-1&machine_name=Workstation-01';
+        'operon://auth/callback?token=test-jwt-token&refresh_token=test-refresh-token&state=xyz123&workspace_id=workspace-uuid-1&machine_name=Desktop-01';
 
       const payload = parseDeepLinkAuthUrl(raw);
       expect(payload).not.toBeNull();
       expect(payload?.token).toBe('test-jwt-token');
       expect(payload?.refreshToken).toBe('test-refresh-token');
       expect(payload?.state).toBe('xyz123');
-      expect(payload?.tenantId).toBe('tenant-uuid-1');
-      expect(payload?.machineName).toBe('Workstation-01');
+      expect(payload?.workspaceId).toBe('workspace-uuid-1');
+      expect(payload?.machineName).toBe('Desktop-01');
     });
 
     it('successfully parses Supabase OAuth hash fragment callback URL', () => {

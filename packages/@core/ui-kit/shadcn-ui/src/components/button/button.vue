@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { VbenButtonProps } from './button';
+import type { OperonButtonProps } from './button';
 
 import { computed } from 'vue';
 
@@ -10,7 +10,7 @@ import { Primitive } from 'reka-ui';
 
 import { buttonVariants } from '../../ui';
 
-interface Props extends VbenButtonProps {}
+interface Props extends OperonButtonProps {}
 
 const props = withDefaults(defineProps<Props>(), {
   as: 'button',

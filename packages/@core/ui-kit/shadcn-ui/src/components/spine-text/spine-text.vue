@@ -16,12 +16,12 @@ const style = computed(() => {
 });
 </script>
 <template>
-  <div :style="style" class="vben-spine-text bg-clip-text! text-transparent">
+  <div :style="style" class="operon-spine-text bg-clip-text! text-transparent">
     <slot></slot>
   </div>
 </template>
 <style>
-.vben-spine-text {
+.operon-spine-text {
   background:
     radial-gradient(circle at center, rgb(255 255 255 / 80%), #f000) -200% 50% /
       200% 100% no-repeat,
@@ -30,7 +30,7 @@ const style = computed(() => {
   /* animation: shine 3s linear infinite; */
 }
 
-.dark .vben-spine-text {
+.dark .operon-spine-text {
   background:
     radial-gradient(circle at center, rgb(24 24 26 / 80%), transparent) -200%
       50% / 200% 100% no-repeat,

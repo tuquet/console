@@ -7,7 +7,7 @@ import { useRoute } from 'vue-router';
 import { preferences } from '@operon/preferences';
 import { useTabbarStore } from '@operon/stores';
 
-import { VbenSpinner } from '@operon-core/shadcn-ui';
+import { OperonSpinner } from '@operon-core/shadcn-ui';
 
 defineOptions({ name: 'IFrameRouterView' });
 
@@ -74,7 +74,7 @@ function showSpinning(index: number) {
         v-show="routeShow(item)"
         class="relative size-full"
       >
-        <VbenSpinner :spinning="showSpinning(index)" />
+        <OperonSpinner :spinning="showSpinning(index)" />
         <iframe
           :src="item.meta.iframeSrc as string"
           class="size-full"

@@ -64,24 +64,24 @@ describe('useAccessStore', () => {
   it('defaults to path as key when query string changes without fullPathKey', () => {
     const store = useTabbarStore();
     const tab1: any = {
-      fullPath: '/tenants?tab=overview',
+      fullPath: '/workspaces?tab=overview',
       meta: {},
-      name: 'Tenants',
-      path: '/tenants',
+      name: 'Workspaces',
+      path: '/workspaces',
       query: { tab: 'overview' },
     };
     store.addTab(tab1);
     expect(store.tabs.length).toBe(1);
-    expect(store.tabs[0]?.key).toBe('/tenants');
+    expect(store.tabs[0]?.key).toBe('/workspaces');
 
     const tab2: any = {
       ...tab1,
-      fullPath: '/tenants?tab=members',
+      fullPath: '/workspaces?tab=members',
       query: { tab: 'members' },
     };
     store.addTab(tab2);
     expect(store.tabs.length).toBe(1);
-    expect(store.tabs[0]?.key).toBe('/tenants');
+    expect(store.tabs[0]?.key).toBe('/workspaces');
     expect(store.tabs[0]?.query).toEqual({ tab: 'members' });
   });
 

@@ -38,11 +38,11 @@ import {
   User,
 } from '@lucide/vue';
 
-import { getActiveTenantId, getCurrentUser, updateUserProfile } from '#/api';
+import { getActiveWorkspaceId, getCurrentUser, updateUserProfile } from '#/api';
 import { useAsyncAction, useClipboard } from '#/composables';
 
 import ProfileSecurityTab from './components/profile-security-tab.vue';
-import ProfileTenantTab from './components/profile-tenant-tab.vue';
+import ProfileWorkspaceTab from './components/profile-workspace-tab.vue';
 
 defineOptions({ name: 'Profile' });
 
@@ -63,7 +63,7 @@ const email = ref('');
 const userId = ref('');
 
 // Active Workspace ID
-const activeTenantId = ref('');
+const activeWorkspaceId = ref('');
 
 // User initials for avatar fallback
 const initials = computed(() => {
@@ -122,7 +122,7 @@ async function handleSaveProfile() {
 }
 
 onMounted(async () => {
-  activeTenantId.value = getActiveTenantId();
+  activeWorkspaceId.value = getActiveWorkspaceId();
   await fetchProfile();
 });
 </script>
@@ -226,8 +226,8 @@ onMounted(async () => {
           <TabsTrigger value="security">
             {{ $t('profile.tabSecurity') }}
           </TabsTrigger>
-          <TabsTrigger value="tenant">
-            {{ $t('profile.tabTenant') }}
+          <TabsTrigger value="workspace">
+            {{ $t('profile.tabWorkspace') }}
           </TabsTrigger>
         </TabsList>
 
@@ -326,9 +326,9 @@ onMounted(async () => {
           <ProfileSecurityTab />
         </TabsContent>
 
-        <!-- Tab 3: Tenant -->
-        <TabsContent value="tenant">
-          <ProfileTenantTab :active-tenant-id="activeTenantId" />
+        <!-- Tab 3: Workspace -->
+        <TabsContent value="workspace">
+          <ProfileWorkspaceTab :active-workspace-id="activeWorkspaceId" />
         </TabsContent>
       </Tabs>
     </div>

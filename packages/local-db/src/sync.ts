@@ -29,7 +29,7 @@ export interface CloudBrowserProfile {
   release_id?: null | string;
   storage_state?: Record<string, unknown>;
   template_id?: null | string;
-  tenant_id: string;
+  workspace_id: string;
   updated_at: string;
 }
 
@@ -43,7 +43,7 @@ export interface CloudWorkflow {
   name: string;
   nodes?: Record<string, unknown>[];
   settings?: Record<string, unknown>;
-  tenant_id: string;
+  workspace_id: string;
   updated_at: string;
   version: string;
 }
@@ -53,7 +53,7 @@ interface SyncableRow {
   deletedAt: null | string;
   id: string;
   lastSyncedAt: null | string;
-  tenantId: null | string;
+  workspaceId: null | string;
   updatedAt: string;
 }
 
@@ -61,7 +61,7 @@ interface CloudSyncableRow {
   created_at: string;
   deleted_at?: null | string;
   id: string;
-  tenant_id: string;
+  workspace_id: string;
   updated_at: string;
 }
 
@@ -69,7 +69,7 @@ interface SyncableTable {
   deletedAt: any;
   id: any;
   lastSyncedAt: any;
-  tenantId: any;
+  workspaceId: any;
   updatedAt: any;
 }
 
@@ -86,7 +86,7 @@ export interface EntitySyncAdapter<
   restResource: string;
   schema: string;
   table: SyncableTable;
-  toCloudPayload: (local: TLocal, tenantId: string) => TCloud;
+  toCloudPayload: (local: TLocal, workspaceId: string) => TCloud;
   toLocalInsert: (cloud: TCloud, syncedAt: string) => Record<string, unknown>;
   toLocalUpdate: (cloud: TCloud, syncedAt: string) => Record<string, unknown>;
 }
@@ -114,7 +114,7 @@ export async function pushDirtyEntitiesToCloud<
   TCloud extends CloudSyncableRow,
 >(
   db: OperonDb,
-  tenantId: string,
+  workspaceId: string,
   adapter: EntitySyncAdapter<TLocal, TCloud>,
 ): Promise<{ errors: string[]; pushed: number }> {
   const errors: string[] = [];
@@ -127,7 +127,7 @@ export async function pushDirtyEntitiesToCloud<
       .from(table as any)
       .where(
         and(
-          or(eq(table.tenantId, tenantId), isNull(table.tenantId)),
+          or(eq(table.workspaceId, workspaceId), isNull(table.workspaceId)),
           or(
             isNull(table.lastSyncedAt),
             gt(table.updatedAt, table.lastSyncedAt),
@@ -141,14 +141,14 @@ export async function pushDirtyEntitiesToCloud<
 
         if (local.deletedAt) {
           await supabaseRequest(
-            `/rest/v1/${restResource}?id=eq.${encodeURIComponent(local.id)}&tenant_id=eq.${encodeURIComponent(tenantId)}`,
+            `/rest/v1/${restResource}?id=eq.${encodeURIComponent(local.id)}&workspace_id=eq.${encodeURIComponent(workspaceId)}`,
             {
               method: 'DELETE',
               schema,
             },
           );
         } else {
-          const payload = adapter.toCloudPayload(local, tenantId);
+          const payload = adapter.toCloudPayload(local, workspaceId);
           await supabaseRequest(`/rest/v1/${restResource}`, {
             body: JSON.stringify(payload),
             headers: {
@@ -161,7 +161,7 @@ export async function pushDirtyEntitiesToCloud<
 
         await db
           .update(table as any)
-          .set({ lastSyncedAt: nowIso, tenantId })
+          .set({ lastSyncedAt: nowIso, workspaceId })
           .where(eq(table.id, local.id));
 
         pushed++;
@@ -188,7 +188,7 @@ export async function pullCloudEntitiesToLocal<
   TCloud extends CloudSyncableRow,
 >(
   db: OperonDb,
-  tenantId: string,
+  workspaceId: string,
   adapter: EntitySyncAdapter<TLocal, TCloud>,
 ): Promise<{ conflicts: number; errors: string[]; pulled: number }> {
   const errors: string[] = [];
@@ -198,7 +198,7 @@ export async function pullCloudEntitiesToLocal<
 
   try {
     const cloudRows = await supabaseRequest<TCloud[]>(
-      `/rest/v1/${restResource}?tenant_id=eq.${encodeURIComponent(tenantId)}&select=*`,
+      `/rest/v1/${restResource}?workspace_id=eq.${encodeURIComponent(workspaceId)}&select=*`,
       { schema },
     );
 
@@ -246,7 +246,7 @@ export async function pullCloudEntitiesToLocal<
       .select()
       .from(table as any)
       .where(
-        and(eq(table.tenantId, tenantId), isNull(table.deletedAt)),
+        and(eq(table.workspaceId, workspaceId), isNull(table.deletedAt)),
       )) as TLocal[];
 
     for (const local of syncedLocals) {
@@ -273,11 +273,11 @@ export async function syncEntity<
   TCloud extends CloudSyncableRow,
 >(
   db: OperonDb,
-  tenantId: string,
+  workspaceId: string,
   adapter: EntitySyncAdapter<TLocal, TCloud>,
 ): Promise<SyncResult> {
-  const pushRes = await pushDirtyEntitiesToCloud(db, tenantId, adapter);
-  const pullRes = await pullCloudEntitiesToLocal(db, tenantId, adapter);
+  const pushRes = await pushDirtyEntitiesToCloud(db, workspaceId, adapter);
+  const pullRes = await pullCloudEntitiesToLocal(db, workspaceId, adapter);
 
   return {
     conflicts: pullRes.conflicts,
@@ -296,7 +296,7 @@ const browserProfileSyncAdapter: EntitySyncAdapter<
   restResource: 'browser_profiles',
   schema: SUPABASE_SCHEMA.OPERON,
   table: browserProfiles,
-  toCloudPayload: (local, tenantId) => ({
+  toCloudPayload: (local, workspaceId) => ({
     cookies: (local.cookies as Record<string, unknown>[]) || [],
     created_at: local.createdAt,
     deleted_at: null,
@@ -308,7 +308,7 @@ const browserProfileSyncAdapter: EntitySyncAdapter<
     release_id: local.releaseId,
     storage_state: (local.storageState as Record<string, unknown>) || {},
     template_id: local.templateId,
-    tenant_id: tenantId,
+    workspace_id: workspaceId,
     updated_at: local.updatedAt,
   }),
   toLocalInsert: (cloud, syncedAt) => ({
@@ -325,7 +325,7 @@ const browserProfileSyncAdapter: EntitySyncAdapter<
     releaseId: cloud.release_id || null,
     storageState: cloud.storage_state || {},
     templateId: cloud.template_id || null,
-    tenantId: cloud.tenant_id,
+    workspaceId: cloud.workspace_id,
     updatedAt: cloud.updated_at,
   }),
   toLocalUpdate: (cloud, syncedAt) => ({
@@ -339,7 +339,7 @@ const browserProfileSyncAdapter: EntitySyncAdapter<
     releaseId: cloud.release_id || null,
     storageState: cloud.storage_state || {},
     templateId: cloud.template_id || null,
-    tenantId: cloud.tenant_id,
+    workspaceId: cloud.workspace_id,
     updatedAt: cloud.updated_at,
   }),
 };
@@ -350,7 +350,7 @@ const workflowSyncAdapter: EntitySyncAdapter<Workflow, CloudWorkflow> = {
   restResource: 'workflows',
   schema: SUPABASE_SCHEMA.OPERON,
   table: workflows,
-  toCloudPayload: (local, tenantId) => ({
+  toCloudPayload: (local, workspaceId) => ({
     created_at: local.createdAt,
     deleted_at: null,
     description: local.description,
@@ -360,7 +360,7 @@ const workflowSyncAdapter: EntitySyncAdapter<Workflow, CloudWorkflow> = {
     name: local.name,
     nodes: (local.nodes as Record<string, unknown>[]) || [],
     settings: (local.settings as Record<string, unknown>) || {},
-    tenant_id: tenantId,
+    workspace_id: workspaceId,
     updated_at: local.updatedAt,
     version: local.version,
   }),
@@ -375,7 +375,7 @@ const workflowSyncAdapter: EntitySyncAdapter<Workflow, CloudWorkflow> = {
     name: cloud.name,
     nodes: cloud.nodes || [],
     settings: cloud.settings || {},
-    tenantId: cloud.tenant_id,
+    workspaceId: cloud.workspace_id,
     updatedAt: cloud.updated_at,
     version: cloud.version,
   }),
@@ -388,7 +388,7 @@ const workflowSyncAdapter: EntitySyncAdapter<Workflow, CloudWorkflow> = {
     name: cloud.name,
     nodes: cloud.nodes || [],
     settings: cloud.settings || {},
-    tenantId: cloud.tenant_id,
+    workspaceId: cloud.workspace_id,
     updatedAt: cloud.updated_at,
     version: cloud.version,
   }),
@@ -406,14 +406,14 @@ export const softDeleteWorkflow = (db: OperonDb, id: string) =>
 export const softDeleteProxy = (db: OperonDb, id: string) =>
   softDeleteEntity(db, proxies, id);
 
-/** Queries active (non-deleted) browser profiles for a tenant. */
+/** Queries active (non-deleted) browser profiles for a workspace. */
 export async function getActiveBrowserProfiles(
   db: OperonDb,
-  tenantId?: string,
+  workspaceId?: string,
 ): Promise<BrowserProfile[]> {
   const conditions = [isNull(browserProfiles.deletedAt)];
-  if (tenantId) {
-    conditions.push(eq(browserProfiles.tenantId, tenantId));
+  if (workspaceId) {
+    conditions.push(eq(browserProfiles.workspaceId, workspaceId));
   }
   return db
     .select()
@@ -423,37 +423,37 @@ export async function getActiveBrowserProfiles(
 
 export const pushLocalBrowserProfilesToCloud = (
   db: OperonDb,
-  tenantId: string,
-) => pushDirtyEntitiesToCloud(db, tenantId, browserProfileSyncAdapter);
+  workspaceId: string,
+) => pushDirtyEntitiesToCloud(db, workspaceId, browserProfileSyncAdapter);
 
 export const pullCloudBrowserProfilesToLocal = (
   db: OperonDb,
-  tenantId: string,
-) => pullCloudEntitiesToLocal(db, tenantId, browserProfileSyncAdapter);
+  workspaceId: string,
+) => pullCloudEntitiesToLocal(db, workspaceId, browserProfileSyncAdapter);
 
-export const syncBrowserProfiles = (db: OperonDb, tenantId: string) =>
-  syncEntity(db, tenantId, browserProfileSyncAdapter);
+export const syncBrowserProfiles = (db: OperonDb, workspaceId: string) =>
+  syncEntity(db, workspaceId, browserProfileSyncAdapter);
 
-export const pushLocalWorkflowsToCloud = (db: OperonDb, tenantId: string) =>
-  pushDirtyEntitiesToCloud(db, tenantId, workflowSyncAdapter);
+export const pushLocalWorkflowsToCloud = (db: OperonDb, workspaceId: string) =>
+  pushDirtyEntitiesToCloud(db, workspaceId, workflowSyncAdapter);
 
-export const pullCloudWorkflowsToLocal = (db: OperonDb, tenantId: string) =>
-  pullCloudEntitiesToLocal(db, tenantId, workflowSyncAdapter);
+export const pullCloudWorkflowsToLocal = (db: OperonDb, workspaceId: string) =>
+  pullCloudEntitiesToLocal(db, workspaceId, workflowSyncAdapter);
 
-export const syncWorkflows = (db: OperonDb, tenantId: string) =>
-  syncEntity(db, tenantId, workflowSyncAdapter);
+export const syncWorkflows = (db: OperonDb, workspaceId: string) =>
+  syncEntity(db, workspaceId, workflowSyncAdapter);
 
 /** Master synchronizer: runs sync across all supported offline-first entities. */
 export async function syncAll(
   db: OperonDb,
-  tenantId: string,
+  workspaceId: string,
 ): Promise<{
   profiles: SyncResult;
   workflows: SyncResult;
 }> {
   const [profiles, workflowResults] = await Promise.all([
-    syncBrowserProfiles(db, tenantId),
-    syncWorkflows(db, tenantId),
+    syncBrowserProfiles(db, workspaceId),
+    syncWorkflows(db, workspaceId),
   ]);
 
   return {

@@ -3,7 +3,7 @@ import type { CSSProperties } from 'vue';
 
 import { computed, onUnmounted, shallowRef, useSlots } from 'vue';
 
-import { VbenScrollbar } from '@operon-core/shadcn-ui';
+import { OperonScrollbar } from '@operon-core/shadcn-ui';
 
 import { useSidebarDrag } from '../hooks/use-sidebar-drag';
 import { SidebarCollapseButton, SidebarFixedButton } from './widgets';
@@ -262,9 +262,9 @@ onUnmounted(() => {
           <slot name="header" :collapsed="collapse"></slot>
         </div>
 
-        <VbenScrollbar class="min-h-0 flex-1" shadow shadow-border>
+        <OperonScrollbar class="min-h-0 flex-1" shadow shadow-border>
           <slot :collapsed="collapse"></slot>
-        </VbenScrollbar>
+        </OperonScrollbar>
 
         <div
           v-if="showFooter"

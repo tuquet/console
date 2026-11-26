@@ -23,9 +23,9 @@ import { usePreferences } from '@operon-core/preferences';
 import { useSelector } from '@operon-core/shared/store';
 
 import { ModalApi } from './modal-api';
-import VbenModal from './modal.vue';
+import OperonModal from './modal.vue';
 
-const USER_MODAL_INJECT_KEY = Symbol('VBEN_MODAL_INJECT');
+const USER_MODAL_INJECT_KEY = Symbol('OPERON_MODAL_INJECT');
 
 declare const MODAL_DATA_NOT_PROVIDED: unique symbol;
 
@@ -57,7 +57,7 @@ export function setDefaultModalProps(props: Partial<ModalProps>) {
   Object.assign(DEFAULT_MODAL_PROPS, props);
 }
 
-export function useVbenModal<
+export function useOperonModal<
   TData = ModalDataNotProvided,
   TConnectedComponent extends Component = Component,
 >(options: ModalApiOptions<TConnectedComponent> = {}) {
@@ -107,7 +107,7 @@ export function useVbenModal<
       },
       // eslint-disable-next-line vue/one-component-per-file
       {
-        name: 'VbenParentModal',
+        name: 'OperonParentModal',
         inheritAttrs: false,
       },
     );
@@ -166,7 +166,7 @@ export function useVbenModal<
     (props: ModalProps, { attrs, slots }) => {
       return () =>
         h(
-          VbenModal,
+          OperonModal,
           {
             ...props,
             ...attrs,
@@ -177,7 +177,7 @@ export function useVbenModal<
     },
     // eslint-disable-next-line vue/one-component-per-file
     {
-      name: 'VbenModal',
+      name: 'OperonModal',
       inheritAttrs: false,
     },
   );
@@ -186,11 +186,11 @@ export function useVbenModal<
   return [Modal, extendedApi] as const;
 }
 
-export function createVbenModal<TData = unknown>() {
-  return function useTypedVbenModal<
+export function createOperonModal<TData = unknown>() {
+  return function useTypedOperonModal<
     TConnectedComponent extends Component = Component,
   >(options: ModalApiOptions<TConnectedComponent> = {}) {
-    return useVbenModal<TData, TConnectedComponent>(options);
+    return useOperonModal<TData, TConnectedComponent>(options);
   };
 }
 
@@ -215,7 +215,7 @@ async function checkProps<TData>(
     if (stateKeys.has(attr) && !['class'].includes(attr)) {
       // When connectedComponent exists, do not pass Modal props to avoid complexity; use useModal or api to modify Modal props
       console.warn(
-        `[Vben Modal]: When 'connectedComponent' exists, do not set props or slots '${attr}', which will increase complexity. If you need to modify the props of Modal, please use useVbenModal or api.`,
+        `[Operon Modal]: When 'connectedComponent' exists, do not set props or slots '${attr}', which will increase complexity. If you need to modify the props of Modal, please use useOperonModal or api.`,
       );
     }
   }

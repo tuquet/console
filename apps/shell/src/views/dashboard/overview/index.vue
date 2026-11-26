@@ -3,10 +3,7 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Page } from '@operon/common-ui';
-import {
-  getLocalBridgeInstallInfo,
-  useLocalBridgeHeartbeat,
-} from '@operon/kernel';
+import { getDaemonInstallInfo, useDaemonHeartbeat } from '@operon/kernel';
 
 import {
   Badge,
@@ -41,14 +38,14 @@ import { $t } from '#/locales';
 defineOptions({ name: 'DashboardOverview' });
 
 const router = useRouter();
-const bridge = useLocalBridgeHeartbeat({ intervalMs: 5000 });
-const installInfo = getLocalBridgeInstallInfo();
+const daemon = useDaemonHeartbeat({ intervalMs: 5000 });
+const installInfo = getDaemonInstallInfo();
 const copiedCommand = ref(false);
 const hasInitiatedInstall = ref(false);
 
-const isHealthy = computed(() => bridge.status.value === 'healthy');
-const isChecking = computed(() => bridge.status.value === 'checking');
-const isInitialChecking = bridge.isInitialChecking;
+const isHealthy = computed(() => daemon.status.value === 'healthy');
+const isChecking = computed(() => daemon.status.value === 'checking');
+const isInitialChecking = daemon.isInitialChecking;
 
 async function copyInstallCommand() {
   try {
@@ -69,7 +66,7 @@ interface ModuleItem {
   icon: any;
   name: string;
   path: string;
-  requiresBridge: boolean;
+  requiresDaemon: boolean;
   requiresCloud: boolean;
 }
 
@@ -79,7 +76,7 @@ const modules = computed<ModuleItem[]>(() => [
     icon: Zap,
     name: $t('page.browsers.title'),
     path: '/browsers',
-    requiresBridge: true,
+    requiresDaemon: true,
     requiresCloud: false,
   },
   {
@@ -87,15 +84,15 @@ const modules = computed<ModuleItem[]>(() => [
     icon: FlaskConical,
     name: $t('page.tasks.title'),
     path: '/tasks',
-    requiresBridge: true,
+    requiresDaemon: true,
     requiresCloud: false,
   },
   {
-    description: $t('page.overview.moduleTenantsDesc'),
+    description: $t('page.overview.moduleWorkspacesDesc'),
     icon: Users,
-    name: $t('page.tenants.title'),
-    path: '/tenants',
-    requiresBridge: false,
+    name: $t('page.workspaces.title'),
+    path: '/workspaces',
+    requiresDaemon: false,
     requiresCloud: true,
   },
 ]);
@@ -124,12 +121,12 @@ const checklistProgress = computed(() =>
 );
 
 function openModule(mod: ModuleItem) {
-  if (mod.requiresBridge && !isHealthy.value) return;
+  if (mod.requiresDaemon && !isHealthy.value) return;
   void router.push(mod.path);
 }
 
 function isLocked(mod: ModuleItem) {
-  return mod.requiresBridge && !isHealthy.value;
+  return mod.requiresDaemon && !isHealthy.value;
 }
 </script>
 
@@ -264,7 +261,7 @@ function isLocked(mod: ModuleItem) {
               size="sm"
               class="h-8 gap-1.5 px-2.5 shadow-none"
               :disabled="isChecking"
-              @click="bridge.checkNow()"
+              @click="daemon.checkNow()"
             >
               <RefreshCw
                 class="size-3.5"
@@ -416,7 +413,7 @@ function isLocked(mod: ModuleItem) {
                 variant="outline"
                 class="text-[10px] text-amber-500 border-amber-500/30"
               >
-                {{ $t('page.overview.moduleRequiresBridge') }}
+                {{ $t('page.overview.moduleRequiresDaemon') }}
               </Badge>
               <ExternalLink
                 v-else

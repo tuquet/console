@@ -36,24 +36,24 @@ export const APP_REGISTRY: Record<string, RegisteredMicroApp> = {
     titleKey: 'page.system.title',
     order: 30,
   },
-  tenants: {
-    id: 'tenants',
-    name: 'Multi-Tenant Hub',
+  workspaces: {
+    id: 'workspaces',
+    name: 'Multi-Workspace Hub',
     version: '0.1.0',
     devPort: 5323,
     defaultPath: 'overview',
     icon: 'lucide:building-2',
-    titleKey: 'page.tenants.title',
+    titleKey: 'page.workspaces.title',
     order: 40,
   },
-  playground: {
-    id: 'playground',
-    name: 'Playground',
+  tasks: {
+    id: 'tasks',
+    name: 'Tasks',
     version: '0.1.0',
     devPort: 5324,
     defaultPath: 'overview',
     icon: 'lucide:layers',
-    titleKey: 'page.playground.title',
+    titleKey: 'page.tasks.title',
     order: 50,
   },
 };

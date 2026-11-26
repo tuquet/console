@@ -4,7 +4,7 @@ import type { BrowserProfileRecord } from '../api/browsers';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import { DataTable } from '@operon/common-ui';
-import { useKernel, useLocalBridgeHeartbeat } from '@operon/kernel';
+import { useDaemonHeartbeat, useKernel } from '@operon/kernel';
 
 import {
   Button,
@@ -18,6 +18,7 @@ import {
 } from '@operon-core/shadcn-ui';
 
 import {
+  Cpu,
   FileSpreadsheet,
   Globe,
   Plus,
@@ -27,13 +28,14 @@ import {
   WifiOff,
 } from '@lucide/vue';
 
-import BrowserDeleteDialog from '../components/browsers/BrowserDeleteDialog.vue';
-import BrowserDetailSheet from '../components/browsers/BrowserDetailSheet.vue';
-import BrowserFormDialog from '../components/browsers/BrowserFormDialog.vue';
-import BrowserImportCsvDialog from '../components/browsers/BrowserImportCsvDialog.vue';
-import BrowsersTableBulkBar from '../components/browsers/BrowsersTableBulkBar.vue';
-import BrowsersTableMetrics from '../components/browsers/BrowsersTableMetrics.vue';
-import BrowsersTableToolbar from '../components/browsers/BrowsersTableToolbar.vue';
+import BrowserDeleteDialog from '../components/browsers/browser-delete-dialog.vue';
+import BrowserDetailSheet from '../components/browsers/browser-detail-sheet.vue';
+import BrowserDriversDialog from '../components/browsers/browser-drivers-dialog.vue';
+import BrowserFormDialog from '../components/browsers/browser-form-dialog.vue';
+import BrowserImportCsvDialog from '../components/browsers/browser-import-csv-dialog.vue';
+import BrowsersTableBulkBar from '../components/browsers/browsers-table-bulk-bar.vue';
+import BrowsersTableMetrics from '../components/browsers/browsers-table-metrics.vue';
+import BrowsersTableToolbar from '../components/browsers/browsers-table-toolbar.vue';
 import { createBrowserColumns } from '../components/browsers/columns';
 import { $t } from '../locales';
 import { useBrowsersStore } from '../stores/browsers';
@@ -42,12 +44,13 @@ defineOptions({ name: 'AutomationBrowsersView' });
 
 const kernel = useKernel();
 const store = useBrowsersStore();
-const bridge = useLocalBridgeHeartbeat({ intervalMs: 5000 });
+const daemon = useDaemonHeartbeat({ intervalMs: 5000 });
 
 const formOpen = ref(false);
 const formTarget = ref<BrowserProfileRecord | null>(null);
 const detailOpen = ref(false);
 const importOpen = ref(false);
+const driversOpen = ref(false);
 const deleteOpen = ref(false);
 const deleteTargets = ref<BrowserProfileRecord[]>([]);
 const deleteLoading = ref(false);
@@ -55,7 +58,7 @@ let clearSelectionFn: (() => void) | null = null;
 
 onMounted(() => {
   store.subscribeEvents();
-  if (bridge.isHealthy.value) {
+  if (daemon.isHealthy.value) {
     void store.fetchBrowsers();
   }
 });
@@ -65,7 +68,7 @@ onBeforeUnmount(() => {
 });
 
 watch(
-  () => bridge.isHealthy.value,
+  () => daemon.isHealthy.value,
   (healthy) => {
     if (healthy) {
       void store.fetchBrowsers();
@@ -327,7 +330,18 @@ const columns = createBrowserColumns(
           variant="outline"
           size="sm"
           class="h-8 gap-1.5 shadow-none"
-          :disabled="!bridge.isHealthy.value || store.loading"
+          :disabled="!daemon.isHealthy.value"
+          @click="driversOpen = true"
+        >
+          <Cpu class="size-3.5" />
+          <span>{{ $t('automation.browsers.drivers_btn') }}</span>
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          class="h-8 gap-1.5 shadow-none"
+          :disabled="!daemon.isHealthy.value || store.loading"
           @click="store.fetchBrowsers()"
         >
           <RefreshCw
@@ -341,7 +355,7 @@ const columns = createBrowserColumns(
           variant="outline"
           size="sm"
           class="h-8 gap-1.5 shadow-none"
-          :disabled="!bridge.isHealthy.value"
+          :disabled="!daemon.isHealthy.value"
           @click="importOpen = true"
         >
           <FileSpreadsheet class="size-3.5" />
@@ -351,7 +365,7 @@ const columns = createBrowserColumns(
         <Button
           size="sm"
           class="h-8 gap-1.5"
-          :disabled="!bridge.isHealthy.value"
+          :disabled="!daemon.isHealthy.value"
           @click="openCreateModal"
         >
           <Plus class="size-3.5" />
@@ -361,7 +375,7 @@ const columns = createBrowserColumns(
     </div>
 
     <!-- Loading Skeleton on Initial Heartbeat -->
-    <div v-if="bridge.isInitialChecking.value" class="flex flex-col gap-4">
+    <div v-if="daemon.isInitialChecking.value" class="flex flex-col gap-4">
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card v-for="idx in 4" :key="idx" class="border-border p-4">
           <Skeleton class="h-3.5 w-24" />
@@ -375,7 +389,7 @@ const columns = createBrowserColumns(
 
     <!-- Daemon Offline Gate -->
     <Card
-      v-else-if="!bridge.isHealthy.value"
+      v-else-if="!daemon.isHealthy.value"
       class="flex flex-col items-start justify-between gap-4 border-amber-500/30 bg-amber-500/5 p-6 sm:flex-row sm:items-center"
     >
       <div class="flex items-start gap-3">
@@ -389,7 +403,7 @@ const columns = createBrowserColumns(
           </p>
         </div>
       </div>
-      <Button size="sm" variant="outline" @click="bridge.checkNow()">
+      <Button size="sm" variant="outline" @click="daemon.checkNow()">
         {{ $t('common.refresh') }}
       </Button>
     </Card>
@@ -490,6 +504,7 @@ const columns = createBrowserColumns(
       "
     />
     <BrowserImportCsvDialog v-model:open="importOpen" />
+    <BrowserDriversDialog v-model:open="driversOpen" />
     <BrowserDeleteDialog
       v-model:open="deleteOpen"
       :targets="deleteTargets"

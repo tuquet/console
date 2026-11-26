@@ -1,2 +1,2 @@
-export { default as VbenHelpTooltip } from './help-tooltip.vue';
-export { default as VbenTooltip } from './tooltip.vue';
+export { default as OperonHelpTooltip } from './help-tooltip.vue';
+export { default as OperonTooltip } from './tooltip.vue';

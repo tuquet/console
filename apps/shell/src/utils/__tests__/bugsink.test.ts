@@ -58,7 +58,7 @@ describe('bugsink telemetry utility', () => {
         durationMs: 42,
         method: 'get',
         status: 200,
-        url: '/api/v1/tenants?key=secret_value&limit=10',
+        url: '/api/v1/workspaces?key=secret_value&limit=10',
       });
 
       expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(

@@ -6,7 +6,7 @@ import { ELEMENT_ID_MAIN_CONTENT } from '@operon-core/shared/constants';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useVbenDrawer } from '../use-drawer';
+import { useOperonDrawer } from '../use-drawer';
 
 vi.mock('@operon-core/preferences', () => ({
   usePreferences: () => ({
@@ -32,9 +32,9 @@ async function mountDrawer(options: MountOptions = {}) {
   mainContent.innerHTML = '<div><div></div></div>';
   document.body.append(mainContent);
 
-  let capturedApi: ReturnType<typeof useVbenDrawer>[1] | undefined;
+  let capturedApi: ReturnType<typeof useOperonDrawer>[1] | undefined;
   const Consumer = defineComponent(() => {
-    const [Drawer, drawerApi] = useVbenDrawer({
+    const [Drawer, drawerApi] = useOperonDrawer({
       appendToMain: true,
       cancelText: 'Cancel',
       confirmText: 'Confirm',
@@ -106,7 +106,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('vben drawer interactions', () => {
+describe('operon drawer interactions', () => {
   it('fires confirm exactly once on confirm click and does not auto-close', async () => {
     const onConfirm = vi.fn();
     const { drawerApi } = await mountDrawer({ onConfirm });
@@ -124,7 +124,7 @@ describe('vben drawer interactions', () => {
   it('closes the drawer when the confirm handler closes the api', async () => {
     const onConfirm = vi.fn();
     const apiRef: {
-      current?: ReturnType<typeof useVbenDrawer>[1];
+      current?: ReturnType<typeof useOperonDrawer>[1];
     } = {};
     const { drawerApi } = await mountDrawer({
       onConfirm: () => {

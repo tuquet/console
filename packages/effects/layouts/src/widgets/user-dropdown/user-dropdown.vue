@@ -57,7 +57,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-  VbenIcon,
+  OperonIcon,
 } from '@operon-core/shadcn-ui';
 
 import { useFullscreen, useMagicKeys, whenever } from '@vueuse/core';
@@ -474,7 +474,7 @@ onMounted(() => {
             :key="menu.text"
             @select="menu.handler"
           >
-            <VbenIcon :icon="menu.icon" />
+            <OperonIcon :icon="menu.icon" />
             {{ menu.text }}
           </DropdownMenuItem>
 

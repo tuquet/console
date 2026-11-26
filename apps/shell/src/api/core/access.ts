@@ -3,8 +3,8 @@ import { useAccessStore } from '@operon/stores';
 
 import { decodeJwtPayload, supabaseRequest } from './supabase-client';
 
-export interface TenantMembershipQueryResult {
-  tenant_id: string;
+export interface WorkspaceMembershipQueryResult {
+  workspace_id: string;
   member_roles?: Array<{
     roles?: null | {
       role_permissions?: Array<{
@@ -16,13 +16,13 @@ export interface TenantMembershipQueryResult {
 
 export interface FlattenedAccess {
   permissions: string[];
-  tenantPermissions: Record<string, string[]>;
+  workspacePermissions: Record<string, string[]>;
 }
 
 export interface EffectiveAccess {
   isSuperadmin: boolean;
   permissions: string[];
-  tenantPermissions: Record<string, string[]>;
+  workspacePermissions: Record<string, string[]>;
 }
 
 /**
@@ -43,22 +43,22 @@ export function readUserIdFromToken(token?: null | string): null | string {
 }
 
 /**
- * Pure helper function to flatten multi-tenant membership rows from PostgREST
- * into a deduplicated union array of permissions and a per-tenant mapping.
+ * Pure helper function to flatten multi-workspace membership rows from PostgREST
+ * into a deduplicated union array of permissions and a per-workspace mapping.
  */
 export function flattenMemberships(
-  rows: TenantMembershipQueryResult[],
+  rows: WorkspaceMembershipQueryResult[],
 ): FlattenedAccess {
   const allPermissions = new Set<string>();
-  const tenantPermissions: Record<string, string[]> = {};
+  const workspacePermissions: Record<string, string[]> = {};
 
   if (!Array.isArray(rows)) {
-    return { permissions: [], tenantPermissions: {} };
+    return { permissions: [], workspacePermissions: {} };
   }
 
   for (const row of rows) {
-    if (!row?.tenant_id) continue;
-    const tenantPermSet = new Set<string>();
+    if (!row?.workspace_id) continue;
+    const workspacePermSet = new Set<string>();
 
     if (Array.isArray(row.member_roles)) {
       for (const mr of row.member_roles) {
@@ -67,19 +67,19 @@ export function flattenMemberships(
           for (const p of perms) {
             if (p?.permission_id) {
               allPermissions.add(p.permission_id);
-              tenantPermSet.add(p.permission_id);
+              workspacePermSet.add(p.permission_id);
             }
           }
         }
       }
     }
 
-    tenantPermissions[row.tenant_id] = [...tenantPermSet].toSorted();
+    workspacePermissions[row.workspace_id] = [...workspacePermSet].toSorted();
   }
 
   return {
     permissions: [...allPermissions].toSorted(),
-    tenantPermissions,
+    workspacePermissions,
   };
 }
 
@@ -130,18 +130,20 @@ export async function getEffectiveAccess(): Promise<EffectiveAccess> {
       return {
         isSuperadmin: true,
         permissions,
-        tenantPermissions: {},
+        workspacePermissions: {},
       };
     }
 
-    // Standard User: derive permissions from active tenant memberships
+    // Standard User: derive permissions from active workspace memberships
     const userId = readUserIdFromToken(token);
     if (!userId) {
       throw new Error($t('authentication.invalidTokenSub'));
     }
 
-    const membershipRows = await supabaseRequest<TenantMembershipQueryResult[]>(
-      `/rest/v1/tenant_members?user_id=eq.${encodeURIComponent(userId)}&status=eq.active&select=tenant_id,member_roles(roles(role_permissions(permission_id)))`,
+    const membershipRows = await supabaseRequest<
+      WorkspaceMembershipQueryResult[]
+    >(
+      `/rest/v1/workspace_members?user_id=eq.${encodeURIComponent(userId)}&status=eq.active&select=workspace_id,member_roles(roles(role_permissions(permission_id)))`,
     );
     cachedToken = accessStore.accessToken || token;
 
@@ -149,7 +151,7 @@ export async function getEffectiveAccess(): Promise<EffectiveAccess> {
     return {
       isSuperadmin: false,
       permissions: flattened.permissions,
-      tenantPermissions: flattened.tenantPermissions,
+      workspacePermissions: flattened.workspacePermissions,
     };
   })().catch((error) => {
     // Clear cache on error so subsequent calls can retry

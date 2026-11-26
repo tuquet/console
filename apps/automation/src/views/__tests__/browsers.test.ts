@@ -6,9 +6,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import AutomationBrowsersView from '../browsers.vue';
 
 const mockFetch = vi.fn();
-const mockTenantState = reactive({
+const mockWorkspaceState = reactive({
   activeId: 'local-default',
-  activeName: 'Local Tenant',
+  activeName: 'Local Workspace',
   activeSlug: 'local',
   isLoading: false,
   items: [],
@@ -18,9 +18,9 @@ vi.mock('@operon/kernel', () => ({
   useKernel: () => ({
     api: { daemonPort: 8765, localDaemonFetch: mockFetch },
     events: { navigate: vi.fn(), notify: vi.fn(), openLoginModal: vi.fn() },
-    tenant: mockTenantState,
+    workspace: mockWorkspaceState,
   }),
-  useLocalBridgeHeartbeat: () => ({
+  useDaemonHeartbeat: () => ({
     checkNow: vi.fn(),
     isHealthy: ref(true),
     isInitialChecking: ref(false),
@@ -45,7 +45,7 @@ const sampleBrowsers = [
     proxy: 'socks5://127.0.0.1:1080',
     startupFlags: [],
     tags: ['sea'],
-    tenantId: 'local-default',
+    workspaceId: 'local-default',
     timezone: 'UTC',
     updatedAt: '2026-01-01T00:00:00Z',
     userAgent: null,
@@ -67,7 +67,7 @@ const sampleBrowsers = [
     proxy: null,
     startupFlags: [],
     tags: ['vip'],
-    tenantId: 'local-default',
+    workspaceId: 'local-default',
     timezone: 'UTC',
     updatedAt: '2026-01-02T00:00:00Z',
     userAgent: null,

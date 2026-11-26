@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import type { ButtonVariants } from '../../ui';
-import type { VbenButtonProps } from './button';
+import type { OperonButtonProps } from './button';
 
 import { computed, useSlots } from 'vue';
 
 import { cn } from '@operon-core/shared/utils';
 
-import { VbenTooltip } from '../tooltip';
-import VbenButton from './button.vue';
+import { OperonTooltip } from '../tooltip';
+import OperonButton from './button.vue';
 
-interface Props extends VbenButtonProps {
+interface Props extends OperonButtonProps {
   class?: any;
   disabled?: boolean;
   onClick?: ((e?: MouseEvent) => void)[] | ((e?: MouseEvent) => void);
@@ -43,7 +43,7 @@ function handleClick(e: MouseEvent) {
 </script>
 
 <template>
-  <VbenButton
+  <OperonButton
     v-if="!showTooltip"
     :class="cn('rounded-full', props.class)"
     :disabled="disabled"
@@ -52,15 +52,15 @@ function handleClick(e: MouseEvent) {
     @click="handleClick"
   >
     <slot></slot>
-  </VbenButton>
+  </OperonButton>
 
-  <VbenTooltip
+  <OperonTooltip
     v-else
     :delay-duration="tooltipDelayDuration"
     :side="tooltipSide"
   >
     <template #trigger>
-      <VbenButton
+      <OperonButton
         :class="cn('rounded-full', props.class)"
         :disabled="disabled"
         :variant="variant"
@@ -68,11 +68,11 @@ function handleClick(e: MouseEvent) {
         @click="handleClick"
       >
         <slot></slot>
-      </VbenButton>
+      </OperonButton>
     </template>
     <slot v-if="slots.tooltip" name="tooltip"> </slot>
     <template v-else>
       {{ tooltip }}
     </template>
-  </VbenTooltip>
+  </OperonTooltip>
 </template>

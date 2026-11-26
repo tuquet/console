@@ -3,7 +3,7 @@ import type { TabsEmits, TabsProps } from './types';
 
 import { useForwardPropsEmits } from '@operon-core/composables';
 import { ChevronsLeft, ChevronsRight } from '@operon-core/icons';
-import { VbenScrollbar } from '@operon-core/shadcn-ui';
+import { OperonScrollbar } from '@operon-core/shadcn-ui';
 
 import { Tabs, TabsChrome } from './components';
 import { useTabsDrag } from './use-tabs-drag';
@@ -16,7 +16,7 @@ defineOptions({
 });
 
 const props = withDefaults(defineProps<Props>(), {
-  contentClass: 'vben-tabs-content',
+  contentClass: 'operon-tabs-content',
   draggable: true,
   styleType: 'chrome',
   wheelable: true,
@@ -69,7 +69,7 @@ useTabsDrag(props, emit);
       }"
       class="size-full flex-1 overflow-hidden"
     >
-      <VbenScrollbar
+      <OperonScrollbar
         ref="scrollbarRef"
         :shadow-bottom="false"
         :shadow-top="false"
@@ -88,7 +88,7 @@ useTabsDrag(props, emit);
         />
 
         <Tabs v-else v-bind="{ ...forward, ...$attrs, ...$props }" />
-      </VbenScrollbar>
+      </OperonScrollbar>
     </div>
 
     <!-- Right scroll button -->

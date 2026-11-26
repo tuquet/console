@@ -25,7 +25,7 @@ import {
 import { CheckCircle2, Laptop } from '@lucide/vue';
 
 import { useClipboard } from '#/composables';
-import { useTenantStore } from '#/store/tenant';
+import { useWorkspaceStore } from '#/store/workspace';
 import { captureError } from '#/utils/bugsink';
 import { validateDesktopBridgePort } from '#/utils/security';
 
@@ -40,14 +40,14 @@ const route = useRoute();
 const router = useRouter();
 const accessStore = useAccessStore();
 const userStore = useUserStore();
-const tenantStore = useTenantStore();
+const workspaceStore = useWorkspaceStore();
 const { copyToClipboard, isCopied } = useClipboard();
 
 // Query parameters from Desk app
 const machineName = computed(
   () =>
     (route.query.machine_name as string) ||
-    $t('authentication.desktopLocalWorkstation'),
+    $t('authentication.desktopLocalDesktop'),
 );
 const state = computed(() => (route.query.state as string) || '');
 const validatedPort = computed(() =>
@@ -65,29 +65,29 @@ const userAvatar = computed(
   () => userStore.userInfo?.avatar || 'https://operon.com/icons/cli.svg',
 );
 
-// Tenancy
-const selectedTenant = ref('');
-const tenantOptions = ref<{ label: string; value: string }[]>([]);
+// workspace
+const selectedWorkspace = ref('');
+const workspaceOptions = ref<{ label: string; value: string }[]>([]);
 
-async function loadTenants() {
+async function loadWorkspaces() {
   if (!accessStore.accessToken) return;
-  const list = await tenantStore.fetchTenants();
+  const list = await workspaceStore.fetchWorkspaces();
   if (list.length > 0) {
-    tenantOptions.value = list.map((t) => ({
+    workspaceOptions.value = list.map((t) => ({
       label: `${t.name} · ${t.slug}`,
       value: t.id,
     }));
-    selectedTenant.value = tenantOptions.value[0]?.value || '';
+    selectedWorkspace.value = workspaceOptions.value[0]?.value || '';
     return;
   }
 
-  tenantOptions.value = [
+  workspaceOptions.value = [
     {
-      label: $t('authentication.desktopDefaultTenant'),
+      label: $t('authentication.desktopDefaultWorkspace'),
       value: 'local-default',
     },
   ];
-  selectedTenant.value = 'local-default';
+  selectedWorkspace.value = 'local-default';
 }
 
 const loading = ref(false);
@@ -98,7 +98,7 @@ const authPayload = computed(() => ({
   machineName: machineName.value,
   refreshToken: accessStore.refreshToken || '',
   state: state.value,
-  tenantId: selectedTenant.value,
+  workspaceId: selectedWorkspace.value,
   token: accessStore.accessToken || '',
 }));
 
@@ -166,7 +166,7 @@ function handleCancel() {
 
 onMounted(() => {
   if (isLoggedIn.value) {
-    loadTenants();
+    loadWorkspaces();
   }
 });
 </script>
@@ -229,7 +229,7 @@ onMounted(() => {
             <div class="flex items-center justify-between">
               <span class="text-foreground">{{ machineName }}</span>
               <Badge variant="secondary">
-                {{ $t('authentication.desktopLocalWorkstation') }}
+                {{ $t('authentication.desktopLocalDesktop') }}
               </Badge>
             </div>
           </div>
@@ -283,15 +283,15 @@ onMounted(() => {
 
           <div>
             <span class="text-muted-foreground block mb-2">{{
-              $t('term.tenant')
+              $t('term.workspace')
             }}</span>
-            <Select v-model="selectedTenant">
+            <Select v-model="selectedWorkspace">
               <SelectTrigger class="w-full bg-background">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem
-                  v-for="opt in tenantOptions"
+                  v-for="opt in workspaceOptions"
                   :key="opt.value"
                   :value="opt.value"
                 >

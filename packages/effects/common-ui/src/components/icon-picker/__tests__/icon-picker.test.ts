@@ -13,7 +13,7 @@ import {
 
 import IconPicker from '../icon-picker.vue';
 
-// VbenIcon renders through @iconify/vue's Icon, which lazily fetches icon data
+// OperonIcon renders through @iconify/vue's Icon, which lazily fetches icon data
 // from api.iconify.design at render time. Isolate it in tests: we only care
 // about which icon names are rendered into the grid, not the SVG bodies.
 vi.mock('@iconify/vue', () => ({

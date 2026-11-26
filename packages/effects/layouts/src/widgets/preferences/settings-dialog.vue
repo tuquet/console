@@ -46,12 +46,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  OperonAvatar,
   Separator,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-  VbenAvatar,
 } from '@operon-core/shadcn-ui';
 import { globalShareState } from '@operon-core/shared/global-state';
 
@@ -258,8 +258,8 @@ const widgetUserDropdownButtonPosition = defineModel<string | undefined>(
   'widgetUserDropdownButtonPosition',
   { default: undefined },
 );
-const widgetTenantSelectorButtonPosition = defineModel<string | undefined>(
-  'widgetTenantSelectorButtonPosition',
+const widgetWorkspaceSelectorButtonPosition = defineModel<string | undefined>(
+  'widgetWorkspaceSelectorButtonPosition',
   { default: undefined },
 );
 const widgetGlobalSearchButtonPosition = defineModel<string | undefined>(
@@ -491,7 +491,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
               }"
               @click="activeTab = 'account'"
             >
-              <VbenAvatar
+              <OperonAvatar
                 :src="accountAvatar"
                 class="size-7 shrink-0 md:size-8"
               />
@@ -642,8 +642,8 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 v-model:widget-user-dropdown-button-position="
                   widgetUserDropdownButtonPosition
                 "
-                v-model:widget-tenant-selector-button-position="
-                  widgetTenantSelectorButtonPosition
+                v-model:widget-workspace-selector-button-position="
+                  widgetWorkspaceSelectorButtonPosition
                 "
                 v-model:widget-timezone-button-position="
                   widgetTimezoneButtonPosition
@@ -753,7 +753,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
             >
               <CardContent class="flex items-center justify-between gap-4 p-4">
                 <div class="flex min-w-0 items-center gap-3">
-                  <VbenAvatar :src="accountAvatar" class="size-11 shrink-0" />
+                  <OperonAvatar :src="accountAvatar" class="size-11 shrink-0" />
                   <div class="min-w-0">
                     <div class="flex items-center gap-2">
                       <p class="truncate text-sm font-medium text-foreground">

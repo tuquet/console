@@ -7,8 +7,8 @@ export interface KernelAuthContext {
   hasCloudAuth: boolean;
   /** Active user ID (sub claim from JWT) or 'local-operator' */
   userId: null | string;
-  /** Active multi-tenant organization ID */
-  tenantId: null | string;
+  /** Active multi-workspace organization ID */
+  workspaceId: null | string;
   /** User role identifiers, e.g. ['superadmin'], ['local_operator'] */
   roles: string[];
   /** True if the user has platform superadmin privileges */
@@ -113,7 +113,7 @@ export interface KernelNotificationContext {
   requestPermission: () => Promise<NotificationPermissionState>;
 }
 
-export interface KernelTenantRecord {
+export interface KernelWorkspaceRecord {
   avatarUrl: null | string;
   createdAt: string;
   createdBy: null | string;
@@ -126,45 +126,45 @@ export interface KernelTenantRecord {
   updatedAt: string;
 }
 
-export interface CreateKernelTenantInput {
+export interface CreateKernelWorkspaceInput {
   name: string;
   plan?: string;
   slug: string;
 }
 
-export interface UpdateKernelTenantPatch {
+export interface UpdateKernelWorkspacePatch {
   name?: string;
   plan?: string;
   slug?: string;
   status?: 'active' | 'archived' | 'suspended';
 }
 
-export interface KernelTenantContext {
-  /** Active tenant ID ('local-default', 'local-*', or Cloud tenant UUID) */
+export interface KernelWorkspaceContext {
+  /** Active workspace ID ('local-default', 'local-*', or Cloud workspace UUID) */
   activeId: string;
-  /** Active tenant URL-safe slug */
+  /** Active workspace URL-safe slug */
   activeSlug: null | string;
-  /** Active tenant display name */
+  /** Active workspace display name */
   activeName: null | string;
-  /** All accessible tenants for the active session */
-  items: KernelTenantRecord[];
-  /** True while tenants are being loaded or mutated */
+  /** All accessible workspaces for the active session */
+  items: KernelWorkspaceRecord[];
+  /** True while workspaces are being loaded or mutated */
   isLoading: boolean;
-  /** Refresh tenant list from local store or Cloud */
-  refresh?: (force?: boolean) => Promise<KernelTenantRecord[]>;
-  /** Switch the host shell's active tenant */
-  switchTenant?: (id: string) => void;
-  /** Create a new local or Cloud tenant */
-  createTenant?: (
-    input: CreateKernelTenantInput,
-  ) => Promise<KernelTenantRecord>;
-  /** Update tenant name, slug, plan, or status */
-  updateTenant?: (
+  /** Refresh workspace list from local store or Cloud */
+  refresh?: (force?: boolean) => Promise<KernelWorkspaceRecord[]>;
+  /** Switch the host shell's active workspace */
+  switchWorkspace?: (id: string) => void;
+  /** Create a new local or Cloud workspace */
+  createWorkspace?: (
+    input: CreateKernelWorkspaceInput,
+  ) => Promise<KernelWorkspaceRecord>;
+  /** Update workspace name, slug, plan, or status */
+  updateWorkspace?: (
     id: string,
-    patch: UpdateKernelTenantPatch,
-  ) => Promise<KernelTenantRecord>;
-  /** Delete a custom tenant */
-  deleteTenant?: (id: string) => Promise<void>;
+    patch: UpdateKernelWorkspacePatch,
+  ) => Promise<KernelWorkspaceRecord>;
+  /** Delete a custom workspace */
+  deleteWorkspace?: (id: string) => Promise<void>;
 }
 
 export interface KernelEventContext {
@@ -184,5 +184,5 @@ export interface KernelContext {
   api: Readonly<KernelApiContext>;
   events: Readonly<KernelEventContext>;
   notifications: Readonly<KernelNotificationContext>;
-  tenant: Readonly<KernelTenantContext>;
+  workspace: Readonly<KernelWorkspaceContext>;
 }

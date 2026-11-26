@@ -6,6 +6,7 @@ export default defineMicroAppRouteModule({
   appId: 'automation',
   manifest: automationManifest,
   meta: {
+    hideInMenu: true,
     platform: 'all',
     plugin: 'operon',
   },

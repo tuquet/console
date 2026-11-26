@@ -3,7 +3,7 @@ import { Maximize, Minimize } from '@operon-core/icons';
 
 import { useFullscreen } from '@vueuse/core';
 
-import { VbenIconButton } from '../button';
+import { OperonIconButton } from '../button';
 
 defineOptions({ name: 'FullScreen' });
 
@@ -30,12 +30,12 @@ isFullscreen.value = !!(
 );
 </script>
 <template>
-  <VbenIconButton
+  <OperonIconButton
     :tooltip="tooltip || undefined"
     class="hover:animate-[shrink_0.3s_ease-in-out]"
     @click="toggle"
   >
     <Minimize v-if="isFullscreen" class="text-foreground size-4" />
     <Maximize v-else class="text-foreground size-4" />
-  </VbenIconButton>
+  </OperonIconButton>
 </template>

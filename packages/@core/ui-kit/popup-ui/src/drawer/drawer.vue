@@ -19,6 +19,10 @@ import {
 import { X } from '@operon-core/icons';
 import { usePreferences } from '@operon-core/preferences';
 import {
+  OperonButton,
+  OperonHelpTooltip,
+  OperonIconButton,
+  OperonLoading,
   Separator,
   Sheet,
   SheetClose,
@@ -27,10 +31,6 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  VbenButton,
-  VbenHelpTooltip,
-  VbenIconButton,
-  VbenLoading,
   VisuallyHidden,
 } from '@operon-core/shadcn-ui';
 import { ELEMENT_ID_MAIN_CONTENT } from '@operon-core/shared/constants';
@@ -240,9 +240,9 @@ const getForceMount = computed(() => {
             class="ml-0.5 cursor-pointer rounded-full opacity-80 transition-opacity hover:opacity-100 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary"
           >
             <slot name="close-icon">
-              <VbenIconButton>
+              <OperonIconButton>
                 <X class="size-4" />
-              </VbenIconButton>
+              </OperonIconButton>
             </slot>
           </SheetClose>
           <Separator
@@ -255,9 +255,9 @@ const getForceMount = computed(() => {
             <slot name="title">
               {{ title }}
 
-              <VbenHelpTooltip v-if="titleTooltip" trigger-class="pb-1">
+              <OperonHelpTooltip v-if="titleTooltip" trigger-class="pb-1">
                 {{ titleTooltip }}
-              </VbenHelpTooltip>
+              </OperonHelpTooltip>
             </slot>
           </SheetTitle>
           <SheetDescription v-if="description" class="mt-1">
@@ -281,9 +281,9 @@ const getForceMount = computed(() => {
             class="ml-0.5 cursor-pointer rounded-full opacity-80 transition-opacity hover:opacity-100 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary"
           >
             <slot name="close-icon">
-              <VbenIconButton>
+              <OperonIconButton>
                 <X class="size-4" />
-              </VbenIconButton>
+              </OperonIconButton>
             </slot>
           </SheetClose>
         </div>
@@ -304,7 +304,7 @@ const getForceMount = computed(() => {
       >
         <slot></slot>
       </div>
-      <VbenLoading v-if="showLoading || submitting" spinning />
+      <OperonLoading v-if="showLoading || submitting" spinning />
       <SheetFooter
         v-if="showFooter"
         :class="
@@ -317,7 +317,7 @@ const getForceMount = computed(() => {
         <slot name="prepend-footer"></slot>
         <slot name="footer">
           <component
-            :is="components.DefaultButton || VbenButton"
+            :is="components.DefaultButton || OperonButton"
             v-if="showCancelButton"
             variant="ghost"
             :disabled="submitting"
@@ -329,7 +329,7 @@ const getForceMount = computed(() => {
           </component>
           <slot name="center-footer"></slot>
           <component
-            :is="components.PrimaryButton || VbenButton"
+            :is="components.PrimaryButton || OperonButton"
             v-if="showConfirmButton"
             :loading="confirmLoading || submitting"
             @click="() => drawerApi?.onConfirm()"

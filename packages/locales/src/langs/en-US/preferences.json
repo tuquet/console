@@ -213,7 +213,7 @@
     "headerRight": "Header Right",
     "sidebarHeader": "Sidebar Header",
     "logo": "Logo",
-    "tenantSelector": "Select tenant",
+    "workspaceSelector": "Select workspace",
     "breadcrumb": "Breadcrumb",
     "userDropdown": "User menu",
     "hidden": "Hidden",
@@ -230,14 +230,14 @@
         "label": "Fullscreen forms",
         "tip": "Allow expanding data forms to fullscreen."
       },
-      "tenantMode": {
-        "label": "Tenant mode",
+      "workspaceMode": {
+        "label": "Workspace mode",
         "options": {
           "single": {
-            "label": "Single tenant"
+            "label": "Single workspace"
           },
           "multi": {
-            "label": "Multi-tenant"
+            "label": "Multi-workspace"
           }
         }
       },
@@ -258,14 +258,14 @@
         "label": "Fullscreen forms",
         "tip": "Allow expanding data forms to fullscreen."
       },
-      "tenantMode": {
-        "label": "Tenant mode",
+      "workspaceMode": {
+        "label": "Workspace mode",
         "options": {
           "single": {
-            "label": "Single tenant"
+            "label": "Single workspace"
           },
           "multi": {
-            "label": "Multi-tenant"
+            "label": "Multi-workspace"
           }
         }
       },

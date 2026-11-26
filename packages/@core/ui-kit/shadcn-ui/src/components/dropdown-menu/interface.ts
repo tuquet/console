@@ -1,6 +1,6 @@
 import type { Component } from 'vue';
 
-interface VbenDropdownMenuItem {
+interface OperonDropdownMenuItem {
   disabled?: boolean;
   /**
    * Click event handler
@@ -26,7 +26,7 @@ interface VbenDropdownMenuItem {
 }
 
 interface DropdownMenuProps {
-  menus: VbenDropdownMenuItem[];
+  menus: OperonDropdownMenuItem[];
 }
 
-export type { DropdownMenuProps, VbenDropdownMenuItem };
+export type { DropdownMenuProps, OperonDropdownMenuItem };

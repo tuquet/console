@@ -1,1 +1,1 @@
-export { default as VbenInputPassword } from './input-password.vue';
+export { default as OperonInputPassword } from './input-password.vue';

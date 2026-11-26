@@ -5,10 +5,10 @@ export type {
   PromptProps,
 } from './alert';
 export { useAlertContext } from './alert';
-export { default as Alert } from './alert.vue';
 export {
-  vbenAlert as alert,
+  operonAlert as alert,
   clearAllAlerts,
-  vbenConfirm as confirm,
-  vbenPrompt as prompt,
-} from './AlertBuilder';
+  operonConfirm as confirm,
+  operonPrompt as prompt,
+} from './alert-builder';
+export { default as Alert } from './alert.vue';

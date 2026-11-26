@@ -6,8 +6,8 @@ import { ELEMENT_ID_MAIN_CONTENT } from '@operon-core/shared/constants';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useVbenDrawer } from '../../drawer/use-drawer';
-import { useVbenModal } from '../use-modal';
+import { useOperonDrawer } from '../../drawer/use-drawer';
+import { useOperonModal } from '../use-modal';
 
 vi.mock('@operon-core/preferences', () => ({
   usePreferences: () => ({
@@ -34,9 +34,9 @@ async function mountModal(options: MountOptions = {}) {
   mainContent.innerHTML = '<div><div></div></div>';
   document.body.append(mainContent);
 
-  let capturedApi: ReturnType<typeof useVbenModal>[1] | undefined;
+  let capturedApi: ReturnType<typeof useOperonModal>[1] | undefined;
   const Consumer = defineComponent(() => {
-    const [Modal, modalApi] = useVbenModal({
+    const [Modal, modalApi] = useOperonModal({
       appendToMain: true,
       cancelText: 'Cancel',
       confirmText: 'Confirm',
@@ -109,7 +109,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('vben modal interactions', () => {
+describe('operon modal interactions', () => {
   it('fires confirm exactly once on confirm click and does not auto-close', async () => {
     const onConfirm = vi.fn();
     const { modalApi } = await mountModal({ onConfirm });
@@ -127,7 +127,7 @@ describe('vben modal interactions', () => {
   it('closes the modal when the confirm handler closes the api', async () => {
     const onConfirm = vi.fn();
     const apiRef: {
-      current?: ReturnType<typeof useVbenModal>[1];
+      current?: ReturnType<typeof useOperonModal>[1];
     } = {};
     const { modalApi } = await mountModal({
       onConfirm: () => {
@@ -225,15 +225,15 @@ describe('vben modal interactions', () => {
   });
 
   it('closes on Escape after a persistent drawer is opened and closed', async () => {
-    let modalApi: ReturnType<typeof useVbenModal>[1] | undefined;
-    let drawerApi: ReturnType<typeof useVbenDrawer>[1] | undefined;
+    let modalApi: ReturnType<typeof useOperonModal>[1] | undefined;
+    let drawerApi: ReturnType<typeof useOperonDrawer>[1] | undefined;
 
     const Consumer = defineComponent(() => {
-      const [Modal, mApi] = useVbenModal({
+      const [Modal, mApi] = useOperonModal({
         destroyOnClose: false,
         title: 'Confirm modal',
       });
-      const [Drawer, dApi] = useVbenDrawer({
+      const [Drawer, dApi] = useOperonDrawer({
         destroyOnClose: false,
         title: 'Preferences drawer',
       });

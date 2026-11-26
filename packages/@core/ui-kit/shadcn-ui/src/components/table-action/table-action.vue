@@ -17,12 +17,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '../../ui';
-import { VbenButton } from '../button';
-import { VbenIcon } from '../icon';
+import { OperonButton } from '../button';
+import { OperonIcon } from '../icon';
 import ActionDropdownItemComp from './action-dropdown-item.vue';
 import ActionItemComp from './action-item.vue';
 
-defineOptions({ name: 'VbenTableAction' });
+defineOptions({ name: 'OperonTableAction' });
 
 const props = withDefaults(defineProps<TableActionProps>(), {
   actions: () => [],
@@ -138,7 +138,7 @@ function onContentInteractOutside(event: Event) {
         <!-- Standard button with tooltip -->
         <Tooltip v-else-if="item.hasTooltip">
           <TooltipTrigger as-child tabindex="-1">
-            <VbenButton
+            <OperonButton
               :class="item.buttonClass"
               :disabled="item.action.disabled"
               :loading="item.action.loading"
@@ -146,13 +146,13 @@ function onContentInteractOutside(event: Event) {
               :variant="item.variant"
               @click="onActionClick(item.action)"
             >
-              <VbenIcon
+              <OperonIcon
                 v-if="item.action.icon"
                 :icon="item.action.icon"
                 class="size-4"
               />
               <span v-if="item.action.text">{{ item.action.text }}</span>
-            </VbenButton>
+            </OperonButton>
           </TooltipTrigger>
           <TooltipContent
             :side="item.tooltipSide"
@@ -163,7 +163,7 @@ function onContentInteractOutside(event: Event) {
         </Tooltip>
 
         <!-- Standard button -->
-        <VbenButton
+        <OperonButton
           v-else
           :class="item.buttonClass"
           :disabled="item.action.disabled"
@@ -172,13 +172,13 @@ function onContentInteractOutside(event: Event) {
           :variant="item.variant"
           @click="onActionClick(item.action)"
         >
-          <VbenIcon
+          <OperonIcon
             v-if="item.action.icon"
             :icon="item.action.icon"
             class="size-4"
           />
           <span v-if="item.action.text">{{ item.action.text }}</span>
-        </VbenButton>
+        </OperonButton>
 
         <Separator v-if="item.showDivider" orientation="vertical" class="h-4" />
       </template>
@@ -189,10 +189,10 @@ function onContentInteractOutside(event: Event) {
       v-model:open="dropdownOpen"
     >
       <DropdownMenuTrigger as-child>
-        <VbenButton class="gap-1 p-2" variant="link">
+        <OperonButton class="gap-1 p-2" variant="link">
           <Ellipsis class="size-4" />
           <span v-if="moreText">{{ moreText }}</span>
-        </VbenButton>
+        </OperonButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"

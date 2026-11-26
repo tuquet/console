@@ -5,7 +5,7 @@ import { computed } from 'vue';
 
 import { useNamespace } from '@operon-core/composables';
 import { ChevronDown, ChevronRight } from '@operon-core/icons';
-import { VbenIcon } from '@operon-core/shadcn-ui';
+import { OperonIcon } from '@operon-core/shadcn-ui';
 
 import { useMenuContext } from '../hooks';
 
@@ -82,7 +82,7 @@ const iconArrowStyle = computed(() => {
   >
     <slot></slot>
 
-    <VbenIcon
+    <OperonIcon
       v-if="!isMenuMore"
       :class="nsMenu.e('icon')"
       :icon="icon"

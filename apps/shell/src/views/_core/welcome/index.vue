@@ -3,10 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { DEFAULT_HOME_PATH } from '@operon/constants';
-import {
-  getLocalBridgeInstallInfo,
-  useLocalBridgeHeartbeat,
-} from '@operon/kernel';
+import { getDaemonInstallInfo, useDaemonHeartbeat } from '@operon/kernel';
 import { preferences, usePreferences } from '@operon/preferences';
 import { openWindow } from '@operon/utils';
 
@@ -41,7 +38,7 @@ import {
 import {
   clearWelcomeRedirect,
   hasPendingWelcomeRedirect,
-  markLocalBridgeSeen,
+  markDaemonSeen,
   resolveWelcomeRedirect,
 } from '#/utils/welcome';
 
@@ -52,20 +49,20 @@ const AUTO_REDIRECT_DURATION_MS = 1600;
 const route = useRoute();
 const router = useRouter();
 const { isDark } = usePreferences();
-const bridge = useLocalBridgeHeartbeat({ intervalMs: 5000 });
-const installInfo = getLocalBridgeInstallInfo();
+const daemon = useDaemonHeartbeat({ intervalMs: 5000 });
+const installInfo = getDaemonInstallInfo();
 
 const copiedCommand = ref(false);
-const wasOffline = ref(bridge.status.value === 'offline');
+const wasOffline = ref(daemon.status.value === 'offline');
 const autoRedirectPending = ref(false);
 const autoRedirectCancelled = ref(false);
 const redirectProgress = ref(0);
 
 let redirectTimer: null | ReturnType<typeof setInterval> = null;
 
-const isHealthy = computed(() => bridge.status.value === 'healthy');
-const isChecking = computed(() => bridge.status.value === 'checking');
-const isInitialChecking = bridge.isInitialChecking;
+const isHealthy = computed(() => daemon.status.value === 'healthy');
+const isChecking = computed(() => daemon.status.value === 'checking');
+const isInitialChecking = daemon.isInitialChecking;
 
 const targetRedirectPath = computed(() =>
   resolveWelcomeRedirect(route.query.redirect, DEFAULT_HOME_PATH),
@@ -129,7 +126,7 @@ function startGentleAutoRedirect() {
 }
 
 watch(
-  bridge.status,
+  daemon.status,
   (status) => {
     if (status === 'offline') {
       wasOffline.value = true;
@@ -140,7 +137,7 @@ watch(
     }
 
     if (status === 'healthy') {
-      markLocalBridgeSeen();
+      markDaemonSeen();
       if (shouldAutoRedirectOnConnect.value) {
         startGentleAutoRedirect();
       }
@@ -270,8 +267,8 @@ async function copyInstallCommand() {
             <span v-if="isInitialChecking">Checking device…</span>
             <span v-else-if="isHealthy">
               Connected{{
-                bridge.health.value?.version
-                  ? ` v${bridge.health.value.version}`
+                daemon.health.value?.version
+                  ? ` v${daemon.health.value.version}`
                   : ''
               }}
             </span>
@@ -293,7 +290,7 @@ async function copyInstallCommand() {
             variant="outline"
             class="h-8 gap-1.5 shadow-none"
             :disabled="isChecking"
-            @click="bridge.checkNow()"
+            @click="daemon.checkNow()"
           >
             <RefreshCw
               class="size-3.5"
@@ -421,7 +418,7 @@ async function copyInstallCommand() {
                 variant="outline"
                 class="gap-2 shadow-none"
                 :disabled="isChecking"
-                @click="bridge.checkNow()"
+                @click="daemon.checkNow()"
               >
                 <RefreshCw
                   class="size-4"
@@ -478,7 +475,7 @@ async function copyInstallCommand() {
                   <code
                     class="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground"
                   >
-                    opn worker start
+                    opn daemon start
                   </code>
                   — this page checks every 5 seconds.
                 </p>
@@ -562,7 +559,7 @@ async function copyInstallCommand() {
       <div
         class="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-xs text-muted-foreground sm:px-6"
       >
-        <span>Operon • Connects locally on port {{ bridge.port }}</span>
+        <span>Operon • Connects locally on port {{ daemon.port }}</span>
         <div class="flex items-center gap-4">
           <button
             type="button"

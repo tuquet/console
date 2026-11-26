@@ -7,7 +7,7 @@ import { ChevronsDown } from '@operon-core/icons';
 import {
   Collapsible,
   CollapsibleContent,
-  VbenRenderContent,
+  OperonRenderContent,
 } from '@operon-core/shadcn-ui';
 import { cn } from '@operon-core/shared/utils';
 
@@ -97,7 +97,7 @@ function toggleCollapsed() {
         >
           <span class="bg-primary h-3.5 w-[3px] flex-none rounded-full"></span>
           <span v-if="props.schema.title" class="form-group-title leading-6">
-            <VbenRenderContent :content="props.schema.title" />
+            <OperonRenderContent :content="props.schema.title" />
           </span>
           <ChevronsDown
             v-if="shouldCollapsible"
@@ -114,7 +114,7 @@ function toggleCollapsed() {
           />
         </component>
         <div v-if="props.schema.extra" class="flex-none">
-          <VbenRenderContent :content="props.schema.extra" />
+          <OperonRenderContent :content="props.schema.extra" />
         </div>
       </div>
       <CollapsibleContent>

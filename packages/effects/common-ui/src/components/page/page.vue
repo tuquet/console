@@ -5,7 +5,7 @@ import type { PageProps } from './types';
 
 import { computed, ref, watch } from 'vue';
 
-import { VbenLoading } from '@operon-core/shadcn-ui';
+import { OperonLoading } from '@operon-core/shadcn-ui';
 import { cn } from '@operon-core/shared/utils';
 
 defineOptions({
@@ -128,7 +128,7 @@ const contentStyle = computed<StyleValue>(() => {
       </Transition>
       <template v-else>
         <slot></slot>
-        <VbenLoading
+        <OperonLoading
           v-if="hasUsedSpinner"
           :min-loading-time="minLoadingTime"
           :spinning="loading"

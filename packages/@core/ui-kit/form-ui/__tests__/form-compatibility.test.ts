@@ -2,7 +2,7 @@ import type { BaseFormComponentType } from '../src/types';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { setupVbenForm } from '../src/config';
+import { setupOperonForm } from '../src/config';
 import {
   resetDeprecationWarnings,
   warnDeprecatedOnce,
@@ -48,13 +48,13 @@ describe('form api compatibility', () => {
     });
     expect(warning).toHaveBeenCalledTimes(3);
     expect(warning).toHaveBeenCalledWith(
-      '[Vben Form] `schema.valueFormat` is deprecated. Use the form-level `codec` instead.',
+      '[Operon Form] `schema.valueFormat` is deprecated. Use the form-level `codec` instead.',
     );
     expect(warning).toHaveBeenCalledWith(
-      '[Vben Form] `fieldMappingTime` is deprecated. Use the form-level `codec` instead.',
+      '[Operon Form] `fieldMappingTime` is deprecated. Use the form-level `codec` instead.',
     );
     expect(warning).toHaveBeenCalledWith(
-      '[Vben Form] `arrayToStringFields` is deprecated. Use the form-level `codec` instead.',
+      '[Operon Form] `arrayToStringFields` is deprecated. Use the form-level `codec` instead.',
     );
   });
 
@@ -89,7 +89,7 @@ describe('form api compatibility', () => {
     expect(await formApi.getValues()).toEqual({ normalizedName: 'ADA' });
     expect(warning).toHaveBeenCalledOnce();
     expect(warning).toHaveBeenCalledWith(
-      '[Vben Form] The form `codec` takes precedence over deprecated `valueFormat`, `fieldMappingTime`, and `arrayToStringFields` options.',
+      '[Operon Form] The form `codec` takes precedence over deprecated `valueFormat`, `fieldMappingTime`, and `arrayToStringFields` options.',
     );
   });
 
@@ -97,12 +97,12 @@ describe('form api compatibility', () => {
     const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const legacyRule = () => 'legacy error';
 
-    setupVbenForm({ defineRules: { legacy: legacyRule } });
-    setupVbenForm({ defineRules: { legacy: legacyRule } });
+    setupOperonForm({ defineRules: { legacy: legacyRule } });
+    setupOperonForm({ defineRules: { legacy: legacyRule } });
 
     expect(warning).toHaveBeenCalledOnce();
     expect(warning).toHaveBeenCalledWith(
-      '[Vben Form] `setupVbenForm({ defineRules })` is deprecated. Use `setupVbenForm({ rules })` instead.',
+      '[Operon Form] `setupOperonForm({ defineRules })` is deprecated. Use `setupOperonForm({ rules })` instead.',
     );
     const registeredRule = getFormRule('legacy');
     expect(registeredRule).toBeDefined();
@@ -117,7 +117,7 @@ describe('form api compatibility', () => {
 
   it('prefers the new rules option when both APIs define the same rule', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
-    setupVbenForm({
+    setupOperonForm({
       defineRules: { required: () => 'legacy error' },
       rules: { required: () => 'new error' },
     });
@@ -165,16 +165,16 @@ describe('form api compatibility', () => {
     expect(form.submit).toHaveBeenCalledOnce();
     expect(warning).toHaveBeenCalledTimes(4);
     expect(warning).toHaveBeenCalledWith(
-      '[Vben Form] `formApi.resetForm()` is deprecated. Use `formApi.reset()` instead.',
+      '[Operon Form] `formApi.resetForm()` is deprecated. Use `formApi.reset()` instead.',
     );
     expect(warning).toHaveBeenCalledWith(
-      '[Vben Form] `formApi.resetValidate()` is deprecated. Use `formApi.clearValidation()` instead.',
+      '[Operon Form] `formApi.resetValidate()` is deprecated. Use `formApi.clearValidation()` instead.',
     );
     expect(warning).toHaveBeenCalledWith(
-      '[Vben Form] `formApi.submitForm()` is deprecated. Use `formApi.submit()` instead.',
+      '[Operon Form] `formApi.submitForm()` is deprecated. Use `formApi.submit()` instead.',
     );
     expect(warning).toHaveBeenCalledWith(
-      '[Vben Form] `formApi.validateAndSubmitForm()` is deprecated. Use `formApi.validateAndSubmit()` instead.',
+      '[Operon Form] `formApi.validateAndSubmitForm()` is deprecated. Use `formApi.validateAndSubmit()` instead.',
     );
   });
 });

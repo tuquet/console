@@ -39,7 +39,7 @@ export interface UseCustomFieldValueReturn<T> {
 }
 
 const CUSTOM_FIELD_INJECTION_KEY: InjectionKey<FormCustomFieldContext> = Symbol(
-  'VbenFormCustomField',
+  'OperonFormCustomField',
 );
 
 export function provideFormCustomField(context: FormCustomFieldContext) {
@@ -47,7 +47,7 @@ export function provideFormCustomField(context: FormCustomFieldContext) {
 }
 
 /**
- * Allow custom components inside VbenForm form items to deliver their values to the form.
+ * Allow custom components inside OperonForm form items to deliver their values to the form.
  *
  * When component neither binds `componentProps` (slot usage) nor implements `modelValue`,
  * the form cannot retrieve its value and schema rules cannot validate it. After calling this function, the getter
@@ -65,7 +65,7 @@ export function useCustomFieldValue<T = any>(
 
   if (!field) {
     console.warn(
-      'useCustomFieldValue can only be used inside a VbenForm field item',
+      'useCustomFieldValue can only be used inside a OperonForm field item',
     );
     return {
       disabled: computed(() => false),

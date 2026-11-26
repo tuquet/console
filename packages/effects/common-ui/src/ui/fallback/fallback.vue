@@ -7,7 +7,7 @@ import { useRouter } from 'vue-router';
 import { ArrowLeft, RotateCw } from '@operon/icons';
 import { $t } from '@operon/locales';
 
-import { VbenButton } from '@operon-core/shadcn-ui';
+import { OperonButton } from '@operon-core/shadcn-ui';
 
 interface Props extends FallbackProps {}
 
@@ -151,14 +151,14 @@ function refresh() {
         {{ descText }}
       </p>
       <slot v-if="$slots.action" name="action"></slot>
-      <VbenButton v-else-if="showBack" size="lg" @click="back">
+      <OperonButton v-else-if="showBack" size="lg" @click="back">
         <ArrowLeft class="mr-2 size-4" />
         {{ $t('common.backToHome') }}
-      </VbenButton>
-      <VbenButton v-else-if="showRefresh" size="lg" @click="refresh">
+      </OperonButton>
+      <OperonButton v-else-if="showRefresh" size="lg" @click="refresh">
         <RotateCw class="mr-2 size-4" />
         {{ $t('common.refresh') }}
-      </VbenButton>
+      </OperonButton>
     </div>
   </div>
 </template>

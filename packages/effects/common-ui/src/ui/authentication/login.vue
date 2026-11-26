@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Recordable } from '@operon/types';
 
-import type { VbenFormSchema } from '@operon-core/form-ui';
+import type { OperonFormSchema } from '@operon-core/form-ui';
 
 import type { AuthenticationProps } from './types';
 
@@ -10,14 +10,14 @@ import { useRouter } from 'vue-router';
 
 import { $t } from '@operon/locales';
 
-import { useVbenForm } from '@operon-core/form-ui';
-import { VbenButton, VbenCheckbox } from '@operon-core/shadcn-ui';
+import { useOperonForm } from '@operon-core/form-ui';
+import { OperonButton, OperonCheckbox } from '@operon-core/shadcn-ui';
 
 import Title from './auth-title.vue';
 import ThirdPartyLogin from './third-party-login.vue';
 
 interface Props extends AuthenticationProps {
-  formSchema?: VbenFormSchema[];
+  formSchema?: OperonFormSchema[];
 }
 
 defineOptions({
@@ -44,7 +44,7 @@ const emit = defineEmits<{
   submit: [Recordable<any>];
 }>();
 
-const [Form, formApi] = useVbenForm(
+const [Form, formApi] = useOperonForm(
   reactive({
     commonConfig: {
       hideLabel: true,
@@ -113,24 +113,24 @@ defineExpose({
       class="mb-6 flex justify-between"
     >
       <div class="flex-center">
-        <VbenCheckbox
+        <OperonCheckbox
           v-if="showRememberMe"
           v-model="rememberMe"
           name="rememberMe"
         >
           {{ $t('authentication.rememberMe') }}
-        </VbenCheckbox>
+        </OperonCheckbox>
       </div>
 
       <span
         v-if="showForgetPassword"
-        class="vben-link"
+        class="operon-link"
         @click="handleGo(forgetPasswordPath)"
       >
         {{ $t('authentication.forgetPassword') }}
       </span>
     </div>
-    <VbenButton
+    <OperonButton
       :class="{
         'cursor-wait': loading,
       }"
@@ -140,16 +140,16 @@ defineExpose({
       @click="handleSubmit"
     >
       {{ submitButtonText || $t('common.login') }}
-    </VbenButton>
+    </OperonButton>
 
     <div v-if="showCodeLogin" class="mt-4 mb-2 flex items-center">
-      <VbenButton
+      <OperonButton
         class="w-full"
         variant="outline"
         @click="handleGo(codeLoginPath)"
       >
         {{ $t('authentication.mobileLogin') }}
-      </VbenButton>
+      </OperonButton>
     </div>
 
     <!-- Third-party login -->
@@ -160,7 +160,7 @@ defineExpose({
     <slot name="to-register">
       <div v-if="showRegister" class="mt-3 text-center">
         {{ $t('authentication.accountTip') }}
-        <span class="vben-link" @click="handleGo(registerPath)">
+        <span class="operon-link" @click="handleGo(registerPath)">
           {{ $t('authentication.createAccount') }}
         </span>
       </div>

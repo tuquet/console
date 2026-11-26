@@ -5,13 +5,13 @@ import { globalShareState } from '@operon/common-ui';
 import { describe, expect, it, vi } from 'vitest';
 
 import { initComponentAdapter } from '../component';
-import { initSetupVbenForm, useVbenForm } from '../form';
+import { initSetupOperonForm, useOperonForm } from '../form';
 
 vi.mock('@operon/locales', () => ({
   $t: (key: string) => key,
 }));
 
-describe('workstation form & component adapter', () => {
+describe('desktop form & component adapter', () => {
   it('allows typing in adapted Input component and triggers modelValue + onChange updates', async () => {
     await initComponentAdapter();
     const AdaptedInput = globalShareState.getComponents().Input;
@@ -76,12 +76,12 @@ describe('workstation form & component adapter', () => {
     }
   });
 
-  it('updates VbenForm state and triggers handleValuesChange when typing into Input field', async () => {
+  it('updates OperonForm state and triggers handleValuesChange when typing into Input field', async () => {
     await initComponentAdapter();
-    await initSetupVbenForm();
+    await initSetupOperonForm();
 
     const onValuesChange = vi.fn();
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       handleValuesChange: onValuesChange,
       schema: [
         {

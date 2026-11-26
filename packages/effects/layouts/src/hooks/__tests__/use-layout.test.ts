@@ -66,8 +66,8 @@ describe('useLayoutHook', () => {
       meta: {},
     } as any;
     const toRoute = {
-      path: '/tenants',
-      matched: [{ path: '/tenants' }],
+      path: '/workspaces',
+      matched: [{ path: '/workspaces' }],
       meta: {},
     } as any;
 
@@ -83,19 +83,19 @@ describe('useLayoutHook', () => {
     const { getTransitionName } = useLayoutHook();
 
     const fromRoute = {
-      path: '/tenants/detail/1',
-      fullPath: '/tenants/detail/1?tab=overview',
-      matched: [{ path: '/tenants/detail/1' }],
+      path: '/workspaces/detail/1',
+      fullPath: '/workspaces/detail/1?tab=overview',
+      matched: [{ path: '/workspaces/detail/1' }],
       meta: {},
     } as any;
     const toRoute = {
-      path: '/tenants/detail/1',
-      fullPath: '/tenants/detail/1?tab=members',
-      matched: [{ path: '/tenants/detail/1' }],
+      path: '/workspaces/detail/1',
+      fullPath: '/workspaces/detail/1?tab=members',
+      matched: [{ path: '/workspaces/detail/1' }],
       meta: {},
     } as any;
 
-    // Simulate switching subtabs on tenant detail page
+    // Simulate switching subtabs on workspace detail page
     triggerBefore(toRoute, fromRoute);
 
     expect(getTransitionName(toRoute)).toBeUndefined();

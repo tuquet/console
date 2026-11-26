@@ -3,9 +3,9 @@ import { nextTick } from 'vue';
 
 import { afterAll, bench, describe } from 'vitest';
 
-import { setupVbenForm } from '../src/config';
+import { setupOperonForm } from '../src/config';
 import { encodeFormValues } from '../src/form-codec';
-import { useVbenForm } from '../src/use-vben-form';
+import { useOperonForm } from '../src/use-operon-form';
 import { TestInput } from './benchmark-fixtures';
 
 interface ContactValues {
@@ -62,8 +62,8 @@ const codec = {
 };
 
 const formValues = createFormValues();
-setupVbenForm({ config: {}, rules: {} });
-const [CodecForm, codecFormApi] = useVbenForm<PerformanceFormValues>({
+setupOperonForm({ config: {}, rules: {} });
+const [CodecForm, codecFormApi] = useOperonForm<PerformanceFormValues>({
   codec,
   schema: [
     {
@@ -80,7 +80,7 @@ const [CodecForm, codecFormApi] = useVbenForm<PerformanceFormValues>({
   showDefaultActions: false,
 });
 const codecWrapper = mount(CodecForm);
-const [ArrayForm, arrayFormApi] = useVbenForm({
+const [ArrayForm, arrayFormApi] = useOperonForm({
   schema: [
     {
       children: [

@@ -93,7 +93,9 @@ describe('page.vue', () => {
     expect(content.attributes('style')).toContain(
       '--page-content-height-offset: 12px',
     );
-    expect(content.attributes('style')).not.toContain('--vben-content-height');
+    expect(content.attributes('style')).not.toContain(
+      '--operon-content-height',
+    );
   });
 
   it('positions the footer according to footerFixed', async () => {

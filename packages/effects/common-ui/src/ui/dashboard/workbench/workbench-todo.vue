@@ -6,7 +6,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  VbenCheckbox,
+  OperonCheckbox,
 } from '@operon-core/shadcn-ui';
 
 interface Props {
@@ -39,7 +39,7 @@ withDefaults(defineProps<Props>(), {
           class="flex cursor-pointer justify-between gap-x-6 py-5"
         >
           <div class="flex min-w-0 items-center gap-x-4">
-            <VbenCheckbox v-model="item.completed" name="completed" />
+            <OperonCheckbox v-model="item.completed" name="completed" />
             <div class="min-w-0 flex-auto">
               <p class="/6 font-semibold text-foreground">
                 {{ item.title }}

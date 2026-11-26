@@ -9,7 +9,7 @@ const isDarkRef = ref(true);
 
 vi.mock('@operon/preferences', () => ({
   preferences: {
-    app: { name: 'Specter' },
+    app: { name: 'Operon' },
     logo: { source: '/logo.svg', sourceDark: '/logo-dark.svg' },
   },
   usePreferences: () => ({

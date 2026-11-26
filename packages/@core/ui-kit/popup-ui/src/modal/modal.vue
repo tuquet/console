@@ -22,10 +22,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  VbenButton,
-  VbenHelpTooltip,
-  VbenIconButton,
-  VbenLoading,
+  OperonButton,
+  OperonHelpTooltip,
+  OperonIconButton,
+  OperonLoading,
   VisuallyHidden,
 } from '@operon-core/shadcn-ui';
 import { ELEMENT_ID_MAIN_CONTENT } from '@operon-core/shared/constants';
@@ -384,9 +384,9 @@ function handleClosed() {
             {{ title }}
 
             <slot v-if="titleTooltip" name="titleTooltip">
-              <VbenHelpTooltip trigger-class="pb-1">
+              <OperonHelpTooltip trigger-class="pb-1">
                 {{ titleTooltip }}
-              </VbenHelpTooltip>
+              </OperonHelpTooltip>
             </slot>
           </slot>
         </DialogTitle>
@@ -410,20 +410,20 @@ function handleClosed() {
       >
         <slot></slot>
       </div>
-      <VbenLoading v-if="showLoading || submitting" spinning />
+      <OperonLoading v-if="showLoading || submitting" spinning />
       <div
         v-if="fullscreenButton || $slots.extra"
         class="absolute top-3 right-10 flex items-center gap-1"
       >
         <slot name="extra"></slot>
-        <VbenIconButton
+        <OperonIconButton
           v-if="fullscreenButton"
           class="flex-center size-6 rounded-full px-1 text-lg text-foreground/80 opacity-70 transition-opacity hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus:outline-hidden disabled:pointer-events-none"
           @click="handleFullscreen"
         >
           <Shrink v-if="fullscreen" class="size-3.5" />
           <Expand v-else class="size-3.5" />
-        </VbenIconButton>
+        </OperonIconButton>
       </div>
 
       <DialogFooter
@@ -442,7 +442,7 @@ function handleClosed() {
         <slot name="prepend-footer"></slot>
         <slot name="footer">
           <component
-            :is="components.DefaultButton || VbenButton"
+            :is="components.DefaultButton || OperonButton"
             v-if="showCancelButton"
             variant="outline"
             :disabled="submitting"
@@ -454,7 +454,7 @@ function handleClosed() {
           </component>
           <slot name="center-footer"></slot>
           <component
-            :is="components.PrimaryButton || VbenButton"
+            :is="components.PrimaryButton || OperonButton"
             v-if="showConfirmButton"
             data-slot="modal-confirm"
             :disabled="confirmDisabled"

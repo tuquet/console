@@ -23,9 +23,9 @@ import { usePreferences } from '@operon-core/preferences';
 import { useSelector } from '@operon-core/shared/store';
 
 import { DrawerApi } from './drawer-api';
-import VbenDrawer from './drawer.vue';
+import OperonDrawer from './drawer.vue';
 
-const USER_DRAWER_INJECT_KEY = Symbol('VBEN_DRAWER_INJECT');
+const USER_DRAWER_INJECT_KEY = Symbol('OPERON_DRAWER_INJECT');
 
 declare const DRAWER_DATA_NOT_PROVIDED: unique symbol;
 
@@ -58,7 +58,7 @@ export function setDefaultDrawerProps(props: Partial<DrawerProps>) {
   Object.assign(DEFAULT_DRAWER_PROPS, props);
 }
 
-export function useVbenDrawer<
+export function useOperonDrawer<
   TData = DrawerDataNotProvided,
   TConnectedComponent extends Component = Component,
 >(options: DrawerApiOptions<TConnectedComponent> = {}) {
@@ -105,7 +105,7 @@ export function useVbenDrawer<
       },
       // eslint-disable-next-line vue/one-component-per-file
       {
-        name: 'VbenParentDrawer',
+        name: 'OperonParentDrawer',
         inheritAttrs: false,
       },
     );
@@ -162,11 +162,11 @@ export function useVbenDrawer<
   const Drawer = defineComponent(
     (props: DrawerProps, { attrs, slots }) => {
       return () =>
-        h(VbenDrawer, { ...props, ...attrs, drawerApi: extendedApi }, slots);
+        h(OperonDrawer, { ...props, ...attrs, drawerApi: extendedApi }, slots);
     },
     // eslint-disable-next-line vue/one-component-per-file
     {
-      name: 'VbenDrawer',
+      name: 'OperonDrawer',
       inheritAttrs: false,
     },
   );
@@ -174,11 +174,11 @@ export function useVbenDrawer<
   return [Drawer, extendedApi] as const;
 }
 
-export function createVbenDrawer<TData = unknown>() {
-  return function useTypedVbenDrawer<
+export function createOperonDrawer<TData = unknown>() {
+  return function useTypedOperonDrawer<
     TConnectedComponent extends Component = Component,
   >(options: DrawerApiOptions<TConnectedComponent> = {}) {
-    return useVbenDrawer<TData, TConnectedComponent>(options);
+    return useOperonDrawer<TData, TConnectedComponent>(options);
   };
 }
 
@@ -201,9 +201,9 @@ async function checkProps<TData>(
 
   for (const attr of Object.keys(attrs)) {
     if (stateKeys.has(attr) && !['class'].includes(attr)) {
-      // When connectedComponent exists, do not pass Drawer props to avoid complexity; use useVbenDrawer or api to modify Drawer props
+      // When connectedComponent exists, do not pass Drawer props to avoid complexity; use useOperonDrawer or api to modify Drawer props
       console.warn(
-        `[Vben Drawer]: When 'connectedComponent' exists, do not set props or slots '${attr}', which will increase complexity. If you need to modify the props of Drawer, please use useVbenDrawer or api.`,
+        `[Operon Drawer]: When 'connectedComponent' exists, do not set props or slots '${attr}', which will increase complexity. If you need to modify the props of Drawer, please use useOperonDrawer or api.`,
       );
     }
   }

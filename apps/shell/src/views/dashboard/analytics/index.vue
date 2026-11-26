@@ -31,7 +31,7 @@ import {
 
 import { $t } from '#/locales';
 
-import AnalyticsLoadingState from './components/AnalyticsLoadingState.vue';
+import AnalyticsLoadingState from './components/analytics-loading-state.vue';
 import { useAnalyticsMetrics } from './use-analytics-metrics';
 
 defineOptions({ name: 'Analytics' });
@@ -64,23 +64,23 @@ const {
 } = useAnalyticsMetrics();
 
 const kpiCards = computed<KpiCardItem[]>(() => {
-  const { fleet, plugins, system, tenants } = analyticsData.value;
+  const { fleet, plugins, system, workspaces } = analyticsData.value;
   return [
     {
       badgeClass: 'shrink-0 bg-primary/10 text-primary hover:bg-primary/15',
-      badgeTestId: 'kpi-tenants-status',
+      badgeTestId: 'kpi-workspaces-status',
       badgeText:
-        tenants.activeCount === tenants.total
-          ? $t('page.analytics.active_tenants')
-          : `${tenants.activeCount} ${$t('page.analytics.active')}`,
+        workspaces.activeCount === workspaces.total
+          ? $t('page.analytics.active_workspaces')
+          : `${workspaces.activeCount} ${$t('page.analytics.active')}`,
       badgeVariant: 'secondary',
-      cardTestId: 'kpi-card-tenants',
+      cardTestId: 'kpi-card-workspaces',
       icon: Building2,
       iconWrapperClass: 'bg-primary/10 text-primary',
-      label: $t('page.analytics.metric_tenants'),
+      label: $t('page.analytics.metric_workspaces'),
       showLoadingDash: true,
-      value: tenants.total,
-      valueTestId: 'kpi-tenants-total',
+      value: workspaces.total,
+      valueTestId: 'kpi-workspaces-total',
     },
     {
       badgeClass: 'shrink-0 text-muted-foreground',
@@ -121,19 +121,19 @@ const kpiCards = computed<KpiCardItem[]>(() => {
 
 const planRows = computed(() => [
   {
-    count: analyticsData.value.tenants.planBreakdown.pro,
+    count: analyticsData.value.workspaces.planBreakdown.pro,
     key: 'pro',
     label: $t('page.analytics.plan_pro'),
     percent: proPlanPercent.value,
   },
   {
-    count: analyticsData.value.tenants.planBreakdown.free,
+    count: analyticsData.value.workspaces.planBreakdown.free,
     key: 'free',
     label: $t('page.analytics.plan_free'),
     percent: freePlanPercent.value,
   },
   {
-    count: analyticsData.value.tenants.planBreakdown.enterprise,
+    count: analyticsData.value.workspaces.planBreakdown.enterprise,
     key: 'enterprise',
     label: $t('page.analytics.plan_enterprise'),
     percent: entPlanPercent.value,
@@ -243,7 +243,7 @@ const planRows = computed(() => [
           <CardAction>
             <Badge variant="outline">
               <ArrowUpRight class="mr-1 size-3 text-success" />
-              +{{ analyticsData.tenants.growth.length }} records
+              +{{ analyticsData.workspaces.growth.length }} records
             </Badge>
           </CardAction>
         </CardHeader>
@@ -254,11 +254,11 @@ const planRows = computed(() => [
           <div v-else class="flex flex-col gap-4">
             <!-- AreaChart for growth trend if enough data points exist -->
             <div
-              v-if="analyticsData.tenants.growth.length > 1"
+              v-if="analyticsData.workspaces.growth.length > 1"
               class="h-44 w-full"
             >
               <AreaChart
-                :data="analyticsData.tenants.growth"
+                :data="analyticsData.workspaces.growth"
                 index="date"
                 :categories="['count']"
                 :show-legend="false"
@@ -270,7 +270,7 @@ const planRows = computed(() => [
             <!-- Fallback compact stat cards -->
             <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div
-                v-for="point in analyticsData.tenants.growth.slice(-4)"
+                v-for="point in analyticsData.workspaces.growth.slice(-4)"
                 :key="point.date"
                 class="rounded-lg border border-border/50 bg-muted/20 p-3"
               >
@@ -280,7 +280,9 @@ const planRows = computed(() => [
                 <div class="mt-1 text-lg font-bold text-foreground">
                   {{ point.count }}
                 </div>
-                <div class="mt-1 text-xs text-success">Active Tenant Node</div>
+                <div class="mt-1 text-xs text-success">
+                  Active Workspace Node
+                </div>
               </div>
             </div>
 
@@ -288,17 +290,17 @@ const planRows = computed(() => [
               <div
                 class="flex items-center justify-between text-muted-foreground"
               >
-                <span>Tenant Fleet Capacity</span>
+                <span>Workspace Fleet Capacity</span>
                 <span class="text-foreground">
-                  {{ analyticsData.tenants.activeCount }} /
-                  {{ analyticsData.tenants.total }} active
+                  {{ analyticsData.workspaces.activeCount }} /
+                  {{ analyticsData.workspaces.total }} active
                 </span>
               </div>
               <Progress
                 :model-value="
-                  analyticsData.tenants.total > 0
-                    ? (analyticsData.tenants.activeCount /
-                        analyticsData.tenants.total) *
+                  analyticsData.workspaces.total > 0
+                    ? (analyticsData.workspaces.activeCount /
+                        analyticsData.workspaces.total) *
                       100
                     : 0
                 "
@@ -329,7 +331,7 @@ const planRows = computed(() => [
           <div v-else class="flex flex-col gap-4">
             <!-- Visual Donut Chart if non-zero subscriptions -->
             <div
-              v-if="analyticsData.tenants.total > 0"
+              v-if="analyticsData.workspaces.total > 0"
               class="flex justify-center py-1"
             >
               <DonutChart

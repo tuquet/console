@@ -3,7 +3,7 @@ import { computed, reactive, watch } from 'vue';
 
 import { $t } from '@operon/locales';
 
-import { useVbenForm, z } from '@operon-core/form-ui';
+import { useOperonForm, z } from '@operon-core/form-ui';
 import {
   Avatar,
   AvatarFallback,
@@ -34,7 +34,7 @@ const emit = defineEmits<{
 }>();
 
 const [Form, { reset, validate, getValues, getFieldComponentRef }] =
-  useVbenForm(
+  useOperonForm(
     reactive({
       commonConfig: {
         hideLabel: true,
@@ -42,7 +42,7 @@ const [Form, { reset, validate, getValues, getFieldComponentRef }] =
       },
       schema: computed(() => [
         {
-          component: 'VbenInputPassword' as const,
+          component: 'OperonInputPassword' as const,
           componentProps: {
             placeholder: $t('ui.widgets.lockScreen.placeholder'),
           },

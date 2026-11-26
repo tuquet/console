@@ -1,6 +1,6 @@
 import type { ButtonVariants } from '../../ui';
 
-import { VbenIcon } from '../icon';
+import { OperonIcon } from '../icon';
 
 /** Permission code(s), evaluated with injected hasPermission */
 export type TableActionAuth = string | string[];
@@ -33,7 +33,7 @@ export interface ActionItem {
   /** Whether disabled */
   disabled?: boolean;
   /** Icon component */
-  icon?: typeof VbenIcon.icon;
+  icon?: typeof OperonIcon.icon;
   /** Whether to show: boolean or function returning boolean */
   ifShow?: (() => boolean) | boolean;
   /** Unique identifier, used to distinguish in click callbacks */

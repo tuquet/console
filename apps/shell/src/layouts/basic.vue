@@ -17,9 +17,9 @@ import { preferences, usePreferences } from '@operon/preferences';
 import { useAccessStore, useUserStore } from '@operon/stores';
 import { openWindow } from '@operon/utils';
 
+import DaemonNotice from '#/components/common/daemon-notice.vue';
 import DaemonStatusPill from '#/components/common/daemon-status-pill.vue';
-import LocalBridgeNotice from '#/components/common/local-bridge-notice.vue';
-import TenantSelector from '#/components/common/tenant-selector.vue';
+import WorkspaceSelector from '#/components/common/workspace-selector.vue';
 import { $t } from '#/locales';
 import { useAuthStore, useNotificationStore } from '#/store';
 import LoginForm from '#/views/_core/authentication/login.vue';
@@ -180,8 +180,8 @@ watch(
     @clear-preferences-and-logout="handleLogout"
     @logout="handleLogout"
   >
-    <template #tenant-selector="{ collapsed }">
-      <TenantSelector :collapsed="Boolean(collapsed)" />
+    <template #workspace-selector="{ collapsed }">
+      <WorkspaceSelector :collapsed="Boolean(collapsed)" />
     </template>
     <template #sidebar-footer="{ collapsed }">
       <DaemonStatusPill :collapsed="collapsed" />
@@ -221,7 +221,7 @@ watch(
       />
     </template>
     <template #extra>
-      <LocalBridgeNotice />
+      <DaemonNotice />
       <AuthenticationLoginExpiredModal
         v-model:open="accessStore.loginExpired"
         :avatar

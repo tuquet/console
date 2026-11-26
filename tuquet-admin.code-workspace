@@ -153,8 +153,8 @@
       "path": "packages/utils"
     },
     {
-      "name": "@operon/playground",
-      "path": "playground"
+      "name": "@operon/tasks",
+      "path": "tasks"
     },
     {
       "name": "@operon/turbo-run",

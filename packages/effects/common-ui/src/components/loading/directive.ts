@@ -2,7 +2,7 @@ import type { App, Directive, DirectiveBinding } from 'vue';
 
 import { h, render } from 'vue';
 
-import { VbenLoading, VbenSpinner } from '@operon-core/shadcn-ui';
+import { OperonLoading, OperonSpinner } from '@operon-core/shadcn-ui';
 import { isString } from '@operon-core/shared/utils';
 
 const LOADING_INSTANCE_KEY = Symbol('loading');
@@ -12,7 +12,7 @@ const CLASS_NAME_RELATIVE = 'spinner-parent--relative';
 
 const loadingDirective: Directive = {
   mounted(el, binding) {
-    const instance = h(VbenLoading, getOptions(binding));
+    const instance = h(OperonLoading, getOptions(binding));
     render(instance, el);
 
     el.classList.add(CLASS_NAME_RELATIVE);
@@ -58,7 +58,7 @@ function getOptions(binding: DirectiveBinding) {
 
 const spinningDirective: Directive = {
   mounted(el, binding) {
-    const instance = h(VbenSpinner, getOptions(binding));
+    const instance = h(OperonSpinner, getOptions(binding));
     render(instance, el);
 
     el.classList.add(CLASS_NAME_RELATIVE);

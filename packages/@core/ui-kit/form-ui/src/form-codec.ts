@@ -7,7 +7,7 @@ export class FormCodecError extends Error {
   readonly phase: FormCodecPhase;
 
   constructor(phase: FormCodecPhase, cause: unknown) {
-    super(`[Vben Form] Failed to ${phase} form values.`);
+    super(`[Operon Form] Failed to ${phase} form values.`);
     this.name = 'FormCodecError';
     this.cause = cause;
     this.phase = phase;

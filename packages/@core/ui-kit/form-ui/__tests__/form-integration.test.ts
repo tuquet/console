@@ -1,6 +1,9 @@
 import type { VueWrapper } from '@vue/test-utils';
 
-import type { FormSchemaRuleType, VbenFormFieldSlotProps } from '../src/types';
+import type {
+  FormSchemaRuleType,
+  OperonFormFieldSlotProps,
+} from '../src/types';
 
 import { flushPromises, mount } from '@vue/test-utils';
 import { defineComponent, h, nextTick } from 'vue';
@@ -8,9 +11,9 @@ import { defineComponent, h, nextTick } from 'vue';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
-import { setupVbenForm } from '../src/config';
+import { setupOperonForm } from '../src/config';
 import { resetDeprecationWarnings } from '../src/deprecation';
-import { useVbenForm } from '../src/use-vben-form';
+import { useOperonForm } from '../src/use-operon-form';
 
 const wrappers: VueWrapper[] = [];
 
@@ -59,7 +62,7 @@ const TestInput = defineComponent({
 });
 
 beforeAll(() => {
-  setupVbenForm({
+  setupOperonForm({
     config: {},
     rules: {
       required(value, _params, context) {
@@ -77,9 +80,9 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('useVbenForm integration', () => {
+describe('useOperonForm integration', () => {
   it('provides empty defaults for native zod string formats', async () => {
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -106,7 +109,7 @@ describe('useVbenForm integration', () => {
 
   it('filters native zod formats from nested default extraction', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -137,7 +140,7 @@ describe('useVbenForm integration', () => {
 
   it('uses model updates as the primary channel and preserves empty strings', async () => {
     const validateValue = vi.fn();
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -172,7 +175,7 @@ describe('useVbenForm integration', () => {
     const staleValueUpdate = vi.fn();
     let defaultSlotProps: Record<string, any> | undefined;
     let valueSlotProps: Record<string, any> | undefined;
-    const [Form, formApi] = useVbenForm<ModelProtocolValues>({
+    const [Form, formApi] = useOperonForm<ModelProtocolValues>({
       schema: [
         {
           component: TestInput,
@@ -256,7 +259,7 @@ describe('useVbenForm integration', () => {
   });
 
   it('keeps values reactive when exposed through the default slot', async () => {
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -289,9 +292,9 @@ describe('useVbenForm integration', () => {
     }
 
     let latestSlotProps:
-      | undefined
-      | VbenFormFieldSlotProps<SlotFormValues, 'name'>;
-    const [Form, formApi] = useVbenForm<SlotFormValues>({
+      | OperonFormFieldSlotProps<SlotFormValues, 'name'>
+      | undefined;
+    const [Form, formApi] = useOperonForm<SlotFormValues>({
       schema: [
         {
           component: TestInput,
@@ -302,7 +305,7 @@ describe('useVbenForm integration', () => {
     });
     const wrapper = mount(Form, {
       slots: {
-        name(slotProps: VbenFormFieldSlotProps<SlotFormValues, 'name'>) {
+        name(slotProps: OperonFormFieldSlotProps<SlotFormValues, 'name'>) {
           latestSlotProps = slotProps;
           return h(TestInput, {
             ...slotProps.componentProps,
@@ -342,7 +345,7 @@ describe('useVbenForm integration', () => {
     }
 
     const fieldSlotProps: Record<string, Record<string, any>> = {};
-    const [Form] = useVbenForm<DisabledFormValues>({
+    const [Form] = useOperonForm<DisabledFormValues>({
       commonConfig: { disabled: true },
       schema: [
         {
@@ -387,7 +390,7 @@ describe('useVbenForm integration', () => {
   });
 
   it('supports a field-level change event fallback for legacy components', async () => {
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -411,7 +414,7 @@ describe('useVbenForm integration', () => {
   it('warns once for legacy dependency callbacks', async () => {
     resetDeprecationWarnings();
     const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -437,7 +440,7 @@ describe('useVbenForm integration', () => {
 
     expect(warning).toHaveBeenCalledOnce();
     expect(warning).toHaveBeenCalledWith(
-      '[Vben Form] Legacy dependency callbacks are deprecated. Use `dependencies.resolve(context)` instead.',
+      '[Operon Form] Legacy dependency callbacks are deprecated. Use `dependencies.resolve(context)` instead.',
     );
   });
 
@@ -446,7 +449,7 @@ describe('useVbenForm integration', () => {
       .spyOn(console, 'error')
       .mockImplementation(() => {});
     const handleSubmit = vi.fn();
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       handleSubmit,
       schema: [
         {
@@ -514,7 +517,7 @@ describe('useVbenForm integration', () => {
     const dependency = vi.fn((values: Record<string, any>) => {
       return values.toggle === 'show';
     });
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -563,7 +566,7 @@ describe('useVbenForm integration', () => {
         if: false,
       };
     });
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -608,7 +611,7 @@ describe('useVbenForm integration', () => {
   });
 
   it('applies required rules enabled by dependencies after mount', async () => {
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -646,7 +649,7 @@ describe('useVbenForm integration', () => {
   });
 
   it('allows dependencies to disable static rules with null', async () => {
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -686,7 +689,7 @@ describe('useVbenForm integration', () => {
   it('ignores stale async dependency rule results', async () => {
     const requiredRules = createDeferred<FormSchemaRuleType>();
     const optionalRules = createDeferred<FormSchemaRuleType>();
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -730,7 +733,7 @@ describe('useVbenForm integration', () => {
   });
 
   it('keeps array values and rendered rows aligned after mutations', async () => {
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           children: [
@@ -768,7 +771,7 @@ describe('useVbenForm integration', () => {
   });
 
   it('preserves array row inputs and focus while editing', async () => {
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [
         {
           children: [
@@ -800,7 +803,7 @@ describe('useVbenForm integration', () => {
   });
 
   it('updates optimized array rows when values and schemas change', async () => {
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           children: [
@@ -852,7 +855,7 @@ describe('useVbenForm integration', () => {
         disabled: schema.row?.role === 'viewer',
       },
     }));
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [
         {
           children: [
@@ -900,7 +903,7 @@ describe('useVbenForm integration', () => {
     vi.useFakeTimers();
     const handleSubmit = vi.fn();
     const handleValuesChange = vi.fn();
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       changeDebouncedTime: 0,
       handleSubmit,
       handleValuesChange,
@@ -940,7 +943,7 @@ describe('useVbenForm integration', () => {
   });
 
   it('respects blur and change validation triggers', async () => {
-    const [Form] = useVbenForm({
+    const [Form] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -989,7 +992,7 @@ describe('useVbenForm integration', () => {
       }
       return value !== 'taken';
     }, 'Username is already taken');
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -1020,7 +1023,7 @@ describe('useVbenForm integration', () => {
 
   it('passes formatted values and raw values to handleSubmit callback', async () => {
     const handleSubmit = vi.fn();
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       codec: {
         decode(values: Readonly<{ normalizedName: string }>) {
           return { name: values.normalizedName };
@@ -1056,7 +1059,7 @@ describe('useVbenForm integration', () => {
 
   it('does not expose raw values through native form submit events', async () => {
     const onSubmit = vi.fn();
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         {
           component: TestInput,
@@ -1083,7 +1086,7 @@ describe('useVbenForm integration', () => {
 
   it('calls handleReset with formatted values on reset button click', async () => {
     const handleReset = vi.fn();
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       codec: {
         decode(values: Readonly<{ normalizedName: string }>) {
           return { name: values.normalizedName };
@@ -1118,7 +1121,7 @@ describe('useVbenForm integration', () => {
 
   it('setValues with multiple fields emits only the final values', async () => {
     const handleValuesChange = vi.fn();
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       handleValuesChange,
       schema: [
         { component: TestInput, fieldName: 'first' },
@@ -1151,7 +1154,7 @@ describe('useVbenForm integration', () => {
       };
     }
 
-    const [Form, formApi] = useVbenForm<NestedFormValues>({
+    const [Form, formApi] = useOperonForm<NestedFormValues>({
       schema: [
         {
           component: TestInput,
@@ -1183,7 +1186,7 @@ describe('useVbenForm integration', () => {
   });
 
   it('retains initial values for unspecified fields on partial reset', async () => {
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       schema: [
         { component: TestInput, defaultValue: 'original', fieldName: 'name' },
         { component: TestInput, defaultValue: 'keep', fieldName: 'alias' },
@@ -1205,7 +1208,7 @@ describe('useVbenForm integration', () => {
 
   it('applies valueFormat consistently across value APIs', async () => {
     const handleSubmit = vi.fn();
-    const [Form, formApi] = useVbenForm({
+    const [Form, formApi] = useOperonForm({
       handleSubmit,
       schema: [
         {

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useVbenDrawer } from '../../use-drawer';
+import { useOperonDrawer } from '../../use-drawer';
 
 interface TypedDrawerData {
   id: number;
   mode: 'edit' | 'view';
 }
 
-const [, drawerApi] = useVbenDrawer<TypedDrawerData | null>();
+const [, drawerApi] = useOperonDrawer<TypedDrawerData | null>();
 
 defineExpose({ drawerApi });
 </script>

@@ -127,9 +127,9 @@ export function buildWidgetConfigMap(options: {
       slotName: 'user-dropdown',
       zone: resolveZone(prefs.widget.userDropdownButtonPosition),
     },
-    tenantSelector: {
-      slotName: 'tenant-selector',
-      zone: resolveZone(prefs.widget.tenantSelectorButtonPosition),
+    workspaceSelector: {
+      slotName: 'workspace-selector',
+      zone: resolveZone(prefs.widget.workspaceSelectorButtonPosition),
     },
   };
 }

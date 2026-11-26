@@ -41,7 +41,7 @@ export const CANONICAL_PLUGIN_IDS = Object.values(
  * Canonical Browser LocalStorage Keys for Admin
  */
 export const STORAGE_KEYS = {
-  ACTIVE_TENANT_ID: 'OPERON_ACTIVE_TENANT_ID',
+  ACTIVE_WORKSPACE_ID: 'OPERON_ACTIVE_WORKSPACE_ID',
   AUTH_BANNER_MODE: 'operon:auth-banner-mode',
   GUEST_ORDERS: 'OPERON_GUEST_ORDERS',
 } as const;

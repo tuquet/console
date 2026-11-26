@@ -7,7 +7,7 @@ import {
 } from '@operon/icons';
 import { $t } from '@operon/locales';
 
-import { VbenIconButton } from '@operon-core/shadcn-ui';
+import { OperonIconButton } from '@operon-core/shadcn-ui';
 
 defineOptions({
   name: 'ThirdPartyLogin',
@@ -25,34 +25,34 @@ defineOptions({
     </div>
 
     <div class="mt-4 flex flex-wrap justify-center">
-      <VbenIconButton
+      <OperonIconButton
         :tooltip="$t('authentication.wechatLogin')"
         tooltip-side="top"
         class="mb-3"
       >
         <SvgWeChatIcon />
-      </VbenIconButton>
-      <VbenIconButton
+      </OperonIconButton>
+      <OperonIconButton
         :tooltip="$t('authentication.qqLogin')"
         tooltip-side="top"
         class="mb-3"
       >
         <SvgQQChatIcon />
-      </VbenIconButton>
-      <VbenIconButton
+      </OperonIconButton>
+      <OperonIconButton
         :tooltip="$t('authentication.githubLogin')"
         tooltip-side="top"
         class="mb-3"
       >
         <SvgGithubIcon />
-      </VbenIconButton>
-      <VbenIconButton
+      </OperonIconButton>
+      <OperonIconButton
         :tooltip="$t('authentication.googleLogin')"
         tooltip-side="top"
         class="mb-3"
       >
         <SvgGoogleIcon />
-      </VbenIconButton>
+      </OperonIconButton>
     </div>
   </div>
 </template>

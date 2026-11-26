@@ -4,7 +4,7 @@ import type { MenuRecordRaw } from '@operon-core/typings';
 import type { NormalMenuProps } from './normal-menu';
 
 import { useNamespace } from '@operon-core/composables';
-import { VbenIcon } from '@operon-core/shadcn-ui';
+import { OperonIcon } from '@operon-core/shadcn-ui';
 
 interface Props extends NormalMenuProps {}
 
@@ -50,7 +50,7 @@ function menuIcon(menu: MenuRecordRaw) {
         @click="() => emit('select', menu)"
         @mouseenter="() => emit('enter', menu)"
       >
-        <VbenIcon :class="e('icon')" :icon="menuIcon(menu)" fallback />
+        <OperonIcon :class="e('icon')" :icon="menuIcon(menu)" fallback />
 
         <span :class="e('name')" class="truncate"> {{ menu.name }}</span>
       </li>
@@ -60,7 +60,7 @@ function menuIcon(menu: MenuRecordRaw) {
 <style scoped>
 @reference "@operon/tailwind-config/theme";
 
-.vben-normal-menu {
+.operon-normal-menu {
   --menu-item-margin-y: 4px;
   --menu-item-margin-x: 0px;
   --menu-item-padding-y: 9px;
@@ -70,29 +70,29 @@ function menuIcon(menu: MenuRecordRaw) {
   height: calc(100% - 4px);
 }
 
-.vben-normal-menu.is-rounded {
+.operon-normal-menu.is-rounded {
   --menu-item-radius: 6px;
   --menu-item-margin-x: 8px;
 }
 
-.vben-normal-menu.is-dark .vben-normal-menu__item {
+.operon-normal-menu.is-dark .operon-normal-menu__item {
   @apply text-foreground/80;
 }
 
-.vben-normal-menu.is-dark .vben-normal-menu__item:not(.is-active):hover {
+.operon-normal-menu.is-dark .operon-normal-menu__item:not(.is-active):hover {
   @apply text-foreground;
 }
 
-.vben-normal-menu.is-dark
-  .vben-normal-menu__item.is-active
-  .vben-normal-menu__name,
-.vben-normal-menu.is-dark
-  .vben-normal-menu__item.is-active
-  .vben-normal-menu__icon {
+.operon-normal-menu.is-dark
+  .operon-normal-menu__item.is-active
+  .operon-normal-menu__name,
+.operon-normal-menu.is-dark
+  .operon-normal-menu__item.is-active
+  .operon-normal-menu__icon {
   @apply text-primary;
 }
 
-.vben-normal-menu.is-collapse .vben-normal-menu__name {
+.operon-normal-menu.is-collapse .operon-normal-menu__name {
   width: 0;
   height: 0;
   margin-top: 0;
@@ -100,11 +100,11 @@ function menuIcon(menu: MenuRecordRaw) {
   opacity: 0;
 }
 
-.vben-normal-menu.is-collapse .vben-normal-menu__icon {
+.operon-normal-menu.is-collapse .operon-normal-menu__icon {
   font-size: calc(var(--font-size-base, 16px) * 1.25);
 }
 
-.vben-normal-menu__item {
+.operon-normal-menu__item {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -125,31 +125,31 @@ function menuIcon(menu: MenuRecordRaw) {
     border-color 0.15s ease;
 }
 
-.vben-normal-menu__item.is-active {
+.operon-normal-menu__item.is-active {
   @apply bg-primary text-primary dark:bg-primary/15;
 }
 
-.vben-normal-menu__item.is-active .vben-normal-menu__name,
-.vben-normal-menu__item.is-active .vben-normal-menu__icon {
+.operon-normal-menu__item.is-active .operon-normal-menu__name,
+.operon-normal-menu__item.is-active .operon-normal-menu__icon {
   @apply text-primary-foreground font-semibold;
 }
 
-.vben-normal-menu__item:not(.is-active):hover {
+.operon-normal-menu__item:not(.is-active):hover {
   @apply bg-heavy text-primary dark:bg-accent dark:text-foreground;
 }
 
-.vben-normal-menu__item:hover .vben-normal-menu__icon {
+.operon-normal-menu__item:hover .operon-normal-menu__icon {
   transform: scale(1.2);
 }
 
-.vben-normal-menu__icon {
+.operon-normal-menu__icon {
   @apply max-h-5;
 
   font-size: calc(var(--font-size-base, 16px) * 1.25);
   transition: all 0.25s ease;
 }
 
-.vben-normal-menu__name {
+.operon-normal-menu__name {
   @apply mt-2;
 
   width: 100%;

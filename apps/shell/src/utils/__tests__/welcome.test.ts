@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   buildWelcomeLocation,
   clearWelcomeRedirect,
-  hasLocalBridgeSeen,
+  hasDaemonSeen,
   hasPendingWelcomeRedirect,
-  markLocalBridgeSeen,
+  markDaemonSeen,
   resolveWelcomeRedirect,
   saveWelcomeRedirect,
 } from '../welcome';
@@ -28,7 +28,7 @@ function createMemoryStorage(): Storage {
   };
 }
 
-describe('welcome bridge & redirect helpers', () => {
+describe('welcome daemon & redirect helpers', () => {
   beforeEach(() => {
     Object.defineProperty(window, 'localStorage', {
       configurable: true,
@@ -40,10 +40,10 @@ describe('welcome bridge & redirect helpers', () => {
     });
   });
 
-  it('tracks whether the local Operon bridge was ever seen', () => {
-    expect(hasLocalBridgeSeen()).toBe(false);
-    markLocalBridgeSeen();
-    expect(hasLocalBridgeSeen()).toBe(true);
+  it('tracks whether the local Operon daemon was ever seen', () => {
+    expect(hasDaemonSeen()).toBe(false);
+    markDaemonSeen();
+    expect(hasDaemonSeen()).toBe(true);
   });
 
   it('caches and resolves safe deep-link redirect paths across query & session cache', () => {
@@ -54,8 +54,8 @@ describe('welcome bridge & redirect helpers', () => {
     expect(resolveWelcomeRedirect(undefined, '/dashboard/overview')).toBe(
       '/automation/overview',
     );
-    expect(resolveWelcomeRedirect('/tenants', '/dashboard/overview')).toBe(
-      '/tenants',
+    expect(resolveWelcomeRedirect('/workspaces', '/dashboard/overview')).toBe(
+      '/workspaces',
     );
 
     clearWelcomeRedirect();

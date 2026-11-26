@@ -12,7 +12,7 @@ import type {
   FormValuePatch,
   FormValues,
   FormValueSnapshot,
-  VbenFormProps,
+  OperonFormProps,
 } from './types';
 
 import { isRef, toRaw } from 'vue';
@@ -41,7 +41,7 @@ type FormApiProps<
   T extends BaseFormComponentType,
   P extends Record<string, any>,
   TSubmitValues extends FormValues,
-> = VbenFormProps<T, P, TFormValues, TSubmitValues>;
+> = OperonFormProps<T, P, TFormValues, TSubmitValues>;
 
 type FormApiSchema<
   TValues extends FormValues,
@@ -120,7 +120,7 @@ export class FormApi<
   P extends Record<string, any> = Record<never, never>,
   TSubmitValues extends FormValues = TFormValues,
 > {
-  // private api: Pick<VbenFormProps, 'handleReset' | 'handleSubmit'>;
+  // private api: Pick<OperonFormProps, 'handleReset' | 'handleSubmit'>;
   public form = {} as FormActions<TFormValues>;
   isMounted = false;
 
@@ -174,7 +174,7 @@ export class FormApi<
   }
 
   formatValues(rawValues: Readonly<TFormValues>): TSubmitValues;
-  /** @deprecated Declare the submit type on `useVbenForm` instead. */
+  /** @deprecated Declare the submit type on `useOperonForm` instead. */
   formatValues<TResult extends FormValues>(
     rawValues: Readonly<FormValues>,
   ): TResult;
@@ -256,7 +256,7 @@ export class FormApi<
   }
 
   async getRawValues(): Promise<TFormValues>;
-  /** @deprecated Declare the form value type on `useVbenForm` instead. */
+  /** @deprecated Declare the form value type on `useOperonForm` instead. */
   async getRawValues<TResult extends FormValues>(): Promise<TResult>;
   async getRawValues(): Promise<FormValues> {
     const form = await this.getForm();
@@ -268,7 +268,7 @@ export class FormApi<
   }
 
   async getValues(): Promise<TSubmitValues>;
-  /** @deprecated Declare the submit type on `useVbenForm` instead. */
+  /** @deprecated Declare the submit type on `useOperonForm` instead. */
   async getValues<TResult extends FormValues>(): Promise<TResult>;
   async getValues(): Promise<FormValues> {
     const form = await this.getForm();
@@ -278,7 +278,7 @@ export class FormApi<
   async getValueSnapshot(): Promise<
     FormValueSnapshot<TFormValues, TSubmitValues>
   >;
-  /** @deprecated Declare form and submit value types on `useVbenForm`. */
+  /** @deprecated Declare form and submit value types on `useOperonForm`. */
   async getValueSnapshot<TResult extends FormValues>(): Promise<
     FormValueSnapshot<TResult>
   >;
@@ -352,7 +352,7 @@ export class FormApi<
             throw error;
           }
           console.warn(
-            '[Vben Form] Failed to encode initial values. Falling back to raw form values.',
+            '[Operon Form] Failed to encode initial values. Falling back to raw form values.',
             error,
           );
           initialValues = cloneDeep(rawInitialValues);
@@ -392,7 +392,7 @@ export class FormApi<
   ) {
     warnDeprecatedOnce(
       'form-api-reset-form',
-      '[Vben Form] `formApi.resetForm()` is deprecated. Use `formApi.reset()` instead.',
+      '[Operon Form] `formApi.resetForm()` is deprecated. Use `formApi.reset()` instead.',
     );
     return this.reset(state, opts);
   }
@@ -401,7 +401,7 @@ export class FormApi<
   async resetValidate() {
     warnDeprecatedOnce(
       'form-api-reset-validate',
-      '[Vben Form] `formApi.resetValidate()` is deprecated. Use `formApi.clearValidation()` instead.',
+      '[Operon Form] `formApi.resetValidate()` is deprecated. Use `formApi.clearValidation()` instead.',
     );
     return this.clearValidation();
   }
@@ -484,7 +484,7 @@ export class FormApi<
     const codec = this.state?.codec;
     if (!codec) {
       throw new Error(
-        '[Vben Form] `setSubmitValues()` requires a form `codec`.',
+        '[Operon Form] `setSubmitValues()` requires a form `codec`.',
       );
     }
     const formValues = decodeFormValues(codec, values);
@@ -569,7 +569,7 @@ export class FormApi<
   async submitForm(e?: Event) {
     warnDeprecatedOnce(
       'form-api-submit-form',
-      '[Vben Form] `formApi.submitForm()` is deprecated. Use `formApi.submit()` instead.',
+      '[Operon Form] `formApi.submitForm()` is deprecated. Use `formApi.submit()` instead.',
     );
     return this.submit(e);
   }
@@ -626,7 +626,7 @@ export class FormApi<
   async validateAndSubmitForm() {
     warnDeprecatedOnce(
       'form-api-validate-and-submit-form',
-      '[Vben Form] `formApi.validateAndSubmitForm()` is deprecated. Use `formApi.validateAndSubmit()` instead.',
+      '[Operon Form] `formApi.validateAndSubmitForm()` is deprecated. Use `formApi.validateAndSubmit()` instead.',
     );
     return this.validateAndSubmit();
   }
@@ -650,7 +650,7 @@ export class FormApi<
       await this.stateHandler.waitForCondition();
     }
     if (!this.form?.meta) {
-      throw new Error('<VbenForm /> is not mounted');
+      throw new Error('<OperonForm /> is not mounted');
     }
     return this.form;
   }
@@ -725,26 +725,26 @@ export class FormApi<
     if (warningState.codec && usesLegacyTransform) {
       warnDeprecatedOnce(
         'form-codec-legacy-transform-conflict',
-        '[Vben Form] The form `codec` takes precedence over deprecated `valueFormat`, `fieldMappingTime`, and `arrayToStringFields` options.',
+        '[Operon Form] The form `codec` takes precedence over deprecated `valueFormat`, `fieldMappingTime`, and `arrayToStringFields` options.',
       );
       return;
     }
     if (usesValueFormat) {
       warnDeprecatedOnce(
         'form-schema-value-format',
-        '[Vben Form] `schema.valueFormat` is deprecated. Use the form-level `codec` instead.',
+        '[Operon Form] `schema.valueFormat` is deprecated. Use the form-level `codec` instead.',
       );
     }
     if (usesFieldMappingTime) {
       warnDeprecatedOnce(
         'form-field-mapping-time',
-        '[Vben Form] `fieldMappingTime` is deprecated. Use the form-level `codec` instead.',
+        '[Operon Form] `fieldMappingTime` is deprecated. Use the form-level `codec` instead.',
       );
     }
     if (usesArrayToStringFields) {
       warnDeprecatedOnce(
         'form-array-to-string-fields',
-        '[Vben Form] `arrayToStringFields` is deprecated. Use the form-level `codec` instead.',
+        '[Operon Form] `arrayToStringFields` is deprecated. Use the form-level `codec` instead.',
       );
     }
   }

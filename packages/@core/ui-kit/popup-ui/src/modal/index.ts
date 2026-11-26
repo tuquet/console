@@ -1,7 +1,7 @@
 export type * from './modal';
-export { default as VbenModal } from './modal.vue';
+export { default as OperonModal } from './modal.vue';
 export {
-  createVbenModal,
+  createOperonModal,
   setDefaultModalProps,
-  useVbenModal,
+  useOperonModal,
 } from './use-modal';

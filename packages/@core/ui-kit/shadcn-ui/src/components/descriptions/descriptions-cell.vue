@@ -7,7 +7,7 @@ import { computed } from 'vue';
 
 import { cn } from '@operon-core/shared/utils';
 
-import { VbenRenderContent } from '../render-content';
+import { OperonRenderContent } from '../render-content';
 
 interface Props {
   /** Whether border mode */
@@ -68,8 +68,8 @@ const hasContent = computed(
   () => props.content !== null && props.content !== undefined,
 );
 
-// Number 0 is treated as falsy by VbenRenderContent; convert to string to ensure display;
-// also normalize null to undefined to match VbenRenderContent content type
+// Number 0 is treated as falsy by OperonRenderContent; convert to string to ensure display;
+// also normalize null to undefined to match OperonRenderContent content type
 const displayLabel = computed(() => {
   if (props.label === null || props.label === undefined) return undefined;
   return typeof props.label === 'number' ? String(props.label) : props.label;
@@ -105,24 +105,24 @@ const labelClass = computed(() =>
     <!-- Bordered mode: each cell hosts only label or content -->
     <template v-if="bordered">
       <span v-if="hasLabel" :style="labelStyle">
-        <VbenRenderContent :content="displayLabel" />
+        <OperonRenderContent :content="displayLabel" />
       </span>
       <span v-if="hasContent" :style="contentStyle">
-        <VbenRenderContent :content="displayContent" />
+        <OperonRenderContent :content="displayContent" />
       </span>
     </template>
 
     <!-- Non-bordered mode: label + content container -->
     <div v-else class="flex">
       <span v-if="hasLabel" :class="labelClass" :style="labelStyle">
-        <VbenRenderContent :content="displayLabel" />
+        <OperonRenderContent :content="displayLabel" />
       </span>
       <span
         v-if="hasContent"
         class="break-words text-foreground"
         :style="contentStyle"
       >
-        <VbenRenderContent :content="displayContent" />
+        <OperonRenderContent :content="displayContent" />
       </span>
     </div>
   </component>

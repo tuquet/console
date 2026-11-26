@@ -6,7 +6,7 @@ import { createApp, defineComponent, h, nextTick, ref, toRaw } from 'vue';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useVbenModal } from '../use-modal';
+import { useOperonModal } from '../use-modal';
 
 vi.mock('@operon-core/preferences', () => ({
   usePreferences: () => ({
@@ -16,7 +16,7 @@ vi.mock('@operon-core/preferences', () => ({
 
 vi.mock('../modal.vue', () => ({
   default: {
-    name: 'VbenModalStub',
+    name: 'OperonModalStub',
     render: () => null,
   },
 }));
@@ -29,7 +29,7 @@ async function mountRebindingHarness() {
   const onOpenChange = vi.fn();
 
   const Consumer = defineComponent(() => {
-    const [Modal, modalApi] = useVbenModal();
+    const [Modal, modalApi] = useOperonModal();
     currentApi = modalApi;
     return () => h(Modal);
   });
@@ -38,7 +38,7 @@ async function mountRebindingHarness() {
     return () => h(Consumer, { key: consumerKey.value });
   });
 
-  const [ParentModal, parentApi] = useVbenModal({
+  const [ParentModal, parentApi] = useOperonModal({
     connectedComponent: ConnectedModal,
     onOpenChange,
     title: 'Parent modal title',
@@ -70,7 +70,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('useVbenModal', () => {
+describe('useOperonModal', () => {
   it('rebinds the parent api when the consumer is recreated', async () => {
     const { consumerKey, getCurrentApi, onOpenChange, parentApi } =
       await mountRebindingHarness();

@@ -1,12 +1,12 @@
 [package]
-name = "workstation"
+name = "desktop"
 version = "5.8.0"
 description = "Operon - Unified Management & Operations Console"
 authors = ["operon"]
 edition = "2021"
 
 [lib]
-name = "workstation_lib"
+name = "desktop_lib"
 crate-type = ["staticlib", "rlib"]
 
 [build-dependencies]

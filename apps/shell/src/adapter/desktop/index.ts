@@ -92,11 +92,11 @@ export const openDevtools = (): Promise<void> =>
     await invoke('open_devtools');
   });
 
-/** Returns the canonical workstation log path on the host. */
+/** Returns the canonical desktop log path on the host. */
 export const getLogPath = (): Promise<string> =>
   withTauriCore('get log path', '', (invoke) => invoke<string>('get_log_path'));
 
-/** Appends a log line to the persistent workstation log file (~/.operon/logs/workstation.log). */
+/** Appends a log line to the persistent desktop log file (~/.operon/logs/desktop.log). */
 export const appendDesktopLog = (
   level: 'debug' | 'error' | 'info' | 'warn',
   message: string,
@@ -112,7 +112,7 @@ export const appendDesktopLog = (
 
 /**
  * Initializes desktop keyboard shortcuts (F12, Ctrl+Shift+I) and intercepts
- * uncaught frontend errors to persist them into workstation.log.
+ * uncaught frontend errors to persist them into desktop.log.
  */
 export function initDesktopLoggingAndShortcuts(): void {
   if (!isTauriEnvironment() || typeof window === 'undefined') return;

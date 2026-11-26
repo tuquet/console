@@ -10,7 +10,7 @@ The sidebar is split across three layers so layout primitives remain stateless w
 | **Host Defaults** | `apps/shell/src/preferences.ts` | Overrides defaults (`layout: 'sidebar-nav'`, `width: 210`, `preferencesButtonPosition: 'header'`). |
 | **Desktop Containment** | `apps/shell/src/layouts/widgets/desktop-shell.vue` | Wraps viewport with `contain: layout` so `position: fixed` sidebars stay below `DesktopTitlebar` without offset math. |
 | **Orchestration** | `packages/effects/layouts/src/basic/layout.vue` | (`BasicLayout`) Binds `preferences.sidebar`, splits `accessStore.accessMenus` via `useMixedMenu`, forwards `#sidebar-header` / `#sidebar-footer`, and hosts singleton `GlobalSearch` + `Preferences` modals in `#extra`. |
-| **Layout Coordinator** | `packages/@core/ui-kit/layout-ui/src/vben-layout.vue` | (`VbenAdminLayout`) Computes sidebar width, `marginTop`, `zIndex`, header/main offsets, and mobile mask (`data-layout-region="sidebar-mask"`). |
+| **Layout Coordinator** | `packages/@core/ui-kit/layout-ui/src/operon-layout.vue` | (`OperonAdminLayout`) Computes sidebar width, `marginTop`, `zIndex`, header/main offsets, and mobile mask (`data-layout-region="sidebar-mask"`). |
 | **Sidebar Primitive** | `packages/@core/ui-kit/layout-ui/src/components/layout-sidebar.vue` | (`LayoutSidebar`) Pure props/`v-model` `<aside data-layout-region="sidebar">` using natural `flex flex-col h-full` regions (`sidebar-header`, `flex-1` scrollbar, `sidebar-footer`), `clip-path` collapse, hover-expand, and drag-resize. |
 | **Preferences State & UI** | `packages/@core/preferences/src/{types,config}.ts`, `packages/effects/layouts/src/widgets/preferences/blocks/layout/sidebar.vue` | Defines `SidebarPreferences` schema/defaults and user settings controls. |
 
@@ -28,7 +28,7 @@ Resolved in `packages/@core/ui-kit/layout-ui/src/hooks/use-layout.ts` (`useLayou
 
 - **Natural Flex Regions (`flex flex-col h-full`)**:
   1. **Top (`[data-layout-region="sidebar-header"]`, `shrink-0 border-b`)**: Dedicated `min-h-[50px]` context switcher slot (`#sidebar-header="{ collapsed }"`), centered in collapsed rail and padded card in expanded mode. (No `#logo` slot exists in `LayoutSidebar` or `LayoutHeader`; `preferences.logo.source` is reserved strictly for authentication pages.)
-  2. **Main (`VbenScrollbar`, `min-h-0 flex-1 py-2`)**: Fills remaining height automatically without manual pixel subtraction. Renders `#menu`.
+  2. **Main (`OperonScrollbar`, `min-h-0 flex-1 py-2`)**: Fills remaining height automatically without manual pixel subtraction. Renders `#menu`.
   3. **Bottom (`[data-layout-region="sidebar-footer"]`, `shrink-0 border-t`)**: Spreads `SidebarCollapseButton` (left) and `SidebarFixedButton` (right) with `justify-between` when expanded (or places custom `#sidebar-footer="{ collapsed }"` on the left and controls on the right; stacks centered when collapsed).
 - **Placeholder + Fixed `<aside>`**: On desktop, `LayoutSidebar` renders a flex-item `<div>` (`flex-basis` matching occupied width) so `main` shifts without layout thrashing, while `<aside>` stays `fixed left-0 top-0`.
 - **Reflow-free Collapse**: Standard desktop sidebar keeps `<aside>` width at `Math.max(currentWidth, expandedWidth)` and animates `clip-path: inset(0 <clippedWidth>px 0 0)` so inner menu labels do not wrap during collapse transitions.

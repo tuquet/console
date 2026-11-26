@@ -6,8 +6,8 @@ import { computed } from 'vue';
 import { TabsTrigger } from 'reka-ui';
 
 import { Tabs, TabsContent, TabsList } from '../../ui';
-import { VbenIcon } from '../icon';
-import { VbenTooltip } from '../tooltip';
+import { OperonIcon } from '../icon';
+import { OperonTooltip } from '../tooltip';
 import TabsIndicator from './tabs-indicator.vue';
 
 interface Props {
@@ -56,7 +56,7 @@ function activeClass(tab: string): string[] {
           :class="activeClass(tab.value)"
           class="hover:text-primary z-20 size-full inline-flex items-center justify-center rounded-md whitespace-nowrap disabled:pointer-events-none disabled:opacity-50 py-1.5"
         >
-          <VbenTooltip :delay-duration="150" side="bottom">
+          <OperonTooltip :delay-duration="150" side="bottom">
             <template #trigger>
               <div class="inline-flex items-center justify-center size-full">
                 <template v-if="tab.icon">
@@ -65,7 +65,7 @@ function activeClass(tab: string): string[] {
                     v-if="typeof tab.icon !== 'string'"
                     class="size-4 shrink-0"
                   />
-                  <VbenIcon v-else :icon="tab.icon" class="size-4 shrink-0" />
+                  <OperonIcon v-else :icon="tab.icon" class="size-4 shrink-0" />
                 </template>
                 <span
                   v-else
@@ -76,7 +76,7 @@ function activeClass(tab: string): string[] {
               </div>
             </template>
             {{ tab.label }}
-          </VbenTooltip>
+          </OperonTooltip>
         </TabsTrigger>
       </template>
     </TabsList>

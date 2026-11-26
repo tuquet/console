@@ -1,4 +1,4 @@
-import type { TenantMembershipQueryResult } from '../access';
+import type { WorkspaceMembershipQueryResult } from '../access';
 
 import { describe, expect, it } from 'vitest';
 
@@ -105,23 +105,23 @@ describe('flattenMemberships', () => {
   it('should handle empty or null input gracefully', () => {
     expect(flattenMemberships([])).toEqual({
       permissions: [],
-      tenantPermissions: {},
+      workspacePermissions: {},
     });
     expect(flattenMemberships(null as any)).toEqual({
       permissions: [],
-      tenantPermissions: {},
+      workspacePermissions: {},
     });
   });
 
-  it('should aggregate, deduplicate, and sort permissions across multiple tenants', () => {
-    const mockRows: TenantMembershipQueryResult[] = [
+  it('should aggregate, deduplicate, and sort permissions across multiple workspaces', () => {
+    const mockRows: WorkspaceMembershipQueryResult[] = [
       {
-        tenant_id: 'tenant-1',
+        workspace_id: 'workspace-1',
         member_roles: [
           {
             roles: {
               role_permissions: [
-                { permission_id: 'tenants:read' },
+                { permission_id: 'workspaces:read' },
                 { permission_id: 'members:read' },
               ],
             },
@@ -130,27 +130,27 @@ describe('flattenMemberships', () => {
             roles: {
               role_permissions: [
                 { permission_id: 'operon:devices:read' },
-                { permission_id: 'tenants:read' }, // duplicate in tenant-1
+                { permission_id: 'workspaces:read' }, // duplicate in workspace-1
               ],
             },
           },
         ],
       },
       {
-        tenant_id: 'tenant-2',
+        workspace_id: 'workspace-2',
         member_roles: [
           {
             roles: {
               role_permissions: [
                 { permission_id: 'operon:workflows:read' },
-                { permission_id: 'members:read' }, // duplicate cross-tenant
+                { permission_id: 'members:read' }, // duplicate cross-workspace
               ],
             },
           },
         ],
       },
       {
-        tenant_id: 'tenant-empty',
+        workspace_id: 'workspace-empty',
         member_roles: [],
       },
     ];
@@ -161,13 +161,13 @@ describe('flattenMemberships', () => {
       'members:read',
       'operon:devices:read',
       'operon:workflows:read',
-      'tenants:read',
+      'workspaces:read',
     ]);
 
-    expect(result.tenantPermissions).toEqual({
-      'tenant-1': ['members:read', 'operon:devices:read', 'tenants:read'],
-      'tenant-2': ['members:read', 'operon:workflows:read'],
-      'tenant-empty': [],
+    expect(result.workspacePermissions).toEqual({
+      'workspace-1': ['members:read', 'operon:devices:read', 'workspaces:read'],
+      'workspace-2': ['members:read', 'operon:workflows:read'],
+      'workspace-empty': [],
     });
   });
 });

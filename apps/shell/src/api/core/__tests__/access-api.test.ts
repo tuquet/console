@@ -58,7 +58,7 @@ describe('getEffectiveAccess & session caching', () => {
     const requestSpy = vi
       .spyOn(supabaseClient, 'supabaseRequest')
       .mockResolvedValueOnce([
-        { id: 'tenants:read' },
+        { id: 'workspaces:read' },
         { id: 'operon:devices:read' },
         { id: 'billing:read' },
       ]);
@@ -69,7 +69,7 @@ describe('getEffectiveAccess & session caching', () => {
     expect(result1.permissions).toEqual([
       'billing:read',
       'operon:devices:read',
-      'tenants:read',
+      'workspaces:read',
     ]);
     expect(requestSpy).toHaveBeenCalledTimes(1);
     expect(requestSpy).toHaveBeenCalledWith('/rest/v1/permissions?select=id');
@@ -81,13 +81,13 @@ describe('getEffectiveAccess & session caching', () => {
 
     // After clearAccessCache, next call makes a new request
     clearAccessCache();
-    requestSpy.mockResolvedValueOnce([{ id: 'tenants:read' }]);
+    requestSpy.mockResolvedValueOnce([{ id: 'workspaces:read' }]);
     const result3 = await getEffectiveAccess();
-    expect(result3.permissions).toEqual(['tenants:read']);
+    expect(result3.permissions).toEqual(['workspaces:read']);
     expect(requestSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('should fetch and flatten tenant permissions for standard users', async () => {
+  it('should fetch and flatten workspace permissions for standard users', async () => {
     const userToken = createMockJwt({
       sub: 'regular-user-42',
       app_metadata: {},
@@ -98,12 +98,12 @@ describe('getEffectiveAccess & session caching', () => {
       .spyOn(supabaseClient, 'supabaseRequest')
       .mockResolvedValueOnce([
         {
-          tenant_id: 't-100',
+          workspace_id: 't-100',
           member_roles: [
             {
               roles: {
                 role_permissions: [
-                  { permission_id: 'tenants:read' },
+                  { permission_id: 'workspaces:read' },
                   { permission_id: 'members:read' },
                 ],
               },
@@ -114,14 +114,14 @@ describe('getEffectiveAccess & session caching', () => {
 
     const result = await getEffectiveAccess();
     expect(result.isSuperadmin).toBe(false);
-    expect(result.permissions).toEqual(['members:read', 'tenants:read']);
-    expect(result.tenantPermissions['t-100']).toEqual([
+    expect(result.permissions).toEqual(['members:read', 'workspaces:read']);
+    expect(result.workspacePermissions['t-100']).toEqual([
       'members:read',
-      'tenants:read',
+      'workspaces:read',
     ]);
     expect(requestSpy).toHaveBeenCalledTimes(1);
     expect(requestSpy.mock.calls[0]?.[0]).toContain(
-      'tenant_members?user_id=eq.regular-user-42',
+      'workspace_members?user_id=eq.regular-user-42',
     );
   });
 });

@@ -22,9 +22,9 @@ import {
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogTitle,
-  VbenButton,
-  VbenLoading,
-  VbenRenderContent,
+  OperonButton,
+  OperonLoading,
+  OperonRenderContent,
 } from '@operon-core/shadcn-ui';
 import { globalShareState } from '@operon-core/shared/global-state';
 import { cn } from '@operon-core/shared/utils';
@@ -171,7 +171,7 @@ async function handleOpenChange(val: boolean) {
             <component :is="getIconRender" class="mr-2" />
             <span class="flex-auto">{{ $t(title) }}</span>
             <AlertDialogCancel v-if="showCancel" as-child>
-              <VbenButton
+              <OperonButton
                 variant="ghost"
                 size="icon"
                 class="rounded-full"
@@ -179,24 +179,24 @@ async function handleOpenChange(val: boolean) {
                 @click="handleCancel"
               >
                 <X class="size-4 text-muted-foreground" />
-              </VbenButton>
+              </OperonButton>
             </AlertDialogCancel>
           </div>
         </AlertDialogTitle>
         <AlertDialogDescription>
           <div class="m-4 min-h-7.5">
-            <VbenRenderContent :content="content" render-br />
+            <OperonRenderContent :content="content" render-br />
           </div>
-          <VbenLoading v-if="loading && contentMasking" :spinning="loading" />
+          <OperonLoading v-if="loading && contentMasking" :spinning="loading" />
         </AlertDialogDescription>
         <div
           class="flex items-center justify-end gap-x-2"
           :class="`justify-${buttonAlign}`"
         >
-          <VbenRenderContent :content="footer" />
+          <OperonRenderContent :content="footer" />
           <AlertDialogCancel v-if="showCancel" as-child>
             <component
-              :is="components.DefaultButton || VbenButton"
+              :is="components.DefaultButton || OperonButton"
               :disabled="loading"
               variant="outline"
               @click="handleCancel"
@@ -206,7 +206,7 @@ async function handleOpenChange(val: boolean) {
           </AlertDialogCancel>
           <AlertDialogAction as-child>
             <component
-              :is="components.PrimaryButton || VbenButton"
+              :is="components.PrimaryButton || OperonButton"
               :loading="loading"
               @click="handleConfirm"
             >

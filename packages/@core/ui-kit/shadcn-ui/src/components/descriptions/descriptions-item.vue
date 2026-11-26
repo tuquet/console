@@ -9,9 +9,9 @@ import { DESCRIPTIONS_ITEM_NAME } from './use-descriptions';
 
 /**
  * Marker component for child node usage, does not render content directly.
- * Its props and default slot are collected as items by parent VbenDescriptions.
+ * Its props and default slot are collected as items by parent OperonDescriptions.
  */
-const VbenDescriptionsItem = defineComponent({
+const OperonDescriptionsItem = defineComponent({
   name: DESCRIPTIONS_ITEM_NAME,
   props: {
     content: {
@@ -51,7 +51,7 @@ const VbenDescriptionsItem = defineComponent({
 });
 
 // Extra marker for robust identification in vnodes
-(VbenDescriptionsItem as Record<string, any>).__isDescriptionsItem = true;
+(OperonDescriptionsItem as Record<string, any>).__isDescriptionsItem = true;
 
-export default VbenDescriptionsItem;
+export default OperonDescriptionsItem;
 </script>

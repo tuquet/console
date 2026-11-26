@@ -108,7 +108,7 @@ function warnMixedDependencies(dependencies: FormItemDependenciesResolve) {
   }
   mixedDependenciesWarnings.add(dependencies);
   console.warn(
-    '[Vben Form] `dependencies.resolve` cannot be combined with legacy dependency callbacks. `resolve` takes precedence.',
+    '[Operon Form] `dependencies.resolve` cannot be combined with legacy dependency callbacks. `resolve` takes precedence.',
   );
 }
 
@@ -255,7 +255,7 @@ export default function useDependencies(
       } else {
         warnDeprecatedOnce(
           'form-dependencies-legacy-callbacks',
-          '[Vben Form] Legacy dependency callbacks are deprecated. Use `dependencies.resolve(context)` instead.',
+          '[Operon Form] Legacy dependency callbacks are deprecated. Use `dependencies.resolve(context)` instead.',
         );
         patch = await resolveLegacyDependencies(dependencies, context);
       }

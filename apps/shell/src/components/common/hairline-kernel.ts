@@ -1,4 +1,4 @@
-/* hairline kernel - exported for workstation */
+/* hairline kernel - exported for desktop */
 export interface HairlineCam {
   az: number;
   k: number;

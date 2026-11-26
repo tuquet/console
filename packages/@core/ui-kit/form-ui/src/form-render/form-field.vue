@@ -31,8 +31,8 @@ import {
   FormField,
   FormItem,
   FormMessage,
-  VbenRenderContent,
-  VbenTooltip,
+  OperonRenderContent,
+  OperonTooltip,
 } from '@operon-core/shadcn-ui';
 import { cn, isFunction, isObject, isString } from '@operon-core/shared/utils';
 
@@ -91,7 +91,7 @@ const fieldValue = formApi.useFieldValue(fieldName);
 const compact = computed(() => formRenderProps.compact);
 const isInValid = computed(() => Boolean(error.value));
 const shouldApplyInvalidStyle = computed(() => {
-  return isInValid.value && component !== 'VbenFormFieldArray';
+  return isInValid.value && component !== 'OperonFormFieldArray';
 });
 const collapseOpen = ref(!defaultCollapsed);
 
@@ -552,7 +552,7 @@ onUnmounted(() => {
           :style="labelStyle"
         >
           <template v-if="label">
-            <VbenRenderContent :content="label" />
+            <OperonRenderContent :content="label" />
           </template>
           <template #extra>
             <Button
@@ -594,7 +594,7 @@ onUnmounted(() => {
                         :key="name"
                         #[name]="renderSlotProps"
                       >
-                        <VbenRenderContent
+                        <OperonRenderContent
                           :content="customContentRender[name]"
                           v-bind="{
                             ...renderSlotProps,
@@ -604,7 +604,7 @@ onUnmounted(() => {
                       </template>
                       <!-- <slot></slot> -->
                     </component>
-                    <VbenTooltip
+                    <OperonTooltip
                       v-if="compact && isInValid"
                       :delay-duration="300"
                       side="left"
@@ -621,19 +621,19 @@ onUnmounted(() => {
                         </slot>
                       </template>
                       <FormMessage />
-                    </VbenTooltip>
+                    </OperonTooltip>
                   </slot>
                 </FormControl>
                 <!-- Custom suffix -->
                 <div v-if="suffix" class="ml-1">
-                  <VbenRenderContent :content="suffix" />
+                  <OperonRenderContent :content="suffix" />
                 </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
 
           <FormDescription v-if="description">
-            <VbenRenderContent :content="description" />
+            <OperonRenderContent :content="description" />
           </FormDescription>
 
           <Transition name="slide-up" v-if="!compact">

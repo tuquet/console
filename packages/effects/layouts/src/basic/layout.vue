@@ -19,8 +19,8 @@ import {
 } from '@operon/stores';
 import { cloneDeep, mapTree } from '@operon/utils';
 
-import { VbenAdminLayout } from '@operon-core/layout-ui';
-import { VbenBackTop } from '@operon-core/shadcn-ui';
+import { OperonAdminLayout } from '@operon-core/layout-ui';
+import { OperonBackTop } from '@operon-core/shadcn-ui';
 import { ELEMENT_ID_LAYOUT_SCROLL } from '@operon-core/shared/constants';
 
 import { useFullscreen } from '@vueuse/core';
@@ -186,7 +186,7 @@ const headerSlots = computed(() => {
 </script>
 
 <template>
-  <VbenAdminLayout
+  <OperonAdminLayout
     :content-compact="preferences.app.contentCompact"
     :content-compact-width="preferences.app.contentCompactWidth"
     :content-padding="preferences.app.contentPadding"
@@ -246,9 +246,11 @@ const headerSlots = computed(() => {
       >
         <template v-for="slotName in sidebarHeaderSlots" :key="slotName">
           <slot
-            v-if="slotName === 'tenant-selector' && $slots['tenant-selector']"
+            v-if="
+              slotName === 'workspace-selector' && $slots['workspace-selector']
+            "
             :collapsed="collapsed"
-            name="tenant-selector"
+            name="workspace-selector"
           ></slot>
           <HeaderWidget
             v-else
@@ -302,8 +304,8 @@ const headerSlots = computed(() => {
         <template #user-dropdown>
           <slot name="user-dropdown"></slot>
         </template>
-        <template v-if="$slots['tenant-selector']" #tenant-selector>
-          <slot :collapsed="false" name="tenant-selector"></slot>
+        <template v-if="$slots['workspace-selector']" #workspace-selector>
+          <slot :collapsed="false" name="workspace-selector"></slot>
         </template>
         <template #notification>
           <slot name="notification"></slot>
@@ -404,7 +406,7 @@ const headerSlots = computed(() => {
         "
         @clear-preferences-and-logout="clearPreferencesAndLogout"
       />
-      <VbenBackTop :target="layoutScrollTarget" />
+      <OperonBackTop :target="layoutScrollTarget" />
     </template>
-  </VbenAdminLayout>
+  </OperonAdminLayout>
 </template>

@@ -195,7 +195,7 @@ async function runConsoleGate() {
   } else {
     cleanStaleViteTempDirs();
     console.log(
-      `🚀 Starting headless Vite dev server for @operon/workstation on port ${PORT}...`,
+      `🚀 Starting headless Vite dev server for @operon/desktop on port ${PORT}...`,
     );
     process.chdir(webAdminDir);
     viteServer = await createServer({
@@ -393,8 +393,8 @@ async function runConsoleGate() {
         return route.fulfill({
           body: JSON.stringify([
             {
-              description: 'Read tenants',
-              id: 'tenants:read',
+              description: 'Read workspaces',
+              id: 'workspaces:read',
               module: 'identity',
             },
             {
@@ -482,8 +482,8 @@ async function runConsoleGate() {
     console.log('  ✓ /dashboard/analytics');
 
     const protectedRoutes = [
-      '/tenants',
-      '/tenants/00000000-0000-0000-0000-000000000001',
+      '/workspaces',
+      '/workspaces/00000000-0000-0000-0000-000000000001',
       '/automation/devices',
       '/automation/browsers',
       '/automation/proxies',

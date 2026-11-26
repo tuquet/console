@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../../ui';
-import { VbenIcon } from '../icon';
+import { OperonIcon } from '../icon';
 
 interface Props extends BreadcrumbProps {}
 
@@ -45,7 +45,7 @@ function handleClick(path?: string) {
             <div v-if="item.items?.length ?? 0 > 0">
               <DropdownMenu>
                 <DropdownMenuTrigger class="inline-flex items-center gap-1.5">
-                  <VbenIcon
+                  <OperonIcon
                     v-if="showIcon && item.icon"
                     :icon="item.icon"
                     class="size-4 shrink-0 align-middle"
@@ -71,7 +71,7 @@ function handleClick(path?: string) {
               @click.stop="handleClick(item.path)"
             >
               <span class="inline-flex items-center">
-                <VbenIcon
+                <OperonIcon
                   v-if="showIcon && item.icon"
                   :class="{ 'size-4.5': item.isHome, 'size-4': !item.isHome }"
                   :icon="item.icon"
@@ -82,7 +82,7 @@ function handleClick(path?: string) {
             </BreadcrumbLink>
             <BreadcrumbPage v-else>
               <span class="inline-flex items-center">
-                <VbenIcon
+                <OperonIcon
                   v-if="showIcon && item.icon"
                   :class="{ 'size-4.5': item.isHome, 'size-4': !item.isHome }"
                   :icon="item.icon"

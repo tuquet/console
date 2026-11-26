@@ -1,0 +1,1 @@
+export { workspacesManifest } from './manifest';
