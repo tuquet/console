@@ -125,16 +125,6 @@ export function createBrowserColumns(
                   () => $t('automation.browsers.default_badge'),
                 )
               : null,
-            options.scopeMode.value === 'all'
-              ? h(
-                  Badge,
-                  {
-                    variant: 'outline',
-                    class: 'px-1.5 py-0 font-mono text-[10px]',
-                  },
-                  () => profile.tenantId,
-                )
-              : null,
           ]),
           h(
             'div',

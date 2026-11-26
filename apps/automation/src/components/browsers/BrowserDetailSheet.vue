@@ -341,18 +341,10 @@ async function handleClone() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" class="mt-3 flex flex-col gap-3">
+          <TabsContent value="overview" class="flex flex-col gap-3">
             <div
               class="flex flex-col gap-2 rounded-lg border border-border p-3 text-xs"
             >
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-muted-foreground">
-                  {{ $t('automation.browsers.detail_tenant') }}
-                </span>
-                <code class="rounded bg-muted px-1.5 py-0.5 font-mono">
-                  {{ profile.tenantId }}
-                </code>
-              </div>
               <div class="flex items-center justify-between gap-2">
                 <span class="text-muted-foreground">
                   {{ $t('automation.browsers.field_group') }}
@@ -479,7 +471,7 @@ async function handleClone() {
             </div>
           </TabsContent>
 
-          <TabsContent value="fingerprint" class="mt-3">
+          <TabsContent value="fingerprint">
             <div
               class="grid grid-cols-2 gap-2 rounded-lg border border-border p-3 text-xs"
             >
@@ -528,7 +520,7 @@ async function handleClone() {
             </div>
           </TabsContent>
 
-          <TabsContent value="extensions" class="mt-3 flex flex-col gap-3">
+          <TabsContent value="extensions" class="flex flex-col gap-3">
             <div class="flex flex-col gap-1.5">
               <Label>
                 {{ $t('automation.browsers.detail_extensions_hint') }}

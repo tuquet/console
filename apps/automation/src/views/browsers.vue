@@ -7,7 +7,6 @@ import { DataTable } from '@operon/common-ui';
 import { useKernel, useLocalBridgeHeartbeat } from '@operon/kernel';
 
 import {
-  Badge,
   Button,
   Card,
   Empty,
@@ -53,10 +52,6 @@ const deleteOpen = ref(false);
 const deleteTargets = ref<BrowserProfileRecord[]>([]);
 const deleteLoading = ref(false);
 let clearSelectionFn: (() => void) | null = null;
-
-const activeTenantName = computed(
-  () => kernel.tenant.activeName || store.activeTenantId,
-);
 
 onMounted(() => {
   store.subscribeEvents();
@@ -325,33 +320,9 @@ const columns = createBrowserColumns(
         <h2 class="text-base font-semibold tracking-tight">
           {{ $t('automation.browsers.title') }}
         </h2>
-        <Badge variant="outline" class="font-mono">
-          {{ activeTenantName }}
-        </Badge>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <div class="border-border bg-muted/30 flex rounded-md border p-0.5">
-          <Button
-            type="button"
-            size="sm"
-            :variant="store.scopeMode === 'tenant' ? 'secondary' : 'ghost'"
-            class="h-7 px-2.5"
-            @click="store.scopeMode = 'tenant'"
-          >
-            {{ $t('automation.browsers.scope_tenant') }}
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            :variant="store.scopeMode === 'all' ? 'secondary' : 'ghost'"
-            class="h-7 px-2.5"
-            @click="store.scopeMode = 'all'"
-          >
-            {{ $t('automation.browsers.scope_all') }}
-          </Button>
-        </div>
-
         <Button
           variant="outline"
           size="sm"
