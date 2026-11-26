@@ -287,7 +287,7 @@ function handleNotify() {
             <h3 class="text-sm font-semibold text-foreground">
               Local Micro-Store (Pinia)
             </h3>
-            <Badge variant="secondary" class="text-xs font-mono">
+            <Badge variant="secondary" class="font-mono">
               automation:sample
             </Badge>
           </div>

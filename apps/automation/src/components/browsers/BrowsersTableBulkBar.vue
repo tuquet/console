@@ -69,7 +69,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEsc));
         {{ $t('automation.overview.browser_batch_run_btn') }}
       </Button>
 
-      <Button variant="ghost" size="sm" class="h-8" @click="emit('batchStop')">
+      <Button variant="ghost" size="sm" @click="emit('batchStop')">
         <Square class="mr-1.5 size-3.5 text-amber-500" />
         {{ $t('automation.overview.browser_batch_stop_btn') }}
       </Button>
@@ -93,7 +93,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEsc));
         @click="emit('clear')"
       >
         <X class="size-3.5" />
-        <Kbd class="ml-1.5 text-[10px]">Esc</Kbd>
+        <Kbd class="ml-1.5">Esc</Kbd>
       </Button>
     </div>
   </Transition>

@@ -120,7 +120,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleGlobalSlash));
             >
               <X class="size-3.5" />
             </Button>
-            <Kbd v-else class="pointer-events-none text-[10px]">/</Kbd>
+            <Kbd v-else class="pointer-events-none">/</Kbd>
           </InputGroupAddon>
         </InputGroup>
       </div>

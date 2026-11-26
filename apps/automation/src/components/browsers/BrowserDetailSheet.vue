@@ -448,7 +448,7 @@ async function handleClone() {
               </Label>
               <div class="flex items-center gap-2">
                 <Select v-model="moveTenantId">
-                  <SelectTrigger class="h-8 flex-1">
+                  <SelectTrigger class="flex-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
