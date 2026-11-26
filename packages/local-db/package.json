@@ -19,6 +19,7 @@
     "./client": "./src/client.ts",
     "./schema": "./src/schema/index.ts",
     "./schema/automation": "./src/schema/automation.ts",
+    "./schema/logs": "./src/schema/logs.ts",
     "./schema/system": "./src/schema/system.ts",
     "./schema/workspaces": "./src/schema/workspaces.ts",
     "./sync": "./src/sync.ts"

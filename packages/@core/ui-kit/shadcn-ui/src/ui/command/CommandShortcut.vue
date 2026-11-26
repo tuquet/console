@@ -1,19 +1,17 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
+import type { HTMLAttributes } from "vue"
+import { cn } from "cn"
 
 const props = defineProps<{
-  class?: HTMLAttributes['class'];
-}>();
+  class?: HTMLAttributes["class"]
+}>()
 </script>
 
 <template>
   <span
-    :class="
-      cn('ml-auto text-xs tracking-widest text-muted-foreground', props.class)
-    "
+    data-slot="command-shortcut"
+    :class="cn('text-muted-foreground ml-auto text-xs tracking-widest', props.class)"
   >
-    <slot></slot>
+    <slot />
   </span>
 </template>

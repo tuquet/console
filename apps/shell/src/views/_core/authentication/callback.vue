@@ -226,7 +226,7 @@ onMounted(async () => {
     <!-- Error View -->
     <div v-else class="flex flex-col items-center gap-4 max-w-md">
       <div class="text-3xl text-destructive font-bold">!</div>
-      <h3 class="text-lg font-semibold text-destructive">
+      <h3 class="text-lg text-destructive">
         {{ $t('authentication.githubAuthFailed') }}
       </h3>
       <p class="text-muted-foreground">

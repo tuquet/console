@@ -2,7 +2,7 @@
 import type { LanguageOption } from '@operon/constants';
 import type { SupportedLanguagesType } from '@operon/locales';
 
-import { onUnmounted, ref } from 'vue';
+import { onUnmounted, ref, useAttrs } from 'vue';
 
 import { onSupportLanguagesChange } from '@operon/constants';
 import { Languages } from '@operon/icons';
@@ -17,10 +17,14 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@operon-core/shadcn-ui';
+import { cn } from '@operon-core/shared/utils';
 
 defineOptions({
   name: 'LanguageToggle',
+  inheritAttrs: false,
 });
+
+const attrs = useAttrs();
 
 const languageList = ref<LanguageOption[]>([]);
 const unsubscribe = onSupportLanguagesChange((langs) => {
@@ -41,7 +45,7 @@ async function handleUpdate(value: string | undefined) {
 </script>
 
 <template>
-  <div class="inline-flex empty:hidden">
+  <div :class="cn('inline-flex empty:hidden', attrs.class as string)">
     <DropdownMenu>
       <DropdownMenuTrigger as-child>
         <Button

@@ -1,34 +1,19 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
-
-import { useVModel } from '@vueuse/core';
+import type { HTMLAttributes } from "vue"
+import { cn } from "cn"
+import { Input } from '@operon-core/shadcn-ui/ui/input'
 
 const props = defineProps<{
-  defaultValue?: number | string;
-  modelValue?: number | string;
-  class?: HTMLAttributes['class'];
-}>();
-
-const emits = defineEmits<{
-  (e: 'update:modelValue', payload: number | string): void;
-}>();
-
-const modelValue = useVModel(props, 'modelValue', emits, {
-  passive: true,
-  defaultValue: props.defaultValue,
-});
+  class?: HTMLAttributes["class"]
+}>()
 </script>
 
 <template>
-  <input
-    v-model="modelValue"
-    :class="
-      cn(
-        'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
-        props.class,
-      )
-    "
+  <Input
+    data-slot="input-group-control"
+    :class="cn(
+      'flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent',
+      props.class,
+    )"
   />
 </template>

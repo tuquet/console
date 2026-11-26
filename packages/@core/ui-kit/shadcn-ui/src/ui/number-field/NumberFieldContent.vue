@@ -1,22 +1,14 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
+import type { HTMLAttributes } from "vue"
+import { cn } from "cn"
 
 const props = defineProps<{
-  class?: HTMLAttributes['class'];
-}>();
+  class?: HTMLAttributes["class"]
+}>()
 </script>
 
 <template>
-  <div
-    :class="
-      cn(
-        'relative has-[[data-slot=decrement]]:[&>[data-slot=input]]:pl-9 has-[[data-slot=increment]]:[&>[data-slot=input]]:pr-9',
-        props.class,
-      )
-    "
-  >
-    <slot></slot>
+  <div :class="cn('relative [&>[data-slot=input]]:has-[[data-slot=increment]]:pr-5 [&>[data-slot=input]]:has-[[data-slot=decrement]]:pl-5', props.class)">
+    <slot />
   </div>
 </template>

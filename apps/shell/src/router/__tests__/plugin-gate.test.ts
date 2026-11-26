@@ -165,6 +165,7 @@ describe('filterRoutesByPlugins', () => {
     expect(withOperon[0]?.children?.map((c) => c.name)).toEqual([
       'AutomationOverview',
       'AutomationBrowsers',
+      'AutomationDrivers',
     ]);
 
     const withoutOperon = filterRoutesByPlugins(automationRoutes, ['identity']);

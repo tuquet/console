@@ -1,36 +1,29 @@
 <script setup lang="ts">
-import type { ListboxRootEmits, ListboxRootProps } from 'reka-ui';
+import type { ListboxRootEmits, ListboxRootProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import { ListboxRoot, useFilter, useForwardPropsEmits } from "reka-ui"
+import { reactive, ref, watch } from "vue"
+import { provideCommandContext } from "."
 
-import type { HTMLAttributes } from 'vue';
+const props = withDefaults(defineProps<ListboxRootProps & { class?: HTMLAttributes["class"] }>(), {
+  modelValue: "",
+  highlightOnHover: true,
+})
 
-import { reactive, ref, watch } from 'vue';
+const emits = defineEmits<ListboxRootEmits>()
 
-import { cn } from '@operon-core/shared/utils';
+const delegatedProps = reactiveOmit(props, "class")
 
-import { reactiveOmit } from '@vueuse/core';
-import { ListboxRoot, useFilter, useForwardPropsEmits } from 'reka-ui';
+const forwarded = useForwardPropsEmits(delegatedProps, emits)
 
-import { provideCommandContext } from './context';
+const allItems = ref<Map<string, string>>(new Map())
+const allGroups = ref<Map<string, Set<string>>>(new Map())
 
-const props = withDefaults(
-  defineProps<ListboxRootProps & { class?: HTMLAttributes['class'] }>(),
-  {
-    modelValue: '',
-  },
-);
-
-const emits = defineEmits<ListboxRootEmits>();
-
-const delegatedProps = reactiveOmit(props, 'class');
-
-const forwarded = useForwardPropsEmits(delegatedProps, emits);
-
-const allItems = ref<Map<string, string>>(new Map());
-const allGroups = ref<Map<string, Set<string>>>(new Map());
-
-const { contains } = useFilter({ sensitivity: 'base' });
+const { contains } = useFilter({ sensitivity: "base" })
 const filterState = reactive({
-  search: '',
+  search: "",
   filtered: {
     /** The count of all visible items. */
     count: 0,
@@ -39,63 +32,57 @@ const filterState = reactive({
     /** Set of groups with at least one visible item. */
     groups: new Set() as Set<string>,
   },
-});
+})
 
 function filterItems() {
   if (!filterState.search) {
-    filterState.filtered.count = allItems.value.size;
+    filterState.filtered.count = allItems.value.size
     // Do nothing, each item will know to show itself because search is empty
-    return;
+    return
   }
 
   // Reset the groups
-  filterState.filtered.groups = new Set();
-  let itemCount = 0;
+  filterState.filtered.groups = new Set()
+  let itemCount = 0
 
   // Check which items should be included
   for (const [id, value] of allItems.value) {
-    const score = contains(value, filterState.search);
-    filterState.filtered.items.set(id, score ? 1 : 0);
-    if (score) itemCount++;
+    const score = contains(value, filterState.search)
+    filterState.filtered.items.set(id, score ? 1 : 0)
+    if (score)
+      itemCount++
   }
 
   // Check which groups have at least 1 item shown
   for (const [groupId, group] of allGroups.value) {
     for (const itemId of group) {
       if (filterState.filtered.items.get(itemId)! > 0) {
-        filterState.filtered.groups.add(groupId);
-        break;
+        filterState.filtered.groups.add(groupId)
+        break
       }
     }
   }
 
-  filterState.filtered.count = itemCount;
+  filterState.filtered.count = itemCount
 }
 
-watch(
-  () => filterState.search,
-  () => {
-    filterItems();
-  },
-);
+watch(() => filterState.search, () => {
+  filterItems()
+})
 
 provideCommandContext({
   allItems,
   allGroups,
   filterState,
-});
+})
 </script>
 
 <template>
   <ListboxRoot
+    data-slot="command"
     v-bind="forwarded"
-    :class="
-      cn(
-        'flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground',
-        props.class,
-      )
-    "
+    :class="cn('bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-md', props.class)"
   >
-    <slot></slot>
+    <slot />
   </ListboxRoot>
 </template>

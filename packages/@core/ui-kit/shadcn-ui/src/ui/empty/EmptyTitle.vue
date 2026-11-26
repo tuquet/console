@@ -1,19 +1,17 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
+import type { HTMLAttributes } from "vue"
+import { cn } from "cn"
 
 const props = defineProps<{
-  class?: HTMLAttributes['class'];
-}>();
+  class?: HTMLAttributes["class"]
+}>()
 </script>
 
 <template>
-  <h4
-    :class="
-      cn('text-base font-semibold tracking-tight text-foreground', props.class)
-    "
+  <div
+    data-slot="empty-title"
+    :class="cn('text-lg font-medium tracking-tight', props.class)"
   >
-    <slot></slot>
-  </h4>
+    <slot />
+  </div>
 </template>

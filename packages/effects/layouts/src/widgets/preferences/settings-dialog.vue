@@ -496,7 +496,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                 class="size-7 shrink-0 md:size-8"
               />
               <div class="hidden min-w-0 flex-1 leading-tight md:block">
-                <p class="truncate text-xs font-medium text-foreground">
+                <p class="truncate font-medium text-foreground">
                   {{ accountName }}
                 </p>
                 <p class="truncate text-[11px] text-muted-foreground">
@@ -740,10 +740,10 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
             class="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-4 md:px-8 md:py-6"
           >
             <div>
-              <h3 class="text-base font-semibold text-foreground">
+              <h3 class="text-base text-foreground">
                 {{ $t('preferences.account.title') }}
               </h3>
-              <p class="mt-0.5 text-xs text-muted-foreground">
+              <p class="mt-0.5 text-muted-foreground">
                 {{ $t('preferences.account.description') }}
               </p>
             </div>
@@ -767,7 +767,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                         }}
                       </Badge>
                     </div>
-                    <p class="mt-0.5 truncate text-xs text-muted-foreground">
+                    <p class="mt-0.5 truncate text-muted-foreground">
                       {{
                         isAuthenticated
                           ? $t('preferences.account.connectedDesc')
@@ -785,7 +785,7 @@ function handleCustomPreferencesUpdate(updates: CustomPreferencesRecord) {
                   <p class="text-sm font-medium text-foreground">
                     {{ $t('preferences.account.cloudSession') }}
                   </p>
-                  <p class="mt-0.5 text-xs text-muted-foreground">
+                  <p class="mt-0.5 text-muted-foreground">
                     {{
                       isAuthenticated
                         ? accountDesc

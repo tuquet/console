@@ -17,7 +17,7 @@ export interface GrowthPoint {
 }
 
 export interface RealAnalyticsData {
-  fleet: {
+  daemon: {
     loopbackPort: number;
     status: 'ready' | 'standby';
   };
@@ -97,7 +97,7 @@ export async function getRealAnalyticsData(): Promise<RealAnalyticsData> {
   const moduleCount = plugins.filter((p) => !(p.is_core ?? p.is_system)).length;
 
   return {
-    fleet: {
+    daemon: {
       loopbackPort: 8765,
       status: 'ready',
     },

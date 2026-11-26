@@ -1,15 +1,13 @@
 <script lang="ts" setup>
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
-
-import { useFormField } from './useFormField';
+import type { HTMLAttributes } from "vue"
+import { cn } from "cn"
+import { useFormField } from "./useFormField"
 
 const props = defineProps<{
-  class?: HTMLAttributes['class'];
-}>();
+  class?: HTMLAttributes["class"]
+}>()
 
-const { formDescriptionId } = useFormField();
+const { formDescriptionId } = useFormField()
 </script>
 
 <template>
@@ -18,6 +16,6 @@ const { formDescriptionId } = useFormField();
     data-slot="form-description"
     :class="cn('text-muted-foreground text-sm', props.class)"
   >
-    <slot></slot>
+    <slot />
   </p>
 </template>

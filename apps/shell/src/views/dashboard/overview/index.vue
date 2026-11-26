@@ -74,8 +74,8 @@ const modules = computed<ModuleItem[]>(() => [
   {
     description: $t('page.automation.browsers_desc'),
     icon: Zap,
-    name: $t('page.browsers.title'),
-    path: '/browsers',
+    name: $t('page.browserProfiles.title'),
+    path: '/browser-profiles',
     requiresDaemon: true,
     requiresCloud: false,
   },
@@ -228,7 +228,7 @@ function isLocked(mod: ModuleItem) {
               <Loader2 v-else class="size-4 animate-spin" />
             </div>
             <div>
-              <CardTitle class="text-sm font-semibold">
+              <CardTitle class="text-sm">
                 {{ $t('page.overview.daemonStatus') }}
               </CardTitle>
               <p class="text-xs text-muted-foreground">
@@ -277,10 +277,10 @@ function isLocked(mod: ModuleItem) {
       <CardContent v-if="!isHealthy && !isChecking" class="pt-0">
         <Separator class="mb-4" />
         <div>
-          <p class="mb-2 text-xs font-medium text-foreground">
+          <p class="mb-2 font-medium text-foreground">
             {{ $t('page.overview.installTitle') }}
           </p>
-          <p class="mb-3 text-xs text-muted-foreground">
+          <p class="mb-3 text-muted-foreground">
             {{ $t('page.overview.installDesc') }}
           </p>
 
@@ -288,13 +288,13 @@ function isLocked(mod: ModuleItem) {
           <div
             class="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-background/80 px-3 py-2"
           >
-            <code class="truncate font-mono text-[11px] text-foreground">
+            <code class="truncate text-[11px] text-foreground">
               {{ installInfo.command }}
             </code>
             <Button
               size="sm"
               variant="ghost"
-              class="h-7 shrink-0 px-2 text-xs"
+              class="h-7 shrink-0 px-2"
               @click="copyInstallCommand"
             >
               <Copy class="mr-1 size-3" />
@@ -315,7 +315,7 @@ function isLocked(mod: ModuleItem) {
               :href="installInfo.releasesUrl"
               target="_blank"
               rel="noreferrer"
-              class="h-8 gap-1.5 text-xs"
+              class="h-8 gap-1.5"
               @click="hasInitiatedInstall = true"
             >
               <Download class="size-3.5" />
@@ -330,7 +330,7 @@ function isLocked(mod: ModuleItem) {
       <!-- Checklist -->
       <Card class="border-border/60 shadow-xs">
         <CardHeader class="pb-3">
-          <CardTitle class="text-sm font-semibold">
+          <CardTitle class="text-sm">
             {{ $t('page.overview.checklistTitle') }}
           </CardTitle>
         </CardHeader>
@@ -371,7 +371,7 @@ function isLocked(mod: ModuleItem) {
       <!-- Modules grid -->
       <div class="lg:col-span-2">
         <p
-          class="mb-3 text-xs font-medium text-muted-foreground uppercase tracking-wider"
+          class="mb-3 font-medium text-muted-foreground uppercase tracking-wider"
         >
           {{ $t('page.overview.modulesTitle') }}
         </p>
@@ -421,7 +421,7 @@ function isLocked(mod: ModuleItem) {
               />
             </div>
             <div>
-              <p class="text-sm font-semibold text-foreground">
+              <p class="text-sm text-foreground">
                 {{ mod.name }}
               </p>
               <p class="mt-0.5 text-[11px] text-muted-foreground leading-snug">

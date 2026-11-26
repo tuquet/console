@@ -3,7 +3,8 @@
   "extends": "@operon/tsconfig/web.json",
   "compilerOptions": {
     "paths": {
-      "@operon-core/shadcn-ui/*": ["./src/*"]
+      "@operon-core/shadcn-ui/*": ["./src/*"],
+      "@operon-core/shared/*": ["../../base/shared/src/*"]
     }
   },
   "include": ["src"],

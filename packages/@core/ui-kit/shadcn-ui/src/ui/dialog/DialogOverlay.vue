@@ -1,34 +1,21 @@
 <script setup lang="ts">
-import { inject } from 'vue';
+import type { DialogOverlayProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import { DialogOverlay } from "reka-ui"
 
-import { useScrollLock } from '@operon-core/composables';
-import { cn } from '@operon-core/shared/utils';
+const props = defineProps<DialogOverlayProps & { class?: HTMLAttributes["class"] }>()
 
-const props = withDefaults(
-  defineProps<{
-    class?: any;
-    overlayBlur?: number;
-    position?: 'absolute' | 'fixed';
-    zIndex?: number;
-  }>(),
-  {
-    position: 'fixed',
-  },
-);
-
-useScrollLock();
-const dismissableModalId = inject('DISMISSABLE_MODAL_ID', undefined);
+const delegatedProps = reactiveOmit(props, "class")
 </script>
 
 <template>
-  <div
-    :data-dismissable-modal="dismissableModalId"
-    :style="{
-      ...(zIndex ? { zIndex } : { zIndex: 1040 }),
-      position,
-      backdropFilter:
-        overlayBlur && overlayBlur > 0 ? `blur(${overlayBlur}px)` : 'none',
-    }"
-    :class="cn('z-popup bg-overlay inset-0 fixed', props.class)"
-  ></div>
+  <DialogOverlay
+    data-slot="dialog-overlay"
+    v-bind="delegatedProps"
+    :class="cn('data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80', props.class)"
+  >
+    <slot />
+  </DialogOverlay>
 </template>

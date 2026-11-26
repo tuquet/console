@@ -98,12 +98,11 @@ async function handleImport() {
           v-model="csvText"
           :rows="7"
           placeholder="id,name,userAgent,timezone,proxy,group,tags"
-          class="font-mono"
         />
 
         <div
           v-if="report"
-          class="flex flex-col gap-1.5 rounded-md border border-border bg-muted/30 p-3 text-xs"
+          class="flex flex-col gap-1.5 rounded-md border border-border bg-muted/30 p-3"
         >
           <div class="font-medium text-foreground">
             {{

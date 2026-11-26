@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import { inject } from 'vue';
+import type { DialogOverlayProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import { DialogOverlay } from "reka-ui"
 
-import { useScrollLock } from '@operon-core/composables';
+const props = defineProps<DialogOverlayProps & { class?: HTMLAttributes["class"] }>()
 
-useScrollLock();
-const id = inject('DISMISSABLE_DRAWER_ID');
+const delegatedProps = reactiveOmit(props, "class")
 </script>
+
 <template>
-  <div :data-dismissable-drawer="id" class="z-popup bg-overlay inset-0"></div>
+  <DialogOverlay
+    data-slot="sheet-overlay"
+    :class="cn('data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80', props.class)"
+    v-bind="delegatedProps"
+  >
+    <slot />
+  </DialogOverlay>
 </template>

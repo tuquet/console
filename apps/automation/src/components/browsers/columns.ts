@@ -12,7 +12,7 @@ import { DataTableColumnHeader } from '@operon/common-ui';
 
 import { Badge, Checkbox } from '@operon-core/shadcn-ui';
 
-import { CheckCircle2, Laptop } from '@lucide/vue';
+import { CheckCircle2, Cloud, HardDrive, Laptop } from '@lucide/vue';
 import { createColumnHelper } from '@tanstack/vue-table';
 
 import { $t } from '../../locales';
@@ -28,6 +28,13 @@ const includesFilterFn = (
   id: string,
   value: string[],
 ) => value.includes(String(row.getValue(id)));
+
+function resolveBrowserSource(row: BrowserProfileRecord): 'cloud' | 'local' {
+  if (row.source === 'cloud' || row.source === 'local') {
+    return row.source;
+  }
+  return row.workspaceId.startsWith('local-') ? 'local' : 'cloud';
+}
 
 const searchProfileFilterFn = (
   row: { original: BrowserProfileRecord },
@@ -130,7 +137,7 @@ export function createBrowserColumns(
             'div',
             {
               class:
-                'text-muted-foreground flex flex-wrap items-center gap-1.5 font-mono text-[11px]',
+                'text-muted-foreground flex flex-wrap items-center gap-1.5 text-[11px]',
             },
             [
               h('span', profile.id),
@@ -157,6 +164,43 @@ export function createBrowserColumns(
             ],
           ),
         ]);
+      },
+    }),
+
+    columnHelper.accessor((row) => resolveBrowserSource(row), {
+      id: 'source',
+      meta: { label: $t('automation.browsers.col_source') },
+      header: ({ column }) =>
+        h(DataTableColumnHeader, {
+          column,
+          title: $t('automation.browsers.col_source'),
+        }),
+      filterFn: includesFilterFn as any,
+      cell: ({ row }) => {
+        const source = resolveBrowserSource(row.original);
+        return source === 'cloud'
+          ? h(
+              Badge,
+              {
+                variant: 'outline',
+                class: 'border-sky-500/30 bg-sky-500/10 text-sky-500',
+              },
+              () => [
+                h(Cloud, { class: 'mr-1 size-3' }),
+                $t('automation.browsers.source_cloud'),
+              ],
+            )
+          : h(
+              Badge,
+              {
+                variant: 'secondary',
+                class: 'text-muted-foreground font-normal',
+              },
+              () => [
+                h(HardDrive, { class: 'mr-1 size-3' }),
+                $t('automation.browsers.source_local'),
+              ],
+            );
       },
     }),
 
@@ -189,7 +233,7 @@ export function createBrowserColumns(
                 'span',
                 {
                   class:
-                    'text-muted-foreground inline-flex items-center gap-1.5 text-xs',
+                    'text-muted-foreground inline-flex items-center gap-1.5',
                 },
                 [
                   h('span', {
@@ -201,7 +245,7 @@ export function createBrowserColumns(
           profile.debuggingPort
             ? h(
                 'span',
-                { class: 'text-muted-foreground font-mono text-[11px]' },
+                { class: 'text-muted-foreground text-[11px]' },
                 `:${profile.debuggingPort}`,
               )
             : null,
@@ -225,7 +269,7 @@ export function createBrowserColumns(
           return h(
             'div',
             {
-              class: 'text-muted-foreground flex items-center gap-1.5 text-xs',
+              class: 'text-muted-foreground flex items-center gap-1.5',
             },
             [
               h(Laptop, { class: 'size-3.5 shrink-0' }),
@@ -253,10 +297,10 @@ export function createBrowserColumns(
       cell: ({ row }) => {
         const proxy = row.original.proxy;
         return proxy
-          ? h('span', { class: 'text-foreground font-mono text-xs' }, proxy)
+          ? h('span', { class: 'text-foreground' }, proxy)
           : h(
               'span',
-              { class: 'text-muted-foreground text-xs' },
+              { class: 'text-muted-foreground' },
               $t('automation.browsers.direct_badge'),
             );
       },
@@ -273,16 +317,10 @@ export function createBrowserColumns(
       cell: ({ row }) => {
         const count = row.original.extensions.length;
         return count > 1
-          ? h(
-              Badge,
-              { variant: 'outline', class: 'font-mono text-[11px]' },
-              () => String(count),
-            )
-          : h(
-              'span',
-              { class: 'text-muted-foreground font-mono text-xs' },
+          ? h(Badge, { variant: 'outline', class: 'text-[11px]' }, () =>
               String(count),
-            );
+            )
+          : h('span', { class: 'text-muted-foreground' }, String(count));
       },
     }),
 

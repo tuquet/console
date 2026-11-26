@@ -1,25 +1,18 @@
 <script setup lang="ts">
-import type { PrimitiveProps } from 'reka-ui';
+import type { PrimitiveProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import type { BadgeVariants } from "."
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import { Primitive } from "reka-ui"
+import { badgeVariants } from "."
 
-import type { HTMLAttributes } from 'vue';
+const props = defineProps<PrimitiveProps & {
+  variant?: BadgeVariants["variant"]
+  class?: HTMLAttributes["class"]
+}>()
 
-import type { BadgeVariants } from './badge';
-
-import { cn } from '@operon-core/shared/utils';
-
-import { reactiveOmit } from '@vueuse/core';
-import { Primitive } from 'reka-ui';
-
-import { badgeVariants } from './badge';
-
-const props = defineProps<
-  PrimitiveProps & {
-    class?: HTMLAttributes['class'];
-    variant?: BadgeVariants['variant'];
-  }
->();
-
-const delegatedProps = reactiveOmit(props, 'class');
+const delegatedProps = reactiveOmit(props, "class")
 </script>
 
 <template>
@@ -28,6 +21,6 @@ const delegatedProps = reactiveOmit(props, 'class');
     :class="cn(badgeVariants({ variant }), props.class)"
     v-bind="delegatedProps"
   >
-    <slot></slot>
+    <slot />
   </Primitive>
 </template>

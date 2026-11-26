@@ -114,6 +114,29 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         .from(schema.browserProfiles)
         .where(eq(schema.browserProfiles.id, 'browser-001'));
       expect(updated[0]?.name).toBe('Renamed Profile');
+
+      // 5. Insert Task linked to Browser Profile and query relationally
+      await db.insert(schema.tasks).values({
+        assignee: 'linh',
+        createdAt: updatedIso,
+        favorite: true,
+        id: 'TASK-7001',
+        label: 'feature',
+        priority: 'high',
+        profileId: 'browser-001',
+        progress: 50,
+        status: 'in progress',
+        title: 'Warmup linked browser',
+        updatedAt: updatedIso,
+        workspaceId: 'workspace-test',
+      });
+
+      const taskWithProfile = await db.query.tasks.findFirst({
+        where: eq(schema.tasks.id, 'TASK-7001'),
+        with: { browserProfile: true },
+      });
+      expect(taskWithProfile?.browserProfile?.id).toBe('browser-001');
+      expect(taskWithProfile?.browserProfile?.name).toBe('Renamed Profile');
     });
 
     it('enforces foreign key constraints and cascaded execution logs', async () => {
@@ -600,6 +623,7 @@ describe('local-first sqlite & cloud sync verification suite', () => {
       expect(getCanonicalSqlitePath('automation')).toContain(
         'automation.sqlite',
       );
+      expect(getCanonicalSqlitePath('logs')).toContain('logs.sqlite');
       expect(getCanonicalSqlitePath('system')).toContain('system.sqlite');
       expect(getCanonicalSqlitePath('workspaces')).toContain(
         'workspaces.sqlite',
@@ -609,12 +633,79 @@ describe('local-first sqlite & cloud sync verification suite', () => {
 
     it('initializes domain-specific Drizzle clients with in-memory test databases', async () => {
       const autoDb = getDomainDb('automation', undefined, ':memory:');
+      const logsDb = getDomainDb('logs', undefined, ':memory:');
       const sysDb = getDomainDb('system', undefined, ':memory:');
       const workspacesDb = getDomainDb('workspaces', undefined, ':memory:');
 
       expect(autoDb).toBeDefined();
+      expect(logsDb).toBeDefined();
       expect(sysDb).toBeDefined();
       expect(workspacesDb).toBeDefined();
+    });
+
+    it('stores and queries ci_runs and sentry_events in logs schema', async () => {
+      await db.insert(schema.ciRuns).values({
+        id: 'ci-run-1',
+        suite: 'console',
+        status: 'pass',
+        gitRef: 'main @ abc123',
+        totalSeconds: 12.4,
+        errorCount: 0,
+        warnCount: 1,
+        lineCount: 42,
+        summaryLines: ['[PASS] check:type (12.4s)'],
+        steps: [
+          {
+            command: 'pnpm check:type',
+            errorCount: 0,
+            exitCode: 0,
+            lines: [],
+            name: 'check:type',
+            seconds: 12.4,
+            startLine: 2,
+            status: 'pass',
+            warnCount: 0,
+          },
+        ],
+        startedAt: '2026-11-27T06:00:00.000Z',
+        finishedAt: '2026-11-27T06:00:12.400Z',
+      });
+
+      await db.insert(schema.sentryEvents).values({
+        id: 'evt-1',
+        fingerprint: 'console:TypeError:local-ci',
+        source: 'console',
+        level: 'error',
+        title: 'TypeError: Cannot read properties of undefined',
+        message: 'steps is undefined',
+        route: '/logs/local-ci',
+        frames: [{ filename: 'local-ci.vue', function: 'setup', lineno: 42 }],
+        breadcrumbs: [
+          {
+            category: 'navigation',
+            level: 'info',
+            message: 'Navigated to /logs/local-ci',
+            timestamp: '2026-11-27T06:01:00.000Z',
+          },
+        ],
+        tags: { suite: 'console' },
+        firstSeenAt: '2026-11-27T06:01:00.000Z',
+        lastSeenAt: '2026-11-27T06:01:00.000Z',
+      });
+
+      const [run] = await db
+        .select()
+        .from(schema.ciRuns)
+        .where(eq(schema.ciRuns.id, 'ci-run-1'));
+      const [evt] = await db
+        .select()
+        .from(schema.sentryEvents)
+        .where(eq(schema.sentryEvents.id, 'evt-1'));
+
+      expect(run?.suite).toBe('console');
+      expect(run?.steps[0]?.name).toBe('check:type');
+      expect(evt?.fingerprint).toBe('console:TypeError:local-ci');
+      expect(evt?.frames[0]?.filename).toBe('local-ci.vue');
     });
   });
 });

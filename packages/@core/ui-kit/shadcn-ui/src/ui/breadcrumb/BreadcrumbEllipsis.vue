@@ -1,13 +1,11 @@
 <script lang="ts" setup>
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
-
-import { MoreHorizontal } from '@lucide/vue';
+import type { HTMLAttributes } from "vue"
+import { MoreHorizontal } from "@lucide/vue"
+import { cn } from "cn"
 
 const props = defineProps<{
-  class?: HTMLAttributes['class'];
-}>();
+  class?: HTMLAttributes["class"]
+}>()
 </script>
 
 <template>

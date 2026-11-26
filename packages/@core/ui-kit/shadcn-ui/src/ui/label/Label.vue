@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import type { LabelProps } from 'reka-ui';
+import type { LabelProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import { Label } from "reka-ui"
 
-import type { HTMLAttributes } from 'vue';
+const props = defineProps<LabelProps & { class?: HTMLAttributes["class"] }>()
 
-import { cn } from '@operon-core/shared/utils';
-
-import { reactiveOmit } from '@vueuse/core';
-import { Label } from 'reka-ui';
-
-const props = defineProps<LabelProps & { class?: HTMLAttributes['class'] }>();
-
-const delegatedProps = reactiveOmit(props, 'class');
+const delegatedProps = reactiveOmit(props, "class")
 </script>
 
 <template>
@@ -24,6 +21,6 @@ const delegatedProps = reactiveOmit(props, 'class');
       )
     "
   >
-    <slot></slot>
+    <slot />
   </Label>
 </template>

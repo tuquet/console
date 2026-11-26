@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import type { SelectSeparatorProps } from 'reka-ui';
+import type { SelectSeparatorProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import { SelectSeparator } from "reka-ui"
 
-import type { HTMLAttributes } from 'vue';
+const props = defineProps<SelectSeparatorProps & { class?: HTMLAttributes["class"] }>()
 
-import { cn } from '@operon-core/shared/utils';
-
-import { reactiveOmit } from '@vueuse/core';
-import { SelectSeparator } from 'reka-ui';
-
-const props = defineProps<
-  SelectSeparatorProps & { class?: HTMLAttributes['class'] }
->();
-
-const delegatedProps = reactiveOmit(props, 'class');
+const delegatedProps = reactiveOmit(props, "class")
 </script>
 
 <template>

@@ -91,7 +91,7 @@ defineExpose({ toggle });
         :aria-label="$t('ui.widgets.notifications')"
       >
         <div class="flex items-center justify-between gap-2 px-4 py-3">
-          <h2 class="text-sm font-semibold">
+          <h2 class="text-sm">
             {{ $t('ui.widgets.notifications') }}
           </h2>
           <Button

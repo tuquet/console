@@ -1,6 +1,6 @@
 {
   "$schema": "https://shadcn-vue.com/schema.json",
-  "style": "new-york",
+  "style": "new-york-v4",
   "typescript": true,
   "tailwind": {
     "config": "",
@@ -8,8 +8,10 @@
     "baseColor": "slate",
     "cssVariables": true
   },
+  "iconLibrary": "lucide",
   "aliases": {
     "components": "@operon-core/shadcn-ui/components",
+    "ui": "@operon-core/shadcn-ui/ui",
     "utils": "@operon-core/shared/utils"
   }
 }

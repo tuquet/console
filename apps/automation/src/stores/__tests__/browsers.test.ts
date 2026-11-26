@@ -153,4 +153,36 @@ describe('useBrowsersStore', () => {
     );
     expect(store.items.some((b) => b.id === 'prf_1')).toBe(false);
   });
+
+  it('tracks live SSE status, patches online state in-place, and kills all sessions', async () => {
+    const store = useBrowsersStore();
+    await store.fetchBrowsers();
+
+    store.patchOnlineStateFromSse({
+      debuggingPort: 9222,
+      id: 'prf_1',
+      pid: 4242,
+      type: 'browser_online',
+      wsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
+    });
+
+    const online = store.items.find((b) => b.id === 'prf_1');
+    expect(online?.isOnline).toBe(true);
+    expect(online?.pid).toBe(4242);
+    expect(online?.debuggingPort).toBe(9222);
+
+    store.patchOnlineStateFromSse({ all: true, type: 'browser_offline' });
+    expect(store.items.every((b) => !b.isOnline)).toBe(true);
+
+    mockFetch.mockResolvedValueOnce({ message: 'killed', success: true });
+    await store.killAllSessions();
+    expect(mockFetch).toHaveBeenCalledWith('/api/v1/browsers/sessions', {
+      method: 'DELETE',
+    });
+    expect(store.sseStatus).toBe('connecting');
+    expect(store.liveEvents).toHaveLength(1);
+    expect(store.liveEvents[0]?.action).toBe('kill_all');
+    store.clearLiveEvents();
+    expect(store.liveEvents).toEqual([]);
+  });
 });

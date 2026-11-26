@@ -35,7 +35,7 @@ const tabsValue = defineModel<string | undefined>('modelValue', {
             :src="userInfo?.avatar ?? preferences.app.defaultAvatar"
             class="size-20"
           />
-          <span class="text-lg font-semibold">
+          <span class="text-lg">
             {{ userInfo?.realName ?? '' }}
           </span>
           <span class="text-foreground/80">

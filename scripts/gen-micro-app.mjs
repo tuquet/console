@@ -432,7 +432,7 @@ function handleNotify() {
       <div>
         <div class="flex items-center gap-2.5">
           <Layers class="size-6 text-primary" />
-          <h2 class="text-xl font-semibold tracking-tight">
+          <h2 class="text-xl tracking-tight">
             {{ $t('${name}.title') }}
           </h2>
           <Badge
@@ -465,28 +465,28 @@ function handleNotify() {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div class="rounded-xl border border-border bg-card p-5 shadow-xs">
         <div class="flex items-center justify-between pb-3">
-          <h3 class="text-sm font-semibold text-foreground">Kernel Context</h3>
+          <h3 class="text-sm text-foreground">Kernel Context</h3>
           <CheckCircle2 class="size-4 text-emerald-500" />
         </div>
-        <div class="flex flex-col gap-2 text-xs text-muted-foreground">
+        <div class="flex flex-col gap-2 text-muted-foreground">
           <div class="flex justify-between py-1 border-b border-border/30">
             <span>User ID:</span>
-            <span class="font-mono text-foreground">{{ kernel.auth.userId || 'N/A' }}</span>
+            <span class="text-foreground">{{ kernel.auth.userId || 'N/A' }}</span>
           </div>
           <div class="flex justify-between py-1 border-b border-border/30">
             <span>Workspace ID:</span>
-            <span class="font-mono text-foreground">{{ kernel.auth.workspaceId || 'N/A' }}</span>
+            <span class="text-foreground">{{ kernel.auth.workspaceId || 'N/A' }}</span>
           </div>
           <div class="flex justify-between py-1">
             <span>Roles:</span>
-            <span class="font-mono text-foreground">{{ kernel.auth.roles.join(', ') }}</span>
+            <span class="text-foreground">{{ kernel.auth.roles.join(', ') }}</span>
           </div>
         </div>
       </div>
 
       <div class="rounded-xl border border-border bg-card p-5 shadow-xs">
         <div class="flex items-center justify-between pb-3">
-          <h3 class="text-sm font-semibold text-foreground">Scoped Store</h3>
+          <h3 class="text-sm text-foreground">Scoped Store</h3>
           <Badge variant="secondary" class="text-xs">
             Namespace: ${name}
           </Badge>
@@ -494,7 +494,7 @@ function handleNotify() {
         <div class="flex flex-col gap-4">
           <div class="flex items-center justify-between">
             <span class="text-xs text-muted-foreground">Counter value:</span>
-            <span class="text-xl font-bold font-mono">{{ store.counter }}</span>
+            <span class="text-xl font-bold ">{{ store.counter }}</span>
           </div>
           <Button size="sm" @click="store.increment">
             Increment Counter

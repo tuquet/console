@@ -1,13 +1,11 @@
 <script lang="ts" setup>
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
-
-import { ChevronRight } from '@lucide/vue';
+import type { HTMLAttributes } from "vue"
+import { ChevronRight } from "@lucide/vue"
+import { cn } from "cn"
 
 const props = defineProps<{
-  class?: HTMLAttributes['class'];
-}>();
+  class?: HTMLAttributes["class"]
+}>()
 </script>
 
 <template>
@@ -15,7 +13,7 @@ const props = defineProps<{
     data-slot="breadcrumb-separator"
     role="presentation"
     aria-hidden="true"
-    :class="cn('inline-flex items-center [&>svg]:size-3.5', props.class)"
+    :class="cn('[&>svg]:size-3.5', props.class)"
   >
     <slot>
       <ChevronRight />

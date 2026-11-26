@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import type { DropdownMenuTriggerProps } from 'reka-ui';
+import type { DropdownMenuTriggerProps } from "reka-ui"
+import { DropdownMenuTrigger, useForwardProps } from "reka-ui"
 
-import { DropdownMenuTrigger, useForwardProps } from 'reka-ui';
+const props = defineProps<DropdownMenuTriggerProps>()
 
-const props = defineProps<DropdownMenuTriggerProps>();
-
-const forwardedProps = useForwardProps(props);
+const forwardedProps = useForwardProps(props)
 </script>
 
 <template>
@@ -13,6 +12,6 @@ const forwardedProps = useForwardProps(props);
     data-slot="dropdown-menu-trigger"
     v-bind="forwardedProps"
   >
-    <slot></slot>
+    <slot />
   </DropdownMenuTrigger>
 </template>

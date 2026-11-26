@@ -1,11 +1,10 @@
 <script lang="ts" setup>
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
+import type { HTMLAttributes } from "vue"
+import { cn } from "cn"
 
 const props = defineProps<{
-  class?: HTMLAttributes['class'];
-}>();
+  class?: HTMLAttributes["class"]
+}>()
 </script>
 
 <template>
@@ -16,6 +15,6 @@ const props = defineProps<{
     aria-current="page"
     :class="cn('text-foreground font-normal', props.class)"
   >
-    <slot></slot>
+    <slot />
   </span>
 </template>

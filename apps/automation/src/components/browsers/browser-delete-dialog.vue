@@ -62,7 +62,7 @@ watch(open, (isOpen) => {
 
       <div
         v-if="hasRunning"
-        class="flex flex-col gap-2.5 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-500"
+        class="flex flex-col gap-2.5 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-amber-500"
       >
         <p>{{ $t('automation.browsers.delete_running_warn') }}</p>
         <label class="flex cursor-pointer items-center gap-2 font-medium">

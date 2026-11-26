@@ -114,9 +114,7 @@ function handleTabChange(
           <CheckCircle2 class="size-4 text-emerald-500" />
         </div>
         <div class="mt-2 text-2xl font-bold text-foreground">Active</div>
-        <div class="mt-1 text-xs text-muted-foreground">
-          Provider: Supabase Auth
-        </div>
+        <div class="mt-1 text-muted-foreground">Provider: Supabase Auth</div>
       </Card>
 
       <Card
@@ -135,7 +133,7 @@ function handleTabChange(
         <div class="mt-2 text-2xl font-bold text-foreground">
           Multi-Workspace
         </div>
-        <div class="mt-1 text-xs text-muted-foreground">
+        <div class="mt-1 text-muted-foreground">
           Current: {{ kernel.auth.username || 'Authenticated' }}
         </div>
       </Card>
@@ -156,7 +154,7 @@ function handleTabChange(
         <div class="mt-2 text-2xl font-bold text-foreground">
           {{ kernel.auth.roles.length || 1 }} Roles
         </div>
-        <div class="mt-1 text-xs text-muted-foreground">
+        <div class="mt-1 text-muted-foreground">
           Assigned: {{ kernel.auth.roles.join(', ') || 'superadmin' }}
         </div>
       </Card>
@@ -175,23 +173,18 @@ function handleTabChange(
           <Puzzle class="size-4 text-purple-500" />
         </div>
         <div class="mt-2 text-2xl font-bold text-foreground">Modular</div>
-        <div class="mt-1 text-xs text-muted-foreground">
-          Decoupled Remote Apps
-        </div>
+        <div class="mt-1 text-muted-foreground">Decoupled Remote Apps</div>
       </Card>
     </div>
 
     <!-- Active Tab Content Area -->
     <Card class="border-border bg-card p-6">
       <div v-if="activeTab === 'overview'" class="flex flex-col gap-4">
-        <h3 class="text-lg font-semibold text-foreground">
-          System Overview & Diagnostics
-        </h3>
+        <h3 class="text-lg text-foreground">System Overview & Diagnostics</h3>
         <p class="text-sm text-muted-foreground">
           Host Kernel contract version:
-          <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs"
-            >v1.0.0</code
-          >. Shared Vue, Pinia, and Router instances provided by Shell.
+          <code class="rounded bg-muted px-1.5 py-0.5">v1.0.0</code>. Shared
+          Vue, Pinia, and Router instances provided by Shell.
         </p>
         <div class="rounded-lg border border-border/60 bg-muted/30 p-4">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -205,7 +198,7 @@ function handleTabChange(
               <span class="text-xs text-muted-foreground"
                 >Current Workspace ID:</span
               >
-              <div class="font-mono text-xs text-foreground">
+              <div class="text-xs text-foreground">
                 {{ kernel.auth.workspaceId || 'None (Global Scope)' }}
               </div>
             </div>
@@ -215,7 +208,7 @@ function handleTabChange(
 
       <div v-else-if="activeTab === 'users'" class="flex flex-col gap-4">
         <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-foreground">User Management</h3>
+          <h3 class="text-lg text-foreground">User Management</h3>
           <Button
             size="sm"
             @click="notifyShell('info', 'Invite user modal placeholder')"
@@ -245,9 +238,7 @@ function handleTabChange(
       </div>
 
       <div v-else-if="activeTab === 'roles'" class="flex flex-col gap-4">
-        <h3 class="text-lg font-semibold text-foreground">
-          RBAC Roles & Permissions
-        </h3>
+        <h3 class="text-lg text-foreground">RBAC Roles & Permissions</h3>
         <p class="text-sm text-muted-foreground">
           Granular permission matrix enforced at both API and UI route guards.
         </p>
@@ -259,11 +250,9 @@ function handleTabChange(
           >
             <div class="flex items-center gap-2">
               <ShieldAlert class="size-4 text-primary" />
-              <span class="font-mono text-sm font-medium capitalize">{{
-                role
-              }}</span>
+              <span class="text-sm font-medium capitalize">{{ role }}</span>
             </div>
-            <p class="mt-1 text-xs text-muted-foreground">
+            <p class="mt-1 text-muted-foreground">
               {{
                 role === 'superadmin'
                   ? 'Unrestricted root access'
@@ -275,9 +264,7 @@ function handleTabChange(
       </div>
 
       <div v-else-if="activeTab === 'audit'" class="flex flex-col gap-4">
-        <h3 class="text-lg font-semibold text-foreground">
-          System Audit Trail
-        </h3>
+        <h3 class="text-lg text-foreground">System Audit Trail</h3>
         <p class="text-sm text-muted-foreground">
           Immutable event log of all administrative actions.
         </p>
@@ -290,9 +277,7 @@ function handleTabChange(
       </div>
 
       <div v-else-if="activeTab === 'plugins'" class="flex flex-col gap-4">
-        <h3 class="text-lg font-semibold text-foreground">
-          Installed Plugins & Micro-Apps
-        </h3>
+        <h3 class="text-lg text-foreground">Installed Plugins & Micro-Apps</h3>
         <p class="text-sm text-muted-foreground">
           Decoupled applications loaded dynamically into the Shell runtime.
         </p>
@@ -304,7 +289,7 @@ function handleTabChange(
               >
               <Badge variant="outline">Installed</Badge>
             </div>
-            <p class="mt-1 text-xs text-muted-foreground">
+            <p class="mt-1 text-muted-foreground">
               Automation mesh and browser control.
             </p>
           </div>
@@ -315,7 +300,7 @@ function handleTabChange(
                 Current
               </Badge>
             </div>
-            <p class="mt-1 text-xs text-muted-foreground">
+            <p class="mt-1 text-muted-foreground">
               System IAM and administration.
             </p>
           </div>

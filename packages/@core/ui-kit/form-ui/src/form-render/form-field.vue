@@ -557,7 +557,7 @@ onUnmounted(() => {
           <template #extra>
             <Button
               class="ml-0.5"
-              variant="icon"
+              variant="ghost"
               size="icon"
               @click.prevent="toggleCollapsed"
               v-if="shouldCollapsible"

@@ -7,24 +7,10 @@ import { useRouter } from 'vue-router';
 import { useKernel } from '@operon/kernel';
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
   Badge,
   Button,
   Card,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   Input,
-  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -46,6 +32,8 @@ import {
   Trash2,
 } from '@lucide/vue';
 
+import WorkspaceDeleteDialog from '../components/workspace-delete-dialog.vue';
+import WorkspaceFormDialog from '../components/workspace-form-dialog.vue';
 import { $t } from '../locales';
 import { useWorkspacesStore } from '../stores/workspaces';
 
@@ -59,25 +47,11 @@ const searchQuery = ref('');
 const planFilter = ref<string>('all');
 const statusFilter = ref<string>('all');
 
-// Create / Edit modal state
+// Dialog targets
 const formOpen = ref(false);
 const editingTarget = ref<null | WorkspaceRecord>(null);
-const formName = ref('');
-const formSlug = ref('');
-const formPlan = ref<string>('pro');
-const formStatus = ref<'active' | 'archived' | 'suspended'>('active');
-const isSlugTouched = ref(false);
-const formError = ref('');
-const isSubmitting = ref(false);
-
-// Delete confirm modal state
 const deleteOpen = ref(false);
 const deletingTarget = ref<null | WorkspaceRecord>(null);
-const confirmSlugInput = ref('');
-const deleteError = ref('');
-const isDeleting = ref(false);
-
-const AVAILABLE_PLANS = ['free', 'pro', 'enterprise'] as const;
 
 onMounted(() => {
   void workspacesStore.fetchWorkspaces();
@@ -101,116 +75,19 @@ const filteredWorkspaces = computed(() => {
   });
 });
 
-function toSlug(raw: string): string {
-  return raw
-    .toLowerCase()
-    .trim()
-    .replaceAll(/[^\w\s-]/g, '')
-    .replaceAll(/[\s_]+/g, '-')
-    .replaceAll(/-+/g, '-')
-    .replaceAll(/^-+|-+$/g, '');
-}
-
 function openCreateModal() {
   editingTarget.value = null;
-  formName.value = '';
-  formSlug.value = '';
-  formPlan.value = kernel.auth.hasCloudAuth ? 'pro' : 'local';
-  formStatus.value = 'active';
-  isSlugTouched.value = false;
-  formError.value = '';
   formOpen.value = true;
 }
 
 function openEditModal(t: WorkspaceRecord) {
   editingTarget.value = t;
-  formName.value = t.name;
-  formSlug.value = t.slug;
-  formPlan.value = t.plan || 'pro';
-  formStatus.value = t.status;
-  isSlugTouched.value = true;
-  formError.value = '';
   formOpen.value = true;
-}
-
-function handleNameInput(event: Event) {
-  const value = (event.target as HTMLInputElement).value;
-  formName.value = value;
-  formError.value = '';
-  if (!isSlugTouched.value) {
-    formSlug.value = toSlug(value);
-  }
-}
-
-function handleSlugInput(event: Event) {
-  isSlugTouched.value = true;
-  formError.value = '';
-  formSlug.value = toSlug((event.target as HTMLInputElement).value);
-}
-
-async function handleSaveForm() {
-  const trimmedName = formName.value.trim();
-  const normalizedSlug = toSlug(formSlug.value || trimmedName);
-  if (trimmedName.length < 2 || normalizedSlug.length < 2) {
-    formError.value = $t('workspaces.workspace_name_slug_required');
-    return;
-  }
-
-  try {
-    isSubmitting.value = true;
-    formError.value = '';
-    if (editingTarget.value) {
-      await workspacesStore.updateWorkspace(editingTarget.value.id, {
-        name: trimmedName,
-        plan: formPlan.value,
-        slug: normalizedSlug,
-        status: formStatus.value,
-      });
-      kernel.events.notify(
-        'success',
-        $t('workspaces.workspace_updated_success'),
-      );
-    } else {
-      await workspacesStore.createWorkspace({
-        name: trimmedName,
-        plan: formPlan.value,
-        slug: normalizedSlug,
-      });
-    }
-    formOpen.value = false;
-  } catch (error: any) {
-    formError.value =
-      error?.message || $t('workspaces.workspace_update_failed');
-  } finally {
-    isSubmitting.value = false;
-  }
 }
 
 function openDeleteModal(t: WorkspaceRecord) {
   deletingTarget.value = t;
-  confirmSlugInput.value = '';
-  deleteError.value = '';
   deleteOpen.value = true;
-}
-
-async function handleConfirmDelete() {
-  if (!deletingTarget.value) return;
-  if (confirmSlugInput.value.trim() !== deletingTarget.value.slug) {
-    deleteError.value = $t('workspaces.confirm_slug_mismatch');
-    return;
-  }
-
-  try {
-    isDeleting.value = true;
-    deleteError.value = '';
-    await workspacesStore.deleteWorkspace(deletingTarget.value.id);
-    deleteOpen.value = false;
-  } catch (error: any) {
-    deleteError.value =
-      error?.message || $t('workspaces.workspace_delete_failed');
-  } finally {
-    isDeleting.value = false;
-  }
 }
 
 async function copyWorkspaceId(id: string) {
@@ -240,7 +117,7 @@ function navigateToDetail(id: string) {
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-2">
           <Building2 class="size-5 text-primary" />
-          <h1 class="text-lg font-semibold tracking-tight text-foreground">
+          <h1 class="text-lg tracking-tight text-foreground">
             {{ $t('page.workspaces.title') }}
           </h1>
           <Badge variant="outline" class="text-[11px]">
@@ -287,7 +164,7 @@ function navigateToDetail(id: string) {
           </div>
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2">
-              <span class="text-sm font-semibold text-foreground">
+              <span class="text-sm text-foreground">
                 {{ workspacesStore.activeWorkspace.name }}
               </span>
               <Badge variant="secondary" class="text-[11px] capitalize">
@@ -300,9 +177,7 @@ function navigateToDetail(id: string) {
                 {{ $t('common.active') }}
               </Badge>
             </div>
-            <div
-              class="mt-0.5 flex items-center gap-2 font-mono text-xs text-muted-foreground"
-            >
+            <div class="mt-0.5 flex items-center gap-2 text-muted-foreground">
               <span>{{ workspacesStore.activeWorkspace.slug }}</span>
               <span>•</span>
               <span>{{ workspacesStore.activeWorkspace.id }}</span>
@@ -313,7 +188,7 @@ function navigateToDetail(id: string) {
         <Button
           variant="outline"
           size="sm"
-          class="gap-1.5 text-xs shadow-none"
+          class="gap-1.5 shadow-none"
           @click="copyWorkspaceId(workspacesStore.activeWorkspace.id)"
         >
           <Copy class="size-3.5" />
@@ -406,10 +281,10 @@ function navigateToDetail(id: string) {
         <div class="flex flex-col gap-2.5">
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0">
-              <h3 class="truncate text-sm font-semibold text-foreground">
+              <h3 class="truncate text-sm text-foreground">
                 {{ t.name }}
               </h3>
-              <p class="truncate font-mono text-xs text-muted-foreground">
+              <p class="truncate text-muted-foreground">
                 {{ t.slug }}
               </p>
             </div>
@@ -427,7 +302,7 @@ function navigateToDetail(id: string) {
             </div>
           </div>
 
-          <p class="truncate font-mono text-[11px] text-muted-foreground/80">
+          <p class="truncate text-[11px] text-muted-foreground/80">
             {{ t.id }}
           </p>
         </div>
@@ -439,7 +314,7 @@ function navigateToDetail(id: string) {
             v-if="t.id !== workspacesStore.activeWorkspaceId"
             variant="outline"
             size="sm"
-            class="h-8 text-xs shadow-none"
+            class="h-8 shadow-none"
             :disabled="t.status !== 'active'"
             @click="handleSwitchWorkspace(t.id)"
           >
@@ -447,7 +322,7 @@ function navigateToDetail(id: string) {
           </Button>
           <div
             v-else
-            class="flex items-center gap-1.5 text-xs font-medium text-emerald-500"
+            class="flex items-center gap-1.5 font-medium text-emerald-500"
           >
             <CheckCircle2 class="size-4" />
             <span>{{ $t('common.active') }}</span>
@@ -476,7 +351,7 @@ function navigateToDetail(id: string) {
             <Button
               variant="ghost"
               size="sm"
-              class="h-8 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
+              class="h-8 gap-1 px-2 text-muted-foreground hover:text-foreground"
               @click="navigateToDetail(t.id)"
             >
               <span>{{ $t('common.detail') }}</span>
@@ -487,151 +362,8 @@ function navigateToDetail(id: string) {
       </Card>
     </div>
 
-    <!-- Create / Edit Dialog -->
-    <Dialog v-model:open="formOpen">
-      <DialogContent class="sm:max-w-[440px]">
-        <DialogHeader>
-          <DialogTitle>
-            {{
-              editingTarget
-                ? $t('workspaces.edit_modal_title')
-                : $t('workspaces.create_modal_title')
-            }}
-          </DialogTitle>
-        </DialogHeader>
+    <WorkspaceFormDialog v-model:open="formOpen" :target="editingTarget" />
 
-        <div class="flex flex-col gap-3.5 py-2">
-          <div class="flex flex-col gap-1.5">
-            <Label>{{ $t('common.name') }}</Label>
-            <Input
-              :value="formName"
-              :placeholder="$t('workspaces.name_placeholder')"
-              @input="handleNameInput"
-            />
-          </div>
-
-          <div class="flex flex-col gap-1.5">
-            <Label>Slug</Label>
-            <Input
-              :value="formSlug"
-              :placeholder="$t('workspaces.slug_placeholder')"
-              class="font-mono text-xs"
-              @input="handleSlugInput"
-            />
-            <p class="text-[11px] text-muted-foreground">
-              {{ $t('workspaces.slug_hint') }}
-            </p>
-          </div>
-
-          <div v-if="kernel.auth.hasCloudAuth" class="flex flex-col gap-1.5">
-            <Label>{{ $t('workspaces.filter_plan') }}</Label>
-            <div class="grid grid-cols-3 gap-2">
-              <Button
-                v-for="item in AVAILABLE_PLANS"
-                :key="item"
-                type="button"
-                variant="outline"
-                class="h-8 capitalize shadow-none"
-                :class="
-                  formPlan === item
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : ''
-                "
-                @click="formPlan = item"
-              >
-                {{ item }}
-              </Button>
-            </div>
-          </div>
-
-          <div v-if="editingTarget" class="flex flex-col gap-1.5">
-            <Label>{{ $t('common.status') }}</Label>
-            <Select v-model="formStatus">
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">
-                  {{ $t('common.active') }}
-                </SelectItem>
-                <SelectItem value="archived">Archived</SelectItem>
-                <SelectItem value="suspended">
-                  {{ $t('common.suspended') }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <p
-            v-if="formError"
-            role="alert"
-            class="text-xs font-medium text-destructive"
-          >
-            {{ formError }}
-          </p>
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" size="sm" @click="formOpen = false">
-            {{ $t('common.cancel') }}
-          </Button>
-          <Button size="sm" :disabled="isSubmitting" @click="handleSaveForm">
-            {{
-              editingTarget
-                ? $t('common.save')
-                : $t('workspaces.create_submit_btn')
-            }}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-
-    <!-- Delete Confirmation AlertDialog -->
-    <AlertDialog v-model:open="deleteOpen">
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
-            {{ $t('workspaces.delete_modal_title') }}
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            {{ $t('workspaces.delete_modal_warning') }}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-
-        <div class="flex flex-col gap-2 py-2">
-          <Label class="text-xs">
-            {{ $t('workspaces.delete_confirm_prompt') }}
-            <code class="ml-1 rounded bg-muted px-1.5 py-0.5 font-mono">
-              {{ deletingTarget?.slug }}
-            </code>
-          </Label>
-          <Input
-            v-model="confirmSlugInput"
-            :placeholder="deletingTarget?.slug"
-            class="font-mono text-xs"
-          />
-          <p
-            v-if="deleteError"
-            role="alert"
-            class="text-xs font-medium text-destructive"
-          >
-            {{ deleteError }}
-          </p>
-        </div>
-
-        <AlertDialogFooter>
-          <AlertDialogCancel @click="deleteOpen = false">
-            {{ $t('common.cancel') }}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            :disabled="isDeleting"
-            @click.prevent="handleConfirmDelete"
-          >
-            {{ $t('workspaces.confirm_delete_btn') }}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <WorkspaceDeleteDialog v-model:open="deleteOpen" :target="deletingTarget" />
   </div>
 </template>

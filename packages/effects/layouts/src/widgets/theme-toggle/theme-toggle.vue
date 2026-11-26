@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import type { ThemeModeType } from '@operon/types';
 
+import { useAttrs } from 'vue';
+
 import { MoonStar, Sun, SunMoon } from '@operon/icons';
 import { $t } from '@operon/locales';
 import {
@@ -17,16 +19,20 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@operon-core/shadcn-ui';
+import { cn } from '@operon-core/shared/utils';
 
 import ThemeButton from './theme-button.vue';
 
 defineOptions({
   name: 'ThemeToggle',
+  inheritAttrs: false,
 });
 
 withDefaults(defineProps<{ shouldOnHover?: boolean }>(), {
   shouldOnHover: false,
 });
+
+const attrs = useAttrs();
 
 function handleChange(isDark: boolean | undefined) {
   updatePreferences({
@@ -55,7 +61,7 @@ const PRESETS = [
 ];
 </script>
 <template>
-  <div class="inline-flex empty:hidden">
+  <div :class="cn('inline-flex empty:hidden', attrs.class as string)">
     <ThemeButton
       v-if="!shouldOnHover"
       :model-value="isDark"

@@ -223,7 +223,7 @@ onMounted(() => {
           </p>
 
           <div class="rounded-lg bg-muted p-4 text-left">
-            <span class="font-semibold text-muted-foreground block mb-1">
+            <span class="text-muted-foreground block mb-1">
               {{ $t('authentication.desktopRequestingDevice') }}
             </span>
             <div class="flex items-center justify-between">
@@ -303,7 +303,7 @@ onMounted(() => {
         </div>
 
         <Alert class="mt-4">
-          <AlertTitle class="mb-0.5 font-semibold">
+          <AlertTitle class="mb-0.5">
             {{ $t('authentication.desktopSecurityNoteTitle') }}
           </AlertTitle>
           <AlertDescription>

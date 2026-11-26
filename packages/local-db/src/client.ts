@@ -12,6 +12,7 @@ import { migrate } from 'drizzle-orm/libsql/migrator';
 
 import * as fullSchema from './schema';
 import * as automationSchema from './schema/automation';
+import * as logsSchema from './schema/logs';
 import * as systemSchema from './schema/system';
 import * as workspacesSchema from './schema/workspaces';
 
@@ -38,6 +39,7 @@ export function getCanonicalSqlitePath(domain?: string): string {
 
 const DOMAIN_SCHEMAS: Record<string, Record<string, unknown>> = {
   automation: automationSchema,
+  logs: logsSchema,
   system: systemSchema,
   workspaces: workspacesSchema,
 };
@@ -68,7 +70,7 @@ function createDrizzleClient<TSchema extends Record<string, unknown>>(
 export function getDomainDb<
   TSchema extends Record<string, unknown> = typeof fullSchema,
 >(
-  domain: 'automation' | 'system' | 'workspaces' | string,
+  domain: 'automation' | 'logs' | 'system' | 'workspaces' | string,
   customSchema?: TSchema,
   customUrl?: string,
 ): OperonDb<TSchema> {

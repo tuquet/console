@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
+import type { HTMLAttributes } from "vue"
+import { cn } from "cn"
 
 const props = defineProps<{
-  class?: HTMLAttributes['class'];
-}>();
+  class?: HTMLAttributes["class"]
+}>()
 </script>
 
 <template>
   <div
-    :class="cn('flex flex-col items-center gap-1.5 text-center', props.class)"
+    data-slot="empty-header"
+    :class="cn(
+      'flex max-w-sm flex-col items-center gap-2 text-center',
+      props.class,
+    )"
   >
-    <slot></slot>
+    <slot />
   </div>
 </template>

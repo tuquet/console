@@ -56,7 +56,7 @@ async function copyCommand() {
           <div class="flex items-start gap-2.5">
             <WifiOff class="size-5 text-amber-500 shrink-0 mt-0.5" />
             <div>
-              <h4 class="text-sm font-semibold text-foreground">
+              <h4 class="text-sm text-foreground">
                 {{ $t('page.daemon.title') }}
               </h4>
               <p class="text-xs text-muted-foreground mt-1">
@@ -77,13 +77,13 @@ async function copyCommand() {
         <div
           class="mt-3 flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-background/80 px-2.5 py-1.5"
         >
-          <code class="text-[11px] font-mono text-foreground truncate">
+          <code class="text-[11px] text-foreground truncate">
             {{ installInfo.command }}
           </code>
           <Button
             size="sm"
             variant="ghost"
-            class="h-6 px-2 text-xs shrink-0"
+            class="h-6 px-2 shrink-0"
             @click="copyCommand"
           >
             <Copy class="size-3 mr-1" />

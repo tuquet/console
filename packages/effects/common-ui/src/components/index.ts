@@ -9,6 +9,7 @@ export * from './icon-picker';
 export * from './loading';
 export * from './page';
 export * from './resize';
+export * from './schema-sheet';
 export * from './tree';
 export * from '@operon-core/form-ui';
 export * from '@operon-core/popup-ui';

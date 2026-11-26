@@ -116,7 +116,7 @@ function applyPreset(card: (typeof cards.value)[number]) {
         "
       >
         <div class="flex items-center justify-between">
-          <span class="text-muted-foreground text-xs font-medium">
+          <span class="text-muted-foreground font-medium">
             {{ card.label }}
           </span>
           <component
@@ -132,10 +132,10 @@ function applyPreset(card: (typeof cards.value)[number]) {
           />
         </div>
         <div class="mt-2 flex items-baseline justify-between gap-2">
-          <span class="text-foreground font-mono text-2xl font-semibold">
+          <span class="text-foreground text-2xl">
             {{ card.value }}
           </span>
-          <span class="text-muted-foreground font-mono text-xs">
+          <span class="text-muted-foreground">
             {{ card.subtext }}
           </span>
         </div>

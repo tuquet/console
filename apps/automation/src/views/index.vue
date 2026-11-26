@@ -68,7 +68,7 @@ function handleNotify() {
       <div>
         <div class="flex items-center gap-2.5">
           <Layers class="size-6 text-primary" />
-          <h2 class="text-xl font-semibold tracking-tight">Automation</h2>
+          <h2 class="text-xl tracking-tight">Automation</h2>
           <Badge
             variant="outline"
             :class="
@@ -106,7 +106,7 @@ function handleNotify() {
         <div
           class="md:col-span-2 flex items-center justify-between rounded-xl border border-border/60 bg-card px-4 py-3"
         >
-          <div class="flex items-center gap-2.5 text-xs text-muted-foreground">
+          <div class="flex items-center gap-2.5 text-muted-foreground">
             <Loader2 class="size-4 animate-spin text-primary" />
             <span>Checking local Operon service...</span>
           </div>
@@ -139,16 +139,14 @@ function handleNotify() {
             <div class="flex items-start gap-3">
               <WifiOff class="size-6 text-amber-500 shrink-0 mt-0.5" />
               <div>
-                <h3 class="text-base font-semibold text-foreground">
-                  Operon Offline
-                </h3>
+                <h3 class="text-base text-foreground">Operon Offline</h3>
                 <p class="text-sm text-muted-foreground mt-1">
                   Operon is not running on your computer. Install and start
                   Operon to unlock automation controls.
                 </p>
                 <p
                   v-if="daemon.error.value"
-                  class="text-xs text-amber-500/90 mt-1.5 font-mono"
+                  class="text-xs text-amber-500/90 mt-1.5"
                 >
                   Last probe: {{ daemon.error.value }}
                 </p>
@@ -192,7 +190,7 @@ function handleNotify() {
           <div
             class="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-background/80 px-3 py-2"
           >
-            <code class="text-xs font-mono text-foreground truncate">{{
+            <code class="text-xs text-foreground truncate">{{
               installCommand
             }}</code>
             <Button
@@ -218,13 +216,13 @@ function handleNotify() {
         <div
           class="md:col-span-2 flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3"
         >
-          <div class="flex items-center gap-2.5 text-xs">
+          <div class="flex items-center gap-2.5">
             <CheckCircle2 class="size-4 text-emerald-500" />
             <span class="font-medium text-foreground"> Operon Connected </span>
             <Badge
               v-if="daemon.health.value?.version"
               variant="secondary"
-              class="text-[11px] font-mono"
+              class="text-[11px]"
             >
               v{{ daemon.health.value.version }}
             </Badge>
@@ -245,21 +243,19 @@ function handleNotify() {
         <!-- Kernel Context Card -->
         <div class="rounded-xl border border-border bg-card p-5 shadow-xs">
           <div class="flex items-center justify-between pb-3">
-            <h3 class="text-sm font-semibold text-foreground">
-              Kernel Context
-            </h3>
+            <h3 class="text-sm text-foreground">Kernel Context</h3>
             <CheckCircle2 class="size-4 text-emerald-500" />
           </div>
-          <div class="flex flex-col gap-2 text-xs text-muted-foreground">
+          <div class="flex flex-col gap-2 text-muted-foreground">
             <div class="flex justify-between py-1 border-b border-border/30">
               <span>User ID:</span>
-              <span class="font-mono text-foreground">{{
+              <span class="text-foreground">{{
                 kernel.auth.userId || 'N/A'
               }}</span>
             </div>
             <div class="flex justify-between py-1 border-b border-border/30">
               <span>Username:</span>
-              <span class="font-mono text-foreground">{{
+              <span class="text-foreground">{{
                 kernel.auth.username || 'operator'
               }}</span>
             </div>
@@ -274,7 +270,7 @@ function handleNotify() {
             </div>
             <div class="flex justify-between py-1">
               <span>Roles:</span>
-              <span class="font-mono text-foreground">{{
+              <span class="text-foreground">{{
                 kernel.auth.roles?.join(', ') || 'local_operator'
               }}</span>
             </div>
@@ -284,21 +280,15 @@ function handleNotify() {
         <!-- Local Pinia Store Card -->
         <div class="rounded-xl border border-border bg-card p-5 shadow-xs">
           <div class="flex items-center justify-between pb-3">
-            <h3 class="text-sm font-semibold text-foreground">
-              Local Micro-Store (Pinia)
-            </h3>
-            <Badge variant="secondary" class="font-mono">
-              automation:sample
-            </Badge>
+            <h3 class="text-sm text-foreground">Local Micro-Store (Pinia)</h3>
+            <Badge variant="secondary"> automation:sample </Badge>
           </div>
           <p class="text-xs text-muted-foreground mb-4">
             State is completely isolated and namespaced. When embedded, it joins
             the Shell Pinia tree without ID collisions.
           </p>
           <div class="flex items-center gap-3">
-            <div
-              class="text-2xl font-bold font-mono px-3 py-1 bg-muted rounded-md"
-            >
+            <div class="text-2xl font-bold px-3 py-1 bg-muted rounded-md">
               {{ sampleStore.counter }}
             </div>
             <Button size="sm" @click="sampleStore.increment">

@@ -180,7 +180,10 @@ async function handleSelect(item?: PaletteItem) {
   await nextTick();
 
   if (target.type === 'command') {
-    await target.handler?.();
+    const handler =
+      target.handler ??
+      getBuiltinCommands().find((cmd) => cmd.id === target.id)?.handler;
+    await handler?.();
   } else if (target.path) {
     if (isHttpUrl(target.path)) {
       window.open(target.path, '_blank');
@@ -318,7 +321,7 @@ useEventListener('mousemove', () => {
       <div v-else class="w-full space-y-1">
         <!-- Group Header -->
         <div
-          class="px-2 py-1 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
+          class="px-2 py-1 text-[11px] tracking-wider text-muted-foreground uppercase"
         >
           {{
             isRecentView
@@ -354,7 +357,7 @@ useEventListener('mousemove', () => {
               <div class="flex min-w-0 flex-1 items-center truncate text-sm">
                 <span
                   v-if="item.category"
-                  class="mr-1.5 shrink-0 text-xs font-medium text-muted-foreground"
+                  class="mr-1.5 shrink-0 font-medium text-muted-foreground"
                 >
                   {{ item.category }}:
                 </span>
@@ -368,7 +371,7 @@ useEventListener('mousemove', () => {
                   >
                     <span
                       v-if="part.highlight"
-                      class="font-semibold text-primary underline decoration-primary/50"
+                      class="text-primary underline decoration-primary/50"
                     >
                       {{ part.text }}
                     </span>
@@ -380,10 +383,7 @@ useEventListener('mousemove', () => {
 
             <!-- Right: Kbd Shortcut & Remove button -->
             <div class="flex shrink-0 items-center gap-1.5">
-              <Kbd
-                v-if="item.shortcut"
-                class="h-5 px-1.5 text-[10px] font-mono"
-              >
+              <Kbd v-if="item.shortcut" class="h-5 px-1.5 text-[10px]">
                 {{ item.shortcut }}
               </Kbd>
               <Button
@@ -405,25 +405,25 @@ useEventListener('mousemove', () => {
 
     <!-- VS Code Style Footer Bar -->
     <div
-      class="flex items-center justify-between border-t border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground select-none"
+      class="flex items-center justify-between border-t border-border bg-muted/40 px-3 py-2 text-muted-foreground select-none"
     >
       <div class="flex items-center gap-3">
         <span class="flex items-center gap-1">
-          <Kbd class="h-4.5 px-1 text-[10px] font-mono">↑</Kbd>
-          <Kbd class="h-4.5 px-1 text-[10px] font-mono">↓</Kbd>
+          <Kbd class="h-4.5 px-1 text-[10px]">↑</Kbd>
+          <Kbd class="h-4.5 px-1 text-[10px]">↓</Kbd>
           <span>{{ $t('ui.widgets.search.hintNavigate') }}</span>
         </span>
         <span class="flex items-center gap-1">
-          <Kbd class="h-4.5 px-1 text-[10px] font-mono">↵</Kbd>
+          <Kbd class="h-4.5 px-1 text-[10px]">↵</Kbd>
           <span>{{ $t('ui.widgets.search.hintSelect') }}</span>
         </span>
         <span class="flex items-center gap-1">
-          <Kbd class="h-4.5 px-1 text-[10px] font-mono">esc</Kbd>
+          <Kbd class="h-4.5 px-1 text-[10px]">esc</Kbd>
           <span>{{ $t('ui.widgets.search.hintClose') }}</span>
         </span>
       </div>
       <div class="flex items-center gap-1">
-        <Kbd class="h-4.5 px-1 font-mono text-[10px]">&gt;</Kbd>
+        <Kbd class="h-4.5 px-1 text-[10px]">&gt;</Kbd>
         <span>{{ $t('ui.widgets.search.hintTypeCommand') }}</span>
       </div>
     </div>

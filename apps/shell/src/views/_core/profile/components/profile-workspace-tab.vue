@@ -21,7 +21,7 @@ const router = useRouter();
 <template>
   <div class="max-w-2xl flex flex-col gap-5 pt-1">
     <div>
-      <h3 class="text-base font-semibold text-foreground">
+      <h3 class="text-base text-foreground">
         {{ $t('profile.activeWorkspaceTitle') }}
       </h3>
       <p class="text-muted-foreground">
@@ -35,7 +35,7 @@ const router = useRouter();
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <Building2 class="size-4.5 text-primary" />
-          <span class="font-semibold text-foreground">{{
+          <span class="text-foreground">{{
             $t('profile.currentWorkspace')
           }}</span>
         </div>

@@ -18,7 +18,7 @@ import {
 } from '@operon-core/shadcn-ui';
 import { cn } from '@operon-core/shared/utils';
 
-import { Check, Copy, Star } from '@lucide/vue';
+import { Check, Copy, Globe, Star } from '@lucide/vue';
 import { createColumnHelper } from '@tanstack/vue-table';
 
 import { assignees, labels, priorities, statuses } from '../data/data';
@@ -274,6 +274,36 @@ export function createTaskColumns(
               },
               person.label,
             ),
+          ],
+        );
+      },
+      filterFn: includesFilterFn,
+    }),
+
+    columnHelper.accessor((row) => row.browserId ?? '__unassigned__', {
+      id: 'browserId',
+      meta: { class: 'w-[168px]' },
+      header: ({ column }) =>
+        h(DataTableColumnHeader, { column, title: 'Browser' }),
+      cell: ({ row }) => {
+        const name = row.original.browserName || row.original.browserId;
+        if (!name) {
+          return h(
+            'span',
+            { class: 'text-muted-foreground/60 text-xs italic' },
+            'Unassigned',
+          );
+        }
+        return h(
+          Badge,
+          {
+            variant: 'outline',
+            class:
+              'max-w-[152px] gap-1.5 rounded-sm px-2 py-0.5 text-xs font-normal',
+          },
+          () => [
+            h(Globe, { class: 'text-primary size-3 shrink-0' }),
+            h('span', { class: 'truncate' }, name),
           ],
         );
       },

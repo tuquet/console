@@ -45,16 +45,13 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
     <!-- ── Operon ─────────────────────────────────────────────────────── -->
     <MenubarMenu>
       <MenubarTrigger
-        class="h-7 px-2.5 text-xs font-semibold cursor-default text-foreground data-[state=open]:text-foreground"
+        class="h-7 px-2.5 cursor-default text-foreground data-[state=open]:text-foreground"
       >
         {{ $t('page.app.menu_operon') }}
       </MenubarTrigger>
       <MenubarContent class="min-w-[200px]">
         <!-- Version badge — non-interactive label -->
-        <MenubarLabel
-          v-if="version"
-          class="font-normal text-xs text-muted-foreground"
-        >
+        <MenubarLabel v-if="version" class="font-normal text-muted-foreground">
           Version {{ version }}
         </MenubarLabel>
         <MenubarSeparator v-if="version" />
@@ -67,7 +64,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
     <!-- ── Workspace ────────────────────────────────────────────────────── -->
     <MenubarMenu>
       <MenubarTrigger
-        class="h-7 px-2.5 text-xs font-medium cursor-default text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
+        class="h-7 px-2.5 font-medium cursor-default text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
       >
         {{ $t('page.app.menu_workspace') }}
       </MenubarTrigger>
@@ -82,7 +79,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
     <!-- ── View ──────────────────────────────────────────────────────── -->
     <MenubarMenu>
       <MenubarTrigger
-        class="h-7 px-2.5 text-xs font-medium cursor-default text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
+        class="h-7 px-2.5 font-medium cursor-default text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
       >
         {{ $t('page.app.menu_view') }}
       </MenubarTrigger>
@@ -105,7 +102,7 @@ const mod = isWindowsOs() ? 'Ctrl' : '⌘';
     <!-- ── Window ────────────────────────────────────────────────────── -->
     <MenubarMenu>
       <MenubarTrigger
-        class="h-7 px-2.5 text-xs font-medium cursor-default text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
+        class="h-7 px-2.5 font-medium cursor-default text-muted-foreground hover:text-foreground data-[state=open]:text-foreground"
       >
         {{ $t('page.app.menu_window') }}
       </MenubarTrigger>

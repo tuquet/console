@@ -54,7 +54,7 @@ async function handleSavePassword() {
 <template>
   <div class="max-w-2xl flex flex-col gap-6 pt-1">
     <div>
-      <h3 class="text-base font-semibold text-foreground">
+      <h3 class="text-base text-foreground">
         {{ $t('profile.changePasswordTitle') }}
       </h3>
       <p class="text-muted-foreground">
@@ -114,7 +114,7 @@ async function handleSavePassword() {
     <!-- Security Overview Cards -->
     <Separator class="my-1" />
     <div class="flex flex-col gap-4">
-      <h4 class="font-semibold text-foreground">
+      <h4 class="text-foreground">
         {{ $t('profile.securityStatusTitle') }}
       </h4>
 

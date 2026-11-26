@@ -45,7 +45,7 @@ function getColumnLabel(
       <Button
         variant="outline"
         size="sm"
-        class="text-muted-foreground hover:text-foreground hidden h-8 text-xs font-normal lg:flex"
+        class="text-muted-foreground hover:text-foreground hidden h-8 font-normal lg:flex"
       >
         <Settings2 class="mr-1.5 size-3.5 opacity-70" />
         Columns

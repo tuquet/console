@@ -45,7 +45,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEsc));
       class="border-border bg-popover/95 text-popover-foreground fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 flex-wrap items-center gap-1.5 rounded-xl border px-3 py-2 shadow-xl backdrop-blur-md"
     >
       <div class="flex items-center gap-2 pr-1">
-        <Badge variant="default" class="font-mono">
+        <Badge variant="default">
           {{ selectedBrowsers.length }}
         </Badge>
         <span class="text-xs font-medium whitespace-nowrap">

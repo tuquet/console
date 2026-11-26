@@ -1,28 +1,23 @@
 <script setup lang="ts">
-import type { AlertDialogDescriptionProps } from 'reka-ui';
+import type { AlertDialogDescriptionProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import {
+  AlertDialogDescription,
+} from "reka-ui"
 
-import type { HTMLAttributes } from 'vue';
+const props = defineProps<AlertDialogDescriptionProps & { class?: HTMLAttributes["class"] }>()
 
-import { cn } from '@operon-core/shared/utils';
-
-import { reactiveOmit } from '@vueuse/core';
-import { AlertDialogDescription, useForwardProps } from 'reka-ui';
-
-const props = defineProps<
-  AlertDialogDescriptionProps & { class?: HTMLAttributes['class'] }
->();
-
-const delegatedProps = reactiveOmit(props, 'class');
-
-const forwardedProps = useForwardProps(delegatedProps);
+const delegatedProps = reactiveOmit(props, "class")
 </script>
 
 <template>
   <AlertDialogDescription
     data-slot="alert-dialog-description"
-    v-bind="forwardedProps"
+    v-bind="delegatedProps"
     :class="cn('text-muted-foreground text-sm', props.class)"
   >
-    <slot></slot>
+    <slot />
   </AlertDialogDescription>
 </template>

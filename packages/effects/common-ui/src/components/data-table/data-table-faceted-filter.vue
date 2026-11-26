@@ -60,7 +60,7 @@ function toggleOption(value: string) {
         size="sm"
         :class="
           cn(
-            'h-8 border-dashed text-xs font-normal transition-colors',
+            'h-8 border-dashed font-normal transition-colors',
             selectedValues.size > 0
               ? 'border-primary/40 bg-primary/5 text-foreground font-medium'
               : 'border-border/80 text-muted-foreground hover:text-foreground',
@@ -73,7 +73,7 @@ function toggleOption(value: string) {
           <Separator orientation="vertical" class="mx-2 h-3.5" />
           <Badge
             variant="secondary"
-            class="rounded-sm px-1 font-mono text-[11px] font-normal lg:hidden"
+            class="rounded-sm px-1 text-[11px] font-normal lg:hidden"
           >
             {{ selectedValues.size }}
           </Badge>
@@ -81,7 +81,7 @@ function toggleOption(value: string) {
             <Badge
               v-if="selectedValues.size > 2"
               variant="secondary"
-              class="rounded-sm px-1 font-mono text-[11px] font-normal"
+              class="rounded-sm px-1 text-[11px] font-normal"
             >
               {{ selectedValues.size }} selected
             </Badge>
@@ -134,7 +134,7 @@ function toggleOption(value: string) {
               <span>{{ option.label }}</span>
               <span
                 v-if="facets?.get(option.value)"
-                class="text-muted-foreground ml-auto flex size-4 items-center justify-center font-mono text-xs"
+                class="text-muted-foreground ml-auto flex size-4 items-center justify-center"
               >
                 {{ facets.get(option.value) }}
               </span>

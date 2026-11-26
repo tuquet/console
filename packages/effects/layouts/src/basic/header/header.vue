@@ -210,7 +210,7 @@ onMounted(() => {
     @confirm="handleSubmitLogout"
   />
 
-  <div class="flex h-full min-w-0 shrink-0 items-center gap-3">
+  <div class="flex h-full min-w-0 shrink items-center gap-1.5 sm:gap-3">
     <template v-for="slot in leftSlots" :key="slot.name">
       <div
         v-if="slot.name === 'breadcrumb'"
@@ -235,13 +235,14 @@ onMounted(() => {
   </div>
 
   <div
+    v-if="$slots.menu"
     :class="`menu-align-${preferences.header.menuAlign}`"
     class="flex h-full min-w-0 flex-1 items-center"
   >
     <slot name="menu"></slot>
   </div>
-  <div class="flex-1 h-full min-w-8"></div>
-  <div class="flex h-full min-w-0 shrink-0 items-center gap-1">
+  <div class="h-full min-w-1 flex-1 sm:min-w-4"></div>
+  <div class="flex h-full shrink-0 items-center gap-0.5 sm:gap-1">
     <template v-for="slot in rightSlots" :key="slot.name">
       <div
         v-if="slot.name === 'breadcrumb'"

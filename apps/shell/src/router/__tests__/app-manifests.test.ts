@@ -1,6 +1,7 @@
 import { createMemoryHistory, createRouter } from 'vue-router';
 
 import { automationManifest } from '@operon/automation';
+import { logsManifest } from '@operon/logs';
 import { systemManifest } from '@operon/system';
 import { workspacesManifest } from '@operon/workspaces';
 
@@ -53,8 +54,18 @@ describe('business application route integration', () => {
     const browsers = routes.find(
       (route) => route.name === 'AutomationBrowsers',
     );
+    const drivers = routes.find((route) => route.name === 'AutomationDrivers');
     expect(overview?.path).toBe('overview');
     expect(browsers?.path).toBe('browsers');
     expect(browsers?.component).not.toBe(overview?.component);
+    expect(drivers?.path).toBe('drivers');
+    expect(drivers?.component).not.toBe(browsers?.component);
+  });
+
+  it('resolves the local CI logs screen', () => {
+    const routes = logsManifest.routes(t);
+    const localCi = routes.find((route) => route.name === 'LogsLocalCi');
+    expect(logsManifest.defaultPath).toBe('local-ci');
+    expect(localCi?.path).toBe('local-ci');
   });
 });

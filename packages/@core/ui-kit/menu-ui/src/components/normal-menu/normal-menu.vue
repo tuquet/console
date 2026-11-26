@@ -131,7 +131,7 @@ function menuIcon(menu: MenuRecordRaw) {
 
 .operon-normal-menu__item.is-active .operon-normal-menu__name,
 .operon-normal-menu__item.is-active .operon-normal-menu__icon {
-  @apply text-primary-foreground font-semibold;
+  @apply text-primary-foreground;
 }
 
 .operon-normal-menu__item:not(.is-active):hover {

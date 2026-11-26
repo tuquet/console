@@ -1,47 +1,33 @@
 <script setup lang="ts">
-import type { PaginationPrevProps } from 'reka-ui';
+import type { PaginationPrevProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import type { ButtonVariants } from '@operon-core/shadcn-ui/ui/button'
+import { ChevronLeftIcon } from "@lucide/vue"
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import { PaginationPrev, useForwardProps } from "reka-ui"
+import { buttonVariants } from '@operon-core/shadcn-ui/ui/button'
 
-import type { HTMLAttributes } from 'vue';
+const props = withDefaults(defineProps<PaginationPrevProps & {
+  size?: ButtonVariants["size"]
+  class?: HTMLAttributes["class"]
+}>(), {
+  size: "default",
+})
 
-import type { ButtonVariants } from '../button';
-
-import { cn } from '@operon-core/shared/utils';
-
-import { ChevronLeft } from '@lucide/vue';
-import { reactiveOmit } from '@vueuse/core';
-import { PaginationPrev, useForwardProps } from 'reka-ui';
-
-import { buttonVariants } from '../button';
-
-const props = withDefaults(
-  defineProps<
-    PaginationPrevProps & {
-      class?: HTMLAttributes['class'];
-      size?: ButtonVariants['size'];
-    }
-  >(),
-  {
-    size: 'icon',
-  },
-);
-
-const delegatedProps = reactiveOmit(props, 'class', 'size');
-const forwarded = useForwardProps(delegatedProps);
+const delegatedProps = reactiveOmit(props, "class", "size")
+const forwarded = useForwardProps(delegatedProps)
 </script>
 
 <template>
   <PaginationPrev
     data-slot="pagination-previous"
-    :class="
-      cn(
-        !props.asChild && [buttonVariants({ variant: 'outline', size }), 'p-0'],
-        props.class,
-      )
-    "
+    :class="cn(buttonVariants({ variant: 'ghost', size }), 'gap-1 px-2.5 sm:pr-2.5', props.class)"
     v-bind="forwarded"
   >
     <slot>
-      <ChevronLeft class="size-4" />
+      <ChevronLeftIcon />
+      <span class="hidden sm:block">Previous</span>
     </slot>
   </PaginationPrev>
 </template>

@@ -21,7 +21,7 @@ import {
   Kbd,
 } from '@operon-core/shadcn-ui';
 
-import { Laptop, Search, Shield, Wifi, X } from '@lucide/vue';
+import { Cloud, HardDrive, Laptop, Search, Shield, Wifi, X } from '@lucide/vue';
 
 import { $t } from '../../locales';
 
@@ -47,6 +47,19 @@ const searchQuery = computed(
 const statusOptions = computed(() => [
   { label: $t('automation.browsers.status_online'), value: 'online' },
   { label: $t('automation.browsers.status_offline'), value: 'offline' },
+]);
+
+const sourceOptions = computed(() => [
+  {
+    icon: HardDrive,
+    label: $t('automation.browsers.source_local'),
+    value: 'local',
+  },
+  {
+    icon: Cloud,
+    label: $t('automation.browsers.source_cloud'),
+    value: 'cloud',
+  },
 ]);
 
 const proxyOptions = computed(() => [
@@ -130,6 +143,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleGlobalSlash));
         :column="table.getColumn('status')"
         :title="$t('automation.browsers.filter_status')"
         :options="statusOptions"
+      />
+      <DataTableFacetedFilter
+        v-if="table.getColumn('source')"
+        :column="table.getColumn('source')"
+        :title="$t('automation.browsers.filter_source')"
+        :options="sourceOptions"
       />
       <DataTableFacetedFilter
         v-if="table.getColumn('proxy')"

@@ -1,65 +1,99 @@
 <script lang="ts" setup>
 import type { BrowserProfileRecord } from '../api/browsers';
 
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { routeLocationKey } from 'vue-router';
 
 import { DataTable } from '@operon/common-ui';
 import { useDaemonHeartbeat, useKernel } from '@operon/kernel';
 
 import {
+  Badge,
   Button,
   Card,
   Empty,
-  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
   Skeleton,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
 } from '@operon-core/shadcn-ui';
 
-import {
-  Cpu,
-  FileSpreadsheet,
-  Globe,
-  Plus,
-  RefreshCw,
-  SearchX,
-  Sparkles,
-  WifiOff,
-} from '@lucide/vue';
+import { Cpu, Globe, Radio, SearchX, Sparkles, WifiOff } from '@lucide/vue';
 
 import BrowserDeleteDialog from '../components/browsers/browser-delete-dialog.vue';
 import BrowserDetailSheet from '../components/browsers/browser-detail-sheet.vue';
-import BrowserDriversDialog from '../components/browsers/browser-drivers-dialog.vue';
-import BrowserFormDialog from '../components/browsers/browser-form-dialog.vue';
+import BrowserFormSheet from '../components/browsers/browser-form-sheet.vue';
 import BrowserImportCsvDialog from '../components/browsers/browser-import-csv-dialog.vue';
 import BrowsersTableBulkBar from '../components/browsers/browsers-table-bulk-bar.vue';
 import BrowsersTableMetrics from '../components/browsers/browsers-table-metrics.vue';
 import BrowsersTableToolbar from '../components/browsers/browsers-table-toolbar.vue';
 import { createBrowserColumns } from '../components/browsers/columns';
+import CommandCenterHud from '../components/browsers/command-center-hud.vue';
+import SseMissionPanel from '../components/browsers/sse-mission-panel.vue';
+import DriversPanel from '../components/drivers/drivers-panel.vue';
 import { $t } from '../locales';
+import { useBrowserDriversStore } from '../stores/browser-drivers';
 import { useBrowsersStore } from '../stores/browsers';
 
 defineOptions({ name: 'AutomationBrowsersView' });
 
+type CenterPanel = 'drivers' | 'live' | 'profiles';
+
 const kernel = useKernel();
 const store = useBrowsersStore();
+const driversStore = useBrowserDriversStore();
 const daemon = useDaemonHeartbeat({ intervalMs: 5000 });
+const maybeRoute = inject(routeLocationKey, null);
+
+function resolveInitialPanel(): CenterPanel {
+  const queryPanel =
+    (typeof maybeRoute?.query?.panel === 'string'
+      ? maybeRoute.query.panel
+      : new URLSearchParams(window.location.search).get('panel')) || '';
+  if (queryPanel === 'drivers' || queryPanel === 'live') {
+    return queryPanel;
+  }
+  return 'profiles';
+}
+
+const activePanel = ref<CenterPanel>(resolveInitialPanel());
+const showTelemetryRail = ref(true);
 
 const formOpen = ref(false);
 const formTarget = ref<BrowserProfileRecord | null>(null);
 const detailOpen = ref(false);
 const importOpen = ref(false);
-const driversOpen = ref(false);
 const deleteOpen = ref(false);
 const deleteTargets = ref<BrowserProfileRecord[]>([]);
 const deleteLoading = ref(false);
 let clearSelectionFn: (() => void) | null = null;
 
+const runningProfiles = computed(() =>
+  store.items.filter((item) => item.isOnline),
+);
+
+const installedDriverCount = computed(
+  () => driversStore.drivers.filter((d) => d.installed).length,
+);
+
+const activeDownloadPercent = computed<null | number>(() => {
+  for (const state of Object.values(driversStore.driverProgress)) {
+    if (state.stage === 'downloading' || state.stage === 'extracting') {
+      return state.percent;
+    }
+  }
+  return null;
+});
+
 onMounted(() => {
   store.subscribeEvents();
   if (daemon.isHealthy.value) {
     void store.fetchBrowsers();
+    void driversStore.fetchDrivers().catch(() => {});
   }
 });
 
@@ -71,7 +105,18 @@ watch(
   () => daemon.isHealthy.value,
   (healthy) => {
     if (healthy) {
+      store.subscribeEvents();
       void store.fetchBrowsers();
+      void driversStore.fetchDrivers().catch(() => {});
+    }
+  },
+);
+
+watch(
+  () => maybeRoute?.query?.panel,
+  (panel) => {
+    if (panel === 'drivers' || panel === 'live' || panel === 'profiles') {
+      activePanel.value = panel;
     }
   },
 );
@@ -93,6 +138,13 @@ async function openInspectSheet(profile: BrowserProfileRecord) {
     await store.inspectBrowser(profile.id);
   } catch {
     // retain table snapshot on detail fetch error
+  }
+}
+
+async function openInspectById(id: string) {
+  const existing = store.items.find((b) => b.id === id);
+  if (existing) {
+    await openInspectSheet(existing);
   }
 }
 
@@ -154,76 +206,65 @@ function handleFormSaved(mode: 'create' | 'restart' | 'update', name: string) {
   kernel.events.notify('success', $t(key, { name }));
 }
 
-async function handleToggleRun(profile: BrowserProfileRecord) {
+async function runWithToast(
+  action: () => Promise<unknown>,
+  fallbackError = $t('automation.overview.browser_action_failed'),
+) {
   try {
-    if (profile.isOnline) {
-      await store.stopProfile(profile.id);
-      kernel.events.notify(
-        'success',
-        $t('automation.overview.browser_stopped_profile', {
-          name: profile.name,
-        }),
-      );
-    } else {
-      await store.launchProfile(profile.id);
-      kernel.events.notify(
-        'success',
-        $t('automation.overview.browser_started_profile', {
-          name: profile.name,
-        }),
-      );
+    const successMsg = await action();
+    if (typeof successMsg === 'string' && successMsg) {
+      kernel.events.notify('success', successMsg);
     }
   } catch (error: any) {
-    kernel.events.notify(
-      'error',
-      error?.message || $t('automation.overview.browser_action_failed'),
-    );
+    kernel.events.notify('error', error?.message || fallbackError);
   }
 }
 
-async function handleSetDefault(profile: BrowserProfileRecord) {
-  try {
-    await store.makeDefaultProfile(profile.id);
-    kernel.events.notify(
-      'success',
-      $t('automation.browsers.default_set_success', { name: profile.name }),
-    );
-  } catch (error: any) {
-    kernel.events.notify(
-      'error',
-      error?.message || $t('automation.overview.browser_action_failed'),
-    );
-  }
+async function handleToggleRun(profile: BrowserProfileRecord) {
+  await runWithToast(async () => {
+    if (profile.isOnline) {
+      await store.stopProfile(profile.id);
+      return $t('automation.overview.browser_stopped_profile', {
+        name: profile.name,
+      });
+    }
+    await store.launchProfile(profile.id);
+    return $t('automation.overview.browser_started_profile', {
+      name: profile.name,
+    });
+  });
+}
+
+async function handleKillAll() {
+  await runWithToast(async () => {
+    const res = await store.killAllSessions();
+    return res.message || $t('automation.browsers.cmd_stop_all_done');
+  });
 }
 
 async function handleDuplicate(profile: BrowserProfileRecord) {
-  try {
+  await runWithToast(async () => {
     const cloned = await store.cloneProfile(profile.id);
-    kernel.events.notify(
-      'success',
-      $t('automation.browsers.cloned_success', { name: cloned.name }),
-    );
-  } catch (error: any) {
-    kernel.events.notify(
-      'error',
-      error?.message || $t('automation.overview.browser_action_failed'),
-    );
-  }
+    return $t('automation.browsers.cloned_success', { name: cloned.name });
+  });
+}
+
+async function handleSetDefault(profile: BrowserProfileRecord) {
+  await runWithToast(async () => {
+    await store.makeDefaultProfile(profile.id);
+    return $t('automation.browsers.default_set_success', {
+      name: profile.name,
+    });
+  });
 }
 
 async function handleUnbind(profile: BrowserProfileRecord) {
-  try {
+  await runWithToast(async () => {
     await store.unbindProfile(profile.id);
-    kernel.events.notify(
-      'success',
-      $t('automation.overview.browser_unbind_success', { name: profile.name }),
-    );
-  } catch (error: any) {
-    kernel.events.notify(
-      'error',
-      error?.message || $t('automation.overview.browser_unbind_failed'),
-    );
-  }
+    return $t('automation.overview.browser_unbind_success', {
+      name: profile.name,
+    });
+  });
 }
 
 async function handleProbeRow(profile: BrowserProfileRecord) {
@@ -234,11 +275,11 @@ async function handleProbeRow(profile: BrowserProfileRecord) {
       res.alive ? 'success' : 'error',
       res.alive
         ? $t('automation.browsers.proxy_alive_msg', {
-            ip: res.egressIp || res.protocol,
+            ip: res.egressIp || 'unknown',
             rtt: res.rttMs,
           })
         : $t('automation.browsers.proxy_dead_msg', {
-            error: res.error || 'failed',
+            error: res.error || 'timeout',
           }),
     );
   } catch (error: any) {
@@ -250,10 +291,11 @@ async function handleProbeRow(profile: BrowserProfileRecord) {
 }
 
 async function handleBatchLaunch(rows: BrowserProfileRecord[]) {
+  if (rows.length === 0) return;
   const { started, total } = await store.batchLaunchSelected(rows);
   if (total === 0) {
     kernel.events.notify(
-      'info',
+      'warning',
       $t('automation.overview.browser_batch_all_running'),
     );
     return;
@@ -268,10 +310,11 @@ async function handleBatchLaunch(rows: BrowserProfileRecord[]) {
 }
 
 async function handleBatchStop(rows: BrowserProfileRecord[]) {
+  if (rows.length === 0) return;
   const { stopped, total } = await store.batchStopSelected(rows);
   if (total === 0) {
     kernel.events.notify(
-      'info',
+      'warning',
       $t('automation.overview.browser_batch_none_running'),
     );
     return;
@@ -286,14 +329,20 @@ async function handleBatchStop(rows: BrowserProfileRecord[]) {
 }
 
 async function handleAutoDetect() {
-  try {
-    await store.autoDetect();
-  } catch (error: any) {
-    kernel.events.notify(
-      'error',
-      error?.message || $t('automation.overview.browser_action_failed'),
-    );
+  await runWithToast(() => store.autoDetect());
+}
+
+function handleRefreshActive() {
+  if (activePanel.value === 'drivers') {
+    void driversStore.fetchDrivers();
+    return;
   }
+  void store.fetchBrowsers();
+}
+
+function reconnectSse() {
+  store.unsubscribeEvents();
+  store.subscribeEvents();
 }
 
 const columns = createBrowserColumns(
@@ -315,64 +364,26 @@ const columns = createBrowserColumns(
 </script>
 
 <template>
-  <div class="flex h-full min-h-0 flex-col gap-3.5 overflow-hidden p-4 sm:p-5">
-    <!-- Top Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div class="flex flex-wrap items-center gap-2">
-        <Globe class="text-primary size-4" />
-        <h2 class="text-base font-semibold tracking-tight">
-          {{ $t('automation.browsers.title') }}
-        </h2>
-      </div>
-
-      <div class="flex flex-wrap items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          class="h-8 gap-1.5 shadow-none"
-          :disabled="!daemon.isHealthy.value"
-          @click="driversOpen = true"
-        >
-          <Cpu class="size-3.5" />
-          <span>{{ $t('automation.browsers.drivers_btn') }}</span>
-        </Button>
-
-        <Button
-          variant="outline"
-          size="sm"
-          class="h-8 gap-1.5 shadow-none"
-          :disabled="!daemon.isHealthy.value || store.loading"
-          @click="store.fetchBrowsers()"
-        >
-          <RefreshCw
-            class="size-3.5"
-            :class="{ 'animate-spin': store.loading }"
-          />
-          <span>{{ $t('common.refresh') }}</span>
-        </Button>
-
-        <Button
-          variant="outline"
-          size="sm"
-          class="h-8 gap-1.5 shadow-none"
-          :disabled="!daemon.isHealthy.value"
-          @click="importOpen = true"
-        >
-          <FileSpreadsheet class="size-3.5" />
-          <span>{{ $t('automation.browsers.import_csv') }}</span>
-        </Button>
-
-        <Button
-          size="sm"
-          class="h-8 gap-1.5"
-          :disabled="!daemon.isHealthy.value"
-          @click="openCreateModal"
-        >
-          <Plus class="size-3.5" />
-          <span>{{ $t('automation.browsers.new_profile') }}</span>
-        </Button>
-      </div>
-    </div>
+  <div
+    class="flex h-full min-h-0 flex-col gap-3 overflow-hidden p-3 sm:gap-3.5 sm:p-5"
+  >
+    <CommandCenterHud
+      :active-download-percent="activeDownloadPercent"
+      :active-driver-version="driversStore.activeDriverVersion"
+      :daemon-healthy="daemon.isHealthy.value"
+      :killing-all="store.killingAll"
+      :loading="store.loading || driversStore.driversLoading"
+      :running-count="store.stats.running"
+      :show-telemetry-rail="showTelemetryRail"
+      :sse-status="store.sseStatus"
+      @import-csv="importOpen = true"
+      @kill-all="handleKillAll"
+      @new-profile="openCreateModal"
+      @open-drivers="activePanel = 'drivers'"
+      @reconnect-sse="reconnectSse"
+      @refresh="handleRefreshActive"
+      @toggle-telemetry-rail="showTelemetryRail = !showTelemetryRail"
+    />
 
     <!-- Loading Skeleton on Initial Heartbeat -->
     <div v-if="daemon.isInitialChecking.value" class="flex flex-col gap-4">
@@ -395,7 +406,7 @@ const columns = createBrowserColumns(
       <div class="flex items-start gap-3">
         <WifiOff class="mt-0.5 size-6 shrink-0 text-amber-500" />
         <div>
-          <h3 class="text-foreground text-base font-semibold">
+          <h3 class="text-foreground text-base">
             {{ $t('automation.browsers.offline_title') }}
           </h3>
           <p class="text-muted-foreground mt-1 text-sm">
@@ -408,87 +419,161 @@ const columns = createBrowserColumns(
       </Button>
     </Card>
 
-    <DataTable
-      v-else
-      class="min-h-0 flex-1"
-      :columns="columns"
-      :data="store.items"
-      :loading="store.loading"
-      row-key="id"
-      enable-row-selection
-      interactive-rows
-      @row-click="openInspectSheet"
-    >
-      <template #header="{ table }">
-        <BrowsersTableMetrics :table="table" :stats="store.stats" />
-      </template>
-
-      <template
-        #toolbar="{ table, density, setDensity, isFiltered, resetFilters }"
+    <div v-else class="flex min-h-0 flex-1 gap-4 overflow-hidden">
+      <Tabs
+        v-model="activePanel"
+        :unmount-on-hide="false"
+        class="flex min-h-0 min-w-0 flex-1 flex-col gap-3"
       >
-        <BrowsersTableToolbar
-          :table="table"
-          :density="density"
-          :is-filtered="isFiltered"
-          @update:density="setDensity"
-          @reset="resetFilters"
-        />
-      </template>
+        <TabsList
+          class="grid w-full grid-cols-3 sm:w-fit sm:grid-cols-none sm:inline-flex"
+        >
+          <TabsTrigger value="profiles" class="text-ui-label gap-1.5">
+            <Globe class="size-3.5" />
+            <span>{{ $t('automation.browsers.cmd_tab_fleet') }}</span>
+            <Badge variant="secondary">{{ store.stats.total }}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="drivers" class="text-ui-label gap-1.5">
+            <Cpu class="size-3.5" />
+            <span>{{ $t('automation.browsers.drivers_btn') }}</span>
+            <Badge variant="secondary">{{ installedDriverCount }}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="live" class="text-ui-label gap-1.5 xl:hidden">
+            <Radio class="size-3.5" />
+            <span>{{ $t('automation.browsers.cmd_tab_live') }}</span>
+            <Badge variant="secondary">{{ store.liveEvents.length }}</Badge>
+          </TabsTrigger>
+        </TabsList>
 
-      <template #empty="{ resetFilters }">
-        <Empty class="min-h-[240px]">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <SearchX
-                v-if="store.items.length > 0"
-                class="text-muted-foreground size-5"
-              />
-              <Globe v-else class="text-muted-foreground size-5" />
-            </EmptyMedia>
-            <EmptyTitle>
-              {{ $t('automation.browsers.empty_title') }}
-            </EmptyTitle>
-            <EmptyDescription>
-              {{ $t('automation.browsers.empty_desc') }}
-            </EmptyDescription>
-          </EmptyHeader>
-          <div class="mt-4 flex flex-wrap justify-center gap-2">
-            <Button
-              v-if="store.items.length > 0"
-              size="sm"
-              variant="outline"
-              @click="resetFilters"
+        <TabsContent
+          value="profiles"
+          class="mt-0 flex min-h-0 flex-1 flex-col overflow-hidden"
+        >
+          <DataTable
+            class="min-h-0 flex-1"
+            :columns="columns"
+            :data="store.items"
+            :loading="store.loading"
+            row-key="id"
+            enable-row-selection
+            interactive-rows
+            @row-click="openInspectSheet"
+          >
+            <template #header="{ table }">
+              <BrowsersTableMetrics :table="table" :stats="store.stats" />
+            </template>
+
+            <template
+              #toolbar="{
+                table,
+                density,
+                setDensity,
+                isFiltered,
+                resetFilters,
+              }"
             >
-              Reset
-            </Button>
-            <Button size="sm" @click="openCreateModal">
-              <Plus class="mr-1.5 size-3.5" />
-              <span>{{ $t('automation.browsers.new_profile') }}</span>
-            </Button>
-            <Button size="sm" variant="outline" @click="importOpen = true">
-              <FileSpreadsheet class="mr-1.5 size-3.5" />
-              <span>{{ $t('automation.browsers.import_csv') }}</span>
-            </Button>
-            <Button size="sm" variant="outline" @click="handleAutoDetect">
-              <Sparkles class="mr-1.5 size-3.5" />
-              <span>{{ $t('automation.browsers.auto_detect') }}</span>
-            </Button>
-          </div>
-        </Empty>
-      </template>
+              <BrowsersTableToolbar
+                :table="table"
+                :density="density"
+                :is-filtered="isFiltered"
+                @update:density="setDensity"
+                @reset="resetFilters"
+              />
+            </template>
 
-      <template #footer="{ selectedRows, clearSelection }">
-        <BrowsersTableBulkBar
-          :selected-browsers="selectedRows"
-          @batch-launch="handleBatchLaunch(selectedRows)"
-          @batch-stop="handleBatchStop(selectedRows)"
-          @batch-delete="openBatchDelete(selectedRows, clearSelection)"
-          @clear="clearSelection"
+            <template #empty="{ resetFilters }">
+              <Empty class="min-h-[200px]">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <SearchX
+                      v-if="store.items.length > 0"
+                      class="text-muted-foreground size-5"
+                    />
+                    <Globe v-else class="text-muted-foreground size-5" />
+                  </EmptyMedia>
+                  <EmptyTitle>
+                    {{ $t('automation.browsers.empty_title') }}
+                  </EmptyTitle>
+                </EmptyHeader>
+                <div class="mt-3 flex justify-center">
+                  <Button
+                    v-if="store.items.length > 0"
+                    size="sm"
+                    variant="outline"
+                    @click="resetFilters"
+                  >
+                    {{ $t('common.reset') }}
+                  </Button>
+                  <Button
+                    v-else
+                    size="sm"
+                    variant="outline"
+                    @click="handleAutoDetect"
+                  >
+                    <Sparkles class="mr-1.5 size-3.5" />
+                    <span>{{ $t('automation.browsers.auto_detect') }}</span>
+                  </Button>
+                </div>
+              </Empty>
+            </template>
+
+            <template #footer="{ selectedRows, clearSelection }">
+              <BrowsersTableBulkBar
+                :selected-browsers="selectedRows"
+                @batch-launch="handleBatchLaunch(selectedRows)"
+                @batch-stop="handleBatchStop(selectedRows)"
+                @batch-delete="openBatchDelete(selectedRows, clearSelection)"
+                @clear="clearSelection"
+              />
+            </template>
+          </DataTable>
+        </TabsContent>
+
+        <TabsContent
+          value="drivers"
+          class="mt-0 flex min-h-0 flex-1 flex-col overflow-hidden"
+        >
+          <DriversPanel embedded />
+        </TabsContent>
+
+        <TabsContent
+          value="live"
+          class="mt-0 flex min-h-0 flex-1 flex-col overflow-hidden xl:hidden"
+        >
+          <SseMissionPanel
+            :events="store.liveEvents"
+            :is-mutating="(id) => store.isMutating(id)"
+            :last-event-at="store.lastEventAt"
+            :running-profiles="runningProfiles"
+            :sse-status="store.sseStatus"
+            @clear-events="store.clearLiveEvents()"
+            @inspect-profile="openInspectSheet"
+            @inspect-target-id="openInspectById"
+            @stop-profile="handleToggleRun"
+          />
+        </TabsContent>
+      </Tabs>
+
+      <!-- Desktop Live Mission Rail -->
+      <aside
+        v-if="showTelemetryRail"
+        class="hidden min-h-0 w-[340px] shrink-0 flex-col xl:flex"
+      >
+        <SseMissionPanel
+          :events="store.liveEvents"
+          :is-mutating="(id) => store.isMutating(id)"
+          :last-event-at="store.lastEventAt"
+          :running-profiles="runningProfiles"
+          :sse-status="store.sseStatus"
+          @clear-events="store.clearLiveEvents()"
+          @inspect-profile="openInspectSheet"
+          @inspect-target-id="openInspectById"
+          @stop-profile="handleToggleRun"
         />
-      </template>
-    </DataTable>
+      </aside>
+    </div>
 
-    <BrowserFormDialog
+    <BrowserFormSheet
       v-model:open="formOpen"
       :target="formTarget"
       @saved="handleFormSaved"
@@ -504,7 +589,6 @@ const columns = createBrowserColumns(
       "
     />
     <BrowserImportCsvDialog v-model:open="importOpen" />
-    <BrowserDriversDialog v-model:open="driversOpen" />
     <BrowserDeleteDialog
       v-model:open="deleteOpen"
       :targets="deleteTargets"

@@ -124,7 +124,7 @@ function openManageWorkspaces() {
         />
         <span
           v-else
-          class="flex size-6 items-center justify-center rounded-md bg-primary/15 text-sm font-semibold text-primary"
+          class="flex size-6 items-center justify-center rounded-md bg-primary/15 text-sm text-primary"
         >
           {{ activeWorkspace?.name?.charAt(0)?.toUpperCase() || '?' }}
         </span>
@@ -138,10 +138,10 @@ function openManageWorkspaces() {
         :aria-expanded="open"
         :aria-label="$t('preferences.widget.workspaceSelector')"
         data-testid="workspace-selector-trigger"
-        class="h-9 min-w-0 max-w-[240px] flex-1 justify-between gap-2 px-2 font-normal shadow-none"
+        class="h-9 min-w-0 max-w-[148px] flex-1 justify-between gap-1.5 px-2 font-normal shadow-none sm:max-w-[240px] sm:gap-2"
         :style="triggerStyle"
       >
-        <span class="flex min-w-0 items-center gap-2">
+        <span class="flex min-w-0 items-center gap-1.5 sm:gap-2">
           <img
             v-if="activeWorkspace?.avatar_url"
             :src="activeWorkspace.avatar_url"
@@ -150,19 +150,21 @@ function openManageWorkspaces() {
           />
           <span
             v-else
-            class="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/15 text-sm font-semibold text-primary"
+            class="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/15 text-sm text-primary"
           >
             {{ activeWorkspace?.name?.charAt(0)?.toUpperCase() || '?' }}
           </span>
           <span v-if="isLoading" class="flex min-w-0 flex-col gap-1 text-left">
-            <Skeleton class="h-3 w-24" />
-            <Skeleton class="h-2.5 w-14" />
+            <Skeleton class="h-3 w-20 sm:w-24" />
+            <Skeleton class="hidden h-2.5 w-14 sm:block" />
           </span>
           <span v-else class="flex min-w-0 flex-col text-left leading-tight">
-            <span class="truncate text-xs font-semibold text-foreground">
+            <span class="truncate text-foreground">
               {{ activeWorkspace?.name || $t('page.workspace.not_selected') }}
             </span>
-            <span class="truncate text-[10px] text-muted-foreground">
+            <span
+              class="hidden truncate text-[10px] text-muted-foreground sm:block"
+            >
               {{ activeWorkspace?.slug || 'local' }}
             </span>
           </span>

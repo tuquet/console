@@ -36,6 +36,7 @@
     "@operon/kernel": "workspace:*",
     "@operon/layouts": "workspace:*",
     "@operon/locales": "workspace:*",
+    "@operon/logs": "workspace:*",
     "@operon/preferences": "workspace:*",
     "@operon/stores": "workspace:*",
     "@operon/styles": "workspace:*",

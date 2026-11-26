@@ -2,6 +2,9 @@ import { z } from 'zod';
 
 export const taskSchema = z.object({
   id: z.string(),
+  workspaceId: z.string().optional(),
+  browserId: z.string().nullable().optional(),
+  browserName: z.string().nullable().optional(),
   title: z.string().min(1),
   status: z.string(),
   label: z.string(),
@@ -15,6 +18,7 @@ export const taskSchema = z.object({
 export type Task = z.infer<typeof taskSchema>;
 
 export interface TaskDraft {
+  browserId?: null | string;
   title: string;
   status: string;
   label: string;

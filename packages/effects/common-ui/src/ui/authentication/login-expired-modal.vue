@@ -118,7 +118,7 @@ function calcZIndex() {
           type="button"
           variant="link"
           size="sm"
-          class="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+          class="h-auto p-0 text-muted-foreground hover:text-foreground"
           @click="closeModal"
         >
           {{ $t('common.cancel') || 'Dismiss / Continue as Local Operator' }}

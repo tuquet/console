@@ -240,7 +240,7 @@ async function copyInstallCommand() {
             alt="Operon"
             class="size-6 shrink-0 rounded-md object-contain"
           />
-          <span class="text-sm font-semibold tracking-tight text-foreground">
+          <span class="text-sm tracking-tight text-foreground">
             {{ preferences.app.name || 'Operon' }}
           </span>
           <Badge variant="outline" class="hidden text-[11px] sm:inline-flex">
@@ -256,7 +256,7 @@ async function copyInstallCommand() {
                 ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500'
                 : 'text-muted-foreground'
             "
-            class="gap-1.5 text-xs font-normal"
+            class="gap-1.5 font-normal"
           >
             <Activity v-if="isHealthy" class="size-3" />
             <Loader2
@@ -310,15 +310,13 @@ async function copyInstallCommand() {
       <section class="mx-auto flex max-w-2xl flex-col items-center text-center">
         <Badge
           variant="outline"
-          class="mb-5 gap-1.5 rounded-full border-border/80 bg-card px-3 py-1 text-xs font-normal text-muted-foreground"
+          class="mb-5 gap-1.5 rounded-full border-border/80 bg-card px-3 py-1 font-normal text-muted-foreground"
         >
           <Laptop class="size-3.5 text-primary" />
           <span>Runs safely on your own computer</span>
         </Badge>
 
-        <h1
-          class="text-3xl font-semibold tracking-tight text-foreground sm:text-5xl"
-        >
+        <h1 class="text-3xl tracking-tight text-foreground sm:text-5xl">
           Browser automation, right on your machine.
         </h1>
 
@@ -434,9 +432,7 @@ async function copyInstallCommand() {
             >
               <CardContent class="flex flex-col gap-3 p-4">
                 <div class="flex items-center justify-between gap-2">
-                  <div
-                    class="flex items-center gap-2 text-xs text-muted-foreground"
-                  >
+                  <div class="flex items-center gap-2 text-muted-foreground">
                     <Terminal class="size-3.5 text-primary" />
                     <span class="font-medium text-foreground">
                       Or install with one command
@@ -448,7 +444,7 @@ async function copyInstallCommand() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    class="h-7 gap-1.5 px-2 text-xs"
+                    class="h-7 gap-1.5 px-2"
                     @click="copyInstallCommand"
                   >
                     <Check
@@ -463,9 +459,7 @@ async function copyInstallCommand() {
                 <div
                   class="overflow-x-auto rounded-lg border border-border/60 bg-background px-3 py-2.5"
                 >
-                  <code
-                    class="whitespace-nowrap font-mono text-xs text-foreground"
-                  >
+                  <code class="whitespace-nowrap text-foreground">
                     {{ installInfo.command }}
                   </code>
                 </div>
@@ -473,7 +467,7 @@ async function copyInstallCommand() {
                 <p class="text-xs text-muted-foreground">
                   Already installed? Start it with
                   <code
-                    class="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground"
+                    class="rounded bg-muted px-1.5 py-0.5 text-[11px] text-foreground"
                   >
                     opn daemon start
                   </code>
@@ -490,9 +484,7 @@ async function copyInstallCommand() {
       <!-- How It Works -->
       <section class="flex flex-col gap-5">
         <div class="flex flex-col gap-1 text-center">
-          <h2
-            class="text-lg font-semibold tracking-tight text-foreground sm:text-xl"
-          >
+          <h2 class="text-lg tracking-tight text-foreground sm:text-xl">
             How it works
           </h2>
           <p class="text-xs text-muted-foreground sm:text-sm">
@@ -513,12 +505,12 @@ async function copyInstallCommand() {
                 >
                   <component :is="step.icon" class="size-4" />
                 </div>
-                <span class="font-mono text-xs text-muted-foreground">
+                <span class="text-xs text-muted-foreground">
                   {{ step.number }}
                 </span>
               </div>
               <div class="flex flex-col gap-1">
-                <h3 class="text-sm font-semibold text-foreground">
+                <h3 class="text-sm text-foreground">
                   {{ step.title }}
                 </h3>
                 <p class="text-xs leading-relaxed text-muted-foreground">
@@ -557,7 +549,7 @@ async function copyInstallCommand() {
     <!-- Minimal Landing Footer -->
     <footer class="border-t border-border/60">
       <div
-        class="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-xs text-muted-foreground sm:px-6"
+        class="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-5 text-muted-foreground sm:px-6"
       >
         <span>Operon • Connects locally on port {{ daemon.port }}</span>
         <div class="flex items-center gap-4">

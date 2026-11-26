@@ -36,19 +36,19 @@ withDefaults(defineProps<DataTablePaginationProps>(), {
   <div
     class="flex flex-col gap-3 px-1 sm:flex-row sm:items-center sm:justify-between"
   >
-    <div class="text-muted-foreground flex-1 text-xs">
+    <div class="text-muted-foreground flex-1">
       <template v-if="selectable">
-        <span class="text-foreground font-mono font-medium">
+        <span class="text-foreground font-medium">
           {{ table.getFilteredSelectedRowModel().rows.length }}
         </span>
         of
-        <span class="text-foreground font-mono font-medium">
+        <span class="text-foreground font-medium">
           {{ table.getRowCount() }}
         </span>
         row(s) selected.
       </template>
       <template v-else>
-        <span class="text-foreground font-mono font-medium">
+        <span class="text-foreground font-medium">
           {{ table.getRowCount() }}
         </span>
         total row(s).
@@ -57,12 +57,12 @@ withDefaults(defineProps<DataTablePaginationProps>(), {
 
     <div class="flex flex-wrap items-center gap-4 lg:gap-6">
       <div class="flex items-center gap-2">
-        <p class="text-muted-foreground text-xs font-medium">Rows per page</p>
+        <p class="text-muted-foreground font-medium">Rows per page</p>
         <Select
           :model-value="`${table.atoms.pagination.get().pageSize}`"
           @update:model-value="(val) => table.setPageSize(Number(val))"
         >
-          <SelectTrigger class="h-8 w-[70px] font-mono text-xs">
+          <SelectTrigger class="h-8 w-[70px]">
             <SelectValue
               :placeholder="`${table.atoms.pagination.get().pageSize}`"
             />
@@ -73,7 +73,7 @@ withDefaults(defineProps<DataTablePaginationProps>(), {
                 v-for="pageSize in pageSizes"
                 :key="pageSize"
                 :value="`${pageSize}`"
-                class="font-mono text-xs"
+                class="text-xs"
               >
                 {{ pageSize }}
               </SelectItem>
@@ -82,9 +82,7 @@ withDefaults(defineProps<DataTablePaginationProps>(), {
         </Select>
       </div>
 
-      <div
-        class="flex min-w-[96px] items-center justify-center font-mono text-xs font-medium"
-      >
+      <div class="flex min-w-[96px] items-center justify-center font-medium">
         Page {{ table.atoms.pagination.get().pageIndex + 1 }} of
         {{ Math.max(1, table.getPageCount()) }}
       </div>

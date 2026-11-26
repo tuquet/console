@@ -15,15 +15,30 @@ import { useMutation, useQuery } from '@tanstack/vue-query';
 import { defineStore } from 'pinia';
 
 import { createBrowserApi } from '../api/browsers';
-import { useBrowserRuntimesStore } from './browser-runtimes';
+import { useBrowserDriversStore } from './browser-drivers';
 import { getAutomationQueryClient } from './query-client';
 
 export type ScopeMode = 'all' | 'workspace';
 
+export type BrowserSseStatus = 'connecting' | 'error' | 'open';
+
+export interface BrowserSseEvent {
+  action?: string;
+  category: 'driver' | 'session' | 'system';
+  id: string;
+  message: string;
+  severity: 'error' | 'info' | 'success' | 'warning';
+  targetId?: string;
+  timestamp: string;
+  type: string;
+}
+
+const MAX_SSE_EVENTS = 100;
+
 export const useBrowsersStore = defineStore('automation:browsers', () => {
   const kernel = useKernel();
   const api = createBrowserApi(kernel.api);
-  const runtimesStore = useBrowserRuntimesStore();
+  const driversStore = useBrowserDriversStore();
   const queryClient = getAutomationQueryClient();
 
   const detailTarget = ref<BrowserProfileRecord | null>(null);
@@ -38,9 +53,14 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
 
   const selectedIds = ref<string[]>([]);
   const mutatingIds = ref<string[]>([]);
+  const sseStatus = ref<BrowserSseStatus>('connecting');
+  const lastEventAt = ref<null | string>(null);
+  const liveEvents = ref<BrowserSseEvent[]>([]);
+  const killingAll = ref(false);
 
   let eventSource: EventSource | null = null;
   let refreshTimer: null | ReturnType<typeof setTimeout> = null;
+  let sseSeq = 0;
 
   const activeWorkspaceId = computed(
     () => kernel.workspace.activeId || 'local-default',
@@ -458,6 +478,102 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     return await batchDeleteMutation.mutateAsync({ force, ids });
   }
 
+  function recordLiveEvent(entry: Omit<BrowserSseEvent, 'id' | 'timestamp'>) {
+    const now = new Date().toISOString();
+    sseSeq += 1;
+    lastEventAt.value = now;
+    liveEvents.value = [
+      {
+        ...entry,
+        id: `sse-${sseSeq}`,
+        timestamp: now,
+      },
+      ...liveEvents.value,
+    ].slice(0, MAX_SSE_EVENTS);
+  }
+
+  function clearLiveEvents() {
+    liveEvents.value = [];
+  }
+
+  function resolveProfileLabel(id?: string): string {
+    if (!id) return 'fleet';
+    return items.value.find((b) => b.id === id)?.name || id;
+  }
+
+  function patchOnlineStateFromSse(data: Record<string, any>) {
+    if (data.type === 'browser_offline' && data.all) {
+      queryClient.setQueryData<BrowserProfileRecord[]>(
+        browsersQueryKey.value,
+        (prev) =>
+          (prev ?? []).map((b) => ({
+            ...b,
+            debuggingPort: null,
+            isOnline: false,
+            pid: null,
+            wsUrl: null,
+          })),
+      );
+      if (detailTarget.value) {
+        detailTarget.value = {
+          ...detailTarget.value,
+          debuggingPort: null,
+          isOnline: false,
+          pid: null,
+          wsUrl: null,
+        };
+      }
+      return;
+    }
+
+    const targetId = typeof data.id === 'string' ? data.id : '';
+    if (!targetId) return;
+    const isOnline = data.type === 'browser_online';
+    const patch: Partial<BrowserProfileRecord> = isOnline
+      ? {
+          isOnline: true,
+          ...(typeof data.pid === 'number' ? { pid: data.pid } : {}),
+          ...(typeof data.debuggingPort === 'number'
+            ? { debuggingPort: data.debuggingPort }
+            : {}),
+          ...(typeof data.wsUrl === 'string' ? { wsUrl: data.wsUrl } : {}),
+        }
+      : {
+          debuggingPort: null,
+          isOnline: false,
+          pid: null,
+          wsUrl: null,
+        };
+
+    queryClient.setQueryData<BrowserProfileRecord[]>(
+      browsersQueryKey.value,
+      (prev) =>
+        (prev ?? []).map((b) => (b.id === targetId ? { ...b, ...patch } : b)),
+    );
+    if (detailTarget.value?.id === targetId) {
+      detailTarget.value = { ...detailTarget.value, ...patch };
+    }
+  }
+
+  async function killAllSessions() {
+    killingAll.value = true;
+    try {
+      const res = await api.killAllSessions();
+      patchOnlineStateFromSse({ all: true, type: 'browser_offline' });
+      recordLiveEvent({
+        action: 'kill_all',
+        category: 'session',
+        message: res.message || 'Stopped all running browser sessions',
+        severity: 'warning',
+        type: 'browser_offline',
+      });
+      await fetchBrowsers(true);
+      return res;
+    } finally {
+      killingAll.value = false;
+    }
+  }
+
   function scheduleSilentRefresh() {
     if (refreshTimer) clearTimeout(refreshTimer);
     refreshTimer = setTimeout(() => {
@@ -468,30 +584,120 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
 
   function subscribeEvents() {
     if (typeof EventSource === 'undefined' || eventSource) return;
+    sseStatus.value = 'connecting';
     try {
       eventSource = new EventSource(
         `http://127.0.0.1:${kernel.api.daemonPort}/api/v1/events`,
       );
+      eventSource.addEventListener('open', () => {
+        sseStatus.value = 'open';
+      });
+      eventSource.addEventListener('error', () => {
+        sseStatus.value =
+          eventSource?.readyState === EventSource.CONNECTING
+            ? 'connecting'
+            : 'error';
+      });
       eventSource.addEventListener('message', (evt) => {
         try {
           const data = JSON.parse(evt.data);
-          if (data?.type === 'runtime_download_progress' && data?.version) {
-            runtimesStore.applyProgressEvent(data);
+          sseStatus.value = 'open';
+          if (data?.type === 'driver_download_progress' && data?.version) {
+            const prevStage = driversStore.driverProgress[data.version]?.stage;
+            driversStore.applyProgressEvent(data);
+            if (
+              data.stage === 'ready' ||
+              data.stage === 'error' ||
+              prevStage !== data.stage
+            ) {
+              let severity: BrowserSseEvent['severity'] = 'info';
+              if (data.stage === 'error') {
+                severity = 'error';
+              } else if (data.stage === 'ready') {
+                severity = 'success';
+              }
+              recordLiveEvent({
+                action: String(data.stage ?? 'downloading'),
+                category: 'driver',
+                message:
+                  data.stage === 'error'
+                    ? `Driver v${data.version} failed: ${data.error || 'error'}`
+                    : `Driver v${data.version} · ${data.stage} (${Number(data.percent ?? 0)}%)`,
+                severity,
+                targetId: String(data.version),
+                type: 'driver_download_progress',
+              });
+            }
+          } else if (data?.type === 'driver_changed') {
+            recordLiveEvent({
+              action: String(data.action ?? 'updated'),
+              category: 'driver',
+              message:
+                `Driver v${data.version ?? ''} ${data.action ?? 'updated'}`.trim(),
+              severity: 'info',
+              targetId: data.version ? String(data.version) : undefined,
+              type: 'driver_changed',
+            });
+            void driversStore.fetchDrivers().catch(() => {});
+          } else if (data?.type === 'browser_online') {
+            patchOnlineStateFromSse(data);
+            const label = resolveProfileLabel(data.id);
+            const portSuffix = data.debuggingPort
+              ? ` · :${data.debuggingPort}`
+              : '';
+            recordLiveEvent({
+              action: 'online',
+              category: 'session',
+              message: `${label} online${portSuffix}`,
+              severity: 'success',
+              targetId: data.id,
+              type: 'browser_online',
+            });
+            scheduleSilentRefresh();
+          } else if (data?.type === 'browser_offline') {
+            patchOnlineStateFromSse(data);
+            const label = data.all
+              ? 'All sessions'
+              : resolveProfileLabel(data.id);
+            recordLiveEvent({
+              action: 'offline',
+              category: 'session',
+              message: `${label} stopped`,
+              severity: 'warning',
+              targetId: data.id,
+              type: 'browser_offline',
+            });
+            scheduleSilentRefresh();
           } else if (
             data?.type === 'browser_changed' ||
-            data?.type === 'browser_online' ||
-            data?.type === 'browser_offline' ||
             data?.type === 'settings_updated' ||
             data?.type === 'workspace_switched'
           ) {
+            let message = `${resolveProfileLabel(data.id)} ${data.action || 'updated'}`;
+            if (data.type === 'workspace_switched') {
+              message = 'Workspace switched';
+            } else if (data.type === 'settings_updated') {
+              message = 'Daemon settings updated';
+            }
+            recordLiveEvent({
+              action: data.action ? String(data.action) : undefined,
+              category: data.type === 'browser_changed' ? 'session' : 'system',
+              message,
+              severity: 'info',
+              targetId: data.id,
+              type: String(data.type),
+            });
             scheduleSilentRefresh();
+            if (data.type === 'settings_updated') {
+              void driversStore.fetchDrivers().catch(() => {});
+            }
           }
         } catch {
           // ignore keepalive / non-JSON frames
         }
       });
     } catch {
-      // ignore SSE connection errors while offline
+      sseStatus.value = 'error';
     }
   }
 
@@ -504,6 +710,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
       eventSource.close();
       eventSource = null;
     }
+    sseStatus.value = 'connecting';
   }
 
   watch(activeWorkspaceId, () => {
@@ -526,6 +733,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     batchLaunchSelected,
     batchRemoveSelected,
     batchStopSelected,
+    clearLiveEvents,
     clearSelection,
     cloneProfile: (id: string, input: CloneBrowserInput = {}) =>
       cloneMutation.mutateAsync({ id, input }),
@@ -540,8 +748,12 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     inspectBrowser,
     isMutating,
     items,
+    killAllSessions,
+    killingAll,
+    lastEventAt,
     launchProfile: (id: string, opts: StartSessionInput = {}) =>
       launchMutation.mutateAsync({ id, opts }),
+    liveEvents,
     loading,
     makeDefaultProfile: async (id: string) => {
       await defaultMutation.mutateAsync(id);
@@ -549,6 +761,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     moveProfileToWorkspace: (id: string, targetWorkspaceId: string) =>
       moveMutation.mutateAsync({ id, targetWorkspaceId }),
     mutatingIds,
+    patchOnlineStateFromSse,
     patchProfile: (id: string, patch: PatchBrowserPatch) =>
       patchMutation.mutateAsync({ id, patch }),
     platformFilter,
@@ -560,6 +773,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     searchQuery,
     selectedIds,
     selectedProfiles,
+    sseStatus,
     stats,
     statusFilter,
     stopProfile: (id: string, force = false) =>

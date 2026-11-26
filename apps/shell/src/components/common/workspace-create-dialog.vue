@@ -122,7 +122,7 @@ async function handleSubmit() {
           <Input
             :value="slug"
             placeholder="e.g. acme-corp"
-            class="h-9 font-mono text-xs"
+            class="h-9"
             @input="handleSlugInput"
           />
         </div>

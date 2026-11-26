@@ -1,48 +1,34 @@
 <script setup lang="ts">
-import type { PaginationListItemProps } from 'reka-ui';
+import type { PaginationListItemProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import type { ButtonVariants } from '@operon-core/shadcn-ui/ui/button'
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import { PaginationListItem } from "reka-ui"
+import { buttonVariants } from '@operon-core/shadcn-ui/ui/button'
 
-import type { HTMLAttributes } from 'vue';
+const props = withDefaults(defineProps<PaginationListItemProps & {
+  size?: ButtonVariants["size"]
+  class?: HTMLAttributes["class"]
+  isActive?: boolean
+}>(), {
+  size: "icon",
+})
 
-import type { ButtonVariants } from '../button';
-
-import { cn } from '@operon-core/shared/utils';
-
-import { reactiveOmit } from '@vueuse/core';
-import { PaginationListItem } from 'reka-ui';
-
-import { buttonVariants } from '../button';
-
-const props = withDefaults(
-  defineProps<
-    PaginationListItemProps & {
-      class?: HTMLAttributes['class'];
-      isActive?: boolean;
-      size?: ButtonVariants['size'];
-    }
-  >(),
-  {
-    size: 'icon',
-  },
-);
-
-const delegatedProps = reactiveOmit(props, 'class', 'size', 'isActive');
+const delegatedProps = reactiveOmit(props, "class", "size", "isActive")
 </script>
 
 <template>
   <PaginationListItem
     data-slot="pagination-item"
     v-bind="delegatedProps"
-    :class="
-      cn(
-        !props.asChild &&
-          buttonVariants({
-            variant: isActive ? 'outline' : 'ghost',
-            size,
-          }),
-        props.class,
-      )
-    "
+    :class="cn(
+      buttonVariants({
+        variant: isActive ? 'outline' : 'ghost',
+        size,
+      }),
+      props.class)"
   >
-    <slot></slot>
+    <slot />
   </PaginationListItem>
 </template>

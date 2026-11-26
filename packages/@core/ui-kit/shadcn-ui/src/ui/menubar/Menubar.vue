@@ -1,29 +1,33 @@
 <script setup lang="ts">
-import type { MenubarRootEmits, MenubarRootProps } from 'reka-ui';
+import type { MenubarRootEmits, MenubarRootProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import {
+  MenubarRoot,
+  useForwardPropsEmits,
+} from "reka-ui"
 
-import type { HTMLAttributes } from 'vue';
+const props = defineProps<MenubarRootProps & { class?: HTMLAttributes["class"] }>()
+const emits = defineEmits<MenubarRootEmits>()
 
-import { cn } from '@operon-core/shared/utils';
+const delegatedProps = reactiveOmit(props, "class")
 
-import { reactiveOmit } from '@vueuse/core';
-import { MenubarRoot, useForwardPropsEmits } from 'reka-ui';
-
-const props = defineProps<
-  MenubarRootProps & { class?: HTMLAttributes['class'] }
->();
-const emits = defineEmits<MenubarRootEmits>();
-
-const delegatedProps = reactiveOmit(props, 'class');
-
-const forwarded = useForwardPropsEmits(delegatedProps, emits);
+const forwarded = useForwardPropsEmits(delegatedProps, emits)
 </script>
 
 <template>
   <MenubarRoot
+    v-slot="slotProps"
     data-slot="menubar"
     v-bind="forwarded"
-    :class="cn('flex h-9 items-center gap-0.5', props.class)"
+    :class="
+      cn(
+        'bg-background flex h-9 items-center gap-1 rounded-md border p-1 shadow-xs',
+        props.class,
+      )
+    "
   >
-    <slot></slot>
+    <slot v-bind="slotProps" />
   </MenubarRoot>
 </template>

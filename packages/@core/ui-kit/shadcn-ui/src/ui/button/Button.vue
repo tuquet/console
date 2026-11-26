@@ -1,25 +1,20 @@
 <script setup lang="ts">
-import type { PrimitiveProps } from 'reka-ui';
-
-import type { HTMLAttributes } from 'vue';
-
-import type { ButtonVariants } from './button';
-
-import { cn } from '@operon-core/shared/utils';
-
-import { Primitive } from 'reka-ui';
-
-import { buttonVariants } from './button';
+import type { PrimitiveProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import type { ButtonVariants } from "."
+import { cn } from "cn"
+import { Primitive } from "reka-ui"
+import { buttonVariants } from "."
 
 interface Props extends PrimitiveProps {
-  class?: HTMLAttributes['class'];
-  size?: ButtonVariants['size'];
-  variant?: ButtonVariants['variant'];
+  variant?: ButtonVariants["variant"]
+  size?: ButtonVariants["size"]
+  class?: HTMLAttributes["class"]
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  as: 'button',
-});
+  as: "button",
+})
 </script>
 
 <template>
@@ -29,14 +24,8 @@ const props = withDefaults(defineProps<Props>(), {
     :data-size="size"
     :as="as"
     :as-child="asChild"
-    :class="
-      cn(
-        buttonVariants({ variant, size }),
-        'gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-4',
-        props.class,
-      )
-    "
+    :class="cn(buttonVariants({ variant, size }), props.class)"
   >
-    <slot></slot>
+    <slot />
   </Primitive>
 </template>

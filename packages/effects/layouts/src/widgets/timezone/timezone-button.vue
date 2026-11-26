@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, useAttrs } from 'vue';
 
 import { Check, Globe } from '@operon/icons';
 import { $t } from '@operon/locales';
@@ -21,8 +21,16 @@ import {
   Spinner,
   toast,
 } from '@operon-core/shadcn-ui';
+import { cn } from '@operon-core/shared/utils';
+
+defineOptions({
+  name: 'TimezoneButton',
+  inheritAttrs: false,
+});
 
 withDefaults(defineProps<{ showButton?: boolean }>(), { showButton: true });
+
+const attrs = useAttrs();
 
 const timezoneStore = useTimezoneStore();
 const isOpen = ref(false);
@@ -62,7 +70,7 @@ defineExpose({ open });
 </script>
 
 <template>
-  <div class="inline-flex empty:hidden">
+  <div :class="cn('inline-flex empty:hidden', attrs.class as string)">
     <Button
       v-if="showButton"
       type="button"

@@ -72,7 +72,7 @@ const contentStyle = computed<StyleValue>(() => {
         <slot name="title">
           <div
             v-if="title"
-            class="flex text-lg font-semibold tracking-tight text-foreground"
+            class="flex text-lg tracking-tight text-foreground"
             :class="{ 'mb-2': description || $slots.description }"
           >
             {{ title }}

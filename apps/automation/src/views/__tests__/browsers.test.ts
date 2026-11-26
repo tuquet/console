@@ -66,9 +66,10 @@ const sampleBrowsers = [
     isOnline: true,
     name: 'QA Running',
     proxy: null,
+    source: 'cloud' as const,
     startupFlags: [],
     tags: ['vip'],
-    workspaceId: 'local-default',
+    workspaceId: 'ws_cloud_1',
     timezone: 'UTC',
     updatedAt: '2026-01-02T00:00:00Z',
     userAgent: null,
@@ -101,11 +102,13 @@ describe('automation browsers view with shared DataTable', () => {
     await nextTick();
 
     expect(errors).toEqual([]);
-    expect(host.querySelectorAll('tbody tr').length).toBe(2);
+    expect(host.querySelector('tbody')?.querySelectorAll('tr').length).toBe(2);
     expect(host.textContent).toContain('Marketing Profile');
     expect(host.textContent).toContain('QA Running');
     expect(host.textContent).toContain('#sea');
     expect(host.textContent).toContain('#vip');
+    expect(host.textContent).toContain('automation.browsers.source_local');
+    expect(host.textContent).toContain('automation.browsers.source_cloud');
     expect(host.textContent).toContain('Rows per page');
 
     const profileLink = [
@@ -122,6 +125,28 @@ describe('automation browsers view with shared DataTable', () => {
     expect(
       sheet?.querySelector('[title="automation.browsers.detail_copy_id"]'),
     ).not.toBeNull();
+
+    // Command Center HUD & tabs
+    expect(host.textContent).toContain('automation.browsers.cmd_title');
+    expect(host.textContent).toContain('automation.browsers.cmd_tab_fleet');
+    expect(host.textContent).toContain('automation.browsers.drivers_btn');
+    expect(host.textContent).toContain('automation.browsers.cmd_sse_stream');
+
+    // Edit opens responsive Sheet instead of centered Dialog
+    const editBtn = [
+      ...document.body.querySelectorAll<HTMLButtonElement>(
+        '[role="dialog"] button',
+      ),
+    ].find((btn) => btn.textContent?.includes('common.edit'));
+    editBtn?.click();
+    await nextTick();
+    await nextTick();
+
+    const editSheet = document.body.querySelector('[role="dialog"]');
+    expect(editSheet?.textContent).toContain(
+      'automation.browsers.form_edit_title',
+    );
+    expect(editSheet?.innerHTML).toContain('px-5 py-4');
 
     app.unmount();
     host.remove();

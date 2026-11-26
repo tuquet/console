@@ -11,6 +11,9 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
+    "shadcn:diff": "pnpm dlx shadcn-vue@latest diff",
+    "shadcn:search": "pnpm dlx shadcn-vue@latest search @shadcn",
+    "shadcn:view": "node ./scripts/view.mjs",
     "typecheck": "vue-tsc --noEmit"
   },
   "files": [
@@ -28,6 +31,36 @@
       "types": "./src/index.ts",
       "development": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./ui/*.vue": {
+      "types": "./src/ui/*.vue",
+      "development": "./src/ui/*.vue",
+      "default": "./src/ui/*.vue"
+    },
+    "./ui/*.ts": {
+      "types": "./src/ui/*.ts",
+      "development": "./src/ui/*.ts",
+      "default": "./src/ui/*.ts"
+    },
+    "./ui/*": {
+      "types": "./src/ui/*/index.ts",
+      "development": "./src/ui/*/index.ts",
+      "default": "./src/ui/*/index.ts"
+    },
+    "./components/*.vue": {
+      "types": "./src/components/*.vue",
+      "development": "./src/components/*.vue",
+      "default": "./src/components/*.vue"
+    },
+    "./components/*.ts": {
+      "types": "./src/components/*.ts",
+      "development": "./src/components/*.ts",
+      "default": "./src/components/*.ts"
+    },
+    "./components/*": {
+      "types": "./src/components/*/index.ts",
+      "development": "./src/components/*/index.ts",
+      "default": "./src/components/*/index.ts"
     }
   },
   "publishConfig": {
@@ -36,6 +69,36 @@
         "types": "./src/index.ts",
         "development": "./src/index.ts",
         "default": "./src/index.ts"
+      },
+      "./ui/*.vue": {
+        "types": "./src/ui/*.vue",
+        "development": "./src/ui/*.vue",
+        "default": "./src/ui/*.vue"
+      },
+      "./ui/*.ts": {
+        "types": "./src/ui/*.ts",
+        "development": "./src/ui/*.ts",
+        "default": "./src/ui/*.ts"
+      },
+      "./ui/*": {
+        "types": "./src/ui/*/index.ts",
+        "development": "./src/ui/*/index.ts",
+        "default": "./src/ui/*/index.ts"
+      },
+      "./components/*.vue": {
+        "types": "./src/components/*.vue",
+        "development": "./src/components/*.vue",
+        "default": "./src/components/*.vue"
+      },
+      "./components/*.ts": {
+        "types": "./src/components/*.ts",
+        "development": "./src/components/*.ts",
+        "default": "./src/components/*.ts"
+      },
+      "./components/*": {
+        "types": "./src/components/*/index.ts",
+        "development": "./src/components/*/index.ts",
+        "default": "./src/components/*/index.ts"
       }
     }
   },
@@ -50,8 +113,13 @@
     "@unovis/vue": "catalog:",
     "@vueuse/core": "catalog:",
     "class-variance-authority": "catalog:",
+    "cn": "^0.5.2",
+    "embla-carousel-vue": "^8.6.0",
     "reka-ui": "catalog:",
+    "shiki": "^4.6.0",
+    "vee-validate": "^4.15.1",
     "vue": "catalog:",
+    "vue-input-otp": "^0.4.0",
     "vue-sonner": "catalog:"
   }
 }

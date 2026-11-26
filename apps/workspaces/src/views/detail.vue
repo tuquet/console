@@ -150,7 +150,7 @@ async function copyWorkspaceId() {
           <h1 class="text-xl font-bold tracking-tight text-foreground">
             {{ workspace?.name || $t('common.unknownWorkspace') }}
           </h1>
-          <p class="font-mono text-xs text-muted-foreground">
+          <p class="text-xs text-muted-foreground">
             ID: {{ workspaceId }}
             <template v-if="workspace?.slug">
               | Slug: {{ workspace.slug }}
@@ -201,7 +201,7 @@ async function copyWorkspaceId() {
 
     <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-3">
       <Card class="flex flex-col gap-3 border-border bg-card p-5 shadow-none">
-        <div class="flex items-center gap-2 text-sm font-semibold text-primary">
+        <div class="flex items-center gap-2 text-sm text-primary">
           <Building2 class="size-4" />
           <span>{{ $t('workspaces.workspace_details') }}</span>
         </div>
@@ -216,16 +216,16 @@ async function copyWorkspaceId() {
       </Card>
 
       <Card class="flex flex-col gap-3 border-border bg-card p-5 shadow-none">
-        <div class="text-sm font-semibold text-primary">
+        <div class="text-sm text-primary">
           {{ $t('workspaces.workspace_id') }}
         </div>
-        <code class="truncate rounded bg-muted px-2 py-1 font-mono text-xs">
+        <code class="truncate rounded bg-muted px-2 py-1">
           {{ workspace.id }}
         </code>
         <Button
           variant="outline"
           size="sm"
-          class="gap-1.5 text-xs"
+          class="gap-1.5"
           @click="copyWorkspaceId"
         >
           <Copy class="size-3.5" />
@@ -234,10 +234,10 @@ async function copyWorkspaceId() {
       </Card>
 
       <Card class="flex flex-col gap-3 border-border bg-card p-5 shadow-none">
-        <div class="text-sm font-semibold text-primary">
+        <div class="text-sm text-primary">
           {{ $t('workspaces.pair_cli') }}
         </div>
-        <code class="truncate rounded bg-muted px-2 py-1 font-mono text-xs">
+        <code class="truncate rounded bg-muted px-2 py-1">
           opn workspace switch {{ workspace.slug }}
         </code>
       </Card>
@@ -255,7 +255,7 @@ async function copyWorkspaceId() {
           </div>
           <div class="flex flex-col gap-1.5">
             <Label>Slug</Label>
-            <Input v-model="editSlug" class="font-mono text-xs" />
+            <Input v-model="editSlug" class="text-xs" />
           </div>
           <p v-if="editError" class="text-xs font-medium text-destructive">
             {{ editError }}
@@ -285,11 +285,11 @@ async function copyWorkspaceId() {
         <div class="flex flex-col gap-2 py-2">
           <Label class="text-xs">
             {{ $t('workspaces.delete_confirm_prompt') }}
-            <code class="ml-1 rounded bg-muted px-1.5 py-0.5 font-mono">
+            <code class="ml-1 rounded bg-muted px-1.5 py-0.5">
               {{ workspace?.slug }}
             </code>
           </Label>
-          <Input v-model="confirmSlug" class="font-mono text-xs" />
+          <Input v-model="confirmSlug" class="text-xs" />
           <p v-if="deleteError" class="text-xs font-medium text-destructive">
             {{ deleteError }}
           </p>

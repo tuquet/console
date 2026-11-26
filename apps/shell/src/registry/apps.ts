@@ -56,6 +56,16 @@ export const APP_REGISTRY: Record<string, RegisteredMicroApp> = {
     titleKey: 'page.tasks.title',
     order: 50,
   },
+  logs: {
+    id: 'logs',
+    name: 'Logs',
+    version: '0.1.0',
+    devPort: 5325,
+    defaultPath: 'local-ci',
+    icon: 'lucide:scroll-text',
+    titleKey: 'page.logs.title',
+    order: 25,
+  },
 };
 
 export function getRegisteredApp(id: string): RegisteredMicroApp | undefined {

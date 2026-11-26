@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import type { PrimitiveProps } from 'reka-ui';
+import type { PrimitiveProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import { Primitive, useForwardProps } from "reka-ui"
 
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
-
-import { reactiveOmit } from '@vueuse/core';
-import { Primitive, useForwardProps } from 'reka-ui';
-
-const props = defineProps<
-  PrimitiveProps & { class?: HTMLAttributes['class'] }
->();
-const delegatedProps = reactiveOmit(props, 'class');
-const forwardedProps = useForwardProps(delegatedProps);
+const props = defineProps<PrimitiveProps & { class?: HTMLAttributes["class"] }>()
+const delegatedProps = reactiveOmit(props, "class")
+const forwardedProps = useForwardProps(delegatedProps)
 </script>
 
 <template>
@@ -21,6 +16,6 @@ const forwardedProps = useForwardProps(delegatedProps);
     v-bind="forwardedProps"
     :class="cn('flex items-center', props.class)"
   >
-    <slot></slot>
+    <slot />
   </Primitive>
 </template>

@@ -1,44 +1,34 @@
 <script setup lang="ts">
-import type { VariantProps } from 'class-variance-authority';
-import type { ToggleGroupRootEmits, ToggleGroupRootProps } from 'reka-ui';
+import type { VariantProps } from "class-variance-authority"
+import type { ToggleGroupRootEmits, ToggleGroupRootProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import type { toggleVariants } from '@operon-core/shadcn-ui/ui/toggle'
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import { ToggleGroupRoot, useForwardPropsEmits } from "reka-ui"
+import { provide } from "vue"
 
-import type { HTMLAttributes } from 'vue';
+type ToggleGroupVariants = VariantProps<typeof toggleVariants>
 
-import type { toggleVariants } from '../toggle';
+const props = withDefaults(defineProps<ToggleGroupRootProps & {
+  class?: HTMLAttributes["class"]
+  variant?: ToggleGroupVariants["variant"]
+  size?: ToggleGroupVariants["size"]
+  spacing?: number
+}>(), {
+  spacing: 0,
+})
 
-import { provide } from 'vue';
+const emits = defineEmits<ToggleGroupRootEmits>()
 
-import { cn } from '@operon-core/shared/utils';
-
-import { reactiveOmit } from '@vueuse/core';
-import { ToggleGroupRoot, useForwardPropsEmits } from 'reka-ui';
-
-type ToggleGroupVariants = VariantProps<typeof toggleVariants>;
-
-const props = withDefaults(
-  defineProps<
-    ToggleGroupRootProps & {
-      class?: HTMLAttributes['class'];
-      size?: ToggleGroupVariants['size'];
-      spacing?: number;
-      variant?: ToggleGroupVariants['variant'];
-    }
-  >(),
-  {
-    spacing: 0,
-  },
-);
-
-const emits = defineEmits<ToggleGroupRootEmits>();
-
-provide('toggleGroup', {
+provide("toggleGroup", {
   variant: props.variant,
   size: props.size,
   spacing: props.spacing,
-});
+})
 
-const delegatedProps = reactiveOmit(props, 'class', 'size', 'variant');
-const forwarded = useForwardPropsEmits(delegatedProps, emits);
+const delegatedProps = reactiveOmit(props, "class", "size", "variant")
+const forwarded = useForwardPropsEmits(delegatedProps, emits)
 </script>
 
 <template>
@@ -52,13 +42,8 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
       '--gap': spacing,
     }"
     v-bind="forwarded"
-    :class="
-      cn(
-        'group/toggle-group flex w-fit items-center gap-[--spacing(var(--gap))] rounded-md data-[spacing=default]:data-[variant=outline]:shadow-xs',
-        props.class,
-      )
-    "
+    :class="cn('group/toggle-group flex w-fit items-center gap-[--spacing(var(--gap))] rounded-md data-[spacing=default]:data-[variant=outline]:shadow-xs', props.class)"
   >
-    <slot v-bind="slotProps"></slot>
+    <slot v-bind="slotProps" />
   </ToggleGroupRoot>
 </template>

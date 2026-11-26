@@ -99,7 +99,7 @@ useScrollLock();
         <Button
           type="button"
           variant="ghost"
-          class="group fixed top-6 left-1/2 z-2001 flex-col-center -translate-x-1/2 cursor-pointer text-xl font-semibold text-foreground/80 hover:text-foreground"
+          class="group fixed top-6 left-1/2 z-2001 flex-col-center -translate-x-1/2 cursor-pointer text-xl text-foreground/80 hover:text-foreground"
           @click="toggleUnlockForm"
         >
           <LockKeyhole
@@ -112,7 +112,7 @@ useScrollLock();
             <div
               class="relative flex-center h-35 w-35 rounded-xl bg-accent text-[36px] sm:h-40 sm:w-40 sm:text-[42px] md:h-50 md:w-50 md:text-[72px]"
             >
-              <span class="absolute top-3 left-3 font-semibold sm: md:text-xl">
+              <span class="absolute top-3 left-3 sm: md:text-xl">
                 {{ meridiem }}
               </span>
               {{ hour }}

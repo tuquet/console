@@ -11,7 +11,11 @@ import type { BaseFormComponentType, IconPickerProps } from '@operon/common-ui';
 
 import { defineComponent, h, ref } from 'vue';
 
-import { globalShareState, IconPicker } from '@operon/common-ui';
+import {
+  BUILTIN_SCHEMA_COMPONENTS,
+  globalShareState,
+  IconPicker,
+} from '@operon/common-ui';
 import { $t } from '@operon/locales';
 
 import {
@@ -214,7 +218,9 @@ export type ComponentType =
   | 'InputNumber'
   | 'InputPassword'
   | 'Mentions'
+  | 'OptionSelect'
   | 'PrimaryButton'
+  | 'ProgressSteps'
   | 'Radio'
   | 'RadioGroup'
   | 'RangePicker'
@@ -222,8 +228,10 @@ export type ComponentType =
   | 'Select'
   | 'Space'
   | 'Switch'
+  | 'SwitchCard'
   | 'Textarea'
   | 'TimePicker'
+  | 'ToggleGroup'
   | 'TreeSelect'
   | 'Upload'
   | BaseFormComponentType;
@@ -244,7 +252,9 @@ export interface ComponentPropsMap {
   InputNumber: Record<string, any>;
   InputPassword: Record<string, any>;
   Mentions: Record<string, any>;
+  OptionSelect: Record<string, any>;
   PrimaryButton: Record<string, any>;
+  ProgressSteps: Record<string, any>;
   Radio: Record<string, any>;
   RadioGroup: Record<string, any>;
   RangePicker: Record<string, any>;
@@ -252,8 +262,10 @@ export interface ComponentPropsMap {
   Select: Record<string, any>;
   Space: Record<string, any>;
   Switch: Record<string, any>;
+  SwitchCard: Record<string, any>;
   Textarea: Record<string, any>;
   TimePicker: Record<string, any>;
+  ToggleGroup: Record<string, any>;
   TreeSelect: Record<string, any>;
   Upload: Record<string, any>;
 }
@@ -294,6 +306,7 @@ async function initComponentAdapter() {
       INPUT_DEFAULT_CLASS,
     ),
     Mentions: withDefaultPlaceholder(Input, 'input', INPUT_DEFAULT_CLASS),
+    OptionSelect: BUILTIN_SCHEMA_COMPONENTS.OptionSelect,
     PrimaryButton: (props, { attrs, slots }) => {
       return h(
         Button,
@@ -383,7 +396,10 @@ async function initComponentAdapter() {
       'input',
       'bg-background/90 shadow-2xs',
     ),
+    ProgressSteps: BUILTIN_SCHEMA_COMPONENTS.ProgressSteps,
+    SwitchCard: BUILTIN_SCHEMA_COMPONENTS.SwitchCard,
     TimePicker: FallbackComponent,
+    ToggleGroup: BUILTIN_SCHEMA_COMPONENTS.ToggleGroup,
     TreeSelect: FallbackComponent,
     Upload: FallbackComponent,
   };

@@ -17,18 +17,18 @@ const routes: RouteRecordRaw[] = [
     meta: {
       authority: ['superadmin', 'local_operator'],
       hideChildrenInMenu: true,
-      icon: 'lucide:globe',
+      icon: 'lucide:radar',
       order: 10,
       platform: 'all',
       plugin: 'operon',
-      title: $t('page.browsers.title'),
+      title: $t('page.browserCenter.title'),
     },
-    name: 'Browsers',
+    name: 'BrowserCenter',
     path: '/browsers',
     redirect: '/browsers/index',
     children: [
       {
-        name: 'BrowsersIndex',
+        name: 'BrowserCenterIndex',
         path: 'index',
         component: loadBrowsersComponent
           ? async () => {
@@ -41,9 +41,9 @@ const routes: RouteRecordRaw[] = [
           : () => import('#/views/_core/fallback/not-found.vue'),
         meta: {
           authority: ['superadmin', 'local_operator'],
-          icon: 'lucide:globe',
+          icon: 'lucide:radar',
           plugin: 'operon',
-          title: $t('page.browsers.title'),
+          title: $t('page.browserCenter.title'),
         },
       },
     ],

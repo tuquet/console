@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { Task, TaskDraft } from '../tasks/data/schema';
 
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import { DataTable } from '@operon/common-ui';
 import { useKernel } from '@operon/kernel';
@@ -99,41 +99,90 @@ function handleExportJson(rows: Task[]) {
   kernel.events.notify('success', `Exported ${rows.length} task(s) to JSON`);
 }
 
-function handleCreate(draft: TaskDraft) {
-  const created = store.createTask(draft);
-  kernel.events.notify('success', `Created ${created.id}: ${created.title}`);
+onMounted(() => {
+  store.subscribeEvents();
+  void store.syncFromDaemon().catch(() => {
+    // retain offline seed tasks when daemon is unavailable
+  });
+});
+
+onBeforeUnmount(() => {
+  store.unsubscribeEvents();
+});
+
+watch(
+  () => store.activeWorkspaceId,
+  () => {
+    if (store.isDaemonBacked) {
+      void store.syncFromDaemon().catch(() => {});
+    }
+  },
+);
+
+async function handleCreate(draft: TaskDraft) {
+  try {
+    const created = await store.createTaskPersisted(draft);
+    kernel.events.notify('success', `Created ${created.id}: ${created.title}`);
+  } catch (error: any) {
+    kernel.events.notify('error', error?.message || 'Failed to create task');
+  }
 }
 
-function handleSave(id: string, draft: TaskDraft) {
-  store.updateTask(id, draft);
-  kernel.events.notify('success', `Saved changes to ${id}`);
+async function handleSave(id: string, draft: TaskDraft) {
+  try {
+    await store.updateTaskPersisted(id, draft);
+    kernel.events.notify('success', `Saved changes to ${id}`);
+  } catch (error: any) {
+    kernel.events.notify('error', error?.message || 'Failed to update task');
+  }
 }
 
-function handleDeleteSingle(id: string) {
-  store.deleteTasks([id]);
-  kernel.events.notify('info', `Deleted ${id}`);
+async function handleDeleteSingle(id: string) {
+  try {
+    await store.deleteTasksPersisted([id]);
+    kernel.events.notify('info', `Deleted ${id}`);
+  } catch (error: any) {
+    kernel.events.notify('error', error?.message || 'Failed to delete task');
+  }
 }
 
-function handleBulkUpdate(
+async function handleBulkUpdate(
   selectedRows: Task[],
-  patch: Partial<Pick<Task, 'assignee' | 'label' | 'priority' | 'status'>>,
+  patch: Partial<
+    Pick<Task, 'assignee' | 'browserId' | 'label' | 'priority' | 'status'>
+  >,
 ) {
   const ids = selectedRows.map((t) => t.id);
   if (ids.length === 0) return;
-  const updated = store.bulkUpdate(ids, patch);
-  kernel.events.notify('success', `Updated ${updated} selected task(s)`);
+  try {
+    const updated = await store.bulkUpdatePersisted(ids, patch);
+    kernel.events.notify('success', `Updated ${updated} selected task(s)`);
+  } catch (error: any) {
+    kernel.events.notify('error', error?.message || 'Failed to update tasks');
+  }
 }
 
-function handleBulkDelete(selectedRows: Task[], clearSelection: () => void) {
+async function handleBulkDelete(
+  selectedRows: Task[],
+  clearSelection: () => void,
+) {
   const ids = selectedRows.map((t) => t.id);
   if (ids.length === 0) return;
-  const deleted = store.deleteTasks(ids);
-  clearSelection();
-  kernel.events.notify('info', `Deleted ${deleted} task(s)`);
+  try {
+    const deleted = await store.deleteTasksPersisted(ids);
+    clearSelection();
+    kernel.events.notify('info', `Deleted ${deleted} task(s)`);
+  } catch (error: any) {
+    kernel.events.notify('error', error?.message || 'Failed to delete tasks');
+  }
 }
 
 function handleReset() {
-  store.resetTasks();
+  if (store.isDaemonBacked) {
+    void store.syncFromDaemon();
+  } else {
+    store.resetTasks();
+  }
   kernel.events.notify('info', 'Tasks synced to workspace baseline');
 }
 
@@ -141,20 +190,41 @@ const columns = createTaskColumns(
   {
     onInspect: openInspectSheet,
     onCopyId: copyTaskId,
-    onDuplicate: (id) => {
-      const copy = store.duplicateTask(id);
-      if (copy) kernel.events.notify('success', `Duplicated as ${copy.id}`);
+    onDuplicate: async (id) => {
+      try {
+        const copy = await store.duplicateTaskPersisted(id);
+        if (copy) kernel.events.notify('success', `Duplicated as ${copy.id}`);
+      } catch (error: any) {
+        kernel.events.notify(
+          'error',
+          error?.message || 'Failed to duplicate task',
+        );
+      }
     },
-    onToggleFavorite: (id) => {
-      const pinned = store.toggleFavorite(id);
-      kernel.events.notify(
-        'info',
-        pinned ? `Pinned ${id} to favorites` : `Unpinned ${id}`,
-      );
+    onToggleFavorite: async (id) => {
+      try {
+        const pinned = await store.toggleFavoritePersisted(id);
+        kernel.events.notify(
+          'info',
+          pinned ? `Pinned ${id} to favorites` : `Unpinned ${id}`,
+        );
+      } catch (error: any) {
+        kernel.events.notify(
+          'error',
+          error?.message || 'Failed to update favorite',
+        );
+      }
     },
-    onQuickUpdate: (id, patch) => {
-      store.bulkUpdate([id], patch);
-      kernel.events.notify('success', `Updated ${id}`);
+    onQuickUpdate: async (id, patch) => {
+      try {
+        await store.bulkUpdatePersisted([id], patch);
+        kernel.events.notify('success', `Updated ${id}`);
+      } catch (error: any) {
+        kernel.events.notify(
+          'error',
+          error?.message || 'Failed to update task',
+        );
+      }
     },
     onDelete: handleDeleteSingle,
   },
@@ -217,6 +287,7 @@ const columns = createTaskColumns(
         #toolbar="{ table, density, setDensity, isFiltered, resetFilters }"
       >
         <TasksTableToolbar
+          :browsers="store.browsers"
           :table="table"
           :density="density"
           :is-filtered="isFiltered"
@@ -251,6 +322,7 @@ const columns = createTaskColumns(
 
       <template #footer="{ selectedRows, clearSelection }">
         <TasksTableBulkBar
+          :browsers="store.browsers"
           :selected-tasks="selectedRows"
           @bulk-update="(patch) => handleBulkUpdate(selectedRows, patch)"
           @bulk-delete="handleBulkDelete(selectedRows, clearSelection)"
@@ -264,6 +336,7 @@ const columns = createTaskColumns(
     <!-- Slide-Over Inspector / Creator -->
     <TaskInspectorSheet
       v-model:open="inspectorOpen"
+      :browsers="store.browsers"
       :mode="inspectorMode"
       :task="activeTask"
       @create="handleCreate"

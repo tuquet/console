@@ -235,7 +235,7 @@ onMounted(async () => {
         <TabsContent value="info">
           <div class="max-w-2xl flex flex-col gap-5 pt-1">
             <div>
-              <h3 class="text-base font-semibold text-foreground">
+              <h3 class="text-base text-foreground">
                 {{ $t('profile.personalProfile') }}
               </h3>
               <p class="text-muted-foreground">

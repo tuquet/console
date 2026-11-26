@@ -310,7 +310,7 @@ defineExpose({
               :key="header.id"
               :class="
                 cn(
-                  'h-9 text-xs',
+                  'h-9',
                   getDataTableColumnMeta(header.column.columnDef.meta)?.class,
                 )
               "

@@ -9,7 +9,7 @@ import { $t } from '#/locales';
 import { captureError } from '#/utils/bugsink';
 
 const INITIAL_ANALYTICS_DATA: RealAnalyticsData = {
-  fleet: { loopbackPort: 8765, status: 'ready' },
+  daemon: { loopbackPort: 8765, status: 'ready' },
   plugins: { coreCount: 0, items: [], moduleCount: 0, total: 0 },
   system: {
     edgeProvider: 'Cloudflare Pages',

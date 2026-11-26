@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
+import type { HTMLAttributes } from "vue"
+import { cn } from "cn"
 
 const props = defineProps<{
-  class?: HTMLAttributes['class'];
-}>();
+  class?: HTMLAttributes["class"]
+}>()
 </script>
 
 <template>
@@ -13,6 +12,6 @@ const props = defineProps<{
     data-slot="card-footer"
     :class="cn('flex items-center px-6 [.border-t]:pt-6', props.class)"
   >
-    <slot></slot>
+    <slot />
   </div>
 </template>

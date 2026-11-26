@@ -53,10 +53,7 @@ async function handleToggleMaximize() {
         <circle cx="154" cy="164" r="6" fill="#FFFFFF" />
         <circle cx="254" cy="164" r="6" fill="#FFFFFF" />
       </svg>
-      <span
-        class="font-semibold tracking-tight text-foreground"
-        data-tauri-drag-region
-      >
+      <span class="tracking-tight text-foreground" data-tauri-drag-region>
         Admin
       </span>
 

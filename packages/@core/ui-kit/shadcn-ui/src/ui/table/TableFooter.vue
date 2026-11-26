@@ -1,20 +1,17 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
+import type { HTMLAttributes } from "vue"
+import { cn } from "cn"
 
 const props = defineProps<{
-  class?: HTMLAttributes['class'];
-}>();
+  class?: HTMLAttributes["class"]
+}>()
 </script>
 
 <template>
   <tfoot
     data-slot="table-footer"
-    :class="
-      cn('bg-muted/50 border-t font-medium [&>tr]:last:border-b-0', props.class)
-    "
+    :class="cn('bg-muted/50 border-t font-medium [&>tr]:last:border-b-0', props.class)"
   >
-    <slot></slot>
+    <slot />
   </tfoot>
 </template>

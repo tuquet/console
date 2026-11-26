@@ -29,9 +29,7 @@ const { copyToClipboard, isCopied } = useClipboard();
   <div class="rounded-xl border border-border/60 bg-muted/20 p-4">
     <div class="flex items-center gap-2 mb-2">
       <Terminal class="size-4 text-primary" />
-      <Label
-        class="font-semibold uppercase tracking-wider text-muted-foreground"
-      >
+      <Label class="uppercase tracking-wider text-muted-foreground">
         {{ resolvedLabel }}
       </Label>
     </div>

@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
+import type { HTMLAttributes } from "vue"
+import { cn } from "cn"
 
 const props = defineProps<{
-  class?: HTMLAttributes['class'];
-}>();
+  class?: HTMLAttributes["class"]
+}>()
 </script>
 
 <template>
@@ -18,6 +17,6 @@ const props = defineProps<{
       )
     "
   >
-    <slot></slot>
+    <slot />
   </div>
 </template>

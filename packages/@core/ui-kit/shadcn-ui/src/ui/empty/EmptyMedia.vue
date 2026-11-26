@@ -1,22 +1,21 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
-
-import { cn } from '@operon-core/shared/utils';
+import type { HTMLAttributes } from "vue"
+import type { EmptyMediaVariants } from "."
+import { cn } from "cn"
+import { emptyMediaVariants } from "."
 
 const props = defineProps<{
-  class?: HTMLAttributes['class'];
-}>();
+  class?: HTMLAttributes["class"]
+  variant?: EmptyMediaVariants["variant"]
+}>()
 </script>
 
 <template>
   <div
-    :class="
-      cn(
-        'mb-2 flex items-center justify-center text-muted-foreground',
-        props.class,
-      )
-    "
+    data-slot="empty-icon"
+    :data-variant="variant"
+    :class="cn(emptyMediaVariants({ variant }), props.class)"
   >
-    <slot></slot>
+    <slot />
   </div>
 </template>

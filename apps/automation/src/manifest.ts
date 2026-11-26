@@ -31,6 +31,17 @@ export const automationManifest = {
           title: t('page.automation.browsers'),
         },
       },
+      {
+        name: 'AutomationDrivers',
+        path: 'drivers',
+        component: () => import('./views/drivers.vue'),
+        meta: {
+          authority: ['superadmin', 'local_operator'],
+          icon: 'lucide:cpu',
+          plugin: 'operon',
+          title: t('automation.browsers.drivers_title'),
+        },
+      },
     ];
   },
 };

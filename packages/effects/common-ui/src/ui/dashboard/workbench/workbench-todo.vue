@@ -41,7 +41,7 @@ withDefaults(defineProps<Props>(), {
           <div class="flex min-w-0 items-center gap-x-4">
             <OperonCheckbox v-model="item.completed" name="completed" />
             <div class="min-w-0 flex-auto">
-              <p class="/6 font-semibold text-foreground">
+              <p class="/6 text-foreground">
                 {{ item.title }}
               </p>
               <!-- eslint-disable vue/no-v-html -->

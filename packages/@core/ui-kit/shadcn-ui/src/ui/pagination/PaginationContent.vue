@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import type { PaginationListProps } from 'reka-ui';
+import type { PaginationListProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import { reactiveOmit } from "@vueuse/core"
+import { cn } from "cn"
+import { PaginationList } from "reka-ui"
 
-import type { HTMLAttributes } from 'vue';
+const props = defineProps<PaginationListProps & { class?: HTMLAttributes["class"] }>()
 
-import { cn } from '@operon-core/shared/utils';
-
-import { reactiveOmit } from '@vueuse/core';
-import { PaginationList } from 'reka-ui';
-
-const props = defineProps<
-  PaginationListProps & { class?: HTMLAttributes['class'] }
->();
-
-const delegatedProps = reactiveOmit(props, 'class');
+const delegatedProps = reactiveOmit(props, "class")
 </script>
 
 <template>
@@ -22,6 +17,6 @@ const delegatedProps = reactiveOmit(props, 'class');
     v-bind="delegatedProps"
     :class="cn('flex flex-row items-center gap-1', props.class)"
   >
-    <slot v-bind="slotProps"></slot>
+    <slot v-bind="slotProps" />
   </PaginationList>
 </template>
