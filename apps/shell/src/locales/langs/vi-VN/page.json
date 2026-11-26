@@ -14,6 +14,13 @@
     "overview": "Tổng quan",
     "analytics": "Phân tích"
   },
+  "browsers": {
+    "title": "Browsers"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "desc": "Quản lý tác vụ, gán trình duyệt và lịch chạy tự động"
+  },
   "tenants": {
     "title": "Quản lý Tenant",
     "detail": "Chi tiết Tenant"
@@ -206,7 +213,7 @@
     "installDownload": "Tải Operon",
     "checklistTitle": "Cài đặt nhanh",
     "checklistStep1": "Cài đặt Operon bằng lệnh phía trên",
-    "checklistStep2": "Khởi động Operon: opn worker start",
+    "checklistStep2": "Khởi động Operon daemon",
     "checklistStep3": "Chờ tự động kết nối (hoặc bấm Thử lại)",
     "modulesTitle": "Các module",
     "modulesDesc": "Các module sẽ tự động mở khóa sau khi kết nối Operon.",
