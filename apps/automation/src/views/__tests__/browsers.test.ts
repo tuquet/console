@@ -101,17 +101,6 @@ describe('automation browsers view with shared DataTable', () => {
     expect(host.textContent).toContain('#vip');
     expect(host.textContent).toContain('Rows per page');
 
-    const autoDetectBtn = [...host.querySelectorAll('button')].find((btn) =>
-      btn.textContent?.includes('auto_detect'),
-    );
-    expect(autoDetectBtn).toBeDefined();
-    autoDetectBtn?.click();
-    await nextTick();
-    await nextTick();
-    expect(mockFetch).toHaveBeenCalledWith('/api/v1/browsers/auto-detect', {
-      method: 'POST',
-    });
-
     const profileLink = [
       ...host.querySelectorAll<HTMLButtonElement>('tbody button'),
     ].find((btn) => btn.textContent?.includes('Marketing Profile'));
