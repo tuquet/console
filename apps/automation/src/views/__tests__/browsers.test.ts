@@ -1,5 +1,6 @@
 import { createApp, h, nextTick, reactive, ref } from 'vue';
 
+import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -85,12 +86,18 @@ describe('automation browsers view with shared DataTable', () => {
     const host = document.createElement('div');
     document.body.append(host);
 
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
     const app = createApp({ render: () => h(AutomationBrowsersView) });
     app.use(createPinia());
+    app.use(VueQueryPlugin, { queryClient });
     app.config.errorHandler = (err) => errors.push(err);
     app.mount(host);
 
+    await Promise.resolve();
     await nextTick();
+    await new Promise((resolve) => setTimeout(resolve, 10));
     await nextTick();
 
     expect(errors).toEqual([]);

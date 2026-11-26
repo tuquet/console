@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useBrowsersStore } from '../browsers';
+import { resetFallbackQueryClient } from '../query-client';
 
 const mockFetch = vi.fn();
 const mockWorkspaceState = reactive({
@@ -78,6 +79,7 @@ const sampleBrowsers = [
 
 describe('useBrowsersStore', () => {
   beforeEach(() => {
+    resetFallbackQueryClient();
     setActivePinia(createPinia());
     mockWorkspaceState.activeId = 'local-default';
     vi.clearAllMocks();

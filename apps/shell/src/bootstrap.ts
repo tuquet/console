@@ -6,6 +6,7 @@ import { preferences } from '@operon/preferences';
 import { initStores } from '@operon/stores';
 import '@operon/styles';
 
+import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
 import { useTitle } from '@vueuse/core';
 
 import { $t, setupI18n } from '#/locales';
@@ -69,6 +70,17 @@ async function bootstrap(namespace: string) {
 
   // Configure Pinia store before router to ensure active Pinia during navigation guards
   await initStores(app, { namespace });
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: 1,
+        staleTime: 10_000,
+      },
+    },
+  });
+  app.use(VueQueryPlugin, { queryClient });
 
   // Setup internationalization (i18n)
   await setupI18n(app);

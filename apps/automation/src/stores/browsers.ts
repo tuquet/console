@@ -4,7 +4,6 @@ import type {
   CreateBrowserInput,
   PatchBrowserPatch,
   ProbeProxyResult,
-  RuntimeReleaseItem,
   StartSessionInput,
 } from '../api/browsers';
 
@@ -12,21 +11,24 @@ import { computed, ref, watch } from 'vue';
 
 import { useKernel } from '@operon/kernel';
 
+import { useMutation, useQuery } from '@tanstack/vue-query';
 import { defineStore } from 'pinia';
 
 import { createBrowserApi } from '../api/browsers';
+import { useBrowserRuntimesStore } from './browser-runtimes';
+import { getAutomationQueryClient } from './query-client';
 
 export type ScopeMode = 'all' | 'workspace';
 
 export const useBrowsersStore = defineStore('automation:browsers', () => {
   const kernel = useKernel();
   const api = createBrowserApi(kernel.api);
+  const runtimesStore = useBrowserRuntimesStore();
+  const queryClient = getAutomationQueryClient();
 
-  const items = ref<BrowserProfileRecord[]>([]);
-  const loading = ref(false);
-  const error = ref<null | string>(null);
   const detailTarget = ref<BrowserProfileRecord | null>(null);
   const detailLoading = ref(false);
+  const silentRefreshing = ref(false);
 
   const scopeMode = ref<ScopeMode>('workspace');
   const searchQuery = ref('');
@@ -36,12 +38,6 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
 
   const selectedIds = ref<string[]>([]);
   const mutatingIds = ref<string[]>([]);
-  const runtimes = ref<RuntimeReleaseItem[]>([]);
-  const activeRuntimeVersion = ref('');
-  const runtimesLoading = ref(false);
-  const runtimeProgress = ref<
-    Record<string, { error?: string; percent: number; stage: string }>
-  >({});
 
   let eventSource: EventSource | null = null;
   let refreshTimer: null | ReturnType<typeof setTimeout> = null;
@@ -49,6 +45,46 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
   const activeWorkspaceId = computed(
     () => kernel.workspace.activeId || 'local-default',
   );
+
+  const browsersQueryKey = computed(
+    () =>
+      [
+        'browsers',
+        scopeMode.value,
+        scopeMode.value === 'workspace' ? activeWorkspaceId.value : 'all',
+      ] as const,
+  );
+
+  const browsersQuery = useQuery(
+    {
+      enabled: false,
+      queryFn: async () => {
+        const list = await api.list({
+          scope: scopeMode.value,
+          workspaceId:
+            scopeMode.value === 'workspace'
+              ? activeWorkspaceId.value
+              : undefined,
+        });
+        return Array.isArray(list) ? list : [];
+      },
+      queryKey: browsersQueryKey,
+    },
+    queryClient,
+  );
+
+  const items = computed<BrowserProfileRecord[]>(
+    () => browsersQuery.data.value ?? [],
+  );
+  const loading = computed(
+    () => !silentRefreshing.value && browsersQuery.isFetching.value,
+  );
+  const error = computed<null | string>(() => {
+    const err = browsersQuery.error.value;
+    return err
+      ? (err as Error).message || 'Failed to load browser profiles'
+      : null;
+  });
 
   const filteredItems = computed(() => {
     const q = searchQuery.value.trim().toLowerCase();
@@ -140,49 +176,40 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     selectedIds.value = [];
   }
 
-  async function fetchBrowsers(silent = false) {
-    if (!silent) {
-      loading.value = true;
+  function syncSelectionAndDetail(list: BrowserProfileRecord[]) {
+    const validIds = new Set(list.map((b) => b.id));
+    selectedIds.value = selectedIds.value.filter((id) => validIds.has(id));
+
+    if (detailTarget.value) {
+      const refreshed = list.find((b) => b.id === detailTarget.value?.id);
+      if (refreshed) {
+        detailTarget.value = { ...detailTarget.value, ...refreshed };
+      }
     }
-    error.value = null;
-    let loadErrorMessage: null | string = null;
+  }
+
+  async function fetchBrowsers(silent = false) {
+    if (silent) {
+      silentRefreshing.value = true;
+    }
     try {
-      const list = await api.list({
-        scope: scopeMode.value,
-        workspaceId:
-          scopeMode.value === 'workspace' ? activeWorkspaceId.value : undefined,
-      });
-      items.value = Array.isArray(list) ? list : [];
-
-      const validIds = new Set(items.value.map((b) => b.id));
-      selectedIds.value = selectedIds.value.filter((id) => validIds.has(id));
-
-      if (detailTarget.value) {
-        const refreshed = items.value.find(
-          (b) => b.id === detailTarget.value?.id,
-        );
-        if (refreshed) {
-          detailTarget.value = { ...detailTarget.value, ...refreshed };
-        }
-      }
-      return items.value;
-    } catch (error: any) {
-      loadErrorMessage = error?.message || 'Failed to load browser profiles';
-      return items.value;
+      const res = await browsersQuery.refetch();
+      const list = res.data ?? items.value;
+      syncSelectionAndDetail(list);
+      return list;
     } finally {
-      if (loadErrorMessage) {
-        error.value = loadErrorMessage;
-      }
-      if (!silent) {
-        loading.value = false;
-      }
+      silentRefreshing.value = false;
     }
   }
 
   async function inspectBrowser(id: string) {
     detailLoading.value = true;
     try {
-      const detail = await api.detail(id);
+      const detail = await queryClient.fetchQuery({
+        queryFn: () => api.detail(id),
+        queryKey: ['browser-detail', id],
+        staleTime: 5000,
+      });
       detailTarget.value = detail;
       return detail;
     } finally {
@@ -190,139 +217,205 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     }
   }
 
-  async function createProfile(input: CreateBrowserInput) {
-    const res = await api.create({
-      ...input,
-      workspaceId: input.workspaceId || activeWorkspaceId.value,
-    });
-    await fetchBrowsers(true);
-    return res;
-  }
-
-  async function patchProfile(id: string, patch: PatchBrowserPatch) {
-    setMutating(id, true);
-    try {
-      const updated = await api.patch(id, patch);
-      items.value = items.value.map((b) => (b.id === id ? updated : b));
-      if (detailTarget.value?.id === id) {
-        detailTarget.value = updated;
-      }
-      return updated;
-    } finally {
-      setMutating(id, false);
-    }
-  }
-
-  async function removeProfile(id: string, force = false) {
-    setMutating(id, true);
-    try {
-      await api.remove(id, force);
-      items.value = items.value.filter((b) => b.id !== id);
-      selectedIds.value = selectedIds.value.filter((item) => item !== id);
-      if (detailTarget.value?.id === id) {
-        detailTarget.value = null;
-      }
-    } finally {
-      setMutating(id, false);
-    }
-  }
-
-  async function unbindProfile(id: string) {
-    setMutating(id, true);
-    try {
-      const res = await api.unbind(id);
-      await fetchBrowsers(true);
-      return res;
-    } finally {
-      setMutating(id, false);
-    }
-  }
-
-  async function launchProfile(id: string, opts: StartSessionInput = {}) {
-    setMutating(id, true);
-    try {
-      const res = await api.startSession(id, opts);
-      await fetchBrowsers(true);
-      return res;
-    } finally {
-      setMutating(id, false);
-    }
-  }
-
-  async function stopProfile(id: string, force = false) {
-    setMutating(id, true);
-    try {
-      const res = await api.stopSession(id, force);
-      await fetchBrowsers(true);
-      return res;
-    } finally {
-      setMutating(id, false);
-    }
-  }
-
-  async function makeDefaultProfile(id: string) {
-    setMutating(id, true);
-    try {
-      await api.setDefault(id);
-      await fetchBrowsers(true);
-    } finally {
-      setMutating(id, false);
-    }
-  }
-
-  async function cloneProfile(id: string, input: CloneBrowserInput = {}) {
-    setMutating(id, true);
-    try {
-      const cloned = await api.clone(id, input);
-      await fetchBrowsers(true);
-      return cloned;
-    } finally {
-      setMutating(id, false);
-    }
-  }
-
-  async function moveProfileToWorkspace(id: string, targetWorkspaceId: string) {
-    setMutating(id, true);
-    try {
-      const moved = await api.move(id, { targetWorkspaceId });
-      await fetchBrowsers(true);
-      if (detailTarget.value?.id === id) {
-        detailTarget.value =
-          scopeMode.value === 'workspace' &&
-          targetWorkspaceId !== activeWorkspaceId.value
-            ? null
-            : moved;
-      }
-      return moved;
-    } finally {
-      setMutating(id, false);
-    }
-  }
-
-  async function probeProxy(proxy: string): Promise<ProbeProxyResult> {
-    return await api.probeProxy({ proxy, timeoutSecs: 5 });
-  }
-
-  async function updateExtensions(
+  async function withRowMutation<T>(
     id: string,
-    extensions: string[],
-    allowRemoveAutomation = false,
-  ) {
+    fn: () => Promise<T>,
+  ): Promise<T> {
     setMutating(id, true);
     try {
-      const updated = await api.updateExtensions(
-        id,
-        extensions,
-        allowRemoveAutomation,
-      );
-      items.value = items.value.map((b) => (b.id === id ? updated : b));
-      if (detailTarget.value?.id === id) {
-        detailTarget.value = updated;
-      }
-      return updated;
+      return await fn();
     } finally {
       setMutating(id, false);
     }
+  }
+
+  function updateCachedRecord(updated: BrowserProfileRecord) {
+    queryClient.setQueryData<BrowserProfileRecord[]>(
+      browsersQueryKey.value,
+      (prev) => (prev ?? []).map((b) => (b.id === updated.id ? updated : b)),
+    );
+    if (detailTarget.value?.id === updated.id) {
+      detailTarget.value = updated;
+    }
+  }
+
+  const createMutation = useMutation(
+    {
+      mutationFn: (input: CreateBrowserInput) =>
+        api.create({
+          ...input,
+          workspaceId: input.workspaceId || activeWorkspaceId.value,
+        }),
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: ['browsers'] });
+        await fetchBrowsers(true);
+      },
+    },
+    queryClient,
+  );
+
+  const patchMutation = useMutation(
+    {
+      mutationFn: ({ id, patch }: { id: string; patch: PatchBrowserPatch }) =>
+        withRowMutation(id, () => api.patch(id, patch)),
+      onSuccess: (updated) => {
+        updateCachedRecord(updated);
+      },
+    },
+    queryClient,
+  );
+
+  const removeMutation = useMutation(
+    {
+      mutationFn: ({ force, id }: { force: boolean; id: string }) =>
+        withRowMutation(id, () => api.remove(id, force)),
+      onSuccess: (_res, { id }) => {
+        queryClient.setQueryData<BrowserProfileRecord[]>(
+          browsersQueryKey.value,
+          (prev) => (prev ?? []).filter((b) => b.id !== id),
+        );
+        selectedIds.value = selectedIds.value.filter((item) => item !== id);
+        if (detailTarget.value?.id === id) {
+          detailTarget.value = null;
+        }
+      },
+    },
+    queryClient,
+  );
+
+  const unbindMutation = useMutation(
+    {
+      mutationFn: (id: string) => withRowMutation(id, () => api.unbind(id)),
+      onSuccess: async () => {
+        await fetchBrowsers(true);
+      },
+    },
+    queryClient,
+  );
+
+  const launchMutation = useMutation(
+    {
+      mutationFn: ({ id, opts }: { id: string; opts: StartSessionInput }) =>
+        withRowMutation(id, () => api.startSession(id, opts)),
+      onSuccess: async () => {
+        await fetchBrowsers(true);
+      },
+    },
+    queryClient,
+  );
+
+  const stopMutation = useMutation(
+    {
+      mutationFn: ({ force, id }: { force: boolean; id: string }) =>
+        withRowMutation(id, () => api.stopSession(id, force)),
+      onSuccess: async () => {
+        await fetchBrowsers(true);
+      },
+    },
+    queryClient,
+  );
+
+  const defaultMutation = useMutation(
+    {
+      mutationFn: (id: string) => withRowMutation(id, () => api.setDefault(id)),
+      onSuccess: async () => {
+        await fetchBrowsers(true);
+      },
+    },
+    queryClient,
+  );
+
+  const cloneMutation = useMutation(
+    {
+      mutationFn: ({ id, input }: { id: string; input: CloneBrowserInput }) =>
+        withRowMutation(id, () => api.clone(id, input)),
+      onSuccess: async () => {
+        await fetchBrowsers(true);
+      },
+    },
+    queryClient,
+  );
+
+  const moveMutation = useMutation(
+    {
+      mutationFn: ({
+        id,
+        targetWorkspaceId,
+      }: {
+        id: string;
+        targetWorkspaceId: string;
+      }) => withRowMutation(id, () => api.move(id, { targetWorkspaceId })),
+      onSuccess: async (moved, { id, targetWorkspaceId }) => {
+        await fetchBrowsers(true);
+        if (detailTarget.value?.id === id) {
+          detailTarget.value =
+            scopeMode.value === 'workspace' &&
+            targetWorkspaceId !== activeWorkspaceId.value
+              ? null
+              : moved;
+        }
+      },
+    },
+    queryClient,
+  );
+
+  const extensionsMutation = useMutation(
+    {
+      mutationFn: ({
+        allowRemoveAutomation,
+        extensions,
+        id,
+      }: {
+        allowRemoveAutomation: boolean;
+        extensions: string[];
+        id: string;
+      }) =>
+        withRowMutation(id, () =>
+          api.updateExtensions(id, extensions, allowRemoveAutomation),
+        ),
+      onSuccess: (updated) => {
+        updateCachedRecord(updated);
+      },
+    },
+    queryClient,
+  );
+
+  const batchDeleteMutation = useMutation(
+    {
+      mutationFn: ({ force, ids }: { force: boolean; ids: string[] }) =>
+        api.batchDelete(ids, force),
+      onSuccess: async () => {
+        await fetchBrowsers(true);
+      },
+    },
+    queryClient,
+  );
+
+  const importCsvMutation = useMutation(
+    {
+      mutationFn: (csvString: string) =>
+        api.importCsv(csvString, activeWorkspaceId.value),
+      onSuccess: async (res) => {
+        if (res.imported > 0) {
+          await fetchBrowsers(true);
+        }
+      },
+    },
+    queryClient,
+  );
+
+  const autoDetectMutation = useMutation(
+    {
+      mutationFn: () => api.autoDetect(),
+      onSuccess: async () => {
+        await fetchBrowsers(true);
+      },
+    },
+    queryClient,
+  );
+
+  function probeProxy(proxy: string): Promise<ProbeProxyResult> {
+    return api.probeProxy({ proxy, timeoutSecs: 5 });
   }
 
   async function batchLaunchSelected(targets?: BrowserProfileRecord[]) {
@@ -332,7 +425,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     let started = 0;
     for (const profile of offline) {
       try {
-        await launchProfile(profile.id);
+        await launchMutation.mutateAsync({ id: profile.id, opts: {} });
         started += 1;
       } catch {
         // continue remaining rows
@@ -348,7 +441,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     let stopped = 0;
     for (const profile of running) {
       try {
-        await stopProfile(profile.id);
+        await stopMutation.mutateAsync({ force: false, id: profile.id });
         stopped += 1;
       } catch {
         // continue remaining rows
@@ -362,60 +455,13 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
     if (ids.length === 0) {
       return { deleted: [], errors: [], skipped: [] };
     }
-    const res = await api.batchDelete(ids, force);
-    await fetchBrowsers(true);
-    return res;
-  }
-
-  async function importCsv(csvString: string) {
-    const res = await api.importCsv(csvString, activeWorkspaceId.value);
-    if (res.imported > 0) {
-      await fetchBrowsers(true);
-    }
-    return res;
-  }
-
-  async function autoDetect() {
-    const list = await api.autoDetect();
-    await fetchBrowsers(true);
-    return list;
-  }
-
-  async function fetchRuntimes() {
-    runtimesLoading.value = true;
-    try {
-      const res = await api.listRuntimes();
-      runtimes.value = res.releases;
-      activeRuntimeVersion.value = res.activeVersion;
-      return res;
-    } finally {
-      runtimesLoading.value = false;
-    }
-  }
-
-  async function installRuntime(version: string) {
-    runtimeProgress.value = {
-      ...runtimeProgress.value,
-      [version]: { percent: 10, stage: 'downloading' },
-    };
-    return await api.installRuntime(version);
-  }
-
-  async function useRuntime(version: string) {
-    const res = await api.useRuntime(version);
-    await fetchRuntimes();
-    return res;
-  }
-
-  async function deleteRuntime(version: string) {
-    const res = await api.deleteRuntime(version);
-    await fetchRuntimes();
-    return res;
+    return await batchDeleteMutation.mutateAsync({ force, ids });
   }
 
   function scheduleSilentRefresh() {
     if (refreshTimer) clearTimeout(refreshTimer);
     refreshTimer = setTimeout(() => {
+      void queryClient.invalidateQueries({ queryKey: ['browsers'] });
       void fetchBrowsers(true);
     }, 150);
   }
@@ -430,17 +476,7 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
         try {
           const data = JSON.parse(evt.data);
           if (data?.type === 'runtime_download_progress' && data?.version) {
-            runtimeProgress.value = {
-              ...runtimeProgress.value,
-              [data.version]: {
-                error: data.error,
-                percent: Number(data.percent ?? 0),
-                stage: String(data.stage ?? 'downloading'),
-              },
-            };
-            if (data.stage === 'ready') {
-              void fetchRuntimes();
-            }
+            runtimesStore.applyProgressEvent(data);
           } else if (
             data?.type === 'browser_changed' ||
             data?.type === 'browser_online' ||
@@ -484,54 +520,64 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
   });
 
   return {
-    activeRuntimeVersion,
     activeWorkspaceId,
     allFilteredSelected,
-    autoDetect,
+    autoDetect: () => autoDetectMutation.mutateAsync(),
     batchLaunchSelected,
     batchRemoveSelected,
     batchStopSelected,
     clearSelection,
-    cloneProfile,
-    createProfile,
-    deleteRuntime,
+    cloneProfile: (id: string, input: CloneBrowserInput = {}) =>
+      cloneMutation.mutateAsync({ id, input }),
+    createProfile: (input: CreateBrowserInput) =>
+      createMutation.mutateAsync(input),
     detailLoading,
     detailTarget,
     error,
     fetchBrowsers,
-    fetchRuntimes,
     filteredItems,
-    importCsv,
+    importCsv: (csvString: string) => importCsvMutation.mutateAsync(csvString),
     inspectBrowser,
-    installRuntime,
     isMutating,
     items,
-    launchProfile,
+    launchProfile: (id: string, opts: StartSessionInput = {}) =>
+      launchMutation.mutateAsync({ id, opts }),
     loading,
-    makeDefaultProfile,
-    moveProfileToWorkspace,
+    makeDefaultProfile: async (id: string) => {
+      await defaultMutation.mutateAsync(id);
+    },
+    moveProfileToWorkspace: (id: string, targetWorkspaceId: string) =>
+      moveMutation.mutateAsync({ id, targetWorkspaceId }),
     mutatingIds,
-    patchProfile,
+    patchProfile: (id: string, patch: PatchBrowserPatch) =>
+      patchMutation.mutateAsync({ id, patch }),
     platformFilter,
     probeProxy,
     proxyFilter,
-    removeProfile,
-    runtimeProgress,
-    runtimes,
-    runtimesLoading,
+    removeProfile: (id: string, force = false) =>
+      removeMutation.mutateAsync({ force, id }),
     scopeMode,
     searchQuery,
     selectedIds,
     selectedProfiles,
     stats,
     statusFilter,
-    stopProfile,
+    stopProfile: (id: string, force = false) =>
+      stopMutation.mutateAsync({ force, id }),
     subscribeEvents,
     toggleSelectAllFiltered,
     toggleSelected,
-    unbindProfile,
+    unbindProfile: (id: string) => unbindMutation.mutateAsync(id),
     unsubscribeEvents,
-    updateExtensions,
-    useRuntime,
+    updateExtensions: (
+      id: string,
+      extensions: string[],
+      allowRemoveAutomation = false,
+    ) =>
+      extensionsMutation.mutateAsync({
+        allowRemoveAutomation,
+        extensions,
+        id,
+      }),
   };
 });
