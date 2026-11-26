@@ -266,7 +266,7 @@ async function submitForm(restartAfterSave = false) {
               v-model="customId"
               :disabled="isEditMode"
               placeholder="auto-generated"
-              class="font-mono text-xs"
+              class="font-mono"
             />
           </div>
           <div class="flex flex-col gap-1.5">
@@ -335,11 +335,7 @@ async function submitForm(restartAfterSave = false) {
           <div class="flex flex-col gap-1.5 sm:col-span-2">
             <Label>{{ $t('automation.browsers.field_seed') }}</Label>
             <div class="flex items-center gap-2">
-              <Input
-                v-model.number="seed"
-                type="number"
-                class="font-mono text-xs"
-              />
+              <Input v-model.number="seed" type="number" class="font-mono" />
               <Button
                 type="button"
                 variant="outline"
@@ -370,9 +366,9 @@ async function submitForm(restartAfterSave = false) {
           <div class="flex flex-col gap-1.5">
             <Label>{{ $t('automation.browsers.field_resolution') }}</Label>
             <div class="flex items-center gap-1.5">
-              <Input v-model="screenWidth" class="font-mono text-xs" />
+              <Input v-model="screenWidth" class="font-mono" />
               <span class="text-muted-foreground">x</span>
-              <Input v-model="screenHeight" class="font-mono text-xs" />
+              <Input v-model="screenHeight" class="font-mono" />
             </div>
           </div>
 
@@ -394,7 +390,7 @@ async function submitForm(restartAfterSave = false) {
               <Input
                 v-model="proxy"
                 placeholder="socks5://127.0.0.1:1080 or http://user:pass@host:8080"
-                class="font-mono text-xs"
+                class="font-mono"
               />
               <Button
                 type="button"
@@ -437,7 +433,7 @@ async function submitForm(restartAfterSave = false) {
             <Input
               v-model="userAgent"
               placeholder="Leave blank for automatic Chromium fingerprint UA"
-              class="font-mono text-xs"
+              class="font-mono"
             />
           </div>
         </div>

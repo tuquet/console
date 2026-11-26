@@ -325,7 +325,7 @@ const columns = createBrowserColumns(
         <h2 class="text-base font-semibold tracking-tight">
           {{ $t('automation.browsers.title') }}
         </h2>
-        <Badge variant="outline" class="font-mono text-[11px]">
+        <Badge variant="outline" class="font-mono">
           {{ activeTenantName }}
         </Badge>
       </div>
@@ -336,7 +336,7 @@ const columns = createBrowserColumns(
             type="button"
             size="sm"
             :variant="store.scopeMode === 'tenant' ? 'secondary' : 'ghost'"
-            class="h-7 px-2.5 text-xs"
+            class="h-7 px-2.5"
             @click="store.scopeMode = 'tenant'"
           >
             {{ $t('automation.browsers.scope_tenant') }}
@@ -345,7 +345,7 @@ const columns = createBrowserColumns(
             type="button"
             size="sm"
             :variant="store.scopeMode === 'all' ? 'secondary' : 'ghost'"
-            class="h-7 px-2.5 text-xs"
+            class="h-7 px-2.5"
             @click="store.scopeMode = 'all'"
           >
             {{ $t('automation.browsers.scope_all') }}
@@ -355,7 +355,7 @@ const columns = createBrowserColumns(
         <Button
           variant="outline"
           size="sm"
-          class="h-8 gap-1.5 text-xs shadow-none"
+          class="h-8 gap-1.5 shadow-none"
           :disabled="!bridge.isHealthy.value || store.loading"
           @click="store.fetchBrowsers()"
         >
@@ -369,7 +369,7 @@ const columns = createBrowserColumns(
         <Button
           variant="outline"
           size="sm"
-          class="h-8 gap-1.5 text-xs shadow-none"
+          class="h-8 gap-1.5 shadow-none"
           :disabled="!bridge.isHealthy.value"
           @click="importOpen = true"
         >
@@ -379,7 +379,7 @@ const columns = createBrowserColumns(
 
         <Button
           size="sm"
-          class="h-8 gap-1.5 text-xs"
+          class="h-8 gap-1.5"
           :disabled="!bridge.isHealthy.value"
           @click="openCreateModal"
         >

@@ -49,7 +49,7 @@ defineProps<{
     <Button
       size="sm"
       :variant="profile.isOnline ? 'destructive' : 'outline'"
-      class="h-7 gap-1 px-2.5 text-xs shadow-none"
+      class="h-7 gap-1 px-2.5 shadow-none"
       :disabled="mutating"
       @click="actions.onToggleRun(profile)"
     >

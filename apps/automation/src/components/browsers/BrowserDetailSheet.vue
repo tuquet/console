@@ -238,15 +238,11 @@ async function handleClone() {
           <Badge
             v-if="profile.isOnline"
             variant="outline"
-            class="shrink-0 border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0 text-[10px] text-emerald-500"
+            class="shrink-0 border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
           >
             {{ $t('automation.browsers.running_badge') }}
           </Badge>
-          <Badge
-            v-if="profile.isDefault"
-            variant="secondary"
-            class="shrink-0 px-1.5 py-0 text-[10px]"
-          >
+          <Badge v-if="profile.isDefault" variant="secondary" class="shrink-0">
             {{ $t('automation.browsers.default_badge') }}
           </Badge>
         </div>
@@ -375,7 +371,7 @@ async function handleClone() {
                 >
                   {{ profile.proxy }}
                 </code>
-                <Badge v-else variant="outline" class="text-[11px]">
+                <Badge v-else variant="outline">
                   {{ $t('automation.browsers.direct_badge') }}
                 </Badge>
               </div>
@@ -403,7 +399,7 @@ async function handleClone() {
                     v-for="tag in profile.tags"
                     :key="tag"
                     variant="outline"
-                    class="px-1.5 py-0 font-mono text-[10px]"
+                    class="font-mono"
                   >
                     #{{ tag }}
                   </Badge>
@@ -447,12 +443,12 @@ async function handleClone() {
               v-if="tenantOptions.length > 1"
               class="flex flex-col gap-2 rounded-lg border border-border p-3"
             >
-              <Label class="text-xs">
+              <Label>
                 {{ $t('automation.browsers.action_move_tenant') }}
               </Label>
               <div class="flex items-center gap-2">
                 <Select v-model="moveTenantId">
-                  <SelectTrigger class="h-8 flex-1 text-xs">
+                  <SelectTrigger class="h-8 flex-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -468,7 +464,7 @@ async function handleClone() {
                 <Button
                   size="sm"
                   variant="outline"
-                  class="h-8 gap-1.5 text-xs"
+                  class="h-8 gap-1.5"
                   :disabled="
                     moving ||
                     profile.isOnline ||
@@ -534,13 +530,13 @@ async function handleClone() {
 
           <TabsContent value="extensions" class="mt-3 flex flex-col gap-3">
             <div class="flex flex-col gap-1.5">
-              <Label class="text-xs">
+              <Label>
                 {{ $t('automation.browsers.detail_extensions_hint') }}
               </Label>
               <Input
                 v-model="extInput"
                 placeholder="automation, /path/to/unpacked"
-                class="font-mono text-xs"
+                class="font-mono"
               />
             </div>
             <div class="flex flex-wrap gap-1.5">
@@ -548,7 +544,7 @@ async function handleClone() {
                 v-for="ext in profile.extensions"
                 :key="ext"
                 variant="outline"
-                class="gap-1 text-xs"
+                class="gap-1"
               >
                 <CheckCircle2 class="size-3 text-emerald-500" />
                 <span>{{ ext }}</span>

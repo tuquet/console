@@ -45,7 +45,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEsc));
       class="border-border bg-popover/95 text-popover-foreground fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 flex-wrap items-center gap-1.5 rounded-xl border px-3 py-2 shadow-xl backdrop-blur-md"
     >
       <div class="flex items-center gap-2 pr-1">
-        <Badge variant="default" class="font-mono text-xs">
+        <Badge variant="default" class="font-mono">
           {{ selectedBrowsers.length }}
         </Badge>
         <span class="text-xs font-medium whitespace-nowrap">
@@ -62,19 +62,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEsc));
       <Button
         variant="ghost"
         size="sm"
-        class="h-8 text-xs"
+        class="h-8"
         @click="emit('batchLaunch')"
       >
         <Play class="mr-1.5 size-3.5 text-emerald-500" />
         {{ $t('automation.overview.browser_batch_run_btn') }}
       </Button>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        class="h-8 text-xs"
-        @click="emit('batchStop')"
-      >
+      <Button variant="ghost" size="sm" class="h-8" @click="emit('batchStop')">
         <Square class="mr-1.5 size-3.5 text-amber-500" />
         {{ $t('automation.overview.browser_batch_stop_btn') }}
       </Button>
@@ -82,7 +77,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEsc));
       <Button
         variant="ghost"
         size="sm"
-        class="text-destructive hover:text-destructive h-8 text-xs"
+        class="text-destructive hover:text-destructive h-8"
         @click="emit('batchDelete')"
       >
         <Trash2 class="mr-1.5 size-3.5" />
@@ -94,7 +89,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEsc));
       <Button
         variant="ghost"
         size="sm"
-        class="text-muted-foreground h-8 px-2 text-xs"
+        class="text-muted-foreground h-8 px-2"
         @click="emit('clear')"
       >
         <X class="size-3.5" />

@@ -106,7 +106,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleGlobalSlash));
           <InputGroupInput
             :model-value="searchQuery"
             :placeholder="$t('automation.browsers.search_placeholder')"
-            class="bg-background h-8 pr-11 pl-8 text-xs"
+            class="bg-background h-8 pr-11 pl-8"
             @update:model-value="setSearch"
           />
           <InputGroupAddon class="absolute right-0 px-2">
@@ -148,7 +148,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleGlobalSlash));
         v-if="isFiltered"
         variant="ghost"
         size="sm"
-        class="text-muted-foreground hover:text-foreground h-8 px-2.5 text-xs"
+        class="text-muted-foreground hover:text-foreground h-8 px-2.5"
         @click="emit('reset')"
       >
         Reset

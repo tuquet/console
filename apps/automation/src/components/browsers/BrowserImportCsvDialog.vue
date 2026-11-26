@@ -80,14 +80,14 @@ async function handleImport() {
 
       <div class="flex flex-col gap-3 py-2">
         <div class="flex items-center justify-between gap-2">
-          <Label class="text-xs text-muted-foreground">
+          <Label class="text-muted-foreground">
             {{ $t('automation.browsers.csv_desc') }}
           </Label>
           <Button
             type="button"
             size="sm"
             variant="ghost"
-            class="h-7 shrink-0 text-xs"
+            class="h-7 shrink-0"
             @click="loadSample"
           >
             {{ $t('automation.browsers.csv_sample_btn') }}
@@ -98,7 +98,7 @@ async function handleImport() {
           v-model="csvText"
           :rows="7"
           placeholder="id,name,userAgent,timezone,proxy,group,tags"
-          class="font-mono text-xs"
+          class="font-mono"
         />
 
         <div

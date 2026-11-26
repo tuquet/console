@@ -144,7 +144,9 @@ export function createBrowserColumns(
             },
             [
               h('span', profile.id),
-              profile.groupName ? h('span', `• ${profile.groupName}`) : null,
+              profile.groupName && profile.groupName.toLowerCase() !== 'default'
+                ? h('span', `• ${profile.groupName}`)
+                : null,
               ...profile.tags.slice(0, 3).map((tag) =>
                 h(
                   Badge,
@@ -180,23 +182,32 @@ export function createBrowserColumns(
       cell: ({ row }) => {
         const profile = row.original;
         return h('div', { class: 'flex items-center gap-1.5' }, [
-          h(
-            Badge,
-            {
-              variant: 'outline',
-              class: profile.isOnline
-                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-500'
-                : 'text-muted-foreground',
-            },
-            () => [
-              profile.isOnline
-                ? h(CheckCircle2, { class: 'mr-1 size-3' })
-                : null,
-              profile.isOnline
-                ? $t('automation.browsers.running_badge')
-                : $t('automation.browsers.idle_badge'),
-            ],
-          ),
+          profile.isOnline
+            ? h(
+                Badge,
+                {
+                  variant: 'outline',
+                  class:
+                    'border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
+                },
+                () => [
+                  h(CheckCircle2, { class: 'mr-1 size-3' }),
+                  $t('automation.browsers.running_badge'),
+                ],
+              )
+            : h(
+                'span',
+                {
+                  class:
+                    'text-muted-foreground inline-flex items-center gap-1.5 text-xs',
+                },
+                [
+                  h('span', {
+                    class: 'bg-muted-foreground/50 size-1.5 rounded-full',
+                  }),
+                  $t('automation.browsers.idle_badge'),
+                ],
+              ),
           profile.debuggingPort
             ? h(
                 'span',
@@ -254,12 +265,9 @@ export function createBrowserColumns(
         return proxy
           ? h('span', { class: 'text-foreground font-mono text-xs' }, proxy)
           : h(
-              Badge,
-              {
-                variant: 'outline',
-                class: 'text-muted-foreground text-[11px]',
-              },
-              () => $t('automation.browsers.direct_badge'),
+              'span',
+              { class: 'text-muted-foreground text-xs' },
+              $t('automation.browsers.direct_badge'),
             );
       },
     }),
@@ -272,10 +280,20 @@ export function createBrowserColumns(
           column,
           title: $t('automation.browsers.col_extensions'),
         }),
-      cell: ({ row }) =>
-        h(Badge, { variant: 'outline', class: 'font-mono text-[11px]' }, () =>
-          String(row.original.extensions.length),
-        ),
+      cell: ({ row }) => {
+        const count = row.original.extensions.length;
+        return count > 1
+          ? h(
+              Badge,
+              { variant: 'outline', class: 'font-mono text-[11px]' },
+              () => String(count),
+            )
+          : h(
+              'span',
+              { class: 'text-muted-foreground font-mono text-xs' },
+              String(count),
+            );
+      },
     }),
 
     columnHelper.display({
