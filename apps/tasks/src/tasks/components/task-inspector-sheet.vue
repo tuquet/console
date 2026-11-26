@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { LinkedBrowserOption } from '../../api/tasks';
 import type { Task, TaskDraft } from '../data/schema';
 
 import { computed, reactive, ref, watch } from 'vue';
@@ -29,11 +30,12 @@ import {
 } from '@operon-core/shadcn-ui';
 import { cn } from '@operon-core/shared/utils';
 
-import { Star, Trash2 } from '@lucide/vue';
+import { Globe, Star, Trash2 } from '@lucide/vue';
 
 import { assignees, labels, priorities, statuses } from '../data/data';
 
 interface TaskInspectorSheetProps {
+  browsers?: LinkedBrowserOption[];
   mode: 'create' | 'edit';
   open: boolean;
   task: null | Task;
@@ -49,11 +51,13 @@ const emit = defineEmits<{
 }>();
 
 const PROGRESS_STEPS = [0, 25, 50, 75, 100] as const;
+const UNASSIGNED_BROWSER = '__unassigned__';
 
 const touched = ref(false);
 
 const DEFAULT_FORM: TaskDraft = {
   assignee: 'linh',
+  browserId: null,
   favorite: false,
   label: 'feature',
   priority: 'medium',
@@ -70,6 +74,10 @@ const selectedStatus = computed(() =>
 
 const selectedAssignee = computed(() =>
   assignees.find((person) => person.value === form.assignee),
+);
+
+const selectedBrowser = computed(() =>
+  (props.browsers ?? []).find((b) => b.id === form.browserId),
 );
 
 function snapToStep(val: number): number {
@@ -93,6 +101,7 @@ watch(
     if (currentMode === 'edit' && currentTask) {
       Object.assign(form, {
         assignee: currentTask.assignee,
+        browserId: currentTask.browserId ?? null,
         favorite: currentTask.favorite,
         label: currentTask.label,
         priority: currentTask.priority,
@@ -150,6 +159,7 @@ function handleSubmit() {
     priority: form.priority,
     label: form.label,
     assignee: form.assignee,
+    browserId: form.browserId ?? null,
     favorite: form.favorite,
     progress: form.progress,
   };
@@ -320,6 +330,55 @@ function handleDelete() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <!-- Linked Browser Profile -->
+          <div class="flex flex-col gap-1.5">
+            <Label class="text-xs font-medium">Browser Profile</Label>
+            <Select
+              :model-value="form.browserId || UNASSIGNED_BROWSER"
+              @update:model-value="
+                (val) =>
+                  (form.browserId =
+                    val === UNASSIGNED_BROWSER ? null : String(val))
+              "
+            >
+              <SelectTrigger class="h-9 w-full text-xs">
+                <SelectValue placeholder="Unassigned">
+                  <div class="flex items-center gap-2 truncate">
+                    <Globe class="text-muted-foreground size-3.5 shrink-0" />
+                    <span class="truncate">
+                      {{
+                        selectedBrowser?.name || form.browserId || 'Unassigned'
+                      }}
+                    </span>
+                  </div>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem :value="UNASSIGNED_BROWSER" class="text-xs">
+                    <span class="text-muted-foreground italic">Unassigned</span>
+                  </SelectItem>
+                  <SelectItem
+                    v-for="browser in browsers ?? []"
+                    :key="browser.id"
+                    :value="browser.id"
+                    class="text-xs"
+                  >
+                    <div class="flex items-center gap-2">
+                      <Globe class="text-primary size-3.5 shrink-0" />
+                      <span class="truncate">{{ browser.name }}</span>
+                      <span
+                        class="text-muted-foreground ml-auto font-mono text-[10px]"
+                      >
+                        {{ browser.id }}
+                      </span>
+                    </div>
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
 
           <!-- Priority -->

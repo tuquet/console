@@ -12,7 +12,7 @@ import { DataTableColumnHeader } from '@operon/common-ui';
 
 import { Badge, Checkbox } from '@operon-core/shadcn-ui';
 
-import { CheckCircle2, Laptop } from '@lucide/vue';
+import { CheckCircle2, Cloud, HardDrive, Laptop } from '@lucide/vue';
 import { createColumnHelper } from '@tanstack/vue-table';
 
 import { $t } from '../../locales';
@@ -28,6 +28,13 @@ const includesFilterFn = (
   id: string,
   value: string[],
 ) => value.includes(String(row.getValue(id)));
+
+function resolveBrowserSource(row: BrowserProfileRecord): 'cloud' | 'local' {
+  if (row.source === 'cloud' || row.source === 'local') {
+    return row.source;
+  }
+  return row.workspaceId.startsWith('local-') ? 'local' : 'cloud';
+}
 
 const searchProfileFilterFn = (
   row: { original: BrowserProfileRecord },
@@ -157,6 +164,43 @@ export function createBrowserColumns(
             ],
           ),
         ]);
+      },
+    }),
+
+    columnHelper.accessor((row) => resolveBrowserSource(row), {
+      id: 'source',
+      meta: { label: $t('automation.browsers.col_source') },
+      header: ({ column }) =>
+        h(DataTableColumnHeader, {
+          column,
+          title: $t('automation.browsers.col_source'),
+        }),
+      filterFn: includesFilterFn as any,
+      cell: ({ row }) => {
+        const source = resolveBrowserSource(row.original);
+        return source === 'cloud'
+          ? h(
+              Badge,
+              {
+                variant: 'outline',
+                class: 'border-sky-500/30 bg-sky-500/10 text-sky-500',
+              },
+              () => [
+                h(Cloud, { class: 'mr-1 size-3' }),
+                $t('automation.browsers.source_cloud'),
+              ],
+            )
+          : h(
+              Badge,
+              {
+                variant: 'secondary',
+                class: 'text-muted-foreground font-normal',
+              },
+              () => [
+                h(HardDrive, { class: 'mr-1 size-3' }),
+                $t('automation.browsers.source_local'),
+              ],
+            );
       },
     }),
 

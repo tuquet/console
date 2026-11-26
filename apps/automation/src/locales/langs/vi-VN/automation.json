@@ -132,9 +132,9 @@
     "workspace_id": "Mã workspace",
     "description_label": "Mô tả"
   },
-  "fleet": {
+  "devices": {
     "title": "Quản lý thiết bị",
-    "badge": "Device fleet",
+    "badge": "Thiết bị",
     "connect_btn": "Kết nối thiết bị",
     "refresh": "Làm mới",
     "col_name": "Thiết bị",
@@ -235,12 +235,16 @@
     "status_all": "Tất cả trạng thái",
     "status_online": "Đang chạy",
     "status_offline": "Ngoại tuyến",
+    "filter_source": "Nguồn",
+    "source_local": "Cục bộ",
+    "source_cloud": "Cloud",
     "filter_proxy": "Kết nối",
     "proxy_all": "Tất cả kết nối",
     "col_profile": "Hồ sơ",
     "col_fingerprint": "Fingerprint",
     "col_proxy": "Proxy",
     "col_extensions": "Tiện ích",
+    "col_source": "Nguồn",
     "col_status": "Trạng thái",
     "col_actions": "Thao tác",
     "default_badge": "Mặc định",
@@ -311,11 +315,15 @@
     "default_set_success": "Đã đặt {name} làm mặc định của workspace",
     "drivers_btn": "Drivers",
     "drivers_title": "Browser Drivers",
-    "drivers_desc": "Cài đặt, chọn mặc định hoặc xóa các phiên bản trình duyệt Chromium.",
+    "drivers_desc": "Cài đặt, chọn mặc định hoặc xóa các phiên bản Chromium driver.",
     "driver_selected": "Đang chọn",
     "driver_install_btn": "Cài đặt",
     "driver_select_btn": "Chọn",
     "driver_selected_msg": "Đã chọn browser driver v{version}",
-    "driver_deleted_msg": "Đã xóa browser driver v{version}"
+    "driver_deleted_msg": "Đã xóa browser driver v{version}",
+    "driver_stage_downloading": "Đang tải xuống",
+    "driver_stage_extracting": "Đang giải nén & kiểm tra SHA256",
+    "driver_installed_msg": "Đã cài đặt browser driver v{version}",
+    "driver_download_failed": "Lỗi tải browser driver v{version}"
   }
 }

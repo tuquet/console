@@ -28,6 +28,7 @@ export interface BrowserProfileRecord {
   name: string;
   pid?: null | number;
   proxy?: null | string;
+  source?: 'cloud' | 'local';
   startupFlags: string[];
   tags: string[];
   workspaceId: string;
@@ -45,6 +46,7 @@ export interface ListBrowsersParams {
   platform?: string;
   scope?: 'all' | 'workspace';
   search?: string;
+  source?: 'cloud' | 'local';
   status?: 'offline' | 'online';
   workspaceId?: string;
 }
@@ -161,7 +163,7 @@ export interface ImportCsvResult {
   status: string;
 }
 
-export interface RuntimeReleaseItem {
+export interface DriverReleaseItem {
   channel: string;
   installed: boolean;
   isActive: boolean;
@@ -172,12 +174,12 @@ export interface RuntimeReleaseItem {
   version: string;
 }
 
-export interface ListRuntimesResult {
+export interface ListDriversResult {
   activeVersion: string;
-  releases: RuntimeReleaseItem[];
+  releases: DriverReleaseItem[];
 }
 
-export interface RuntimeActionResult {
+export interface DriverActionResult {
   message: string;
   success: boolean;
   version: string;
@@ -217,9 +219,9 @@ export function createBrowserApi(api: KernelApiContext) {
         method: 'POST',
       }),
 
-    deleteRuntime: (version: string) =>
-      api.localDaemonFetch<RuntimeActionResult>(
-        `/api/v1/browsers/runtimes/${encodeURIComponent(version)}`,
+    deleteDriver: (version: string) =>
+      api.localDaemonFetch<DriverActionResult>(
+        `/api/v1/browsers/drivers/${encodeURIComponent(version)}`,
         { method: 'DELETE' },
       ),
 
@@ -228,18 +230,18 @@ export function createBrowserApi(api: KernelApiContext) {
         `/api/v1/browsers/${encodeURIComponent(id)}`,
       ),
 
-    installRuntime: (version: string) =>
-      api.localDaemonFetch<RuntimeActionResult>(
-        `/api/v1/browsers/runtimes/${encodeURIComponent(version)}/install`,
+    installDriver: (version: string) =>
+      api.localDaemonFetch<DriverActionResult>(
+        `/api/v1/browsers/drivers/${encodeURIComponent(version)}/install`,
         { method: 'POST' },
       ),
 
-    listRuntimes: () =>
-      api.localDaemonFetch<ListRuntimesResult>('/api/v1/browsers/runtimes'),
+    listDrivers: () =>
+      api.localDaemonFetch<ListDriversResult>('/api/v1/browsers/drivers'),
 
-    useRuntime: (version: string) =>
-      api.localDaemonFetch<RuntimeActionResult>(
-        `/api/v1/browsers/runtimes/${encodeURIComponent(version)}/use`,
+    useDriver: (version: string) =>
+      api.localDaemonFetch<DriverActionResult>(
+        `/api/v1/browsers/drivers/${encodeURIComponent(version)}/use`,
         { method: 'POST' },
       ),
 
@@ -255,6 +257,7 @@ export function createBrowserApi(api: KernelApiContext) {
       if (params.workspaceId) qs.set('workspaceId', params.workspaceId);
       if (params.scope) qs.set('scope', params.scope);
       if (params.search?.trim()) qs.set('search', params.search.trim());
+      if (params.source) qs.set('source', params.source);
       if (params.status) qs.set('status', params.status);
       if (params.hasProxy !== undefined) {
         qs.set('hasProxy', String(params.hasProxy));

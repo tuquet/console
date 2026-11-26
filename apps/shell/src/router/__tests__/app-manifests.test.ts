@@ -1,6 +1,7 @@
 import { createMemoryHistory, createRouter } from 'vue-router';
 
 import { automationManifest } from '@operon/automation';
+import { logsManifest } from '@operon/logs';
 import { systemManifest } from '@operon/system';
 import { workspacesManifest } from '@operon/workspaces';
 
@@ -56,5 +57,11 @@ describe('business application route integration', () => {
     expect(overview?.path).toBe('overview');
     expect(browsers?.path).toBe('browsers');
     expect(browsers?.component).not.toBe(overview?.component);
+  });
+
+  it('resolves the CI logs overview screen', () => {
+    const routes = logsManifest.routes(t);
+    const overview = routes.find((route) => route.name === 'LogsOverview');
+    expect(overview?.path).toBe('overview');
   });
 });

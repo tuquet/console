@@ -35,7 +35,9 @@ export interface RowActionCallbacks {
   onInspect: (task: Task) => void;
   onQuickUpdate: (
     id: string,
-    patch: Partial<Pick<Task, 'assignee' | 'label' | 'priority' | 'status'>>,
+    patch: Partial<
+      Pick<Task, 'assignee' | 'browserId' | 'label' | 'priority' | 'status'>
+    >,
   ) => void;
   onToggleFavorite: (id: string) => void;
 }

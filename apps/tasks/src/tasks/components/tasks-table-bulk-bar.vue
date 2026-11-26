@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import type { LinkedBrowserOption } from '../../api/tasks';
 import type { Task } from '../data/schema';
 
-import { onBeforeUnmount, onMounted } from 'vue';
+import { computed, onBeforeUnmount, onMounted } from 'vue';
 
 import {
   Badge,
@@ -22,6 +23,7 @@ import {
   Download,
   FileJson,
   Flame,
+  Globe,
   Trash2,
   UserCheck,
   X,
@@ -30,6 +32,7 @@ import {
 import { assignees, priorities, statuses } from '../data/data';
 
 interface TasksTableBulkBarProps {
+  browsers?: LinkedBrowserOption[];
   selectedTasks: Task[];
 }
 
@@ -38,12 +41,16 @@ const props = defineProps<TasksTableBulkBarProps>();
 const emit = defineEmits<{
   bulkDelete: [];
   bulkUpdate: [
-    patch: Partial<Pick<Task, 'assignee' | 'label' | 'priority' | 'status'>>,
+    patch: Partial<
+      Pick<Task, 'assignee' | 'browserId' | 'label' | 'priority' | 'status'>
+    >,
   ];
   clear: [];
   exportCsv: [];
   exportJson: [];
 }>();
+
+const browserOptions = computed(() => props.browsers ?? []);
 
 type BulkField = 'assignee' | 'priority' | 'status';
 
@@ -154,6 +161,32 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleEsc));
                 class="text-muted-foreground mr-2 size-3.5"
               />
               {{ item.label }}
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DropdownMenu v-if="browserOptions.length > 0">
+        <DropdownMenuTrigger as-child>
+          <Button variant="ghost" size="sm" class="h-8 text-xs">
+            <Globe class="text-primary mr-1.5 size-3.5" />
+            Browser
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="center" class="w-[195px]">
+          <DropdownMenuLabel class="text-xs">Assign Browser</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem @select="emit('bulkUpdate', { browserId: null })">
+              <span class="text-muted-foreground italic">Unassigned</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              v-for="b in browserOptions"
+              :key="b.id"
+              @select="emit('bulkUpdate', { browserId: b.id })"
+            >
+              <Globe class="text-muted-foreground mr-2 size-3.5" />
+              <span class="truncate">{{ b.name }}</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

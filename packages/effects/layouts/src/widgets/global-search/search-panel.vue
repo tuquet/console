@@ -180,7 +180,10 @@ async function handleSelect(item?: PaletteItem) {
   await nextTick();
 
   if (target.type === 'command') {
-    await target.handler?.();
+    const handler =
+      target.handler ??
+      getBuiltinCommands().find((cmd) => cmd.id === target.id)?.handler;
+    await handler?.();
   } else if (target.path) {
     if (isHttpUrl(target.path)) {
       window.open(target.path, '_blank');

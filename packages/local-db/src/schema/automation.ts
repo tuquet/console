@@ -137,7 +137,31 @@ export const devices = sqliteTable(
   (table) => [index('idx_devices_status').on(table.status)],
 );
 
-// 5. Jobs (Execution Runs & Tasks)
+// 5. Tasks (Executable automation units assigned to browser profiles)
+export const tasks = sqliteTable(
+  'tasks',
+  {
+    id: text('id').primaryKey(),
+    profileId: text('profile_id').references(() => browserProfiles.id, {
+      onDelete: 'set null',
+    }),
+    title: text('title').notNull(),
+    status: text('status').default('todo').notNull(),
+    label: text('label').default('feature').notNull(),
+    priority: text('priority').default('medium').notNull(),
+    assignee: text('assignee').default('linh').notNull(),
+    favorite: integer('favorite', { mode: 'boolean' }).default(false).notNull(),
+    progress: integer('progress').default(0).notNull(),
+    ...syncAuditColumns(),
+  },
+  (table) => [
+    index('idx_tasks_profile').on(table.profileId),
+    index('idx_tasks_status').on(table.status),
+    index('idx_tasks_workspace').on(table.workspaceId),
+  ],
+);
+
+// 6. Jobs (Execution Runs & Tasks)
 export const jobs = sqliteTable(
   'jobs',
   {
@@ -146,6 +170,9 @@ export const jobs = sqliteTable(
       onDelete: 'set null',
     }),
     profileId: text('profile_id').references(() => browserProfiles.id, {
+      onDelete: 'set null',
+    }),
+    taskId: text('task_id').references(() => tasks.id, {
       onDelete: 'set null',
     }),
     deviceId: text('device_id').references(() => devices.id, {
@@ -177,6 +204,7 @@ export const jobs = sqliteTable(
   (table) => [
     index('idx_jobs_workflow').on(table.workflowId),
     index('idx_jobs_profile').on(table.profileId),
+    index('idx_jobs_task').on(table.taskId),
     index('idx_jobs_status').on(table.status),
   ],
 );
@@ -243,10 +271,19 @@ export const browserProfilesRelations = relations(
       fields: [browserProfiles.proxyId],
       references: [proxies.id],
     }),
+    tasks: many(tasks),
     jobs: many(jobs),
     assets: many(assets),
   }),
 );
+
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
+  browserProfile: one(browserProfiles, {
+    fields: [tasks.profileId],
+    references: [browserProfiles.id],
+  }),
+  jobs: many(jobs),
+}));
 
 export const devicesRelations = relations(devices, ({ many }) => ({
   jobs: many(jobs),
@@ -260,6 +297,10 @@ export const jobsRelations = relations(jobs, ({ one, many }) => ({
   browserProfile: one(browserProfiles, {
     fields: [jobs.profileId],
     references: [browserProfiles.id],
+  }),
+  task: one(tasks, {
+    fields: [jobs.taskId],
+    references: [tasks.id],
   }),
   device: one(devices, {
     fields: [jobs.deviceId],
@@ -294,6 +335,8 @@ export type Proxy = typeof proxies.$inferSelect;
 export type NewProxy = typeof proxies.$inferInsert;
 export type BrowserProfile = typeof browserProfiles.$inferSelect;
 export type NewBrowserProfile = typeof browserProfiles.$inferInsert;
+export type Task = typeof tasks.$inferSelect;
+export type NewTask = typeof tasks.$inferInsert;
 export type Device = typeof devices.$inferSelect;
 export type NewDevice = typeof devices.$inferInsert;
 export type Job = typeof jobs.$inferSelect;

@@ -64,7 +64,7 @@ const {
 } = useAnalyticsMetrics();
 
 const kpiCards = computed<KpiCardItem[]>(() => {
-  const { fleet, plugins, system, workspaces } = analyticsData.value;
+  const { daemon, plugins, system, workspaces } = analyticsData.value;
   return [
     {
       badgeClass: 'shrink-0 bg-primary/10 text-primary hover:bg-primary/15',
@@ -95,16 +95,16 @@ const kpiCards = computed<KpiCardItem[]>(() => {
     },
     {
       badgeClass: 'shrink-0 text-success',
-      badgeText: fleet.status,
+      badgeText: daemon.status,
       badgeVariant: 'secondary',
-      cardTestId: 'kpi-card-fleet',
+      cardTestId: 'kpi-card-daemon',
       icon: Terminal,
       iconWrapperClass: 'bg-muted text-muted-foreground',
-      label: $t('page.analytics.metric_fleet'),
-      value: fleet.loopbackPort,
+      label: $t('page.analytics.metric_daemon'),
+      value: daemon.loopbackPort,
       valueClass:
         'truncate text-base font-bold tracking-tight text-foreground sm:text-lg',
-      valueTestId: 'kpi-fleet-port',
+      valueTestId: 'kpi-daemon-port',
     },
     {
       badgeClass: 'shrink-0 text-success',
@@ -290,7 +290,7 @@ const planRows = computed(() => [
               <div
                 class="flex items-center justify-between text-muted-foreground"
               >
-                <span>Workspace Fleet Capacity</span>
+                <span>Workspace Capacity</span>
                 <span class="text-foreground">
                   {{ analyticsData.workspaces.activeCount }} /
                   {{ analyticsData.workspaces.total }} active

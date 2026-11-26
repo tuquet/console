@@ -3,6 +3,7 @@ import type { VueTable } from '@tanstack/vue-table';
 
 import type { DataTableDensity, DataTableFeatures } from '@operon/common-ui';
 
+import type { LinkedBrowserOption } from '../../api/tasks';
 import type { Task } from '../data/schema';
 
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
@@ -22,11 +23,12 @@ import {
 } from '@operon-core/shadcn-ui';
 import { cn } from '@operon-core/shared/utils';
 
-import { Plus, Search, Star, X } from '@lucide/vue';
+import { Globe, Plus, Search, Star, X } from '@lucide/vue';
 
 import { assignees, labels, priorities, statuses } from '../data/data';
 
 interface TasksTableToolbarProps {
+  browsers?: LinkedBrowserOption[];
   density: DataTableDensity;
   favoritesOnly: boolean;
   isFiltered: boolean;
@@ -48,6 +50,15 @@ const FACET_FILTERS = [
   { columnId: 'label', options: labels, title: 'Label' },
   { columnId: 'assignee', options: assignees, title: 'Assignee' },
 ] as const;
+
+const browserFilterOptions = computed(() => [
+  { icon: Globe, label: 'Unassigned', value: '__unassigned__' },
+  ...(props.browsers ?? []).map((b) => ({
+    icon: Globe,
+    label: b.name,
+    value: b.id,
+  })),
+]);
 
 const searchWrapperRef = ref<HTMLElement | null>(null);
 
@@ -125,6 +136,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleGlobalSlash));
           :options="facet.options"
         />
       </template>
+
+      <DataTableFacetedFilter
+        v-if="table.getColumn('browserId') && browserFilterOptions.length > 1"
+        :column="table.getColumn('browserId')"
+        title="Browser"
+        :options="browserFilterOptions"
+      />
 
       <Button
         variant="outline"

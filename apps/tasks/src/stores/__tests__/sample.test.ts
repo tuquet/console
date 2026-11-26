@@ -57,6 +57,8 @@ describe('tasks tasks store', () => {
         priority: 'high',
         label: 'bug',
         assignee: 'alex',
+        browserId: 'prf_1',
+        browserName: 'Stealth 1',
         progress: 100,
         favorite: false,
         updatedAt: 'Just now',
@@ -65,7 +67,7 @@ describe('tasks tasks store', () => {
     const lines = csv.split('\n');
     expect(lines).toHaveLength(2);
     expect(lines[1]).toBe(
-      'TASK-1,"Fix ""edge"", retry",done,high,bug,alex,100,false,Just now',
+      'TASK-1,"Fix ""edge"", retry",done,high,bug,alex,prf_1,Stealth 1,100,false,Just now',
     );
   });
 });

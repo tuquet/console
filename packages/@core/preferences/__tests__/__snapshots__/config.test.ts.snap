@@ -163,12 +163,12 @@ exports[`defaultPreferences immutability test > should not modify the config obj
     "refreshButtonPosition": "header",
     "sidebarToggle": true,
     "sidebarToggleButtonPosition": "header-left",
-    "workspaceSelectorButtonPosition": "none",
     "themeToggle": true,
     "themeToggleButtonPosition": "header",
     "timezone": true,
     "timezoneButtonPosition": "header",
     "userDropdownButtonPosition": "header",
+    "workspaceSelectorButtonPosition": "none",
   },
 }
 `;

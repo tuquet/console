@@ -19,6 +19,7 @@ import { openWindow } from '@operon/utils';
 
 import DaemonNotice from '#/components/common/daemon-notice.vue';
 import DaemonStatusPill from '#/components/common/daemon-status-pill.vue';
+import ShellToolDialogs from '#/components/common/shell-tool-dialogs.vue';
 import WorkspaceSelector from '#/components/common/workspace-selector.vue';
 import { $t } from '#/locales';
 import { useAuthStore, useNotificationStore } from '#/store';
@@ -222,6 +223,7 @@ watch(
     </template>
     <template #extra>
       <DaemonNotice />
+      <ShellToolDialogs />
       <AuthenticationLoginExpiredModal
         v-model:open="accessStore.loginExpired"
         :avatar

@@ -114,6 +114,29 @@ describe('local-first sqlite & cloud sync verification suite', () => {
         .from(schema.browserProfiles)
         .where(eq(schema.browserProfiles.id, 'browser-001'));
       expect(updated[0]?.name).toBe('Renamed Profile');
+
+      // 5. Insert Task linked to Browser Profile and query relationally
+      await db.insert(schema.tasks).values({
+        assignee: 'linh',
+        createdAt: updatedIso,
+        favorite: true,
+        id: 'TASK-7001',
+        label: 'feature',
+        priority: 'high',
+        profileId: 'browser-001',
+        progress: 50,
+        status: 'in progress',
+        title: 'Warmup linked browser',
+        updatedAt: updatedIso,
+        workspaceId: 'workspace-test',
+      });
+
+      const taskWithProfile = await db.query.tasks.findFirst({
+        where: eq(schema.tasks.id, 'TASK-7001'),
+        with: { browserProfile: true },
+      });
+      expect(taskWithProfile?.browserProfile?.id).toBe('browser-001');
+      expect(taskWithProfile?.browserProfile?.name).toBe('Renamed Profile');
     });
 
     it('enforces foreign key constraints and cascaded execution logs', async () => {

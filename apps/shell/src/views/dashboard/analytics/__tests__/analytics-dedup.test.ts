@@ -31,7 +31,7 @@ vi.mock('#/composables', () => ({
 
 vi.mock('#/api', () => ({
   getRealAnalyticsData: vi.fn().mockResolvedValue({
-    fleet: { loopbackPort: 8765, status: 'ready' },
+    daemon: { loopbackPort: 8765, status: 'ready' },
     plugins: { coreCount: 8, items: [], moduleCount: 4, total: 12 },
     system: {
       edgeProvider: 'Cloudflare Pages',
@@ -145,11 +145,11 @@ describe('enterprise UI information deduplication (SPEC-ui-information-deduplica
       'page.analytics.plan_free',
     );
 
-    // Fleet card shows port :8765 as primary metric without repeating local daemon in Infrastructure Services
-    const fleetPortEl = container.querySelector(
-      '[data-testid="kpi-fleet-port"]',
+    // Daemon card shows port :8765 as primary metric without repeating local daemon in Infrastructure Services
+    const daemonPortEl = container.querySelector(
+      '[data-testid="kpi-daemon-port"]',
     );
-    expect(fleetPortEl?.textContent?.trim()).toContain('8765');
+    expect(daemonPortEl?.textContent?.trim()).toContain('8765');
     expect(container.textContent).not.toContain(
       'page.analytics.desktop_daemon',
     );

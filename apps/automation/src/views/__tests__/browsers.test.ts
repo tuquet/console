@@ -66,9 +66,10 @@ const sampleBrowsers = [
     isOnline: true,
     name: 'QA Running',
     proxy: null,
+    source: 'cloud' as const,
     startupFlags: [],
     tags: ['vip'],
-    workspaceId: 'local-default',
+    workspaceId: 'ws_cloud_1',
     timezone: 'UTC',
     updatedAt: '2026-01-02T00:00:00Z',
     userAgent: null,
@@ -106,6 +107,8 @@ describe('automation browsers view with shared DataTable', () => {
     expect(host.textContent).toContain('QA Running');
     expect(host.textContent).toContain('#sea');
     expect(host.textContent).toContain('#vip');
+    expect(host.textContent).toContain('automation.browsers.source_local');
+    expect(host.textContent).toContain('automation.browsers.source_cloud');
     expect(host.textContent).toContain('Rows per page');
 
     const profileLink = [

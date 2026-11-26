@@ -74,8 +74,8 @@ const modules = computed<ModuleItem[]>(() => [
   {
     description: $t('page.automation.browsers_desc'),
     icon: Zap,
-    name: $t('page.browsers.title'),
-    path: '/browsers',
+    name: $t('page.browserProfiles.title'),
+    path: '/browser-profiles',
     requiresDaemon: true,
     requiresCloud: false,
   },

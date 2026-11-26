@@ -1,0 +1,1 @@
+export { logsManifest } from './manifest';

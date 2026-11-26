@@ -154,99 +154,77 @@ function handleFormSaved(mode: 'create' | 'restart' | 'update', name: string) {
   kernel.events.notify('success', $t(key, { name }));
 }
 
-async function handleToggleRun(profile: BrowserProfileRecord) {
+async function runWithToast(
+  action: () => Promise<unknown>,
+  fallbackError = $t('automation.overview.browser_action_failed'),
+) {
   try {
-    if (profile.isOnline) {
-      await store.stopProfile(profile.id);
-      kernel.events.notify(
-        'success',
-        $t('automation.overview.browser_stopped_profile', {
-          name: profile.name,
-        }),
-      );
-    } else {
-      await store.launchProfile(profile.id);
-      kernel.events.notify(
-        'success',
-        $t('automation.overview.browser_started_profile', {
-          name: profile.name,
-        }),
-      );
+    const successMsg = await action();
+    if (typeof successMsg === 'string' && successMsg) {
+      kernel.events.notify('success', successMsg);
     }
   } catch (error: any) {
-    kernel.events.notify(
-      'error',
-      error?.message || $t('automation.overview.browser_action_failed'),
-    );
+    kernel.events.notify('error', error?.message || fallbackError);
   }
+}
+
+async function handleToggleRun(profile: BrowserProfileRecord) {
+  await runWithToast(async () => {
+    if (profile.isOnline) {
+      await store.stopProfile(profile.id);
+      return $t('automation.overview.browser_stopped_profile', {
+        name: profile.name,
+      });
+    }
+    await store.launchProfile(profile.id);
+    return $t('automation.overview.browser_started_profile', {
+      name: profile.name,
+    });
+  });
 }
 
 async function handleSetDefault(profile: BrowserProfileRecord) {
-  try {
+  await runWithToast(async () => {
     await store.makeDefaultProfile(profile.id);
-    kernel.events.notify(
-      'success',
-      $t('automation.browsers.default_set_success', { name: profile.name }),
-    );
-  } catch (error: any) {
-    kernel.events.notify(
-      'error',
-      error?.message || $t('automation.overview.browser_action_failed'),
-    );
-  }
+    return $t('automation.browsers.default_set_success', {
+      name: profile.name,
+    });
+  });
 }
 
 async function handleDuplicate(profile: BrowserProfileRecord) {
-  try {
+  await runWithToast(async () => {
     const cloned = await store.cloneProfile(profile.id);
-    kernel.events.notify(
-      'success',
-      $t('automation.browsers.cloned_success', { name: cloned.name }),
-    );
-  } catch (error: any) {
-    kernel.events.notify(
-      'error',
-      error?.message || $t('automation.overview.browser_action_failed'),
-    );
-  }
+    return $t('automation.browsers.cloned_success', { name: cloned.name });
+  });
 }
 
 async function handleUnbind(profile: BrowserProfileRecord) {
-  try {
+  await runWithToast(async () => {
     await store.unbindProfile(profile.id);
-    kernel.events.notify(
-      'success',
-      $t('automation.overview.browser_unbind_success', { name: profile.name }),
-    );
-  } catch (error: any) {
-    kernel.events.notify(
-      'error',
-      error?.message || $t('automation.overview.browser_unbind_failed'),
-    );
-  }
+    return $t('automation.overview.browser_unbind_success', {
+      name: profile.name,
+    });
+  }, $t('automation.overview.browser_unbind_failed'));
 }
 
 async function handleProbeRow(profile: BrowserProfileRecord) {
-  if (!profile.proxy) return;
-  try {
-    const res = await store.probeProxy(profile.proxy);
-    kernel.events.notify(
-      res.alive ? 'success' : 'error',
-      res.alive
-        ? $t('automation.browsers.proxy_alive_msg', {
-            ip: res.egressIp || res.protocol,
-            rtt: res.rttMs,
-          })
-        : $t('automation.browsers.proxy_dead_msg', {
-            error: res.error || 'failed',
-          }),
-    );
-  } catch (error: any) {
-    kernel.events.notify(
-      'error',
-      error?.message || $t('automation.overview.browser_action_failed'),
-    );
-  }
+  const proxy = profile.proxy;
+  if (!proxy) return;
+  await runWithToast(async () => {
+    const res = await store.probeProxy(proxy);
+    if (!res.alive) {
+      throw new Error(
+        $t('automation.browsers.proxy_dead_msg', {
+          error: res.error || 'failed',
+        }),
+      );
+    }
+    return $t('automation.browsers.proxy_alive_msg', {
+      ip: res.egressIp || res.protocol,
+      rtt: res.rttMs,
+    });
+  });
 }
 
 async function handleBatchLaunch(rows: BrowserProfileRecord[]) {
@@ -286,14 +264,7 @@ async function handleBatchStop(rows: BrowserProfileRecord[]) {
 }
 
 async function handleAutoDetect() {
-  try {
-    await store.autoDetect();
-  } catch (error: any) {
-    kernel.events.notify(
-      'error',
-      error?.message || $t('automation.overview.browser_action_failed'),
-    );
-  }
+  await runWithToast(() => store.autoDetect());
 }
 
 const columns = createBrowserColumns(

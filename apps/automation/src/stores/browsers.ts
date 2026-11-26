@@ -15,7 +15,7 @@ import { useMutation, useQuery } from '@tanstack/vue-query';
 import { defineStore } from 'pinia';
 
 import { createBrowserApi } from '../api/browsers';
-import { useBrowserRuntimesStore } from './browser-runtimes';
+import { useBrowserDriversStore } from './browser-drivers';
 import { getAutomationQueryClient } from './query-client';
 
 export type ScopeMode = 'all' | 'workspace';
@@ -23,7 +23,7 @@ export type ScopeMode = 'all' | 'workspace';
 export const useBrowsersStore = defineStore('automation:browsers', () => {
   const kernel = useKernel();
   const api = createBrowserApi(kernel.api);
-  const runtimesStore = useBrowserRuntimesStore();
+  const driversStore = useBrowserDriversStore();
   const queryClient = getAutomationQueryClient();
 
   const detailTarget = ref<BrowserProfileRecord | null>(null);
@@ -475,8 +475,8 @@ export const useBrowsersStore = defineStore('automation:browsers', () => {
       eventSource.addEventListener('message', (evt) => {
         try {
           const data = JSON.parse(evt.data);
-          if (data?.type === 'runtime_download_progress' && data?.version) {
-            runtimesStore.applyProgressEvent(data);
+          if (data?.type === 'driver_download_progress' && data?.version) {
+            driversStore.applyProgressEvent(data);
           } else if (
             data?.type === 'browser_changed' ||
             data?.type === 'browser_online' ||

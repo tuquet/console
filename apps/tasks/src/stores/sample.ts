@@ -1,9 +1,15 @@
+import type { KernelApiContext } from '@operon/kernel';
+
+import type { LinkedBrowserOption } from '../api/tasks';
 import type { Task, TaskDraft } from '../tasks/data/schema';
 
 import { computed, ref } from 'vue';
 
+import { useKernel } from '@operon/kernel';
+
 import { defineStore } from 'pinia';
 
+import { createTasksApi } from '../api/tasks';
 import { assignees } from '../tasks/data/data';
 import rawTasks from '../tasks/data/tasks.json';
 
@@ -30,14 +36,18 @@ export function hydrateSeedTasks(): Task[] {
   return rawTasks.map((item, index) => ({
     ...item,
     assignee: assignees[index % assignees.length]?.value ?? 'linh',
+    browserId: null,
+    browserName: null,
     favorite: index < 4 || (item.priority === 'high' && index % 9 === 0),
     progress: deriveProgress(item.status, index),
     updatedAt: RELATIVE_TIMES[index % RELATIVE_TIMES.length] ?? '1h ago',
   }));
 }
 
-function escapeCsvCell(value: boolean | number | string): string {
-  const str = String(value);
+function escapeCsvCell(
+  value: boolean | null | number | string | undefined,
+): string {
+  const str = String(value ?? '');
   if (/[",\n\r]/.test(str)) {
     return `"${str.replaceAll('"', '""')}"`;
   }
@@ -52,6 +62,8 @@ export function tasksToCsv(rows: Task[]): string {
     'priority',
     'label',
     'assignee',
+    'browserId',
+    'browserName',
     'progress',
     'favorite',
     'updatedAt',
@@ -65,9 +77,75 @@ export function tasksToCsv(rows: Task[]): string {
   return lines.join('\n');
 }
 
+function tryUseKernel() {
+  try {
+    return useKernel();
+  } catch {
+    return null;
+  }
+}
+
 export const useTasksStore = defineStore('tasks:tasks', () => {
+  const kernel = tryUseKernel();
+  const daemonApi: KernelApiContext | null =
+    kernel?.api && typeof kernel.api.localDaemonFetch === 'function'
+      ? kernel.api
+      : null;
+  const api = daemonApi ? createTasksApi(daemonApi) : null;
+
   const tasks = ref<Task[]>(hydrateSeedTasks());
+  const browsers = ref<LinkedBrowserOption[]>([]);
+  const loading = ref(false);
+  const isDaemonBacked = ref(false);
   let seq = 9000;
+  let eventSource: EventSource | null = null;
+  let refreshTimer: null | ReturnType<typeof setTimeout> = null;
+
+  function scheduleSync() {
+    if (refreshTimer) clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => {
+      void syncFromDaemon().catch(() => {});
+    }, 150);
+  }
+
+  function subscribeEvents() {
+    if (!api || typeof EventSource === 'undefined' || eventSource) return;
+    try {
+      const port = daemonApi?.daemonPort || 8765;
+      eventSource = new EventSource(`http://127.0.0.1:${port}/api/v1/events`);
+      eventSource.addEventListener('message', (evt) => {
+        try {
+          const data = JSON.parse(evt.data);
+          if (
+            data?.type === 'task_changed' ||
+            data?.type === 'browser_changed' ||
+            data?.type === 'workspace_switched'
+          ) {
+            scheduleSync();
+          }
+        } catch {
+          // ignore keepalive frames
+        }
+      });
+    } catch {
+      // ignore offline SSE errors
+    }
+  }
+
+  function unsubscribeEvents() {
+    if (refreshTimer) {
+      clearTimeout(refreshTimer);
+      refreshTimer = null;
+    }
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
+  }
+
+  const activeWorkspaceId = computed(
+    () => kernel?.workspace?.activeId || 'local-default',
+  );
 
   const metrics = computed(() => {
     const total = tasks.value.length;
@@ -101,13 +179,49 @@ export const useTasksStore = defineStore('tasks:tasks', () => {
     return Math.max(0, Math.min(100, Math.round(progress)));
   }
 
+  function resolveBrowserName(browserId?: null | string): null | string {
+    if (!browserId) return null;
+    return browsers.value.find((b) => b.id === browserId)?.name ?? null;
+  }
+
+  async function syncFromDaemon() {
+    if (!api) return;
+    loading.value = true;
+    try {
+      const [taskList, browserList] = await Promise.all([
+        api.list(activeWorkspaceId.value),
+        api.listBrowsers(activeWorkspaceId.value),
+      ]);
+      tasks.value = Array.isArray(taskList) ? taskList : [];
+      browsers.value = Array.isArray(browserList) ? browserList : [];
+      isDaemonBacked.value = true;
+    } finally {
+      loading.value = false;
+    }
+  }
+
   function createTask(draft: TaskDraft): Task {
+    const browserId = draft.browserId ?? null;
     const created: Task = {
       ...draft,
+      browserId,
+      browserName: resolveBrowserName(browserId),
       id: nextTaskId(),
       progress: normalizeProgress(draft.status, draft.progress),
       updatedAt: 'Just now',
     };
+    tasks.value = [created, ...tasks.value];
+    return created;
+  }
+
+  async function createTaskPersisted(draft: TaskDraft): Promise<Task> {
+    if (!api || !isDaemonBacked.value) {
+      return createTask(draft);
+    }
+    const created = await api.create({
+      ...draft,
+      workspaceId: activeWorkspaceId.value,
+    });
     tasks.value = [created, ...tasks.value];
     return created;
   }
@@ -124,16 +238,38 @@ export const useTasksStore = defineStore('tasks:tasks', () => {
         nextStatus,
         patch.progress ?? task.progress,
       );
+      const nextBrowserId =
+        patch.browserId === undefined
+          ? (task.browserId ?? null)
+          : patch.browserId;
+      const nextBrowserName =
+        patch.browserId === undefined
+          ? (task.browserName ?? null)
+          : resolveBrowserName(nextBrowserId);
 
       updatedItem = {
         ...task,
         ...patch,
+        browserId: nextBrowserId,
+        browserName: nextBrowserName,
         progress: nextProgress,
         updatedAt: 'Just now',
       };
       return updatedItem;
     });
     return updatedItem;
+  }
+
+  async function updateTaskPersisted(
+    id: string,
+    patch: Partial<TaskDraft>,
+  ): Promise<Task | undefined> {
+    if (!api || !isDaemonBacked.value) {
+      return updateTask(id, patch);
+    }
+    const updated = await api.patch(id, patch);
+    tasks.value = tasks.value.map((t) => (t.id === id ? updated : t));
+    return updated;
   }
 
   function duplicateTask(id: string): Task | undefined {
@@ -152,6 +288,27 @@ export const useTasksStore = defineStore('tasks:tasks', () => {
     return copy;
   }
 
+  async function duplicateTaskPersisted(id: string): Promise<Task | undefined> {
+    if (!api || !isDaemonBacked.value) {
+      return duplicateTask(id);
+    }
+    const source = tasks.value.find((task) => task.id === id);
+    if (!source) return undefined;
+    const created = await api.create({
+      assignee: source.assignee,
+      browserId: source.browserId ?? null,
+      favorite: source.favorite,
+      label: source.label,
+      priority: source.priority,
+      progress: source.progress,
+      status: source.status,
+      title: `${source.title} (Copy)`,
+      workspaceId: activeWorkspaceId.value,
+    });
+    tasks.value = [created, ...tasks.value];
+    return created;
+  }
+
   function toggleFavorite(id: string): boolean {
     const target = tasks.value.find((t) => t.id === id);
     if (!target) return false;
@@ -160,9 +317,19 @@ export const useTasksStore = defineStore('tasks:tasks', () => {
     return nextState;
   }
 
+  async function toggleFavoritePersisted(id: string): Promise<boolean> {
+    const target = tasks.value.find((t) => t.id === id);
+    if (!target) return false;
+    const nextState = !target.favorite;
+    await updateTaskPersisted(id, { favorite: nextState });
+    return nextState;
+  }
+
   function bulkUpdate(
     ids: string[],
-    patch: Partial<Pick<Task, 'assignee' | 'label' | 'priority' | 'status'>>,
+    patch: Partial<
+      Pick<Task, 'assignee' | 'browserId' | 'label' | 'priority' | 'status'>
+    >,
   ): number {
     const idSet = new Set(ids);
     let count = 0;
@@ -170,13 +337,37 @@ export const useTasksStore = defineStore('tasks:tasks', () => {
       if (!idSet.has(task.id)) return task;
       count += 1;
       const nextStatus = patch.status ?? task.status;
+      const nextBrowserId =
+        patch.browserId === undefined
+          ? (task.browserId ?? null)
+          : patch.browserId;
+      const nextBrowserName =
+        patch.browserId === undefined
+          ? (task.browserName ?? null)
+          : resolveBrowserName(nextBrowserId);
       return {
         ...task,
         ...patch,
+        browserId: nextBrowserId,
+        browserName: nextBrowserName,
         progress: normalizeProgress(nextStatus, task.progress),
         updatedAt: 'Just now',
       };
     });
+    return count;
+  }
+
+  async function bulkUpdatePersisted(
+    ids: string[],
+    patch: Partial<
+      Pick<Task, 'assignee' | 'browserId' | 'label' | 'priority' | 'status'>
+    >,
+  ): Promise<number> {
+    if (!api || !isDaemonBacked.value) {
+      return bulkUpdate(ids, patch);
+    }
+    const { count } = await api.bulkUpdate(ids, patch);
+    bulkUpdate(ids, patch);
     return count;
   }
 
@@ -187,19 +378,41 @@ export const useTasksStore = defineStore('tasks:tasks', () => {
     return before - tasks.value.length;
   }
 
+  async function deleteTasksPersisted(ids: string[]): Promise<number> {
+    if (!api || !isDaemonBacked.value) {
+      return deleteTasks(ids);
+    }
+    const { count } = await api.batchDelete(ids);
+    deleteTasks(ids);
+    return count;
+  }
+
   function resetTasks() {
     tasks.value = hydrateSeedTasks();
   }
 
   return {
-    tasks,
-    metrics,
-    createTask,
-    updateTask,
-    duplicateTask,
-    toggleFavorite,
+    activeWorkspaceId,
+    browsers,
     bulkUpdate,
+    bulkUpdatePersisted,
+    createTask,
+    createTaskPersisted,
     deleteTasks,
+    deleteTasksPersisted,
+    duplicateTask,
+    duplicateTaskPersisted,
+    isDaemonBacked,
+    loading,
+    metrics,
     resetTasks,
+    subscribeEvents,
+    syncFromDaemon,
+    tasks,
+    toggleFavorite,
+    toggleFavoritePersisted,
+    unsubscribeEvents,
+    updateTask,
+    updateTaskPersisted,
   };
 });

@@ -21,14 +21,14 @@ const routes: RouteRecordRaw[] = [
       order: 10,
       platform: 'all',
       plugin: 'operon',
-      title: $t('page.browsers.title'),
+      title: $t('page.browserProfiles.title'),
     },
-    name: 'Browsers',
-    path: '/browsers',
-    redirect: '/browsers/index',
+    name: 'BrowserProfiles',
+    path: '/browser-profiles',
+    redirect: '/browser-profiles/index',
     children: [
       {
-        name: 'BrowsersIndex',
+        name: 'BrowserProfilesIndex',
         path: 'index',
         component: loadBrowsersComponent
           ? async () => {
@@ -43,7 +43,7 @@ const routes: RouteRecordRaw[] = [
           authority: ['superadmin', 'local_operator'],
           icon: 'lucide:globe',
           plugin: 'operon',
-          title: $t('page.browsers.title'),
+          title: $t('page.browserProfiles.title'),
         },
       },
     ],

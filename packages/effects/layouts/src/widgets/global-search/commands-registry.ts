@@ -3,6 +3,7 @@ import { markRaw } from 'vue';
 import {
   ArrowUpCircle,
   BookOpenText,
+  Globe,
   Languages,
   LockKeyhole,
   Maximize,
@@ -210,6 +211,33 @@ export function getBuiltinCommands(): CommandAction[] {
       keywords: ['update', 'version', 'upgrade', 'cập nhật', 'phiên bản'],
       handler: () => {
         window.dispatchEvent(new Event('check-desktop-updates'));
+      },
+    },
+
+    // ── Tools ──────────────────────────────────────────────────────────────
+    {
+      id: 'tools-proxy-bulk-check',
+      title: 'Tools: Bulk Proxy Checker',
+      category: 'Tools',
+      icon: markRaw(Globe),
+      keywords: [
+        'proxy',
+        'proxies',
+        'check',
+        'live',
+        'bulk',
+        'socks5',
+        'http',
+        'probe',
+        'kiểm tra proxy',
+        'hàng loạt',
+      ],
+      handler: () => {
+        window.dispatchEvent(
+          new CustomEvent('open-shell-tool', {
+            detail: { toolId: 'proxy-bulk-check' },
+          }),
+        );
       },
     },
 

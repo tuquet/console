@@ -132,9 +132,9 @@
     "workspace_id": "Workspace ID",
     "description_label": "Description"
   },
-  "fleet": {
+  "devices": {
     "title": "Device management",
-    "badge": "Device fleet",
+    "badge": "Devices",
     "connect_btn": "Connect device",
     "refresh": "Refresh",
     "col_name": "Device",
@@ -235,12 +235,16 @@
     "status_all": "All statuses",
     "status_online": "Running",
     "status_offline": "Idle",
+    "filter_source": "Source",
+    "source_local": "Local",
+    "source_cloud": "Cloud",
     "filter_proxy": "Network",
     "proxy_all": "All routing",
     "col_profile": "Profile",
     "col_fingerprint": "Fingerprint",
     "col_proxy": "Proxy",
     "col_extensions": "Extensions",
+    "col_source": "Source",
     "col_status": "Status",
     "col_actions": "Actions",
     "default_badge": "Default",
@@ -257,7 +261,7 @@
     "selected_count": "{count} selected",
     "batch_delete": "Delete selected",
     "empty_title": "No browser profiles in this workspace",
-    "empty_desc": "Create a new antidetect profile, import CSV rows, or auto-detect a default runtime.",
+    "empty_desc": "Create a new antidetect profile, import CSV rows, or auto-detect a default profile.",
     "offline_title": "Operon daemon offline",
     "offline_desc": "Start Operon on your computer (`opn daemon start`) to manage and launch local browsers.",
     "form_create_title": "Create browser profile",
@@ -316,6 +320,10 @@
     "driver_install_btn": "Install",
     "driver_select_btn": "Select",
     "driver_selected_msg": "Selected browser driver v{version}",
-    "driver_deleted_msg": "Deleted browser driver v{version}"
+    "driver_deleted_msg": "Deleted browser driver v{version}",
+    "driver_stage_downloading": "Downloading",
+    "driver_stage_extracting": "Extracting & verifying",
+    "driver_installed_msg": "Installed browser driver v{version}",
+    "driver_download_failed": "Browser driver v{version} failed"
   }
 }

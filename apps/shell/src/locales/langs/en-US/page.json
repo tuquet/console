@@ -14,8 +14,8 @@
     "overview": "Overview",
     "analytics": "Analytics"
   },
-  "browsers": {
-    "title": "Browsers"
+  "browserProfiles": {
+    "title": "Browser Profiles"
   },
   "tasks": {
     "title": "Tasks",
@@ -70,9 +70,8 @@
     "refresh": "Refresh",
     "metric_workspaces": "Workspaces",
     "metric_plugins": "Active plugins",
-    "metric_fleet": "Fleet gateway",
+    "metric_daemon": "Daemon gateway",
     "metric_latency": "API latency",
-    "fleet_daemon": "Daemon",
     "core_suffix": "core / modules",
     "total_workspaces": "Total workspaces",
     "active_workspaces": "Active",
@@ -256,5 +255,32 @@
     "step3Desc": "Once connected, Automation and Analytics unlock automatically.",
     "continueBtn": "Continue to Dashboard Overview",
     "showOnStartup": "Show welcome page on startup"
+  },
+  "logs": {
+    "title": "CI Logs",
+    "overview": "Overview"
+  },
+  "tools": {
+    "proxyCheck": {
+      "title": "Bulk Proxy Checker",
+      "description": "Probe multiple HTTP/SOCKS5 proxies via your local daemon and inspect exit IP and latency.",
+      "daemonOffline": "Local daemon (:8765) is offline. Start Operon daemon to probe proxies.",
+      "inputLabel": "Proxy List (1 per line)",
+      "placeholder": "socks5://user:pass@127.0.0.1:1080\nhost:port:user:pass\n192.168.1.10:8080",
+      "filterAll": "All",
+      "filterAlive": "Alive",
+      "filterDead": "Dead",
+      "copyAlive": "Copy Alive",
+      "colProxy": "Proxy",
+      "colStatus": "Status",
+      "colDetails": "Exit IP / Error",
+      "statusDead": "Dead",
+      "clear": "Clear",
+      "stop": "Stop",
+      "check": "Check Proxies",
+      "emptyInput": "Paste at least one proxy line first",
+      "copied": "Copied to clipboard",
+      "copyFailed": "Failed to copy to clipboard"
+    }
   }
 }

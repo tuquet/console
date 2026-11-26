@@ -18,6 +18,7 @@ import {
 import { Check, Cpu, Download, Trash2 } from '@lucide/vue';
 
 import { $t } from '../../locales';
+import { useBrowserDriversStore } from '../../stores/browser-drivers';
 import { useBrowsersStore } from '../../stores/browsers';
 
 defineOptions({ name: 'BrowserDriversDialog' });
@@ -26,23 +27,70 @@ const open = defineModel<boolean>('open', { default: false });
 
 const kernel = useKernel();
 const store = useBrowsersStore();
+const driversStore = useBrowserDriversStore();
 const busyVersion = ref<null | string>(null);
 
 const hasRunningSessions = computed(() => store.stats.running > 0);
 
+function isActiveProgressStage(stage?: string): boolean {
+  return stage === 'downloading' || stage === 'extracting';
+}
+
+function formatProgressLabel(version: string): string {
+  const progress = driversStore.driverProgress[version];
+  if (!progress) return '';
+  const stageText =
+    progress.stage === 'extracting'
+      ? $t('automation.browsers.driver_stage_extracting')
+      : $t('automation.browsers.driver_stage_downloading');
+
+  if (
+    typeof progress.totalBytes === 'number' &&
+    progress.totalBytes > 0 &&
+    typeof progress.downloadedBytes === 'number'
+  ) {
+    const dlMb = (progress.downloadedBytes / 1_048_576).toFixed(1);
+    const totalMb = (progress.totalBytes / 1_048_576).toFixed(1);
+    return `${stageText} (${dlMb} / ${totalMb} MB · ${progress.percent}%)`;
+  }
+  return `${stageText} (${progress.percent}%)`;
+}
+
 watch(open, (isOpen) => {
   if (isOpen) {
-    void store.fetchRuntimes();
+    store.subscribeEvents();
+    void driversStore.fetchDrivers().catch((error: unknown) => {
+      const msg =
+        error instanceof Error
+          ? error.message
+          : $t('automation.overview.browser_action_failed');
+      driversStore.pushDriverNotification(
+        'error',
+        $t('automation.browsers.drivers_title'),
+        msg,
+      );
+    });
   }
 });
 
 async function handleInstall(version: string) {
   try {
-    await store.installRuntime(version);
-  } catch (error: any) {
-    kernel.events.notify(
+    store.subscribeEvents();
+    await driversStore.installDriver(version);
+  } catch (error: unknown) {
+    const msg =
+      error instanceof Error
+        ? error.message
+        : $t('automation.overview.browser_action_failed');
+    driversStore.driverProgress[version] = {
+      error: msg,
+      percent: 0,
+      stage: 'error',
+    };
+    driversStore.pushDriverNotification(
       'error',
-      error?.message || $t('automation.overview.browser_action_failed'),
+      $t('automation.browsers.driver_download_failed', { version }),
+      msg,
     );
   }
 }
@@ -50,15 +98,20 @@ async function handleInstall(version: string) {
 async function handleSelect(version: string) {
   busyVersion.value = version;
   try {
-    await store.useRuntime(version);
+    await driversStore.useDriver(version);
     kernel.events.notify(
       'success',
       $t('automation.browsers.driver_selected_msg', { version }),
     );
-  } catch (error: any) {
-    kernel.events.notify(
+  } catch (error: unknown) {
+    const msg =
+      error instanceof Error
+        ? error.message
+        : $t('automation.overview.browser_action_failed');
+    driversStore.pushDriverNotification(
       'error',
-      error?.message || $t('automation.overview.browser_action_failed'),
+      $t('automation.browsers.drivers_title'),
+      msg,
     );
   } finally {
     busyVersion.value = null;
@@ -68,15 +121,20 @@ async function handleSelect(version: string) {
 async function handleDelete(version: string) {
   busyVersion.value = version;
   try {
-    await store.deleteRuntime(version);
+    await driversStore.deleteDriver(version);
     kernel.events.notify(
       'success',
       $t('automation.browsers.driver_deleted_msg', { version }),
     );
-  } catch (error: any) {
-    kernel.events.notify(
+  } catch (error: unknown) {
+    const msg =
+      error instanceof Error
+        ? error.message
+        : $t('automation.overview.browser_action_failed');
+    driversStore.pushDriverNotification(
       'error',
-      error?.message || $t('automation.overview.browser_action_failed'),
+      $t('automation.browsers.drivers_title'),
+      msg,
     );
   } finally {
     busyVersion.value = null;
@@ -97,13 +155,13 @@ async function handleDelete(version: string) {
         </DialogDescription>
       </DialogHeader>
 
-      <div v-if="store.runtimesLoading" class="flex flex-col gap-3 py-2">
+      <div v-if="driversStore.driversLoading" class="flex flex-col gap-3 py-2">
         <Skeleton v-for="idx in 3" :key="idx" class="h-16 w-full" />
       </div>
 
       <div v-else class="flex flex-col gap-2.5 py-2">
         <div
-          v-for="item in store.runtimes"
+          v-for="item in driversStore.drivers"
           :key="item.version"
           class="border-border flex flex-col gap-2 rounded-lg border p-3"
         >
@@ -155,7 +213,9 @@ async function handleDelete(version: string) {
                 v-else
                 size="sm"
                 :disabled="
-                  store.runtimeProgress[item.version]?.stage === 'downloading'
+                  isActiveProgressStage(
+                    driversStore.driverProgress[item.version]?.stage,
+                  )
                 "
                 @click="handleInstall(item.version)"
               >
@@ -170,23 +230,31 @@ async function handleDelete(version: string) {
           </p>
 
           <div
-            v-if="store.runtimeProgress[item.version]?.stage === 'downloading'"
+            v-if="
+              isActiveProgressStage(
+                driversStore.driverProgress[item.version]?.stage,
+              )
+            "
             class="flex flex-col gap-1"
           >
             <Progress
-              :model-value="store.runtimeProgress[item.version]?.percent ?? 0"
+              :model-value="
+                driversStore.driverProgress[item.version]?.percent ?? 0
+              "
               class="h-1.5"
             />
-            <span class="text-muted-foreground text-xs">
-              {{ store.runtimeProgress[item.version]?.percent ?? 0 }}%
+            <span class="text-muted-foreground font-mono text-xs">
+              {{ formatProgressLabel(item.version) }}
             </span>
           </div>
 
           <p
-            v-else-if="store.runtimeProgress[item.version]?.stage === 'error'"
+            v-else-if="
+              driversStore.driverProgress[item.version]?.stage === 'error'
+            "
             class="text-destructive text-xs"
           >
-            {{ store.runtimeProgress[item.version]?.error }}
+            {{ driversStore.driverProgress[item.version]?.error }}
           </p>
         </div>
       </div>
