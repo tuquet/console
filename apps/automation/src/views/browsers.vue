@@ -89,11 +89,12 @@ function openEditModal(profile: BrowserProfileRecord) {
 }
 
 async function openInspectSheet(profile: BrowserProfileRecord) {
+  store.detailTarget = profile;
   detailOpen.value = true;
   try {
     await store.inspectBrowser(profile.id);
   } catch {
-    store.detailTarget = profile;
+    // retain table snapshot on detail fetch error
   }
 }
 
@@ -356,10 +357,14 @@ const columns = createBrowserColumns(
           size="sm"
           class="h-8 gap-1.5 text-xs shadow-none"
           :disabled="!bridge.isHealthy.value || store.loading"
+          :title="$t('automation.browsers.auto_detect')"
+          :aria-label="$t('automation.browsers.auto_detect')"
           @click="handleAutoDetect"
         >
           <Sparkles class="size-3.5" />
-          <span>{{ $t('automation.browsers.auto_detect') }}</span>
+          <span class="hidden xl:inline">
+            {{ $t('automation.browsers.auto_detect') }}
+          </span>
         </Button>
 
         <Button
@@ -521,6 +526,12 @@ const columns = createBrowserColumns(
     <BrowserDetailSheet
       v-model:open="detailOpen"
       :profile="store.detailTarget"
+      @edit="
+        (profile) => {
+          detailOpen = false;
+          openEditModal(profile);
+        }
+      "
     />
     <BrowserImportCsvDialog v-model:open="importOpen" />
     <BrowserDeleteDialog

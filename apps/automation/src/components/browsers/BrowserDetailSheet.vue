@@ -16,10 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  Skeleton,
   Tabs,
   TabsContent,
   TabsList,
@@ -31,9 +33,12 @@ import {
   CheckCircle2,
   Copy,
   CopyPlus,
+  Loader2,
+  Pencil,
   Play,
   Square,
   Star,
+  X,
 } from '@lucide/vue';
 
 import { $t } from '../../locales';
@@ -43,6 +48,10 @@ defineOptions({ name: 'BrowserDetailSheet' });
 
 const props = defineProps<{
   profile: BrowserProfileRecord | null;
+}>();
+
+const emit = defineEmits<{
+  edit: [profile: BrowserProfileRecord];
 }>();
 
 const open = defineModel<boolean>('open', { default: false });
@@ -86,15 +95,26 @@ async function copyText(text: string) {
   }
 }
 
+const parsedExtensions = computed(() =>
+  extInput.value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
+
+const isExtensionsDirty = computed(() => {
+  if (!props.profile) return false;
+  return (
+    JSON.stringify(parsedExtensions.value) !==
+    JSON.stringify(props.profile.extensions)
+  );
+});
+
 async function handleSaveExtensions() {
-  if (!props.profile) return;
+  if (!props.profile || !isExtensionsDirty.value) return;
   savingExts.value = true;
   try {
-    const parsed = extInput.value
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-    await store.updateExtensions(props.profile.id, parsed);
+    await store.updateExtensions(props.profile.id, parsedExtensions.value);
     kernel.events.notify(
       'success',
       $t('automation.browsers.updated_success', { name: props.profile.name }),
@@ -126,6 +146,52 @@ async function handleMoveTenant() {
   }
 }
 
+async function runProfileAction(
+  action: () => Promise<void>,
+  successMessage: string,
+) {
+  try {
+    await action();
+    kernel.events.notify('success', successMessage);
+  } catch (error: any) {
+    kernel.events.notify(
+      'error',
+      error?.message || $t('automation.overview.browser_action_failed'),
+    );
+  }
+}
+
+async function handleToggleRun() {
+  if (!props.profile) return;
+  const target = props.profile;
+  await (target.isOnline
+    ? runProfileAction(
+        async () => {
+          await store.stopProfile(target.id);
+        },
+        $t('automation.overview.browser_stopped_profile', {
+          name: target.name,
+        }),
+      )
+    : runProfileAction(
+        async () => {
+          await store.launchProfile(target.id);
+        },
+        $t('automation.overview.browser_started_profile', {
+          name: target.name,
+        }),
+      ));
+}
+
+async function handleSetDefault() {
+  if (!props.profile) return;
+  const target = props.profile;
+  await runProfileAction(
+    () => store.makeDefaultProfile(target.id),
+    $t('automation.browsers.default_set_success', { name: target.name }),
+  );
+}
+
 async function handleClone() {
   if (!props.profile) return;
   try {
@@ -145,67 +211,110 @@ async function handleClone() {
 
 <template>
   <Sheet v-model:open="open">
-    <SheetContent class="w-full overflow-y-auto sm:max-w-[520px]">
-      <SheetHeader v-if="profile">
-        <div class="flex flex-wrap items-center gap-2">
-          <SheetTitle class="truncate">{{ profile.name }}</SheetTitle>
+    <SheetContent
+      :open="open"
+      modal
+      side="right"
+      :show-close-button="false"
+      class="flex h-dvh max-h-dvh w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-[520px]"
+    >
+      <SheetHeader
+        v-if="profile"
+        class="border-border flex shrink-0 flex-row items-center justify-between gap-2 border-b px-5 py-3"
+      >
+        <div class="flex min-w-0 items-center gap-2">
+          <SheetTitle class="truncate text-sm font-semibold tracking-tight">
+            {{ profile.name }}
+          </SheetTitle>
+          <button
+            type="button"
+            class="border-border text-muted-foreground hover:bg-accent hover:text-foreground inline-flex shrink-0 items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-[11px] transition-colors"
+            :title="$t('automation.browsers.detail_copy_id')"
+            @click="copyText(profile.id)"
+          >
+            <span>{{ profile.id }}</span>
+            <Copy class="size-2.5 opacity-70" />
+          </button>
           <Badge
             v-if="profile.isOnline"
             variant="outline"
-            class="border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
+            class="shrink-0 border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0 text-[10px] text-emerald-500"
           >
             {{ $t('automation.browsers.running_badge') }}
           </Badge>
-          <Badge v-if="profile.isDefault" variant="secondary">
+          <Badge
+            v-if="profile.isDefault"
+            variant="secondary"
+            class="shrink-0 px-1.5 py-0 text-[10px]"
+          >
             {{ $t('automation.browsers.default_badge') }}
           </Badge>
         </div>
-        <SheetDescription class="font-mono text-xs">
+        <SheetDescription class="sr-only">
           {{ profile.id }}
         </SheetDescription>
-        <div
-          v-if="profile.tags.length > 0"
-          class="flex flex-wrap items-center gap-1 pt-1"
-        >
-          <Badge
-            v-for="tag in profile.tags"
-            :key="tag"
-            variant="outline"
-            class="px-1.5 py-0 font-mono text-[10px]"
+        <SheetClose as-child>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            class="text-muted-foreground hover:text-foreground size-7 shrink-0"
+            :aria-label="$t('common.close')"
           >
-            #{{ tag }}
-          </Badge>
-        </div>
+            <X class="size-4" />
+          </Button>
+        </SheetClose>
+      </SheetHeader>
+      <SheetHeader v-else class="sr-only">
+        <SheetTitle>{{ $t('automation.browsers.detail_title') }}</SheetTitle>
+        <SheetDescription>
+          {{ $t('automation.browsers.detail_title') }}
+        </SheetDescription>
       </SheetHeader>
 
-      <div v-if="profile" class="mt-5 flex flex-col gap-4">
+      <div
+        v-if="profile"
+        class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 py-4"
+      >
         <div class="flex flex-wrap gap-2">
           <Button
-            v-if="!profile.isOnline"
             size="sm"
+            :variant="profile.isOnline ? 'destructive' : 'default'"
             class="gap-1.5"
-            @click="store.launchProfile(profile.id)"
+            :disabled="store.isMutating(profile.id)"
+            @click="handleToggleRun"
           >
-            <Play class="size-3.5" />
-            <span>{{ $t('automation.browsers.action_run') }}</span>
-          </Button>
-          <Button
-            v-else
-            size="sm"
-            variant="destructive"
-            class="gap-1.5"
-            @click="store.stopProfile(profile.id)"
-          >
-            <Square class="size-3.5" />
-            <span>{{ $t('automation.browsers.action_stop') }}</span>
+            <Loader2
+              v-if="store.isMutating(profile.id)"
+              class="size-3.5 animate-spin"
+            />
+            <Square v-else-if="profile.isOnline" class="size-3.5" />
+            <Play v-else class="size-3.5" />
+            <span>
+              {{
+                profile.isOnline
+                  ? $t('automation.browsers.action_stop')
+                  : $t('automation.browsers.action_run')
+              }}
+            </span>
           </Button>
 
           <Button
             size="sm"
             variant="outline"
             class="gap-1.5"
-            :disabled="profile.isDefault"
-            @click="store.makeDefaultProfile(profile.id)"
+            @click="emit('edit', profile)"
+          >
+            <Pencil class="size-3.5" />
+            <span>{{ $t('common.edit') }}</span>
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            class="gap-1.5"
+            :disabled="profile.isDefault || store.isMutating(profile.id)"
+            @click="handleSetDefault"
           >
             <Star class="size-3.5" />
             <span>{{ $t('automation.browsers.action_set_default') }}</span>
@@ -215,6 +324,7 @@ async function handleClone() {
             size="sm"
             variant="outline"
             class="gap-1.5"
+            :disabled="store.isMutating(profile.id)"
             @click="handleClone"
           >
             <CopyPlus class="size-3.5" />
@@ -249,11 +359,55 @@ async function handleClone() {
               </div>
               <div class="flex items-center justify-between gap-2">
                 <span class="text-muted-foreground">
+                  {{ $t('automation.browsers.field_group') }}
+                </span>
+                <span class="font-mono">
+                  {{ profile.groupName || 'default' }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-muted-foreground">
+                  {{ $t('automation.browsers.col_proxy') }}
+                </span>
+                <code
+                  v-if="profile.proxy"
+                  class="max-w-[260px] truncate rounded bg-muted px-1.5 py-0.5 font-mono"
+                >
+                  {{ profile.proxy }}
+                </code>
+                <Badge v-else variant="outline" class="text-[11px]">
+                  {{ $t('automation.browsers.direct_badge') }}
+                </Badge>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-muted-foreground">
                   {{ $t('automation.browsers.detail_disk_size') }}
                 </span>
-                <span class="font-mono font-medium">
+                <Skeleton
+                  v-if="
+                    store.detailLoading && profile.diskSizeBytes === undefined
+                  "
+                  class="h-4 w-14"
+                />
+                <span v-else class="font-mono font-medium">
                   {{ formatBytes(profile.diskSizeBytes) }}
                 </span>
+              </div>
+              <div
+                v-if="profile.tags.length > 0"
+                class="flex items-start justify-between gap-2"
+              >
+                <span class="text-muted-foreground pt-0.5">Tags</span>
+                <div class="flex flex-wrap justify-end gap-1">
+                  <Badge
+                    v-for="tag in profile.tags"
+                    :key="tag"
+                    variant="outline"
+                    class="px-1.5 py-0 font-mono text-[10px]"
+                  >
+                    #{{ tag }}
+                  </Badge>
+                </div>
               </div>
               <div
                 v-if="profile.pid"
@@ -383,7 +537,11 @@ async function handleClone() {
               <Label class="text-xs">
                 {{ $t('automation.browsers.detail_extensions_hint') }}
               </Label>
-              <Input v-model="extInput" class="font-mono text-xs" />
+              <Input
+                v-model="extInput"
+                placeholder="automation, /path/to/unpacked"
+                class="font-mono text-xs"
+              />
             </div>
             <div class="flex flex-wrap gap-1.5">
               <Badge
@@ -399,7 +557,7 @@ async function handleClone() {
             <div>
               <Button
                 size="sm"
-                :disabled="savingExts"
+                :disabled="savingExts || !isExtensionsDirty"
                 @click="handleSaveExtensions"
               >
                 {{ $t('automation.browsers.detail_save_extensions') }}

@@ -112,6 +112,21 @@ describe('automation browsers view with shared DataTable', () => {
       method: 'POST',
     });
 
+    const profileLink = [
+      ...host.querySelectorAll<HTMLButtonElement>('tbody button'),
+    ].find((btn) => btn.textContent?.includes('Marketing Profile'));
+    profileLink?.click();
+    await nextTick();
+    await nextTick();
+
+    const sheet = document.body.querySelector('[role="dialog"]');
+    expect(sheet?.textContent).toContain('common.edit');
+    expect(sheet?.innerHTML).toContain('px-5 py-4');
+    expect(sheet?.querySelector('[aria-label="common.close"]')).not.toBeNull();
+    expect(
+      sheet?.querySelector('[title="automation.browsers.detail_copy_id"]'),
+    ).not.toBeNull();
+
     app.unmount();
     host.remove();
   });
